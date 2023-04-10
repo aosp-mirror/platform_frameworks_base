@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -25,7 +26,10 @@ import static android.os.Process.myUid;
 
 import static java.lang.Character.MIN_VALUE;
 
+import android.annotation.AnimRes;
 import android.annotation.CallSuper;
+import android.annotation.CallbackExecutor;
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -106,6 +110,7 @@ import android.util.AttributeSet;
 import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1004,6 +1009,25 @@ public class Activity extends ContextThemeWrapper
      */
     public static final int FULLSCREEN_MODE_REQUEST_ENTER = 1;
 
+    /** @hide */
+    @IntDef(prefix = { "OVERRIDE_TRANSITION_" }, value = {
+            OVERRIDE_TRANSITION_OPEN,
+            OVERRIDE_TRANSITION_CLOSE
+    })
+    public @interface OverrideTransition {}
+
+    /**
+     * Request type of {@link #overrideActivityTransition(int, int, int)} or
+     * {@link #overrideActivityTransition(int, int, int, int)}, to override the
+     * opening transition.
+     */
+    public static final int OVERRIDE_TRANSITION_OPEN = 0;
+    /**
+     * Request type of {@link #overrideActivityTransition(int, int, int)} or
+     * {@link #overrideActivityTransition(int, int, int, int)}, to override the
+     * closing transition.
+     */
+    public static final int OVERRIDE_TRANSITION_CLOSE = 1;
     private boolean mShouldDockBigOverlays;
 
     private UiTranslationController mUiTranslationController;
@@ -1016,6 +1040,7 @@ public class Activity extends ContextThemeWrapper
     private ComponentCallbacksController mCallbacksController;
 
     @Nullable private IVoiceInteractionManagerService mVoiceInteractionManagerService;
+    private ScreenCaptureCallbackHandler mScreenCaptureCallbackHandler;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -6459,6 +6484,124 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Customizes the animation for the activity transition with this activity. This can be called
+     * at any time while the activity still alive.
+     *
+     * <p> This is a more robust method of overriding the transition animation at runtime without
+     * relying on {@link #overridePendingTransition(int, int)} which doesn't work for predictive
+     * back. However, the animation set from {@link #overridePendingTransition(int, int)} still
+     * has higher priority when the system is looking for the next transition animation.</p>
+     * <p> The animations resources set by this method will be chosen if and only if the activity is
+     * on top of the task while activity transitions are being played.
+     * For example, if we want to customize the opening transition when launching Activity B which
+     * gets started from Activity A, we should call this method inside B's onCreate with
+     * {@code overrideType = OVERRIDE_TRANSITION_OPEN} because the Activity B will on top of the
+     * task. And if we want to customize the closing transition when finishing Activity B and back
+     * to Activity A, since B is still is above A, we should call this method in Activity B with
+     * {@code overrideType = OVERRIDE_TRANSITION_CLOSE}. </p>
+     *
+     * <p> If an Activity has called this method, and it also set another activity animation
+     * by {@link Window#setWindowAnimations(int)}, the system will choose the animation set from
+     * this method.</p>
+     *
+     * <p> Note that {@link Window#setWindowAnimations},
+     * {@link #overridePendingTransition(int, int)} and this method will be ignored if the Activity
+     * is started with {@link ActivityOptions#makeSceneTransitionAnimation(Activity, Pair[])}. Also
+     * note that this method can only be used to customize cross-activity transitions but not
+     * cross-task transitions which are fully non-customizable as of Android 11.</p>
+     *
+     * @param overrideType {@code OVERRIDE_TRANSITION_OPEN} This animation will be used when
+     *                     starting/entering an activity. {@code OVERRIDE_TRANSITION_CLOSE} This
+     *                     animation will be used when finishing/closing an activity.
+     * @param enterAnim A resource ID of the animation resource to use for the incoming activity.
+     *                  Use 0 for no animation.
+     * @param exitAnim A resource ID of the animation resource to use for the outgoing activity.
+     *                 Use 0 for no animation.
+     *
+     * @see #overrideActivityTransition(int, int, int, int)
+     * @see #clearOverrideActivityTransition(int)
+     * @see OnBackInvokedCallback
+     * @see #overridePendingTransition(int, int)
+     * @see Window#setWindowAnimations(int)
+     * @see ActivityOptions#makeSceneTransitionAnimation(Activity, Pair[])
+     */
+    public void overrideActivityTransition(@OverrideTransition int overrideType,
+            @AnimRes int enterAnim, @AnimRes int exitAnim) {
+        overrideActivityTransition(overrideType, enterAnim, exitAnim, Color.TRANSPARENT);
+    }
+
+    /**
+     * Customizes the animation for the activity transition with this activity. This can be called
+     * at any time while the activity still alive.
+     *
+     * <p> This is a more robust method of overriding the transition animation at runtime without
+     * relying on {@link #overridePendingTransition(int, int)} which doesn't work for predictive
+     * back. However, the animation set from {@link #overridePendingTransition(int, int)} still
+     * has higher priority when the system is looking for the next transition animation.</p>
+     * <p> The animations resources set by this method will be chosen if and only if the activity is
+     * on top of the task while activity transitions are being played.
+     * For example, if we want to customize the opening transition when launching Activity B which
+     * gets started from Activity A, we should call this method inside B's onCreate with
+     * {@code overrideType = OVERRIDE_TRANSITION_OPEN} because the Activity B will on top of the
+     * task. And if we want to customize the closing transition when finishing Activity B and back
+     * to Activity A, since B is still is above A, we should call this method in Activity B with
+     * {@code overrideType = OVERRIDE_TRANSITION_CLOSE}. </p>
+     *
+     * <p> If an Activity has called this method, and it also set another activity animation
+     * by {@link Window#setWindowAnimations(int)}, the system will choose the animation set from
+     * this method.</p>
+     *
+     * <p> Note that {@link Window#setWindowAnimations},
+     * {@link #overridePendingTransition(int, int)} and this method will be ignored if the Activity
+     * is started with {@link ActivityOptions#makeSceneTransitionAnimation(Activity, Pair[])}. Also
+     * note that this method can only be used to customize cross-activity transitions but not
+     * cross-task transitions which are fully non-customizable as of Android 11.</p>
+     *
+     * @param overrideType {@code OVERRIDE_TRANSITION_OPEN} This animation will be used when
+     *                     starting/entering an activity. {@code OVERRIDE_TRANSITION_CLOSE} This
+     *                     animation will be used when finishing/closing an activity.
+     * @param enterAnim A resource ID of the animation resource to use for the incoming activity.
+     *                  Use 0 for no animation.
+     * @param exitAnim A resource ID of the animation resource to use for the outgoing activity.
+     *                 Use 0 for no animation.
+     * @param backgroundColor The background color to use for the background during the animation
+     *                        if the animation requires a background. Set to
+     *                        {@link Color#TRANSPARENT} to not override the default color.
+     * @see #overrideActivityTransition(int, int, int)
+     * @see #clearOverrideActivityTransition(int)
+     * @see OnBackInvokedCallback
+     * @see #overridePendingTransition(int, int)
+     * @see Window#setWindowAnimations(int)
+     * @see ActivityOptions#makeSceneTransitionAnimation(Activity, Pair[])
+     */
+    public void overrideActivityTransition(@OverrideTransition int overrideType,
+            @AnimRes int enterAnim, @AnimRes int exitAnim, @ColorInt int backgroundColor) {
+        if (overrideType != OVERRIDE_TRANSITION_OPEN && overrideType != OVERRIDE_TRANSITION_CLOSE) {
+            throw new IllegalArgumentException("Override type must be either open or close");
+        }
+
+        ActivityClient.getInstance().overrideActivityTransition(mToken,
+                overrideType == OVERRIDE_TRANSITION_OPEN, enterAnim, exitAnim, backgroundColor);
+    }
+
+    /**
+     * Clears the animations which are set from {@link #overrideActivityTransition}.
+     * @param overrideType {@code OVERRIDE_TRANSITION_OPEN} clear the animation set for starting a
+     *                     new activity. {@code OVERRIDE_TRANSITION_CLOSE} clear the animation set
+     *                     for finishing an activity.
+     *
+     * @see #overrideActivityTransition(int, int, int)
+     * @see #overrideActivityTransition(int, int, int, int)
+     */
+    public void clearOverrideActivityTransition(@OverrideTransition int overrideType) {
+        if (overrideType != OVERRIDE_TRANSITION_OPEN && overrideType != OVERRIDE_TRANSITION_CLOSE) {
+            throw new IllegalArgumentException("Override type must be either open or close");
+        }
+        ActivityClient.getInstance().clearOverrideActivityTransition(mToken,
+                overrideType == OVERRIDE_TRANSITION_OPEN);
+    }
+
+    /**
      * Call immediately after one of the flavors of {@link #startActivity(Intent)}
      * or {@link #finish} to specify an explicit transition animation to
      * perform next.
@@ -6478,7 +6621,9 @@ public class Activity extends ContextThemeWrapper
      * the incoming activity.  Use 0 for no animation.
      * @param exitAnim A resource ID of the animation resource to use for
      * the outgoing activity.  Use 0 for no animation.
+     * @deprecated Use {@link #overrideActivityTransition(int, int, int)}} instead.
      */
+    @Deprecated
     public void overridePendingTransition(int enterAnim, int exitAnim) {
         overridePendingTransition(enterAnim, exitAnim, 0);
     }
@@ -6501,7 +6646,9 @@ public class Activity extends ContextThemeWrapper
      * the outgoing activity.  Use 0 for no animation.
      * @param backgroundColor The background color to use for the background during the animation if
      * the animation requires a background. Set to 0 to not override the default color.
+     * @deprecated Use {@link #overrideActivityTransition(int, int, int, int)}} instead.
      */
+    @Deprecated
     public void overridePendingTransition(int enterAnim, int exitAnim, int backgroundColor) {
         ActivityClient.getInstance().overridePendingTransition(mToken, getPackageName(), enterAnim,
                 exitAnim, backgroundColor);
@@ -9050,6 +9197,25 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Specifies whether the activities below this one in the task can also start other activities
+     * or finish the task.
+     * <p>
+     * Starting from Target SDK Level {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, apps
+     * are blocked from starting new activities or finishing their task unless the top activity of
+     * such task belong to the same UID for security reasons.
+     * <p>
+     * Setting this flag to {@code true} will allow the launching app to ignore the restriction if
+     * this activity is on top. Apps matching the UID of this activity are always exempt.
+     *
+     * @param allowed {@code true} to disable the UID restrictions; {@code false} to revert back to
+     *                            the default behaviour
+     * @hide
+     */
+    public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
+        ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
+    }
+
+    /**
      * Registers remote animations per transition type for this activity.
      *
      * @param definition The remote animation definition that defines which transition whould run
@@ -9221,5 +9387,44 @@ public class Activity extends ContextThemeWrapper
                     + "non-visual activities");
         }
         return mWindow.getOnBackInvokedDispatcher();
+    }
+
+    /**
+     * Interface for observing screen captures of an {@link Activity}.
+     */
+    public interface ScreenCaptureCallback {
+        /**
+         * Called when one of the monitored activities is captured.
+         * This is not invoked if the activity window
+         * has {@link WindowManager.LayoutParams#FLAG_SECURE} set.
+         */
+        void onScreenCaptured();
+    }
+
+    /**
+     * Registers a screen capture callback for this activity.
+     * The callback will be triggered when a screen capture of this activity is attempted.
+     * This callback will be executed on the thread of the passed {@code executor}.
+     * For details, see {@link ScreenCaptureCallback#onScreenCaptured}.
+     */
+    @RequiresPermission(DETECT_SCREEN_CAPTURE)
+    public void registerScreenCaptureCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ScreenCaptureCallback callback) {
+        if (mScreenCaptureCallbackHandler == null) {
+            mScreenCaptureCallbackHandler = new ScreenCaptureCallbackHandler(mToken);
+        }
+        mScreenCaptureCallbackHandler.registerScreenCaptureCallback(executor, callback);
+    }
+
+
+    /**
+     * Unregisters a screen capture callback for this surface.
+     */
+    @RequiresPermission(DETECT_SCREEN_CAPTURE)
+    public void unregisterScreenCaptureCallback(@NonNull ScreenCaptureCallback callback) {
+        if (mScreenCaptureCallbackHandler != null) {
+            mScreenCaptureCallbackHandler.unregisterScreenCaptureCallback(callback);
+        }
     }
 }

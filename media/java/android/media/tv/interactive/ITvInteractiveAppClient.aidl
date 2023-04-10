@@ -39,7 +39,7 @@ oneway interface ITvInteractiveAppClient {
     void onSessionStateChanged(int state, int err, int seq);
     void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId, int seq);
     void onTeletextAppStateChanged(int state, int seq);
-    void onAdBuffer(in AdBuffer buffer, int seq);
+    void onAdBufferReady(in AdBuffer buffer, int seq);
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onTimeShiftCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onSetVideoBounds(in Rect rect, int seq);
@@ -49,8 +49,14 @@ oneway interface ITvInteractiveAppClient {
     void onRequestStreamVolume(int seq);
     void onRequestTrackInfoList(int seq);
     void onRequestCurrentTvInputId(int seq);
-    void onRequestStartRecording(in Uri programUri, int seq);
+    void onRequestTimeShiftMode(int seq);
+    void onRequestAvailableSpeeds(int seq);
+    void onRequestStartRecording(in String requestId, in Uri programUri, int seq);
     void onRequestStopRecording(in String recordingId, int seq);
+    void onRequestScheduleRecording(in String requestId, in String inputId, in Uri channelUri,
+            in Uri programUri, in Bundle params, int seq);
+    void onRequestScheduleRecording2(in String requestId, in String inputId, in Uri channelUri,
+            long start, long duration, int repeat, in Bundle params, int seq);
     void onSetTvRecordingInfo(in String recordingId, in TvRecordingInfo recordingInfo, int seq);
     void onRequestTvRecordingInfo(in String recordingId, int seq);
     void onRequestTvRecordingInfoList(in int type, int seq);

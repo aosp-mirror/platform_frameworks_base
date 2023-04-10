@@ -36,6 +36,7 @@ import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
@@ -127,7 +128,7 @@ public final class DeviceIdleJobsController extends StateController {
     public DeviceIdleJobsController(JobSchedulerService service) {
         super(service);
 
-        mHandler = new DeviceIdleJobsDelayHandler(mContext.getMainLooper());
+        mHandler = new DeviceIdleJobsDelayHandler(AppSchedulingModuleThread.get().getLooper());
         // Register for device idle mode changes
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mLocalDeviceIdleController =

@@ -64,6 +64,8 @@ import com.android.internal.app.ResolverListAdapter.ActivityInfoPresentationGett
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
 import com.android.internal.widget.ResolverDrawerLayout;
 
+import com.google.android.collect.Lists;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -110,8 +112,8 @@ public class ResolverActivityTest {
         assertThat(activity.getAdapter().getCount(), is(2));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
 
@@ -226,8 +228,8 @@ public class ResolverActivityTest {
         assertThat(activity.getAdapter().getPlaceholderCount(), is(1));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
 
@@ -258,8 +260,8 @@ public class ResolverActivityTest {
         assertThat(activity.getAdapter().getCount(), is(1));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
         // Make a stable copy of the components as the original list may be modified
@@ -298,8 +300,8 @@ public class ResolverActivityTest {
         assertThat(activity.getAdapter().getCount(), is(2));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
 
@@ -345,8 +347,8 @@ public class ResolverActivityTest {
         assertThat(activity.getAdapter().getCount(), is(2));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
 
@@ -531,8 +533,8 @@ public class ResolverActivityTest {
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendImageIntent();
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
 
@@ -634,8 +636,8 @@ public class ResolverActivityTest {
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendImageIntent();
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
 
@@ -848,8 +850,8 @@ public class ResolverActivityTest {
         Intent sendIntent = createSendImageIntent();
         sendIntent.setType("TestType");
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
         waitForIdle();
@@ -873,8 +875,8 @@ public class ResolverActivityTest {
         Intent sendIntent = createSendImageIntent();
         sendIntent.setType("TestType");
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
         waitForIdle();
@@ -902,8 +904,8 @@ public class ResolverActivityTest {
         Intent sendIntent = createSendImageIntent();
         sendIntent.setType("TestType");
         ResolveInfo[] chosen = new ResolveInfo[1];
-        sOverrides.onSafelyStartCallback = targetInfo -> {
-            chosen[0] = targetInfo.getResolveInfo();
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            chosen[0] = result.first.getResolveInfo();
             return true;
         };
 
@@ -1072,8 +1074,8 @@ public class ResolverActivityTest {
         Intent sendIntent = createSendImageIntent();
         sendIntent.setType("TestType");
         final UserHandle[] selectedActivityUserHandle = new UserHandle[1];
-        sOverrides.onSafelyStartInternalCallback = userHandle -> {
-            selectedActivityUserHandle[0] = userHandle;
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            selectedActivityUserHandle[0] = result.second;
             return true;
         };
 
@@ -1109,8 +1111,8 @@ public class ResolverActivityTest {
         Intent sendIntent = createSendImageIntent();
         sendIntent.setType("TestType");
         final UserHandle[] selectedActivityUserHandle = new UserHandle[1];
-        sOverrides.onSafelyStartInternalCallback = userHandle -> {
-            selectedActivityUserHandle[0] = userHandle;
+        sOverrides.onSafelyStartInternalCallback = result -> {
+            selectedActivityUserHandle[0] = result.second;
             return true;
         };
 
@@ -1127,6 +1129,31 @@ public class ResolverActivityTest {
         waitForIdle();
 
         assertThat(selectedActivityUserHandle[0], is(activity.getAdapter().getUserHandle()));
+    }
+
+    @Test
+    public void testClonedProfilePresent_personalProfileResolverComparatorHasCorrectUsers()
+            throws Exception {
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsWithCloneProfileForTest(
+                        3,
+                        PERSONAL_USER_HANDLE,
+                        sOverrides.cloneProfileUserHandle);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        List<UserHandle> result = activity
+                .getResolverRankerServiceUserHandleList(PERSONAL_USER_HANDLE);
+
+        assertTrue(result.containsAll(Lists.newArrayList(PERSONAL_USER_HANDLE,
+                sOverrides.cloneProfileUserHandle)));
     }
 
     private Intent createSendImageIntent() {

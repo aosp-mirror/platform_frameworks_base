@@ -19,4 +19,4 @@ package com.android.systemui.notetask
 import javax.inject.Qualifier
 
 /** Key associated with a [Boolean] flag that enables or disables the note task feature. */
-@Qualifier internal annotation class NoteTaskEnabledKey
+@Qualifier annotation class NoteTaskEnabledKey

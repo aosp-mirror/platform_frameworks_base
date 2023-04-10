@@ -83,9 +83,8 @@ class AppListRepositoryTest {
     @Test
     fun loadApps_notShowInstantApps() = runTest {
         mockInstalledApplications(listOf(NORMAL_APP, INSTANT_APP))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
-        val appListFlow = repository.loadApps(appListConfig)
+        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
 
         assertThat(appListFlow).containsExactly(NORMAL_APP)
     }
@@ -93,9 +92,8 @@ class AppListRepositoryTest {
     @Test
     fun loadApps_showInstantApps() = runTest {
         mockInstalledApplications(listOf(NORMAL_APP, INSTANT_APP))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = true)
 
-        val appListFlow = repository.loadApps(appListConfig)
+        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = true)
 
         assertThat(appListFlow).containsExactly(NORMAL_APP, INSTANT_APP)
     }
@@ -109,9 +107,8 @@ class AppListRepositoryTest {
         whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
             .thenReturn(arrayOf(app.packageName))
         mockInstalledApplications(listOf(app))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
-        val appListFlow = repository.loadApps(appListConfig)
+        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
 
         assertThat(appListFlow).isEmpty()
     }
@@ -126,9 +123,8 @@ class AppListRepositoryTest {
         whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
             .thenReturn(arrayOf(app.packageName))
         mockInstalledApplications(listOf(app))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
-        val appListFlow = repository.loadApps(appListConfig)
+        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
 
         assertThat(appListFlow).isEmpty()
     }
@@ -142,9 +138,8 @@ class AppListRepositoryTest {
         whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
             .thenReturn(arrayOf(app.packageName))
         mockInstalledApplications(listOf(app))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
-        val appListFlow = repository.loadApps(appListConfig)
+        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
 
         assertThat(appListFlow).containsExactly(app)
     }
@@ -157,9 +152,8 @@ class AppListRepositoryTest {
             enabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
         }
         mockInstalledApplications(listOf(app))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
-        val appListFlow = repository.loadApps(appListConfig)
+        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
 
         assertThat(appListFlow).containsExactly(app)
     }
@@ -171,9 +165,8 @@ class AppListRepositoryTest {
             enabled = false
         }
         mockInstalledApplications(listOf(app))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
-        val appListFlow = repository.loadApps(appListConfig)
+        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
 
         assertThat(appListFlow).isEmpty()
     }
@@ -223,7 +216,7 @@ class AppListRepositoryTest {
 
     @Test
     fun showSystemPredicate_appInLauncher() = runTest {
-        val app = IN_LAUMCHER_APP
+        val app = IN_LAUNCHER_APP
 
         whenever(
             packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), eq(USER_ID))
@@ -237,10 +230,13 @@ class AppListRepositoryTest {
     @Test
     fun getSystemPackageNames_returnExpectedValues() = runTest {
         mockInstalledApplications(listOf(
-                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUMCHER_APP))
-        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
+                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP))
 
-        val systemPackageNames = AppListRepositoryUtil.getSystemPackageNames(context, appListConfig)
+        val systemPackageNames = AppListRepositoryUtil.getSystemPackageNames(
+            context = context,
+            userId = USER_ID,
+            showInstantApps = false,
+        )
 
         assertThat(systemPackageNames).containsExactly("system.app", "home.app", "app.in.launcher")
     }
@@ -280,7 +276,7 @@ class AppListRepositoryTest {
             flags = ApplicationInfo.FLAG_SYSTEM
         }
 
-        val IN_LAUMCHER_APP = ApplicationInfo().apply {
+        val IN_LAUNCHER_APP = ApplicationInfo().apply {
             packageName = "app.in.launcher"
             flags = ApplicationInfo.FLAG_SYSTEM
         }

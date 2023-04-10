@@ -69,7 +69,6 @@ final class ReconcilePackageUtils {
 
         for (InstallRequest installRequest :  installRequests) {
             installRequest.onReconcileStarted();
-            final String installPackageName = installRequest.getParsedPackage().getPackageName();
 
             // add / replace existing with incoming packages
             combinedPackages.put(installRequest.getScannedPackageSetting().getPackageName(),
@@ -82,12 +81,19 @@ final class ReconcilePackageUtils {
                 for (SharedLibraryInfo info : allowedSharedLibInfos) {
                     if (!SharedLibraryUtils.addSharedLibraryToPackageVersionMap(
                             incomingSharedLibraries, info)) {
-                        throw new ReconcileFailure("Shared Library " + info.getName()
-                                + " is being installed twice in this set!");
+                        throw ReconcileFailure.ofInternalError(
+                                "Shared Library " + info.getName()
+                                        + " is being installed twice in this set!",
+                                PackageManagerException.INTERNAL_ERROR_SHARED_LIB_INSTALLED_TWICE);
                     }
                 }
             }
+        }
 
+        for (InstallRequest installRequest : installRequests) {
+            final String installPackageName = installRequest.getParsedPackage().getPackageName();
+            final List<SharedLibraryInfo> allowedSharedLibInfos =
+                    sharedLibraries.getAllowedSharedLibInfos(installRequest);
 
             final DeletePackageAction deletePackageAction;
             // we only want to try to delete for non system apps

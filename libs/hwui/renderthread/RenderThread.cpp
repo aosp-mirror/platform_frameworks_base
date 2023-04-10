@@ -135,7 +135,9 @@ void RenderThread::frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t
         !mFrameCallbackTaskPending) {
         ATRACE_NAME("queue mFrameCallbackTask");
         mFrameCallbackTaskPending = true;
-        nsecs_t runAt = (frameTimeNanos + mDispatchFrameDelay);
+
+        nsecs_t timeUntilDeadline = frameDeadline - frameTimeNanos;
+        nsecs_t runAt = (frameTimeNanos + (timeUntilDeadline * 0.25f));
         queue().postAt(runAt, [=]() { dispatchFrameCallbacks(); });
     }
 }
@@ -257,7 +259,6 @@ void RenderThread::initThreadLocals() {
 void RenderThread::setupFrameInterval() {
     nsecs_t frameIntervalNanos = DeviceInfo::getVsyncPeriod();
     mTimeLord.setFrameInterval(frameIntervalNanos);
-    mDispatchFrameDelay = static_cast<nsecs_t>(frameIntervalNanos * .25f);
 }
 
 void RenderThread::requireGlContext() {

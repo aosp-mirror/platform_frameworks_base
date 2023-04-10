@@ -74,7 +74,8 @@
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
     <uses-permission android:name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS"/>
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
-    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG"/>
+    <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG"/>
+    <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG"/>
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -108,6 +109,7 @@
     <uses-permission android:name="android.permission.UPDATE_LOCK_TASK_PACKAGES" />
     <uses-permission android:name="android.permission.ACCESS_CONTEXT_HUB" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC_INTERNAL" />
+    <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
 
     <queries>
         <package android:name="com.android.servicestests.apps.suspendtestapp" />

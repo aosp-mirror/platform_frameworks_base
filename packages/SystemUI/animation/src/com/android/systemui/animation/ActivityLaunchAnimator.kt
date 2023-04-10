@@ -41,6 +41,7 @@ import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
+import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityLaunchAnimator"
@@ -301,10 +302,13 @@ class ActivityLaunchAnimator(
 
     interface Callback {
         /** Whether we are currently on the keyguard or not. */
-        fun isOnKeyguard(): Boolean
+        @JvmDefault fun isOnKeyguard(): Boolean = false
 
         /** Hide the keyguard and animate using [runner]. */
-        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
+        @JvmDefault
+        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner) {
+            throw UnsupportedOperationException()
+        }
 
         /* Get the background color of [task]. */
         fun getBackgroundColor(task: TaskInfo): Int
@@ -335,13 +339,24 @@ class ActivityLaunchAnimator(
              * Return a [Controller] that will animate and expand [view] into the opening window.
              *
              * Important: The view must be attached to a [ViewGroup] when calling this function and
-             * during the animation. For safety, this method will return null when it is not.
+             * during the animation. For safety, this method will return null when it is not. The
+             * view must also implement [LaunchableView], otherwise this method will throw.
              *
              * Note: The background of [view] should be a (rounded) rectangle so that it can be
              * properly animated.
              */
             @JvmStatic
             fun fromView(view: View, cujType: Int? = null): Controller? {
+                // Make sure the View we launch from implements LaunchableView to avoid visibility
+                // issues.
+                if (view !is LaunchableView) {
+                    throw IllegalArgumentException(
+                        "An ActivityLaunchAnimator.Controller was created from a View that does " +
+                            "not implement LaunchableView. This can lead to subtle bugs where the" +
+                            " visibility of the View we are launching from is not what we expected."
+                    )
+                }
+
                 if (view.parent !is ViewGroup) {
                     Log.e(
                         TAG,
@@ -404,7 +419,7 @@ class ActivityLaunchAnimator(
         internal val delegate: AnimationDelegate
 
         init {
-            delegate = AnimationDelegate(controller, callback, launchAnimator, listener)
+            delegate = AnimationDelegate(controller, callback, listener, launchAnimator)
         }
 
         @BinderThread
@@ -431,10 +446,10 @@ class ActivityLaunchAnimator(
     constructor(
         private val controller: Controller,
         private val callback: Callback,
-        /** The animator to use to animate the window launch. */
-        private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
         /** Listener for animation lifecycle events. */
-        private val listener: Listener? = null
+        private val listener: Listener? = null,
+        /** The animator to use to animate the window launch. */
+        private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR
     ) : RemoteAnimationDelegate<IRemoteAnimationFinishedCallback> {
         private val launchContainer = controller.launchContainer
         private val context = launchContainer.context

@@ -19,8 +19,10 @@ package com.android.wm.shell.transition;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
@@ -31,6 +33,8 @@ import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPI
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
+import static com.android.wm.shell.util.TransitionUtil.isClosingType;
+import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,6 +49,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITransitionPlayer;
@@ -71,17 +76,35 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/** Plays transition animations */
+/**
+ * Plays transition animations. Within this player, each transition has a lifecycle.
+ * 1. When a transition is directly started or requested, it is added to "pending" state.
+ * 2. Once WMCore applies the transition and notifies, the transition moves to "ready" state.
+ * 3. When a transition starts animating, it is moved to the "active" state.
+ *
+ * Basically: --start--> PENDING --onTransitionReady--> READY --play--> ACTIVE --finish--> |
+ *                                                            --merge--> MERGED --^
+ *
+ * At the moment, only one transition can be animating at a time. While a transition is animating,
+ * transitions will be queued in the "ready" state for their turn. At the same time, whenever a
+ * transition makes it to the head of the "ready" queue, it will attempt to merge to with the
+ * "active" transition. If the merge succeeds, it will be moved to the "active" transition's
+ * "merged" and then the next "ready" transition can attempt to merge.
+ *
+ * Once the "active" transition animation is finished, it will be removed from the "active" list
+ * and then the next "ready" transition can play.
+ */
 public class Transitions implements RemoteCallable<Transitions> {
     static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
     public static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
     public static final boolean SHELL_TRANSITIONS_ROTATION = ENABLE_SHELL_TRANSITIONS
             && SystemProperties.getBoolean("persist.wm.debug.shell_transit_rotate", false);
 
@@ -111,6 +134,15 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type for maximize to freeform transition. */
     public static final int TRANSIT_RESTORE_FROM_MAXIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 9;
 
+    /** Transition type to freeform in desktop mode. */
+    public static final int TRANSIT_ENTER_FREEFORM = WindowManager.TRANSIT_FIRST_CUSTOM + 10;
+
+    /** Transition type to freeform in desktop mode. */
+    public static final int TRANSIT_ENTER_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 11;
+
+    /** Transition type to fullscreen from desktop mode. */
+    public static final int TRANSIT_EXIT_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 12;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
@@ -121,6 +153,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final DisplayController mDisplayController;
     private final ShellController mShellController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
+    private final SleepHandler mSleepHandler = new SleepHandler();
 
     private boolean mIsRegistered = false;
 
@@ -134,17 +167,41 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     private float mTransitionAnimationScaleSetting = 1.0f;
 
+    /**
+     * How much time we allow for an animation to finish itself on sleep. If it takes longer, we
+     * will force-finish it (on this end) which may leave it in a bad state but won't hang the
+     * device. This needs to be pretty small because it is an allowance for each queued animation,
+     * however it can't be too small since there is some potential IPC involved.
+     */
+    private static final int SLEEP_ALLOWANCE_MS = 120;
+
     private static final class ActiveTransition {
         IBinder mToken;
         TransitionHandler mHandler;
-        boolean mMerged;
         boolean mAborted;
         TransitionInfo mInfo;
         SurfaceControl.Transaction mStartT;
         SurfaceControl.Transaction mFinishT;
+
+        /** Ordered list of transitions which have been merged into this one. */
+        private ArrayList<ActiveTransition> mMerged;
+
+        @Override
+        public String toString() {
+            if (mInfo != null && mInfo.getDebugId() >= 0) {
+                return "(#" + mInfo.getDebugId() + ")" + mToken;
+            }
+            return mToken.toString();
+        }
     }
 
-    /** Keeps track of currently playing transitions in the order of receipt. */
+    /** Keeps track of transitions which have been started, but aren't ready yet. */
+    private final ArrayList<ActiveTransition> mPendingTransitions = new ArrayList<>();
+
+    /** Keeps track of transitions which are ready to play but still waiting for their turn. */
+    private final ArrayList<ActiveTransition> mReadyTransitions = new ArrayList<>();
+
+    /** Keeps track of currently playing transitions. For now, there can only be 1 max. */
     private final ArrayList<ActiveTransition> mActiveTransitions = new ArrayList<>();
 
     public Transitions(@NonNull Context context,
@@ -278,6 +335,10 @@ public class Transitions implements RemoteCallable<Transitions> {
         mRemoteTransitionHandler.removeFiltered(remoteTransition);
     }
 
+    RemoteTransitionHandler getRemoteTransitionHandler() {
+        return mRemoteTransitionHandler;
+    }
+
     /** Registers an observer on the lifecycle of transitions. */
     public void registerObserver(@NonNull TransitionObserver observer) {
         mObservers.add(observer);
@@ -309,23 +370,12 @@ public class Transitions implements RemoteCallable<Transitions> {
      * will be executed when the last active transition is finished.
      */
     public void runOnIdle(Runnable runnable) {
-        if (mActiveTransitions.isEmpty()) {
+        if (mActiveTransitions.isEmpty() && mPendingTransitions.isEmpty()
+                && mReadyTransitions.isEmpty()) {
             runnable.run();
         } else {
             mRunWhenIdleQueue.add(runnable);
         }
-    }
-
-    /** @return true if the transition was triggered by opening something vs closing something */
-    public static boolean isOpeningType(@WindowManager.TransitionType int type) {
-        return type == TRANSIT_OPEN
-                || type == TRANSIT_TO_FRONT
-                || type == TRANSIT_KEYGUARD_GOING_AWAY;
-    }
-
-    /** @return true if the transition was triggered by closing something vs opening something */
-    public static boolean isClosingType(@WindowManager.TransitionType int type) {
-        return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
     }
 
     /**
@@ -388,8 +438,8 @@ public class Transitions implements RemoteCallable<Transitions> {
     private static void setupAnimHierarchy(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         boolean isOpening = isOpeningType(info.getType());
-        if (info.getRootLeash().isValid()) {
-            t.show(info.getRootLeash());
+        for (int i = 0; i < info.getRootCount(); ++i) {
+            t.show(info.getRoot(i).getLeash());
         }
         final int numChanges = info.getChanges().size();
         // Put animating stuff above this line and put static stuff below it.
@@ -407,10 +457,12 @@ public class Transitions implements RemoteCallable<Transitions> {
 
             boolean hasParent = change.getParent() != null;
 
+            final int rootIdx = TransitionUtil.rootIndexFor(change, info);
             if (!hasParent) {
-                t.reparent(leash, info.getRootLeash());
-                t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
-                        change.getStartAbsBounds().top - info.getRootOffset().y);
+                t.reparent(leash, info.getRoot(rootIdx).getLeash());
+                t.setPosition(leash,
+                        change.getStartAbsBounds().left - info.getRoot(rootIdx).getOffset().x,
+                        change.getStartAbsBounds().top - info.getRoot(rootIdx).getOffset().y);
             }
             final int layer;
             // Put all the OPEN/SHOW on top
@@ -440,9 +492,9 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
     }
 
-    private int findActiveTransition(IBinder token) {
-        for (int i = mActiveTransitions.size() - 1; i >= 0; --i) {
-            if (mActiveTransitions.get(i).mToken == token) return i;
+    private static int findByToken(ArrayList<ActiveTransition> list, IBinder token) {
+        for (int i = list.size() - 1; i >= 0; --i) {
+            if (list.get(i).mToken == token) return i;
         }
         return -1;
     }
@@ -475,31 +527,59 @@ public class Transitions implements RemoteCallable<Transitions> {
         return hasNoAnimation;
     }
 
+    /**
+     * Check if all changes in this transition are only ordering changes. If so, we won't animate.
+     */
+    static boolean isAllOrderOnly(TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            if (!TransitionUtil.isOrderOnly(info.getChanges().get(i))) return false;
+        }
+        return true;
+    }
+
     @VisibleForTesting
     void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady %s: %s",
                 transitionToken, info);
-        final int activeIdx = findActiveTransition(transitionToken);
+        final int activeIdx = findByToken(mPendingTransitions, transitionToken);
         if (activeIdx < 0) {
-            throw new IllegalStateException("Got transitionReady for non-active transition "
+            throw new IllegalStateException("Got transitionReady for non-pending transition "
                     + transitionToken + ". expecting one of "
-                    + Arrays.toString(mActiveTransitions.stream().map(
+                    + Arrays.toString(mPendingTransitions.stream().map(
                             activeTransition -> activeTransition.mToken).toArray()));
         }
+        if (activeIdx > 0) {
+            Log.e(TAG, "Transition became ready out-of-order " + mPendingTransitions.get(activeIdx)
+                    + ". Expected order: " + Arrays.toString(mPendingTransitions.stream().map(
+                            activeTransition -> activeTransition.mToken).toArray()));
+        }
+        // Move from pending to ready
+        final ActiveTransition active = mPendingTransitions.remove(activeIdx);
+        mReadyTransitions.add(active);
+        active.mInfo = info;
+        active.mStartT = t;
+        active.mFinishT = finishT;
 
         for (int i = 0; i < mObservers.size(); ++i) {
             mObservers.get(i).onTransitionReady(transitionToken, info, t, finishT);
         }
 
-        if (!info.getRootLeash().isValid()) {
-            // Invalid root-leash implies that the transition is empty/no-op, so just do
+        if (info.getType() == TRANSIT_SLEEP) {
+            if (activeIdx > 0 || !mActiveTransitions.isEmpty() || mReadyTransitions.size() > 1) {
+                // Sleep starts a process of forcing all prior transitions to finish immediately
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Start finish-for-sleep");
+                finishForSleep(null /* forceFinish */);
+                return;
+            }
+        }
+
+        if (info.getRootCount() == 0 && !alwaysReportToKeyguard(info)) {
+            // No root-leashes implies that the transition is empty/no-op, so just do
             // housekeeping and return.
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Invalid root leash (%s): %s",
-                    transitionToken, info);
-            t.apply();
-            finishT.apply();
-            onAbort(transitionToken);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots in %s so"
+                    + " abort", active);
+            onAbort(active);
             return;
         }
 
@@ -525,44 +605,113 @@ public class Transitions implements RemoteCallable<Transitions> {
                 // changes are underneath another change.
                 || ((info.getType() == TRANSIT_TO_BACK || info.getType() == TRANSIT_TO_FRONT)
                 && allOccluded)) {
-            t.apply();
-            finishT.apply();
             // Treat this as an abort since we are bypassing any merge logic and effectively
             // finishing immediately.
-            onAbort(transitionToken);
-            releaseSurfaces(info);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "Non-visible anim so abort: %s", active);
+            onAbort(active);
             return;
         }
 
-        final ActiveTransition active = mActiveTransitions.get(activeIdx);
-        active.mInfo = info;
-        active.mStartT = t;
-        active.mFinishT = finishT;
         setupStartState(active.mInfo, active.mStartT, active.mFinishT);
 
-        if (activeIdx > 0) {
-            // This is now playing at the same time as an existing animation, so try merging it.
-            attemptMergeTransition(mActiveTransitions.get(0), active);
+        if (mReadyTransitions.size() > 1) {
+            // There are already transitions waiting in the queue, so just return.
             return;
         }
-        // The normal case, just play it.
-        playTransition(active);
+        processReadyQueue();
     }
 
     /**
-     * Attempt to merge by delegating the transition start to the handler of the currently
-     * playing transition.
+     * Some transitions we always need to report to keyguard even if they are empty.
+     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
      */
-    void attemptMergeTransition(@NonNull ActiveTransition playing,
-            @NonNull ActiveTransition merging) {
+    private static boolean alwaysReportToKeyguard(TransitionInfo info) {
+        // occlusion status of activities can change while screen is off so there will be no
+        // visibility change but we still need keyguardservice to be notified.
+        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
+
+        // It's possible for some activities to stop with bad timing (esp. since we can't yet
+        // queue activity transitions initiated by apps) that results in an empty transition for
+        // keyguard going-away. In general, we should should always report Keyguard-going-away.
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
+
+        return false;
+    }
+
+    void processReadyQueue() {
+        if (mReadyTransitions.isEmpty()) {
+            // Check if idle.
+            if (mActiveTransitions.isEmpty() && mPendingTransitions.isEmpty()) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition "
+                        + "animations finished");
+                // Run all runnables from the run-when-idle queue.
+                for (int i = 0; i < mRunWhenIdleQueue.size(); i++) {
+                    mRunWhenIdleQueue.get(i).run();
+                }
+                mRunWhenIdleQueue.clear();
+            }
+            return;
+        }
+        final ActiveTransition ready = mReadyTransitions.get(0);
+        if (mActiveTransitions.isEmpty()) {
+            // The normal case, just play it (currently we only support 1 active transition).
+            mReadyTransitions.remove(0);
+            mActiveTransitions.add(ready);
+            if (ready.mAborted) {
+                // finish now since there's nothing to animate. Calls back into processReadyQueue
+                onFinish(ready, null, null);
+                return;
+            }
+            playTransition(ready);
+            // Attempt to merge any more queued-up transitions.
+            processReadyQueue();
+            return;
+        }
+        // An existing animation is playing, so see if we can merge.
+        final ActiveTransition playing = mActiveTransitions.get(0);
+        if (ready.mAborted) {
+            // record as merged since it is no-op. Calls back into processReadyQueue
+            onMerged(playing, ready);
+            return;
+        }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s ready while"
-                + " another transition %s is still animating. Notify the animating transition"
-                + " in case they can be merged", merging.mToken, playing.mToken);
-        playing.mHandler.mergeAnimation(merging.mToken, merging.mInfo, merging.mStartT,
-                playing.mToken, (wct, cb) -> onFinish(merging.mToken, wct, cb));
+                + " %s is still animating. Notify the animating transition"
+                + " in case they can be merged", ready, playing);
+        playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT,
+                playing.mToken, (wct, cb) -> onMerged(playing, ready));
+    }
+
+    private void onMerged(@NonNull ActiveTransition playing, @NonNull ActiveTransition merged) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged: %s into %s",
+                merged, playing);
+        int readyIdx = 0;
+        if (mReadyTransitions.isEmpty() || mReadyTransitions.get(0) != merged) {
+            Log.e(TAG, "Merged transition out-of-order? " + merged);
+            readyIdx = mReadyTransitions.indexOf(merged);
+            if (readyIdx < 0) {
+                Log.e(TAG, "Merged a transition that is no-longer queued? " + merged);
+                return;
+            }
+        }
+        mReadyTransitions.remove(readyIdx);
+        if (playing.mMerged == null) {
+            playing.mMerged = new ArrayList<>();
+        }
+        playing.mMerged.add(merged);
+        // if it was aborted, then onConsumed has already been reported.
+        if (merged.mHandler != null && !merged.mAborted) {
+            merged.mHandler.onTransitionConsumed(merged.mToken, false /* abort */, merged.mFinishT);
+        }
+        for (int i = 0; i < mObservers.size(); ++i) {
+            mObservers.get(i).onTransitionMerged(merged.mToken, playing.mToken);
+        }
+        // See if we should merge another transition.
+        processReadyQueue();
     }
 
     private void playTransition(@NonNull ActiveTransition active) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Playing animation for %s", active);
         for (int i = 0; i < mObservers.size(); ++i) {
             mObservers.get(i).onTransitionStarting(active.mToken);
         }
@@ -574,7 +723,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try firstHandler %s",
                     active.mHandler);
             boolean consumed = active.mHandler.startAnimation(active.mToken, active.mInfo,
-                    active.mStartT, active.mFinishT, (wct, cb) -> onFinish(active.mToken, wct, cb));
+                    active.mStartT, active.mFinishT, (wct, cb) -> onFinish(active, wct, cb));
             if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
                 return;
@@ -582,7 +731,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
         // Otherwise give every other handler a chance
         active.mHandler = dispatchTransition(active.mToken, active.mInfo, active.mStartT,
-                active.mFinishT, (wct, cb) -> onFinish(active.mToken, wct, cb), active.mHandler);
+                active.mFinishT, (wct, cb) -> onFinish(active, wct, cb), active.mHandler);
     }
 
     /**
@@ -612,27 +761,41 @@ public class Transitions implements RemoteCallable<Transitions> {
      * Gives every handler (in order) a chance to handle request until one consumes the transition.
      * @return the WindowContainerTransaction given by the handler which consumed the transition.
      */
-    public WindowContainerTransaction dispatchRequest(@NonNull IBinder transition,
-            @NonNull TransitionRequestInfo request, @Nullable TransitionHandler skip) {
+    public Pair<TransitionHandler, WindowContainerTransaction> dispatchRequest(
+            @NonNull IBinder transition, @NonNull TransitionRequestInfo request,
+            @Nullable TransitionHandler skip) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             if (mHandlers.get(i) == skip) continue;
             WindowContainerTransaction wct = mHandlers.get(i).handleRequest(transition, request);
             if (wct != null) {
-                return wct;
+                return new Pair<>(mHandlers.get(i), wct);
             }
         }
         return null;
     }
 
-    /** Special version of finish just for dealing with no-op/invalid transitions. */
-    private void onAbort(IBinder transition) {
-        onFinish(transition, null /* wct */, null /* wctCB */, true /* abort */);
-    }
+    /** Aborts a transition. This will still queue it up to maintain order. */
+    private void onAbort(ActiveTransition transition) {
+        // apply immediately since they may be "parallel" operations: We currently we use abort for
+        // thing which are independent to other transitions (like starting-window transfer).
+        transition.mStartT.apply();
+        transition.mFinishT.apply();
+        transition.mAborted = true;
 
-    private void onFinish(IBinder transition,
-            @Nullable WindowContainerTransaction wct,
-            @Nullable WindowContainerTransactionCallback wctCB) {
-        onFinish(transition, wct, wctCB, false /* abort */);
+        if (transition.mHandler != null) {
+            // Notifies to clean-up the aborted transition.
+            transition.mHandler.onTransitionConsumed(
+                    transition.mToken, true /* aborted */, null /* finishTransaction */);
+        }
+
+        releaseSurfaces(transition.mInfo);
+
+        // This still went into the queue (to maintain the correct finish ordering).
+        if (mReadyTransitions.size() > 1) {
+            // There are already transitions waiting in the queue, so just return.
+            return;
+        }
+        processReadyQueue();
     }
 
     /**
@@ -644,190 +807,210 @@ public class Transitions implements RemoteCallable<Transitions> {
         info.releaseAnimSurfaces();
     }
 
-    private void onFinish(IBinder transition,
+    private void onFinish(ActiveTransition active,
             @Nullable WindowContainerTransaction wct,
-            @Nullable WindowContainerTransactionCallback wctCB,
-            boolean abort) {
-        int activeIdx = findActiveTransition(transition);
+            @Nullable WindowContainerTransactionCallback wctCB) {
+        int activeIdx = mActiveTransitions.indexOf(active);
         if (activeIdx < 0) {
             Log.e(TAG, "Trying to finish a non-running transition. Either remote crashed or "
-                    + " a handler didn't properly deal with a merge.", new RuntimeException());
+                    + " a handler didn't properly deal with a merge. " + active,
+                    new RuntimeException());
             return;
-        } else if (activeIdx > 0) {
-            // This transition was merged.
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged (abort=%b:"
-                    + " %s", abort, transition);
-            final ActiveTransition active = mActiveTransitions.get(activeIdx);
-            active.mMerged = true;
-            active.mAborted = abort;
-            if (active.mHandler != null) {
-                active.mHandler.onTransitionConsumed(
-                        active.mToken, abort, abort ? null : active.mFinishT);
-            }
-            for (int i = 0; i < mObservers.size(); ++i) {
-                mObservers.get(i).onTransitionMerged(
-                        active.mToken, mActiveTransitions.get(0).mToken);
-            }
-            return;
+        } else if (activeIdx != 0) {
+            // Relevant right now since we only allow 1 active transition at a time.
+            Log.e(TAG, "Finishing a transition out of order. " + active);
         }
-        final ActiveTransition active = mActiveTransitions.get(activeIdx);
-        active.mAborted = abort;
-        if (active.mAborted && active.mHandler != null) {
-            // Notifies to clean-up the aborted transition.
-            active.mHandler.onTransitionConsumed(
-                    transition, true /* aborted */, null /* finishTransaction */);
-        }
+        mActiveTransitions.remove(activeIdx);
+
         for (int i = 0; i < mObservers.size(); ++i) {
             mObservers.get(i).onTransitionFinished(active.mToken, active.mAborted);
         }
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                "Transition animation finished (abort=%b), notifying core %s", abort, transition);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition animation finished "
+                + "(aborted=%b), notifying core %s", active.mAborted, active);
         if (active.mStartT != null) {
-            // Applied by now, so close immediately. Do not set to null yet, though, since nullness
-            // is used later to disambiguate malformed transitions.
-            active.mStartT.close();
+            // Applied by now, so clear immediately to remove any references. Do not set to null
+            // yet, though, since nullness is used later to disambiguate malformed transitions.
+            active.mStartT.clear();
         }
-        // Merge all relevant transactions together
+        // Merge all associated transactions together
         SurfaceControl.Transaction fullFinish = active.mFinishT;
-        for (int iA = activeIdx + 1; iA < mActiveTransitions.size(); ++iA) {
-            final ActiveTransition toMerge = mActiveTransitions.get(iA);
-            if (!toMerge.mMerged) break;
-            // aborted transitions have no start/finish transactions
-            if (mActiveTransitions.get(iA).mStartT == null) break;
-            if (fullFinish == null) {
-                fullFinish = new SurfaceControl.Transaction();
+        if (active.mMerged != null) {
+            for (int iM = 0; iM < active.mMerged.size(); ++iM) {
+                final ActiveTransition toMerge = active.mMerged.get(iM);
+                // Include start. It will be a no-op if it was already applied. Otherwise, we need
+                // it to maintain consistent state.
+                if (toMerge.mStartT != null) {
+                    if (fullFinish == null) {
+                        fullFinish = toMerge.mStartT;
+                    } else {
+                        fullFinish.merge(toMerge.mStartT);
+                    }
+                }
+                if (toMerge.mFinishT != null) {
+                    if (fullFinish == null) {
+                        fullFinish = toMerge.mFinishT;
+                    } else {
+                        fullFinish.merge(toMerge.mFinishT);
+                    }
+                }
             }
-            // Include start. It will be a no-op if it was already applied. Otherwise, we need it
-            // to maintain consistent state.
-            fullFinish.merge(mActiveTransitions.get(iA).mStartT);
-            fullFinish.merge(mActiveTransitions.get(iA).mFinishT);
         }
         if (fullFinish != null) {
             fullFinish.apply();
         }
-        // Now perform all the finishes.
+        // Now perform all the finish callbacks (starting with the playing one and then all the
+        // transitions merged into it).
         releaseSurfaces(active.mInfo);
-        mActiveTransitions.remove(activeIdx);
-        mOrganizer.finishTransition(transition, wct, wctCB);
-        while (activeIdx < mActiveTransitions.size()) {
-            if (!mActiveTransitions.get(activeIdx).mMerged) break;
-            ActiveTransition merged = mActiveTransitions.remove(activeIdx);
-            mOrganizer.finishTransition(merged.mToken, null /* wct */, null /* wctCB */);
-            releaseSurfaces(merged.mInfo);
-        }
-        // sift through aborted transitions
-        while (mActiveTransitions.size() > activeIdx
-                && mActiveTransitions.get(activeIdx).mAborted) {
-            ActiveTransition aborted = mActiveTransitions.remove(activeIdx);
-            // Notifies to clean-up the aborted transition.
-            if (aborted.mHandler != null) {
-                aborted.mHandler.onTransitionConsumed(
-                        transition, true /* aborted */, null /* finishTransaction */);
+        mOrganizer.finishTransition(active.mToken, wct, wctCB);
+        if (active.mMerged != null) {
+            for (int iM = 0; iM < active.mMerged.size(); ++iM) {
+                ActiveTransition merged = active.mMerged.get(iM);
+                mOrganizer.finishTransition(merged.mToken, null /* wct */, null /* wctCB */);
+                releaseSurfaces(merged.mInfo);
             }
-            mOrganizer.finishTransition(aborted.mToken, null /* wct */, null /* wctCB */);
-            for (int i = 0; i < mObservers.size(); ++i) {
-                mObservers.get(i).onTransitionFinished(aborted.mToken, true);
-            }
-            releaseSurfaces(aborted.mInfo);
-        }
-        if (mActiveTransitions.size() <= activeIdx) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition animations "
-                    + "finished");
-            // Run all runnables from the run-when-idle queue.
-            for (int i = 0; i < mRunWhenIdleQueue.size(); i++) {
-                mRunWhenIdleQueue.get(i).run();
-            }
-            mRunWhenIdleQueue.clear();
-            return;
-        }
-        // Start animating the next active transition
-        final ActiveTransition next = mActiveTransitions.get(activeIdx);
-        if (next.mInfo == null) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Pending transition after one"
-                    + " finished, but it isn't ready yet.");
-            return;
-        }
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Pending transitions after one"
-                + " finished, so start the next one.");
-        playTransition(next);
-        // Now try to merge the rest of the transitions (re-acquire activeIdx since next may have
-        // finished immediately)
-        activeIdx = findActiveTransition(next.mToken);
-        if (activeIdx < 0) {
-            // This means 'next' finished immediately and thus re-entered this function. Since
-            // that is the case, just return here since all relevant logic has already run in the
-            // re-entered call.
-            return;
+            active.mMerged.clear();
         }
 
-        // This logic is also convoluted because 'next' may finish immediately in response to any of
-        // the merge requests (eg. if it decided to "cancel" itself).
-        int mergeIdx = activeIdx + 1;
-        while (mergeIdx < mActiveTransitions.size()) {
-            ActiveTransition mergeCandidate = mActiveTransitions.get(mergeIdx);
-            if (mergeCandidate.mAborted) {
-                // transition was aborted, so we can skip for now (still leave it in the list
-                // so that it gets cleaned-up in the right order).
-                ++mergeIdx;
-                continue;
-            }
-            if (mergeCandidate.mMerged) {
-                throw new IllegalStateException("Can't merge a transition after not-merging"
-                        + " a preceding one.");
-            }
-            attemptMergeTransition(next, mergeCandidate);
-            mergeIdx = findActiveTransition(mergeCandidate.mToken);
-            if (mergeIdx < 0) {
-                // This means 'next' finished immediately and thus re-entered this function. Since
-                // that is the case, just return here since all relevant logic has already run in
-                // the re-entered call.
-                return;
-            }
-            ++mergeIdx;
+        // Now that this is done, check the ready queue for more work.
+        processReadyQueue();
+    }
+
+    private boolean isTransitionKnown(IBinder token) {
+        for (int i = 0; i < mPendingTransitions.size(); ++i) {
+            if (mPendingTransitions.get(i).mToken == token) return true;
         }
+        for (int i = 0; i < mReadyTransitions.size(); ++i) {
+            if (mReadyTransitions.get(i).mToken == token) return true;
+        }
+        for (int i = 0; i < mActiveTransitions.size(); ++i) {
+            final ActiveTransition active = mActiveTransitions.get(i);
+            if (active.mToken == token) return true;
+            if (active.mMerged == null) continue;
+            for (int m = 0; m < active.mMerged.size(); ++m) {
+                if (active.mMerged.get(m).mToken == token) return true;
+            }
+        }
+        return false;
     }
 
     void requestStartTransition(@NonNull IBinder transitionToken,
             @Nullable TransitionRequestInfo request) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested: %s %s",
                 transitionToken, request);
-        if (findActiveTransition(transitionToken) >= 0) {
+        if (isTransitionKnown(transitionToken)) {
             throw new RuntimeException("Transition already started " + transitionToken);
         }
         final ActiveTransition active = new ActiveTransition();
         WindowContainerTransaction wct = null;
-        for (int i = mHandlers.size() - 1; i >= 0; --i) {
-            wct = mHandlers.get(i).handleRequest(transitionToken, request);
-            if (wct != null) {
-                active.mHandler = mHandlers.get(i);
-                break;
-            }
-        }
-        if (request.getDisplayChange() != null) {
-            TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
-            if (change.getEndRotation() != change.getStartRotation()) {
-                // Is a rotation, so dispatch to all displayChange listeners
-                if (wct == null) {
-                    wct = new WindowContainerTransaction();
+
+        // If we have sleep, we use a special handler and we try to finish everything ASAP.
+        if (request.getType() == TRANSIT_SLEEP) {
+            mSleepHandler.handleRequest(transitionToken, request);
+            active.mHandler = mSleepHandler;
+        } else {
+            for (int i = mHandlers.size() - 1; i >= 0; --i) {
+                wct = mHandlers.get(i).handleRequest(transitionToken, request);
+                if (wct != null) {
+                    active.mHandler = mHandlers.get(i);
+                    break;
                 }
-                mDisplayController.getChangeController().dispatchOnDisplayChange(wct,
-                        change.getDisplayId(), change.getStartRotation(), change.getEndRotation(),
-                        null /* newDisplayAreaInfo */);
+            }
+            if (request.getDisplayChange() != null) {
+                TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
+                if (change.getEndRotation() != change.getStartRotation()) {
+                    // Is a rotation, so dispatch to all displayChange listeners
+                    if (wct == null) {
+                        wct = new WindowContainerTransaction();
+                    }
+                    mDisplayController.getChangeController().dispatchOnDisplayChange(wct,
+                            change.getDisplayId(), change.getStartRotation(),
+                            change.getEndRotation(), null /* newDisplayAreaInfo */);
+                }
             }
         }
         mOrganizer.startTransition(transitionToken, wct != null && wct.isEmpty() ? null : wct);
         active.mToken = transitionToken;
-        mActiveTransitions.add(active);
+        // Currently, WMCore only does one transition at a time. If it makes a requestStart, it
+        // is already collecting that transition on core-side, so it will be the next one to
+        // become ready. There may already be pending transitions added as part of direct
+        // `startNewTransition` but if we have a request now, it means WM created the request
+        // transition before it acknowledged any of the pending `startNew` transitions. So, insert
+        // it at the front.
+        mPendingTransitions.add(0, active);
     }
 
     /** Start a new transition directly. */
     public IBinder startTransition(@WindowManager.TransitionType int type,
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Directly starting a new transition "
+                + "type=%d wct=%s handler=%s", type, wct, handler);
         final ActiveTransition active = new ActiveTransition();
         active.mHandler = handler;
         active.mToken = mOrganizer.startNewTransition(type, wct);
-        mActiveTransitions.add(active);
+        mPendingTransitions.add(active);
         return active.mToken;
+    }
+
+    /**
+     * Finish running animations (almost) immediately when a SLEEP transition comes in. We use this
+     * as both a way to reduce unnecessary work (animations not visible while screen off) and as a
+     * failsafe to unblock "stuck" animations (in particular remote animations).
+     *
+     * This works by "merging" the sleep transition into the currently-playing transition (even if
+     * its out-of-order) -- turning SLEEP into a signal. If the playing transition doesn't finish
+     * within `SLEEP_ALLOWANCE_MS` from this merge attempt, this will then finish it directly (and
+     * send an abort/consumed message).
+     *
+     * This is then repeated until there are no more pending sleep transitions.
+     *
+     * @param forceFinish When non-null, this is the transition that we last sent the SLEEP merge
+     *                    signal to -- so it will be force-finished if it's still running.
+     */
+    private void finishForSleep(@Nullable ActiveTransition forceFinish) {
+        if ((mActiveTransitions.isEmpty() && mReadyTransitions.isEmpty())
+                || mSleepHandler.mSleepTransitions.isEmpty()) {
+            // Done finishing things.
+            // Prevent any weird leaks... shouldn't happen though.
+            mSleepHandler.mSleepTransitions.clear();
+            return;
+        }
+        if (forceFinish != null && mActiveTransitions.contains(forceFinish)) {
+            Log.e(TAG, "Forcing transition to finish due to sleep timeout: " + forceFinish);
+            forceFinish.mAborted = true;
+            // Last notify of it being consumed. Note: mHandler should never be null,
+            // but check just to be safe.
+            if (forceFinish.mHandler != null) {
+                forceFinish.mHandler.onTransitionConsumed(
+                        forceFinish.mToken, true /* aborted */, null /* finishTransaction */);
+            }
+            onFinish(forceFinish, null, null);
+        }
+        final SurfaceControl.Transaction dummyT = new SurfaceControl.Transaction();
+        final TransitionInfo dummyInfo = new TransitionInfo(TRANSIT_SLEEP, 0 /* flags */);
+        while (!mActiveTransitions.isEmpty() && !mSleepHandler.mSleepTransitions.isEmpty()) {
+            final ActiveTransition playing = mActiveTransitions.get(0);
+            int sleepIdx = findByToken(mReadyTransitions, mSleepHandler.mSleepTransitions.get(0));
+            if (sleepIdx >= 0) {
+                // Try to signal that we are sleeping by attempting to merge the sleep transition
+                // into the playing one.
+                final ActiveTransition nextSleep = mReadyTransitions.get(sleepIdx);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge SLEEP %s"
+                        + " into %s", nextSleep, playing);
+                playing.mHandler.mergeAnimation(nextSleep.mToken, dummyInfo, dummyT,
+                        playing.mToken, (wct, cb) -> {});
+            } else {
+                Log.e(TAG, "Couldn't find sleep transition in ready list: "
+                        + mSleepHandler.mSleepTransitions.get(0));
+            }
+            // it's possible to complete immediately. If that happens, just repeat the signal
+            // loop until we either finish everything or start playing an animation that isn't
+            // finishing immediately.
+            if (!mActiveTransitions.isEmpty() && mActiveTransitions.get(0) == playing) {
+                // Give it a (very) short amount of time to process it before forcing.
+                mMainExecutor.executeDelayed(() -> finishForSleep(playing), SLEEP_ALLOWANCE_MS);
+                break;
+            }
+        }
     }
 
     /**

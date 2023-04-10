@@ -55,7 +55,7 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
                 return
             }
 
-            val targetExpression = "${node.name}$HELPER_SUFFIX()"
+            val targetExpression = getHelperMethodCallSourceString(node)
             val message =
                 "Method must start with $targetExpression or super.${node.name}(), if applicable"
 
@@ -85,22 +85,11 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
                 val locationTarget = getLocationTarget(firstExpression)
                 val expressionLocation = context.getLocation(locationTarget)
 
-                val indent = " ".repeat(expressionLocation.start?.column ?: 0)
-
-                val fix = fix()
-                    .replace()
-                    .range(expressionLocation)
-                    .beginning()
-                    .with("$targetExpression;\n\n$indent")
-                    .reformat(true)
-                    .autoFix()
-                    .build()
-
                 context.report(
                     ISSUE_ENFORCE_PERMISSION_HELPER,
                     context.getLocation(node),
                     message,
-                    fix
+                    getHelperMethodFix(node, expressionLocation),
                 )
             }
         }

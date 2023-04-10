@@ -19,6 +19,7 @@
           package="android.media.projection.mediaprojectiontests"
           android:sharedUserId="com.android.uid.test">
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+    <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
 
     <application android:debuggable="true"
                  android:testOnly="true">

@@ -5,12 +5,14 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.text.TextFlags;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -46,8 +48,6 @@ import java.util.List;
  */
 final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKeyListener,
         PopupWindow.OnDismissListener {
-    private static final int ITEM_LAYOUT = com.android.internal.R.layout.cascading_menu_item_layout;
-
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HORIZ_POSITION_LEFT, HORIZ_POSITION_RIGHT})
     public @interface HorizPosition {}
@@ -190,6 +190,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private Callback mPresenterCallback;
     private ViewTreeObserver mTreeObserver;
     private PopupWindow.OnDismissListener mOnDismissListener;
+    private final int mItemLayout;
 
     /** Whether popup menus should disable exit animations when closing. */
     private boolean mShouldCloseImmediately;
@@ -215,6 +216,12 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
                 res.getDimensionPixelSize(com.android.internal.R.dimen.config_prefDialogWidth));
 
         mSubMenuHoverHandler = new Handler();
+
+        mItemLayout = AppGlobals.getIntCoreSetting(
+                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
+                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0
+                ? com.android.internal.R.layout.cascading_menu_item_layout_material
+                : com.android.internal.R.layout.cascading_menu_item_layout;
     }
 
     @Override
@@ -348,7 +355,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     private void showMenu(@NonNull MenuBuilder menu) {
         final LayoutInflater inflater = LayoutInflater.from(mContext);
-        final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT);
+        final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly, mItemLayout);
 
         // Apply "force show icon" setting. There are 3 cases:
         // (1) This is the top level menu and icon spacing is forced. Add spacing.

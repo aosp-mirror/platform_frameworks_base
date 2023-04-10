@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.MathUtils;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -98,22 +99,81 @@ public class FontScaleConverterFactory {
     public static FontScaleConverter forScale(float fontScale) {
         if (fontScale <= 1) {
             // We don't need non-linear curves for shrinking text or for 100%.
-            // Also, fontScale==0 should not have a curve either
+            // Also, fontScale==0 should not have a curve either.
+            // And ignore negative font scales; that's just silly.
             return null;
         }
 
         FontScaleConverter lookupTable = get(fontScale);
-        // TODO(b/247861716): interpolate between two tables when null
+        if (lookupTable != null) {
+            return lookupTable;
+        }
 
-        return lookupTable;
+        // Didn't find an exact match: interpolate between two existing tables
+        final int index = LOOKUP_TABLES.indexOfKey(getKey(fontScale));
+        if (index >= 0) {
+            // This should never happen, should have been covered by get() above.
+            return LOOKUP_TABLES.valueAt(index);
+        }
+        // Didn't find an exact match: interpolate between two existing tables
+        final int lowerIndex = -(index + 1) - 1;
+        final int higherIndex = lowerIndex + 1;
+        if (lowerIndex < 0 || higherIndex >= LOOKUP_TABLES.size()) {
+            // We have gone beyond our bounds and have nothing to interpolate between. Just give
+            // them a straight linear table instead.
+            // This works because when FontScaleConverter encounters a size beyond its bounds, it
+            // calculates a linear fontScale factor using the ratio of the last element pair.
+            return new FontScaleConverter(new float[] {1f}, new float[] {fontScale});
+        } else {
+            float startScale = getScaleFromKey(LOOKUP_TABLES.keyAt(lowerIndex));
+            float endScale = getScaleFromKey(LOOKUP_TABLES.keyAt(higherIndex));
+            float interpolationPoint = MathUtils.constrainedMap(
+                    /* rangeMin= */ 0f,
+                    /* rangeMax= */ 1f,
+                    startScale,
+                    endScale,
+                    fontScale
+            );
+            return createInterpolatedTableBetween(
+                    LOOKUP_TABLES.valueAt(lowerIndex),
+                    LOOKUP_TABLES.valueAt(higherIndex),
+                    interpolationPoint);
+        }
+    }
+
+    @NonNull
+    private static FontScaleConverter createInterpolatedTableBetween(
+            FontScaleConverter start,
+            FontScaleConverter end,
+            float interpolationPoint
+    ) {
+        float[] commonSpSizes = new float[] { 8f, 10f, 12f, 14f, 18f, 20f, 24f, 30f, 100f};
+        float[] dpInterpolated = new float[commonSpSizes.length];
+
+        for (int i = 0; i < commonSpSizes.length; i++) {
+            float sp = commonSpSizes[i];
+            float startDp = start.convertSpToDp(sp);
+            float endDp = end.convertSpToDp(sp);
+            dpInterpolated[i] = MathUtils.lerp(startDp, endDp, interpolationPoint);
+        }
+
+        return new FontScaleConverter(commonSpSizes, dpInterpolated);
+    }
+
+    private static int getKey(float fontScale) {
+        return (int) (fontScale * SCALE_KEY_MULTIPLIER);
+    }
+
+    private static float getScaleFromKey(int key) {
+        return (float) key / SCALE_KEY_MULTIPLIER;
     }
 
     private static void put(float scaleKey, @NonNull FontScaleConverter fontScaleConverter) {
-        LOOKUP_TABLES.put((int) (scaleKey * SCALE_KEY_MULTIPLIER), fontScaleConverter);
+        LOOKUP_TABLES.put(getKey(scaleKey), fontScaleConverter);
     }
 
     @Nullable
     private static FontScaleConverter get(float scaleKey) {
-        return LOOKUP_TABLES.get((int) (scaleKey * SCALE_KEY_MULTIPLIER));
+        return LOOKUP_TABLES.get(getKey(scaleKey));
     }
 }

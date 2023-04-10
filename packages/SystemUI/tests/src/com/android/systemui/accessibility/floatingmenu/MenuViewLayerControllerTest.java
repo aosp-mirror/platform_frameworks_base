@@ -39,6 +39,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -63,6 +64,9 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
 
     @Mock
+    private SecureSettings mSecureSettings;
+
+    @Mock
     private WindowMetrics mWindowMetrics;
 
     private MenuViewLayerController mMenuViewLayerController;
@@ -77,7 +81,7 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
         when(mWindowMetrics.getBounds()).thenReturn(new Rect(0, 0, 1080, 2340));
         when(mWindowMetrics.getWindowInsets()).thenReturn(stubDisplayInsets());
         mMenuViewLayerController = new MenuViewLayerController(mContext, mWindowManager,
-                mAccessibilityManager);
+                mAccessibilityManager, mSecureSettings);
     }
 
     @Test

@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
@@ -33,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -48,6 +50,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -85,6 +88,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
@@ -167,6 +171,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private BiometricPromptCredentialInteractor mBiometricPromptCredentialInteractor;
     @Mock
     private CredentialViewModel mCredentialViewModel;
+    @Mock
+    private UdfpsUtils mUdfpsUtils;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mFpAuthenticatorsRegisteredCaptor;
@@ -174,6 +180,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback> mFaceAuthenticatorsRegisteredCaptor;
     @Captor
     private ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
+    @Mock
+    private Resources mResources;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -902,6 +910,34 @@ public class AuthControllerTest extends SysuiTestCase {
         );
     }
 
+    @Test
+    public void testUpdateFingerprintLocation_defaultPointChanges_whenConfigChanges() {
+        when(mContextSpy.getResources()).thenReturn(mResources);
+
+        doReturn(500).when(mResources)
+                .getDimensionPixelSize(eq(com.android.systemui.R.dimen
+                        .physical_fingerprint_sensor_center_screen_location_y));
+        mAuthController.onConfigurationChanged(null /* newConfig */);
+
+        final Point firstFpLocation = mAuthController.getFingerprintSensorLocation();
+
+        doReturn(1000).when(mResources)
+                .getDimensionPixelSize(eq(com.android.systemui.R.dimen
+                        .physical_fingerprint_sensor_center_screen_location_y));
+        mAuthController.onConfigurationChanged(null /* newConfig */);
+
+        assertNotSame(firstFpLocation, mAuthController.getFingerprintSensorLocation());
+    }
+
+    @Test
+    public void testCloseDialog_whenGlobalActionsMenuShown() throws Exception {
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        mAuthController.handleShowGlobalActionsMenu();
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL),
+                eq(null) /* credentialAttestation */);
+    }
+
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
         mAuthController.showAuthenticationDialog(createTestPromptInfo(),
                 mReceiver /* receiver */,
@@ -958,7 +994,7 @@ public class AuthControllerTest extends SysuiTestCase {
                     mPanelInteractionDetector, mUserManager, mLockPatternUtils, mUdfpsLogger,
                     mLogContextInteractor, () -> mBiometricPromptCredentialInteractor,
                     () -> mCredentialViewModel, mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mVibratorHelper);
+                    mBackgroundExecutor, mVibratorHelper, mUdfpsUtils);
         }
 
         @Override

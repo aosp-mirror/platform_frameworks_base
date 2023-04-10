@@ -26,12 +26,16 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.IBinder;
 import android.util.Slog;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import com.android.internal.policy.PhoneWindow;
+
+import java.util.Objects;
 
 /**
  * Window of type {@code LayoutParams.TYPE_INPUT_METHOD_DIALOG} for drawing
@@ -184,5 +188,13 @@ final class InkWindow extends PhoneWindow {
     boolean isInkViewVisible() {
         return getDecorView().getVisibility() == View.VISIBLE
                 && mInkView != null && mInkView.isVisibleToUser();
+    }
+
+    void dispatchHandwritingEvent(@NonNull MotionEvent event) {
+        final View decor = getDecorView();
+        Objects.requireNonNull(decor);
+        final ViewRootImpl viewRoot = decor.getViewRootImpl();
+        Objects.requireNonNull(viewRoot);
+        viewRoot.enqueueInputEvent(event);
     }
 }

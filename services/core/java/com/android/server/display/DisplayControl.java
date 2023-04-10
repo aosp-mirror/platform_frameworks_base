@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.os.IBinder;
+import android.view.Display;
 
 import java.util.Objects;
 
@@ -27,11 +28,16 @@ import java.util.Objects;
  * Calls into SurfaceFlinger for Display creation and deletion.
  */
 public class DisplayControl {
-    private static native IBinder nativeCreateDisplay(String name, boolean secure);
+    private static native IBinder nativeCreateDisplay(String name, boolean secure,
+            float requestedRefreshRate);
     private static native void nativeDestroyDisplay(IBinder displayToken);
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
     private static native long[] nativeGetPhysicalDisplayIds();
     private static native IBinder nativeGetPhysicalDisplayToken(long physicalDisplayId);
+    private static native int nativeSetHdrConversionMode(int conversionMode,
+            int preferredHdrOutputType, int[] autoHdrTypes, int autoHdrTypesLength);
+    private static native int[] nativeGetSupportedHdrOutputTypes();
+    private static native boolean nativeGetHdrOutputConversionSupport();
 
     /**
      * Create a display in SurfaceFlinger.
@@ -42,7 +48,25 @@ public class DisplayControl {
      */
     public static IBinder createDisplay(String name, boolean secure) {
         Objects.requireNonNull(name, "name must not be null");
-        return nativeCreateDisplay(name, secure);
+        return nativeCreateDisplay(name, secure, 0.0f);
+    }
+
+    /**
+     * Create a display in SurfaceFlinger.
+     *
+     * @param name The name of the display
+     * @param secure Whether this display is secure.
+     * @param requestedRefreshRate The requested refresh rate in frames per second.
+     * For best results, specify a divisor of the physical refresh rate, e.g., 30 or 60 on
+     * 120hz display. If an arbitrary refresh rate is specified, the rate will be rounded
+     * up or down to a divisor of the physical display. If 0 is specified, the virtual
+     * display is refreshed at the physical display refresh rate.
+     * @return The token reference for the display in SurfaceFlinger.
+     */
+    public static IBinder createDisplay(String name, boolean secure,
+            float requestedRefreshRate) {
+        Objects.requireNonNull(name, "name must not be null");
+        return nativeCreateDisplay(name, secure, requestedRefreshRate);
     }
 
     /**
@@ -78,5 +102,36 @@ public class DisplayControl {
      */
     public static IBinder getPhysicalDisplayToken(long physicalDisplayId) {
         return nativeGetPhysicalDisplayToken(physicalDisplayId);
+    }
+
+    /**
+     * Sets the HDR conversion mode for the device.
+     *
+     * Returns the system preferred Hdr output type nn case when HDR conversion mode is
+     * {@link android.hardware.display.HdrConversionMode#HDR_CONVERSION_SYSTEM}.
+     * Returns Hdr::INVALID in other cases.
+     * @hide
+     */
+    public static int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+            int[] autoHdrTypes) {
+        int length = autoHdrTypes != null ? autoHdrTypes.length : 0;
+        return nativeSetHdrConversionMode(
+                conversionMode, preferredHdrOutputType, autoHdrTypes, length);
+    }
+
+    /**
+     * Returns the HDR output types supported by the device.
+     * @hide
+     */
+    public static @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypes() {
+        return nativeGetSupportedHdrOutputTypes();
+    }
+
+    /**
+     * Returns whether the HDR output conversion is supported by the device.
+     * @hide
+     */
+    public static boolean getHdrOutputConversionSupport() {
+        return nativeGetHdrOutputConversionSupport();
     }
 }

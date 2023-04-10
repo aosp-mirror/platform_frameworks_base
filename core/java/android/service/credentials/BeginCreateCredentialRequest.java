@@ -17,28 +17,20 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.Objects;
-
 /**
  * Request for beginning a create credential request.
  *
  * See {@link BeginCreateCredentialResponse} for the counterpart response
- *
- * <p>Any class that derives this class must only add extra field values to the {@code slice}
- * object passed into the constructor. Any other field will not be parceled through. If the
- * derived class has custom parceling implementation, this class will not be able to unpack
- * the parcel without having access to that implementation.
  */
-@SuppressLint("ParcelNotFinal")
-public class BeginCreateCredentialRequest implements Parcelable {
-    private final @NonNull CallingAppInfo mCallingAppInfo;
+public final class BeginCreateCredentialRequest implements Parcelable {
+    private final @Nullable CallingAppInfo mCallingAppInfo;
     private final @NonNull String mType;
     private final @NonNull Bundle mData;
 
@@ -49,13 +41,25 @@ public class BeginCreateCredentialRequest implements Parcelable {
      * null or empty.
      * @throws NullPointerException If {@code data} is null.
      */
-    public BeginCreateCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
-            @NonNull String type, @NonNull Bundle data) {
-        mCallingAppInfo = Objects.requireNonNull(callingAppInfo,
-                "callingAppInfo must not be null");
+    public BeginCreateCredentialRequest(@NonNull String type, @NonNull Bundle data,
+            @Nullable CallingAppInfo callingAppInfo) {
         mType = Preconditions.checkStringNotEmpty(type,
                 "type must not be null or empty");
-        mData = Objects.requireNonNull(data, "data must not be null");
+        Bundle dataCopy = new Bundle();
+        dataCopy.putAll(data);
+        mData = dataCopy;
+        mCallingAppInfo = callingAppInfo;
+    }
+
+    /**
+     * Constructs a new instance without {@link CallingAppInfo}.
+     *
+     * @throws IllegalArgumentException If {{@code type} string is
+     * null or empty.
+     * @throws NullPointerException If {@code data} is null.
+     */
+    public BeginCreateCredentialRequest(@NonNull String type, @NonNull Bundle data) {
+        this(type, data, /*callingAppInfo=*/null);
     }
 
     private BeginCreateCredentialRequest(@NonNull Parcel in) {
@@ -89,8 +93,14 @@ public class BeginCreateCredentialRequest implements Parcelable {
         dest.writeBundle(mData);
     }
 
-    /** Returns the info pertaining to the calling app. */
-    @NonNull
+    /**
+     * Returns the info pertaining to the calling app.
+     *
+     * This value can be null when this instance is set on a {@link BeginGetCredentialRequest} or
+     * a {@link BeginCreateCredentialRequest} if the caller of the API does not wish to propagate
+     * this information to a credential provider.
+     */
+    @Nullable
     public CallingAppInfo getCallingAppInfo() {
         return mCallingAppInfo;
     }

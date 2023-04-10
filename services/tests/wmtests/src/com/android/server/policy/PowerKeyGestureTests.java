@@ -20,6 +20,7 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_ASSISTANT;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_GLOBAL_ACTIONS;
+import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_DREAM_OR_SLEEP;
 
 import android.provider.Settings;
 import android.view.Display;
@@ -46,6 +47,32 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
         sendKey(KEYCODE_POWER);
         mPhoneWindowManager.assertPowerWakeUp();
         mPhoneWindowManager.assertNoPowerSleep();
+    }
+
+    /**
+     * Power single press to start dreaming when so configured.
+     */
+    @Test
+    public void testPowerSinglePressRequestsDream() {
+        mPhoneWindowManager.overrideShortPressOnPower(SHORT_PRESS_POWER_DREAM_OR_SLEEP);
+        mPhoneWindowManager.overrideCanStartDreaming(true);
+        sendKey(KEYCODE_POWER);
+        mPhoneWindowManager.assertDreamRequest();
+        mPhoneWindowManager.assertLockedAfterAppTransitionFinished();
+    }
+
+    /**
+     * Power double-press to launch camera does not lock device when the single press behavior is to
+     * dream.
+     */
+    @Test
+    public void testPowerDoublePressWillNotLockDevice() {
+        mPhoneWindowManager.overrideShortPressOnPower(SHORT_PRESS_POWER_DREAM_OR_SLEEP);
+        mPhoneWindowManager.overrideCanStartDreaming(false);
+        sendKey(KEYCODE_POWER);
+        sendKey(KEYCODE_POWER);
+        mPhoneWindowManager.assertCameraLaunch();
+        mPhoneWindowManager.assertWillNotLockAfterAppTransitionFinished();
     }
 
     /**

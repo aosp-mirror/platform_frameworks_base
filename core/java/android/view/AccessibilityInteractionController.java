@@ -172,7 +172,7 @@ public final class AccessibilityInteractionController {
 
     private boolean isVisibleToAccessibilityService(View view) {
         return view != null && (mA11yManager.isRequestFromAccessibilityTool()
-                || !view.isAccessibilityDataPrivate());
+                || !view.isAccessibilityDataSensitive());
     }
 
     public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
@@ -874,8 +874,11 @@ public final class AccessibilityInteractionController {
             return;
         }
         try {
+            // Clearing focus does not expose sensitive data, so set fetch flags to ensure that the
+            // root view is always returned if present.
             setAccessibilityFetchFlags(
-                    AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS);
+                    AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS
+                            | AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL);
             final View root = getRootView();
             if (root != null && isShown(root)) {
                 final View host = mViewRootImpl.mAccessibilityFocusedHost;
@@ -1571,7 +1574,7 @@ public final class AccessibilityInteractionController {
                     parent = provider.createAccessibilityNodeInfo(virtualDescendantId);
                     if (parent == null) {
                         // Going up the parent relation we found a null predecessor,
-                        // so remove these disconnected nodes form the result.
+                        // so remove these disconnected nodes from the result.
                         final int currentResultSize = outInfos.size();
                         for (int i = currentResultSize - 1; i >= initialResultSize; i--) {
                             outInfos.remove(i);

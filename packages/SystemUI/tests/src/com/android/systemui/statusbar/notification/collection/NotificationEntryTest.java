@@ -21,6 +21,7 @@ import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
+import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
@@ -246,6 +247,36 @@ public class NotificationEntryTest extends SysuiTestCase {
         assertEquals(NOTIFICATION_CHANNEL, entry.getChannel());
         assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.getUserSentiment());
         assertEquals(snoozeCriterions, entry.getSnoozeCriteria());
+    }
+
+    @Test
+    public void testIsStickyAndNotDemoted_noFlagAndDemoted_returnFalse() {
+        mEntry.getSbn().getNotification().flags &= ~FLAG_FSI_REQUESTED_BUT_DENIED;
+        assertFalse(mEntry.isStickyAndNotDemoted());
+    }
+
+    @Test
+    public void testIsStickyAndNotDemoted_noFlagAndNotDemoted_demoteAndReturnFalse() {
+        mEntry.getSbn().getNotification().flags &= ~FLAG_FSI_REQUESTED_BUT_DENIED;
+
+        assertFalse(mEntry.isStickyAndNotDemoted());
+        assertTrue(mEntry.isDemoted());
+    }
+
+    @Test
+    public void testIsStickyAndNotDemoted_hasFlagButAlreadyDemoted_returnFalse() {
+        mEntry.getSbn().getNotification().flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
+        mEntry.demoteStickyHun();
+
+        assertFalse(mEntry.isStickyAndNotDemoted());
+    }
+
+    @Test
+    public void testIsStickyAndNotDemoted_hasFlagAndNotDemoted_returnTrue() {
+        mEntry.getSbn().getNotification().flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
+
+        assertFalse(mEntry.isDemoted());
+        assertTrue(mEntry.isStickyAndNotDemoted());
     }
 
     @Test

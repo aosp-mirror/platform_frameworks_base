@@ -895,9 +895,13 @@ public class TelecomManager {
             "android.telecom.extra.NOTIFICATION_PHONE_NUMBER";
 
     /**
-     * The intent to clear missed calls.
+     * Included in the extras of the {@link #ACTION_SHOW_MISSED_CALLS_NOTIFICATION}, provides a
+     * pending intent which can be used to clear the missed calls notification and mark unread
+     * missed call log entries as read.
      * @hide
+     * @deprecated Use {@link #cancelMissedCallsNotification()} instead.
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT =
             "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
@@ -949,6 +953,23 @@ public class TelecomManager {
      */
     @SystemApi
     public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
+
+    /**
+     * Intent action to trigger "switch to managed profile" dialog for call in SystemUI
+     *
+     * @hide
+     */
+    public static final String ACTION_SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG =
+            "android.telecom.action.SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG";
+
+    /**
+     * Extra specifying the managed profile user id.
+     * This is used with {@link TelecomManager#ACTION_SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG}
+     *
+     * @hide
+     */
+    public static final String EXTRA_MANAGED_PROFILE_USER_ID =
+            "android.telecom.extra.MANAGED_PROFILE_USER_ID";
 
     /**
      * Indicating the call is initiated via emergency dialer's shortcut button.
@@ -2056,6 +2077,14 @@ public class TelecomManager {
      * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
      * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
      * <p>
+     * Specify the address associated with the incoming call using
+     * {@link #EXTRA_INCOMING_CALL_ADDRESS}.  If an incoming call is from an anonymous source, omit
+     * this extra and ensure you specify a valid number presentation via
+     * {@link Connection#setAddress(Uri, int)} on the {@link Connection} instance you return in
+     * your
+     * {@link ConnectionService#onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * implementation.
+     * <p>
      * The incoming call you are adding is assumed to have a video state of
      * {@link VideoProfile#STATE_AUDIO_ONLY}, unless the extra value
      * {@link #EXTRA_INCOMING_VIDEO_STATE} is specified.
@@ -2237,9 +2266,10 @@ public class TelecomManager {
     }
 
     /**
-     * Removes the missed-call notification if one is present.
+     * Removes the missed-call notification if one is present and marks missed calls in the call
+     * log as read.
      * <p>
-     * Requires that the method-caller be set as the system dialer app.
+     * Requires that the method-caller be set as the default dialer app.
      * </p>
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -2652,8 +2682,10 @@ public class TelecomManager {
     }
 
     /**
-     * Adds a new call with the specified {@link CallAttributes} to the telecom service. This method
-     * can be used to add both incoming and outgoing calls.
+     * Reports a new call with the specified {@link CallAttributes} to the telecom service. This
+     * method can be used to report both incoming and outgoing calls.  By reporting the call, the
+     * system is aware of the call and can provide updates on services (ex. Another device wants to
+     * disconnect the call) or events (ex. a new Bluetooth route became available).
      *
      * <p>
      * The difference between this API call and {@link TelecomManager#placeCall(Uri, Bundle)} or
@@ -2676,9 +2708,20 @@ public class TelecomManager {
      * <pre>
      *
      *  // An app should first define their own construct of a Call that overrides all the
-     *  // {@link CallEventCallback}s
-     *  private class MyVoipCall implements CallEventCallback {
-     *    // override all the {@link CallEventCallback}s
+     *  // {@link CallControlCallback}s and {@link CallEventCallback}s
+     *  private class MyVoipCall {
+     *   public String callId = "";
+     *
+     *   public CallControlCallEventCallback handshakes = new
+     *                       CallControlCallEventCallback() {
+     *                         // override/ implement all {@link CallControlCallback}s
+     *                        }
+     *   public CallEventCallback events = new
+     *                       CallEventCallback() {
+     *                         // override/ implement all {@link CallEventCallback}s
+     *                        }
+     *   public MyVoipCall(String id){
+     *       callId = id;
      *  }
      *
      * PhoneAccountHandle handle = new PhoneAccountHandle(
@@ -2690,28 +2733,33 @@ public class TelecomManager {
      *                                            "John Smith", Uri.fromParts("tel", "123", null))
      *                                            .build();
      *
+     * MyVoipCall myFirstOutgoingCall = new MyVoipCall("1");
+     *
      * telecomManager.addCall(callAttributes, Runnable::run, new OutcomeReceiver() {
      *                              public void onResult(CallControl callControl) {
      *                                 // The call has been added successfully
      *                              }
-     *                           }, new MyVoipCall());
+     *                           }, myFirstOutgoingCall.handshakes, myFirstOutgoingCall.events);
      * </pre>
      *
      * @param callAttributes    attributes of the new call (incoming or outgoing, address, etc. )
      * @param executor          thread to run background CallEventCallback updates on
      * @param pendingControl    OutcomeReceiver that receives the result of addCall transaction
-     * @param callEventCallback object that overrides CallEventCallback
+     * @param handshakes        object that overrides {@link CallControlCallback}s
+     * @param events            object that overrides {@link CallEventCallback}s
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS)
     @SuppressLint("SamShouldBeLast")
     public void addCall(@NonNull CallAttributes callAttributes,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<CallControl, CallException> pendingControl,
-            @NonNull CallEventCallback callEventCallback) {
+            @NonNull CallControlCallback handshakes,
+            @NonNull CallEventCallback events) {
         Objects.requireNonNull(callAttributes);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(pendingControl);
-        Objects.requireNonNull(callEventCallback);
+        Objects.requireNonNull(handshakes);
+        Objects.requireNonNull(events);
 
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -2723,7 +2771,7 @@ public class TelecomManager {
 
                 // couple all the args passed by the client
                 String newCallId = transactionalServiceWrapper.trackCall(callAttributes, executor,
-                        pendingControl, callEventCallback);
+                        pendingControl, handshakes, events);
 
                 // send args to server to process new call
                 service.addCall(callAttributes, transactionalServiceWrapper.getCallEventCallback(),

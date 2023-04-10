@@ -61,6 +61,10 @@ class StatusBarWindowStateController @Inject constructor(
         listeners.add(listener)
     }
 
+    fun removeListener(listener: StatusBarWindowStateListener) {
+        listeners.remove(listener)
+    }
+
     /** Returns true if the window is currently showing. */
     fun windowIsShowing() = windowState == WINDOW_STATE_SHOWING
 

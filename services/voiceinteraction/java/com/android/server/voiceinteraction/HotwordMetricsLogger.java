@@ -34,10 +34,13 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_SOFTWARE;
+import static com.android.internal.util.LatencyTracker.ACTION_SHOW_VOICE_INTERACTION;
 
+import android.content.Context;
 import android.service.voice.HotwordDetector;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.LatencyTracker;
 
 /**
  * A utility class for logging hotword statistics event.
@@ -114,6 +117,46 @@ public final class HotwordMetricsLogger {
         int metricsDetectorType = getAudioEgressDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED,
                 metricsDetectorType, event, uid, streamSizeBytes, bundleSizeBytes, streamCount);
+    }
+
+    /**
+     * Starts a {@link LatencyTracker} log for the time it takes to show the
+     * {@link android.service.voice.VoiceInteractionSession} system UI after a voice trigger.
+     *
+     * @see LatencyTracker
+     *
+     * @param tag Extra tag to separate different sessions from each other.
+     */
+    public static void startHotwordTriggerToUiLatencySession(Context context, String tag) {
+        LatencyTracker.getInstance(context).onActionStart(ACTION_SHOW_VOICE_INTERACTION, tag);
+    }
+
+    /**
+     * Completes a {@link LatencyTracker} log for the time it takes to show the
+     * {@link android.service.voice.VoiceInteractionSession} system UI after a voice trigger.
+     *
+     * <p>Completing this session will result in logging metric data.</p>
+     *
+     * @see LatencyTracker
+     */
+    public static void stopHotwordTriggerToUiLatencySession(Context context) {
+        LatencyTracker.getInstance(context).onActionEnd(ACTION_SHOW_VOICE_INTERACTION);
+    }
+
+    /**
+     * Cancels a {@link LatencyTracker} log for the time it takes to show the
+     * {@link android.service.voice.VoiceInteractionSession} system UI after a voice trigger.
+     *
+     * <p>Cancels typically occur when the VoiceInteraction session UI is shown for reasons outside
+     * of a {@link android.hardware.soundtrigger.SoundTrigger.RecognitionEvent} such as an
+     * invocation from an external source or service.</p>
+     *
+     * <p>Canceling this session will not result in logging metric data.
+     *
+     * @see LatencyTracker
+     */
+    public static void cancelHotwordTriggerToUiLatencySession(Context context) {
+        LatencyTracker.getInstance(context).onActionCancel(ACTION_SHOW_VOICE_INTERACTION);
     }
 
     private static int getCreateMetricsDetectorType(int detectorType) {

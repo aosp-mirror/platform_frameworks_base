@@ -47,9 +47,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
-    private DragResizeCallback mDragResizeCallback;
+    private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
-    private final DragDetector mDragDetector;
+    private DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final RelayoutResult<WindowDecorLinearLayout> mResult =
@@ -69,7 +69,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
-        mDragDetector = new DragDetector(ViewConfiguration.get(context).getScaledTouchSlop());
     }
 
     void setCaptionListeners(
@@ -79,8 +78,13 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mOnCaptionTouchListener = onCaptionTouchListener;
     }
 
-    void setDragResizeCallback(DragResizeCallback dragResizeCallback) {
-        mDragResizeCallback = dragResizeCallback;
+    void setDragPositioningCallback(DragPositioningCallback dragPositioningCallback) {
+        mDragPositioningCallback = dragPositioningCallback;
+    }
+
+    void setDragDetector(DragDetector dragDetector) {
+        mDragDetector = dragDetector;
+        mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
     }
 
     @Override
@@ -147,7 +151,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                     mChoreographer,
                     mDisplay.getDisplayId(),
                     mDecorationContainerSurface,
-                    mDragResizeCallback);
+                    mDragPositioningCallback);
         }
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())

@@ -22,7 +22,7 @@
     android:layout_weight="1">
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/screenrecord_audio_label"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:fontFamily="@*android:string/config_headlineFontFamily"
@@ -30,7 +30,7 @@
     <TextView
         android:id="@+id/screen_recording_dialog_source_text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:textColor="?android:attr/textColorSecondary"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 </LinearLayout>

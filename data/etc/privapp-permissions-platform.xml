@@ -122,6 +122,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
         <permission name="android.permission.BIND_IMS_SERVICE"/>
+        <permission name="android.permission.BIND_SATELLITE_SERVICE"/>
         <permission name="android.permission.BIND_TELEPHONY_DATA_SERVICE"/>
         <permission name="android.permission.BIND_VISUAL_VOICEMAIL_SERVICE"/>
         <permission name="android.permission.CALL_PRIVILEGED"/>
@@ -274,6 +275,7 @@ applications that come with the platform
         <!-- Permission required to test onPermissionsChangedListener -->
         <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.QUERY_USERS"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_ACCESSIBILITY"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
@@ -281,6 +283,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_GAME_MODE"/>
         <permission name="android.permission.MANAGE_GAME_ACTIVITY" />
         <permission name="android.permission.MANAGE_LOW_POWER_STANDBY" />
+        <permission name="android.permission.SET_LOW_POWER_STANDBY_PORTS" />
         <permission name="android.permission.MANAGE_ROLLBACKS"/>
         <permission name="android.permission.MANAGE_USB"/>
         <!-- Needed for tests only -->
@@ -310,6 +313,7 @@ applications that come with the platform
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <!-- Permission required for UiModeManager CTS test -->
         <permission name="android.permission.READ_PROJECTION_STATE"/>
+        <permission name="android.permission.READ_WALLPAPER_INTERNAL"/>
         <permission name="android.permission.READ_WIFI_CREDENTIAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -317,6 +321,7 @@ applications that come with the platform
         <permission name="android.permission.REGISTER_CONNECTION_MANAGER"/>
         <permission name="android.permission.REGISTER_SIM_SUBSCRIPTION"/>
         <permission name="android.permission.RETRIEVE_WINDOW_CONTENT"/>
+        <permission name="android.permission.SCHEDULE_EXACT_ALARM"/>
         <permission name="android.permission.SET_ALWAYS_FINISH"/>
         <permission name="android.permission.SET_ANIMATION_SCALE"/>
         <permission name="android.permission.SET_DEBUG_APP"/>
@@ -465,10 +470,10 @@ applications that come with the platform
         <!-- Permission required for CTS test - SystemMediaRouter2Test -->
         <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
         <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
-        <permission name="android.permission.MODIFY_AUDIO_SYSTEM_SETTINGS"/>
+        <permission name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED"/>
         <!-- Permission required for CTS test - CallAudioInterceptionTest -->
         <permission name="android.permission.CALL_AUDIO_INTERCEPTION"/>
-        <!-- Permission required for CTS test - CtsPermission5TestCases -->
+        <!-- Permission required for CTS test - CtsAttributionSourceTestCases -->
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
         <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
@@ -504,6 +509,12 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_BROADCAST_RADIO"/>
         <!-- Permission required for CTS test - CtsAmbientContextServiceTestCases -->
         <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"/>
+        <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
+        <permission name="android.permission.WRITE_APN_SETTINGS"/>
+        <!-- Permission required for GTS test - GtsStatsdHostTestCases -->
+        <permission name="android.permission.READ_RESTRICTED_STATS"/>
+        <!-- Permission required for CTS test -->
+        <permission name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -530,6 +541,12 @@ applications that come with the platform
     <privapp-permissions package="com.android.wallpaper.livepicker">
         <permission name="android.permission.SET_WALLPAPER_COMPONENT"/>
         <permission name="android.permission.BIND_WALLPAPER"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.wallpaper">
+        <permission name="android.permission.SET_WALLPAPER_COMPONENT"/>
+        <permission name="android.permission.BIND_WALLPAPER"/>
+        <permission name="android.permission.CUSTOMIZE_SYSTEM_UI"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.dynsystem">

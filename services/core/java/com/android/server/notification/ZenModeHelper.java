@@ -20,7 +20,7 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
-import static android.service.notification.DNDModeProto.ROOT_CONFIG;
+import static android.service.notification.NotificationServiceProto.ROOT_CONFIG;
 import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
@@ -1258,17 +1258,18 @@ public class ZenModeHelper {
                         .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                         .writeByteArray(config.toZenPolicy().toProto());
                 events.add(data.build());
-                if (config.manualRule != null && config.manualRule.enabler != null) {
-                    ruleToProtoLocked(user, config.manualRule, events);
+                if (config.manualRule != null) {
+                    ruleToProtoLocked(user, config.manualRule, true, events);
                 }
                 for (ZenRule rule : config.automaticRules.values()) {
-                    ruleToProtoLocked(user, rule, events);
+                    ruleToProtoLocked(user, rule, false, events);
                 }
             }
         }
     }
 
-    private void ruleToProtoLocked(int user, ZenRule rule, List<StatsEvent> events) {
+    private void ruleToProtoLocked(int user, ZenRule rule, boolean isManualRule,
+            List<StatsEvent> events) {
         // Make the ID safe.
         String id = rule.id == null ? "" : rule.id;
         if (!ZenModeConfig.DEFAULT_RULE_IDS.contains(id)) {
@@ -1279,6 +1280,9 @@ public class ZenModeHelper {
         String pkg = rule.getPkg() == null ? "" : rule.getPkg();
         if (rule.enabler != null) {
             pkg = rule.enabler;
+        }
+
+        if (isManualRule) {
             id = ZenModeConfig.MANUAL_RULE_ID;
         }
 

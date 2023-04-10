@@ -61,7 +61,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public final class StageTaskListenerTests extends ShellTestCase {
     private static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
 
     @Mock
     private ShellTaskOrganizer mTaskOrganizer;
@@ -124,12 +124,6 @@ public final class StageTaskListenerTests extends ShellTestCase {
 
         assertThat(mStageTaskListener.mChildrenTaskInfo.contains(childTask.taskId)).isTrue();
         verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(true));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnknownTaskVanished() {
-        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-        mStageTaskListener.onTaskVanished(task);
     }
 
     @Test

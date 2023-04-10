@@ -32,16 +32,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.IntOffset
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.common.LogCategory
-import com.android.settingslib.spa.framework.common.SettingsPage
+import com.android.settingslib.spa.framework.common.NullPageProvider
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.AnimatedNavHost
 import com.android.settingslib.spa.framework.compose.LocalNavController
 import com.android.settingslib.spa.framework.compose.NavControllerWrapperImpl
@@ -104,39 +106,41 @@ fun BrowseContent(sppRepository: SettingsPageProviderRepository, initialIntent: 
 
 @Composable
 private fun NavControllerWrapperImpl.NavContent(allProvider: Collection<SettingsPageProvider>) {
-    val nullPage = SettingsPage.createNull()
     AnimatedNavHost(
         navController = navController,
-        startDestination = nullPage.sppName,
+        startDestination = NullPageProvider.name,
     ) {
         val slideEffect = tween<IntOffset>(durationMillis = 300)
         val fadeEffect = tween<Float>(durationMillis = 300)
-        composable(nullPage.sppName) {}
+        composable(NullPageProvider.name) {}
         for (spp in allProvider) {
             composable(
                 route = spp.name + spp.parameter.navRoute(),
                 arguments = spp.parameter,
                 enterTransition = {
                     slideIntoContainer(
-                        AnimatedContentScope.SlideDirection.Left, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Start, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentScope.SlideDirection.Left, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Start, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        AnimatedContentScope.SlideDirection.Right, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.End, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentScope.SlideDirection.Right, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.End, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
-            ) { navBackStackEntry -> spp.PageWithEvent(navBackStackEntry.arguments) }
+            ) { navBackStackEntry ->
+                val page = remember { spp.createSettingsPage(navBackStackEntry.arguments) }
+                page.PageWithEvent()
+            }
         }
     }
 }

@@ -100,6 +100,8 @@ public:
         mHardwareBufferParams = params;
     }
 
+    void setRenderSdrHdrRatio(float ratio) { mRenderSdrHdrRatio = ratio; }
+
 private:
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
@@ -112,6 +114,7 @@ private:
     CanvasContext* mContext;
     RenderNode* mTargetNode = nullptr;
     Rect mContentDrawBounds;
+    float mRenderSdrHdrRatio = 1.f;
 
     /*********************************************
      *  Single frame data

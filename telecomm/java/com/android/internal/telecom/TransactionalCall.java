@@ -19,6 +19,7 @@ package com.android.internal.telecom;
 import android.os.OutcomeReceiver;
 import android.telecom.CallAttributes;
 import android.telecom.CallControl;
+import android.telecom.CallControlCallback;
 import android.telecom.CallEventCallback;
 import android.telecom.CallException;
 
@@ -33,18 +34,22 @@ public class TransactionalCall {
     private final CallAttributes mCallAttributes;
     private final Executor mExecutor;
     private final OutcomeReceiver<CallControl, CallException> mPendingControl;
-    private final CallEventCallback mCallEventCallback;
+    private final CallControlCallback mCallControlCallback;
+    private final CallEventCallback mCallStateCallback;
     private CallControl mCallControl;
 
     public TransactionalCall(String callId, CallAttributes callAttributes,
-            Executor executor, OutcomeReceiver<CallControl, CallException>  pendingControl,
-            CallEventCallback callEventCallback) {
+            Executor executor, OutcomeReceiver<CallControl, CallException> pendingControl,
+            CallControlCallback callControlCallback,
+            CallEventCallback callStateCallback) {
         mCallId = callId;
         mCallAttributes = callAttributes;
         mExecutor = executor;
         mPendingControl = pendingControl;
-        mCallEventCallback = callEventCallback;
+        mCallControlCallback = callControlCallback;
+        mCallStateCallback = callStateCallback;
     }
+
 
     public void setCallControl(CallControl callControl) {
         mCallControl = callControl;
@@ -70,7 +75,11 @@ public class TransactionalCall {
         return mPendingControl;
     }
 
-    public CallEventCallback getCallEventCallback() {
-        return mCallEventCallback;
+    public CallControlCallback getCallControlCallback() {
+        return mCallControlCallback;
+    }
+
+    public CallEventCallback getCallStateCallback() {
+        return mCallStateCallback;
     }
 }

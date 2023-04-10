@@ -16,12 +16,14 @@
 package com.android.server.timedetector;
 
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_CLEAR_NETWORK_TIME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_CLEAR_SYSTEM_CLOCK_NETWORK_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_CONFIRM_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_GET_NETWORK_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_GET_TIME_STATE;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SERVICE_NAME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SET_SYSTEM_CLOCK_NETWORK_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SET_TIME_STATE;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_EXTERNAL_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_GNSS_TIME;
@@ -73,9 +75,9 @@ class TimeDetectorShellCommand extends ShellCommand {
             case SHELL_COMMAND_SUGGEST_NETWORK_TIME:
                 return runSuggestNetworkTime();
             case SHELL_COMMAND_GET_NETWORK_TIME:
-                return runGetNetworkTime();
+                return runGetLatestNetworkTime();
             case SHELL_COMMAND_CLEAR_NETWORK_TIME:
-                return runClearNetworkTime();
+                return runClearLatestNetworkTime();
             case SHELL_COMMAND_SUGGEST_GNSS_TIME:
                 return runSuggestGnssTime();
             case SHELL_COMMAND_SUGGEST_EXTERNAL_TIME:
@@ -86,6 +88,10 @@ class TimeDetectorShellCommand extends ShellCommand {
                 return runSetTimeState();
             case SHELL_COMMAND_CONFIRM_TIME:
                 return runConfirmTime();
+            case SHELL_COMMAND_CLEAR_SYSTEM_CLOCK_NETWORK_TIME:
+                return runClearSystemClockNetworkTime();
+            case SHELL_COMMAND_SET_SYSTEM_CLOCK_NETWORK_TIME:
+                return runSetSystemClockNetworkTime();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -128,15 +134,15 @@ class TimeDetectorShellCommand extends ShellCommand {
                 mInterface::suggestNetworkTime);
     }
 
-    private int runGetNetworkTime() {
+    private int runGetLatestNetworkTime() {
         NetworkTimeSuggestion networkTimeSuggestion = mInterface.getLatestNetworkSuggestion();
         final PrintWriter pw = getOutPrintWriter();
         pw.println(networkTimeSuggestion);
         return 0;
     }
 
-    private int runClearNetworkTime() {
-        mInterface.clearNetworkTime();
+    private int runClearLatestNetworkTime() {
+        mInterface.clearLatestNetworkTime();
         return 0;
     }
 
@@ -187,6 +193,20 @@ class TimeDetectorShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runClearSystemClockNetworkTime() {
+        mInterface.clearNetworkTimeForSystemClockForTests();
+        return 0;
+    }
+
+    private int runSetSystemClockNetworkTime() {
+        NetworkTimeSuggestion networkTimeSuggestion =
+                NetworkTimeSuggestion.parseCommandLineArg(this);
+        mInterface.setNetworkTimeForSystemClockForTests(
+                networkTimeSuggestion.getUnixEpochTime(),
+                networkTimeSuggestion.getUncertaintyMillis());
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -218,6 +238,16 @@ class TimeDetectorShellCommand extends ShellCommand {
         pw.printf("    Prints the network time information held by the detector.\n");
         pw.printf("  %s\n", SHELL_COMMAND_CLEAR_NETWORK_TIME);
         pw.printf("    Clears the network time information held by the detector.\n");
+        // TODO(b/222295093) Remove these "system_clock" commands when
+        //  SystemClock.currentNetworkTimeClock() is guaranteed to use the latest network
+        //  suggestion. Then, commands above can be used instead.
+        pw.printf("  %s <network suggestion opts>\n",
+                SHELL_COMMAND_SET_SYSTEM_CLOCK_NETWORK_TIME);
+        pw.printf("    Sets the network time information used for"
+                + " SystemClock.currentNetworkTimeClock().\n");
+        pw.printf("  %s\n", SHELL_COMMAND_CLEAR_SYSTEM_CLOCK_NETWORK_TIME);
+        pw.printf("    Clears the network time information used for"
+                + " SystemClock.currentNetworkTimeClock().\n");
         pw.println();
         ManualTimeSuggestion.printCommandLineOpts(pw);
         pw.println();

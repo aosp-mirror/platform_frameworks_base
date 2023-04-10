@@ -339,7 +339,7 @@ int APerformanceHint_sendHint(void* session, int32_t hint) {
     return reinterpret_cast<APerformanceHintSession*>(session)->sendHint(hint);
 }
 
-int APerformanceHint_setThreads(APerformanceHintSession* session, const int32_t* threadIds,
+int APerformanceHint_setThreads(APerformanceHintSession* session, const pid_t* threadIds,
                                 size_t size) {
     if (session == nullptr) {
         return EINVAL;

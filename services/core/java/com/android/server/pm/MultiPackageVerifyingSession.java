@@ -47,7 +47,8 @@ final class MultiPackageVerifyingSession {
             throws PackageManagerException {
         mUser = parent.getUser();
         if (children.size() == 0) {
-            throw new PackageManagerException("No child sessions found!");
+            throw PackageManagerException.ofInternalError("No child sessions found!",
+                    PackageManagerException.INTERNAL_ERROR_VERIFY_MISSING_CHILD_SESSIONS);
         }
         mChildVerifyingSessions = children;
         // Provide every child with reference to this object as parent

@@ -16,15 +16,20 @@
 
 package android.view;
 
+import static android.view.WindowInsets.Type.FIRST;
+import static android.view.WindowInsets.Type.LAST;
+import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -206,6 +211,21 @@ public class InsetsSourceTest {
         assertEquals(Insets.of(0, 0, 0, 0), insets);
     }
 
+    @Test
+    public void testCreateId() {
+        final int numSourcePerType = 2048;
+        final int numTotalSources = SIZE * numSourcePerType;
+        final SparseArray<InsetsSource> sources = new SparseArray<>(numTotalSources);
+        final Object owner = new Object();
+        for (int index = 0; index < numSourcePerType; index++) {
+            for (int type = FIRST; type <= LAST; type = type << 1) {
+                final int id = InsetsSource.createId(owner, index, type);
+                assertNull("Must not create the same ID.", sources.get(id));
+                sources.append(id, new InsetsSource(id, type));
+            }
+        }
+        assertEquals(numTotalSources, sources.size());
+    }
 
     // Parcel and equals already tested via InsetsStateTest
 }

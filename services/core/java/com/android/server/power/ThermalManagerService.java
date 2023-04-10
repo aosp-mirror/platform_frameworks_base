@@ -129,6 +129,9 @@ public class ThermalManagerService extends SystemService {
     ThermalManagerService(Context context, @Nullable ThermalHalWrapper halWrapper) {
         super(context);
         mHalWrapper = halWrapper;
+        if (halWrapper != null) {
+            halWrapper.setCallback(this::onTemperatureChangedCallback);
+        }
         mStatus = Temperature.THROTTLING_NONE;
     }
 
@@ -149,22 +152,21 @@ public class ThermalManagerService extends SystemService {
             // Connect to HAL and post to listeners.
             boolean halConnected = (mHalWrapper != null);
             if (!halConnected) {
-                mHalWrapper = new ThermalHalAidlWrapper();
+                mHalWrapper = new ThermalHalAidlWrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal20Wrapper();
+                mHalWrapper = new ThermalHal20Wrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal11Wrapper();
+                mHalWrapper = new ThermalHal11Wrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal10Wrapper();
+                mHalWrapper = new ThermalHal10Wrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
-            mHalWrapper.setCallback(this::onTemperatureChangedCallback);
             if (!halConnected) {
                 Slog.w(TAG, "No Thermal HAL service on this device");
                 return;
@@ -503,47 +505,9 @@ public class ThermalManagerService extends SystemService {
             return mTemperatureWatcher.getForecast(forecastSeconds);
         }
 
-        private void dumpItemsLocked(PrintWriter pw, String prefix,
-                Collection<?> items) {
-            for (Iterator iterator = items.iterator(); iterator.hasNext();) {
-                pw.println(prefix + iterator.next().toString());
-            }
-        }
-
         @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                synchronized (mLock) {
-                    pw.println("IsStatusOverride: " + mIsStatusOverride);
-                    pw.println("ThermalEventListeners:");
-                    mThermalEventListeners.dump(pw, "\t");
-                    pw.println("ThermalStatusListeners:");
-                    mThermalStatusListeners.dump(pw, "\t");
-                    pw.println("Thermal Status: " + mStatus);
-                    pw.println("Cached temperatures:");
-                    dumpItemsLocked(pw, "\t", mTemperatureMap.values());
-                    pw.println("HAL Ready: " + mHalReady.get());
-                    if (mHalReady.get()) {
-                        pw.println("HAL connection:");
-                        mHalWrapper.dump(pw, "\t");
-                        pw.println("Current temperatures from HAL:");
-                        dumpItemsLocked(pw, "\t",
-                                mHalWrapper.getCurrentTemperatures(false, 0));
-                        pw.println("Current cooling devices from HAL:");
-                        dumpItemsLocked(pw, "\t",
-                                mHalWrapper.getCurrentCoolingDevices(false, 0));
-                        pw.println("Temperature static thresholds from HAL:");
-                        dumpItemsLocked(pw, "\t",
-                                mHalWrapper.getTemperatureThresholds(false, 0));
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            dumpInternal(fd, pw, args);
         }
 
         private boolean isCallerShell() {
@@ -564,6 +528,62 @@ public class ThermalManagerService extends SystemService {
         }
 
     };
+
+    private static void dumpItemsLocked(PrintWriter pw, String prefix,
+            Collection<?> items) {
+        for (Iterator iterator = items.iterator(); iterator.hasNext();) {
+            pw.println(prefix + iterator.next().toString());
+        }
+    }
+
+    private static void dumpTemperatureThresholds(PrintWriter pw, String prefix,
+            List<TemperatureThreshold> thresholds) {
+        for (TemperatureThreshold threshold : thresholds) {
+            pw.println(prefix + "TemperatureThreshold{mType=" + threshold.type
+                    + ", mName=" + threshold.name
+                    + ", mHotThrottlingThresholds=" + Arrays.toString(
+                    threshold.hotThrottlingThresholds)
+                    + ", mColdThrottlingThresholds=" + Arrays.toString(
+                    threshold.coldThrottlingThresholds)
+                    + "}");
+        }
+    }
+
+    @VisibleForTesting
+    void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
+            return;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                pw.println("IsStatusOverride: " + mIsStatusOverride);
+                pw.println("ThermalEventListeners:");
+                mThermalEventListeners.dump(pw, "\t");
+                pw.println("ThermalStatusListeners:");
+                mThermalStatusListeners.dump(pw, "\t");
+                pw.println("Thermal Status: " + mStatus);
+                pw.println("Cached temperatures:");
+                dumpItemsLocked(pw, "\t", mTemperatureMap.values());
+                pw.println("HAL Ready: " + mHalReady.get());
+                if (mHalReady.get()) {
+                    pw.println("HAL connection:");
+                    mHalWrapper.dump(pw, "\t");
+                    pw.println("Current temperatures from HAL:");
+                    dumpItemsLocked(pw, "\t",
+                            mHalWrapper.getCurrentTemperatures(false, 0));
+                    pw.println("Current cooling devices from HAL:");
+                    dumpItemsLocked(pw, "\t",
+                            mHalWrapper.getCurrentCoolingDevices(false, 0));
+                    pw.println("Temperature static thresholds from HAL:");
+                    dumpTemperatureThresholds(pw, "\t",
+                            mHalWrapper.getTemperatureThresholds(false, 0));
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
 
     class ThermalShellCommand extends ShellCommand {
         @Override
@@ -723,6 +743,10 @@ public class ThermalManagerService extends SystemService {
             }
         };
 
+        ThermalHalAidlWrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
+
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
                 int type) {
@@ -735,6 +759,9 @@ public class ThermalManagerService extends SystemService {
                     final android.hardware.thermal.Temperature[] halRet =
                             shouldFilter ? mInstance.getTemperaturesWithType(type)
                                     : mInstance.getTemperatures();
+                    if (halRet == null) {
+                        return ret;
+                    }
                     for (android.hardware.thermal.Temperature t : halRet) {
                         if (!Temperature.isValidStatus(t.throttlingStatus)) {
                             Slog.e(TAG, "Invalid temperature status " + t.throttlingStatus
@@ -768,6 +795,9 @@ public class ThermalManagerService extends SystemService {
                     final android.hardware.thermal.CoolingDevice[] halRet = shouldFilter
                             ? mInstance.getCoolingDevicesWithType(type)
                             : mInstance.getCoolingDevices();
+                    if (halRet == null) {
+                        return ret;
+                    }
                     for (android.hardware.thermal.CoolingDevice t : halRet) {
                         if (!CoolingDevice.isValidType(t.type)) {
                             Slog.e(TAG, "Invalid cooling device type " + t.type + " from AIDL HAL");
@@ -800,9 +830,14 @@ public class ThermalManagerService extends SystemService {
                     final TemperatureThreshold[] halRet =
                             shouldFilter ? mInstance.getTemperatureThresholdsWithType(type)
                                     : mInstance.getTemperatureThresholds();
-
-                    return Arrays.stream(halRet).filter(t -> t.type == type).collect(
-                            Collectors.toList());
+                    if (halRet == null) {
+                        return ret;
+                    }
+                    if (shouldFilter) {
+                        return Arrays.stream(halRet).filter(t -> t.type == type).collect(
+                                Collectors.toList());
+                    }
+                    return Arrays.asList(halRet);
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     Slog.e(TAG, "Couldn't getTemperatureThresholds due to invalid status", e);
                 } catch (RemoteException e) {
@@ -832,9 +867,10 @@ public class ThermalManagerService extends SystemService {
                         binder.linkToDeath(this, 0);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
-                        mInstance = null;
+                        connectToHal();
                     }
                     if (mInstance != null) {
+                        Slog.i(TAG, "Thermal HAL AIDL service connected.");
                         registerThermalChangedCallback();
                     }
                 }
@@ -850,7 +886,7 @@ public class ThermalManagerService extends SystemService {
                         e);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
-                mInstance = null;
+                connectToHal();
             }
         }
 
@@ -866,8 +902,8 @@ public class ThermalManagerService extends SystemService {
 
         @Override
         public synchronized void binderDied() {
-            Slog.w(TAG, "IThermal HAL instance died");
-            mInstance = null;
+            Slog.w(TAG, "Thermal AIDL HAL died, reconnecting...");
+            connectToHal();
         }
     }
 
@@ -875,6 +911,10 @@ public class ThermalManagerService extends SystemService {
         /** Proxy object for the Thermal HAL 1.0 service. */
         @GuardedBy("mHalLock")
         private android.hardware.thermal.V1_0.IThermal mThermalHal10 = null;
+
+        ThermalHal10Wrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
 
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
@@ -1011,6 +1051,10 @@ public class ThermalManagerService extends SystemService {
                     }
                 };
 
+        ThermalHal11Wrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
+
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
                 int type) {
@@ -1144,6 +1188,10 @@ public class ThermalManagerService extends SystemService {
                         }
                     }
                 };
+
+        ThermalHal20Wrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
 
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,

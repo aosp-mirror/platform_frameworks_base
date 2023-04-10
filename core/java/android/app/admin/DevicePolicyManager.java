@@ -16,17 +16,48 @@
 
 package android.app.admin;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_DEFAULT_SMS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_KEYGUARD;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_TASK;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILE_INTERACTION;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RESET_PASSWORD;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CAPTURE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
+import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
+import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
 import android.accounts.Account;
+import android.annotation.BroadcastBehavior;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -37,6 +68,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringDef;
+import android.annotation.SupportsCoexistence;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -2213,7 +2245,7 @@ public class DevicePolicyManager {
      *
      * <p>If an invalid value is used, it will be treated as {@link #PASSWORD_COMPLEXITY_NONE}.
      */
-    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
+    @RequiresPermission(REQUEST_PASSWORD_COMPLEXITY)
     public static final String EXTRA_PASSWORD_COMPLEXITY =
             "android.app.extra.PASSWORD_COMPLEXITY";
 
@@ -3865,13 +3897,48 @@ public class DevicePolicyManager {
     public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1;
 
     /**
-     * Prevent an app from being placed into app standby buckets, such that it will not be subject
-     * to device resources restrictions as a result of app standby buckets.
+     * Prevent an app from being suspended.
      *
      * @hide
      */
     @SystemApi
-    public static final int EXEMPT_FROM_APP_STANDBY =  0;
+    public static final int EXEMPT_FROM_SUSPENSION =  0;
+
+    /**
+     * Prevent an app from dismissible notifications. Starting from Android U, notifications with
+     * the ongoing parameter can be dismissed by a user on an unlocked device. An app with
+     * this exemption can create non-dismissible notifications.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =  1;
+
+    /**
+     * Allows an application to start an activity while running in the background.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION = 2;
+
+    /**
+     * Prevent an app from entering hibernation.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_HIBERNATION =  3;
+
+    /**
+     * Exempt an app from all power-related restrictions, including app standby and doze.
+     * In addition, the app will be able to start foreground services from the background,
+     * and the user will not be able to stop foreground services run by the app.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_POWER_RESTRICTIONS =  4;
 
     /**
      * Exemptions to platform restrictions, given to an application through
@@ -3880,7 +3947,11 @@ public class DevicePolicyManager {
      * @hide
      */
     @IntDef(prefix = { "EXEMPT_FROM_"}, value = {
-            EXEMPT_FROM_APP_STANDBY
+            EXEMPT_FROM_SUSPENSION,
+            EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+            EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
+            EXEMPT_FROM_HIBERNATION,
+            EXEMPT_FROM_POWER_RESTRICTIONS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationExemptionConstants {}
@@ -3928,6 +3999,27 @@ public class DevicePolicyManager {
     public static final String EXTRA_RESOURCE_IDS =
             "android.app.extra.RESOURCE_IDS";
 
+    /**
+     * Broadcast Action: Broadcast sent to indicate that the device financing state has changed.
+     *
+     * <p>This occurs when, for example, a financing kiosk app has been added or removed.
+     *
+     * <p>To query the current device financing state see {@link #isDeviceFinanced}.
+     *
+     * <p>This will be delivered to the following apps if they include a receiver for this action
+     * in their manifest:
+     * <ul>
+     *     <li>Device owner admins.
+     *     <li>Organization-owned profile owner admins
+     *     <li>The supervision app
+     *     <li>The device management role holder
+     * </ul>
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true, includeBackground = true)
+    public static final String ACTION_DEVICE_FINANCING_STATE_CHANGED =
+            "android.app.admin.action.DEVICE_FINANCING_STATE_CHANGED";
+
     /** Allow the user to choose whether to enable MTE on the device. */
     public static final int MTE_NOT_CONTROLLED_BY_POLICY = 0;
 
@@ -3948,7 +4040,8 @@ public class DevicePolicyManager {
     public static @interface MtePolicy {}
 
     /**
-     * Called by a device owner or profile owner of an organization-owned device to set the Memory
+     * Called by a device owner, profile owner of an organization-owned device, or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MTE} permission to set the Memory
      * Tagging Extension (MTE) policy. MTE is a CPU extension that allows to protect against certain
      * classes of security problems at a small runtime performance cost overhead.
      *
@@ -3957,15 +4050,16 @@ public class DevicePolicyManager {
      *
      * <p>The device needs to be rebooted to apply changes to the MTE policy.
      *
-     * @throws SecurityException if caller is not device owner or profile owner of org-owned device
-     *     or if called on a parent instance
+     * @throws SecurityException if caller is not permitted to set Mte policy
+     * @throws UnsupportedOperationException if the device does not support MTE
      * @param policy the MTE policy to be set
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_MTE, conditional = true)
     public void setMtePolicy(@MtePolicy int policy) {
         throwIfParentInstance("setMtePolicy");
         if (mService != null) {
             try {
-                mService.setMtePolicy(policy);
+                mService.setMtePolicy(policy, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3973,77 +4067,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner, a profile owner of an organization-owned device or the system to
+     * Called by a device owner, profile owner of an organization-owned device, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MTE} permission to
      * get the Memory Tagging Extension (MTE) policy
      *
      * <a href="https://source.android.com/docs/security/test/memory-safety/arm-mte">
      * Learn more about MTE</a>
      *
-     * @throws SecurityException if caller is not device owner or profile owner of org-owned device
-     *                           or system uid, or if called on a parent instance
+     * @throws SecurityException if caller is not permitted to set Mte policy
      * @return the currently set MTE policy
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_MTE, conditional = true)
     public @MtePolicy int getMtePolicy() {
         throwIfParentInstance("setMtePolicy");
         if (mService != null) {
             try {
-                return mService.getMtePolicy();
+                return mService.getMtePolicy(mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
         return MTE_NOT_CONTROLLED_BY_POLICY;
     }
-
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static final String AUTO_TIMEZONE_POLICY = "autoTimezone";
-
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static final String PERMISSION_GRANT_POLICY_KEY = "permissionGrant";
-
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static String PERMISSION_GRANT_POLICY(
-            @NonNull String packageName, @NonNull String permission) {
-        Objects.requireNonNull(packageName);
-        Objects.requireNonNull(permission);
-        return PERMISSION_GRANT_POLICY_KEY + "_" + packageName + "_" + permission;
-    }
-
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static final String LOCK_TASK_POLICY = "lockTask";
-
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static final String USER_CONTROL_DISABLED_PACKAGES_POLICY =
-            "userControlDisabledPackages";
-
-
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static final String PERSISTENT_PREFERRED_ACTIVITY_POLICY =
-            "persistentPreferredActivity";
-
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static final String PACKAGE_UNINSTALL_BLOCKED_POLICY = "packageUninstallBlocked";
 
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
@@ -5233,7 +5278,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device admin to set the password expiration timeout. Calling this method will
+     * Called by a device admin or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission to set
+     * the password expiration timeout. Calling this method will
      * restart the countdown for password expiration for the given admin, as will changing the
      * device password (for all admins).
      * <p>
@@ -5246,7 +5293,7 @@ public class DevicePolicyManager {
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password expiration is always disabled.
      * <p>
-     * The calling device admin must have requested
+     * A calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
@@ -5257,17 +5304,23 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param timeout The limit (in ms) that a password can remain in effect. A value of 0 means
      *            there is no restriction (unlimited).
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
-     *             does not use {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} and the caller
+     *             does not hold the
+     *             {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS}
+     *             permission
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void setPasswordExpirationTimeout(@NonNull ComponentName admin, long timeout) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
+    public void setPasswordExpirationTimeout(@Nullable ComponentName admin, long timeout) {
         if (mService != null) {
             try {
-                mService.setPasswordExpirationTimeout(admin, timeout, mParentInstance);
+                mService.setPasswordExpirationTimeout(
+                        admin, mContext.getPackageName(), timeout, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5423,13 +5476,16 @@ public class DevicePolicyManager {
      *
      * @return {@code true} if the password meets the policy requirements, {@code false} otherwise
      * @throws SecurityException if the calling application isn't an active admin that uses
-     *     {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     *     {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} and does not hold the
+     *     {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission
      * @throws IllegalStateException if the user isn't unlocked
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
             try {
-                return mService.isActivePasswordSufficient(myUserId(), mParentInstance);
+                return mService.isActivePasswordSufficient(
+                        mContext.getPackageName(), myUserId(), mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5489,7 +5545,8 @@ public class DevicePolicyManager {
      * <p>Note that when called from a profile which uses an unified challenge with its parent, the
      * screen lock complexity of the parent will be returned.
      *
-     * <p>Apps need the {@link permission#REQUEST_PASSWORD_COMPLEXITY} permission to call this
+     * <p>Apps need the {@link permission#REQUEST_PASSWORD_COMPLEXITY} or
+     * {@link permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permissions to call this
      * method. On Android {@link android.os.Build.VERSION_CODES#S} and above, the calling
      * application does not need this permission if it is a device owner or a profile owner.
      *
@@ -5499,11 +5556,12 @@ public class DevicePolicyManager {
      *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException     if the calling application does not have the permission
-     *                               {@link permission#REQUEST_PASSWORD_COMPLEXITY}, and is not a
-     *                               device owner or a profile owner.
+     *                               {@link permission#REQUEST_PASSWORD_COMPLEXITY} or
+     *                               {@link permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS}, and
+     *                               is not a device owner or a profile owner.
      */
     @PasswordComplexity
-    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
+    @RequiresPermission(anyOf={MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, REQUEST_PASSWORD_COMPLEXITY}, conditional = true)
     public int getPasswordComplexity() {
         if (mService == null) {
             return PASSWORD_COMPLEXITY_NONE;
@@ -5537,20 +5595,23 @@ public class DevicePolicyManager {
      * with {@link #PASSWORD_QUALITY_UNSPECIFIED} on that instance prior to setting complexity
      * requirement for the managed profile.
      *
-     * @throws SecurityException if the calling application is not a device owner or a profile
-     * owner.
+     * @throws SecurityException if the calling application is not a device owner, a profile
+     * owner, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission.
      * @throws IllegalArgumentException if the complexity level is not one of the four above.
      * @throws IllegalStateException if the caller is trying to set password complexity while there
      * are password requirements specified using {@link #setPasswordQuality(ComponentName, int)}
      * on the parent {@code DevicePolicyManager} instance.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public void setRequiredPasswordComplexity(@PasswordComplexity int passwordComplexity) {
         if (mService == null) {
             return;
         }
 
         try {
-            mService.setRequiredPasswordComplexity(passwordComplexity, mParentInstance);
+            mService.setRequiredPasswordComplexity(
+                    mContext.getPackageName(), passwordComplexity, mParentInstance);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5570,16 +5631,19 @@ public class DevicePolicyManager {
      * restrictions on the parent profile.
      *
      * @throws SecurityException if the calling application is not a device owner or a profile
-     * owner.
+     * owner and does not hold the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission.
      */
     @PasswordComplexity
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public int getRequiredPasswordComplexity() {
         if (mService == null) {
             return PASSWORD_COMPLEXITY_NONE;
         }
 
         try {
-            return mService.getRequiredPasswordComplexity(mParentInstance);
+            return mService.getRequiredPasswordComplexity(
+                    mContext.getPackageName(), mParentInstance);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5680,9 +5744,11 @@ public class DevicePolicyManager {
      * @return The number of times user has entered an incorrect password since the last correct
      *         password entry.
      * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN}
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and does not hold the
+     * @link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission.
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public int getCurrentFailedPasswordAttempts() {
         return getCurrentFailedPasswordAttempts(myUserId());
     }
@@ -5701,7 +5767,8 @@ public class DevicePolicyManager {
     public int getCurrentFailedPasswordAttempts(int userHandle) {
         if (mService != null) {
             try {
-                return mService.getCurrentFailedPasswordAttempts(userHandle, mParentInstance);
+                return mService.getCurrentFailedPasswordAttempts(
+                        mContext.getPackageName(), userHandle, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5727,16 +5794,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Setting this to a value greater than zero enables a built-in policy that will perform a
+     * Setting this to a value greater than zero enables a policy that will perform a
      * device or profile wipe after too many incorrect device-unlock passwords have been entered.
-     * This built-in policy combines watching for failed passwords and wiping the device, and
-     * requires that you request both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
+     * This policy combines watching for failed passwords and wiping the device, and
+     * requires that calling Device Admins request both
+     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
      * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}}.
      * <p>
-     * When this policy is set by a device owner, profile owner of an organization-owned device or
-     * an admin on the primary user, the device will be factory reset after too many incorrect
-     * password attempts. When set by a profile owner or an admin on a secondary user or a managed
-     * profile, only the corresponding user or profile will be wiped.
+     * When this policy is set on the system or the main user, the device will be factory reset
+     * after too many incorrect password attempts. When set on any other user, only the
+     * corresponding user or profile will be wiped.
      * <p>
      * To implement any other policy (e.g. wiping data for a particular application only, erasing or
      * revoking credentials, or reporting the failure to a server), you should implement
@@ -5749,19 +5816,27 @@ public class DevicePolicyManager {
      * profile.
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always empty and this method has no effect - i.e. the policy is not set.
+     * <p>
+     * This policy can be set by holders of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIPE_DATA} permission.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param num The number of failed password attempts at which point the device or profile will
      *            be wiped.
-     * @throws SecurityException if {@code admin} is not an active administrator or does not use
-     *             both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
-     *             {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}.
+     * @throws SecurityException if {@code admin} is not null, and {@code admin} is not an active
+     *            administrator or does not use both
+     *            {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
+     *            {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}, or if {@code admin} is null and the
+     *            caller does not have permission to wipe the device.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIPE_DATA, conditional = true)
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void setMaximumFailedPasswordsForWipe(@NonNull ComponentName admin, int num) {
+    public void setMaximumFailedPasswordsForWipe(@Nullable ComponentName admin, int num) {
         if (mService != null) {
             try {
-                mService.setMaximumFailedPasswordsForWipe(admin, num, mParentInstance);
+                mService.setMaximumFailedPasswordsForWipe(
+                        admin, mContext.getPackageName(), num, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5916,9 +5991,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to provision a token which can later be used to reset the
-     * device lockscreen password (if called by device owner), or managed profile challenge (if
-     * called by profile owner), via {@link #resetPasswordWithToken}.
+     * Called by a profile owner, device owner or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD} to provision a token
+     * which can later be used to reset the device lockscreen password (if called by on the main or
+     * system user), or managed profile challenge (if called on a managed profile), via
+     * {@link #resetPasswordWithToken}.
      * <p>
      * If the user currently has a lockscreen password, the provisioned token will not be
      * immediately usable; it only becomes active after the user performs a confirm credential
@@ -5941,19 +6018,23 @@ public class DevicePolicyManager {
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * reset token is not set and this method returns false.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param token a secure token a least 32-byte long, which must be generated by a
      *        cryptographically strong random number generator.
      * @return true if the operation is successful, false otherwise.
-     * @throws SecurityException if admin is not a device or profile owner.
+     * @throws SecurityException if admin is not a device or profile owner and the caller does
+     * not hold the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD}.
      * @throws IllegalArgumentException if the supplied token is invalid.
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public boolean setResetPasswordToken(ComponentName admin, byte[] token) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_RESET_PASSWORD, conditional = true)
+    public boolean setResetPasswordToken(@Nullable ComponentName admin, byte[] token) {
         throwIfParentInstance("setResetPasswordToken");
         if (mService != null) {
             try {
-                return mService.setResetPasswordToken(admin, token);
+                return mService.setResetPasswordToken(admin, mContext.getPackageName(), token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5962,22 +6043,27 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to revoke the current password reset token.
+     * Called by a profile, device owner or holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD}
+     * to revoke the current password reset token.
      *
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, this
      * method has no effect - the reset token should not have been set in the first place - and
      * false is returned.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @return true if the operation is successful, false otherwise.
-     * @throws SecurityException if admin is not a device or profile owner.
+     * @throws SecurityException if admin is not a device or profile owner and if the caller does
+     * not the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD}.
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public boolean clearResetPasswordToken(ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_RESET_PASSWORD, conditional = true)
+    public boolean clearResetPasswordToken(@Nullable ComponentName admin) {
         throwIfParentInstance("clearResetPasswordToken");
         if (mService != null) {
             try {
-                return mService.clearResetPasswordToken(admin);
+                return mService.clearResetPasswordToken(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5986,22 +6072,27 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to check if the current reset password token is active.
+     * Called by a profile, device owner or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD}
+     * to check if the current reset password token is active.
      *
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature,
      * false is always returned.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @return true if the token is active, false otherwise.
-     * @throws SecurityException if admin is not a device or profile owner.
+     * @throws SecurityException if admin is not a device or profile owner and not a holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD}
      * @throws IllegalStateException if no token has been set.
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public boolean isResetPasswordTokenActive(ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_RESET_PASSWORD, conditional = true)
+    public boolean isResetPasswordTokenActive(@Nullable ComponentName admin) {
         throwIfParentInstance("isResetPasswordTokenActive");
         if (mService != null) {
             try {
-                return mService.isResetPasswordTokenActive(admin);
+                return mService.isResetPasswordTokenActive(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6010,8 +6101,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owner to force set a new device unlock password or a managed
-     * profile challenge on current user. This takes effect immediately.
+     * Called by device owner, profile owner or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD}to force set a new
+     * device unlock password or a managed profile challenge on current user. This takes effect
+     * immediately.
      * <p>
      * Unlike {@link #resetPassword}, this API can change the password even before the user or
      * device is unlocked or decrypted. The supplied token must have been previously provisioned via
@@ -6029,7 +6122,8 @@ public class DevicePolicyManager {
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature,
      * calling this methods has no effect - the password is always empty - and false is returned.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param password The new password for the user. {@code null} or empty clears the password.
      * @param token the password reset token previously provisioned by
      *        {@link #setResetPasswordToken}.
@@ -6037,16 +6131,19 @@ public class DevicePolicyManager {
      *        {@link #RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT}.
      * @return Returns true if the password was applied, or false if it is not acceptable for the
      *         current constraints.
-     * @throws SecurityException if admin is not a device or profile owner.
+     * @throws SecurityException if admin is not a device or profile owner and the caller does not
+     * hold the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RESET_PASSWORD}.
      * @throws IllegalStateException if the provided token is not valid.
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public boolean resetPasswordWithToken(@NonNull ComponentName admin, String password,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_RESET_PASSWORD, conditional = true)
+    public boolean resetPasswordWithToken(@Nullable ComponentName admin, String password,
             byte[] token, int flags) {
         throwIfParentInstance("resetPassword");
         if (mService != null) {
             try {
-                return mService.resetPasswordWithToken(admin, password, token, flags);
+                return mService.resetPasswordWithToken(admin, mContext.getPackageName(), password,
+                        token, flags);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6059,23 +6156,26 @@ public class DevicePolicyManager {
      * activity until the device will lock. This limits the length that the user can set. It takes
      * effect immediately.
      * <p>
-     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     * A calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param timeMs The new desired maximum time to lock in milliseconds. A value of 0 means there
      *            is no restriction.
      * @throws SecurityException if {@code admin} is not an active administrator or it does not use
-     *             {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     *             {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} and the caller does not hold the
+     *             {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK} permission
      */
-    public void setMaximumTimeToLock(@NonNull ComponentName admin, long timeMs) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK, conditional = true)
+    public void setMaximumTimeToLock(@Nullable ComponentName admin, long timeMs) {
         if (mService != null) {
             try {
-                mService.setMaximumTimeToLock(admin, timeMs, mParentInstance);
+                mService.setMaximumTimeToLock(admin, mContext.getPackageName(), timeMs, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6114,7 +6214,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device/profile owner to set the timeout after which unlocking with secondary, non
+     * Called by a device owner, profile owner, or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission to set
+     * the timeout after which unlocking with secondary, non
      * strong auth (e.g. fingerprint, face, trust agents) times out, i.e. the user has to use a
      * strong authentication method like password, pin or pattern.
      *
@@ -6125,10 +6227,7 @@ public class DevicePolicyManager {
      *
      * <p>Trust agents can also be disabled altogether using {@link #KEYGUARD_DISABLE_TRUST_AGENTS}.
      *
-     * <p>The calling device admin must be a device or profile owner. If it is not,
-     * a {@link SecurityException} will be thrown.
-     *
-     * <p>The calling device admin can verify the value it has set by calling
+     * <p>A calling device admin can verify the value it has set by calling
      * {@link #getRequiredStrongAuthTimeout(ComponentName)} and passing in its instance.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance returned by
@@ -6138,7 +6237,8 @@ public class DevicePolicyManager {
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature,
      * calling this methods has no effect - i.e. the timeout is not set.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param timeoutMs The new timeout in milliseconds, after which the user will have to unlock
      *         with strong authentication method. A value of 0 means the admin is not participating
      *         in controlling the timeout.
@@ -6147,14 +6247,17 @@ public class DevicePolicyManager {
      *         auth at all times using {@link #KEYGUARD_DISABLE_FINGERPRINT} and/or
      *         {@link #KEYGUARD_DISABLE_TRUST_AGENTS}.
      *
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not permitted to set this policy.
+     *
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void setRequiredStrongAuthTimeout(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
+    public void setRequiredStrongAuthTimeout(@Nullable ComponentName admin,
             long timeoutMs) {
         if (mService != null) {
             try {
-                mService.setRequiredStrongAuthTimeout(admin, timeoutMs, mParentInstance);
+                mService.setRequiredStrongAuthTimeout(
+                        admin, mContext.getPackageName(), timeoutMs, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6222,7 +6325,8 @@ public class DevicePolicyManager {
      * <p>
      * This method secures the device in response to an urgent situation, such as a lost or stolen
      * device. After this method is called, the device must be unlocked using strong authentication
-     * (PIN, pattern, or password). This API is intended for use only by device admins.
+     * (PIN, pattern, or password). This API is for use only by device admins and holders of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK} permission.
      * <p>
      * From version {@link android.os.Build.VERSION_CODES#R} onwards, the caller must either have
      * the LOCK_DEVICE permission or the device must have the device admin feature; if neither is
@@ -6246,8 +6350,10 @@ public class DevicePolicyManager {
      * Equivalent to calling {@link #lockNow(int)} with no flags.
      *
      * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} and does not hold the
+     *             {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK} permission
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK, conditional = true)
     public void lockNow() {
         lockNow(0);
     }
@@ -6258,7 +6364,8 @@ public class DevicePolicyManager {
      * <p>
      * This method secures the device in response to an urgent situation, such as a lost or stolen
      * device. After this method is called, the device must be unlocked using strong authentication
-     * (PIN, pattern, or password). This API is intended for use only by device admins.
+     * (PIN, pattern, or password). This API is for use only by device admins and holders of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK} permission.
      * <p>
      * From version {@link android.os.Build.VERSION_CODES#R} onwards, the caller must either have
      * the LOCK_DEVICE permission or the device must have the device admin feature; if neither is
@@ -6266,7 +6373,7 @@ public class DevicePolicyManager {
      * {@link android.os.Build.VERSION_CODES#R}, the device needed the device admin feature,
      * regardless of the caller's permissions.
      * <p>
-     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     * A calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
      * <p>
      * If there's no lock type set, this method forces the device to go to sleep but doesn't lock
@@ -6292,20 +6399,21 @@ public class DevicePolicyManager {
      *
      * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} or the
-     *             {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is passed by an application
-     *             that is not a profile
-     *             owner of a managed profile.
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} and the does not hold
+     *             the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK} permission, or
+     *             the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is passed by an
+     *             application that is not a profile owner of a managed profile.
      * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is
      *             passed when locking the parent profile.
      * @throws UnsupportedOperationException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}
      *             flag is passed when {@link #getStorageEncryptionStatus} does not return
      *             {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK, conditional = true)
     public void lockNow(@LockNowFlag int flags) {
         if (mService != null) {
             try {
-                mService.lockNow(flags, mParentInstance);
+                mService.lockNow(flags, mContext.getPackageName(), mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6343,15 +6451,18 @@ public class DevicePolicyManager {
      * @param flags Bit mask of additional options: currently supported flags are
      *              {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
      *              {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
-     * @throws SecurityException     if the calling application does not own an active
-     *                               administrator
-     *                               that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is
-     *                               not granted the
-     *                               {@link android.Manifest.permission#MASTER_CLEAR} permission.
+     * @throws SecurityException if the calling application does not own an active
+     *                           administrator
+     *                           that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is
+     *                           not granted the
+     *                           {@link android.Manifest.permission#MASTER_CLEAR} or
+     *                           {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIPE_DATA}
+     *                            permissions.
      * @throws IllegalStateException if called on last full-user or system-user
      * @see #wipeDevice(int)
      * @see #wipeData(int, CharSequence)
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIPE_DATA, conditional = true)
     public void wipeData(int flags) {
         wipeDataInternal(flags,
                 /* wipeReasonForUser= */ "",
@@ -6385,13 +6496,15 @@ public class DevicePolicyManager {
      *            presented to the user.
      * @throws SecurityException if the calling application does not own an active administrator
      *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is not granted the
-     *            {@link android.Manifest.permission#MASTER_CLEAR} permission.
+     *            {@link android.Manifest.permission#MASTER_CLEAR} or
+     *            {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIPE_DATA} permissions.
      * @throws IllegalArgumentException if the input reason string is null or empty, or if
      *            {@link #WIPE_SILENTLY} is set.
      * @throws IllegalStateException if called on last full-user or system-user
      * @see #wipeDevice(int)
      * @see #wipeData(int)
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIPE_DATA, conditional = true)
     public void wipeData(int flags, @NonNull CharSequence reason) {
         Objects.requireNonNull(reason, "reason string is null");
         Preconditions.checkStringNotEmpty(reason, "reason string is empty");
@@ -6411,13 +6524,17 @@ public class DevicePolicyManager {
      *              {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
      *              {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
      * @throws SecurityException if the calling application does not own an active administrator
-     *                           that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is not
-     *                           granted the {@link android.Manifest.permission#MASTER_CLEAR}
-     *                           permission.
+     *                       that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} and is not
+     *                       granted the {@link android.Manifest.permission#MASTER_CLEAR}
+     *                       or both the
+     *                       {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIPE_DATA} and
+     *                       {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS}
+     *                       permissions.
      * @see #wipeData(int)
      * @see #wipeData(int, CharSequence)
      */
     // TODO(b/255323293) Add host-side tests
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIPE_DATA, conditional = true)
     public void wipeDevice(int flags) {
         wipeDataInternal(flags,
                 /* wipeReasonForUser= */ "",
@@ -6437,8 +6554,8 @@ public class DevicePolicyManager {
             boolean factoryReset) {
         if (mService != null) {
             try {
-                mService.wipeDataWithReason(flags, wipeReasonForUser, mParentInstance,
-                        factoryReset);
+                mService.wipeDataWithReason(mContext.getPackageName(), flags, wipeReasonForUser,
+                        mParentInstance, factoryReset);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6446,24 +6563,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Callable by device owner or profile owner of an organization-owned device, to set a
+     * Callable by device owner, profile owner of an organization-owned device, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_FACTORY_RESET} permission to set a
      * factory reset protection (FRP) policy. When a new policy is set, the system
      * notifies the FRP management agent of a policy change by broadcasting
      * {@code ACTION_RESET_PROTECTION_POLICY_CHANGED}.
      *
-     * @param admin  Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin  Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin
      * @param policy the new FRP policy, or {@code null} to clear the current policy.
-     * @throws SecurityException if {@code admin} is not a device owner or a profile owner of
-     *                           an organization-owned device.
+     * @throws SecurityException if {@code admin} is not a device owner, profile owner of
+     *                           an organization-owned device, or holder of the
+     *                           {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_FACTORY_RESET} permission
      * @throws UnsupportedOperationException if factory reset protection is not
      *                           supported on the device.
      */
-    public void setFactoryResetProtectionPolicy(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_FACTORY_RESET, conditional = true)
+    public void setFactoryResetProtectionPolicy(@Nullable ComponentName admin,
             @Nullable FactoryResetProtectionPolicy policy) {
         throwIfParentInstance("setFactoryResetProtectionPolicy");
         if (mService != null) {
             try {
-                mService.setFactoryResetProtectionPolicy(admin, policy);
+                mService.setFactoryResetProtectionPolicy(admin, mContext.getPackageName(), policy);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6471,23 +6592,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Callable by device owner or profile owner of an organization-owned device, to retrieve
-     * the current factory reset protection (FRP) policy set previously by
-     * {@link #setFactoryResetProtectionPolicy}.
+     * Callable by device owner, profile owner of an organization-owned device, or
+     * holder of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_FACTORY_RESET}
+     * permission to retrieve the current factory reset protection (FRP)
+     * policy set previously by {@link #setFactoryResetProtectionPolicy}.
      * <p>
      * This method can also be called by the FRP management agent on device or with the permission
      * {@link android.Manifest.permission#MASTER_CLEAR}, in which case, it can pass {@code null}
      * as the ComponentName.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with or
-     *              {@code null} if called by the FRP management agent on device or with the
-     *              permission {@link android.Manifest.permission#MASTER_CLEAR}.
+     *              {@code null} if the caller is not a device admin
      * @return The current FRP policy object or {@code null} if no policy is set.
      * @throws SecurityException if {@code admin} is not a device owner, a profile owner of
-     *                           an organization-owned device or the FRP management agent.
+     *                           an organization-owned device, a holder of the
+     *                           {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_FACTORY_RESET}
+     *                           permission, or the FRP management agent.
      * @throws UnsupportedOperationException if factory reset protection is not
      *                           supported on the device.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_FACTORY_RESET, conditional = true)
     public @Nullable FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(
             @Nullable ComponentName admin) {
         throwIfParentInstance("getFactoryResetProtectionPolicy");
@@ -6864,6 +6988,11 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_IRIS = 1 << 8;
 
     /**
+     * Disable all keyguard shortcuts.
+     */
+    public static final int KEYGUARD_DISABLE_SHORTCUTS_ALL = 1 << 9;
+
+    /**
      * NOTE: Please remember to update the DevicePolicyManagerTest's testKeyguardDisabledFeatures
      * CTS test when adding to the list above.
      */
@@ -6906,7 +7035,8 @@ public class DevicePolicyManager {
      */
     public static final int ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY =
             DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA
-                    | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
+                    | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS
+                    | DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL;
 
     /**
      * Keyguard features that when set on a normal or organization-owned managed profile, have
@@ -7220,6 +7350,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * All apps within the profile will be able to access the certificate and use the private key,
      * given direct user approval.
@@ -7242,17 +7374,19 @@ public class DevicePolicyManager {
      * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *            {@code null} if the caller is not a device admin.
      * @param privKey The private key to install.
      * @param cert The certificate to install.
      * @param alias The private key alias under which to install the certificate. If a certificate
      * with that alias already exists, it will be overwritten.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner.
+     *         owner, or {@code admin} is null and the calling application does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate cert, @NonNull String alias) {
         return installKeyPair(admin, privKey, new Certificate[] {cert}, alias, false);
@@ -7266,6 +7400,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * All apps within the profile will be able to access the certificate chain and use the private
      * key, given direct user approval.
@@ -7286,7 +7422,7 @@ public class DevicePolicyManager {
      * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if the caller is not a device admin.
      * @param privKey The private key to install.
      * @param certs The certificate chain to install. The chain should start with the leaf
      *        certificate and include the chain of trust in order. This will be returned by
@@ -7298,11 +7434,13 @@ public class DevicePolicyManager {
      *        approval.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner.
+     *         owner, or {@code admin} is null and the calling application does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see android.security.KeyChain#getCertificateChain
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess) {
         int flags = INSTALLKEY_SET_USER_SELECTABLE;
@@ -7320,6 +7458,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * All apps within the profile will be able to access the certificate chain and use the
      * private key, given direct user approval (if the user is allowed to select the private key).
@@ -7346,7 +7486,7 @@ public class DevicePolicyManager {
      * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if the caller is not a device admin.
      * @param privKey The private key to install.
      * @param certs The certificate chain to install. The chain should start with the leaf
      *        certificate and include the chain of trust in order. This will be returned by
@@ -7357,13 +7497,15 @@ public class DevicePolicyManager {
      *        and set the key to be user-selectable. See {@link #INSTALLKEY_SET_USER_SELECTABLE} and
      *        {@link #INSTALLKEY_REQUEST_CREDENTIALS_ACCESS}.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or
+     *        profile owner, or {@code admin} is null but the calling application is not a
+     *        delegated certificate installer, credential management app and does not have the
+     *        {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see android.security.KeyChain#getCertificateChain
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, int flags) {
         throwIfParentInstance("installKeyPair");
@@ -7399,6 +7541,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      *
      * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
@@ -7406,15 +7550,17 @@ public class DevicePolicyManager {
      * {@code null}. Note, there can only be a credential management app on an unmanaged device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if the caller is not a device admin.
      * @param alias The private key alias under which the certificate is installed.
      * @return {@code true} if the private key alias no longer exists, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device owner or
+     *        profile owner, or {@code admin} is null but the calling application is not a
+     *        delegated certificate installer, credential management app and does not have the
+     *        {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
         throwIfParentInstance("removeKeyPair");
         try {
@@ -7433,6 +7579,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      *
      * If called by the credential management app, the alias must exist in the credential
@@ -7441,10 +7589,12 @@ public class DevicePolicyManager {
      * @param alias The alias under which the key pair is installed.
      * @return {@code true} if a key pair with this alias exists, {@code false} otherwise.
      * @throws SecurityException if the caller is not a device or profile owner, a delegated
-     *         certificate installer or the credential management app.
+     *         certificate installer, the credential management app and does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean hasKeyPair(@NonNull String alias) {
         throwIfParentInstance("hasKeyPair");
         try {
@@ -7461,6 +7611,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * If the device supports key generation via secure hardware, this method is useful for
      * creating a key in KeyChain that never left the secure hardware. Access to the key is
@@ -7491,19 +7643,23 @@ public class DevicePolicyManager {
      * supports these features, refer to {@link #isDeviceIdAttestationSupported()} and
      * {@link #isUniqueDeviceAttestationSupported()}.
      *
-     * <p>Device owner, profile owner, their delegated certificate installer and the credential
-     * management app can use {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device
-     * information including manufacturer, model, brand, device and product in the attestation
-     * record.
-     * Only device owner, profile owner on an organization-owned device or affiliated user, and
-     * their delegated certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI}
-     * and {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial
-     * number, IMEI and MEID correspondingly), if supported by the device
-     * (see {@link #isDeviceIdAttestationSupported()}).
-     * Additionally, device owner, profile owner on an organization-owned device and their delegated
-     * certificate installers can also request the attestation record to be signed using an
-     * individual attestation certificate by specifying the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION}
-     * flag (if supported by the device, see {@link #isUniqueDeviceAttestationSupported()}).
+     * <p>Device owner, profile owner, their delegated certificate installer, the credential
+     * management app or an app that holds the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission can use
+     * {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information including
+     * manufacturer, model, brand, device and product in the attestation record.
+     * Only device owner, profile owner on an organization-owned device or affiliated user, their
+     * delegated certificate installers or an app that holds the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission can use
+     * {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID} to request unique
+     * device identifiers to be attested (the serial number, IMEI and MEID correspondingly),
+     * if supported by the device (see {@link #isDeviceIdAttestationSupported()}).
+     * Additionally, device owner, profile owner on an organization-owned device, their delegated
+     * certificate installers and an app that holds the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission can also
+     * request the attestation record to be signed using an individual attestation certificate by
+     * specifying the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION} flag (if supported by the device,
+     * see {@link #isUniqueDeviceAttestationSupported()}).
      * <p>
      * If any of {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID}
      * is set, it is implicitly assumed that {@link #ID_TYPE_BASE_INFO} is also set.
@@ -7512,7 +7668,7 @@ public class DevicePolicyManager {
      * key generation is done in StrongBox.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *            {@code null} if the caller is not a device admin.
      * @param algorithm The key generation algorithm, see {@link java.security.KeyPairGenerator}.
      * @param keySpec Specification of the key to generate, see
      * {@link java.security.KeyPairGenerator}.
@@ -7528,12 +7684,14 @@ public class DevicePolicyManager {
      *        If any flag is specified, then an attestation challenge must be included in the
      *        {@code keySpec}.
      * @return A non-null {@code AttestedKeyPair} if the key generation succeeded, null otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app. If Device ID attestation is
-     *         requested (using {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} or
-     *         {@link #ID_TYPE_MEID}), the caller must be the Device Owner or the Certificate
-     *         Installer delegate.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device owner or
+     *         profile owner, or {@code admin} is null but the calling application is not a
+     *         delegated certificate installer, credential management app and does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
+     *         If Device ID attestation is requested (using {@link #ID_TYPE_SERIAL},
+     *         {@link #ID_TYPE_IMEI} or {@link #ID_TYPE_MEID}), the caller must be the Device Owner,
+     *         the Certificate Installer delegate or have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @throws IllegalArgumentException in the following cases:
      *         <p>
      *         <ul>
@@ -7549,6 +7707,7 @@ public class DevicePolicyManager {
      *         specified in {@code keySpec} but the device does not have one.
      * @see KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public AttestedKeyPair generateKeyPair(@Nullable ComponentName admin,
             @NonNull String algorithm, @NonNull KeyGenParameterSpec keySpec,
             @AttestationIdType int idAttestationFlags) {
@@ -7815,6 +7974,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      *
      * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
@@ -7822,7 +7983,7 @@ public class DevicePolicyManager {
      * {@code null}. Note, there can only be a credential management app on an unmanaged device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *            {@code null} if the caller is not a device admin.
      * @param alias The private key alias under which to install the certificate. The {@code alias}
      *        should denote an existing private key. If a certificate with that alias already
      *        exists, it will be overwritten.
@@ -7835,10 +7996,12 @@ public class DevicePolicyManager {
      *        {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias}.
      * @return {@code true} if the provided {@code alias} exists and the certificates has been
      *        successfully associated with it, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device owner or
+     *        profile owner, or {@code admin} is null but the calling application is not a
+     *        delegated certificate installer, credential management app and does not have the
+     *        {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean setKeyPairCertificate(@Nullable ComponentName admin,
             @NonNull String alias, @NonNull List<Certificate> certs, boolean isUserSelectable) {
         throwIfParentInstance("setKeyPairCertificate");
@@ -7858,7 +8021,6 @@ public class DevicePolicyManager {
         }
         return false;
     }
-
 
     /**
      * @return the alias of a given CA certificate in the certificate store, or {@code null} if it
@@ -8225,14 +8387,15 @@ public class DevicePolicyManager {
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance,
      * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
-     * the profile owner of an organization-owned managed profile.
+     * the profile owner of an organization-owned managed profile
      * <p>
      * If the caller is device owner, then the restriction will be applied to all users. If
      * called on the parent instance, then the restriction will be applied on the personal profile.
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call this method; if it has
-     * not, a security exception will be thrown.
+     * not, a security exception will be thrown, or the caller must hold the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
      * <p>
      * <b>Note</b>, this policy type is deprecated for legacy device admins since
      * {@link android.os.Build.VERSION_CODES#Q}. On Android
@@ -8244,15 +8407,19 @@ public class DevicePolicyManager {
      * legacy device admins targeting SDK version {@link android.os.Build.VERSION_CODES#P} or
      * below will be silently ignored.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or null if
+                     the caller is not a device admin
      * @param disabled Whether or not the camera should be disabled.
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
-     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} and the caller does not hold
+     *             the permisisons {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
      */
-    public void setCameraDisabled(@NonNull ComponentName admin, boolean disabled) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
+    public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {
         if (mService != null) {
             try {
-                mService.setCameraDisabled(admin, disabled, mParentInstance);
+                mService.setCameraDisabled(admin, mContext.getPackageName(), disabled,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8265,11 +8432,14 @@ public class DevicePolicyManager {
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance,
      * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
-     * the profile owner of an organization-owned managed profile.
+     * the profile owner of an organization-owned managed profile or the caller has been granted
+     * the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA} and the
+     * cross-user permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS}.
      *
-     * @param admin The name of the admin component to check, or {@code null} to check whether any admins
-     * have disabled the camera
+     * @param admin The name of the admin component to check, or {@code null} to check whether any
+     *              admins have disabled the camera
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
     public boolean getCameraDisabled(@Nullable ComponentName admin) {
         return getCameraDisabled(admin, myUserId());
     }
@@ -8279,7 +8449,8 @@ public class DevicePolicyManager {
     public boolean getCameraDisabled(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getCameraDisabled(admin, userHandle, mParentInstance);
+                return mService.getCameraDisabled(admin, mContext.getPackageName(), userHandle,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8314,9 +8485,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device/profile owner to set whether the screen capture is disabled. Disabling
-     * screen capture also prevents the content from being shown on display devices that do not have
-     * a secure video output. See {@link android.view.Display#FLAG_SECURE} for more details about
+     * Called by a device owner, profile owner, or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SCREEN_CAPTURE} permission to set
+     * whether the screen capture is disabled. Disabling screen capture also prevents the
+     * content from being shown on display devices that do not have a secure video output.
+     * See {@link android.view.Display#FLAG_SECURE} for more details about
      * secure surfaces and secure displays.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance, returned by
@@ -8330,16 +8503,17 @@ public class DevicePolicyManager {
      * From version {@link android.os.Build.VERSION_CODES#M} disabling screen capture also blocks
      * assist requests for all activities of the relevant user.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param disabled Whether screen capture is disabled or not.
-     * @throws SecurityException if {@code admin} is not a device or profile owner or if
-     *                           called on the parent profile and the {@code admin} is not a
-     *                           profile owner of an organization-owned managed profile.
+     * @throws SecurityException if the caller is not permitted to control screen capture policy.
      */
-    public void setScreenCaptureDisabled(@NonNull ComponentName admin, boolean disabled) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SCREEN_CAPTURE, conditional = true)
+    public void setScreenCaptureDisabled(@Nullable ComponentName admin, boolean disabled) {
         if (mService != null) {
             try {
-                mService.setScreenCaptureDisabled(admin, disabled, mParentInstance);
+                mService.setScreenCaptureDisabled(
+                        admin, mContext.getPackageName(), disabled, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8473,7 +8647,8 @@ public class DevicePolicyManager {
      * higher, to set whether auto time is required. If auto time is required, no user will be able
      * set the date and time and network date and time will be used.
      * <p>
-     * Note: if auto time is required the user can still manually set the time zone.
+     * Note: If auto time is required the user can still manually set the time zone. Staring from
+     * Android 11, if auto time is required, the user cannot manually set the time zone.
      * <p>
      * The calling device admin must be a device owner, or alternatively a profile owner from
      * Android 8.0 (API level 26) or higher. If it is not, a security exception will be thrown.
@@ -8534,17 +8709,18 @@ public class DevicePolicyManager {
      * no user will be able set the date and time. Instead, the network date
      * and time will be used.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param enabled Whether time should be obtained automatically from the network or not.
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile or a holder of the
      * permission {@link android.Manifest.permission#SET_TIME}.
      */
     @RequiresPermission(value = SET_TIME, conditional = true)
-    public void setAutoTimeEnabled(@NonNull ComponentName admin, boolean enabled) {
+    public void setAutoTimeEnabled(@Nullable ComponentName admin, boolean enabled) {
         if (mService != null) {
             try {
-                mService.setAutoTimeEnabled(admin, enabled);
+                mService.setAutoTimeEnabled(admin, mContext.getPackageName(), enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8558,16 +8734,18 @@ public class DevicePolicyManager {
      * are also able to call this method if they hold the permission
      *{@link android.Manifest.permission#SET_TIME}.
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @return true if auto time is enabled on the device.
      * @throws SecurityException if the caller is not a device owner, a profile
      * owner for the primary user, or a profile owner of an organization-owned managed profile or a
      * holder of the permission {@link android.Manifest.permission#SET_TIME}.
      */
     @RequiresPermission(anyOf = {SET_TIME, QUERY_ADMIN_POLICY}, conditional = true)
-    public boolean getAutoTimeEnabled(@NonNull ComponentName admin) {
+    public boolean getAutoTimeEnabled(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getAutoTimeEnabled(admin);
+                return mService.getAutoTimeEnabled(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8587,18 +8765,20 @@ public class DevicePolicyManager {
      * no user will be able set the date and time zone. Instead, the network date
      * and time zone will be used.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or Null if the
+     *              caller is not a device admin.
      * @param enabled Whether time zone should be obtained automatically from the network or not.
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile or a holder of the
      * permission {@link android.Manifest.permission#SET_TIME_ZONE}.
      */
+    @SupportsCoexistence
     @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
-    public void setAutoTimeZoneEnabled(@NonNull ComponentName admin, boolean enabled) {
+    public void setAutoTimeZoneEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setAutoTimeZone");
         if (mService != null) {
             try {
-                mService.setAutoTimeZoneEnabled(admin, enabled);
+                mService.setAutoTimeZoneEnabled(admin, mContext.getPackageName(), enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8612,17 +8792,19 @@ public class DevicePolicyManager {
      * are also able to call this method if they hold the permission
      *{@link android.Manifest.permission#SET_TIME}.
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @return true if auto time zone is enabled on the device.
      * @throws SecurityException if the caller is not a device owner, a profile
      * owner for the primary user, or a profile owner of an organization-owned managed profile or a
      * holder of the permission {@link android.Manifest.permission#SET_TIME_ZONE}.
      */
     @RequiresPermission(anyOf = {SET_TIME_ZONE, QUERY_ADMIN_POLICY}, conditional = true)
-    public boolean getAutoTimeZoneEnabled(@NonNull ComponentName admin) {
+    public boolean getAutoTimeZoneEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("getAutoTimeZone");
         if (mService != null) {
             try {
-                return mService.getAutoTimeZoneEnabled(admin);
+                return mService.getAutoTimeZoneEnabled(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8672,7 +8854,7 @@ public class DevicePolicyManager {
      * such as widgets. After setting this, keyguard features will be disabled according to the
      * provided feature list.
      * <p>
-     * The calling device admin must have requested
+     * A calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call this method;
      * if it has not, a security exception will be thrown.
      * <p>
@@ -8711,7 +8893,8 @@ public class DevicePolicyManager {
      * The admin can check which features have been disabled by calling
      * {@link #getKeyguardDisabledFeatures(ComponentName)}
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param which The disabled features flag which can be either
      *            {@link #KEYGUARD_DISABLE_FEATURES_NONE} (default),
      *            {@link #KEYGUARD_DISABLE_FEATURES_ALL}, or a combination of
@@ -8721,14 +8904,18 @@ public class DevicePolicyManager {
      *            {@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS},
      *            {@link #KEYGUARD_DISABLE_FINGERPRINT},
      *            {@link #KEYGUARD_DISABLE_FACE},
-     *            {@link #KEYGUARD_DISABLE_IRIS}.
-     * @throws SecurityException if {@code admin} is not an active administrator or does not user
-     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES}
+     *            {@link #KEYGUARD_DISABLE_IRIS},
+     *            {@link #KEYGUARD_DISABLE_SHORTCUTS_ALL}.
+     * @throws SecurityException if {@code admin} is not an active administrator or does not use
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} and does not hold
+     *             the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_KEYGUARD} permission
      */
-    public void setKeyguardDisabledFeatures(@NonNull ComponentName admin, int which) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_KEYGUARD, conditional = true)
+    public void setKeyguardDisabledFeatures(@Nullable ComponentName admin, int which) {
         if (mService != null) {
             try {
-                mService.setKeyguardDisabledFeatures(admin, which, mParentInstance);
+                mService.setKeyguardDisabledFeatures(
+                        admin, mContext.getPackageName(), which, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8774,7 +8961,7 @@ public class DevicePolicyManager {
     @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(allOf = {
-            android.Manifest.permission.MANAGE_DEVICE_ADMINS,
+            MANAGE_DEVICE_ADMINS,
             INTERACT_ACROSS_USERS_FULL
     })
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
@@ -9202,7 +9389,7 @@ public class DevicePolicyManager {
      */
     @Deprecated
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS)
+    @RequiresPermission(MANAGE_DEVICE_ADMINS)
     public boolean setActiveProfileOwner(@NonNull ComponentName admin, @Deprecated String ownerName)
             throws IllegalArgumentException {
         throwIfParentInstance("setActiveProfileOwner");
@@ -9338,9 +9525,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owners to suspend packages for this user. This function can be
-     * called by a device owner, profile owner, or by a delegate given the
-     * {@link #DELEGATION_PACKAGE_ACCESS} scope via {@link #setDelegatedScopes}.
+     * Called by device or profile owners or holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE}.
+     * to suspend packages for this user. This function can be
+     * called by a device owner, profile owner, by a delegate given the
+     * {@link #DELEGATION_PACKAGE_ACCESS} scope via {@link #setDelegatedScopes} or by holders of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE}.
      * <p>
      * A suspended package will not be able to start activities. Its notifications will be hidden,
      * it will not show up in recents, will not be able to show toasts or dialogs or ring the
@@ -9354,18 +9544,22 @@ public class DevicePolicyManager {
      * package installer, the required package uninstaller, the required package verifier, the
      * default dialer, and the permission controller.
      *
-     * @param admin The name of the admin component to check, or {@code null} if the caller is a
-     *            package access delegate.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param packageNames The package names to suspend or unsuspend.
      * @param suspended If set to {@code true} than the packages will be suspended, if set to
      *            {@code false} the packages will be unsuspended.
      * @return an array of package names for which the suspended status is not set as requested in
      *         this method.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or has not been
+     * granted the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE}.
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
-    public @NonNull String[] setPackagesSuspended(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    @NonNull
+    public String[] setPackagesSuspended(@Nullable ComponentName admin,
             @NonNull String[] packageNames, boolean suspended) {
         throwIfParentInstance("setPackagesSuspended");
         if (mService != null) {
@@ -9382,19 +9576,23 @@ public class DevicePolicyManager {
     /**
      * Determine if a package is suspended. This function can be called by a device owner, profile
      * owner, or by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
-     * {@link #setDelegatedScopes}.
+     * {@link #setDelegatedScopes} or by holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE}.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if the caller is a package access delegate.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param packageName The name of the package to retrieve the suspended status of.
      * @return {@code true} if the package is suspended or {@code false} if the package is not
      *         suspended, could not be found or an error occurred.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or has not been
+     * granted the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE}.
      * @throws NameNotFoundException if the package could not be found.
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
-    public boolean isPackageSuspended(@NonNull ComponentName admin, String packageName)
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    public boolean isPackageSuspended(@Nullable ComponentName admin, String packageName)
             throws NameNotFoundException {
         throwIfParentInstance("isPackageSuspended");
         if (mService != null) {
@@ -9436,7 +9634,8 @@ public class DevicePolicyManager {
      * @see #isProfileOwnerApp
      * @see #isDeviceOwnerApp
      * @param admin Which {@link DeviceAdminReceiver} this request is associate with.
-     * @param profileName The name of the profile.
+     * @param profileName The name of the profile. If the name is longer than 200 characters
+     *                    it will be truncated.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setProfileName(@NonNull ComponentName admin, String profileName) {
@@ -9640,10 +9839,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner or device owner to set a default activity that the system selects
-     * to handle intents that match the given {@link IntentFilter}. This activity will remain the
-     * default intent handler even if the set of potential event handlers for the intent filter
-     * changes and if the intent preferences are reset.
+     * Called by a profile owner or device owner or holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}. to set a default activity
+     * that the system selects to handle intents that match the given {@link IntentFilter}.
+     * This activity will remain the default intent handler even if the set of potential event
+     * handlers for the intent filter changes and if the intent preferences are reset.
      * <p>
      * Note that the caller should still declare the activity in the manifest, the API just sets
      * the activity to be the default one to handle the given intent filter.
@@ -9657,17 +9857,22 @@ public class DevicePolicyManager {
      *
      * <p>NOTE: Performs disk I/O and shouldn't be called on the main thread.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *        caller is not a device admin.
      * @param filter The IntentFilter for which a default handler is added.
      * @param activity The Activity that is added as default intent handler.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      */
-    public void addPersistentPreferredActivity(@NonNull ComponentName admin, IntentFilter filter,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    @SupportsCoexistence
+    public void addPersistentPreferredActivity(@Nullable ComponentName admin, IntentFilter filter,
             @NonNull ComponentName activity) {
         throwIfParentInstance("addPersistentPreferredActivity");
         if (mService != null) {
             try {
-                mService.addPersistentPreferredActivity(admin, filter, activity);
+                mService.addPersistentPreferredActivity(admin, mContext.getPackageName(), filter,
+                        activity);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9675,22 +9880,30 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner or device owner to remove all persistent intent handler preferences
-     * associated with the given package that were set by {@link #addPersistentPreferredActivity}.
+     * Called by a profile owner or device owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK} to remove all
+     * persistent intent handler preferences associated with the given package that were set by
+     * {@link #addPersistentPreferredActivity}.
      * <p>
      * The calling device admin must be a profile owner. If it is not, a security exception will be
      * thrown.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param packageName The name of the package for which preferences are removed.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      */
-    public void clearPackagePersistentPreferredActivities(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    public void clearPackagePersistentPreferredActivities(@Nullable ComponentName admin,
             String packageName) {
         throwIfParentInstance("clearPackagePersistentPreferredActivities");
         if (mService != null) {
             try {
-                mService.clearPackagePersistentPreferredActivities(admin, packageName);
+                mService.clearPackagePersistentPreferredActivities(
+                        admin,
+                        mContext.getPackageName(),
+                        packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9699,27 +9912,69 @@ public class DevicePolicyManager {
 
     /**
      * Must be called by a device owner or a profile owner of an organization-owned managed profile
-     * to set the default SMS application.
+     * or holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_DEFAULT_SMS} to set the default SMS
+     * application.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance, returned by
      * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
      * of an organization-owned managed profile and the package must be a pre-installed system
      * package. If called on the parent instance, then the default SMS application is set on the
      * personal profile.
+     * <p>
+     * Starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the profile
+     * owner of an organization-owned managed profile can also call this method directly (not on the
+     * parent profile instance) to set the default SMS application in the work profile. This is only
+     * meaningful when work profile telephony is enabled by {@link #setManagedSubscriptionsPolicy}.
      *
-     * @param admin       Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param packageName The name of the package to set as the default SMS application.
-     * @throws SecurityException        if {@code admin} is not a device or profile owner or if
-     *                                  called on the parent profile and the {@code admin} is not a
-     *                                  profile owner of an organization-owned managed profile.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or if
+     *                        called on the parent profile and the {@code admin} is not a
+     *                        profile owner of an organization-owned managed profile and
+     *                        if the caller has not been granted the permission
+     *                        {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_DEFAULT_SMS}.
      * @throws IllegalArgumentException if called on the parent profile and the package
      *                                  provided is not a pre-installed system package.
      */
-    public void setDefaultSmsApplication(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_DEFAULT_SMS, conditional = true)
+    public void setDefaultSmsApplication(@Nullable ComponentName admin,
             @NonNull String packageName) {
         if (mService != null) {
             try {
-                mService.setDefaultSmsApplication(admin, packageName, mParentInstance);
+                mService.setDefaultSmsApplication(admin, mContext.getPackageName(), packageName,
+                        mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Must be called by a device owner or a profile owner of an organization-owned managed profile
+     * to set the default dialer application for the calling user.
+     * <p>
+     * When the profile owner of an organization-owned managed profile calls this method, it sets
+     * the default dialer application in the work profile. This is only meaningful when work profile
+     * telephony is enabled by {@link #setManagedSubscriptionsPolicy}.
+     * <p>
+     * If the device does not support telephony ({@link PackageManager#FEATURE_TELEPHONY}), calling
+     * this method will do nothing.
+     *
+     * @param packageName The name of the package to set as the default dialer application.
+     * @throws SecurityException        if {@code admin} is not a device or profile owner or a
+     *                                  profile owner of an organization-owned managed profile.
+     * @throws IllegalArgumentException if the package cannot be set as the default dialer, for
+     *                                  example if the package is not installed or does not expose
+     *                                  the expected activities or services that a dialer app is
+     *                                  required to have.
+     */
+    public void setDefaultDialerApplication(@NonNull String packageName) {
+        throwIfParentInstance("setDefaultDialerApplication");
+        if (mService != null) {
+            try {
+                mService.setDefaultDialerApplication(packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9838,6 +10093,11 @@ public class DevicePolicyManager {
      * owner, and the application restrictions managing package via
      * {@link #getApplicationRestrictions}.
      *
+     * <p>Starting from Android Version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * multiple admins can set app restrictions for the same application, the target application can
+     * get the list of app restrictions set by each admin via
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin}.
+     *
      * <p>NOTE: The method performs disk I/O and shouldn't be called on the main thread
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
@@ -9879,7 +10139,7 @@ public class DevicePolicyManager {
      * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} and aggregate the configurations to determine its
      * behavior. The exact meaning of aggregation is trust-agent-specific.
      * <p>
-     * The calling device admin must have requested
+     * A calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call this method;
      * if not, a security exception will be thrown.
      * <p>
@@ -9890,20 +10150,24 @@ public class DevicePolicyManager {
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, calling
      * this method has no effect - no trust agent configuration will be set.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param target Component name of the agent to be configured.
      * @param configuration Trust-agent-specific feature configuration bundle. Please consult
      *        documentation of the specific trust agent to determine the interpretation of this
      *        bundle.
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
-     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES}
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} and does not have
+     *             the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_KEYGUARD} permission
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void setTrustAgentConfiguration(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_KEYGUARD, conditional = true)
+    public void setTrustAgentConfiguration(@Nullable ComponentName admin,
             @NonNull ComponentName target, PersistableBundle configuration) {
         if (mService != null) {
             try {
-                mService.setTrustAgentConfiguration(admin, target, configuration, mParentInstance);
+                mService.setTrustAgentConfiguration(
+                        admin, mContext.getPackageName(), target, configuration, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10039,6 +10303,58 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Called by a device owner or profile owner of a managed profile to set the credential manager
+     * policy.
+     *
+     * <p>Affects APIs exposed by {@link android.credentials.CredentialManager}.
+     *
+     * <p>A {@link PackagePolicy#PACKAGE_POLICY_ALLOWLIST} policy type will limit the credential
+     * providers that the user can use to the list of packages in the policy.
+     *
+     * <p>A {@link PackagePolicy#PACKAGE_POLICY_ALLOWLIST_AND_SYSTEM} policy type
+     * allows access from the OEM default credential providers and the allowlist of credential
+     * providers.
+     *
+     * <p>A {@link PackagePolicy#PACKAGE_POLICY_BLOCKLIST} policy type will block the credential
+     * providers listed in the policy from being used by the user.
+     *
+     * @param policy the policy to set, setting this value to {@code null} will allow all packages
+     * @throws SecurityException if caller is not a device owner or profile owner of a
+     * managed profile
+     */
+    public void setCredentialManagerPolicy(@Nullable PackagePolicy policy) {
+        throwIfParentInstance("setCredentialManagerPolicy");
+        if (mService != null) {
+            try {
+                mService.setCredentialManagerPolicy(policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a device owner or profile owner of a managed profile to retrieve the credential
+     * manager policy.
+     *
+     * @throws SecurityException if caller is not a device owner or profile owner of a
+     * managed profile.
+     * @return the current credential manager policy if null then this policy has not been
+     * configured.
+     */
+    public @Nullable PackagePolicy getCredentialManagerPolicy() {
+        throwIfParentInstance("getCredentialManagerPolicy");
+        if (mService != null) {
+            try {
+                return mService.getCredentialManagerPolicy();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
     }
 
     /**
@@ -10377,22 +10693,29 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner of a managed profile so that some intents sent in the managed
-     * profile can also be resolved in the parent, or vice versa. Only activity intents are
-     * supported.
+     * Called by the profile owner of a managed profile or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}. so that some
+     * intents sent in the managed profile can also be resolved in the parent, or vice versa.
+     * Only activity intents are supported.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param filter The {@link IntentFilter} the intent has to match to be also resolved in the
      *            other profile
      * @param flags {@link DevicePolicyManager#FLAG_MANAGED_CAN_ACCESS_PARENT} and
      *            {@link DevicePolicyManager#FLAG_PARENT_CAN_ACCESS_MANAGED} are supported.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner and is not a
+     * holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}.
      */
-    public void addCrossProfileIntentFilter(@NonNull ComponentName admin, IntentFilter filter, int flags) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PROFILE_INTERACTION, conditional = true)
+    public void addCrossProfileIntentFilter(@Nullable ComponentName admin, IntentFilter filter,
+            int flags) {
         throwIfParentInstance("addCrossProfileIntentFilter");
         if (mService != null) {
             try {
-                mService.addCrossProfileIntentFilter(admin, filter, flags);
+                mService.addCrossProfileIntentFilter(admin, mContext.getPackageName(), filter,
+                        flags);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10400,9 +10723,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to remove the cross-profile intent filters
-     * that go from the managed profile to the parent, or from the parent to the managed profile.
-     * Only removes those that have been set by the profile owner.
+     * Called by a profile owner of a managed profile or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION} to remove the
+     * cross-profile intent filters that go from the managed profile to the parent, or from the
+     * parent to the managed profile. Only removes those that have been set by the profile owner.
      * <p>
      * <em>Note</em>: A list of default cross profile intent filters are set up by the system when
      * the profile is created, some of them ensure the proper functioning of the profile, while
@@ -10411,14 +10735,18 @@ public class DevicePolicyManager {
      * profile data sharing is not desired, they can be disabled with
      * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE}.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
+     * @throws SecurityException if {@code admin} is not a profile owner and is not a
+     * holder of the permission
+     * @link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}.
      */
-    public void clearCrossProfileIntentFilters(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PROFILE_INTERACTION, conditional = true)
+    public void clearCrossProfileIntentFilters(@Nullable ComponentName admin) {
         throwIfParentInstance("clearCrossProfileIntentFilters");
         if (mService != null) {
             try {
-                mService.clearCrossProfileIntentFilters(admin);
+                mService.clearCrossProfileIntentFilters(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10532,8 +10860,10 @@ public class DevicePolicyManager {
      }
 
     /**
-     * Called by a profile or device owner to set the permitted input methods services for this
-     * user. By default, the user can use any input method.
+     * Called by a profile or device owner or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_INPUT_METHODS} permission to set
+     * the permitted input methods services for this user. By default, the user can use any input
+     * method.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance,
      * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
@@ -10558,22 +10888,28 @@ public class DevicePolicyManager {
      * <p>
      * System input methods are always available to the user - this method can't modify this.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param packageNames List of input method package names.
      * @return {@code true} if the operation succeeded, or {@code false} if the list didn't
      *        contain every enabled non-system input method service.
-     * @throws SecurityException if {@code admin} is not a device, profile owner or if called on
-     *                           the parent profile and the {@code admin} is not a profile owner
-     *                           of an organization-owned managed profile.
+     * @throws SecurityException if {@code admin} is not a device or profile owner and does not
+     *                              hold the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_INPUT_METHODS}
+     *                              permission, or if called on the parent profile and the
+     *                              {@code admin} is not a profile owner of an organization-owned
+     *                              managed profile.
      * @throws IllegalArgumentException if called on the parent profile, the {@code admin} is a
      *                           profile owner of an organization-owned managed profile and the
      *                           list of permitted input method package names is not null or empty.
      */
+    @SupportsCoexistence
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_INPUT_METHODS, conditional = true)
     public boolean setPermittedInputMethods(
-            @NonNull ComponentName admin, List<String> packageNames) {
+            @Nullable ComponentName admin, List<String> packageNames) {
         if (mService != null) {
             try {
-                return mService.setPermittedInputMethods(admin, packageNames, mParentInstance);
+                return mService.setPermittedInputMethods(
+                        admin, mContext.getPackageName(), packageNames, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10594,16 +10930,19 @@ public class DevicePolicyManager {
      * An empty list means no input methods except system input methods are allowed. Null means all
      * input methods are allowed.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @return List of input method package names.
-     * @throws SecurityException if {@code admin} is not a device, profile owner or if called on
-     *                           the parent profile and the {@code admin} is not a profile owner
-     *                           of an organization-owned managed profile.
+     * @throws SecurityException if {@code admin} is not a device or profile owner and does not
+     *                          hold the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_INPUT_METHODS}
+     *                          permission or if called on the parent profile and the {@code admin}
+     *                          is not a profile owner of an organization-owned managed profile.
      */
-    public @Nullable List<String> getPermittedInputMethods(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_INPUT_METHODS, conditional = true)
+    public @Nullable List<String> getPermittedInputMethods(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getPermittedInputMethods(admin, mParentInstance);
+                return mService.getPermittedInputMethods(admin, mContext.getPackageName(), mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11049,6 +11388,7 @@ public class DevicePolicyManager {
      * @throws SecurityException     if the caller is not a profile owner on an organization-owned
      *                               managed profile.
      * @throws IllegalStateException if called after the device setup has been completed.
+     * @throws UnsupportedOperationException if the api is not enabled.
      * @see ManagedSubscriptionsPolicy
      */
     public void setManagedSubscriptionsPolicy(@Nullable ManagedSubscriptionsPolicy policy) {
@@ -11195,9 +11535,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to set a user restriction specified by the key.
+     * Called by a profile owner, device owner or a holder of any permission that is associated with
+     * a user restriction to set a user restriction specified by the key.
      * <p>
-     * The calling device admin must be a profile or device owner; if it is not, a security
+     * The calling device admin must be a profile owner, device owner or holder of any permission
+     * that is associated with a user restriction; if it is not, a security
      * exception will be thrown.
      * <p>
      * The profile owner of an organization-owned managed profile may invoke this method on
@@ -11205,17 +11547,27 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)}, for enforcing device-wide restrictions.
      * <p>
      * See the constants in {@link android.os.UserManager} for the list of restrictions that can
-     * be enforced device-wide.
+     * be enforced device-wide. These constants will also state in their documentation which
+     * permission is required to manage the restriction using this API.
+     *
+     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * above, calling this API will result in applying the restriction locally on the calling user,
+     * or locally on the parent profile if called from the
+     * {@link DevicePolicyManager} instance obtained from
+     * {@link #getParentProfileInstance(ComponentName)}. To set a restriction globally, call
+     * {@link #addUserRestrictionGlobally} instead.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner and if the caller
+     * has not been granted the permission to set the given user restriction.
      */
     public void addUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
-                mService.setUserRestriction(admin, key, true, mParentInstance);
+                mService.setUserRestriction(
+                        admin, mContext.getPackageName(), key, true, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11223,7 +11575,41 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to clear a user restriction specified by the key.
+     * Called by a profile owner, device owner or a holder of any permission that is associated with
+     *  a user restriction to set a user restriction specified by the provided {@code key} globally
+     *  on all users. To clear the restriction use {@link #clearUserRestriction}.
+     *
+     * <p>For a given user, a restriction will be set if it was applied globally or locally by any
+     * admin.
+     *
+     * <p> The calling device admin must be a profile owner, device owner or or a holder of any
+     * permission that is associated with a user restriction; if it is not, a security
+     * exception will be thrown.
+     *
+     * <p> See the constants in {@link android.os.UserManager} for the list of restrictions that can
+     * be enforced device-wide. These constants will also state in their documentation which
+     * permission is required to manage the restriction using this API.
+     *
+     * @param key The key of the restriction.
+     * @throws SecurityException if {@code admin} is not a device or profile owner and if the
+     * caller has not been granted the permission to set the given user restriction.
+     * @throws IllegalStateException if caller is not targeting Android
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
+     */
+    public void addUserRestrictionGlobally(@NonNull @UserManager.UserRestrictionKey String key) {
+        throwIfParentInstance("addUserRestrictionGlobally");
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGlobally(mContext.getPackageName(), key);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner, device owner or a holder of any permission that is associated with
+     * a user restriction to clear a user restriction specified by the key.
      * <p>
      * The calling device admin must be a profile or device owner; if it is not, a security
      * exception will be thrown.
@@ -11232,17 +11618,25 @@ public class DevicePolicyManager {
      * the {@link DevicePolicyManager} instance it obtained from
      * {@link #getParentProfileInstance(ComponentName)}, for clearing device-wide restrictions.
      * <p>
-     * See the constants in {@link android.os.UserManager} for the list of restrictions.
+     * See the constants in {@link android.os.UserManager} for the list of restrictions. These
+     * constants state in their documentation which permission is required to manage the restriction
+     * using this API.
+     *
+     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * above, calling this API will result in clearing any local and global restriction with the
+     * specified key that was previously set by the caller.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner  and if the
+     *  caller has not been granted the permission to set the given user restriction.
      */
     public void clearUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
-                mService.setUserRestriction(admin, key, false, mParentInstance);
+                mService.setUserRestriction(
+                        admin, mContext.getPackageName(), key, false, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11250,17 +11644,29 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to get user restrictions set with
+     * Called by an admin to get user restrictions set by themselves with
      * {@link #addUserRestriction(ComponentName, String)}.
      * <p>
-     * The target user may have more restrictions set by the system or other device owner / profile
-     * owner. To get all the user restrictions currently set, use
+     * The target user may have more restrictions set by the system or other admin.
+     * To get all the user restrictions currently set, use
      * {@link UserManager#getUserRestrictions()}.
      * <p>
      * The profile owner of an organization-owned managed profile may invoke this method on
      * the {@link DevicePolicyManager} instance it obtained from
      * {@link #getParentProfileInstance(ComponentName)}, for retrieving device-wide restrictions
      * it previously set with {@link #addUserRestriction(ComponentName, String)}.
+     *
+     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * above, this API will return the local restrictions set on the calling user, or on the parent
+     * profile if called from the {@link DevicePolicyManager} instance obtained from
+     * {@link #getParentProfileInstance(ComponentName)}. To get global restrictions set by admin,
+     * call {@link #getUserRestrictionsGlobally()} instead.
+     *
+     * <p>Note that this is different that the returned restrictions for callers targeting pre
+     * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, were this API returns
+     * all local/global restrictions set by the admin on the calling user using
+     * {@link #addUserRestriction(ComponentName, String)} or the parent user if called on the
+     * {@link DevicePolicyManager} instance it obtained from {@link #getParentProfileInstance}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return a {@link Bundle} whose keys are the user restrictions, and the values a
@@ -11271,7 +11677,33 @@ public class DevicePolicyManager {
         Bundle ret = null;
         if (mService != null) {
             try {
-                ret = mService.getUserRestrictions(admin, mParentInstance);
+                ret = mService.getUserRestrictions(
+                        admin, mContext.getPackageName(), mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return ret == null ? new Bundle() : ret;
+    }
+
+    /**
+     * Called by a profile or device owner to get global user restrictions set with
+     * {@link #addUserRestrictionGlobally(String)}.
+     * <p>
+     * To get all the user restrictions currently set for a certain user, use
+     * {@link UserManager#getUserRestrictions()}.
+     * @return a {@link Bundle} whose keys are the user restrictions, and the values a
+     * {@code boolean} indicating whether the restriction is set.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws IllegalStateException if caller is not targeting Android
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
+     */
+    public @NonNull Bundle getUserRestrictionsGlobally() {
+        throwIfParentInstance("createAdminSupportIntent");
+        Bundle ret = null;
+        if (mService != null) {
+            try {
+                ret = mService.getUserRestrictionsGlobally(mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11334,9 +11766,10 @@ public class DevicePolicyManager {
 
     /**
      * Hide or unhide packages. When a package is hidden it is unavailable for use, but the data and
-     * actual package file remain. This function can be called by a device owner, profile owner, or
-     * by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
-     * {@link #setDelegatedScopes}.
+     * actual package file remain. This function can be called by a device owner, profile owner,
+     * delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
+     * {@link #setDelegatedScopes}, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE} permission.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance, returned by
      * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
@@ -11344,7 +11777,7 @@ public class DevicePolicyManager {
      * on the parent instance, then the package is hidden or unhidden in the personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if the caller is a package access delegate.
+     *            {@code null} if the caller is not a device admin.
      * @param packageName The name of the package to hide or unhide.
      * @param hidden {@code true} if the package should be hidden, {@code false} if it should be
      *            unhidden.
@@ -11357,7 +11790,8 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
-    public boolean setApplicationHidden(@NonNull ComponentName admin, String packageName,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    public boolean setApplicationHidden(@Nullable ComponentName admin, String packageName,
             boolean hidden) {
         if (mService != null) {
             try {
@@ -11372,8 +11806,9 @@ public class DevicePolicyManager {
 
     /**
      * Determine if a package is hidden. This function can be called by a device owner, profile
-     * owner, or by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
-     * {@link #setDelegatedScopes}.
+     * owner, delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
+     * {@link #setDelegatedScopes}, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE} permission.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance, returned by
      * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
@@ -11382,7 +11817,7 @@ public class DevicePolicyManager {
      * personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if the caller is a package access delegate.
+     *            {@code null} if the caller is not a device admin.
      * @param packageName The name of the package to retrieve the hidden status of.
      * @return boolean {@code true} if the package is hidden, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device or profile owner or if called on
@@ -11393,7 +11828,8 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
-    public boolean isApplicationHidden(@NonNull ComponentName admin, String packageName) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    public boolean isApplicationHidden(@Nullable ComponentName admin, String packageName) {
         if (mService != null) {
             try {
                 return mService.isApplicationHidden(admin, mContext.getPackageName(), packageName,
@@ -11486,8 +11922,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or profile owner to disable account management for a specific type
-     * of account.
+     * Called by a device owner, profile owner or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT}
+     * to disable account management for a specific type of account.
      * <p>
      * The calling device admin must be a device owner or profile owner. If it is not, a security
      * exception will be thrown.
@@ -11504,18 +11941,22 @@ public class DevicePolicyManager {
      * organization-owned device, to restrict accounts that may not be managed on the primary
      * profile.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param accountType For which account management is disabled or enabled.
      * @param disabled The boolean indicating that account management will be disabled (true) or
      *            enabled (false).
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or has not been
+     * granted the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT}.
      */
-    public void setAccountManagementDisabled(@NonNull ComponentName admin, String accountType,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT, conditional = true)
+    public void setAccountManagementDisabled(@Nullable ComponentName admin, String accountType,
             boolean disabled) {
         if (mService != null) {
             try {
-                mService.setAccountManagementDisabled(admin, accountType, disabled,
-                        mParentInstance);
+                mService.setAccountManagementDisabled(admin, mContext.getPackageName(), accountType,
+                        disabled, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11545,8 +11986,13 @@ public class DevicePolicyManager {
      * @see #getAccountTypesWithManagementDisabled()
      * Note that calling this method on the parent profile instance will return the same
      * value as calling it on the main {@code DevicePolicyManager} instance.
+     *
+     * @throws SecurityException if the userId is different to the caller's and the caller has not
+     * been granted {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT} and
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS}.
      * @hide
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT, conditional = true)
     public @Nullable String[] getAccountTypesWithManagementDisabledAsUser(int userId) {
         return getAccountTypesWithManagementDisabledAsUser(userId, false);
     }
@@ -11559,7 +12005,8 @@ public class DevicePolicyManager {
             int userId, boolean parentInstance) {
         if (mService != null) {
             try {
-                return mService.getAccountTypesWithManagementDisabledAsUser(userId, parentInstance);
+                return mService.getAccountTypesWithManagementDisabledAsUser(userId,
+                        mContext.getPackageName(), parentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11627,25 +12074,31 @@ public class DevicePolicyManager {
      * package list results in locked tasks belonging to those packages to be finished.
      * <p>
      * This function can only be called by the device owner, a profile owner of an affiliated user
-     * or profile, or the profile owner when no device owner is set. See {@link #isAffiliatedUser}.
+     * or profile, or the profile owner when no device owner is set or holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}. See
+     * {@link #isAffiliatedUser}.
      * Any package set via this method will be cleared if the user becomes unaffiliated.
      *
      * @param packages The list of packages allowed to enter lock task mode
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
-     * affiliated user or profile, or the profile owner when no device owner is set.
+     * affiliated user or profile, or the profile owner when no device owner is set or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      * @see #isAffiliatedUser
      * @see Activity#startLockTask()
      * @see DeviceAdminReceiver#onLockTaskModeEntering(Context, Intent, String)
      * @see DeviceAdminReceiver#onLockTaskModeExiting(Context, Intent)
      * @see UserManager#DISALLOW_CREATE_WINDOWS
      */
-    public void setLockTaskPackages(@NonNull ComponentName admin, @NonNull String[] packages)
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    @SupportsCoexistence
+    public void setLockTaskPackages(@Nullable ComponentName admin, @NonNull String[] packages)
             throws SecurityException {
         throwIfParentInstance("setLockTaskPackages");
         if (mService != null) {
             try {
-                mService.setLockTaskPackages(admin, packages);
+                mService.setLockTaskPackages(admin, mContext.getPackageName(),  packages);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11655,16 +12108,20 @@ public class DevicePolicyManager {
     /**
      * Returns the list of packages allowed to start the lock task mode.
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
-     * affiliated user or profile, or the profile owner when no device owner is set.
+     * affiliated user or profile, or the profile owner when no device owner is set or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      * @see #isAffiliatedUser
      * @see #setLockTaskPackages
      */
-    public @NonNull String[] getLockTaskPackages(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    public @NonNull String[] getLockTaskPackages(@Nullable ComponentName admin) {
         throwIfParentInstance("getLockTaskPackages");
         if (mService != null) {
             try {
-                return mService.getLockTaskPackages(admin);
+                return mService.getLockTaskPackages(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11698,21 +12155,26 @@ public class DevicePolicyManager {
      * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}.
      *
      * <p>This method can only be called by the device owner, a profile owner of an affiliated
-     * user or profile, or the profile owner when no device owner is set. See
+     * user or profile, or the profile owner when no device owner is set or holders of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}. See
      * {@link #isAffiliatedUser}.
      * Any features set using this method are cleared if the user becomes unaffiliated.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param flags The system features enabled during lock task mode.
      * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
-     * affiliated user or profile, or the profile owner when no device owner is set.
+     * affiliated user or profile, or the profile owner when no device owner is set or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      * @see #isAffiliatedUser
      **/
-    public void setLockTaskFeatures(@NonNull ComponentName admin, @LockTaskFeature int flags) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    @SupportsCoexistence
+    public void setLockTaskFeatures(@Nullable ComponentName admin, @LockTaskFeature int flags) {
         throwIfParentInstance("setLockTaskFeatures");
         if (mService != null) {
             try {
-                mService.setLockTaskFeatures(admin, flags);
+                mService.setLockTaskFeatures(admin, mContext.getPackageName(), flags);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11722,18 +12184,21 @@ public class DevicePolicyManager {
     /**
      * Gets which system features are enabled for LockTask mode.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @return bitfield of flags. See {@link #setLockTaskFeatures(ComponentName, int)} for a list.
      * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
-     * affiliated user or profile, or the profile owner when no device owner is set.
+     * affiliated user or profile, or the profile owner when no device owner is set or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      * @see #isAffiliatedUser
      * @see #setLockTaskFeatures
      */
-    public @LockTaskFeature int getLockTaskFeatures(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    public @LockTaskFeature int getLockTaskFeatures(@Nullable ComponentName admin) {
         throwIfParentInstance("getLockTaskFeatures");
         if (mService != null) {
             try {
-                return mService.getLockTaskFeatures(admin);
+                return mService.getLockTaskFeatures(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11950,7 +12415,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or a profile owner of an organization-owned managed profile to
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI} permission to
      * control whether the user can change networks configured by the admin. When this lockdown is
      * enabled, the user can still configure and connect to other Wi-Fi networks, or use other Wi-Fi
      * capabilities such as tethering.
@@ -11962,17 +12428,19 @@ public class DevicePolicyManager {
      * to this API.
      *
      * @param admin             admin Which {@link DeviceAdminReceiver} this request is associated
-     *                          with.
+     *                          with. Null if the caller is not a device admin.
      * @param lockdown Whether the admin configured networks should be unmodifiable by the
      *                          user.
-     * @throws SecurityException if caller is not a device owner or a profile owner of an
-     *                           organization-owned managed profile.
+     * @throws SecurityException if caller is not permitted to modify this policy
      */
-    public void setConfiguredNetworksLockdownState(@NonNull ComponentName admin, boolean lockdown) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
+    public void setConfiguredNetworksLockdownState(
+            @Nullable ComponentName admin, boolean lockdown) {
         throwIfParentInstance("setConfiguredNetworksLockdownState");
         if (mService != null) {
             try {
-                mService.setConfiguredNetworksLockdownState(admin, lockdown);
+                mService.setConfiguredNetworksLockdownState(
+                        admin, mContext.getPackageName(), lockdown);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11980,15 +12448,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or a profile owner of an organization-owned managed profile to
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI} permission to
      * determine whether the user is prevented from modifying networks configured by the admin.
      *
      * @param admin             admin Which {@link DeviceAdminReceiver} this request is associated
-     *                          with.
-     * @throws SecurityException if caller is not a device owner or a profile owner of an
-     *                           organization-owned managed profile.
+     *                          with. Null if the caller is not a device admin.
+     * @throws SecurityException if caller is not a device owner, a profile owner of an
+     *                           organization-owned managed profile, or holder of the
+     *                           {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     *                           permission.
      */
-    public boolean hasLockdownAdminConfiguredNetworks(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
+    public boolean hasLockdownAdminConfiguredNetworks(@Nullable ComponentName admin) {
         throwIfParentInstance("hasLockdownAdminConfiguredNetworks");
         if (mService != null) {
             try {
@@ -12008,7 +12480,8 @@ public class DevicePolicyManager {
      * {@link android.provider.Settings.Global#AUTO_TIME} is 0, otherwise {@code false} will be
      * returned.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param millis time in milliseconds since the Epoch
      * @return {@code true} if set time succeeded, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner or a profile owner
@@ -12016,11 +12489,11 @@ public class DevicePolicyManager {
      * {@link android.Manifest.permission#SET_TIME}.
      */
     @RequiresPermission(value = SET_TIME, conditional = true)
-    public boolean setTime(@NonNull ComponentName admin, long millis) {
+    public boolean setTime(@Nullable ComponentName admin, long millis) {
         throwIfParentInstance("setTime");
         if (mService != null) {
             try {
-                return mService.setTime(admin, millis);
+                return mService.setTime(admin, mContext.getPackageName(), millis);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -12037,7 +12510,8 @@ public class DevicePolicyManager {
      * returned.
      *
      * @see android.app.AlarmManager#setTimeZone(String)
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param timeZone one of the Olson ids from the list returned by
      *     {@link java.util.TimeZone#getAvailableIDs}
      * @return {@code true} if set timezone succeeded, {@code false} otherwise.
@@ -12046,11 +12520,11 @@ public class DevicePolicyManager {
      * {@link android.Manifest.permission#SET_TIME_ZONE}.
      */
     @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
-    public boolean setTimeZone(@NonNull ComponentName admin, String timeZone) {
+    public boolean setTimeZone(@Nullable ComponentName admin, String timeZone) {
         throwIfParentInstance("setTimeZone");
         if (mService != null) {
             try {
-                return mService.setTimeZone(admin, timeZone);
+                return mService.setTimeZone(admin, mContext.getPackageName(), timeZone);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -12201,16 +12675,20 @@ public class DevicePolicyManager {
     /**
      * Change whether a user can uninstall a package. This function can be called by a device owner,
      * profile owner, or by a delegate given the {@link #DELEGATION_BLOCK_UNINSTALL} scope via
-     * {@link #setDelegatedScopes}.
+     * {@link #setDelegatedScopes} or holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *             {@code null} if the caller is a block uninstall delegate.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param packageName package to change.
      * @param uninstallBlocked true if the user shouldn't be able to uninstall the package.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}.
      * @see #setDelegatedScopes
      * @see #DELEGATION_BLOCK_UNINSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_APPS_CONTROL, conditional = true)
+    @SupportsCoexistence
     public void setUninstallBlocked(@Nullable ComponentName admin, String packageName,
             boolean uninstallBlocked) {
         throwIfParentInstance("setUninstallBlocked");
@@ -12238,17 +12716,21 @@ public class DevicePolicyManager {
      * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
      *
      * @param admin The name of the admin component whose blocking policy will be checked, or
-     *            {@code null} to check whether any admin has blocked the uninstallation.
+     *            {@code null} to check whether any admin has blocked the uninstallation. Starting
+     *              from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} admin will be
+     *              ignored and assumed {@code null}.
      * @param packageName package to check.
      * @return true if uninstallation is blocked and the given package is visible to you, false
      *         otherwise if uninstallation isn't blocked or the given package isn't visible to you.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner. Starting
+     *  from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} there will not be a security
+     *  check at all.
      */
     public boolean isUninstallBlocked(@Nullable ComponentName admin, String packageName) {
         throwIfParentInstance("isUninstallBlocked");
         if (mService != null) {
             try {
-                return mService.isUninstallBlocked(admin, packageName);
+                return mService.isUninstallBlocked(packageName);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -12257,26 +12739,33 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner of a managed profile to enable widget providers from a given
-     * package to be available in the parent profile. As a result the user will be able to add
-     * widgets from the allowlisted package running under the profile to a widget host which runs
-     * under the parent profile, for example the home screen. Note that a package may have zero or
-     * more provider components, where each component provides a different widget type.
+     * Called by the profile owner of a managed profile or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION} to enable
+     * widget providers from a given package to be available in the parent profile. As a result the
+     * user will be able to add widgets from the allowlisted package running under the profile to a
+     * widget host which runs under the parent profile, for example the home screen. Note that a
+     * package may have zero or more provider components, where each component provides a different
+     * widget type.
      * <p>
      * <strong>Note:</strong> By default no widget provider package is allowlisted.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param packageName The package from which widget providers are allowlisted.
      * @return Whether the package was added.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} is not a profile owner and not a holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}.
      * @see #removeCrossProfileWidgetProvider(android.content.ComponentName, String)
      * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
      */
-    public boolean addCrossProfileWidgetProvider(@NonNull ComponentName admin, String packageName) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PROFILE_INTERACTION, conditional = true)
+    public boolean addCrossProfileWidgetProvider(@Nullable ComponentName admin,
+            String packageName) {
         throwIfParentInstance("addCrossProfileWidgetProvider");
         if (mService != null) {
             try {
-                return mService.addCrossProfileWidgetProvider(admin, packageName);
+                return mService.addCrossProfileWidgetProvider(admin,
+                        mContext.getPackageName(), packageName);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -12285,26 +12774,31 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner of a managed profile to disable widget providers from a given
-     * package to be available in the parent profile. For this method to take effect the package
-     * should have been added via
+     * Called by the profile owner of a managed profile or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION} to disable
+     * widget providers from a given package to be available in the parent profile. For this method
+     * to take effect the package should have been added via
      * {@link #addCrossProfileWidgetProvider( android.content.ComponentName, String)}.
      * <p>
      * <strong>Note:</strong> By default no widget provider package is allowlisted.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param packageName The package from which widget providers are no longer allowlisted.
      * @return Whether the package was removed.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} is not a profile owner and not a holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}.
      * @see #addCrossProfileWidgetProvider(android.content.ComponentName, String)
      * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
      */
-    public boolean removeCrossProfileWidgetProvider(
-            @NonNull ComponentName admin, String packageName) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PROFILE_INTERACTION, conditional = true)
+    public boolean removeCrossProfileWidgetProvider(@Nullable ComponentName admin,
+            String packageName) {
         throwIfParentInstance("removeCrossProfileWidgetProvider");
         if (mService != null) {
             try {
-                return mService.removeCrossProfileWidgetProvider(admin, packageName);
+                return mService.removeCrossProfileWidgetProvider(admin, mContext.getPackageName(),
+                        packageName);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -12313,20 +12807,25 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner of a managed profile to query providers from which packages are
-     * available in the parent profile.
+     * Called by the profile owner of a managed profile or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION} to query
+     * providers from which packages are available in the parent profile.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @return The allowlisted package list.
      * @see #addCrossProfileWidgetProvider(android.content.ComponentName, String)
      * @see #removeCrossProfileWidgetProvider(android.content.ComponentName, String)
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} is not a profile owner and not a holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILE_INTERACTION}.
      */
-    public @NonNull List<String> getCrossProfileWidgetProviders(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PROFILE_INTERACTION, conditional = true)
+    public @NonNull List<String> getCrossProfileWidgetProviders(@Nullable ComponentName admin) {
         throwIfParentInstance("getCrossProfileWidgetProviders");
         if (mService != null) {
             try {
-                List<String> providers = mService.getCrossProfileWidgetProviders(admin);
+                List<String> providers = mService.getCrossProfileWidgetProviders(admin,
+                        mContext.getPackageName());
                 if (providers != null) {
                     return providers;
                 }
@@ -12354,9 +12853,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners or profile owners of an organization-owned managed profile to to set
-     * a local system update policy. When a new policy is set,
-     * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcasted.
+     * Called by a device owner, profile owners of an organization-owned managed profile, or a
+     * holder of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SYSTEM_UPDATES}
+     * permission to set a local system update policy. When a new policy is set,
+     * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcast.
      * <p>
      * If the supplied system update policy has freeze periods set but the freeze periods do not
      * meet 90-day maximum length or 60-day minimum separation requirement set out in
@@ -12370,22 +12870,24 @@ public class DevicePolicyManager {
      * {@code adb shell dpm clear-freeze-period-record} can be used to clear the record.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. All
-     *            components in the device owner package can set system update policies and the most
-     *            recent policy takes effect.
+     *            components in the package can set system update policies and the most
+     *            recent policy takes effect. This should be null if the caller is not a device
+     *              admin.
      * @param policy the new policy, or {@code null} to clear the current policy.
      * @throws SecurityException if {@code admin} is not a device owner or a profile owner of an
-     *      organization-owned managed profile.
+     *      organization-owned managed profile, or the caller is not permitted to set this policy
      * @throws IllegalArgumentException if the policy type or maintenance window is not valid.
      * @throws SystemUpdatePolicy.ValidationFailedException if the policy's freeze period does not
      *             meet the requirement.
      * @see SystemUpdatePolicy
      * @see SystemUpdatePolicy#setFreezePeriods(List)
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SYSTEM_UPDATES, conditional = true)
     public void setSystemUpdatePolicy(@NonNull ComponentName admin, SystemUpdatePolicy policy) {
         throwIfParentInstance("setSystemUpdatePolicy");
         if (mService != null) {
             try {
-                mService.setSystemUpdatePolicy(admin, policy);
+                mService.setSystemUpdatePolicy(admin, mContext.getPackageName(), policy);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -12459,9 +12961,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of secondary users that is affiliated with the
-     * device to disable the status bar. Disabling the status bar blocks notifications and quick
-     * settings.
+     * Called by device owner, profile owner of secondary users that is affiliated with the
+     * device or a holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_STATUS_BAR} to disable the status
+     * bar. Disabling the status bar blocks notifications and quick settings.
      * <p>
      * <strong>Note:</strong> This method has no effect for LockTask mode. The behavior of the
      * status bar in LockTask mode can be configured with
@@ -12472,18 +12975,48 @@ public class DevicePolicyManager {
      * <p>This policy does not have any effect while on the lock screen, where the status bar will
      * not be disabled. Using LockTask instead of this method is recommended.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param disabled {@code true} disables the status bar, {@code false} reenables it.
      * @return {@code false} if attempting to disable the status bar failed. {@code true} otherwise.
-     * @throws SecurityException if {@code admin} is not the device owner, or a profile owner of
+     * @throws SecurityException if {@code admin} is not the device owner, a profile owner of
+     * secondary user that is affiliated with the device or if the caller is not a holder of
+     * the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_STATUS_BAR}.
+     * @see #isAffiliatedUser
+     * @see #getSecondaryUsers
+     */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_STATUS_BAR, conditional = true)
+    public boolean setStatusBarDisabled(@Nullable ComponentName admin, boolean disabled) {
+        throwIfParentInstance("setStatusBarDisabled");
+        try {
+            return mService.setStatusBarDisabled(admin, mContext.getPackageName(), disabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the status bar is disabled/enabled, see {@link #setStatusBarDisabled}.
+     *
+     * <p>Callable by device owner or profile owner of secondary users that is affiliated with the
+     * device owner.
+     *
+     * <p>This policy has no effect in LockTask mode. The behavior of the
+     * status bar in LockTask mode can be configured with
+     * {@link #setLockTaskFeatures(ComponentName, int)}.
+     *
+     * <p>This policy also does not have any effect while on the lock screen, where the status bar
+     * will not be disabled.
+     *
+     * @throws SecurityException if the caller is not the device owner, or a profile owner of
      * secondary user that is affiliated with the device.
      * @see #isAffiliatedUser
      * @see #getSecondaryUsers
      */
-    public boolean setStatusBarDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setStatusBarDisabled");
+    public boolean isStatusBarDisabled() {
+        throwIfParentInstance("isStatusBarDisabled");
         try {
-            return mService.setStatusBarDisabled(admin, disabled);
+            return mService.isStatusBarDisabled(mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -12622,7 +13155,8 @@ public class DevicePolicyManager {
      * cannot manage it through the UI, and {@link #PERMISSION_GRANT_STATE_GRANTED granted} in which
      * the permission is granted and the user cannot manage it through the UI. This method can only
      * be called by a profile owner, device owner, or a delegate given the
-     * {@link #DELEGATION_PERMISSION_GRANT} scope via {@link #setDelegatedScopes}.
+     * {@link #DELEGATION_PERMISSION_GRANT} scope via {@link #setDelegatedScopes} or holders of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS} .
      * <p/>
      * Note that user cannot manage other permissions in the affected group through the UI
      * either and their granted state will be kept as the current value. Thus, it's recommended that
@@ -12685,21 +13219,25 @@ public class DevicePolicyManager {
      * the permissions listed above and {@code grantState} of
      * {@code #PERMISSION_GRANT_STATE_GRANTED}), but may deny them.
      *
-     * @param admin Which profile or device owner this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param packageName The application to grant or revoke a permission to.
      * @param permission The permission to grant or revoke.
      * @param grantState The permission grant state which is one of
      *            {@link #PERMISSION_GRANT_STATE_DENIED}, {@link #PERMISSION_GRANT_STATE_DEFAULT},
      *            {@link #PERMISSION_GRANT_STATE_GRANTED},
      * @return whether the permission was successfully granted or revoked.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS}.
      * @see #PERMISSION_GRANT_STATE_DENIED
      * @see #PERMISSION_GRANT_STATE_DEFAULT
      * @see #PERMISSION_GRANT_STATE_GRANTED
      * @see #setDelegatedScopes
      * @see #DELEGATION_PERMISSION_GRANT
      */
-    public boolean setPermissionGrantState(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS, conditional = true)
+    @SupportsCoexistence
+    public boolean setPermissionGrantState(@Nullable ComponentName admin,
             @NonNull String packageName, @NonNull String permission,
             @PermissionGrantState int grantState) {
         throwIfParentInstance("setPermissionGrantState");
@@ -12727,11 +13265,11 @@ public class DevicePolicyManager {
      * function can be called by a device owner, profile owner, or by a delegate given the
      * {@link #DELEGATION_PERMISSION_GRANT} scope via {@link #setDelegatedScopes}.
      *
-     * @param admin Which profile or device owner this request is associated with, or {@code null}
-     *            if the caller is a permission grant delegate.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param packageName The application to check the grant state for.
      * @param permission The permission to check for.
-     * @return the current grant state specified by device policy. If the profile or device owner
+     * @return the current grant state specified by device policy. If admins have not set a grant
      *         has not set a grant state, the return value is
      *         {@link #PERMISSION_GRANT_STATE_DEFAULT}. This does not indicate whether or not the
      *         permission is currently granted for the package.
@@ -12740,12 +13278,14 @@ public class DevicePolicyManager {
      *         be one of {@link #PERMISSION_GRANT_STATE_DENIED} or
      *         {@link #PERMISSION_GRANT_STATE_GRANTED}, which indicates if the permission is
      *         currently denied or granted.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS}.
      * @see #setPermissionGrantState(ComponentName, String, String, int)
      * @see PackageManager#checkPermission(String, String)
      * @see #setDelegatedScopes
      * @see #DELEGATION_PERMISSION_GRANT
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS, conditional = true)
     public @PermissionGrantState int getPermissionGrantState(@Nullable ComponentName admin,
             @NonNull String packageName, @NonNull String permission) {
         throwIfParentInstance("getPermissionGrantState");
@@ -12815,7 +13355,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner, or profile owner on organization-owned device, to get the MAC
+     * Called by a device owner or profile owner on organization-owned device to get the MAC
      * address of the Wi-Fi device.
      *
      * NOTE: The MAC address returned here should only be used for inventory management and is
@@ -12824,17 +13364,19 @@ public class DevicePolicyManager {
      * To get the randomized MAC address used, call
      * {@link android.net.wifi.WifiConfiguration#getRandomizedMacAddress}.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which admin this request is associated with. Null if the caller is not a device
+     *              admin
      * @return the MAC address of the Wi-Fi device, or null when the information is not available.
      *         (For example, Wi-Fi hasn't been enabled, or the device doesn't support Wi-Fi.)
      *         <p>
      *         The address will be in the {@code XX:XX:XX:XX:XX:XX} format.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not permitted to get wifi mac addresses
      */
-    public @Nullable String getWifiMacAddress(@NonNull ComponentName admin) {
+//    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
+    public @Nullable String getWifiMacAddress(@Nullable ComponentName admin) {
         throwIfParentInstance("getWifiMacAddress");
         try {
-            return mService.getWifiMacAddress(admin);
+            return mService.getWifiMacAddress(admin, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -12858,7 +13400,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device admin to set the short support message. This will be displayed to the user
+     * Called by a device admin or holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE} to set the short
+     * support message. This will be displayed to the user
      * in settings screens where funtionality has been disabled by the admin. The message should be
      * limited to a short statement such as "This setting is disabled by your administrator. Contact
      * someone@example.com for support." If the message is longer than 200 characters it may be
@@ -12869,17 +13413,21 @@ public class DevicePolicyManager {
      * and set a new version of this string accordingly.
      *
      * @see #setLongSupportMessage
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param message Short message to be displayed to the user in settings or null to clear the
      *            existing message.
-     * @throws SecurityException if {@code admin} is not an active administrator.
+     * @throws SecurityException if {@code admin} is not an active administrator and is not a
+     * holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE}.
      */
-    public void setShortSupportMessage(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE, conditional = true)
+    public void setShortSupportMessage(@Nullable ComponentName admin,
             @Nullable CharSequence message) {
         throwIfParentInstance("setShortSupportMessage");
         if (mService != null) {
             try {
-                mService.setShortSupportMessage(admin, message);
+                mService.setShortSupportMessage(admin, mContext.getPackageName(), message);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -12887,18 +13435,23 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device admin to get the short support message.
+     * Called by a device admin or holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE} to get the short
+     * support message.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @return The message set by {@link #setShortSupportMessage(ComponentName, CharSequence)} or
      *         null if no message has been set.
-     * @throws SecurityException if {@code admin} is not an active administrator.
+     * @throws SecurityException if {@code admin} is not an active administrator and not a holder of
+     * the permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE}..
      */
-    public CharSequence getShortSupportMessage(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE, conditional = true)
+    public CharSequence getShortSupportMessage(@Nullable ComponentName admin) {
         throwIfParentInstance("getShortSupportMessage");
         if (mService != null) {
             try {
-                return mService.getShortSupportMessage(admin);
+                return mService.getShortSupportMessage(admin, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -13075,31 +13628,34 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or a profile owner of an organization-owned managed profile to
-     * control the security logging feature.
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SECURITY_LOGGING} permission
+     * to control the security logging feature.
      *
      * <p> Security logs contain various information intended for security auditing purposes.
-     * When security logging is enabled by a profile owner of
-     * an organization-owned managed profile, certain security logs are not visible (for example
-     * personal app launch events) or they will be redacted (for example, details of the physical
-     * volume mount events). Please see {@link SecurityEvent} for details.
+     * When security logging is enabled by any app other than the device owner, certain security
+     * logs are not visible (for example personal app launch events) or they will be redacted
+     * (for example, details of the physical volume mount events).
+     * Please see {@link SecurityEvent} for details.
      *
      * <p><strong>Note:</strong> The device owner won't be able to retrieve security logs if there
      * are unaffiliated secondary users or profiles on the device, regardless of whether the
      * feature is enabled. Logs will be discarded if the internal buffer fills up while waiting for
      * all users to become affiliated. Therefore it's recommended that affiliation ids are set for
-     * new users as soon as possible after provisioning via {@link #setAffiliationIds}. Profile
-     * owner of organization-owned managed profile is not subject to this restriction since all
+     * new users as soon as possible after provisioning via {@link #setAffiliationIds}. Non device
+     * owners are not subject to this restriction since all
      * privacy-sensitive events happening outside the managed profile would have been redacted
      * already.
      *
-     * @param admin Which device admin this request is associated with.
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *              if called by a delegated app.
      * @param enabled whether security logging should be enabled or not.
-     * @throws SecurityException if {@code admin} is not allowed to control security logging.
+     * @throws SecurityException if the caller is not permitted to control security logging.
      * @see #setAffiliationIds
      * @see #retrieveSecurityLogs
      */
-    public void setSecurityLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SECURITY_LOGGING, conditional = true)
+    public void setSecurityLoggingEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setSecurityLoggingEnabled");
         try {
             mService.setSecurityLoggingEnabled(admin, mContext.getPackageName(), enabled);
@@ -13111,13 +13667,17 @@ public class DevicePolicyManager {
     /**
      * Return whether security logging is enabled or not by the admin.
      *
-     * <p>Can only be called by the device owner or a profile owner of an organization-owned
-     * managed profile, otherwise a {@link SecurityException} will be thrown.
+     * <p>Can only be called by a device owner, a profile owner of an organization-owned
+     * managed profile, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SECURITY_LOGGING} permission
+     * otherwise a {@link SecurityException} will be thrown.
      *
-     * @param admin Which device admin this request is associated with.
-     * @return {@code true} if security logging is enabled by device owner, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not allowed to control security logging.
+     * @param admin Which device admin this request is associated with. Null if the caller is not
+     *              a device admin
+     * @return {@code true} if security logging is enabled, {@code false} otherwise.
+     * @throws SecurityException if the caller is not allowed to control security logging.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SECURITY_LOGGING, conditional = true)
     public boolean isSecurityLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isSecurityLoggingEnabled");
         try {
@@ -13128,26 +13688,30 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to retrieve
-     * all new security logging entries since the last call to this API after device boots.
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SECURITY_LOGGING} permission
+     * to retrieve all new security logging entries since the last call to this API after device
+     * boots.
      *
-     * <p> Access to the logs is rate limited and it will only return new logs after the device
-     * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
+     * <p> Access to the logs is rate limited and it will only return new logs after the admin has
+     * been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
      *
      * <p> When called by a device owner, if there is any other user or profile on the device,
      * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
      * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device admin this request is associated with.
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *              if called by a delegated app.
      * @return the new batch of security logs which is a list of {@link SecurityEvent},
      * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
-     * @throws SecurityException if {@code admin} is not allowed to access security logging,
+     * @throws SecurityException if the caller is not allowed to access security logging,
      * or there is at least one profile or secondary user that is not affiliated with the device.
      * @see #isAffiliatedUser
      * @see DeviceAdminReceiver#onSecurityLogsAvailable
      */
     @SuppressLint("NullableCollection")
-    public @Nullable List<SecurityEvent> retrieveSecurityLogs(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SECURITY_LOGGING, conditional = true)
+    public @Nullable List<SecurityEvent> retrieveSecurityLogs(@Nullable ComponentName admin) {
         throwIfParentInstance("retrieveSecurityLogs");
         try {
             ParceledListSlice<SecurityEvent> list = mService.retrieveSecurityLogs(
@@ -13281,8 +13845,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to retrieve
-     * device logs from before the device's last reboot.
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manfiest.permission#MANAGE_DEVICE_POLICY_SECURITY_LOGGING} permission
+     * to retrieve device logs from before the device's last reboot.
      * <p>
      * <strong> This API is not supported on all devices. Calling this API on unsupported devices
      * will result in {@code null} being returned. The device logs are retrieved from a RAM region
@@ -13293,17 +13858,19 @@ public class DevicePolicyManager {
      * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
      * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device admin this request is associated with.
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *             if called by a delegated app.
      * @return Device logs from before the latest reboot of the system, or {@code null} if this API
      *         is not supported on the device.
-     * @throws SecurityException if {@code admin} is not allowed to access security logging, or
+     * @throws SecurityException if the caller is not allowed to access security logging, or
      * there is at least one profile or secondary user that is not affiliated with the device.
      * @see #isAffiliatedUser
      * @see #retrieveSecurityLogs
      */
     @SuppressLint("NullableCollection")
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SECURITY_LOGGING, conditional = true)
     public @Nullable List<SecurityEvent> retrievePreRebootSecurityLogs(
-            @NonNull ComponentName admin) {
+            @Nullable ComponentName admin) {
         throwIfParentInstance("retrievePreRebootSecurityLogs");
         try {
             ParceledListSlice<SecurityEvent> list = mService.retrievePreRebootSecurityLogs(
@@ -13410,38 +13977,47 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the device owner (since API 26) or profile owner (since API 24) to set the name of
-     * the organization under management.
+     * Called by the device owner (since API 26) or profile owner (since API 24) or holders of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY} to
+     * set the name of the organization under management.
      *
-     * <p>If the organization name needs to be localized, it is the responsibility of the {@link
-     * DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast and set
-     * a new version of this string accordingly.
+     * <p>If the organization name needs to be localized, it is the responsibility of the caller
+     * to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast and set a new version of this
+     * string accordingly.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param title The organization name or {@code null} to clear a previously set name.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY}.
      */
-    public void setOrganizationName(@NonNull ComponentName admin, @Nullable CharSequence title) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY, conditional = true)
+    public void setOrganizationName(@Nullable ComponentName admin, @Nullable CharSequence title) {
         throwIfParentInstance("setOrganizationName");
         try {
-            mService.setOrganizationName(admin, title);
+            mService.setOrganizationName(admin, mContext.getPackageName(), title);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Called by a profile owner of a managed profile to retrieve the name of the organization under
-     * management.
+     * Called by the device owner (since API 26) or profile owner (since API 24) or holders of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY
+     * to retrieve the name of the organization under management.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @return The organization name or {@code null} if none is set.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} if {@code admin} is not a device or profile
+     * owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY}.
      */
-    public @Nullable CharSequence getOrganizationName(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY, conditional = true)
+    public @Nullable CharSequence getOrganizationName(@Nullable ComponentName admin) {
         throwIfParentInstance("getOrganizationName");
         try {
-            return mService.getOrganizationName(admin);
+            return mService.getOrganizationName(admin, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -13493,11 +14069,14 @@ public class DevicePolicyManager {
             android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
     })
     @UserProvisioningState
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS)
     public int getUserProvisioningState() {
         throwIfParentInstance("getUserProvisioningState");
         if (mService != null) {
             try {
-                return mService.getUserProvisioningState();
+                return mService.getUserProvisioningState(mContext.getUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -13969,18 +14548,40 @@ public class DevicePolicyManager {
      * @see Context#bindService(Intent, ServiceConnection, int)
      * @see #getBindDeviceAdminTargetUsers(ComponentName)
      */
-    public boolean bindDeviceAdminServiceAsUser(
-            @NonNull ComponentName admin,  Intent serviceIntent, @NonNull ServiceConnection conn,
-            @Context.BindServiceFlags int flags, @NonNull UserHandle targetUser) {
+    public boolean bindDeviceAdminServiceAsUser(@NonNull ComponentName admin,
+            @NonNull Intent serviceIntent, @NonNull ServiceConnection conn,
+            @Context.BindServiceFlagsBits int flags, @NonNull UserHandle targetUser) {
         throwIfParentInstance("bindDeviceAdminServiceAsUser");
         // Keep this in sync with ContextImpl.bindServiceCommon.
         try {
             final IServiceConnection sd = mContext.getServiceDispatcher(
-                    conn, mContext.getMainThreadHandler(), flags);
+                    conn, mContext.getMainThreadHandler(), Integer.toUnsignedLong(flags));
             serviceIntent.prepareToLeaveProcess(mContext);
             return mService.bindDeviceAdminServiceAsUser(admin,
                     mContext.getIApplicationThread(), mContext.getActivityToken(), serviceIntent,
-                    sd, flags, targetUser.getIdentifier());
+                    sd, Integer.toUnsignedLong(flags), targetUser.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * See {@link #bindDeviceAdminServiceAsUser(ComponentName, Intent, ServiceConnection, int,
+     *       UserHandle)}.
+     * Call {@link Context.BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindDeviceAdminServiceAsUser(@NonNull ComponentName admin,
+            @NonNull Intent serviceIntent, @NonNull ServiceConnection conn,
+            @NonNull Context.BindServiceFlags flags, @NonNull UserHandle targetUser) {
+        throwIfParentInstance("bindDeviceAdminServiceAsUser");
+        // Keep this in sync with ContextImpl.bindServiceCommon.
+        try {
+            final IServiceConnection sd = mContext.getServiceDispatcher(
+                    conn, mContext.getMainThreadHandler(), flags.getValue());
+            serviceIntent.prepareToLeaveProcess(mContext);
+            return mService.bindDeviceAdminServiceAsUser(admin,
+                    mContext.getIApplicationThread(), mContext.getActivityToken(), serviceIntent,
+                    sd, flags.getValue(), targetUser.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -14647,8 +15248,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to install
-     * a system update from the given file. The device will be
+     * Called by a device owner, profile owner of an organization-owned managed profile, or a holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SYSTEM_UPDATES} permission to
+     * install a system update from the given file. The device will be
      * rebooted in order to finish installing the update. Note that if the device is rebooted, this
      * doesn't necessarily mean that the update has been applied successfully. The caller should
      * additionally check the system version with {@link android.os.Build#FINGERPRINT} or {@link
@@ -14657,15 +15259,17 @@ public class DevicePolicyManager {
      * sufficient battery level, the installation will fail with error {@link
      * InstallSystemUpdateCallback#UPDATE_ERROR_BATTERY_LOW}.
      *
-     * @param admin The {@link DeviceAdminReceiver} that this request is associated with.
-     * @param updateFilePath An Uri of the file that contains the update. The file should be
+     * @param admin The {@link DeviceAdminReceiver} that this request is associated with. Null if
+     *              the caller is not a device admin
+     * @param updateFilePath A Uri of the file that contains the update. The file should be
      * readable by the calling app.
      * @param executor The executor through which the callback should be invoked.
      * @param callback A callback object that will inform the caller when installing an update
      * fails.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_SYSTEM_UPDATES, conditional = true)
     public void installSystemUpdate(
-            @NonNull ComponentName admin, @NonNull Uri updateFilePath,
+            @Nullable ComponentName admin, @NonNull Uri updateFilePath,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull InstallSystemUpdateCallback callback) {
         throwIfParentInstance("installUpdate");
@@ -14675,7 +15279,8 @@ public class DevicePolicyManager {
         try (ParcelFileDescriptor fileDescriptor = mContext.getContentResolver()
                     .openFileDescriptor(updateFilePath, "r")) {
             mService.installUpdateFromFile(
-                    admin, fileDescriptor, new StartInstallingUpdateCallback.Stub() {
+                    admin, mContext.getPackageName(), fileDescriptor,
+                    new StartInstallingUpdateCallback.Stub() {
                         @Override
                         public void onStartInstallingUpdateError(
                                 int errorCode, String errorMessage) {
@@ -15171,7 +15776,7 @@ public class DevicePolicyManager {
         throwIfParentInstance("setApplicationExemptions");
         if (mService != null) {
             try {
-                mService.setApplicationExemptions(packageName,
+                mService.setApplicationExemptions(mContext.getPackageName(), packageName,
                         ArrayUtils.convertToIntArray(new ArraySet<>(exemptions)));
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
@@ -15233,21 +15838,27 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or a profile owner to disable user control over apps. User will not
-     * be able to clear app data or force-stop packages. When called by a device owner, applies to
-     * all users on the device. Starting from Android 13, packages with user control disabled are
-     * exempted from being put in the "restricted" App Standby Bucket.
+     * Called by a device owner or a profile owner or holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL} to disable user
+     * control over apps. User will not be able to clear app data or force-stop packages. When
+     * called by a device owner, applies to all users on the device. Packages with user control
+     * disabled are exempted from App Standby Buckets.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
      * @param packages The package names for the apps.
-     * @throws SecurityException if {@code admin} is not a device owner or a profile owner.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner or
+     * holder of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}.
      */
-    public void setUserControlDisabledPackages(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_APPS_CONTROL, conditional = true)
+    @SupportsCoexistence
+    public void setUserControlDisabledPackages(@Nullable ComponentName admin,
             @NonNull List<String> packages) {
         throwIfParentInstance("setUserControlDisabledPackages");
         if (mService != null) {
             try {
-                mService.setUserControlDisabledPackages(admin, packages);
+                mService.setUserControlDisabledPackages(admin, mContext.getPackageName(), packages);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -15256,17 +15867,21 @@ public class DevicePolicyManager {
 
     /**
      * Returns the list of packages over which user control is disabled by a device or profile
-     * owner.
+     * owner or holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_APPS_CONTROL, conditional = true)
     @NonNull
-    public List<String> getUserControlDisabledPackages(@NonNull ComponentName admin) {
+    public List<String> getUserControlDisabledPackages(@Nullable ComponentName admin) {
         throwIfParentInstance("getUserControlDisabledPackages");
         if (mService != null) {
             try {
-                return mService.getUserControlDisabledPackages(admin);
+                return mService.getUserControlDisabledPackages(admin, mContext.getPackageName());
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -15275,7 +15890,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to toggle
+     * Called by device owner or profile owner of an organization-owned managed profile or
+     * holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE} to toggle
      * Common Criteria mode for the device. When the device is in Common Criteria mode,
      * certain device functionalities are tuned to meet the higher
      * security level required by Common Criteria certification. For example:
@@ -15288,14 +15905,16 @@ public class DevicePolicyManager {
      * <p><em>Note:</em> if Common Critera mode is turned off after being enabled previously,
      * all existing WiFi configurations will be lost.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @param enabled whether Common Criteria mode should be enabled or not.
      */
-    public void setCommonCriteriaModeEnabled(@NonNull ComponentName admin, boolean enabled) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE, conditional = true)
+    public void setCommonCriteriaModeEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setCommonCriteriaModeEnabled");
         if (mService != null) {
             try {
-                mService.setCommonCriteriaModeEnabled(admin, enabled);
+                mService.setCommonCriteriaModeEnabled(admin, mContext.getPackageName(), enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -15309,8 +15928,8 @@ public class DevicePolicyManager {
      * aggregated device-wide Common Criteria mode state by passing {@code null} as the
      * {@code admin} argument.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with, or
-     *     {@code null} if the caller is not a device admin.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
      * @return {@code true} if Common Criteria mode is enabled, {@code false} otherwise.
      */
     public boolean isCommonCriteriaModeEnabled(@Nullable ComponentName admin) {
@@ -15500,7 +16119,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS)
+    @RequiresPermission(MANAGE_DEVICE_ADMINS)
     public void setNextOperationSafety(@DevicePolicyOperation int operation,
             @OperationSafetyReason int reason) {
         if (mService != null) {
@@ -15723,7 +16342,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns true if the caller is running on a device where the admin can grant
+     * Returns true if the caller is running on a device where an admin can grant
      * permissions related to device sensors.
      * This is a signal that the device is a fully-managed device where personal usage is
      * discouraged.
@@ -15731,7 +16350,7 @@ public class DevicePolicyManager {
      * {@link #setPermissionGrantState(ComponentName, String, String, int)}.
      *
      * May be called by any app.
-     * @return true if the app can grant device sensors-related permissions, false otherwise.
+     * @return true if an admin can grant device sensors-related permissions, false otherwise.
      */
     public boolean canAdminGrantSensorsPermissions() {
         throwIfParentInstance("canAdminGrantSensorsPermissions");
@@ -15739,7 +16358,7 @@ public class DevicePolicyManager {
             return false;
         }
         try {
-            return mService.canAdminGrantSensorsPermissionsForUser(myUserId());
+            return mService.canAdminGrantSensorsPermissions();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -15816,20 +16435,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to
-     * enable or disable USB data signaling for the device. When disabled, USB data connections
-     * (except from charging functions) are prohibited.
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING}
+     * permission to enable or disable USB data signaling for the device. When disabled, USB data
+     * connections (except from charging functions) are prohibited.
      *
      * <p> This API is not supported on all devices, the caller should call
      * {@link #canUsbDataSignalingBeDisabled()} to check whether enabling or disabling USB data
      * signaling is supported on the device.
      *
      * @param enabled whether USB data signaling should be enabled or not.
-     * @throws SecurityException if the caller is not a device owner or a profile owner on
-     *         an organization-owned managed profile.
+     * @throws SecurityException if the caller is not permitted to set this policy
      * @throws IllegalStateException if disabling USB data signaling is not supported or
      *         if USB data signaling fails to be enabled/disabled.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING, conditional = true)
     public void setUsbDataSignalingEnabled(boolean enabled) {
         throwIfParentInstance("setUsbDataSignalingEnabled");
         if (mService != null) {
@@ -15923,7 +16543,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(value = android.Manifest.permission.MANAGE_DEVICE_ADMINS)
+    @RequiresPermission(value = MANAGE_DEVICE_ADMINS)
     public @NonNull Set<String> getPolicyExemptApps() {
         if (mService == null) return Collections.emptySet();
 
@@ -15964,7 +16584,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI} permission to
      * specify the minimum security level required for Wi-Fi networks.
      * The device may not connect to networks that do not meet the minimum security level.
      * If the current network does not meet the minimum security level set, it will be disconnected.
@@ -15976,14 +16597,14 @@ public class DevicePolicyManager {
      * {@link #WIFI_SECURITY_ENTERPRISE_192}
      *
      * @param level minimum security level
-     * @throws SecurityException if the caller is not a device owner or a profile owner on
-     *         an organization-owned managed profile.
+     * @throws SecurityException if the caller is not permitted to set this policy
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
     public void setMinimumRequiredWifiSecurityLevel(@WifiSecurity int level) {
         throwIfParentInstance("setMinimumRequiredWifiSecurityLevel");
         if (mService != null) {
             try {
-                mService.setMinimumRequiredWifiSecurityLevel(level);
+                mService.setMinimumRequiredWifiSecurityLevel(mContext.getPackageName(), level);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -16008,23 +16629,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to
+     * Called by device owner, profile owner of an organization-owned managed profile, or holder of
+     * the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI} permission to
      * specify the Wi-Fi SSID policy ({@link WifiSsidPolicy}).
      * Wi-Fi SSID policy specifies the SSID restriction the network must satisfy
      * in order to be eligible for a connection. Providing a null policy results in the
      * deactivation of the SSID restriction
      *
      * @param policy Wi-Fi SSID policy
-     * @throws SecurityException if the caller is not a device owner or a profile owner on
-     *         an organization-owned managed profile.
+     * @throws SecurityException if the caller is not permitted to manage wifi policy
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
     public void setWifiSsidPolicy(@Nullable WifiSsidPolicy policy) {
         throwIfParentInstance("setWifiSsidPolicy");
         if (mService == null) {
             return;
         }
         try {
-            mService.setWifiSsidPolicy(policy);
+            mService.setWifiSsidPolicy(mContext.getPackageName(), policy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -16036,9 +16658,9 @@ public class DevicePolicyManager {
      * If the policy has not been set, it will return NULL.
      *
      * @see #setWifiSsidPolicy(WifiSsidPolicy)
-     * @throws SecurityException if the caller is not a device owner or a profile owner on
-     * an organization-owned managed profile.
+     * @throws SecurityException if the caller is not permitted to manage wifi policy
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
     @Nullable
     public WifiSsidPolicy getWifiSsidPolicy() {
         throwIfParentInstance("getWifiSsidPolicy");
@@ -16046,7 +16668,7 @@ public class DevicePolicyManager {
             return null;
         }
         try {
-            return mService.getWifiSsidPolicy();
+            return mService.getWifiSsidPolicy(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -16219,5 +16841,116 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns a {@link DevicePolicyState} object containing information about the current state
+     * of device policies (e.g. values set by different admins, info about the enforcing admins,
+     * resolved policy, etc).
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public DevicePolicyState getDevicePolicyState() {
+        if (mService != null) {
+            try {
+                return mService.getDevicePolicyState();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Overrides the effective cached value of enable_keep_profiles_running for testing purposes.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void setOverrideKeepProfilesRunning(boolean enabled) {
+        if (mService != null) {
+            try {
+                mService.setOverrideKeepProfilesRunning(enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Triggers the data migration of device policies for existing DPCs to the Device Policy Engine.
+     * If {@code forceMigration} is set to {@code true} it skips the prerequisite checks before
+     * triggering the migration.
+     *
+     * <p>Returns {@code true} if migration was completed successfully, {@code false} otherwise.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean triggerDevicePolicyEngineMigration(boolean forceMigration) {
+        if (mService != null) {
+            try {
+                return mService.triggerDevicePolicyEngineMigration(forceMigration);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns {@code true} if this device is marked as a financed device.
+     *
+     * <p>A financed device can be entered into lock task mode (see {@link #setLockTaskPackages})
+     * by the holder of the role {@link android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
+     * If this occurs, Device Owners and Profile Owners that have set lock task packages or
+     * features, or that attempt to set lock task packages or features, will receive a callback
+     * indicating that it could not be set. See {@link PolicyUpdateReceiver#onPolicyChanged} and
+     * {@link PolicyUpdateReceiver#onPolicySetResult}.
+     *
+     * <p>To be informed of changes to this status you can subscribe to the broadcast
+     * {@link ACTION_DEVICE_FINANCING_STATE_CHANGED}.
+     *
+     * @throws SecurityException if the caller is not a device owner, profile owner of an
+     * organization-owned managed profile, profile owner on the primary user or holder of one of the
+     * following roles: {@link android.app.role.RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT},
+     * android.app.role.RoleManager.ROLE_SYSTEM_SUPERVISION.
+     */
+    public boolean isDeviceFinanced() {
+        if (mService != null) {
+            try {
+                return mService.isDeviceFinanced(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the package name of the application holding the role:
+     * {@link android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
+     *
+     * @return the package name of the application holding the role or {@code null} if the role is
+     * not held by any applications.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @Nullable
+    public String getFinancedDeviceKioskRoleHolder() {
+        if (mService != null) {
+            try {
+                return mService.getFinancedDeviceKioskRoleHolder(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
     }
 }

@@ -19,6 +19,7 @@ package com.android.server.alarm;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
+import static android.app.AlarmManager.EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_COMPAT;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
@@ -29,6 +30,9 @@ import static android.app.AlarmManager.INTERVAL_DAY;
 import static android.app.AlarmManager.INTERVAL_HOUR;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+import static android.content.PermissionChecker.PID_UNKNOWN;
+import static android.content.PermissionChecker.checkPermissionForPreflight;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.PowerExemptionManager.REASON_ALARM_MANAGER_ALARM_CLOCK;
 import static android.os.PowerExemptionManager.REASON_DENIED;
@@ -54,9 +58,12 @@ import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_POLICY_PERMISSIO
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_PRIORITIZED;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.TARE_POLICY_INDEX;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_ALARM_CANCELLED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_DATA_CLEARED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_EXACT_PERMISSION_REVOKED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_LISTENER_BINDER_DIED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_LISTENER_CACHED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_PI_CANCELLED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_UNDEFINED;
 
@@ -77,17 +84,16 @@ import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.app.role.RoleManager;
+import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserPackage;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryStatsInternal;
@@ -143,12 +149,12 @@ import com.android.internal.util.LocalLog;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.util.StatLogger;
 import com.android.server.AlarmManagerInternal;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.AppStateTrackerImpl.Listener;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
-import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemClockTime;
 import com.android.server.SystemClockTime.TimeConfidence;
@@ -178,7 +184,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -265,7 +270,8 @@ public class AlarmManagerService extends SystemService {
 
     /**
      * A map from uid to the last op-mode we have seen for
-     * {@link AppOpsManager#OP_SCHEDULE_EXACT_ALARM}
+     * {@link AppOpsManager#OP_SCHEDULE_EXACT_ALARM}. Used for evaluating permission state change
+     * when the denylist changes.
      */
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -609,14 +615,16 @@ public class AlarmManagerService extends SystemService {
         static final int REMOVE_REASON_EXACT_PERMISSION_REVOKED = 2;
         static final int REMOVE_REASON_DATA_CLEARED = 3;
         static final int REMOVE_REASON_PI_CANCELLED = 4;
+        static final int REMOVE_REASON_LISTENER_BINDER_DIED = 5;
+        static final int REMOVE_REASON_LISTENER_CACHED = 6;
 
-        final String mTag;
+        final Alarm.Snapshot mAlarmSnapshot;
         final long mWhenRemovedElapsed;
         final long mWhenRemovedRtc;
         final int mRemoveReason;
 
         RemovedAlarm(Alarm a, int removeReason, long nowRtc, long nowElapsed) {
-            mTag = a.statsTag;
+            mAlarmSnapshot = new Alarm.Snapshot(a);
             mRemoveReason = removeReason;
             mWhenRemovedRtc = nowRtc;
             mWhenRemovedElapsed = nowElapsed;
@@ -638,19 +646,31 @@ public class AlarmManagerService extends SystemService {
                     return "data_cleared";
                 case REMOVE_REASON_PI_CANCELLED:
                     return "pi_cancelled";
+                case REMOVE_REASON_LISTENER_BINDER_DIED:
+                    return "listener_binder_died";
+                case REMOVE_REASON_LISTENER_CACHED:
+                    return "listener_cached";
                 default:
                     return "unknown:" + reason;
             }
         }
 
         void dump(IndentingPrintWriter pw, long nowElapsed, SimpleDateFormat sdf) {
-            pw.print("[tag", mTag);
-            pw.print("reason", removeReasonToString(mRemoveReason));
+            pw.increaseIndent();
+
+            pw.print("Reason", removeReasonToString(mRemoveReason));
             pw.print("elapsed=");
             TimeUtils.formatDuration(mWhenRemovedElapsed, nowElapsed, pw);
             pw.print(" rtc=");
             pw.print(sdf.format(new Date(mWhenRemovedRtc)));
-            pw.println("]");
+            pw.println();
+
+            pw.println("Snapshot:");
+            pw.increaseIndent();
+            mAlarmSnapshot.dump(pw, nowElapsed);
+            pw.decreaseIndent();
+
+            pw.decreaseIndent();
         }
     }
 
@@ -728,6 +748,8 @@ public class AlarmManagerService extends SystemService {
                 "kill_on_schedule_exact_alarm_revoked";
         @VisibleForTesting
         static final String KEY_TEMPORARY_QUOTA_BUMP = "temporary_quota_bump";
+        @VisibleForTesting
+        static final String KEY_CACHED_LISTENER_REMOVAL_DELAY = "cached_listener_removal_delay";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
@@ -756,11 +778,11 @@ public class AlarmManagerService extends SystemService {
          * Default quota for pre-S apps. The same as allowing an alarm slot once
          * every ALLOW_WHILE_IDLE_LONG_DELAY, which was 9 minutes.
          */
-        private static final int DEFAULT_ALLOW_WHILE_IDLE_COMPAT_QUOTA = 1;
+        private static final int DEFAULT_ALLOW_WHILE_IDLE_COMPAT_QUOTA = 7;
         private static final int DEFAULT_ALLOW_WHILE_IDLE_QUOTA = 72;
 
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WINDOW = 60 * 60 * 1000; // 1 hour.
-        private static final long DEFAULT_ALLOW_WHILE_IDLE_COMPAT_WINDOW = 9 * 60 * 1000; // 9 mins.
+        private static final long DEFAULT_ALLOW_WHILE_IDLE_COMPAT_WINDOW = 60 * 60 * 1000;
 
         private static final long DEFAULT_PRIORITY_ALARM_DELAY = 9 * 60_000;
 
@@ -772,6 +794,8 @@ public class AlarmManagerService extends SystemService {
         private static final int DEFAULT_TEMPORARY_QUOTA_BUMP = 0;
 
         private static final boolean DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF = true;
+
+        private static final long DEFAULT_CACHED_LISTENER_REMOVAL_DELAY = 10_000;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -852,7 +876,8 @@ public class AlarmManagerService extends SystemService {
         public boolean KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
                 DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED;
 
-        public boolean USE_TARE_POLICY = Settings.Global.DEFAULT_ENABLE_TARE == 1;
+        public int USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_ALARM
+                ? EconomyManager.DEFAULT_ENABLE_TARE_MODE : EconomyManager.ENABLED_MODE_OFF;
 
         /**
          * The amount of temporary reserve quota to give apps on receiving the
@@ -867,6 +892,13 @@ public class AlarmManagerService extends SystemService {
 
         public boolean DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF =
                 DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF;
+
+        /**
+         * Exact listener alarms for apps that get cached are removed after this duration. This is
+         * a grace period to allow for transient procstate changes, e.g., when the app switches
+         * between different lifecycles.
+         */
+        public long CACHED_LISTENER_REMOVAL_DELAY = DEFAULT_CACHED_LISTENER_REMOVAL_DELAY;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
         private int mVersion = 0;
@@ -892,7 +924,7 @@ public class AlarmManagerService extends SystemService {
                     AlarmManagerEconomicPolicy.POLICY_ALARM);
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ALARM_MANAGER));
             updateTareSettings(
-                    economyManagerInternal.isEnabled(AlarmManagerEconomicPolicy.POLICY_ALARM));
+                    economyManagerInternal.getEnabledMode(AlarmManagerEconomicPolicy.POLICY_ALARM));
         }
 
         public void updateAllowWhileIdleWhitelistDurationLocked() {
@@ -1051,6 +1083,11 @@ public class AlarmManagerService extends SystemService {
                                     KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF,
                                     DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF);
                             break;
+                        case KEY_CACHED_LISTENER_REMOVAL_DELAY:
+                            CACHED_LISTENER_REMOVAL_DELAY = properties.getLong(
+                                    KEY_CACHED_LISTENER_REMOVAL_DELAY,
+                                    DEFAULT_CACHED_LISTENER_REMOVAL_DELAY);
+                            break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
                                 // The quotas need to be updated in order, so we can't just rely
@@ -1065,18 +1102,19 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public void onTareEnabledStateChanged(boolean isTareEnabled) {
-            updateTareSettings(isTareEnabled);
+        public void onTareEnabledModeChanged(@EconomyManager.EnabledMode int enabledMode) {
+            updateTareSettings(enabledMode);
         }
 
-        private void updateTareSettings(boolean isTareEnabled) {
+        private void updateTareSettings(int enabledMode) {
             synchronized (mLock) {
-                if (USE_TARE_POLICY != isTareEnabled) {
-                    USE_TARE_POLICY = isTareEnabled;
+                if (USE_TARE_POLICY != enabledMode) {
+                    USE_TARE_POLICY = enabledMode;
                     final boolean changed = mAlarmStore.updateAlarmDeliveries(alarm -> {
                         final boolean standbyChanged = adjustDeliveryTimeBasedOnBucketLocked(alarm);
                         final boolean tareChanged = adjustDeliveryTimeBasedOnTareLocked(alarm);
-                        if (USE_TARE_POLICY) {
+                        if (USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
+                            // Only register listeners if we're going to be acting on the policy.
                             registerTareListener(alarm);
                         } else {
                             mEconomyManagerInternal.unregisterAffordabilityChangeListener(
@@ -1086,7 +1124,7 @@ public class AlarmManagerService extends SystemService {
                         }
                         return standbyChanged || tareChanged;
                     });
-                    if (!USE_TARE_POLICY) {
+                    if (USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON) {
                         // Remove the cached values so we don't accidentally use them when TARE is
                         // re-enabled.
                         mAffordabilityCache.clear();
@@ -1283,7 +1321,8 @@ public class AlarmManagerService extends SystemService {
                     KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
             pw.println();
 
-            pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY);
+            pw.print(Settings.Global.ENABLE_TARE,
+                    EconomyManager.enabledModeToString(USE_TARE_POLICY));
             pw.println();
 
             pw.print(KEY_TEMPORARY_QUOTA_BUMP, TEMPORARY_QUOTA_BUMP);
@@ -1291,6 +1330,11 @@ public class AlarmManagerService extends SystemService {
 
             pw.print(KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF,
                     DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF);
+            pw.println();
+
+            pw.print(KEY_CACHED_LISTENER_REMOVAL_DELAY);
+            pw.print("=");
+            TimeUtils.formatDuration(CACHED_LISTENER_REMOVAL_DELAY, pw);
             pw.println();
 
             pw.decreaseIndent();
@@ -1890,7 +1934,9 @@ public class AlarmManagerService extends SystemService {
             @Override
             public void binderDied(IBinder who) {
                 final IAlarmListener listener = IAlarmListener.Stub.asInterface(who);
-                removeImpl(null, listener);
+                synchronized (mLock) {
+                    removeLocked(null, listener, REMOVE_REASON_LISTENER_BINDER_DIED);
+                }
             }
         };
 
@@ -1931,8 +1977,9 @@ public class AlarmManagerService extends SystemService {
                     Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND
                             | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-            mTimeTickOptions = BroadcastOptions
-                    .makeRemovingMatchingFilter(new IntentFilter(Intent.ACTION_TIME_TICK))
+            mTimeTickOptions = BroadcastOptions.makeBasic()
+                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                     .toBundle();
             mTimeTickTrigger = new IAlarmListener.Stub() {
                 @Override
@@ -2081,20 +2128,31 @@ public class AlarmManagerService extends SystemService {
                                 if (oldMode == newMode) {
                                     return;
                                 }
-                                final boolean allowedByDefault =
-                                        isScheduleExactAlarmAllowedByDefault(packageName, uid);
+                                final boolean deniedByDefault = isScheduleExactAlarmDeniedByDefault(
+                                        packageName, UserHandle.getUserId(uid));
 
                                 final boolean hadPermission;
-                                if (oldMode != AppOpsManager.MODE_DEFAULT) {
-                                    hadPermission = (oldMode == AppOpsManager.MODE_ALLOWED);
-                                } else {
-                                    hadPermission = allowedByDefault;
-                                }
                                 final boolean hasPermission;
-                                if (newMode != AppOpsManager.MODE_DEFAULT) {
-                                    hasPermission = (newMode == AppOpsManager.MODE_ALLOWED);
+
+                                if (deniedByDefault) {
+                                    final boolean permissionState = getContext().checkPermission(
+                                            Manifest.permission.SCHEDULE_EXACT_ALARM, PID_UNKNOWN,
+                                            uid) == PackageManager.PERMISSION_GRANTED;
+                                    hadPermission = (oldMode == AppOpsManager.MODE_DEFAULT)
+                                            ? permissionState
+                                            : (oldMode == AppOpsManager.MODE_ALLOWED);
+                                    hasPermission = (newMode == AppOpsManager.MODE_DEFAULT)
+                                            ? permissionState
+                                            : (newMode == AppOpsManager.MODE_ALLOWED);
                                 } else {
-                                    hasPermission = allowedByDefault;
+                                    final boolean allowedByDefault =
+                                            !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
+                                    hadPermission = (oldMode == AppOpsManager.MODE_DEFAULT)
+                                            ? allowedByDefault
+                                            : (oldMode == AppOpsManager.MODE_ALLOWED);
+                                    hasPermission = (newMode == AppOpsManager.MODE_DEFAULT)
+                                            ? allowedByDefault
+                                            : (newMode == AppOpsManager.MODE_ALLOWED);
                                 }
 
                                 if (hadPermission && !hasPermission) {
@@ -2526,7 +2584,8 @@ public class AlarmManagerService extends SystemService {
      */
     private boolean adjustDeliveryTimeBasedOnBucketLocked(Alarm alarm) {
         final long nowElapsed = mInjector.getElapsedRealtimeMillis();
-        if (mConstants.USE_TARE_POLICY || isExemptFromAppStandby(alarm) || mAppStandbyParole) {
+        if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON
+                || isExemptFromAppStandby(alarm) || mAppStandbyParole) {
             return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, nowElapsed);
         }
 
@@ -2586,7 +2645,7 @@ public class AlarmManagerService extends SystemService {
      */
     private boolean adjustDeliveryTimeBasedOnTareLocked(Alarm alarm) {
         final long nowElapsed = mInjector.getElapsedRealtimeMillis();
-        if (!mConstants.USE_TARE_POLICY
+        if (mConstants.USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON
                 || isExemptFromTare(alarm) || hasEnoughWealthLocked(alarm)) {
             return alarm.setPolicyElapsed(TARE_POLICY_INDEX, nowElapsed);
         }
@@ -2596,7 +2655,8 @@ public class AlarmManagerService extends SystemService {
     }
 
     private void registerTareListener(Alarm alarm) {
-        if (!mConstants.USE_TARE_POLICY) {
+        if (mConstants.USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON) {
+            // Only register listeners if we're going to be acting on the policy.
             return;
         }
         mEconomyManagerInternal.registerAffordabilityChangeListener(
@@ -2607,7 +2667,7 @@ public class AlarmManagerService extends SystemService {
     /** Unregister the TARE listener associated with the alarm if it's no longer needed. */
     @GuardedBy("mLock")
     private void maybeUnregisterTareListenerLocked(Alarm alarm) {
-        if (!mConstants.USE_TARE_POLICY) {
+        if (mConstants.USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON) {
             return;
         }
         final EconomyManagerInternal.ActionBill bill = TareBill.getAppropriateBill(alarm);
@@ -2736,41 +2796,13 @@ public class AlarmManagerService extends SystemService {
 
     boolean hasUseExactAlarmInternal(String packageName, int uid) {
         return isUseExactAlarmEnabled(packageName, UserHandle.getUserId(uid))
-                && (PermissionChecker.checkPermissionForPreflight(getContext(),
-                Manifest.permission.USE_EXACT_ALARM, PermissionChecker.PID_UNKNOWN, uid,
-                packageName) == PermissionChecker.PERMISSION_GRANTED);
-    }
-
-    /**
-     * Returns whether SCHEDULE_EXACT_ALARM is allowed by default.
-     */
-    boolean isScheduleExactAlarmAllowedByDefault(String packageName, int uid) {
-        if (isScheduleExactAlarmDeniedByDefault(packageName, UserHandle.getUserId(uid))) {
-
-            // This is essentially like changing the protection level of the permission to
-            // (privileged|signature|role|appop), but have to implement this logic to maintain
-            // compatibility for older apps.
-            if (mPackageManagerInternal.isPlatformSigned(packageName)
-                    || mPackageManagerInternal.isUidPrivileged(uid)) {
-                return true;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final List<String> wellbeingHolders = (mRoleManager != null)
-                        ? mRoleManager.getRoleHolders(RoleManager.ROLE_SYSTEM_WELLBEING)
-                        : Collections.emptyList();
-                return wellbeingHolders.contains(packageName);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-        return !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
+                && (checkPermissionForPreflight(getContext(), Manifest.permission.USE_EXACT_ALARM,
+                PID_UNKNOWN, uid, packageName) == PERMISSION_GRANTED);
     }
 
     boolean hasScheduleExactAlarmInternal(String packageName, int uid) {
         final long start = mStatLogger.getTime();
 
-        // Not using getScheduleExactAlarmState as this can avoid some calls to AppOpsService.
         // Not using #mLastOpScheduleExactAlarm as it may contain stale values.
         // No locking needed as all internal containers being queried are immutable.
         final boolean hasPermission;
@@ -2778,11 +2810,16 @@ public class AlarmManagerService extends SystemService {
             hasPermission = false;
         } else if (!isExactAlarmChangeEnabled(packageName, UserHandle.getUserId(uid))) {
             hasPermission = false;
+        } else if (isScheduleExactAlarmDeniedByDefault(packageName, UserHandle.getUserId(uid))) {
+            hasPermission = (checkPermissionForPreflight(getContext(),
+                    Manifest.permission.SCHEDULE_EXACT_ALARM, PID_UNKNOWN, uid, packageName)
+                    == PERMISSION_GRANTED);
         } else {
+            // Compatibility permission check for older apps.
             final int mode = mAppOps.checkOpNoThrow(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, uid,
                     packageName);
             if (mode == AppOpsManager.MODE_DEFAULT) {
-                hasPermission = isScheduleExactAlarmAllowedByDefault(packageName, uid);
+                hasPermission = !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
             } else {
                 hasPermission = (mode == AppOpsManager.MODE_ALLOWED);
             }
@@ -3059,7 +3096,9 @@ public class AlarmManagerService extends SystemService {
                         + " does not belong to the calling uid " + callingUid);
             }
             synchronized (mLock) {
-                removeLocked(callingPackage, REMOVE_REASON_ALARM_CANCELLED);
+                removeAlarmsInternalLocked(
+                        a -> (a.matches(callingPackage) && a.creatorUid == callingUid),
+                        REMOVE_REASON_ALARM_CANCELLED);
             }
         }
 
@@ -3126,7 +3165,7 @@ public class AlarmManagerService extends SystemService {
             mConstants.dump(pw);
             pw.println();
 
-            if (mConstants.USE_TARE_POLICY) {
+            if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
                 pw.println("TARE details:");
                 pw.increaseIndent();
 
@@ -3474,15 +3513,16 @@ public class AlarmManagerService extends SystemService {
             }
 
             if (mRemovalHistory.size() > 0) {
-                pw.println("Removal history: ");
+                pw.println("Removal history:");
                 pw.increaseIndent();
                 for (int i = 0; i < mRemovalHistory.size(); i++) {
                     UserHandle.formatUid(pw, mRemovalHistory.keyAt(i));
                     pw.println(":");
                     pw.increaseIndent();
                     final RemovedAlarm[] historyForUid = mRemovalHistory.valueAt(i).toArray();
-                    for (final RemovedAlarm removedAlarm : historyForUid) {
-                        removedAlarm.dump(pw, nowELAPSED, sdf);
+                    for (int index = historyForUid.length - 1; index >= 0; index--) {
+                        pw.print("#" + (historyForUid.length - index) + ": ");
+                        historyForUid[index].dump(pw, nowELAPSED, sdf);
                     }
                     pw.decreaseIndent();
                 }
@@ -4248,18 +4288,33 @@ public class AlarmManagerService extends SystemService {
                     }
                 }
                 // And send a TIME_TICK right now, since it is important to get the UI updated.
-                mHandler.post(() ->
-                        getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL));
+                mHandler.post(() -> getContext().sendBroadcastAsUser(mTimeTickIntent,
+                        UserHandle.ALL, null, mTimeTickOptions));
             } else {
                 mNonInteractiveStartTime = nowELAPSED;
             }
         }
     }
 
-    boolean lookForPackageLocked(String packageName) {
-        final ArrayList<Alarm> allAlarms = mAlarmStore.asList();
-        for (final Alarm alarm : allAlarms) {
-            if (alarm.matches(packageName)) {
+    @GuardedBy("mLock")
+    boolean lookForPackageLocked(String packageName, int uid) {
+        // This is called extremely rarely, e.g. when the user opens the force-stop page in settings
+        // so the loops using an iterator should be fine.
+        for (final Alarm alarm : mAlarmStore.asList()) {
+            if (alarm.matches(packageName) && alarm.creatorUid == uid) {
+                return true;
+            }
+        }
+        final ArrayList<Alarm> alarmsForUid = mPendingBackgroundAlarms.get(uid);
+        if (alarmsForUid != null) {
+            for (final Alarm alarm : alarmsForUid) {
+                if (alarm.matches(packageName)) {
+                    return true;
+                }
+            }
+        }
+        for (final Alarm alarm : mPendingNonWakeupAlarms) {
+            if (alarm.matches(packageName) && alarm.creatorUid == uid) {
                 return true;
             }
         }
@@ -4500,7 +4555,8 @@ public class AlarmManagerService extends SystemService {
     }
 
     private void reportAlarmEventToTare(Alarm alarm) {
-        if (!mConstants.USE_TARE_POLICY) {
+        // Don't bother reporting events if TARE is completely off.
+        if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_OFF) {
             return;
         }
         final boolean allowWhileIdle =
@@ -4666,13 +4722,9 @@ public class AlarmManagerService extends SystemService {
             return service.new ClockReceiver();
         }
 
-        void registerContentObserver(ContentObserver contentObserver, Uri uri) {
-            mContext.getContentResolver().registerContentObserver(uri, false, contentObserver);
-        }
-
         void registerDeviceConfigListener(DeviceConfig.OnPropertiesChangedListener listener) {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ALARM_MANAGER,
-                    JobSchedulerBackgroundThread.getExecutor(), listener);
+                    AppSchedulingModuleThread.getExecutor(), listener);
         }
     }
 
@@ -4800,12 +4852,16 @@ public class AlarmManagerService extends SystemService {
                             }
                             final ArraySet<UserPackage> triggerPackages = new ArraySet<>();
                             final IntArray wakeupUids = new IntArray();
+                            final SparseIntArray countsPerUid = new SparseIntArray();
+                            final SparseIntArray wakeupCountsPerUid = new SparseIntArray();
                             for (int i = 0; i < triggerList.size(); i++) {
                                 final Alarm a = triggerList.get(i);
+                                increment(countsPerUid, a.uid);
                                 if (a.wakeup) {
                                     wakeupUids.add(a.uid);
+                                    increment(wakeupCountsPerUid, a.uid);
                                 }
-                                if (mConstants.USE_TARE_POLICY) {
+                                if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
                                     if (!isExemptFromTare(a)) {
                                         triggerPackages.add(UserPackage.of(
                                                 UserHandle.getUserId(a.creatorUid),
@@ -4823,14 +4879,15 @@ public class AlarmManagerService extends SystemService {
                             }
                             deliverAlarmsLocked(triggerList, nowELAPSED);
                             mTemporaryQuotaReserve.cleanUpExpiredQuotas(nowELAPSED);
-                            if (mConstants.USE_TARE_POLICY) {
+                            if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
                                 reorderAlarmsBasedOnTare(triggerPackages);
                             } else {
                                 reorderAlarmsBasedOnStandbyBuckets(triggerPackages);
                             }
                             rescheduleKernelAlarmsLocked();
                             updateNextAlarmClockLocked();
-                            MetricsHelper.pushAlarmBatchDelivered(triggerList.size(), wakeUps);
+                            logAlarmBatchDelivered(
+                                    triggerList.size(), wakeUps, countsPerUid, wakeupCountsPerUid);
                         }
                     }
 
@@ -4843,6 +4900,32 @@ public class AlarmManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    private static void increment(SparseIntArray array, int key) {
+        final int index = array.indexOfKey(key);
+        if (index >= 0) {
+            array.setValueAt(index, array.valueAt(index) + 1);
+        } else {
+            array.put(key, 1);
+        }
+    }
+
+    private void logAlarmBatchDelivered(
+            int alarms,
+            int wakeups,
+            SparseIntArray countsPerUid,
+            SparseIntArray wakeupCountsPerUid) {
+        final int[] uids = new int[countsPerUid.size()];
+        final int[] countsArray = new int[countsPerUid.size()];
+        final int[] wakeupCountsArray = new int[countsPerUid.size()];
+        for (int i = 0; i < countsPerUid.size(); i++) {
+            uids[i] = countsPerUid.keyAt(i);
+            countsArray[i] = countsPerUid.valueAt(i);
+            wakeupCountsArray[i] = wakeupCountsPerUid.get(uids[i], 0);
+        }
+        MetricsHelper.pushAlarmBatchDelivered(
+                alarms, wakeups, uids, countsArray, wakeupCountsArray);
     }
 
     /**
@@ -4933,6 +5016,7 @@ public class AlarmManagerService extends SystemService {
         public static final int TARE_AFFORDABILITY_CHANGED = 12;
         public static final int CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE = 13;
         public static final int TEMPORARY_QUOTA_CHANGED = 14;
+        public static final int REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED = 15;
 
         AlarmHandler() {
             super(Looper.myLooper());
@@ -5051,6 +5135,21 @@ public class AlarmManagerService extends SystemService {
                     if (!hasScheduleExactAlarmInternal(packageName, uid)
                             && !hasUseExactAlarmInternal(packageName, uid)) {
                         removeExactAlarmsOnPermissionRevoked(uid, packageName, /*killUid = */false);
+                    }
+                    break;
+                case REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED:
+                    uid = (Integer) msg.obj;
+                    synchronized (mLock) {
+                        removeAlarmsInternalLocked(a -> {
+                            if (a.uid != uid || a.listener == null || a.windowLength != 0) {
+                                return false;
+                            }
+                            // TODO (b/265195908): Change to .w once we have some data on breakages.
+                            Slog.wtf(TAG, "Alarm " + a.listenerTag + " being removed for "
+                                    + UserHandle.formatUid(a.uid) + ":" + a.packageName
+                                    + " because the app went into cached state");
+                            return true;
+                        }, REMOVE_REASON_LISTENER_CACHED);
                     }
                     break;
                 default:
@@ -5196,7 +5295,7 @@ public class AlarmManagerService extends SystemService {
                     case Intent.ACTION_QUERY_PACKAGE_RESTART:
                         pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                         for (String packageName : pkgList) {
-                            if (lookForPackageLocked(packageName)) {
+                            if (lookForPackageLocked(packageName, uid)) {
                                 setResultCode(Activity.RESULT_OK);
                                 return;
                             }
@@ -5379,9 +5478,7 @@ public class AlarmManagerService extends SystemService {
 
         @Override
         public void unblockAllUnrestrictedAlarms() {
-            // Called when:
-            // 1. Power exemption list changes,
-            // 2. User FAS feature is disabled.
+            // Called when the power exemption list changes.
             synchronized (mLock) {
                 sendAllUnrestrictedPendingBackgroundAlarmsLocked();
             }
@@ -5407,6 +5504,34 @@ public class AlarmManagerService extends SystemService {
         public void removeAlarmsForUid(int uid) {
             synchronized (mLock) {
                 removeForStoppedLocked(uid);
+            }
+        }
+
+        @Override
+        public void handleUidCachedChanged(int uid, boolean cached) {
+            if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, uid)) {
+                return;
+            }
+            // Apps can quickly get frozen after being cached, breaking the exactness guarantee on
+            // listener alarms. So going forward, the contract of exact listener alarms explicitly
+            // states that they will be removed as soon as the app goes out of lifecycle. We still
+            // allow a short grace period for quick shuffling of proc-states that may happen
+            // unexpectedly when switching between different lifecycles and is generally hard for
+            // apps to avoid.
+
+            final long delay;
+            synchronized (mLock) {
+                delay = mConstants.CACHED_LISTENER_REMOVAL_DELAY;
+            }
+            final Integer uidObj = uid;
+
+            if (cached && !mHandler.hasEqualMessages(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED,
+                    uidObj)) {
+                mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED, uidObj),
+                        delay);
+            } else {
+                mHandler.removeEqualMessages(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED, uidObj);
             }
         }
     };
@@ -5763,12 +5888,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     private void incrementAlarmCount(int uid) {
-        final int uidIndex = mAlarmsPerUid.indexOfKey(uid);
-        if (uidIndex >= 0) {
-            mAlarmsPerUid.setValueAt(uidIndex, mAlarmsPerUid.valueAt(uidIndex) + 1);
-        } else {
-            mAlarmsPerUid.put(uid, 1);
-        }
+        increment(mAlarmsPerUid, uid);
     }
 
     /**

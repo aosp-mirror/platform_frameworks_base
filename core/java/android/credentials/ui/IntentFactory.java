@@ -22,6 +22,7 @@ import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ResultReceiver;
 
@@ -66,6 +67,27 @@ public class IntentFactory {
     }
 
     /**
+     * Creates an Intent that cancels any UI matching the given request token id.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Intent createCancelUiIntent(@NonNull IBinder requestToken,
+            boolean shouldShowCancellationUi, @NonNull String appPackageName) {
+        Intent intent = new Intent();
+        ComponentName componentName =
+                ComponentName.unflattenFromString(
+                        Resources.getSystem()
+                                .getString(
+                                        com.android.internal.R.string
+                                                .config_credentialManagerDialogComponent));
+        intent.setComponent(componentName);
+        intent.putExtra(CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
+                new CancelUiRequest(requestToken, shouldShowCancellationUi, appPackageName));
+        return intent;
+    }
+
+    /**
      * Notify the UI that providers have been enabled/disabled.
      *
      * @hide
@@ -78,7 +100,7 @@ public class IntentFactory {
                         Resources.getSystem()
                                 .getString(
                                         com.android.internal.R.string
-                                                .config_credentialManagerDialogComponent));
+                                                .config_credentialManagerReceiverComponent));
         intent.setComponent(componentName);
         intent.setAction(Constants.CREDMAN_ENABLED_PROVIDERS_UPDATED);
         return intent;

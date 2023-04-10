@@ -180,6 +180,57 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testBlockedWhenConfigurationChangesAndScreenOff() {
+        // Let's set it onto QS:
+        mediaHierarchyManager.qsExpansion = 1.0f
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+        val observer = wakefullnessObserver.value
+        assertNotNull("lifecycle observer wasn't registered", observer)
+        observer.onStartedGoingToSleep()
+        clearInvocations(mediaCarouselController)
+        configurationController.notifyConfigurationChanged()
+        verify(mediaCarouselController, times(0))
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+    }
+
+    @Test
+    fun testAllowedWhenConfigurationChanges() {
+        // Let's set it onto QS:
+        mediaHierarchyManager.qsExpansion = 1.0f
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+        clearInvocations(mediaCarouselController)
+        configurationController.notifyConfigurationChanged()
+        verify(mediaCarouselController)
+            .onDesiredLocationChanged(
+                ArgumentMatchers.anyInt(),
+                any(MediaHostState::class.java),
+                anyBoolean(),
+                anyLong(),
+                anyLong()
+            )
+    }
+
+    @Test
     fun testAllowedWhenNotTurningOff() {
         // Let's set it onto QS:
         mediaHierarchyManager.qsExpansion = 1.0f
@@ -335,6 +386,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         val expectedTranslation = LOCKSCREEN_TOP - QS_TOP
         assertThat(mediaHierarchyManager.getGuidedTransformationTranslationY())
             .isEqualTo(expectedTranslation)
+    }
+
+    @Test
+    fun getGuidedTransformationTranslationY_previousHostInvisible_returnsZero() {
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(false)
+
+        assertThat(mediaHierarchyManager.getGuidedTransformationTranslationY()).isEqualTo(0)
     }
 
     @Test

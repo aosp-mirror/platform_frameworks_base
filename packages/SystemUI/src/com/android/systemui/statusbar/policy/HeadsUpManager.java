@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.view.accessibility.AccessibilityManager;
@@ -91,6 +92,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         mUiEventLogger = uiEventLogger;
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
+        mStickyDisplayTime = resources.getInteger(R.integer.sticky_heads_up_notification_time);
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
@@ -279,6 +281,10 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         mUser = user;
     }
 
+    public int getUser() {
+        return  mUser;
+    }
+
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("HeadsUpManager state:");
         dumpInternal(pw, args);
@@ -409,7 +415,13 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         @Override
         public boolean isSticky() {
             return (mEntry.isRowPinned() && expanded)
-                    || remoteInputActive || hasFullScreenIntent(mEntry);
+                    || remoteInputActive
+                    || hasFullScreenIntent(mEntry);
+        }
+
+        @Override
+        public boolean isStickyForSomeTime() {
+            return mEntry.isStickyAndNotDemoted();
         }
 
         @Override
@@ -465,9 +477,16 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
             return super.calculatePostTime() + mTouchAcceptanceDelay;
         }
 
+        /**
+         * @return When the notification should auto-dismiss itself, based on
+         * {@link SystemClock#elapsedRealTime()}
+         */
         @Override
         protected long calculateFinishTime() {
-            return mPostTime + getRecommendedHeadsUpTimeoutMs(mAutoDismissNotificationDecay);
+            final long duration = getRecommendedHeadsUpTimeoutMs(
+                    isStickyForSomeTime() ? mStickyDisplayTime : mAutoDismissNotificationDecay);
+
+            return mPostTime + duration;
         }
 
         /**

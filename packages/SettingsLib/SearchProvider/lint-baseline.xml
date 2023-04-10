@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.0.0-dev" type="baseline" dependencies="true" variant="all" version="8.0.0-dev">
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 23 (current min is 21): `new android.provider.SearchIndexableResource`"
+        errorLine1="            super("
+        errorLine2="            ~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="107"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 23 (current min is 21): `android.provider.SearchIndexableResource`"
+        errorLine1="    public static final class SearchIndexableIntentResource extends SearchIndexableResource {"
+        errorLine2="                                                                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="97"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 23 (current min is 21): `android.provider.SearchIndexablesProvider`"
+        errorLine1="public abstract class SettingsXmlIndexProvider extends SearchIndexablesProvider {"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="34"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableData#className`"
+        errorLine1="                    .add(XmlResource.COLUMN_CLASS_NAME, indexableResource.className)"
+        errorLine2="                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="52"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableData#intentAction`"
+        errorLine1="                    .add(XmlResource.COLUMN_INTENT_ACTION, indexableResource.intentAction)"
+        errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="53"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableData#intentAction`"
+        errorLine1='                this.intentAction = "android.intent.action.MAIN";'
+        errorLine2="                ~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="113"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableData#intentAction`"
+        errorLine1="                this.intentAction = intentAction;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="115"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableData#intentTargetClass`"
+        errorLine1="                            indexableResource.intentTargetClass);"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="56"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableData#intentTargetClass`"
+        errorLine1="            this.intentTargetClass = className;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableData#rank`"
+        errorLine1="                    .add(XmlResource.COLUMN_RANK, indexableResource.rank)"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="50"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexableResource#xmlResId`"
+        errorLine1="                    .add(XmlResource.COLUMN_XML_RESID, indexableResource.xmlResId)"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="51"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.SearchIndexablesContract#INDEXABLES_XML_RES_COLUMNS`"
+        errorLine1="        final MatrixCursor cursor = new MatrixCursor(INDEXABLES_XML_RES_COLUMNS);"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/SearchProvider/src/com/android/settingslib/searchprovider/SettingsXmlIndexProvider.java"
+            line="45"
+            column="54"/>
+    </issue>
+
+</issues>

@@ -97,6 +97,8 @@ java_library_host {
         ],
         type: "full",
     },
+    // b/267831518: Pin tradefed and dependencies to Java 11.
+    java_version: "11",
     // Protos have lots of MissingOverride and similar.
     errorprone: {
         enabled: false,

@@ -18,50 +18,49 @@ package com.android.server.companion.transport;
 
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 
+import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PERMISSION_RESTORE;
+import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PLATFORM_INFO;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManagerInternal;
+import android.companion.AssociationInfo;
+import android.companion.IOnMessageReceivedListener;
+import android.companion.IOnTransportsChangedListener;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
-import libcore.util.EmptyArray;
+import com.android.server.companion.AssociationStore;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressLint("LongLogTag")
 public class CompanionTransportManager {
     private static final String TAG = "CDM_CompanionTransportManager";
-    // TODO: flip to false
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
-    private static final int HEADER_LENGTH = 12;
-    // TODO: refactor message processing to use streams to remove this limit
-    private static final int MAX_PAYLOAD_LENGTH = 1_000_000;
+    private static final int SECURE_CHANNEL_AVAILABLE_SDK = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+    private static final int NON_ANDROID = -1;
 
-    private static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-    private static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
-
-    private static final int MESSAGE_RESPONSE_SUCCESS = 0x33838567; // !SUC
-    private static final int MESSAGE_RESPONSE_FAILURE = 0x33706573; // !FAI
+    private boolean mSecureTransportEnabled = true;
 
     private static boolean isRequest(int message) {
         return (message & 0xFF000000) == 0x63000000;
@@ -71,24 +70,98 @@ public class CompanionTransportManager {
         return (message & 0xFF000000) == 0x33000000;
     }
 
-    public interface Listener {
-        void onRequestPermissionRestore(byte[] data);
-    }
-
     private final Context mContext;
+    private final AssociationStore mAssociationStore;
 
+    /** Association id -> Transport */
     @GuardedBy("mTransports")
     private final SparseArray<Transport> mTransports = new SparseArray<>();
+    @NonNull
+    private final RemoteCallbackList<IOnTransportsChangedListener> mTransportsListeners =
+            new RemoteCallbackList<>();
+    /** Message type -> IOnMessageReceivedListener */
+    @NonNull
+    private final SparseArray<IOnMessageReceivedListener> mMessageListeners = new SparseArray<>();
+
 
     @Nullable
-    private Listener mListener;
+    private Transport mTempTransport;
 
-    public CompanionTransportManager(Context context) {
+    public CompanionTransportManager(Context context, AssociationStore associationStore) {
         mContext = context;
+        mAssociationStore = associationStore;
     }
 
-    public void setListener(@NonNull Listener listener) {
-        mListener = listener;
+    /**
+     * Add a listener to receive callbacks when a message is received for the message type
+     */
+    @GuardedBy("mTransports")
+    public void addListener(int message, @NonNull IOnMessageReceivedListener listener) {
+        mMessageListeners.put(message, listener);
+        for (int i = 0; i < mTransports.size(); i++) {
+            mTransports.valueAt(i).addListener(message, listener);
+        }
+    }
+
+    /**
+     * Add a listener to receive callbacks when any of the transports is changed
+     */
+    @GuardedBy("mTransports")
+    public void addListener(IOnTransportsChangedListener listener) {
+        Slog.i(TAG, "Registering OnTransportsChangedListener");
+        mTransportsListeners.register(listener);
+        List<AssociationInfo> associations = new ArrayList<>();
+        for (int i = 0; i < mTransports.size(); i++) {
+            AssociationInfo association = mAssociationStore.getAssociationById(
+                    mTransports.keyAt(i));
+            if (association != null) {
+                associations.add(association);
+            }
+        }
+        mTransportsListeners.broadcast(listener1 -> {
+            // callback to the current listener with all the associations of the transports
+            // immediately
+            if (listener1 == listener) {
+                try {
+                    listener.onTransportsChanged(associations);
+                } catch (RemoteException ignored) {
+                }
+            }
+        });
+    }
+
+    /**
+     * Remove the listener for receiving callbacks when any of the transports is changed
+     */
+    public void removeListener(IOnTransportsChangedListener listener) {
+        mTransportsListeners.unregister(listener);
+    }
+
+    /**
+     * Remove the listener to stop receiving calbacks when a message is received for the given type
+     */
+    public void removeListener(int messageType, IOnMessageReceivedListener listener) {
+        mMessageListeners.remove(messageType);
+    }
+
+    /**
+     * Send a message to remote devices through the transports
+     */
+    @GuardedBy("mTransports")
+    public void sendMessage(int message, byte[] data, int[] associationIds) {
+        Slog.i(TAG, "Sending message 0x" + Integer.toHexString(message)
+                + " data length " + data.length);
+        for (int i = 0; i < associationIds.length; i++) {
+            if (mTransports.contains(associationIds[i])) {
+                try {
+                    mTransports.get(associationIds[i]).sendMessage(message, data);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to send message 0x" + Integer.toHexString(message)
+                            + " data length " + data.length + " to association "
+                            + associationIds[i]);
+                }
+            }
+        }
     }
 
     /**
@@ -122,9 +195,9 @@ public class CompanionTransportManager {
                 detachSystemDataTransport(packageName, userId, associationId);
             }
 
-            final Transport transport = new Transport(associationId, fd);
-            transport.start();
-            mTransports.put(associationId, transport);
+            initializeTransport(associationId, fd);
+
+            notifyOnTransportsChanged();
         }
     }
 
@@ -136,188 +209,156 @@ public class CompanionTransportManager {
                 mTransports.delete(associationId);
                 transport.stop();
             }
+
+            notifyOnTransportsChanged();
         }
+    }
+
+    @GuardedBy("mTransports")
+    private void notifyOnTransportsChanged() {
+        List<AssociationInfo> associations = new ArrayList<>();
+        for (int i = 0; i < mTransports.size(); i++) {
+            AssociationInfo association = mAssociationStore.getAssociationById(
+                    mTransports.keyAt(i));
+            if (association != null) {
+                associations.add(association);
+            }
+        }
+        mTransportsListeners.broadcast(listener -> {
+            try {
+                listener.onTransportsChanged(associations);
+            } catch (RemoteException ignored) {
+            }
+        });
+    }
+
+    @GuardedBy("mTransports")
+    private void initializeTransport(int associationId, ParcelFileDescriptor fd) {
+        Slog.i(TAG, "Initializing transport");
+        if (!isSecureTransportEnabled()) {
+            Transport transport = new RawTransport(associationId, fd, mContext);
+            addMessageListenersToTransport(transport);
+            transport.start();
+            mTransports.put(associationId, transport);
+            Slog.i(TAG, "RawTransport is created");
+            return;
+        }
+
+        // Exchange platform info to decide which transport should be created
+        mTempTransport = new RawTransport(associationId, fd, mContext);
+        addMessageListenersToTransport(mTempTransport);
+        IOnMessageReceivedListener listener = new IOnMessageReceivedListener() {
+            @Override
+            public void onMessageReceived(int associationId, byte[] data) throws RemoteException {
+                synchronized (mTransports) {
+                    onPlatformInfoReceived(associationId, data);
+                }
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+        mTempTransport.addListener(MESSAGE_REQUEST_PLATFORM_INFO, listener);
+        mTempTransport.start();
+
+        int sdk = Build.VERSION.SDK_INT;
+        String release = Build.VERSION.RELEASE;
+        // data format: | SDK_INT (int) | release length (int) | release |
+        final ByteBuffer data = ByteBuffer.allocate(4 + 4 + release.getBytes().length)
+                .putInt(sdk)
+                .putInt(release.getBytes().length)
+                .put(release.getBytes());
+
+        // TODO: it should check if preSharedKey is given
+        try {
+            mTempTransport.sendMessage(MESSAGE_REQUEST_PLATFORM_INFO, data.array());
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to exchange platform info");
+        }
+    }
+
+    /**
+     * Depending on the remote platform info to decide which transport should be created
+     */
+    @GuardedBy("CompanionTransportManager.this.mTransports")
+    private void onPlatformInfoReceived(int associationId, byte[] data) {
+        if (mTempTransport.getAssociationId() != associationId) {
+            return;
+        }
+        // TODO: it should check if preSharedKey is given
+
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+        int remoteSdk = buffer.getInt();
+        byte[] remoteRelease = new byte[buffer.getInt()];
+        buffer.get(remoteRelease);
+
+        Slog.i(TAG, "Remote device SDK: " + remoteSdk + ", release:" + new String(remoteRelease));
+
+        Transport transport = mTempTransport;
+        mTempTransport.stop();
+
+        int sdk = Build.VERSION.SDK_INT;
+        String release = Build.VERSION.RELEASE;
+
+        if (sdk < SECURE_CHANNEL_AVAILABLE_SDK || remoteSdk < SECURE_CHANNEL_AVAILABLE_SDK) {
+            // If either device is Android T or below, use raw channel
+            // TODO: depending on the release version, either
+            //       1) using a RawTransport for old T versions
+            //       2) or an Ukey2 handshaked transport for UKey2 backported T versions
+            Slog.d(TAG, "Secure channel is not supported. Using raw transport");
+            transport = new RawTransport(transport.getAssociationId(), transport.getFd(), mContext);
+        } else if (Build.isDebuggable()) {
+            // If device is debug build, use hardcoded test key for authentication
+            Slog.d(TAG, "Creating an unauthenticated secure channel");
+            final byte[] testKey = "CDM".getBytes(StandardCharsets.UTF_8);
+            transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
+                    mContext, testKey, null);
+        } else if (sdk == NON_ANDROID || remoteSdk == NON_ANDROID) {
+            // If either device is not Android, then use app-specific pre-shared key
+            // TODO: pass in a real preSharedKey
+            Slog.d(TAG, "Creating a PSK-authenticated secure channel");
+            transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
+                    mContext, new byte[0], null);
+        } else {
+            // If none of the above applies, then use secure channel with attestation verification
+            Slog.d(TAG, "Creating a secure channel");
+            transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
+                    mContext);
+        }
+        addMessageListenersToTransport(transport);
+        transport.start();
+        mTransports.put(transport.getAssociationId(), transport);
+        // Doesn't need to notifyTransportsChanged here, it'll be done in attachSystemDataTransport
     }
 
     public Future<?> requestPermissionRestore(int associationId, byte[] data) {
         synchronized (mTransports) {
             final Transport transport = mTransports.get(associationId);
-            if (transport != null) {
-                return transport.requestForResponse(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
-            } else {
+            if (transport == null) {
                 return CompletableFuture.failedFuture(new IOException("Missing transport"));
             }
+            return transport.requestForResponse(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
         }
     }
 
-    private class Transport {
-        private final int mAssociationId;
+    /**
+     * @hide
+     */
+    public void enableSecureTransport(boolean enabled) {
+        this.mSecureTransportEnabled = enabled;
+    }
 
-        private final InputStream mRemoteIn;
-        private final OutputStream mRemoteOut;
+    private boolean isSecureTransportEnabled() {
+        boolean enabled = !Build.IS_DEBUGGABLE || mSecureTransportEnabled;
 
-        private final AtomicInteger mNextSequence = new AtomicInteger();
+        return enabled;
+    }
 
-        @GuardedBy("mPendingRequests")
-        private final SparseArray<CompletableFuture<byte[]>> mPendingRequests = new SparseArray<>();
-
-        private volatile boolean mStopped;
-
-        public Transport(int associationId, ParcelFileDescriptor fd) {
-            mAssociationId = associationId;
-            mRemoteIn = new ParcelFileDescriptor.AutoCloseInputStream(fd);
-            mRemoteOut = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-        }
-
-        public void start() {
-            new Thread(() -> {
-                try {
-                    while (!mStopped) {
-                        receiveMessage();
-                    }
-                } catch (IOException e) {
-                    if (!mStopped) {
-                        Slog.w(TAG, "Trouble during transport", e);
-                        stop();
-                    }
-                }
-            }).start();
-        }
-
-        public void stop() {
-            mStopped = true;
-
-            IoUtils.closeQuietly(mRemoteIn);
-            IoUtils.closeQuietly(mRemoteOut);
-        }
-
-        public Future<byte[]> requestForResponse(int message, byte[] data) {
-            final int sequence = mNextSequence.incrementAndGet();
-            final CompletableFuture<byte[]> pending = new CompletableFuture<>();
-            synchronized (mPendingRequests) {
-                mPendingRequests.put(sequence, pending);
-            }
-            try {
-                sendMessage(message, sequence, data);
-            } catch (IOException e) {
-                synchronized (mPendingRequests) {
-                    mPendingRequests.remove(sequence);
-                }
-                pending.completeExceptionally(e);
-            }
-            return pending;
-        }
-
-        private void sendMessage(int message, int sequence, @NonNull byte[] data)
-                throws IOException {
-            if (DEBUG) {
-                Slog.d(TAG, "Sending message 0x" + Integer.toHexString(message)
-                        + " sequence " + sequence + " length " + data.length
-                        + " to association " + mAssociationId);
-            }
-
-            synchronized (mRemoteOut) {
-                final ByteBuffer header = ByteBuffer.allocate(HEADER_LENGTH)
-                        .putInt(message)
-                        .putInt(sequence)
-                        .putInt(data.length);
-                mRemoteOut.write(header.array());
-                mRemoteOut.write(data);
-                mRemoteOut.flush();
-            }
-        }
-
-        private void receiveMessage() throws IOException {
-            if (DEBUG) {
-                Slog.d(TAG, "Waiting for next message...");
-            }
-
-            final byte[] headerBytes = new byte[HEADER_LENGTH];
-            Streams.readFully(mRemoteIn, headerBytes);
-            final ByteBuffer header = ByteBuffer.wrap(headerBytes);
-            final int message = header.getInt();
-            final int sequence = header.getInt();
-            final int length = header.getInt();
-
-            if (DEBUG) {
-                Slog.d(TAG, "Received message 0x" + Integer.toHexString(message)
-                        + " sequence " + sequence + " length " + length
-                        + " from association " + mAssociationId);
-            }
-            if (length > MAX_PAYLOAD_LENGTH) {
-                Slog.w(TAG, "Ignoring message 0x" + Integer.toHexString(message)
-                        + " sequence " + sequence + " length " + length
-                        + " from association " + mAssociationId + " beyond maximum length");
-                Streams.skipByReading(mRemoteIn, length);
-                return;
-            }
-
-            final byte[] data = new byte[length];
-            Streams.readFully(mRemoteIn, data);
-
-            if (isRequest(message)) {
-                processRequest(message, sequence, data);
-            } else if (isResponse(message)) {
-                processResponse(message, sequence, data);
-            } else {
-                Slog.w(TAG, "Unknown message 0x" + Integer.toHexString(message));
-            }
-        }
-
-        private void processRequest(int message, int sequence, byte[] data)
-                throws IOException {
-            switch (message) {
-                case MESSAGE_REQUEST_PING: {
-                    sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
-                    break;
-                }
-                case MESSAGE_REQUEST_PERMISSION_RESTORE: {
-                    if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
-                            && !Build.isDebuggable()) {
-                        Slog.w(TAG, "Restoring permissions only supported on watches");
-                        sendMessage(MESSAGE_RESPONSE_FAILURE, sequence, EmptyArray.BYTE);
-                        break;
-                    }
-                    try {
-                        mListener.onRequestPermissionRestore(data);
-                        sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Failed to restore permissions");
-                        sendMessage(MESSAGE_RESPONSE_FAILURE, sequence, EmptyArray.BYTE);
-                    }
-                    break;
-                }
-                default: {
-                    Slog.w(TAG, "Unknown request 0x" + Integer.toHexString(message));
-                    sendMessage(MESSAGE_RESPONSE_FAILURE, sequence, EmptyArray.BYTE);
-                    break;
-                }
-            }
-        }
-
-        private void processResponse(int message, int sequence, byte[] data) {
-            final CompletableFuture<byte[]> future;
-            synchronized (mPendingRequests) {
-                future = mPendingRequests.removeReturnOld(sequence);
-            }
-            if (future == null) {
-                Slog.w(TAG, "Ignoring unknown sequence " + sequence);
-                return;
-            }
-
-            switch (message) {
-                case MESSAGE_RESPONSE_SUCCESS: {
-                    future.complete(data);
-                    break;
-                }
-                case MESSAGE_RESPONSE_FAILURE: {
-                    future.completeExceptionally(new RuntimeException("Remote failure"));
-                    break;
-                }
-                default: {
-                    Slog.w(TAG, "Ignoring unknown response 0x" + Integer.toHexString(message));
-                }
-            }
+    private void addMessageListenersToTransport(Transport transport) {
+        for (int i = 0; i < mMessageListeners.size(); i++) {
+            transport.addListener(mMessageListeners.keyAt(i), mMessageListeners.valueAt(i));
         }
     }
 }

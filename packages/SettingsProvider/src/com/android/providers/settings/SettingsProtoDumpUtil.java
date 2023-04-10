@@ -120,6 +120,17 @@ class SettingsProtoDumpUtil {
             dumpProtoUserSettingsLocked(proto, SettingsServiceDumpProto.USER_SETTINGS,
                     settingsRegistry, UserHandle.of(users.keyAt(i)));
         }
+
+        // Generation registry
+        dumpProtoGenerationRegistryLocked(proto, SettingsServiceDumpProto.GENERATION_REGISTRY,
+                settingsRegistry);
+    }
+
+    private static void dumpProtoGenerationRegistryLocked(@NonNull ProtoOutputStream proto,
+            long fieldId, SettingsProvider.SettingsRegistry settingsRegistry) {
+        final long token = proto.start(fieldId);
+        settingsRegistry.getGenerationRegistry().dumpProto(proto);
+        proto.end(token);
     }
 
     /**
@@ -228,9 +239,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
                 GlobalSettingsProto.App.AUTO_RESTRICTION_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.FORCED_APP_STANDBY_ENABLED,
-                GlobalSettingsProto.App.FORCED_APP_STANDBY_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,
                 GlobalSettingsProto.App.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED);
         p.end(appToken);
@@ -241,6 +249,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.AUDIO_SAFE_VOLUME_STATE,
                 GlobalSettingsProto.AUDIO_SAFE_VOLUME_STATE);
+        dumpSetting(s, p,
+                Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE,
+                GlobalSettingsProto.AUDIO_SAFE_CSD_CURRENT_VALUE);
+        dumpSetting(s, p,
+                Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING,
+                GlobalSettingsProto.AUDIO_SAFE_CSD_NEXT_WARNING);
+        dumpSetting(s, p,
+                Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS,
+                GlobalSettingsProto.AUDIO_SAFE_CSD_DOSE_RECORDS);
 
         final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,
@@ -1826,6 +1843,29 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED,
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_RINGTONE_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_CALL_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_CALL_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_MEDIA_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_MEDIA_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
@@ -2806,6 +2846,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 SystemSettingsProto.Notification.VIBRATION_INTENSITY);
+        dumpSetting(s, p,
+                Settings.System.CAMERA_FLASH_NOTIFICATION,
+                SystemSettingsProto.Notification.CAMERA_FLASH_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_FLASH_NOTIFICATION,
+                SystemSettingsProto.Notification.SCREEN_FLASH_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_FLASH_NOTIFICATION_COLOR,
+                SystemSettingsProto.Notification.SCREEN_FLASH_NOTIFICATION_COLOR_GLOBAL);
         // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
         p.end(notificationToken);
 
@@ -2916,6 +2965,22 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.TIME_12_24,
                 SystemSettingsProto.TIME_12_24);
+
+        final long touchpadToken = p.start(SystemSettingsProto.TOUCHPAD);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_NATURAL_SCROLLING,
+                SystemSettingsProto.Touchpad.NATURAL_SCROLLING);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_POINTER_SPEED,
+                SystemSettingsProto.Touchpad.POINTER_SPEED);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE,
+                SystemSettingsProto.Touchpad.RIGHT_CLICK_ZONE);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_TAP_TO_CLICK,
+                SystemSettingsProto.Touchpad.TAP_TO_CLICK);
+        p.end(touchpadToken);
+
         dumpSetting(s, p,
                 Settings.System.TTY_MODE,
                 SystemSettingsProto.TTY_MODE);

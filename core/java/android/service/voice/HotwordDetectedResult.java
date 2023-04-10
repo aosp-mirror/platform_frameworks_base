@@ -94,6 +94,9 @@ public final class HotwordDetectedResult implements Parcelable {
     /** Represents unset value for the triggered audio channel. */
     public static final int AUDIO_CHANNEL_UNSET = -1;
 
+    /** Represents unset value for the background audio signal power. */
+    public static final int BACKGROUND_AUDIO_POWER_UNSET = -1;
+
     /** Limits the max value for the hotword offset. */
     private static final int LIMIT_HOTWORD_OFFSET_MAX_VALUE = 60 * 60 * 1000; // 1 hour
 
@@ -286,6 +289,27 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     /**
+     * Power of the background audio signal in which the hotword phrase was detected.
+     *
+     * <p> Only values between 0 and {@link #getMaxBackgroundAudioPower} (inclusive)
+     * and the special value {@link #BACKGROUND_AUDIO_POWER_UNSET} are valid.
+     *
+     * <p> This value is unitless. The relation between this value and the real audio signal
+     * power measured in decibels depends on the hotword detection service implementation.
+     */
+    private final int mBackgroundAudioPower;
+    private static int defaultBackgroundAudioPower() {
+        return BACKGROUND_AUDIO_POWER_UNSET;
+    }
+
+    /**
+     * Returns the maximum value of {@link #getBackgroundAudioPower()}.
+     */
+    public static int getMaxBackgroundAudioPower() {
+        return 255;
+    }
+
+    /**
      * Returns how many bytes should be written into the Parcel
      *
      * @hide
@@ -336,6 +360,10 @@ public final class HotwordDetectedResult implements Parcelable {
         if (!persistableBundle.isEmpty()) {
             totalBits += getParcelableSize(persistableBundle) * Byte.SIZE;
         }
+        if (hotwordDetectedResult.getBackgroundAudioPower() != defaultBackgroundAudioPower()) {
+            totalBits += bitCount(HotwordDetectedResult.getMaxBackgroundAudioPower());
+        }
+
         return totalBits;
     }
 
@@ -354,6 +382,10 @@ public final class HotwordDetectedResult implements Parcelable {
                 "personalizedScore");
         Preconditions.checkArgumentInRange(mHotwordPhraseId, 0, getMaxHotwordPhraseId(),
                 "hotwordPhraseId");
+        if (mBackgroundAudioPower != BACKGROUND_AUDIO_POWER_UNSET) {
+            Preconditions.checkArgumentInRange(mBackgroundAudioPower,
+                    0, getMaxBackgroundAudioPower(), "backgroundAudioPower");
+        }
         Preconditions.checkArgumentInRange((long) mHotwordDurationMillis, 0,
                 AudioRecord.getMaxSharedAudioHistoryMillis(), "hotwordDurationMillis");
         if (mHotwordOffsetMillis != HOTWORD_OFFSET_UNSET) {
@@ -470,7 +502,8 @@ public final class HotwordDetectedResult implements Parcelable {
             .setPersonalizedScore(mPersonalizedScore)
             .setHotwordPhraseId(mHotwordPhraseId)
             .setAudioStreams(mAudioStreams)
-            .setExtras(mExtras);
+            .setExtras(mExtras)
+            .setBackgroundAudioPower(mBackgroundAudioPower);
     }
 
 
@@ -581,7 +614,8 @@ public final class HotwordDetectedResult implements Parcelable {
             int personalizedScore,
             int hotwordPhraseId,
             @NonNull List<HotwordAudioStream> audioStreams,
-            @NonNull PersistableBundle extras) {
+            @NonNull PersistableBundle extras,
+            int backgroundAudioPower) {
         this.mConfidenceLevel = confidenceLevel;
         com.android.internal.util.AnnotationValidations.validate(
                 HotwordConfidenceLevelValue.class, null, mConfidenceLevel);
@@ -599,6 +633,7 @@ public final class HotwordDetectedResult implements Parcelable {
         this.mExtras = extras;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mExtras);
+        this.mBackgroundAudioPower = backgroundAudioPower;
 
         onConstructed();
     }
@@ -712,6 +747,20 @@ public final class HotwordDetectedResult implements Parcelable {
         return mExtras;
     }
 
+    /**
+     * Power of the background audio signal in which the hotword phrase was detected.
+     *
+     * <p> Only values between 0 and {@link #getMaxBackgroundAudioPower} (inclusive)
+     * and the special value {@link #BACKGROUND_AUDIO_POWER_UNSET} are valid.
+     *
+     * <p> This value is unitless. The relation between this value and the real audio signal
+     * power measured in decibels depends on the hotword detection service implementation.
+     */
+    @DataClass.Generated.Member
+    public int getBackgroundAudioPower() {
+        return mBackgroundAudioPower;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -729,7 +778,8 @@ public final class HotwordDetectedResult implements Parcelable {
                 "personalizedScore = " + mPersonalizedScore + ", " +
                 "hotwordPhraseId = " + mHotwordPhraseId + ", " +
                 "audioStreams = " + mAudioStreams + ", " +
-                "extras = " + mExtras +
+                "extras = " + mExtras + ", " +
+                "backgroundAudioPower = " + mBackgroundAudioPower +
         " }";
     }
 
@@ -756,7 +806,8 @@ public final class HotwordDetectedResult implements Parcelable {
                 && mPersonalizedScore == that.mPersonalizedScore
                 && mHotwordPhraseId == that.mHotwordPhraseId
                 && Objects.equals(mAudioStreams, that.mAudioStreams)
-                && Objects.equals(mExtras, that.mExtras);
+                && Objects.equals(mExtras, that.mExtras)
+                && mBackgroundAudioPower == that.mBackgroundAudioPower;
     }
 
     @Override
@@ -777,6 +828,7 @@ public final class HotwordDetectedResult implements Parcelable {
         _hash = 31 * _hash + mHotwordPhraseId;
         _hash = 31 * _hash + Objects.hashCode(mAudioStreams);
         _hash = 31 * _hash + Objects.hashCode(mExtras);
+        _hash = 31 * _hash + mBackgroundAudioPower;
         return _hash;
     }
 
@@ -800,6 +852,7 @@ public final class HotwordDetectedResult implements Parcelable {
         dest.writeInt(mHotwordPhraseId);
         dest.writeParcelableList(mAudioStreams, flags);
         dest.writeTypedObject(mExtras, flags);
+        dest.writeInt(mBackgroundAudioPower);
     }
 
     @Override
@@ -826,6 +879,7 @@ public final class HotwordDetectedResult implements Parcelable {
         List<HotwordAudioStream> audioStreams = new ArrayList<>();
         in.readParcelableList(audioStreams, HotwordAudioStream.class.getClassLoader());
         PersistableBundle extras = (PersistableBundle) in.readTypedObject(PersistableBundle.CREATOR);
+        int backgroundAudioPower = in.readInt();
 
         this.mConfidenceLevel = confidenceLevel;
         com.android.internal.util.AnnotationValidations.validate(
@@ -844,6 +898,7 @@ public final class HotwordDetectedResult implements Parcelable {
         this.mExtras = extras;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mExtras);
+        this.mBackgroundAudioPower = backgroundAudioPower;
 
         onConstructed();
     }
@@ -880,6 +935,7 @@ public final class HotwordDetectedResult implements Parcelable {
         private int mHotwordPhraseId;
         private @NonNull List<HotwordAudioStream> mAudioStreams;
         private @NonNull PersistableBundle mExtras;
+        private int mBackgroundAudioPower;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -1035,10 +1091,27 @@ public final class HotwordDetectedResult implements Parcelable {
             return this;
         }
 
+        /**
+         * Power of the background audio signal in which the hotword phrase was detected.
+         *
+         * <p> Only values between 0 and {@link #getMaxBackgroundAudioPower} (inclusive)
+         * and the special value {@link #BACKGROUND_AUDIO_POWER_UNSET} are valid.
+         *
+         * <p> This value is unitless. The relation between this value and the real audio signal
+         * power measured in decibels depends on the hotword detection service implementation.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setBackgroundAudioPower(int value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x800;
+            mBackgroundAudioPower = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull HotwordDetectedResult build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x800; // Mark builder used
+            mBuilderFieldsSet |= 0x1000; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mConfidenceLevel = defaultConfidenceLevel();
@@ -1073,6 +1146,9 @@ public final class HotwordDetectedResult implements Parcelable {
             if ((mBuilderFieldsSet & 0x400) == 0) {
                 mExtras = defaultExtras();
             }
+            if ((mBuilderFieldsSet & 0x800) == 0) {
+                mBackgroundAudioPower = defaultBackgroundAudioPower();
+            }
             HotwordDetectedResult o = new HotwordDetectedResult(
                     mConfidenceLevel,
                     mMediaSyncEvent,
@@ -1084,12 +1160,13 @@ public final class HotwordDetectedResult implements Parcelable {
                     mPersonalizedScore,
                     mHotwordPhraseId,
                     mAudioStreams,
-                    mExtras);
+                    mExtras,
+                    mBackgroundAudioPower);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x800) != 0) {
+            if ((mBuilderFieldsSet & 0x1000) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -1097,10 +1174,10 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1668385264834L,
+            time = 1679517179528L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordDetectedResult.java",
-            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\nprivate static final  int LIMIT_HOTWORD_OFFSET_MAX_VALUE\nprivate static final  int LIMIT_AUDIO_CHANNEL_MAX_VALUE\nprivate static final  java.lang.String EXTRA_PROXIMITY\npublic static final  int PROXIMITY_UNKNOWN\npublic static final  int PROXIMITY_NEAR\npublic static final  int PROXIMITY_FAR\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> mAudioStreams\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  java.util.List<android.service.voice.HotwordAudioStream> defaultAudioStreams()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\npublic static  int getParcelableSize(android.os.Parcelable)\npublic static  int getUsageSize(android.service.voice.HotwordDetectedResult)\nprivate static  int bitCount(long)\nprivate  void onConstructed()\npublic @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams()\npublic  void setProximity(double)\npublic @android.service.voice.HotwordDetectedResult.ProximityValue int getProximity()\nprivate @android.service.voice.HotwordDetectedResult.ProximityValue int convertToProximityLevel(double)\npublic  android.service.voice.HotwordDetectedResult.Builder buildUpon()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\npublic static final  int BACKGROUND_AUDIO_POWER_UNSET\nprivate static final  int LIMIT_HOTWORD_OFFSET_MAX_VALUE\nprivate static final  int LIMIT_AUDIO_CHANNEL_MAX_VALUE\nprivate static final  java.lang.String EXTRA_PROXIMITY\npublic static final  int PROXIMITY_UNKNOWN\npublic static final  int PROXIMITY_NEAR\npublic static final  int PROXIMITY_FAR\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> mAudioStreams\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate final  int mBackgroundAudioPower\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  java.util.List<android.service.voice.HotwordAudioStream> defaultAudioStreams()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\nprivate static  int defaultBackgroundAudioPower()\npublic static  int getMaxBackgroundAudioPower()\npublic static  int getParcelableSize(android.os.Parcelable)\npublic static  int getUsageSize(android.service.voice.HotwordDetectedResult)\nprivate static  int bitCount(long)\nprivate  void onConstructed()\npublic @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams()\npublic  void setProximity(double)\npublic @android.service.voice.HotwordDetectedResult.ProximityValue int getProximity()\nprivate @android.service.voice.HotwordDetectedResult.ProximityValue int convertToProximityLevel(double)\npublic  android.service.voice.HotwordDetectedResult.Builder buildUpon()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

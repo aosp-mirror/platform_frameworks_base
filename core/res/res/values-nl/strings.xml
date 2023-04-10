@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Bellen via wifi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wifi-gesprek"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Uit"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Bellen via wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Bellen via mobiel netwerk"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Je persoonlijke apps zijn geblokkeerd totdat je je werkprofiel aanzet"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Apps die worden gebruikt voor persoonlijke doeleinden, worden geblokkeerd op <xliff:g id="DATE">%1$s</xliff:g> om <xliff:g id="TIME">%2$s</xliff:g>. Je IT-beheerder staat niet toe dat je werkprofiel langer dan <xliff:g id="NUMBER">%3$d</xliff:g> dagen uitstaat."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aanzetten"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Gesprekken en berichten zijn uitgezet"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Je hebt werk-apps gepauzeerd. Je krijgt geen telefoongesprekken of tekstberichten."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Werk-apps hervatten"</string>
     <string name="me" msgid="6207584824693813140">"Ik"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletopties"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opties voor Android TV"</string>
@@ -228,7 +232,7 @@
     <string name="shutdown_progress" msgid="5017145516412657345">"Uitzetten…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Je tablet wordt uitgezet."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Je Android TV-apparaat wordt uitgezet."</string>
-    <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Je horloge wordt uitgezet."</string>
+    <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Je smartwatch wordt uitgezet."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"Je telefoon wordt uitgezet."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Wil je afsluiten?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Opnieuw opstarten in veilige modus"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan gebaren registreren die op de vingerafdruksensor van het apparaat worden getekend."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot maken"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan een screenshot van het scherm maken."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Voorbeeld, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"statusbalk uitzetten of wijzigen"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Hiermee kan de app de statusbalk uitzetten of systeemiconen toevoegen en verwijderen."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"de statusbalk zijn"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"De app heeft toegang tot gegevens van lichaamssensoren, zoals hartslag, temperatuur en zuurstofpercentage in het bloed, terwijl de app wordt gebruikt."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Toegang tot gegevens van lichaamssensoren, zoals hartslag, op de achtergrond"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"De app heeft toegang tot gegevens van lichaamssensoren, zoals hartslag, temperatuur en zuurstofpercentage in het bloed, terwijl de app op de achtergrond wordt uitgevoerd."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app in gebruik is."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Geeft de app toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app in gebruik is."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app op de achtergrond wordt uitgevoerd."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Geeft de app toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app op de achtergrond wordt uitgevoerd."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Agenda-afspraken en -gegevens lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je tablet en je agendagegevens delen of opslaan."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je Android TV-apparaat en je agendagegevens delen of opslaan."</string>
@@ -791,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Hiermee kan de houder informatie over functies bekijken voor een app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"toegang krijgen tot sensorgegevens met een hoge samplingsnelheid"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Hiermee kan de app sensorgegevens samplen met een snelheid die hoger is dan 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -1241,10 +1254,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android wordt gestart…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet wordt gestart…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Apparaat wordt gestart…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Opslagruimte wordt geoptimaliseerd."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Systeemupdate voltooien…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> upgraden…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> van <xliff:g id="NUMBER_1">%2$d</xliff:g> optimaliseren."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> voorbereiden."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps starten."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Opstarten afronden."</string>
@@ -1356,6 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB staat aan"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-tethering staat aan"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB staat aan"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Apparaat verbonden als webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-accessoire verbonden"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Tik voor meer opties."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Verbonden apparaat wordt opgeladen. Tik voor meer opties."</string>
@@ -1386,7 +1398,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Invoermethode selecteren"</string>
     <string name="show_ime" msgid="6406112007347443383">"Toon op het scherm terwijl het fysieke toetsenbord actief is"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtueel toetsenbord tonen"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fysiek toetsenbord instellen"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> instellen"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Fysieke toetsenborden instellen"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om een taal en indeling te selecteren"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1689,11 +1702,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AAN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"UIT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Toestaan dat <xliff:g id="SERVICE">%1$s</xliff:g> volledige controle over je apparaat heeft?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar niet voor de meeste apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar niet voor de meeste andere apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Scherm bekijken en bedienen"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"De functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Deze functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Acties bekijken en uitvoeren"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"De functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Deze functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Toestaan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Weigeren"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op een functie om deze te gebruiken:"</string>
@@ -1704,14 +1717,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klaar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Sneltoets uitzetten"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sneltoets gebruiken"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleurinversie"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Kleurinversie"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Kleurcorrectie"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Bediening met 1 hand"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra dimmen"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hoortoestellen"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volumetoetsen ingedrukt gehouden. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> staat aan."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volumetoetsen ingedrukt gehouden. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> staat uit."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Houd beide volumetoetsen drie seconden ingedrukt om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> te gebruiken"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Laat de volumeknoppen los. Als je <xliff:g id="SERVICE_NAME">%1$s</xliff:g> wilt aanzetten, houd je beide volumeknoppen weer 3 seconden ingedrukt."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Kies een functie om te gebruiken als je op de knop Toegankelijkheid tikt:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Kies een functie om te gebruiken met het toegankelijkheidsgebaar (met twee vingers omhoog swipen vanaf de onderkant van het scherm):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Kies een functie om te gebruiken met het toegankelijkheidsgebaar (met drie vingers omhoog swipen vanaf de onderkant van het scherm):"</string>
@@ -1842,6 +1855,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt getoond"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ik snap het"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai voor een betere weergave"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sluit het gesplitste scherm voor een betere weergave"</string>
     <string name="done_label" msgid="7283767013231718521">"Klaar"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ronde schuifregelaar voor uren"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Ronde schuifregelaar voor minuten"</string>
@@ -1853,6 +1868,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Werk <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Kloon van <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Vraag pin voor losmaken"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Vraag om ontgrendelingspatroon voor losmaken"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Vraag wachtwoord voor losmaken"</string>
@@ -1943,10 +1959,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Werk-apps aanzetten?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Krijg toegang tot je werk-apps en meldingen"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aanzetten"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Noodgeval"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Krijg toegang tot je werk-apps en gesprekken"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> niet beschikbaar"</string>
@@ -2309,4 +2323,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Hiermee kan een bijbehorende app services op de voorgrond vanuit de achtergrond starten."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Microfoon is beschikbaar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Microfoon is geblokkeerd"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dubbel scherm"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dubbel scherm is aan"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruikt beide schermen om content te tonen"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Het apparaat is te warm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dubbel scherm is niet beschikbaar, omdat je telefoon te warm wordt"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen is niet beschikbaar"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen is niet beschikbaar omdat Batterijbesparing aanstaat. Je kunt dit uitzetten via Instellingen."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Naar Instellingen"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Uitzetten"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> is ingesteld"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Toetsenbordindeling ingesteld op <xliff:g id="LAYOUT_1">%s</xliff:g>. Tik om te wijzigen."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Toetsenbordindeling is ingesteld op <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tik om te wijzigen."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Toetsenbordindeling is ingesteld op <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Tik om te wijzigen."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Toetsenbordindeling ingesteld op <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Tik om te wijzigen."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fysieke toetsenborden zijn ingesteld"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tik om toetsenborden te bekijken"</string>
 </resources>

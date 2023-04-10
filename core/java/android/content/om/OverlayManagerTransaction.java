@@ -16,20 +16,20 @@
 
 package android.content.om;
 
+import static android.annotation.SystemApi.Client.SYSTEM_SERVER;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.NonUiContext;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public final class OverlayManagerTransaction implements Parcelable {
     // TODO: remove @hide from this class when OverlayManager is added to the
     // SDK, but keep OverlayManagerTransaction.Request @hidden
     private final List<Request> mRequests;
-    private final OverlayManager mOverlayManager;
+    private final boolean mSelfTargeting;
 
     /**
      * Container for a batch of requests to the OverlayManagerService.
@@ -79,21 +79,23 @@ public final class OverlayManagerTransaction implements Parcelable {
      * }</pre>
      */
     private OverlayManagerTransaction(
-            @NonNull final List<Request> requests, @Nullable OverlayManager overlayManager) {
+            @NonNull final List<Request> requests, boolean selfTargeting) {
         Objects.requireNonNull(requests);
         if (requests.contains(null)) {
             throw new IllegalArgumentException("null request");
         }
         mRequests = requests;
-        mOverlayManager = overlayManager;
+        mSelfTargeting = selfTargeting;
     }
 
     /**
-     * Get an overlay manager transaction with the specified handler.
-     * @param overlayManager handles this transaction.
+     * Get an overlay manager transaction.
+     *
+     * @return a new {@link OverlayManagerTransaction} instance.
      */
-    public OverlayManagerTransaction(@NonNull OverlayManager overlayManager) {
-        this(new ArrayList<>(), Objects.requireNonNull(overlayManager));
+    @NonNull
+    public static OverlayManagerTransaction newInstance() {
+        return new OverlayManagerTransaction(new ArrayList<>(), true /* selfTargeting */);
     }
 
     private OverlayManagerTransaction(@NonNull final Parcel source) {
@@ -106,7 +108,7 @@ public final class OverlayManagerTransaction implements Parcelable {
             final Bundle extras = source.readBundle(null);
             mRequests.add(new Request(request, overlay, userId, extras));
         }
-        mOverlayManager = null;
+        mSelfTargeting = false;
     }
 
     /**
@@ -117,6 +119,7 @@ public final class OverlayManagerTransaction implements Parcelable {
      */
     @SuppressLint("ReferencesHidden")
     @NonNull
+    @SystemApi(client = SYSTEM_SERVER)
     public Iterator<Request> getRequests() {
         return mRequests.iterator();
     }
@@ -137,6 +140,7 @@ public final class OverlayManagerTransaction implements Parcelable {
      *
      * @hide
      */
+    @SystemApi(client = SYSTEM_SERVER)
     public static final class Request {
         @IntDef(prefix = "TYPE_", value = {
                 TYPE_SET_ENABLED,
@@ -200,7 +204,7 @@ public final class OverlayManagerTransaction implements Parcelable {
 
     /**
      * Builder class for OverlayManagerTransaction objects.
-     *
+     * TODO(b/269197647): mark the API used by the systemUI.
      * @hide
      */
     public static final class Builder {
@@ -282,7 +286,7 @@ public final class OverlayManagerTransaction implements Parcelable {
          */
         @NonNull
         public OverlayManagerTransaction build() {
-            return new OverlayManagerTransaction(mRequests, null /* overlayManager */);
+            return new OverlayManagerTransaction(mRequests, false /* selfTargeting */);
         }
     }
 
@@ -324,20 +328,6 @@ public final class OverlayManagerTransaction implements Parcelable {
             return new OverlayManagerTransaction[size];
         }
     };
-
-    /**
-     * Commit the overlay manager transaction to register or unregister overlays for self-targeting.
-     *
-     * <p>Applications can register overlays and unregister the registered overlays via {@link
-     * OverlayManagerTransaction}.
-     *
-     * @throws IOException if there is a file operation error.
-     * @throws PackageManager.NameNotFoundException if the package name is not found.
-     */
-    @NonUiContext
-    public void commit() throws PackageManager.NameNotFoundException, IOException {
-        mOverlayManager.commitSelfTarget(this);
-    }
 
     private static Request generateRegisterFabricatedOverlayRequest(
             @NonNull FabricatedOverlay overlay) {
@@ -385,7 +375,10 @@ public final class OverlayManagerTransaction implements Parcelable {
         mRequests.add(generateUnRegisterFabricatedOverlayRequest(overlay));
     }
 
-    boolean isSelfTargetingTransaction() {
-        return mOverlayManager != null;
+    /**
+     * Indicate whether the transaction is for self-targeting or not.
+     */
+    boolean isSelfTargeting() {
+        return mSelfTargeting;
     }
 }

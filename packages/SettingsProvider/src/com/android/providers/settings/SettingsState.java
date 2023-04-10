@@ -255,6 +255,26 @@ final class SettingsState {
         }
     }
 
+    public static boolean isConfigSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_CONFIG;
+    }
+
+    public static boolean isGlobalSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_GLOBAL;
+    }
+
+    public static boolean isSystemSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_SYSTEM;
+    }
+
+    public static boolean isSecureSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_SECURE;
+    }
+
+    public static boolean isSsaidSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_SSAID;
+    }
+
     public static String keyToString(int key) {
         return "Key[user=" + getUserIdFromKey(key) + ";type="
                 + settingTypeToString(getTypeFromKey(key)) + "]";
@@ -757,6 +777,12 @@ final class SettingsState {
                     + " size: " + newSize + " bytes.");
         }
         mPackageToMemoryUsage.put(packageName, newSize);
+    }
+
+    public boolean hasSetting(String name) {
+        synchronized (mLock) {
+            return hasSettingLocked(name);
+        }
     }
 
     @GuardedBy("mLock")

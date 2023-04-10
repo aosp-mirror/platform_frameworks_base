@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Region;
@@ -46,9 +47,11 @@ import com.android.internal.os.IResultReceiver;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * Provides low-level communication with the system window manager for
@@ -337,6 +340,25 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
+    public void addProposedRotationListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer listener) {
+        Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(listener, "listener must not be null");
+        final IBinder contextToken = Context.getToken(mContext);
+        if (contextToken == null) {
+            throw new UnsupportedOperationException("The context of this window manager instance "
+                    + "must be a UI context, e.g. an Activity or a Context created by "
+                    + "Context#createWindowContext()");
+        }
+        mGlobal.registerProposedRotationListener(contextToken, executor, listener);
+    }
+
+    @Override
+    public void removeProposedRotationListener(@NonNull IntConsumer listener) {
+        mGlobal.unregisterProposedRotationListener(Context.getToken(mContext), listener);
+    }
+
+    @Override
     public boolean isTaskSnapshotSupported() {
         try {
             return WindowManagerGlobal.getWindowManagerService().isTaskSnapshotSupported();
@@ -411,5 +433,16 @@ public final class WindowManagerImpl implements WindowManager {
 
     IBinder getDefaultToken() {
         return mDefaultToken;
+    }
+
+    @Override
+    @NonNull
+    public List<ComponentName> notifyScreenshotListeners(int displayId) {
+        try {
+            return List.copyOf(WindowManagerGlobal.getWindowManagerService()
+                    .notifyScreenshotListeners(displayId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

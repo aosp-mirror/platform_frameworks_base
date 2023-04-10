@@ -59,11 +59,11 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     }
 
     @Override
-    public void showRecentApps(boolean triggeredFromAltTab, boolean forward) {
+    public void showRecentApps(boolean triggeredFromAltTab) {
         IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
         if (overviewProxy != null) {
             try {
-                overviewProxy.onOverviewShown(triggeredFromAltTab, forward);
+                overviewProxy.onOverviewShown(triggeredFromAltTab);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send overview show event to launcher.", e);
             }

@@ -18,14 +18,33 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// This filegroup is used by menu tests.
+filegroup {
+    name: "AccessibilityMenuSource",
+    srcs: [
+        "src/**/AccessibilityMenuService.java",
+        "src/**/A11yMenuShortcut.java",
+    ],
+}
+
 android_app {
     name: "AccessibilityMenu",
 
     static_libs: [
         "androidx.coordinatorlayout_coordinatorlayout",
         "androidx.core_core",
+        "androidx.preference_preference",
         "androidx.viewpager_viewpager",
+        "SettingsLibDisplayUtils",
     ],
+
+    optimize: {
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        shrink_resources: true,
+        proguard_compatibility: false,
+    },
 
     uses_libs: [
         "org.apache.http.legacy",

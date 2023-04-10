@@ -67,6 +67,7 @@ import android.os.RemoteException;
 import android.os.Vibrator;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
+import android.util.FeatureFlagUtils;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.autofill.AutofillManagerInternal;
@@ -76,12 +77,14 @@ import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import junit.framework.Assert;
 
@@ -114,6 +117,7 @@ class TestPhoneWindowManager {
     @Mock private Vibrator mVibrator;
     @Mock private PowerManager mPowerManager;
     @Mock private WindowManagerPolicy.WindowManagerFuncs mWindowManagerFuncsImpl;
+    @Mock private InputMethodManagerInternal mInputMethodManagerInternal;
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
 
@@ -184,6 +188,8 @@ class TestPhoneWindowManager {
                 () -> LocalServices.getService(eq(GestureLauncherService.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(VrManagerInternal.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(AutofillManagerInternal.class)));
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
+        LocalServices.addService(InputMethodManagerInternal.class, mInputMethodManagerInternal);
 
         doReturn(mAppOpsManager).when(mContext).getSystemService(eq(AppOpsManager.class));
         doReturn(mDisplayManager).when(mContext).getSystemService(eq(DisplayManager.class));
@@ -237,10 +243,12 @@ class TestPhoneWindowManager {
         overrideLaunchAccessibility();
         doReturn(false).when(mPhoneWindowManager).keyguardOn();
         doNothing().when(mContext).startActivityAsUser(any(), any());
+        Mockito.reset(mContext);
     }
 
     void tearDown() {
         mHandlerThread.quitSafely();
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         mMockitoSession.finishMocking();
     }
 
@@ -282,6 +290,10 @@ class TestPhoneWindowManager {
         }
     }
 
+    void overrideShortPressOnPower(int behavior) {
+        mPhoneWindowManager.mShortPressOnPowerBehavior = behavior;
+    }
+
      // Override assist perform function.
     void overrideLongPressOnPower(int behavior) {
         mPhoneWindowManager.mLongPressOnPowerBehavior = behavior;
@@ -304,6 +316,10 @@ class TestPhoneWindowManager {
         }
     }
 
+    void overrideCanStartDreaming(boolean canDream) {
+        doReturn(canDream).when(mDreamManagerInternal).canStartDreaming(anyBoolean());
+    }
+
     void overrideDisplayState(int state) {
         doReturn(state).when(mDisplay).getState();
         Mockito.reset(mPowerManager);
@@ -321,12 +337,12 @@ class TestPhoneWindowManager {
         doReturn(true).when(mTelecomManager).endCall();
     }
 
-    void overrideExpandNotificationsPanel() {
+    void overrideTogglePanel() {
         // Can't directly mock on IStatusbarService, use spyOn and override the specific api.
         mPhoneWindowManager.getStatusBarService();
         spyOn(mPhoneWindowManager.mStatusBarService);
         try {
-            doNothing().when(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+            doNothing().when(mPhoneWindowManager.mStatusBarService).togglePanel();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -367,6 +383,10 @@ class TestPhoneWindowManager {
                 timeout(SHORTCUT_KEY_DELAY_MILLIS)).performAccessibilityShortcut();
     }
 
+    void assertDreamRequest() {
+        verify(mDreamManagerInternal).requestDream();
+    }
+
     void assertPowerSleep() {
         waitForIdle();
         verify(mPowerManager,
@@ -399,20 +419,30 @@ class TestPhoneWindowManager {
     void assertLaunchCategory(String category) {
         waitForIdle();
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
-        Assert.assertTrue(intentCaptor.getValue().getSelector().hasCategory(category));
+        try {
+            verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
+            Assert.assertTrue(intentCaptor.getValue().getSelector().hasCategory(category));
+        } catch (Throwable t) {
+            throw new AssertionError("failed to assert " + category, t);
+        }
         // Reset verifier for next call.
         Mockito.reset(mContext);
     }
 
     void assertShowRecentApps() {
         waitForIdle();
-        verify(mStatusBarManagerInternal).showRecentApps(anyBoolean(), anyBoolean());
+        verify(mStatusBarManagerInternal).showRecentApps(anyBoolean());
     }
 
-    void assertSwitchKeyboardLayout() {
+    void assertSwitchKeyboardLayout(int direction) {
         waitForIdle();
-        verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), anyInt());
+        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
+            verify(mInputMethodManagerInternal).switchKeyboardLayout(eq(direction));
+            verify(mWindowManagerFuncsImpl, never()).switchKeyboardLayout(anyInt(), anyInt());
+        } else {
+            verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
+            verify(mInputMethodManagerInternal, never()).switchKeyboardLayout(anyInt());
+        }
     }
 
     void assertTakeBugreport() {
@@ -423,9 +453,9 @@ class TestPhoneWindowManager {
         Assert.assertTrue(intentCaptor.getValue().getAction() == Intent.ACTION_BUG_REPORT);
     }
 
-    void assertExpandNotification() throws RemoteException {
+    void assertTogglePanel() throws RemoteException {
         waitForIdle();
-        verify(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+        verify(mPhoneWindowManager.mStatusBarService).togglePanel();
     }
 
     void assertToggleShortcutsMenu() {
@@ -436,5 +466,18 @@ class TestPhoneWindowManager {
     void assertToggleCapsLock() {
         waitForIdle();
         verify(mInputManagerInternal).toggleCapsLock(anyInt());
+    }
+
+    void assertWillNotLockAfterAppTransitionFinished() {
+        Assert.assertFalse(mPhoneWindowManager.mLockAfterAppTransitionFinished);
+    }
+
+    void assertLockedAfterAppTransitionFinished() {
+        ArgumentCaptor<AppTransitionListener> transitionCaptor =
+                ArgumentCaptor.forClass(AppTransitionListener.class);
+        verify(mWindowManagerInternal).registerAppTransitionListener(
+                transitionCaptor.capture());
+        transitionCaptor.getValue().onAppTransitionFinishedLocked(any());
+        verify(mPhoneWindowManager).lockNow(null);
     }
 }

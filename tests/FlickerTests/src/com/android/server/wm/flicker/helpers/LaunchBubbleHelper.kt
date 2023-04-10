@@ -17,8 +17,9 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.parser.toFlickerComponent
 
 class LaunchBubbleHelper(instrumentation: Instrumentation) :
     StandardAppHelper(

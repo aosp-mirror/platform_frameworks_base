@@ -43,7 +43,7 @@ public class OverrideBrightnessStrategyTest {
     }
 
     @Test
-    public void updateBrightnessWorksAsExpectedWhenScreenDozeStateIsRequested() {
+    public void testUpdateBrightnessWhenScreenDozeStateIsRequested() {
         DisplayManagerInternal.DisplayPowerRequest
                 displayPowerRequest = new DisplayManagerInternal.DisplayPowerRequest();
         float overrideBrightness = 0.2f;
@@ -55,6 +55,7 @@ public class OverrideBrightnessStrategyTest {
                         .setBrightness(overrideBrightness)
                         .setBrightnessReason(brightnessReason)
                         .setSdrBrightness(overrideBrightness)
+                        .setDisplayBrightnessStrategyName(mOverrideBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mOverrideBrightnessStrategy.updateBrightness(displayPowerRequest);

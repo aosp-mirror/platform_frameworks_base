@@ -197,17 +197,29 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.setRoutingControlFeatureEnabled(true);
         mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
-            new HdmiPortInfo(
-                0, HdmiPortInfo.PORT_INPUT, SELF_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(0, HdmiPortInfo.PORT_INPUT, SELF_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mHdmiPortInfo[1] =
-            new HdmiPortInfo(
-                2, HdmiPortInfo.PORT_INPUT, HDMI_1_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, HDMI_1_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mHdmiPortInfo[2] =
-            new HdmiPortInfo(
-                1, HdmiPortInfo.PORT_INPUT, HDMI_2_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, HDMI_2_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mHdmiPortInfo[3] =
-            new HdmiPortInfo(
-                4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);

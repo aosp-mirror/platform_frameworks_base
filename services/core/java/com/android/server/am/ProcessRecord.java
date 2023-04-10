@@ -16,10 +16,14 @@
 
 package com.android.server.am;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 
+import static java.util.Objects.requireNonNull;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
@@ -62,7 +66,6 @@ import com.android.server.wm.WindowProcessListener;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Full information about a particular process that
@@ -175,6 +178,12 @@ class ProcessRecord implements WindowProcessListener {
     private boolean mPendingStart;
 
     /**
+     * Process finish attach application is pending.
+     */
+    @GuardedBy("mService")
+    private boolean mPendingFinishAttach;
+
+    /**
      * Seq no. Indicating the latest process start associated with this process record.
      */
     @GuardedBy("mService")
@@ -199,6 +208,11 @@ class ProcessRecord implements WindowProcessListener {
      * When the process is started. (before zygote fork)
      */
     private volatile long mStartElapsedTime;
+
+    /**
+     * When the process was sent the bindApplication request
+     */
+    private volatile long mBindApplicationTime;
 
     /**
      * This will be same as {@link #uid} usually except for some apps used during factory testing.
@@ -328,6 +342,24 @@ class ProcessRecord implements WindowProcessListener {
      */
     @GuardedBy("mService")
     private boolean mInFullBackup;
+
+    /**
+     * A set of tokens that currently contribute to this process being temporarily allowed
+     * to start certain components (eg. activities or foreground services) even if it's not
+     * in the foreground.
+     */
+    @GuardedBy("mBackgroundStartPrivileges")
+    private final ArrayMap<Binder, BackgroundStartPrivileges> mBackgroundStartPrivileges =
+            new ArrayMap<>();
+
+    /**
+     * The merged BackgroundStartPrivileges based on what's in {@link #mBackgroundStartPrivileges}.
+     * This is lazily generated using {@link #getBackgroundStartPrivileges()}.
+     */
+    @Nullable
+    @GuardedBy("mBackgroundStartPrivileges")
+    private BackgroundStartPrivileges mBackgroundStartPrivilegesMerged =
+            BackgroundStartPrivileges.NONE;
 
     /**
      * Controller for driving the process state on the window manager side.
@@ -698,6 +730,16 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy("mService")
+    void setPendingFinishAttach(boolean pendingFinishAttach) {
+        mPendingFinishAttach = pendingFinishAttach;
+    }
+
+    @GuardedBy("mService")
+    boolean isPendingFinishAttach() {
+        return mPendingFinishAttach;
+    }
+
+    @GuardedBy("mService")
     long getStartSeq() {
         return mStartSeq;
     }
@@ -738,6 +780,14 @@ class ProcessRecord implements WindowProcessListener {
 
     long getStartElapsedTime() {
         return mStartElapsedTime;
+    }
+
+    long getBindApplicationTime() {
+        return mBindApplicationTime;
+    }
+
+    void setBindApplicationTime(long bindApplicationTime) {
+        mBindApplicationTime = bindApplicationTime;
     }
 
     int getStartUid() {
@@ -991,9 +1041,20 @@ class ProcessRecord implements WindowProcessListener {
         mInFullBackup = inFullBackup;
     }
 
+    @GuardedBy("mService")
+    public void setCached(boolean cached) {
+        mState.setCached(cached);
+    }
+
     @Override
+    @GuardedBy("mService")
     public boolean isCached() {
         return mState.isCached();
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    public boolean hasForegroundActivities() {
+        return mState.hasForegroundActivities();
     }
 
     boolean hasActivities() {
@@ -1291,16 +1352,58 @@ class ProcessRecord implements WindowProcessListener {
      * {@param originatingToken} if you have one such originating token, this is useful for tracing
      * back the grant in the case of the notification token.
      */
-    void addOrUpdateBackgroundStartPrivileges(Binder entity,
-            BackgroundStartPrivileges backgroundStartPrivileges) {
-        Objects.requireNonNull(entity);
+    void addOrUpdateBackgroundStartPrivileges(@NonNull Binder entity,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges) {
+        requireNonNull(entity, "entity");
+        requireNonNull(backgroundStartPrivileges, "backgroundStartPrivileges");
+        checkArgument(backgroundStartPrivileges.allowsAny(),
+                "backgroundStartPrivileges does not allow anything");
         mWindowProcessController.addOrUpdateBackgroundStartPrivileges(entity,
                 backgroundStartPrivileges);
+        setBackgroundStartPrivileges(entity, backgroundStartPrivileges);
     }
 
-    void removeBackgroundStartPrivileges(Binder entity) {
-        Objects.requireNonNull(entity);
+    void removeBackgroundStartPrivileges(@NonNull Binder entity) {
+        requireNonNull(entity, "entity");
         mWindowProcessController.removeBackgroundStartPrivileges(entity);
+        setBackgroundStartPrivileges(entity, null);
+    }
+
+    @NonNull
+    BackgroundStartPrivileges getBackgroundStartPrivileges() {
+        synchronized (mBackgroundStartPrivileges) {
+            if (mBackgroundStartPrivilegesMerged == null) {
+                // Lazily generate the merged version when it's actually needed.
+                mBackgroundStartPrivilegesMerged = BackgroundStartPrivileges.NONE;
+                for (int i = mBackgroundStartPrivileges.size() - 1; i >= 0; --i) {
+                    mBackgroundStartPrivilegesMerged =
+                            mBackgroundStartPrivilegesMerged.merge(
+                                    mBackgroundStartPrivileges.valueAt(i));
+                }
+            }
+            return mBackgroundStartPrivilegesMerged;
+        }
+    }
+
+    private void setBackgroundStartPrivileges(@NonNull Binder entity,
+            @Nullable BackgroundStartPrivileges backgroundStartPrivileges) {
+        synchronized (mBackgroundStartPrivileges) {
+            final boolean changed;
+            if (backgroundStartPrivileges == null) {
+                changed = mBackgroundStartPrivileges.remove(entity) != null;
+            } else {
+                final BackgroundStartPrivileges oldBsp =
+                        mBackgroundStartPrivileges.put(entity, backgroundStartPrivileges);
+                // BackgroundStartPrivileges tries to reuse the same object and avoid creating
+                // additional objects. For now, we just compare the reference to see if something
+                // has changed.
+                // TODO: actually compare the individual values to see if there's a change
+                changed = backgroundStartPrivileges != oldBsp;
+            }
+            if (changed) {
+                mBackgroundStartPrivilegesMerged = null;
+            }
+        }
     }
 
     @Override

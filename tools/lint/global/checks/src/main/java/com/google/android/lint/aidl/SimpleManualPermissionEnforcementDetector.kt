@@ -23,19 +23,13 @@ import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
-import com.google.android.lint.findCallExpression
 import org.jetbrains.uast.UBlockExpression
-import org.jetbrains.uast.UElement
-import org.jetbrains.uast.UIfExpression
 import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.skipParenthesizedExprDown
 
 /**
  * Looks for methods implementing generated AIDL interface stubs
  * that can have simple permission checks migrated to
  * @EnforcePermission annotations
- *
- * TODO: b/242564870 (enable parse and autoFix of .aidl files)
  */
 @Suppress("UnstableApiUsage")
 class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
@@ -45,8 +39,8 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
             interfaceName: String,
             body: UBlockExpression
     ) {
-        val enforcePermissionFix = accumulateSimplePermissionCheckFixes(body, context) ?: return
-        val lintFix = enforcePermissionFix.toLintFix(context.getLocation(node))
+        val enforcePermissionFix = EnforcePermissionFix.fromBlockExpression(context, body) ?: return
+        val lintFix = enforcePermissionFix.toLintFix(context, node)
         val message =
                 "$interfaceName permission check ${
                     if (enforcePermissionFix.errorLevel) "should" else "can"
@@ -54,66 +48,17 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
 
         val incident = Incident(
                 ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT,
-                enforcePermissionFix.locations.last(),
+                enforcePermissionFix.manualCheckLocations.last(),
                 message,
                 lintFix
         )
 
-        if (enforcePermissionFix.errorLevel) {
-            incident.overrideSeverity(Severity.ERROR)
-        }
+        // TODO(b/265014041): turn on errors once all code that would cause one is fixed
+        // if (enforcePermissionFix.errorLevel) {
+        //     incident.overrideSeverity(Severity.ERROR)
+        // }
 
         context.report(incident)
-    }
-
-    /**
-     * Walk the expressions in the method, looking for simple permission checks.
-     *
-     * If a single permission check is found at the beginning of the method,
-     * this should be migrated to @EnforcePermission(value).
-     *
-     * If multiple consecutive permission checks are found,
-     * these should be migrated to @EnforcePermission(allOf={value1, value2, ...})
-     *
-     * As soon as something other than a permission check is encountered, stop looking,
-     * as some other business logic is happening that prevents an automated fix.
-     */
-    private fun accumulateSimplePermissionCheckFixes(
-                methodBody: UBlockExpression,
-                context: JavaContext
-        ): EnforcePermissionFix? {
-        try {
-            val singleFixes = mutableListOf<EnforcePermissionFix>()
-            for (expression in methodBody.expressions) {
-                val fix = getPermissionCheckFix(
-                        expression.skipParenthesizedExprDown(),
-                        context) ?: break
-                singleFixes.add(fix)
-            }
-            return when (singleFixes.size) {
-                0 -> null
-                1 -> singleFixes[0]
-                else -> EnforcePermissionFix.compose(singleFixes)
-            }
-        } catch (e: AnyOfAllOfException) {
-            return null
-        }
-    }
-
-
-    /**
-     * If an expression boils down to a permission check, return
-     * the helper for creating a lint auto fix to @EnforcePermission
-     */
-    private fun getPermissionCheckFix(startingExpression: UElement?, context: JavaContext):
-            EnforcePermissionFix? {
-        if (startingExpression is UIfExpression) {
-            return EnforcePermissionFix.fromIfExpression(context, startingExpression)
-        }
-        findCallExpression(startingExpression)?.let {
-            return EnforcePermissionFix.fromCallExpression(context, it)
-        }
-        return null
     }
 
     companion object {
@@ -142,7 +87,6 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
                         SimpleManualPermissionEnforcementDetector::class.java,
                         Scope.JAVA_FILE_SCOPE
                 ),
-                enabledByDefault = false, // TODO: enable once b/241171714 is resolved
         )
     }
 }

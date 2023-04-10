@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"WLAN"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"WLAN-Telefonie"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"WLAN-Anruf"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Aus"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Anruf über WLAN"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Über Mobilfunknetz anrufen"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Deine privaten Apps werden blockiert, bis du dein Arbeitsprofil aktivierst"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Private Apps werden am <xliff:g id="DATE">%1$s</xliff:g> um <xliff:g id="TIME">%2$s</xliff:g> blockiert. Dein IT-Administrator hat festgelegt, dass dein Arbeitsprofil nicht länger als <xliff:g id="NUMBER">%3$d</xliff:g> Tage pausiert werden darf."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivieren"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Anrufe und Nachrichten sind deaktiviert"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Du hast geschäftliche Apps pausiert. Deshalb kannst du keine Anrufe oder Nachrichten empfangen."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Geschäftl. Apps nicht pausieren"</string>
     <string name="me" msgid="6207584824693813140">"Eigene"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-Optionen"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-Optionen"</string>
@@ -292,7 +296,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android-System"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Zum persönlichen Profil wechseln"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Zum privaten Profil wechseln"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Zum Arbeitsprofil wechseln"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"auf deine Kontakte zugreifen"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot erstellen"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Es kann ein Screenshot des Displays erstellt werden."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Vorschau – <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Statusleiste darstellen"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App in Benutzung ist."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Zugriff auf Daten des Körpersensors, etwa Herzfrequenz, wenn im Hintergrund"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App im Hintergrund ist."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zugreifen, während die App verwendet wird."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Ermöglicht der App, auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zuzugreifen, während die App verwendet wird."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zugreifen, während die App im Hintergrund ausgeführt wird."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Ermöglicht der App, auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zuzugreifen, während die App im Hintergrund ausgeführt wird."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Kalendertermine und Details lesen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Diese App kann alle auf deinem Tablet gespeicherten Kalendertermine lesen und deine Kalenderdaten teilen oder speichern."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Diese App kann alle auf deinem Android TV-Gerät gespeicherten Kalendertermine lesen und die Kalenderdaten teilen oder speichern."</string>
@@ -791,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Ermöglicht der App, die Informationen über die Funktionen einer anderen App anzusehen."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Sensordaten mit hoher Frequenz auslesen"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Erlaubt der App, Sensordaten mit einer Frequenz von mehr als 200 Hz auszulesen"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Versuche zum Entsperren des Displays überwachen"</string>
@@ -1241,15 +1254,13 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android wird gestartet…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet wird gestartet…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Gerät wird gestartet…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Speicher wird optimiert"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Systemupdate wird beendet…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Für <xliff:g id="APPLICATION">%1$s</xliff:g> wird gerade ein Upgrade ausgeführt…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> von <xliff:g id="NUMBER_1">%2$d</xliff:g> wird optimiert..."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden der Einrichtung Bildschirm deaktivieren"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden Bildschirm deaktivieren"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktivieren"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
@@ -1356,6 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP über USB aktiviert"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-Tethering aktiviert"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI über USB aktiviert"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Gerät als Webcam verbunden"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Mit USB-Zubehör verbunden"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Für weitere Optionen tippen."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Verbundenes Gerät wird aufgeladen. Für weitere Optionen tippen."</string>
@@ -1386,7 +1398,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Eingabemethode wählen"</string>
     <string name="show_ime" msgid="6406112007347443383">"Bildschirmtastatur auch dann anzeigen, wenn physische Tastatur aktiv ist"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtuelle Tastatur einblenden"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Physische Tastatur konfigurieren"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> konfigurieren"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Physische Tastaturen konfigurieren"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Zum Auswählen von Sprache und Layout tippen"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1689,9 +1702,9 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AUS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"„<xliff:g id="SERVICE">%1$s</xliff:g>“ die vollständige Kontrolle über dein Gerät geben?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir Zugang zu App-Funktionen erleichtern. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir bei der Barrierefreiheit helfen. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bildschirm aufrufen und steuern"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über andere Apps anzeigen."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über anderen Apps anzeigen."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Aktionen aufrufen und durchführen"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Die Funktion kann deine Interaktionen mit einer App oder einem Hardwaresensor verfolgen und in deinem Namen mit Apps interagieren."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Zulassen"</string>
@@ -1704,14 +1717,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fertig"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Verknüpfung deaktivieren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Verknüpfung verwenden"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Farbumkehr"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Farbumkehr"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Farbkorrektur"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Einhandmodus"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extradunkel"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörgeräte"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Lautstärketasten wurden gedrückt gehalten. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ist aktiviert."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Lautstärketasten wurden gedrückt gehalten. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ist deaktiviert."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Halten Sie beide Lautstärketasten drei Sekunden lang gedrückt, um <xliff:g id="SERVICE_NAME">%1$s</xliff:g> zu verwenden"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lass die Lautstärketasten los. Halte zum Aktivieren von <xliff:g id="SERVICE_NAME">%1$s</xliff:g> beide Lautstärketasten noch einmal 3 Sekunden lang gedrückt."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Wähle eine Funktion aus, die verwendet wird, wenn du auf die Schaltfläche \"Bedienungshilfen\" tippst:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Wähle die Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Wähle eine Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
@@ -1842,6 +1855,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vollbildmodus wird aktiviert"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Zum Beenden von oben nach unten wischen"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ok"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Drehen, um die Ansicht zu verbessern"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Modus für geteilten Bildschirm beenden, um die Ansicht zu verbessern"</string>
     <string name="done_label" msgid="7283767013231718521">"Fertig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kreisförmiger Schieberegler für Stunden"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kreisförmiger Schieberegler für Minuten"</string>
@@ -1853,6 +1868,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. <xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Klon <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Vor dem Beenden nach PIN fragen"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Vor dem Beenden nach Entsperrungsmuster fragen"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Vor dem Beenden nach Passwort fragen"</string>
@@ -1943,10 +1959,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Geschäftliche Apps aktivieren?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Du erhältst Zugriff auf deine geschäftlichen Apps und Benachrichtigungen"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivieren"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Notruf"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Zugriff auf deine geschäftlichen Apps und Anrufe anfordern"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App ist nicht verfügbar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ist derzeit nicht verfügbar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nicht verfügbar"</string>
@@ -2309,4 +2323,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Ermöglicht einer Companion-App, Dienste im Vordergrund aus dem Hintergrund zu starten."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon ist verfügbar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon ist blockiert"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ist aktiviert"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> nutzt zum Anzeigen von Inhalten beide Displays"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Gerät ist zu warm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen ist nicht verfügbar, weil dein Smartphone zu warm ist"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ist nicht verfügbar"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ist nicht verfügbar, weil der Energiesparmodus aktiviert ist. Dies lässt sich in den Einstellungen deaktivieren."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Zu den Einstellungen"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Deaktivieren"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> konfiguriert"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Tastaturlayout festgelegt auf <xliff:g id="LAYOUT_1">%s</xliff:g>. Zum Ändern tippen."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Tastaturlayout festgelegt auf <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Zum Ändern tippen."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Tastaturlayout festgelegt auf <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Zum Ändern tippen."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tastaturlayout festgelegt auf <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Zum Ändern tippen."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Physische Tastaturen konfiguriert"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Zum Ansehen der Tastaturen tippen"</string>
 </resources>

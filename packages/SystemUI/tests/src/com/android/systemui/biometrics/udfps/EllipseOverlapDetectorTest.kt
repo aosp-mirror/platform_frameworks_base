@@ -16,30 +16,23 @@
 
 package com.android.systemui.biometrics.udfps
 
-import android.graphics.Point
 import android.graphics.Rect
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.EllipseOverlapDetectorParams
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.`when` as whenEver
 
 @SmallTest
 @RunWith(Parameterized::class)
 class EllipseOverlapDetectorTest(val testCase: TestCase) : SysuiTestCase() {
-    val underTest = spy(EllipseOverlapDetector(neededPoints = 1))
-
-    @Before
-    fun setUp() {
-        // Use one single center point for testing, required or total number of points may change
-        whenEver(underTest.calculateSensorPoints(SENSOR))
-            .thenReturn(listOf(Point(SENSOR.centerX(), SENSOR.centerY())))
-    }
+    val underTest =
+        EllipseOverlapDetector(
+            EllipseOverlapDetectorParams(minOverlap = .4f, targetSize = .2f, stepSize = 1)
+        )
 
     @Test
     fun isGoodOverlap() {

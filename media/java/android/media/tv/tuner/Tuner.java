@@ -805,6 +805,7 @@ public class Tuner implements AutoCloseable  {
         acquireTRMSLock("close()");
         try {
             releaseAll();
+            mTunerResourceManager.unregisterClientProfile(mClientId);
             TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
         } finally {
             releaseTRMSLock();
@@ -968,7 +969,6 @@ public class Tuner implements AutoCloseable  {
         releaseDescramblers();
         releaseFilters();
         releaseDemux();
-        mTunerResourceManager.unregisterClientProfile(mClientId);
     }
 
     /**
@@ -1170,6 +1170,11 @@ public class Tuner implements AutoCloseable  {
      * in Tuner 2.0 or higher version. Unsupported version will cause no-op. Use {@link
      * TunerVersionChecker#getTunerVersion()} to get the version information.
      *
+     * <p>Tuning with {@link
+     * android.media.tv.tuner.frontend.IptvFrontendSettings} is only supported
+     * in Tuner 3.0 or higher version. Unsupported version will cause no-op. Use {@link
+     * TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
      * @param settings Signal delivery information the frontend uses to
      *                 search and lock the signal.
      * @return result status of tune operation.
@@ -1195,6 +1200,12 @@ public class Tuner implements AutoCloseable  {
             if (mFrontendType == FrontendSettings.TYPE_DTMB) {
                 if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
                         TunerVersionChecker.TUNER_VERSION_1_1, "Tuner with DTMB Frontend")) {
+                    return RESULT_UNAVAILABLE;
+                }
+            }
+            if (mFrontendType == FrontendSettings.TYPE_IPTV) {
+                if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_3_0, "Tuner with IPTV Frontend")) {
                     return RESULT_UNAVAILABLE;
                 }
             }
@@ -1283,6 +1294,13 @@ public class Tuner implements AutoCloseable  {
                     if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
                             TunerVersionChecker.TUNER_VERSION_1_1,
                             "Scan with DTMB Frontend")) {
+                        return RESULT_UNAVAILABLE;
+                    }
+                }
+                if (mFrontendType == FrontendSettings.TYPE_IPTV) {
+                    if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                            TunerVersionChecker.TUNER_VERSION_3_0,
+                            "Tuner with IPTV Frontend")) {
                         return RESULT_UNAVAILABLE;
                     }
                 }

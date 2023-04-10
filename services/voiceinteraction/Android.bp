@@ -20,6 +20,7 @@ java_library_static {
     srcs: [":services.voiceinteraction-sources"],
     libs: [
         "services.core",
+        "app-compat-annotations",
         "android.hardware.power-V1-java",
         "android.hardware.power-V1.0-java",
     ],

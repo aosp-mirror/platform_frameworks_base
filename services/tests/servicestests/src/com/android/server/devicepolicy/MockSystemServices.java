@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.NonNull;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -55,6 +56,7 @@ import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.wifi.WifiManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
@@ -77,7 +79,10 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
@@ -101,6 +106,7 @@ public class MockSystemServices {
     public final UsageStatsManagerInternal usageStatsManagerInternal;
     public final NetworkPolicyManagerInternal networkPolicyManagerInternal;
     public final PackageManagerInternal packageManagerInternal;
+    public final PackageManagerLocal packageManagerLocal;
     public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
     public final PowerManagerInternal powerManagerInternal;
@@ -143,7 +149,10 @@ public class MockSystemServices {
     public final File dataDir;
     public final PolicyPathProvider pathProvider;
 
-    public MockSystemServices(Context realContext, String name) {
+    private final Map<String, PackageState> mTestPackageStates = new ArrayMap<>();
+
+    public MockSystemServices(Context realContext, String name,
+            @NonNull DpmMockContext.MockBinder mockBinder) {
         dataDir = new File(realContext.getCacheDir(), name);
         DpmTestUtils.clearDir(dataDir);
 
@@ -157,6 +166,7 @@ public class MockSystemServices {
 
         userManagerForMock = mock(UserManagerForMock.class);
         packageManagerInternal = mock(PackageManagerInternal.class);
+        packageManagerLocal = mock(PackageManagerLocal.class);
         powerManager = mock(PowerManagerForMock.class);
         powerManagerInternal = mock(PowerManagerInternal.class);
         recoverySystem = mock(RecoverySystemForMock.class);
@@ -196,6 +206,14 @@ public class MockSystemServices {
         packageManager = spy(realContext.getPackageManager());
         when(packageManagerInternal.getSystemUiServiceComponent()).thenReturn(
                 new ComponentName("com.android.systemui", ".Service"));
+
+        addTestPackageUid("android", DpmMockContext.SYSTEM_UID);
+        addTestPackageUid(realContext.getPackageName(), Binder.getCallingUid());
+        when(packageManagerLocal.withUnfilteredSnapshot()).thenAnswer(unused -> {
+            var snapshot = mock(PackageManagerLocal.UnfilteredSnapshot.class);
+            when(snapshot.getPackageStates()).thenAnswer(unused1 -> mTestPackageStates);
+            return snapshot;
+        });
 
         contentResolver = new MockContentResolver();
         contentResolver.addProvider("telephony", new MockContentProvider(realContext) {
@@ -409,6 +427,16 @@ public class MockSystemServices {
         throw new UnsupportedOperationException("No package " + packageName + " for user " + user);
     }
 
+    public void addTestPackageUid(@NonNull String packageName, int uid) {
+        var packageState = mock(PackageState.class);
+        when(packageState.getAppId()).thenReturn(UserHandle.getAppId(uid));
+        when(packageState.getUserStateOrDefault(anyInt())).thenAnswer(invocation -> {
+            var userState = mock(PackageUserState.class);
+            when(userState.isInstalled()).thenReturn(true);
+            return userState;
+        });
+        mTestPackageStates.put(packageName, packageState);
+    }
 
     public static class EnvironmentForMock {
         public File getUserSystemDirectory(int userId) {

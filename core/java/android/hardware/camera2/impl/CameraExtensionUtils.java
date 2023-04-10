@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
+import android.hardware.HardwareBuffer;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -149,6 +150,7 @@ public final class CameraExtensionUtils {
             SurfaceInfo surfaceInfo = querySurface(config.getSurface());
             if ((surfaceInfo.mFormat ==
                     CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT) ||
+                    ((surfaceInfo.mUsage & HardwareBuffer.USAGE_COMPOSER_OVERLAY) != 0) ||
                     // The default RGBA_8888 is also implicitly supported because camera will
                     // internally override it to
                     // 'CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT'

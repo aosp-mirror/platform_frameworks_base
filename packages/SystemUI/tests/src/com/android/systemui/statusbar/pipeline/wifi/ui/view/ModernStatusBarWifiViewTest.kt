@@ -30,20 +30,21 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -62,16 +63,10 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     private lateinit var testableLooper: TestableLooper
 
-    @Mock
-    private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
-    @Mock
-    private lateinit var logger: ConnectivityPipelineLogger
-    @Mock
-    private lateinit var tableLogBuffer: TableLogBuffer
-    @Mock
-    private lateinit var connectivityConstants: ConnectivityConstants
-    @Mock
-    private lateinit var wifiConstants: WifiConstants
+    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    @Mock private lateinit var connectivityConstants: ConnectivityConstants
+    @Mock private lateinit var wifiConstants: WifiConstants
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
@@ -91,25 +86,32 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         wifiRepository.setIsWifiEnabled(true)
         interactor = WifiInteractorImpl(connectivityRepository, wifiRepository)
         scope = CoroutineScope(Dispatchers.Unconfined)
-        airplaneModeViewModel = AirplaneModeViewModelImpl(
-            AirplaneModeInteractor(
-                airplaneModeRepository,
-                connectivityRepository,
-            ),
-            logger,
-            scope,
-        )
-        viewModel = WifiViewModel(
-            airplaneModeViewModel,
-            connectivityConstants,
-            context,
-            logger,
-            tableLogBuffer,
-            interactor,
-            scope,
-            statusBarPipelineFlags,
-            wifiConstants,
-        ).home
+        airplaneModeViewModel =
+            AirplaneModeViewModelImpl(
+                AirplaneModeInteractor(
+                    airplaneModeRepository,
+                    connectivityRepository,
+                ),
+                tableLogBuffer,
+                scope,
+            )
+        val viewModelCommon =
+            WifiViewModel(
+                airplaneModeViewModel,
+                connectivityConstants,
+                context,
+                tableLogBuffer,
+                interactor,
+                scope,
+                statusBarPipelineFlags,
+                wifiConstants,
+            )
+        viewModel =
+            viewModelForLocation(
+                viewModelCommon,
+                statusBarPipelineFlags,
+                StatusBarLocation.HOME,
+            )
     }
 
     // Note: The following tests are more like integration tests, since they stand up a full

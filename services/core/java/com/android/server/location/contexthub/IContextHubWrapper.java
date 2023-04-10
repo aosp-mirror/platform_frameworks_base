@@ -18,6 +18,7 @@ package com.android.server.location.contexthub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.contexthub.HostEndpointInfo;
+import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.TransactionResult;
@@ -362,9 +363,11 @@ public abstract class IContextHubWrapper {
      * Provides the list of preloaded nanoapp IDs on the system. The output of this API must
      * not change.
      *
-     * @return The list of preloaded nanoapp IDs
+     * @param contextHubId  The context Hub ID.
+     *
+     * @return The list of preloaded nanoapp IDs.
      */
-    public abstract long[] getPreloadedNanoappIds();
+    public abstract long[] getPreloadedNanoappIds(int contextHubId);
 
     /**
      * Registers a callback with the Context Hub.
@@ -456,8 +459,8 @@ public abstract class IContextHubWrapper {
                 });
             }
 
-            public void handleNanSessionRequest(boolean enable) {
-                // TODO(229888878): Implement
+            public void handleNanSessionRequest(NanSessionRequest request) {
+                // TODO(271471342): Implement
             }
 
             @Override
@@ -713,14 +716,14 @@ public abstract class IContextHubWrapper {
             }
         }
 
-        public long[] getPreloadedNanoappIds() {
+        public long[] getPreloadedNanoappIds(int contextHubId) {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
                 return null;
             }
 
             try {
-                return hub.getPreloadedNanoappIds();
+                return hub.getPreloadedNanoappIds(contextHubId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Exception while getting preloaded nanoapp IDs: " + e.getMessage());
                 return null;
@@ -923,7 +926,7 @@ public abstract class IContextHubWrapper {
                     mHub.queryApps(contextHubId));
         }
 
-        public long[] getPreloadedNanoappIds() {
+        public long[] getPreloadedNanoappIds(int contextHubId) {
             return new long[0];
         }
 

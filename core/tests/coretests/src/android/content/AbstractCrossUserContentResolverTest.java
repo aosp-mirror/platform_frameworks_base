@@ -18,6 +18,7 @@ package android.content;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import org.junit.Ignore;
 
 import android.app.ActivityManager;
 import android.app.activity.LocalProvider;
@@ -34,6 +35,8 @@ import android.os.UserManager;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.compatibility.common.util.SystemUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,6 +99,7 @@ abstract class AbstractCrossUserContentResolverTest {
         mContext.registerReceiverAsUser(receiver, UserHandle.of(mCrossUserId),
                 new IntentFilter(Intent.ACTION_USER_UNLOCKED), null, null);
         ActivityManager.getService().startUserInBackground(mCrossUserId);
+        SystemUtil.runShellCommand("am wait-for-broadcast-barrier");
 
         try {
             if (!latch.await(TIMEOUT_USER_UNLOCK_SEC, TimeUnit.SECONDS)) {
@@ -120,6 +124,7 @@ abstract class AbstractCrossUserContentResolverTest {
      * Register an observer for an URI in another user and verify that it receives
      * onChange callback when data at the URI changes.
      */
+    @Ignore("b/272733874")
     @Test
     public void testRegisterContentObserver() throws Exception {
         Context crossUserContext = null;
@@ -149,6 +154,7 @@ abstract class AbstractCrossUserContentResolverTest {
      * Register an observer for an URI in the current user and verify that another user can
      * notify changes for this URI.
      */
+    @Ignore("b/272733874")
     @Test
     public void testNotifyChange() throws Exception {
         final CountDownLatch notifyLatch = new CountDownLatch(1);

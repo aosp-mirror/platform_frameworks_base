@@ -322,6 +322,14 @@ public abstract class BrightnessMappingStrategy {
     public abstract float convertToNits(float brightness);
 
     /**
+     * Converts the provided nit value to a float scale value if possible.
+     *
+     * Returns {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} if there's no available mapping for
+     * the nits to float scale.
+     */
+    public abstract float convertToFloatScale(float nits);
+
+    /**
      * Adds a user interaction data point to the brightness mapping.
      *
      * This data point <b>must</b> exist on the brightness curve as a result of this call. This is
@@ -355,13 +363,17 @@ public abstract class BrightnessMappingStrategy {
     public abstract void recalculateSplines(boolean applyAdjustment, float[] adjustment);
 
     /**
-     * Returns the timeout for the short term model
+     * Returns the timeout, in milliseconds for the short term model
      *
      * Timeout after which we remove the effects any user interactions might've had on the
      * brightness mapping. This timeout doesn't start until we transition to a non-interactive
      * display policy so that we don't reset while users are using their devices, but also so that
      * we don't erroneously keep the short-term model if the device is dozing but the
      * display is fully on.
+     *
+     * This timeout is also used when the device switches from interactive screen brightness mode
+     * to idle screen brightness mode, to preserve the user's preference when they resume usage of
+     * the device, within the specified timeframe.
      */
     public abstract long getShortTermModelTimeout();
 
@@ -671,6 +683,11 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
+        public float convertToFloatScale(float nits) {
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        }
+
+        @Override
         public void addUserDataPoint(float lux, float brightness) {
             float unadjustedBrightness = getUnadjustedBrightness(lux);
             if (mLoggingEnabled) {
@@ -910,6 +927,11 @@ public abstract class BrightnessMappingStrategy {
         @Override
         public float convertToNits(float brightness) {
             return mBrightnessToNitsSpline.interpolate(brightness);
+        }
+
+        @Override
+        public float convertToFloatScale(float nits) {
+            return mNitsToBrightnessSpline.interpolate(nits);
         }
 
         @Override

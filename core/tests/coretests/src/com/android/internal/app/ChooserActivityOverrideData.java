@@ -53,7 +53,7 @@ public class ChooserActivityOverrideData {
 
     @SuppressWarnings("Since15")
     public Function<PackageManager, PackageManager> createPackageManager;
-    public Function<TargetInfo, Boolean> onSafelyStartCallback;
+    public Function<TargetInfo, Boolean> onSafelyStartInternalCallback;
     public Function<ChooserListAdapter, Void> onQueryDirectShareTargets;
     public BiFunction<
             IChooserWrapper, ChooserListAdapter, Pair<Integer, ChooserActivity.ServiceResultInfo[]>>
@@ -82,7 +82,7 @@ public class ChooserActivityOverrideData {
     public PackageManager packageManager;
 
     public void reset() {
-        onSafelyStartCallback = null;
+        onSafelyStartInternalCallback = null;
         onQueryDirectShareTargets = null;
         directShareTargets = null;
         isVoiceInteraction = null;

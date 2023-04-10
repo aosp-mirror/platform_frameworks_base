@@ -35,9 +35,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.Log;
-import android.view.Display;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -51,6 +49,8 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -58,12 +58,12 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.util.Assert;
 
+import dagger.Lazy;
+
 import java.util.Locale;
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Class to register system actions with accessibility framework.
@@ -178,7 +178,9 @@ public class SystemActions implements CoreStartable {
 
     private final SystemActionsBroadcastReceiver mReceiver;
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final Optional<Recents> mRecentsOptional;
+    private final DisplayTracker mDisplayTracker;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -189,13 +191,17 @@ public class SystemActions implements CoreStartable {
 
     @Inject
     public SystemActions(Context context,
+            UserTracker userTracker,
             NotificationShadeWindowController notificationShadeController,
             ShadeController shadeController,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            Optional<Recents> recentsOptional) {
+            Optional<Recents> recentsOptional,
+            DisplayTracker displayTracker) {
         mContext = context;
+        mUserTracker = userTracker;
         mShadeController = shadeController;
         mRecentsOptional = recentsOptional;
+        mDisplayTracker = displayTracker;
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
         mA11yManager = (AccessibilityManager) mContext.getSystemService(
@@ -204,7 +210,8 @@ public class SystemActions implements CoreStartable {
         // Saving in instance variable since to prevent GC since
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
         mNotificationShadeCallback =
-                (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing, panelExpanded) ->
+                (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, mDozing,
+                        panelExpanded, isDreaming) ->
                         registerOrUnregisterDismissNotificationShadeAction();
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
@@ -466,7 +473,7 @@ public class SystemActions implements CoreStartable {
         KeyEvent event = KeyEvent.obtain(downTime, time, action, keyCode, 0, 0,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM,
                 InputDevice.SOURCE_KEYBOARD, null);
-        InputManager.getInstance()
+        mContext.getSystemService(InputManager.class)
                 .injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         event.recycle();
     }
@@ -519,7 +526,7 @@ public class SystemActions implements CoreStartable {
 
     private void handleAccessibilityButton() {
         AccessibilityManager.getInstance(mContext).notifyAccessibilityButtonClicked(
-                Display.DEFAULT_DISPLAY);
+                mDisplayTracker.getDefaultDisplayId());
     }
 
     private void handleAccessibilityButtonChooser() {
@@ -527,7 +534,7 @@ public class SystemActions implements CoreStartable {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         final String chooserClassName = AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
     }
 
     private void handleAccessibilityShortcut() {

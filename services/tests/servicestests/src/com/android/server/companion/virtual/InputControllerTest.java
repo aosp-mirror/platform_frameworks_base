@@ -18,17 +18,17 @@ package com.android.server.companion.virtual;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -87,7 +87,7 @@ public class InputControllerTest {
 
         // Allow virtual devices to be created on the looper thread for testing.
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
-        mInputController = new InputController(new Object(), mNativeWrapperMock,
+        mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 InstrumentationRegistry.getTargetContext().getSystemService(WindowManager.class),
                 threadVerifier);
@@ -109,7 +109,7 @@ public class InputControllerTest {
                 device1Id).isNotEqualTo(device2Id);
 
 
-        int[] deviceIds = InputManager.getInstance().getInputDeviceIds();
+        int[] deviceIds = InputManagerGlobal.getInstance().getInputDeviceIds();
         assertWithMessage("InputManager's deviceIds list should contain id of device 1").that(
                 deviceIds).asList().contains(device1Id);
         assertWithMessage("InputManager's deviceIds list should contain id of device 2").that(
@@ -133,14 +133,14 @@ public class InputControllerTest {
     @Test
     public void unregisterInputDevice_anotherMouseExists_setPointerDisplayIdOverride() {
         final IBinder deviceToken = new Binder();
-        mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
+        mInputController.createMouse("mouse1", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
-        verify(mNativeWrapperMock).openUinputMouse(eq("name"), eq(1), eq(1), anyString());
+        verify(mNativeWrapperMock).openUinputMouse(eq("mouse1"), eq(1), eq(1), anyString());
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
         final IBinder deviceToken2 = new Binder();
-        mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken2,
+        mInputController.createMouse("mouse2", /*vendorId= */ 1, /*productId= */ 1, deviceToken2,
                 /* displayId= */ 2);
-        verify(mNativeWrapperMock, times(2)).openUinputMouse(eq("name"), eq(1), eq(1), anyString());
+        verify(mNativeWrapperMock).openUinputMouse(eq("mouse2"), eq(1), eq(1), anyString());
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(2));
         mInputController.unregisterInputDevice(deviceToken);
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
@@ -153,7 +153,7 @@ public class InputControllerTest {
                 deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
 
         int deviceId = mInputController.getInputDeviceId(deviceToken);
-        int[] deviceIds = InputManager.getInstance().getInputDeviceIds();
+        int[] deviceIds = InputManagerGlobal.getInstance().getInputDeviceIds();
 
         assertWithMessage("InputManager's deviceIds list should contain id of the device").that(
             deviceIds).asList().contains(deviceId);
@@ -192,5 +192,69 @@ public class InputControllerTest {
 
         mInputController.unregisterInputDevice(deviceToken);
         verify(mInputManagerInternalMock).removeKeyboardLayoutAssociation(anyString());
+    }
+
+    @Test
+    public void createInputDevice_tooLongNameRaisesException() {
+        final IBinder deviceToken = new Binder("device");
+        // The underlying uinput implementation only supports device names up to 80 bytes. This
+        // string is all ASCII characters, therefore if we have more than 80 ASCII characters we
+        // will have more than 80 bytes.
+        String deviceName =
+                "This.is.a.very.long.device.name.that.exceeds.the.maximum.length.of.80.bytes"
+                        + ".by.a.couple.bytes";
+
+        assertThrows(RuntimeException.class, () -> {
+            mInputController.createDpad(deviceName, /*vendorId= */3, /*productId=*/3, deviceToken,
+                    1);
+        });
+    }
+
+    @Test
+    public void createInputDevice_tooLongDeviceNameRaisesException() {
+        final IBinder deviceToken = new Binder("device");
+        // The underlying uinput implementation only supports device names up to 80 bytes (including
+        // a 0-byte terminator).
+        // This string is 79 characters and 80 bytes (including the 0-byte terminator)
+        String deviceName =
+                "This.is.a.very.long.device.name.that.exceeds.the.maximum.length01234567890123456";
+
+        assertThrows(RuntimeException.class, () -> {
+            mInputController.createDpad(deviceName, /*vendorId= */3, /*productId=*/3, deviceToken,
+                    1);
+        });
+    }
+
+    @Test
+    public void createInputDevice_stringWithLessThanMaxCharsButMoreThanMaxBytesRaisesException() {
+        final IBinder deviceToken = new Binder("device1");
+
+        // Has only 39 characters but is 109 bytes as utf-8
+        String device_name =
+                "░▄▄▄▄░\n" +
+                "▀▀▄██►\n" +
+                "▀▀███►\n" +
+                "░▀███►░█►\n" +
+                "▒▄████▀▀";
+
+        assertThrows(RuntimeException.class, () -> {
+            mInputController.createDpad(device_name, /*vendorId= */5, /*productId=*/5,
+                    deviceToken, 1);
+        });
+    }
+
+    @Test
+    public void createInputDevice_duplicateNamesAreNotAllowed() {
+        final IBinder deviceToken1 = new Binder("deviceToken1");
+        final IBinder deviceToken2 = new Binder("deviceToken2");
+
+        final String sharedDeviceName = "DeviceName";
+
+        mInputController.createDpad(sharedDeviceName, /*vendorId= */4, /*productId=*/4,
+                deviceToken1, 1);
+        assertThrows("Device names need to be unique", RuntimeException.class, () -> {
+            mInputController.createDpad(sharedDeviceName, /*vendorId= */5, /*productId=*/5,
+                    deviceToken2, 2);
+        });
     }
 }

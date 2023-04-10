@@ -478,7 +478,7 @@ public final class TextLinks implements Parcelable {
             /**
              * Sets the entity configuration to use. This determines what types of entities the
              * TextClassifier will look for.
-             * Set to {@code null} for the default entity config and teh TextClassifier will
+             * Set to {@code null} for the default entity config and the TextClassifier will
              * automatically determine what links to generate.
              *
              * @return this builder

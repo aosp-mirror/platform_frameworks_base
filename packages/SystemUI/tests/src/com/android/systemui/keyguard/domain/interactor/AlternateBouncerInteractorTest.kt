@@ -16,15 +16,18 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeBiometricRepository
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,42 +37,44 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class AlternateBouncerInteractorTest : SysuiTestCase() {
     private lateinit var underTest: AlternateBouncerInteractor
     private lateinit var bouncerRepository: KeyguardBouncerRepository
-    private lateinit var biometricRepository: FakeBiometricRepository
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
+    private lateinit var deviceEntryFingerprintAuthRepository:
+        FakeDeviceEntryFingerprintAuthRepository
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var systemClock: SystemClock
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var bouncerLogger: TableLogBuffer
-    private lateinit var featureFlags: FakeFeatureFlags
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         bouncerRepository =
-            KeyguardBouncerRepository(
+            KeyguardBouncerRepositoryImpl(
                 mock(ViewMediatorCallback::class.java),
                 FakeSystemClock(),
                 TestCoroutineScope(),
                 bouncerLogger,
             )
-        biometricRepository = FakeBiometricRepository()
-        featureFlags = FakeFeatureFlags().apply { this.set(Flags.MODERN_ALTERNATE_BOUNCER, true) }
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
+        deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
         underTest =
             AlternateBouncerInteractor(
+                statusBarStateController,
+                keyguardStateController,
                 bouncerRepository,
-                biometricRepository,
+                biometricSettingsRepository,
+                deviceEntryFingerprintAuthRepository,
                 systemClock,
-                keyguardUpdateMonitor,
-                featureFlags,
             )
     }
 
@@ -90,7 +95,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_noFingerprintsEnrolled() {
         givenCanShowAlternateBouncer()
-        biometricRepository.setFingerprintEnrolled(false)
+        biometricSettingsRepository.setFingerprintEnrolled(false)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -98,7 +103,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_strongBiometricNotAllowed() {
         givenCanShowAlternateBouncer()
-        biometricRepository.setStrongBiometricAllowed(false)
+        biometricSettingsRepository.setStrongBiometricAllowed(false)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -106,7 +111,15 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_devicePolicyDoesNotAllowFingerprint() {
         givenCanShowAlternateBouncer()
-        biometricRepository.setFingerprintEnabledByDevicePolicy(false)
+        biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(false)
+
+        assertFalse(underTest.canShowAlternateBouncerForFingerprint())
+    }
+
+    @Test
+    fun canShowAlternateBouncerForFingerprint_fingerprintLockedOut() {
+        givenCanShowAlternateBouncer()
+        deviceEntryFingerprintAuthRepository.setLockedOut(true)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -116,7 +129,15 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         givenCanShowAlternateBouncer()
 
         assertTrue(underTest.show())
-        assertTrue(bouncerRepository.isAlternateBouncerVisible.value)
+        assertTrue(bouncerRepository.alternateBouncerVisible.value)
+    }
+
+    @Test
+    fun canShowAlternateBouncerForFingerprint_butCanDismissLockScreen() {
+        givenCanShowAlternateBouncer()
+        whenever(keyguardStateController.isUnlocked).thenReturn(true)
+
+        assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
 
     @Test
@@ -124,7 +145,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         givenCannotShowAlternateBouncer()
 
         assertFalse(underTest.show())
-        assertFalse(bouncerRepository.isAlternateBouncerVisible.value)
+        assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
     @Test
@@ -132,7 +153,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         bouncerRepository.setAlternateVisible(true)
 
         assertTrue(underTest.hide())
-        assertFalse(bouncerRepository.isAlternateBouncerVisible.value)
+        assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
     @Test
@@ -140,17 +161,19 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         bouncerRepository.setAlternateVisible(false)
 
         assertFalse(underTest.hide())
-        assertFalse(bouncerRepository.isAlternateBouncerVisible.value)
+        assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
     private fun givenCanShowAlternateBouncer() {
         bouncerRepository.setAlternateBouncerUIAvailable(true)
-        biometricRepository.setFingerprintEnrolled(true)
-        biometricRepository.setStrongBiometricAllowed(true)
-        biometricRepository.setFingerprintEnabledByDevicePolicy(true)
+        biometricSettingsRepository.setFingerprintEnrolled(true)
+        biometricSettingsRepository.setStrongBiometricAllowed(true)
+        biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(true)
+        deviceEntryFingerprintAuthRepository.setLockedOut(false)
+        whenever(keyguardStateController.isUnlocked).thenReturn(false)
     }
 
     private fun givenCannotShowAlternateBouncer() {
-        biometricRepository.setFingerprintEnrolled(false)
+        biometricSettingsRepository.setFingerprintEnrolled(false)
     }
 }

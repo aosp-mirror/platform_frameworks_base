@@ -575,9 +575,15 @@ public class Utils {
 
     /** Get the corresponding adaptive icon drawable. */
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
+        UserManager um = context.getSystemService(UserManager.class);
+        boolean isClone = um.getProfiles(user.getIdentifier()).stream()
+                .anyMatch(profile ->
+                        profile.isCloneProfile() && profile.id == user.getIdentifier());
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
             return iconFactory
-                    .createBadgedIconBitmap(icon, new IconOptions().setUser(user))
+                    .createBadgedIconBitmap(
+                            icon,
+                            new IconOptions().setUser(user).setIsCloneProfile(isClone))
                     .newIcon(context);
         }
     }

@@ -20,6 +20,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -39,9 +40,8 @@ import android.util.SparseArray;
 
 import androidx.test.annotation.UiThreadTest;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.internal.widget.LockSettingsInternal;
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.am.UserState;
 import com.android.server.pm.UserManagerService.UserData;
@@ -49,13 +49,14 @@ import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
 /**
  * Run as {@code atest FrameworksMockingServicesTests:com.android.server.pm.UserManagerServiceTest}
  */
-public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
+public final class UserManagerServiceTest {
 
     private static final String TAG = UserManagerServiceTest.class.getSimpleName();
 
@@ -83,6 +84,13 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
      */
     private static final int PROFILE_USER_ID = 643;
 
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .spyStatic(UserManager.class)
+            .spyStatic(LocalServices.class)
+            .mockStatic(Settings.Global.class)
+            .build();
+
     private final Object mPackagesLock = new Object();
     private final Context mRealContext = androidx.test.InstrumentationRegistry.getInstrumentation()
             .getTargetContext();
@@ -107,14 +115,6 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
      * Reference to the {@link UserManagerInternal} being tested.
      */
     private UserManagerInternal mUmi;
-
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder
-                .spyStatic(UserManager.class)
-                .spyStatic(LocalServices.class)
-                .mockStatic(Settings.Global.class);
-    }
 
     @Before
     @UiThreadTest // Needed to initialize main handler
@@ -260,7 +260,7 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         mUms.setBootUser(OTHER_USER_ID);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
     }
 
     @Test
@@ -273,7 +273,8 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         mUms.setBootUser(PROFILE_USER_ID);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false))
+                .isEqualTo(UserHandle.USER_SYSTEM);
     }
 
     @Test
@@ -289,7 +290,7 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
 
         // Boot user not switchable so return most recently in foreground.
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
     }
 
     @Test
@@ -299,7 +300,8 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         addUser(OTHER_USER_ID);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false))
+                .isEqualTo(UserHandle.USER_SYSTEM);
     }
 
     @Test
@@ -312,25 +314,15 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
     }
 
     @Test
-    public void testGetBootUser_Headless_UserCreatedIfOnlySystemUserExists() throws Exception {
+    public void testGetBootUser_Headless_ThrowsIfOnlySystemUserExists() throws Exception {
         setSystemUserHeadless(true);
 
-        int bootUser = mUmi.getBootUser();
-
-        assertWithMessage("getStartingUser")
-                .that(bootUser).isNotEqualTo(UserHandle.USER_SYSTEM);
-
-        UserData newUser = mUsers.get(bootUser);
-        assertWithMessage("New boot user is a full user")
-                .that(newUser.info.isFull()).isTrue();
-        assertWithMessage("New boot user is an admin user")
-                .that(newUser.info.isAdmin()).isTrue();
-        assertWithMessage("New boot user is the main user")
-                .that(newUser.info.isMain()).isTrue();
+        assertThrows(UserManager.CheckedUserOperationException.class,
+                () -> mUmi.getBootUser(/* waitUntilSet= */ false));
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {

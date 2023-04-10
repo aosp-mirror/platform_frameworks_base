@@ -19,11 +19,12 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.SystemClock
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject.Companion.assertThat
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import com.android.test.SurfaceViewBufferTestBase.Companion.ScalingMode
 import com.android.test.SurfaceViewBufferTestBase.Companion.Transform
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -43,7 +44,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
         }
 
         // verify buffer size is reset to default buffer size
-        assertThat(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
+        LayersTraceSubject(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
     }
 
     @Test
@@ -56,7 +57,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
             activity.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */)
         }
 
-        assertThat(trace).layer("SurfaceView", 1).also {
+        LayersTraceSubject(trace).layer("SurfaceView", 1).also {
             it.hasBufferSize(bufferSize)
             it.hasLayerSize(defaultBufferSize)
             it.hasScalingMode(ScalingMode.SCALE_TO_WINDOW.ordinal)
@@ -73,7 +74,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
             activity.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */)
         }
 
-        assertThat(trace).layer("SurfaceView", 1).also {
+        LayersTraceSubject(trace).layer("SurfaceView", 1).also {
             it.hasBufferSize(bufferSize)
             it.hasLayerSize(defaultBufferSize)
             it.hasScalingMode(ScalingMode.SCALE_TO_WINDOW.ordinal)
@@ -102,9 +103,11 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
         }
 
         // verify buffer size is reset to default buffer size
-        assertThat(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
-        assertThat(trace).layer("SurfaceView", 2).doesNotExist()
-        assertThat(trace).layer("SurfaceView", 3).hasBufferSize(bufferSize)
+        LayersTraceSubject(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
+        Assert.assertThrows(AssertionError::class.java) {
+            LayersTraceSubject(trace).layer("SurfaceView", 2)
+        }
+        LayersTraceSubject(trace).layer("SurfaceView", 3).hasBufferSize(bufferSize)
     }
 
     @Test
@@ -118,7 +121,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
                 activity.mSurfaceProxy.waitUntilBufferDisplayed(index + 1L, 500 /* ms */)
             }
 
-            assertThat(trace).layer("SurfaceView", index + 1L).also {
+            LayersTraceSubject(trace).layer("SurfaceView", index + 1L).also {
                 it.hasBufferSize(defaultBufferSize)
                 it.hasLayerSize(defaultBufferSize)
                 it.hasBufferOrientation(transform.value)
@@ -145,7 +148,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
         }
 
         // check that the layer and buffer starts with the default size
-        assertThat(trace).layer("SurfaceView", 1).also {
+        LayersTraceSubject(trace).layer("SurfaceView", 1).also {
             it.hasBufferSize(defaultBufferSize)
             it.hasLayerSize(defaultBufferSize)
         }
@@ -169,7 +172,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
             checkPixels(svBounds, Color.BLUE)
         }
 
-        assertThat(trace).layer("SurfaceView", 1).also {
+        LayersTraceSubject(trace).layer("SurfaceView", 1).also {
             it.hasLayerSize(newSize)
             it.hasBufferSize(defaultBufferSize)
         }
@@ -193,7 +196,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
         }
 
         // check that the layer and buffer starts with the default size
-        assertThat(trace).layer("SurfaceView", 1).also {
+        LayersTraceSubject(trace).layer("SurfaceView", 1).also {
             it.hasBufferSize(defaultBufferSize)
             it.hasLayerSize(defaultBufferSize)
         }
@@ -216,7 +219,7 @@ class GeometryTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastA
             checkPixels(svBounds, Color.BLUE)
         }
 
-        assertThat(trace).layer("SurfaceView", 1).also {
+        LayersTraceSubject(trace).layer("SurfaceView", 1).also {
             it.hasLayerSize(defaultBufferSize)
             it.hasBufferSize(defaultBufferSize)
         }

@@ -918,6 +918,10 @@
         <attr name="actionModeFindDrawable" format="reference" />
         <!-- Drawable to use for the Web Search action button in WebView selection action modes. -->
         <attr name="actionModeWebSearchDrawable" format="reference" />
+        <!-- Drawable to use for the Undo action button in WebView selection action modes. -->
+        <attr name="actionModeUndoDrawable" format="reference" />
+        <!-- Drawable to use for the Redo action button in WebView selection action modes. -->
+        <attr name="actionModeRedoDrawable" format="reference" />
 
         <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
         <attr name="actionModePopupWindowStyle" format="reference" />
@@ -1210,6 +1214,128 @@
              a value of 'true' will not override any 'false' value in its parent chain nor will
              it prevent any 'false' in any of its children. -->
         <attr name="forceDarkAllowed" format="boolean" />
+
+        <!-- A lower-emphasized variant of the color on the fixed secondary branding color. @hide
+             -->
+        <attr name="materialColorOnSecondaryFixedVariant" format="color"/>
+        <!-- A lower-emphasized variant of the color on the fixed tertiary branding color. @hide
+             -->
+        <attr name="materialColorOnTertiaryFixedVariant" format="color"/>
+        <!-- The container color of surface the most lowered. @hide -->
+        <attr name="materialColorSurfaceContainerLowest" format="color"/>
+        <!-- A lower-emphasized variant of the color on the fixed primary branding color. @hide -->
+        <attr name="materialColorOnPrimaryFixedVariant" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the secondary container color. @hide -->
+        <attr name="materialColorOnSecondaryContainer" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the tertiary container color. @hide -->
+        <attr name="materialColorOnTertiaryContainer" format="color"/>
+        <!-- The container color of surface slightly lowered, which replaces the previous surface
+             at elevation level 1. @hide -->
+        <attr name="materialColorSurfaceContainerLow" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the primary container color. @hide -->
+        <attr name="materialColorOnPrimaryContainer" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed secondary branding color. @hide -->
+        <attr name="materialColorSecondaryFixedDim" format="color"/>
+        <!-- A tonal variation of the on error color that passes accessibility guidelines for
+             text/iconography when drawn on top of error container. @hide -->
+        <attr name="materialColorOnErrorContainer" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed secondary branding color.
+             @hide -->
+        <attr name="materialColorOnSecondaryFixed" format="color"/>
+        <!-- The "on surface" inverse color, useful for inverted backgrounds. @hide -->
+        <attr name="materialColorOnSurfaceInverse" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed tertiary branding color. @hide -->
+        <attr name="materialColorTertiaryFixedDim" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed tertiary branding color.
+             @hide -->
+        <attr name="materialColorOnTertiaryFixed" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed primary branding color. @hide -->
+        <attr name="materialColorPrimaryFixedDim" format="color"/>
+        <!-- A tonal variation of the secondary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorSecondaryContainer" format="color"/>
+        <!-- A tonal variation of the error color suitable for background color of container views.
+             @hide -->
+        <attr name="materialColorErrorContainer" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed primary branding color.
+             @hide -->
+        <attr name="materialColorOnPrimaryFixed" format="color"/>
+        <!-- The inverse color of colorPrimary. @hide -->
+        <attr name="materialColorPrimaryInverse" format="color"/>
+        <!-- A secondary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorSecondaryFixed" format="color"/>
+        <!-- The surface inverse color, useful for inverted backgrounds. @hide -->
+        <attr name="materialColorSurfaceInverse" format="color"/>
+        <!-- A tonal variation of the surface color. @hide -->
+        <attr name="materialColorSurfaceVariant" format="color"/>
+        <!-- A tonal variation of the tertiary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorTertiaryContainer" format="color"/>
+        <!-- A tertiary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorTertiaryFixed" format="color"/>
+        <!-- A tonal variation of the primary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorPrimaryContainer" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             background. @hide -->
+        <attr name="materialColorOnBackground" format="color"/>
+        <!-- A primary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorPrimaryFixed" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             secondary. @hide -->
+        <attr name="materialColorOnSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             tertiary. @hide -->
+        <attr name="materialColorOnTertiary" format="color"/>
+        <!-- The surface color which always stay the dimmest in either dark or light theme. @hide
+             -->
+        <attr name="materialColorSurfaceDim" format="color"/>
+        <!-- The surface color which always stay the brightest in either dark or light theme. @hide
+             -->
+        <attr name="materialColorSurfaceBright" format="color"/>
+        <!-- The secondary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             error. @hide -->
+        <attr name="materialColorOnError" format="color"/>
+        <!-- The color of surfaces such as cards, sheets, menus. @hide -->
+        <attr name="materialColorSurface" format="color"/>
+        <!-- The container color of surface slightly elevated, which replaces the previous surface
+             at elevation level 3. @hide -->
+        <attr name="materialColorSurfaceContainerHigh" format="color"/>
+        <!-- The tertiary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorTertiary" format="color"/>
+        <!-- The container color of surface the most elevated, which replaces the previous surface
+             variant. @hide -->
+        <attr name="materialColorSurfaceContainerHighest" format="color"/>
+        <!-- A tonal variation of the on surface color that passes accessibility guidelines for
+             text/iconography when drawn on top of surface variant. @hide -->
+        <attr name="materialColorOnSurfaceVariant" format="color"/>
+        <!-- A color meant to be used in element outlines. @hide -->
+        <attr name="materialColorOutline" format="color"/>
+        <!-- A color meant to be used in element outlines on the surface-variant color. @hide -->
+        <attr name="materialColorOutlineVariant" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             primary. @hide -->
+        <attr name="materialColorOnPrimary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             surface. @hide -->
+        <attr name="materialColorOnSurface" format="color"/>
+        <!-- The container color of surface, which replaces the previous surface at elevation level
+             2. @hide -->
+        <attr name="materialColorSurfaceContainer" format="color"/>
+        <!-- The container color of surface, which replaces the previous surface at elevation level
+             2. @hide -->
+        <attr name="materialColorSurfaceContainer" format="color"/>
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2221,6 +2347,10 @@
         <!-- Elevation to use for the window. -->
         <attr name="windowElevation" format="dimension" />
 
+        <!-- Flag indicating whether this window should skip movement animations.
+             See also {@link android.view.WindowManager.LayoutParams#setCanPlayMoveAnimation} -->
+        <attr name="windowNoMoveAnimation" format="boolean" />
+
         <!-- Whether to clip window content to the outline of the window background. -->
         <attr name="windowClipToOutline" format="boolean" />
 
@@ -3081,8 +3211,8 @@
 
         <!-- Describes whether this view should allow interactions from AccessibilityServices only
              if the service sets the isAccessibilityTool property. -->
-        <attr name="accessibilityDataPrivate" format="integer">
-            <!-- The system determines whether the view's accessibility data is private
+        <attr name="accessibilityDataSensitive" format="integer">
+            <!-- The system determines whether the view's accessibility data is sensitive
                  - default (recommended). -->
             <enum name="auto" value="0" />
             <!-- Allow interactions from AccessibilityServices only if the service sets the
@@ -3765,6 +3895,9 @@
             {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
         -->
         <attr name="supportsStylusHandwriting" format="boolean" />
+        <!-- Class name of an activity that allows the user to modify the stylus handwriting
+            settings for this service -->
+        <attr name="stylusHandwritingSettingsActivity" format="string" />
 
     </declare-styleable>
 
@@ -9959,5 +10092,28 @@
         <attr name="maxDrawableWidth" format="dimension"/>
         <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
         <attr name="maxDrawableHeight" format="dimension"/>
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Credential Manager attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Contains Credential Provider related metadata. Since providers are exposed
+         as services these should live under the service.
+    -->
+    <declare-styleable name="CredentialProvider">
+        <!-- A string that is displayed to the user in the Credential Manager settings
+             screen that can be used to provide more information about a provider. For
+             longer strings (40 char) it will be truncated. If multiple services
+             show the subtitle then the string will be joined together. -->
+        <attr name="settingsSubtitle" format="string" />
+    </declare-styleable>
+
+    <!-- A list of capabilities that indicates to the OS what kinds of credentials
+             this provider supports. This list is defined in CredentialProviderService. -->
+    <declare-styleable name="CredentialProvider_Capabilities" parent="CredentialProvider">
+        <!-- An individual capability declared by the provider. -->
+        <attr name="capability" format="string" />
     </declare-styleable>
     </resources>

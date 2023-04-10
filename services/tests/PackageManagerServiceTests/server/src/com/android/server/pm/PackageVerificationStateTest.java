@@ -95,9 +95,13 @@ public class PackageVerificationStateTest extends AndroidTestCase {
 
         state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_REJECT);
 
-        assertFalse("Verification should not be marked as complete yet",
+        assertTrue("Verification should be considered complete now",
                 state.isVerificationComplete());
 
+        assertFalse("Installation should be marked as denied",
+                state.isInstallAllowed());
+
+        // Nothing changes.
         state.setVerifierResponse(REQUIRED_UID_2, PackageManager.VERIFICATION_REJECT);
 
         assertTrue("Verification should be considered complete now",
@@ -117,9 +121,13 @@ public class PackageVerificationStateTest extends AndroidTestCase {
 
         state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_REJECT);
 
-        assertFalse("Verification should not be marked as complete yet",
+        assertTrue("Verification should be considered complete now",
                 state.isVerificationComplete());
 
+        assertFalse("Installation should be marked as denied",
+                state.isInstallAllowed());
+
+        // Nothing changes.
         state.setVerifierResponse(REQUIRED_UID_2, PackageManager.VERIFICATION_ALLOW);
 
         assertTrue("Verification should be considered complete now",
@@ -143,6 +151,162 @@ public class PackageVerificationStateTest extends AndroidTestCase {
                 state.isVerificationComplete());
 
         state.setVerifierResponse(REQUIRED_UID_2, PackageManager.VERIFICATION_REJECT);
+
+        assertTrue("Verification should be considered complete now",
+                state.isVerificationComplete());
+
+        assertFalse("Installation should be marked as denied",
+                state.isInstallAllowed());
+    }
+
+    public void testPackageVerificationState_TwoRequiredVerifiers_SecondTimesOut_DefaultAllow() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+        state.addRequiredVerifierUid(REQUIRED_UID_2);
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        // Timeout with default ALLOW.
+        processOnTimeout(state, PackageManager.VERIFICATION_ALLOW, REQUIRED_UID_2, true);
+    }
+
+    public void testPackageVerificationState_TwoRequiredVerifiers_SecondTimesOut_DefaultReject() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+        state.addRequiredVerifierUid(REQUIRED_UID_2);
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        // Timeout with default REJECT.
+        processOnTimeout(state, PackageManager.VERIFICATION_REJECT, REQUIRED_UID_2, false);
+    }
+
+    public void testPackageVerificationState_TwoRequiredVerifiers_FirstTimesOut_DefaultAllow() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+        state.addRequiredVerifierUid(REQUIRED_UID_2);
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        // Timeout with default ALLOW.
+        processOnTimeout(state, PackageManager.VERIFICATION_ALLOW, REQUIRED_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.setVerifierResponse(REQUIRED_UID_2, PackageManager.VERIFICATION_ALLOW);
+
+        assertTrue("Verification should be considered complete now",
+                state.isVerificationComplete());
+
+        assertTrue("Installation should be marked as allowed",
+                state.isInstallAllowed());
+    }
+
+    public void testPackageVerificationState_TwoRequiredVerifiers_FirstTimesOut_DefaultReject() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+        state.addRequiredVerifierUid(REQUIRED_UID_2);
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        // Timeout with default REJECT.
+        processOnTimeout(state, PackageManager.VERIFICATION_REJECT, REQUIRED_UID_1);
+
+        assertTrue("Verification should be considered complete now",
+                state.isVerificationComplete());
+
+        assertFalse("Installation should be marked as denied",
+                state.isInstallAllowed());
+
+        // Nothing changes.
+        state.setVerifierResponse(REQUIRED_UID_2, PackageManager.VERIFICATION_ALLOW);
+
+        assertTrue("Verification should be considered complete now",
+                state.isVerificationComplete());
+
+        assertFalse("Installation should be marked as denied",
+                state.isInstallAllowed());
+    }
+
+    public void testPackageVerificationState_TwoRequiredVerifiers_FirstTimesOut_SecondExtends_DefaultAllow() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+        state.addRequiredVerifierUid(REQUIRED_UID_2);
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.extendTimeout(REQUIRED_UID_2);
+
+        // Timeout with default ALLOW.
+        processOnTimeout(state, PackageManager.VERIFICATION_ALLOW, REQUIRED_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        assertTrue("Timeout is extended",
+                state.timeoutExtended(REQUIRED_UID_2));
+
+        state.setVerifierResponse(REQUIRED_UID_2, PackageManager.VERIFICATION_ALLOW);
+
+        assertTrue("Verification should be considered complete now",
+                state.isVerificationComplete());
+
+        assertTrue("Installation should be marked as allowed",
+                state.isInstallAllowed());
+    }
+
+    public void testPackageVerificationState_TwoRequiredVerifiers_FirstTimesOut_SecondExtends_DefaultReject() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+        state.addRequiredVerifierUid(REQUIRED_UID_2);
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.extendTimeout(REQUIRED_UID_2);
+
+        // Timeout with default REJECT.
+        processOnTimeout(state, PackageManager.VERIFICATION_REJECT, REQUIRED_UID_1);
+
+        assertFalse("Timeout should not be extended for this verifier",
+                state.timeoutExtended(REQUIRED_UID_2));
+
+        assertTrue("Verification should be considered complete now",
+                state.isVerificationComplete());
+
+        assertFalse("Installation should be marked as denied",
+                state.isInstallAllowed());
+
+        // Nothing changes.
+        state.setVerifierResponse(REQUIRED_UID_2, PackageManager.VERIFICATION_ALLOW);
 
         assertTrue("Verification should be considered complete now",
                 state.isVerificationComplete());
@@ -229,6 +393,66 @@ public class PackageVerificationStateTest extends AndroidTestCase {
 
         assertFalse("Installation should be marked as rejected",
                 state.isInstallAllowed());
+    }
+
+    public void testPackageVerificationState_RequiredAllow_SufficientTimesOut_DefaultAllow() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        // Required allows.
+        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
+
+        // Timeout with default ALLOW.
+        processOnTimeout(state, PackageManager.VERIFICATION_ALLOW, REQUIRED_UID_1, true);
+    }
+
+    public void testPackageVerificationState_RequiredExtendAllow_SufficientTimesOut_DefaultAllow() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        // Extend first.
+        state.extendTimeout(REQUIRED_UID_1);
+
+        // Required allows.
+        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
+
+        // Timeout with default ALLOW.
+        processOnTimeout(state, PackageManager.VERIFICATION_ALLOW, REQUIRED_UID_1, true);
+    }
+
+    public void testPackageVerificationState_RequiredAllow_SufficientTimesOut_DefaultReject() {
+        PackageVerificationState state = new PackageVerificationState(null);
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+
+        // Required allows.
+        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
+
+        // Timeout with default REJECT.
+        processOnTimeout(state, PackageManager.VERIFICATION_REJECT, REQUIRED_UID_1, true);
     }
 
     public void testPackageVerificationState_RequiredAndTwoSufficient_OneSufficientIsEnough() {
@@ -399,5 +623,26 @@ public class PackageVerificationStateTest extends AndroidTestCase {
         state.setIntegrityVerificationResult(PackageManagerInternal.INTEGRITY_VERIFICATION_REJECT);
 
         assertFalse(state.areAllVerificationsComplete());
+    }
+
+    private void processOnTimeout(PackageVerificationState state, int code, int uid) {
+        // CHECK_PENDING_VERIFICATION handler.
+        assertFalse("Verification should not be marked as complete yet",
+                state.isVerificationComplete());
+        assertFalse("Timeout should not be extended for this verifier",
+                state.timeoutExtended(uid));
+
+        PackageVerificationResponse response = new PackageVerificationResponse(code, uid);
+        VerificationUtils.processVerificationResponseOnTimeout(-1, state, response, null);
+    }
+
+    private void processOnTimeout(PackageVerificationState state, int code, int uid,
+            boolean expectAllow) {
+        processOnTimeout(state, code, uid);
+
+        assertTrue("Verification should be considered complete now",
+                state.isVerificationComplete());
+        assertEquals("Installation should be marked as " + (expectAllow ? "allowed" : "rejected"),
+                expectAllow, state.isInstallAllowed());
     }
 }

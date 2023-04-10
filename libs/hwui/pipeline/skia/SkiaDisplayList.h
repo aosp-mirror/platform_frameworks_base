@@ -18,11 +18,11 @@
 
 #include <deque>
 
+#include "Mesh.h"
 #include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
 #include "hwui/AnimatedImageDrawable.h"
-#include "hwui/LottieDrawable.h"
 #include "utils/LinearAllocator.h"
 #include "utils/Pair.h"
 
@@ -168,6 +168,7 @@ public:
     std::deque<RenderNodeDrawable> mChildNodes;
     std::deque<FunctorDrawable*> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
+    std::vector<const Mesh*> mMeshes;
 
 private:
     std::vector<Pair<VectorDrawableRoot*, SkMatrix>> mVectorDrawables;
@@ -187,8 +188,6 @@ public:
         return mHasHolePunches;
     }
 
-    // TODO(b/257304231): create common base class for Lotties and AnimatedImages
-    std::vector<LottieDrawable*> mLotties;
     std::vector<AnimatedImageDrawable*> mAnimatedImages;
     DisplayListData mDisplayList;
 

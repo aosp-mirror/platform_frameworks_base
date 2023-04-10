@@ -679,8 +679,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_PROFILEABLE_BY_SHELL = 1 << 23;
 
     /**
-     * Indicates whether this package requires access to non-SDK APIs.
-     * Only system apps and tests are allowed to use this property.
+     * Indicates whether this application has declared its user data as fragile,
+     * causing the system to prompt the user on whether to keep the user data
+     * on uninstall.
      * @hide
      */
     public static final int PRIVATE_FLAG_HAS_FRAGILE_USER_DATA = 1 << 24;
@@ -2576,7 +2577,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Returns whether attributions provided by the application are meant to be user-visible.
      * Defaults to false if application info is retrieved without
-     * {@link PackageManager#GET_ATTRIBUTIONS}.
+     * {@link PackageManager#GET_ATTRIBUTIONS_LONG}.
      */
     public boolean areAttributionsUserVisible() {
         return (privateFlagsExt & PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE) != 0;

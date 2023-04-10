@@ -22,7 +22,7 @@ import com.android.internal.telephony.IWwanSelectorCallback;
 
 interface ITransportSelectorCallback {
     oneway void onCreated(in IDomainSelector selector);
-    oneway void onWlanSelected();
+    oneway void onWlanSelected(boolean useEmergencyPdn);
     IWwanSelectorCallback onWwanSelected();
     oneway void onWwanSelectedAsync(in ITransportSelectorResultCallback cb);
     oneway void onSelectionTerminated(int cause);

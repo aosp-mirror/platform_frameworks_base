@@ -29,7 +29,11 @@ enum class MultiUserActionsEvent(val value: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "Switch to  Guest User tap from User Switcher.")
     SWITCH_TO_GUEST_FROM_USER_SWITCHER(1267),
     @UiEvent(doc = "Switch to Restricted User tap from User Switcher.")
-    SWITCH_TO_RESTRICTED_USER_FROM_USER_SWITCHER(1268);
+    SWITCH_TO_RESTRICTED_USER_FROM_USER_SWITCHER(1268),
+    @UiEvent(doc = "Grant admin privileges to user on creation from User Switcher.")
+    GRANT_ADMIN_FROM_USER_SWITCHER_CREATION_DIALOG(1278),
+    @UiEvent(doc = "Not grant admin privileges to user on creation from User Switcher")
+    NOT_GRANT_ADMIN_FROM_USER_SWITCHER_CREATION_DIALOG(1279);
 
     override fun getId(): Int {
         return value

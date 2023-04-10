@@ -32,9 +32,6 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.TaskViewFactory;
-import com.android.wm.shell.TaskViewFactoryController;
-import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.back.BackAnimation;
@@ -42,6 +39,7 @@ import com.android.wm.shell.back.BackAnimationBackground;
 import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.common.DevicePostureController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -51,13 +49,16 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
@@ -78,6 +79,7 @@ import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -88,6 +90,9 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellInterface;
+import com.android.wm.shell.taskview.TaskViewFactory;
+import com.android.wm.shell.taskview.TaskViewFactoryController;
+import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
@@ -159,6 +164,28 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static DevicePostureController provideDevicePostureController(
+            Context context,
+            ShellInit shellInit,
+            @ShellMainThread ShellExecutor mainExecutor
+    ) {
+        return new DevicePostureController(context, shellInit, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static TabletopModeController provideTabletopModeController(
+            Context context,
+            ShellInit shellInit,
+            DevicePostureController postureController,
+            DisplayController displayController,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new TabletopModeController(
+                context, shellInit, postureController, displayController, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
     static DragAndDropController provideDragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
@@ -197,10 +224,11 @@ public abstract class WMShellBaseModule {
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy,
-            DockStateReader dockStateReader) {
+            DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration,
+            CompatUIShellCommandHandler compatUIShellCommandHandler) {
         return new CompatUIController(context, shellInit, shellController, displayController,
                 displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy,
-                dockStateReader);
+                dockStateReader, compatUIConfiguration, compatUIShellCommandHandler);
     }
 
     @WMSingleton
@@ -493,6 +521,9 @@ public abstract class WMShellBaseModule {
                         desktopModeTaskRepository, mainExecutor));
     }
 
+    @BindsOptionalOf
+    abstract RecentsTransitionHandler optionalRecentsTransitionHandler();
+
     //
     // Shell transitions
     //
@@ -776,6 +807,7 @@ public abstract class WMShellBaseModule {
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,
             Optional<RecentTasksController> recentTasksOptional,
+            Optional<RecentsTransitionHandler> recentsTransitionHandlerOptional,
             Optional<OneHandedController> oneHandedControllerOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,

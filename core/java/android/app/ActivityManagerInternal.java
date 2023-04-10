@@ -18,6 +18,7 @@ package android.app;
 
 import static android.app.ActivityManager.StopUserOnSwitch;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
@@ -47,6 +48,8 @@ import android.util.Pair;
 
 import com.android.internal.os.TimeoutRecord;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -464,7 +467,18 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isActivityStartsLoggingEnabled();
     /** Returns true if the background activity starts is enabled. */
     public abstract boolean isBackgroundActivityStartsEnabled();
+    /**
+     * Returns The current {@link BackgroundStartPrivileges} of the UID.
+     */
+    @NonNull
+    public abstract BackgroundStartPrivileges getBackgroundStartPrivileges(int uid);
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
+
+    /**
+     * Returns whether the app is in a state where it is allowed to schedule a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
+     */
+    public abstract boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName);
 
     /** @see com.android.server.am.ActivityManagerService#monitor */
     public abstract void monitor();
@@ -502,6 +516,12 @@ public abstract class ActivityManagerInternal {
      * flags.
      */
     public abstract void broadcastCloseSystemDialogs(String reason);
+
+    /**
+     * Trigger an ANR for the specified process.
+     */
+    public abstract void appNotResponding(@NonNull String processName, int uid,
+            @NonNull TimeoutRecord timeoutRecord);
 
     /**
      * Kills all background processes, except those matching any of the specified properties.
@@ -955,4 +975,83 @@ public abstract class ActivityManagerInternal {
      * @hide
      */
     public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
+
+    /**
+     * Same as {@link android.app.IActivityManager#startProfile(int userId)}, but it would succeed
+     * even if the profile is disabled - it should only be called by
+     * {@link com.android.server.devicepolicy.DevicePolicyManagerService} when starting a profile
+     * while it's being created.
+     */
+    public abstract boolean startProfileEvenWhenDisabled(@UserIdInt int userId);
+
+    /**
+     * Internal method for logging foreground service API journey start.
+     * Used with FGS metrics logging
+     *
+     * @hide
+     */
+    public abstract void logFgsApiBegin(int apiType, int uid, int pid);
+
+    /**
+     * Internal method for logging foreground service API journey end.
+     * Used with FGS metrics logging
+     *
+     * @hide
+     */
+    public abstract void logFgsApiEnd(int apiType, int uid, int pid);
+
+     /**
+     * Temporarily allow foreground service started by an uid to have while-in-use permission
+     * for durationMs.
+     *
+     * @param uid The UID of the app that starts the foreground service.
+     * @param durationMs elapsedRealTime duration in milliseconds.
+     * @hide
+     */
+    public abstract void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
+
+    /**
+     * The list of the events about the {@link android.media.projection.IMediaProjection} itself.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        MEDIA_PROJECTION_TOKEN_EVENT_CREATED,
+        MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED,
+    })
+    public @interface MediaProjectionTokenEvent{};
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been created
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_CREATED = 0;
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been destroyed
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED = 1;
+
+    /**
+     * Called after the system created/destroyed a media projection for an app, if the user
+     * has granted the permission to start a media projection from this app.
+     *
+     * <p>This API is specifically for the use case of enforcing the FGS type
+     * {@code android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION},
+     * where the app who is starting this type of FGS must have been granted with the permission
+     * to start the projection via the {@link android.media.projection.MediaProjection} APIs.
+     *
+     * @param uid The uid of the app which the system created/destroyed a media projection for.
+     * @param projectionToken The {@link android.media.projection.IMediaProjection} token that
+     *                        the system created/destroyed.
+     * @param event The actual event happening to the given {@code projectionToken}.
+     */
+    public abstract void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+            @MediaProjectionTokenEvent int event);
 }

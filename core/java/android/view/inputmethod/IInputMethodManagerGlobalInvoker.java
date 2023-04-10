@@ -25,6 +25,7 @@ import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -33,6 +34,7 @@ import android.view.WindowManager;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
@@ -40,7 +42,6 @@ import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
-import com.android.internal.view.IImeTracker;
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
@@ -505,6 +506,42 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    static void prepareStylusHandwritingDelegation(
+            @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.prepareStylusHandwritingDelegation(
+                    client, userId, delegatePackageName, delegatorPackageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    static boolean acceptStylusHandwritingDelegation(
+            @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return false;
+        }
+        try {
+            return service.acceptStylusHandwritingDelegation(
+                    client, userId, delegatePackageName, delegatorPackageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
         final IInputMethodManager service = getService();
@@ -547,51 +584,57 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onRequestShow */
     @AnyThread
-    @Nullable
-    static IBinder onRequestShow(int uid, @ImeTracker.Origin int origin,
-            @SoftInputShowHideReason int reason) {
+    @NonNull
+    static ImeTracker.Token onRequestShow(@NonNull String tag, int uid,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
-            return null;
+            // Create token with "fake" binder if the service was not found.
+            return new ImeTracker.Token(new Binder(), tag);
         }
         try {
-            return service.onRequestShow(uid, origin, reason);
+            return service.onRequestShow(tag, uid, origin, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onRequestHide */
     @AnyThread
-    @Nullable
-    static IBinder onRequestHide(int uid, @ImeTracker.Origin int origin,
-            @SoftInputShowHideReason int reason) {
+    @NonNull
+    static ImeTracker.Token onRequestHide(@NonNull String tag, int uid,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
-            return null;
+            // Create token with "fake" binder if the service was not found.
+            return new ImeTracker.Token(new Binder(), tag);
         }
         try {
-            return service.onRequestHide(uid, origin, reason);
+            return service.onRequestHide(tag, uid, origin, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onProgress */
     @AnyThread
-    static void onProgress(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+    static void onProgress(@NonNull IBinder binder, @ImeTracker.Phase int phase) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
             return;
         }
         try {
-            service.onProgress(statsToken, phase);
+            service.onProgress(binder, phase);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onFailed */
     @AnyThread
-    static void onFailed(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+    static void onFailed(@NonNull ImeTracker.Token statsToken, @ImeTracker.Phase int phase) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
             return;
@@ -603,8 +646,9 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onCancelled */
     @AnyThread
-    static void onCancelled(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+    static void onCancelled(@NonNull ImeTracker.Token statsToken, @ImeTracker.Phase int phase) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
             return;
@@ -616,8 +660,9 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onShown */
     @AnyThread
-    static void onShown(@NonNull IBinder statsToken) {
+    static void onShown(@NonNull ImeTracker.Token statsToken) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
             return;
@@ -629,8 +674,9 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onHidden */
     @AnyThread
-    static void onHidden(@NonNull IBinder statsToken) {
+    static void onHidden(@NonNull ImeTracker.Token statsToken) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
             return;
@@ -642,6 +688,7 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#hasPendingImeVisibilityRequests */
     @AnyThread
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     static boolean hasPendingImeVisibilityRequests() {

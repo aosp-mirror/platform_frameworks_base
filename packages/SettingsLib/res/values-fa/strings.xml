@@ -183,7 +183,7 @@
     <string name="tts_lang_use_system" msgid="6312945299804012406">"استفاده از زبان سیستم"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"زبان انتخاب نشده است"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"صدای خاص یک زبان را برای متن گفتاری تنظیم می‌کند"</string>
-    <string name="tts_play_example_title" msgid="1599468547216481684">"به نمونه‌ای گوش کنید"</string>
+    <string name="tts_play_example_title" msgid="1599468547216481684">"شنیدن نمونه"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"قسمت کوتاهی از ترکیب گفتار پخش شود"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"نصب داده‌های صوتی"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"نصب داده‌های صوتی مورد نیاز برای ترکیب گفتار"</string>
@@ -268,7 +268,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"برنامه موقعیت مکانی ساختگی: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"شبکه"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری مفصل Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏تصادفی‌سازی MAC غیرپایای Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"نمایش مرزها، حاشیه‌ها و ویژگی‌های دیگر کلیپ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"اجباری کردن چیدمان راست‌چین"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"اجباری کردن چیدمان راست‌چین صفحه برای همه زبان‌ها"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"نوار پیمایش شفاف"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"رنگ پس‌زمینه نوار پیمایش را به‌طور پیش‌فرض شفاف می‌کند"</string>
     <string name="window_blurs" msgid="6831008984828425106">"محو کردن در سطح پنجره"</string>
     <string name="force_msaa" msgid="4081288296137775550">"‏اجبار 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏فعال کردن 4X MSAA در برنامه‌های OpenGL ES 2.0"</string>
@@ -378,7 +380,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پرداز زدن HWUI نمایه"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏فعال کردن لایه‌های اشکال‌زدایی GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏مجاز کردن بارگیری لایه‌های اشکال‌زدایی GPU برای برنامه‌های اشکا‌ل‌زدایی"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش طولانی فروشنده"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش‌گیری مفصل فروشنده"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"شامل گزارشات اشکال تکمیلی ورود به سیستم فروشنده ویژه دستگاه می‌شود که ممکن است دربرگیرنده اطلاعات خصوصی، استفاده بیشتر از باتری، و/یا استفاده بیشتر از فضای ذخیره‌سازی باشد."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"این تلفن"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"این رایانه لوحی"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"این تلفن"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"نمی‌توان در این دستگاه پخش کرد"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"برای تغییر، حساب را ارتقا دهید"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"نمی‌توان بارگیری‌ها را در اینجا پخش کرد"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"بعداز آگهی دوباره امتحان کنید"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"برای پخش در اینجا، دستگاه را بیدار کنید"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"دستگاه برای پخش تأیید نشده است"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"نمی‌توان این رسانه را اینجا پخش کرد"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"مشکل در اتصال. دستگاه را خاموش و دوباره روشن کنید"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"دستگاه صوتی سیمی"</string>
     <string name="help_label" msgid="3528360748637781274">"راهنما و بازخورد"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"پویانمایی‌های اشاره برگشت پیش‌گویانه"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"پویانمایی‌های سیستم را برای اشاره برگشت پیش‌گویانه فعال کنید."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏این تنظیم پویانمایی‌های سیستم را برای پویانمایی اشاره برگشت پیش‌بینانه فعال می‌کند. این تنظیم مستلزم تنظیم شدن enableOnBackInvokedCallback مربوط به هر برنامه روی صحیح در فایل مانیفست است."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"انتقال به‌چپ"</item>
+    <item msgid="5425394847942513942">"انتقال به‌پایین"</item>
+    <item msgid="7728484337962740316">"انتقال به‌راست"</item>
+    <item msgid="324200556467459329">"انتقال به‌بالا"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>٪"</string>
 </resources>

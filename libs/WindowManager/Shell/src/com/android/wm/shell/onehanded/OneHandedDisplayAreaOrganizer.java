@@ -154,6 +154,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @Override
     public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
             @NonNull SurfaceControl leash) {
+        leash.setUnreleasedWarningCallSite(
+                "OneHandedSiaplyAreaOrganizer.onDisplayAreaAppeared");
         mDisplayAreaTokenMap.put(displayAreaInfo.token, leash);
     }
 

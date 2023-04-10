@@ -19,10 +19,12 @@ package android.app;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityTaskManager;
+import android.app.ApplicationStartInfo;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.app.ContentProviderHolder;
 import android.app.GrantedUriPermission;
+import android.app.IApplicationStartInfoCompleteListener;
 import android.app.IApplicationThread;
 import android.app.IActivityController;
 import android.app.IAppTask;
@@ -33,6 +35,7 @@ import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
+import android.app.IUidFrozenStateChangedCallback;
 import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
@@ -93,7 +96,7 @@ interface IActivityManager {
     // below block of transactions.
 
     // Since these transactions are also called from native code, these must be kept in sync with
-    // the ones in frameworks/native/libs/binder/include/binder/IActivityManager.h
+    // the ones in frameworks/native/libs/binder/include_activitymanager/binder/ActivityManager.h
     // =============== Beginning of transactions used on native side as well ======================
     ParcelFileDescriptor openContentUri(in String uriString);
     void registerUidObserver(in IUidObserver observer, int which, int cutpoint,
@@ -105,6 +108,15 @@ interface IActivityManager {
     int getUidProcessState(int uid, in String callingPackage);
     @UnsupportedAppUsage
     int checkPermission(in String permission, int pid, int uid);
+
+    /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiBegin(int apiType, int appUid, int appPid);
+
+    /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiEnd(int apiType, int appUid, int appPid);
+
+    /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
@@ -147,6 +159,7 @@ interface IActivityManager {
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
             boolean abortBroadcast, int flags);
     void attachApplication(in IApplicationThread app, long startSeq);
+    void finishAttachApplication(long startSeq);
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
     @UnsupportedAppUsage
     void moveTaskToFront(in IApplicationThread caller, in String callingPackage, int task,
@@ -169,10 +182,10 @@ interface IActivityManager {
     // Currently keeping old bindService because it is on the greylist
     @UnsupportedAppUsage
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,
-            in String resolvedType, in IServiceConnection connection, int flags,
+            in String resolvedType, in IServiceConnection connection, long flags,
             in String callingPackage, int userId);
     int bindServiceInstance(in IApplicationThread caller, in IBinder token, in Intent service,
-            in String resolvedType, in IServiceConnection connection, int flags,
+            in String resolvedType, in IServiceConnection connection, long flags,
             in String instanceName, in String callingPackage, int userId);
     void updateServiceGroup(in IServiceConnection connection, int group, int importance);
     @UnsupportedAppUsage
@@ -310,7 +323,8 @@ interface IActivityManager {
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, in String name, in String callerPackage);
     void addPackageDependency(in String packageName);
-    void killApplication(in String pkg, int appId, int userId, in String reason);
+    void killApplication(in String pkg, int appId, int userId, in String reason,
+            int exitInfoReason);
     @UnsupportedAppUsage
     void closeSystemDialogs(in String reason);
     @UnsupportedAppUsage
@@ -337,13 +351,7 @@ interface IActivityManager {
             in String message, boolean force, int exceptionTypeId);
     void crashApplicationWithTypeWithExtras(int uid, int initialPid, in String packageName,
             int userId, in String message, boolean force, int exceptionTypeId, in Bundle extras);
-    /** @deprecated -- use getProviderMimeTypeAsync */
-    @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
-            "Use {@link android.content.ContentResolver#getType} public API instead.")
-    String getProviderMimeType(in Uri uri, int userId);
-
-    oneway void getProviderMimeTypeAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
-
+    oneway void getMimeTypeFilterAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
             boolean runGc, in String path, in ParcelFileDescriptor fd,
@@ -483,8 +491,18 @@ interface IActivityManager {
 
     // Start of L transactions
     String getTagForIntentSender(in IIntentSender sender, in String prefix);
+
+    /**
+      * Starts a user in the background (i.e., while another user is running in the foreground).
+      *
+      * Notice that a background user is "invisible" and cannot launch activities. Starting on
+      * Android U, all users started with this method are invisible, even profiles (prior to Android
+      * U, profiles started with this method would be visible if its parent was the current user) -
+      * if you want to start a profile visible, you should call {@code startProfile()} instead.
+      */
     @UnsupportedAppUsage
     boolean startUserInBackground(int userid);
+
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isInLockTaskMode();
     @UnsupportedAppUsage
@@ -632,6 +650,45 @@ interface IActivityManager {
     void appNotResponding(String reason);
 
     /**
+     * Return a list of {@link ApplicationStartInfo} records.
+     *
+     * <p class="note"> Note: System stores historical information in a ring buffer, older
+     * records would be overwritten by newer records. </p>
+     *
+     * @param packageName Optional, an empty value means match all packages belonging to the
+     *                    caller's UID. If this package belongs to another UID, you must hold
+     *                    {@link android.Manifest.permission#DUMP} in order to retrieve it.
+     * @param maxNum      Optional, the maximum number of results should be returned; A value of 0
+     *                    means to ignore this parameter and return all matching records
+     * @param userId      The userId in the multi-user environment.
+     *
+     * @return a list of {@link ApplicationStartInfo} records with the matching criteria, sorted in
+     *         the order from most recent to least recent.
+     */
+    ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(String packageName,
+            int maxNum, int userId);
+
+
+    /**
+     * Sets a callback for {@link ApplicationStartInfo} upon completion of collecting startup data.
+     *
+     * <p class="note"> Note: completion of startup is no guaranteed and as such this callback may not occur.</p>
+     *
+     * @param listener    A listener to for the callback upon completion of startup data collection.
+     * @param userId      The userId in the multi-user environment.
+     */
+    void setApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
+            int userId);
+
+
+    /**
+     * Removes callback for {@link ApplicationStartInfo} upon completion of collecting startup data.
+     *
+     * @param userId      The userId in the multi-user environment.
+     */
+    void removeApplicationStartInfoCompleteListener(int userId);
+
+    /**
      * Return a list of {@link ApplicationExitInfo} records.
      *
      * <p class="note"> Note: System stores these historical information in a ring buffer, older
@@ -719,8 +776,8 @@ interface IActivityManager {
 
     /**
      * Control the app freezer state. Returns true in case of success, false if the operation
-     * didn't succeed (for example, when the app freezer isn't supported). 
-     * Handling the freezer state via this method is reentrant, that is it can be 
+     * didn't succeed (for example, when the app freezer isn't supported).
+     * Handling the freezer state via this method is reentrant, that is it can be
      * disabled and re-enabled multiple times in parallel. As long as there's a 1:1 disable to
      * enable match, the freezer is re-enabled at last enable only.
      * @param enable set it to true to enable the app freezer, false to disable it.
@@ -770,6 +827,7 @@ interface IActivityManager {
 
     /** Blocks until all broadcast queues become idle. */
     void waitForBroadcastIdle();
+    void waitForBroadcastBarrier();
 
     /** Delays delivering broadcasts to the specified package. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
@@ -778,6 +836,10 @@ interface IActivityManager {
     /** Checks if the modern broadcast queue is enabled. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
     boolean isModernBroadcastQueueEnabled();
+
+    /** Checks if the process represented by the given pid is frozen. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    boolean isProcessFrozen(int pid);
 
     /**
      * @return The reason code of whether or not the given UID should be exempted from background
@@ -791,7 +853,7 @@ interface IActivityManager {
 
     // Start (?) of T transactions
     /**
-     * Similar to {@link #startUserInBackgroundWithListener(int userId, IProgressListener unlockProgressListener),
+     * Similar to {@link #startUserInBackgroundWithListener(int userId, IProgressListener unlockProgressListener)},
      * but setting the user as the visible user of that display (i.e., allowing the user and its
      * running profiles to launch activities on that display).
      *
@@ -799,7 +861,13 @@ interface IActivityManager {
      */
     @JavaPassthrough(annotation=
             "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
-    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId);
+    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId, IProgressListener unlockProgressListener);
+
+    /**
+     * Similar to {@link #startProfile(int userId)}, but with a listener to report user unlock
+     * progress.
+     */
+    boolean startProfileWithListener(int userid, IProgressListener unlockProgressListener);
 
     /**
      * Gets the ids of displays that can be used on {@link #startUserInBackgroundVisibleOnDisplay(int userId, int displayId)}.
@@ -810,4 +878,10 @@ interface IActivityManager {
 
     /** Returns if the service is a short-service is still "alive" and past the timeout. */
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
+
+    void registerUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    int[] getUidFrozenState(in int[] uids);
 }

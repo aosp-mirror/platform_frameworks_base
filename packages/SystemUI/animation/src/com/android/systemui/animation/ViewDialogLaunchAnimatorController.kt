@@ -25,7 +25,7 @@ import com.android.internal.jank.InteractionJankMonitor
 /** A [DialogLaunchAnimator.Controller] that can animate a [View] from/to a dialog. */
 class ViewDialogLaunchAnimatorController
 internal constructor(
-    internal val source: View,
+    private val source: View,
     override val cuj: DialogCuj?,
 ) : DialogLaunchAnimator.Controller {
     override val viewRoot: ViewRootImpl?

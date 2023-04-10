@@ -37,6 +37,7 @@ import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE;
+import static com.android.server.timedetector.ServerFlags.KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT;
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED;
 
 import android.app.time.LocationTimeZoneManager;
@@ -308,6 +309,10 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE);
         pw.printf("    Used to override the device's 'geolocation time zone detection enabled'"
                 + " setting [*].\n");
+        pw.printf("  %s\n", KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT);
+        pw.printf("    Used to set the automatic time zone detection enabled default, i.e. when the"
+                + " device's automatic time zone detection enabled setting hasn't been set"
+                + " explicitly. Intended for internal testers.");
         pw.printf("  %s\n", KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED);
         pw.printf("    Used to enable / disable support for telephony detection fallback. Also see"
                 + " the %s command.\n", SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK);

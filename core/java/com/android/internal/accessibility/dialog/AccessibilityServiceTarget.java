@@ -26,6 +26,7 @@ import android.content.Context;
 import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
+import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
 
 /**
  * Base class for creating accessibility service target with various fragment types related to
@@ -42,8 +43,25 @@ class AccessibilityServiceTarget extends AccessibilityTarget {
                 isShortcutContained(context, shortcutType,
                         serviceInfo.getComponentName().flattenToString()),
                 serviceInfo.getComponentName().flattenToString(),
+                serviceInfo.getResolveInfo().serviceInfo.applicationInfo.uid,
                 serviceInfo.getResolveInfo().loadLabel(context.getPackageManager()),
                 serviceInfo.getResolveInfo().loadIcon(context.getPackageManager()),
                 convertToKey(convertToUserType(shortcutType)));
+    }
+
+    @Override
+    public void updateActionItem(@NonNull TargetAdapter.ViewHolder holder,
+            @ShortcutMenuMode int shortcutMenuMode) {
+        super.updateActionItem(holder, shortcutMenuMode);
+
+        final boolean isAllowed = AccessibilityTargetHelper.isAccessibilityTargetAllowed(
+                getContext(), getComponentName().getPackageName(), getUid());
+        final boolean isEditMenuMode =
+                shortcutMenuMode == ShortcutMenuMode.EDIT;
+        final boolean enabled = isAllowed || (isEditMenuMode && isShortcutEnabled());
+        holder.mCheckBoxView.setEnabled(enabled);
+        holder.mIconView.setEnabled(enabled);
+        holder.mLabelView.setEnabled(enabled);
+        holder.mStatusView.setEnabled(enabled);
     }
 }

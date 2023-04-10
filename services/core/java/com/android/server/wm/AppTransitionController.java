@@ -176,6 +176,42 @@ public class AppTransitionController {
                 || !transitionGoodToGoForTaskFragments()) {
             return;
         }
+        final boolean isRecentsInOpening = mDisplayContent.mOpeningApps.stream().anyMatch(
+                ConfigurationContainer::isActivityTypeRecents);
+        // In order to avoid visual clutter caused by a conflict between app transition
+        // animation and recents animation, app transition is delayed until recents finishes.
+        // One exceptional case. When 3P launcher is used and a user taps a task screenshot in
+        // task switcher (isRecentsInOpening=true), app transition must start even though
+        // recents is running. Otherwise app transition is blocked until timeout (b/232984498).
+        // When 1P launcher is used, this animation is controlled by the launcher outside of
+        // the app transition, so delaying app transition doesn't cause visible delay. After
+        // recents finishes, app transition is handled just to commit visibility on apps.
+        if (!isRecentsInOpening) {
+            final ArraySet<WindowContainer> participants = new ArraySet<>();
+            participants.addAll(mDisplayContent.mOpeningApps);
+            participants.addAll(mDisplayContent.mChangingContainers);
+            boolean deferForRecents = false;
+            for (int i = 0; i < participants.size(); i++) {
+                WindowContainer wc = participants.valueAt(i);
+                final ActivityRecord activity = getAppFromContainer(wc);
+                if (activity == null) {
+                    continue;
+                }
+                // Don't defer recents animation if one of activity isn't running for it, that one
+                // might be started from quickstep.
+                if (!activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
+                    deferForRecents = false;
+                    break;
+                }
+                deferForRecents = true;
+            }
+            if (deferForRecents) {
+                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                        "Delaying app transition for recents animation to finish");
+                return;
+            }
+        }
+
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "**** GOOD TO GO");
@@ -217,12 +253,12 @@ public class AppTransitionController {
 
         ArraySet<ActivityRecord> tmpOpenApps = mDisplayContent.mOpeningApps;
         ArraySet<ActivityRecord> tmpCloseApps = mDisplayContent.mClosingApps;
-        if (mDisplayContent.mAtmService.mBackNavigationController.isWaitBackTransition()) {
+        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringTransition()) {
             tmpOpenApps = new ArraySet<>(mDisplayContent.mOpeningApps);
             tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
             if (mDisplayContent.mAtmService.mBackNavigationController
                     .removeIfContainsBackAnimationTargets(tmpOpenApps, tmpCloseApps)) {
-                mDisplayContent.mAtmService.mBackNavigationController.clearBackAnimations(null);
+                mDisplayContent.mAtmService.mBackNavigationController.clearBackAnimations();
             }
         }
 
@@ -285,7 +321,7 @@ public class AppTransitionController {
             mService.mSurfaceAnimationRunner.continueStartingAnimations();
         }
 
-        mService.mTaskSnapshotController.onTransitionStarting(mDisplayContent);
+        mService.mSnapshotController.onTransitionStarting(mDisplayContent);
 
         mDisplayContent.mOpeningApps.clear();
         mDisplayContent.mClosingApps.clear();
@@ -893,7 +929,7 @@ public class AppTransitionController {
 
     /**
      * Returns {@code true} if a given {@link WindowContainer} is an embedded Task in
-     * {@link com.android.wm.shell.TaskView}.
+     * {@link TaskView}.
      *
      * Note that this is a short term workaround to support Android Auto until it migrate to
      * ShellTransition. This should only be used by {@link #getAnimationTargets}.
@@ -901,9 +937,18 @@ public class AppTransitionController {
      * TODO(b/213312721): Remove this predicate and its callers once ShellTransition is enabled.
      */
     static boolean isTaskViewTask(WindowContainer wc) {
-        // We use Task#mRemoveWithTaskOrganizer to identify an embedded Task, but this is a hack and
+        // Use Task#mRemoveWithTaskOrganizer to identify an embedded Task, but this is a hack and
         // it is not guaranteed to work this logic in the future version.
-        return wc instanceof Task && ((Task) wc).mRemoveWithTaskOrganizer;
+        boolean isTaskViewTask =  wc instanceof Task && ((Task) wc).mRemoveWithTaskOrganizer;
+        if (isTaskViewTask) {
+            return true;
+        }
+
+        WindowContainer parent = wc.getParent();
+        boolean isParentATaskViewTask = parent != null
+                && parent instanceof Task
+                && ((Task) parent).mRemoveWithTaskOrganizer;
+        return isParentATaskViewTask;
     }
 
     /**
@@ -1232,26 +1277,11 @@ public class AppTransitionController {
                     "Delaying app transition for screen rotation animation to finish");
             return false;
         }
-        final boolean isRecentsInOpening = mDisplayContent.mOpeningApps.stream().anyMatch(
-                ConfigurationContainer::isActivityTypeRecents);
         for (int i = 0; i < apps.size(); i++) {
             WindowContainer wc = apps.valueAt(i);
             final ActivityRecord activity = getAppFromContainer(wc);
             if (activity == null) {
                 continue;
-            }
-            // In order to avoid visual clutter caused by a conflict between app transition
-            // animation and recents animation, app transition is delayed until recents finishes.
-            // One exceptional case. When 3P launcher is used and a user taps a task screenshot in
-            // task switcher (isRecentsInOpening=true), app transition must start even though
-            // recents is running. Otherwise app transition is blocked until timeout (b/232984498).
-            // When 1P launcher is used, this animation is controlled by the launcher outside of
-            // the app transition, so delaying app transition doesn't cause visible delay. After
-            // recents finishes, app transition is handled just to commit visibility on apps.
-            if (!isRecentsInOpening && activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "Delaying app transition for recents animation to finish");
-                return false;
             }
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Check opening app=%s: allDrawn=%b startingDisplayed=%b "

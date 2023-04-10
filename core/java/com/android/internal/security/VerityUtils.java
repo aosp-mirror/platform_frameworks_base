@@ -81,6 +81,15 @@ public abstract class VerityUtils {
         }
     }
 
+    /** Enables fs-verity for an open file without signature. */
+    public static void setUpFsverity(int fd) throws IOException {
+        int errno = enableFsverityForFdNative(fd);
+        if (errno != 0) {
+            throw new IOException("Failed to enable fs-verity on FD(" + fd + "): "
+                    + Os.strerror(errno));
+        }
+    }
+
     /** Returns whether the file has fs-verity enabled. */
     public static boolean hasFsverity(@NonNull String filePath) {
         int retval = statxForFsverityNative(filePath);
@@ -211,6 +220,7 @@ public abstract class VerityUtils {
     }
 
     private static native int enableFsverityNative(@NonNull String filePath);
+    private static native int enableFsverityForFdNative(int fd);
     private static native int measureFsverityNative(@NonNull String filePath,
             @NonNull byte[] digest);
     private static native int statxForFsverityNative(@NonNull String filePath);

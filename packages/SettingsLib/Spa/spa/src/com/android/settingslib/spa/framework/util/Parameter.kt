@@ -29,8 +29,16 @@ fun List<NamedNavArgument>.navRoute(): String {
 }
 
 fun List<NamedNavArgument>.navLink(arguments: Bundle? = null): String {
+    return normalizeArgList(arguments).joinToString("") { arg -> "/$arg" }
+}
+
+fun List<NamedNavArgument>.normalizeArgList(
+    arguments: Bundle? = null,
+    eraseRuntimeValues: Boolean = false
+): List<String> {
     val argsArray = mutableListOf<String>()
     for (navArg in this) {
+        if (eraseRuntimeValues && navArg.isRuntimeParam()) continue
         if (arguments == null || !arguments.containsKey(navArg.name)) {
             argsArray.add(UNSET_PARAM_VALUE)
             continue
@@ -44,7 +52,7 @@ fun List<NamedNavArgument>.navLink(arguments: Bundle? = null): String {
             }
         }
     }
-    return argsArray.joinToString("") { arg -> "/$arg" }
+    return argsArray
 }
 
 fun List<NamedNavArgument>.normalize(
@@ -55,7 +63,7 @@ fun List<NamedNavArgument>.normalize(
     val normArgs = Bundle()
     for (navArg in this) {
         // Erase value of runtime parameters.
-        if (navArg.isRuntimeParam() && eraseRuntimeValues) {
+        if (eraseRuntimeValues && navArg.isRuntimeParam()) {
             normArgs.putString(navArg.name, null)
             continue
         }

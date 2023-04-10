@@ -657,6 +657,17 @@ public abstract class WindowManagerInternal {
     public abstract int getWindowOwnerUserId(IBinder windowToken);
 
     /**
+     * Control visilibility of a {@link WallpaperWindowToken} {@code} binder on the lock screen.
+     *
+     * <p>This will also affect its Z-ordering as {@code showWhenLocked} wallpaper tokens are
+     * arranged underneath non-{@code showWhenLocked} wallpaper tokens.
+     *
+     * @param windowToken wallpaper token previously added via {@link #addWindowToken}
+     * @param showWhenLocked whether {@param token} can continue to be shown on the lock screen.
+     */
+    public abstract void setWallpaperShowWhenLocked(IBinder windowToken, boolean showWhenLocked);
+
+    /**
      * Returns {@code true} if a Window owned by {@code uid} has focus.
      */
     public abstract boolean isUidFocused(int uid);
@@ -729,7 +740,7 @@ public abstract class WindowManagerInternal {
     /**
      * Show IME on imeTargetWindow once IME has finished layout.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be shown.
+     * @param imeTargetWindowToken token of the (IME target) window which IME should be shown.
      * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
     public abstract void showImePostLayout(IBinder imeTargetWindowToken,
@@ -738,7 +749,7 @@ public abstract class WindowManagerInternal {
     /**
      * Hide IME using imeTargetWindow when requested.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
+     * @param imeTargetWindowToken token of the (IME target) window on which requests hiding IME.
      * @param displayId the id of the display the IME is on.
      * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */

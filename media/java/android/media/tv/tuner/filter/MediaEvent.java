@@ -18,9 +18,14 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.BytesLong;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.media.AudioPresentation;
 import android.media.MediaCodec.LinearBlock;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Filter event sent from {@link Filter} objects with media type.
@@ -51,12 +56,13 @@ public class MediaEvent extends FilterEvent {
     private final boolean mIsPrivateData;
     private final int mScIndexMask;
     private final AudioDescriptor mExtraMetaData;
+    private final List<AudioPresentation> mAudioPresentations;
 
     // This constructor is used by JNI code only
     private MediaEvent(int streamId, boolean isPtsPresent, long pts, boolean isDtsPresent, long dts,
             long dataLength, long offset, LinearBlock buffer, boolean isSecureMemory, long dataId,
             int mpuSequenceNumber, boolean isPrivateData, int scIndexMask,
-            AudioDescriptor extraMetaData) {
+            AudioDescriptor extraMetaData, List<AudioPresentation> audioPresentations) {
         mStreamId = streamId;
         mIsPtsPresent = isPtsPresent;
         mPts = pts;
@@ -71,6 +77,7 @@ public class MediaEvent extends FilterEvent {
         mIsPrivateData = isPrivateData;
         mScIndexMask = scIndexMask;
         mExtraMetaData = extraMetaData;
+        mAudioPresentations = audioPresentations;
     }
 
     /**
@@ -215,6 +222,17 @@ public class MediaEvent extends FilterEvent {
         return mExtraMetaData;
     }
 
+    /**
+     * Gets audio presentations.
+     *
+     * <p>The audio presentation order matters. As specified in ETSI EN 300 468 V1.17.1, all the
+     * audio programme components corresponding to the first audio preselection in the loop are
+     * contained in the main NGA stream.
+     */
+    @NonNull
+    public List<AudioPresentation> getAudioPresentations() {
+        return mAudioPresentations == null ? Collections.emptyList() : mAudioPresentations;
+    }
 
     /**
      * Finalize the MediaEvent object.

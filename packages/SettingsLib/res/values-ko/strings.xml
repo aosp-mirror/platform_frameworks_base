@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"탐색 메뉴 투명하게 하기"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"기본적으로 탐색 메뉴의 배경 색상을 투명하게 하기"</string>
     <string name="window_blurs" msgid="6831008984828425106">"창 수준 블러 허용"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"이 휴대전화"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"태블릿"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"이 기기에서 재생할 수 없음"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"전환하려면 계정을 업그레이드하세요."</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"여기서 다운로드한 콘텐츠를 재생할 수 없습니다."</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"광고 후에 다시 시도해 주세요."</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"기기 절전 모드 해제 후 여기에서 재생"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"기기에서 재생을 승인하지 않음"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"여기에서 이 미디어를 재생할 수 없음"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
     <string name="help_label" msgid="3528360748637781274">"고객센터"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"예측된 뒤로 동작 애니메이션"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"예측된 뒤로 동작에 시스템 애니메이션을 사용하도록 설정합니다."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"이 설정은 예측된 동작 애니메이션에 시스템 애니메이션을 사용하도록 합니다. 매니페스트 파일에서 앱별 enableOnBackInvokedCallback을 True로 설정해야 합니다."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"왼쪽으로 이동"</item>
+    <item msgid="5425394847942513942">"아래로 이동"</item>
+    <item msgid="7728484337962740316">"오른쪽으로 이동"</item>
+    <item msgid="324200556467459329">"위로 이동"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

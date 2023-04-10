@@ -54,7 +54,9 @@ public class GnssConfiguration {
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String DEBUG_PROPERTIES_FILE = "/etc/gps_debug.conf";
+    private static final String DEBUG_PROPERTIES_SYSTEM_FILE = "/etc/gps_debug.conf";
+
+    private static final String DEBUG_PROPERTIES_VENDOR_FILE = "/vendor/etc/gps_debug.conf";
 
     // config.xml properties
     private static final String CONFIG_SUPL_HOST = "SUPL_HOST";
@@ -92,6 +94,8 @@ public class GnssConfiguration {
     // Represents an HAL interface version. Instances of this class are created in the JNI layer
     // and returned through native methods.
     static class HalInterfaceVersion {
+        // mMajor being this value denotes AIDL HAL. In this case, mMinor denotes the AIDL version.
+        static final int AIDL_INTERFACE = 3;
         final int mMajor;
         final int mMinor;
 
@@ -283,7 +287,8 @@ public class GnssConfiguration {
         /*
          * Overlay carrier properties from a debug configuration file.
          */
-        loadPropertiesFromGpsDebugConfig(mProperties);
+        loadPropertiesFromGpsDebugConfig(mProperties, DEBUG_PROPERTIES_VENDOR_FILE);
+        loadPropertiesFromGpsDebugConfig(mProperties, DEBUG_PROPERTIES_SYSTEM_FILE);
         mEsExtensionSec = getRangeCheckedConfigEsExtensionSec();
 
         logConfigurations();
@@ -390,9 +395,9 @@ public class GnssConfiguration {
         }
     }
 
-    private void loadPropertiesFromGpsDebugConfig(Properties properties) {
+    private void loadPropertiesFromGpsDebugConfig(Properties properties, String filePath) {
         try {
-            File file = new File(DEBUG_PROPERTIES_FILE);
+            File file = new File(filePath);
             FileInputStream stream = null;
             try {
                 stream = new FileInputStream(file);
@@ -401,7 +406,7 @@ public class GnssConfiguration {
                 IoUtils.closeQuietly(stream);
             }
         } catch (IOException e) {
-            if (DEBUG) Log.d(TAG, "Could not open GPS configuration file " + DEBUG_PROPERTIES_FILE);
+            if (DEBUG) Log.d(TAG, "Could not open GPS configuration file " + filePath);
         }
     }
 

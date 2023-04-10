@@ -61,6 +61,7 @@ public class TvPipSystemAction extends TvPipAction {
         button.setTextAndDescription(mTitleResource);
         button.setImageResource(mIconResource);
         button.setEnabled(true);
+        button.setIsCustomCloseAction(false);
     }
 
     PendingIntent getPendingIntent() {

@@ -23,6 +23,7 @@ import android.graphics.PointF;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -46,6 +47,7 @@ import com.android.server.input.InputManagerInternal;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -79,11 +81,20 @@ class InputController {
     @interface PhysType {
     }
 
-    final Object mLock;
+    /**
+     * The maximum length of a device name (in bytes in UTF-8 encoding).
+     *
+     * This limitation comes directly from uinput.
+     * See also UINPUT_MAX_NAME_SIZE in linux/uinput.h
+     */
+    private static final int DEVICE_NAME_MAX_LENGTH = 80;
+
+    final Object mLock = new Object();
 
     /* Token -> file descriptor associations. */
     @GuardedBy("mLock")
-    private final Map<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors = new ArrayMap<>();
+    private final ArrayMap<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors =
+            new ArrayMap<>();
 
     private final Handler mHandler;
     private final NativeWrapper mNativeWrapper;
@@ -92,18 +103,17 @@ class InputController {
     private final WindowManager mWindowManager;
     private final DeviceCreationThreadVerifier mThreadVerifier;
 
-    InputController(@NonNull Object lock, @NonNull Handler handler,
+    InputController(@NonNull Handler handler,
             @NonNull WindowManager windowManager) {
-        this(lock, new NativeWrapper(), handler, windowManager,
+        this(new NativeWrapper(), handler, windowManager,
                 // Verify that virtual devices are not created on the handler thread.
                 () -> !handler.getLooper().isCurrentThread());
     }
 
     @VisibleForTesting
-    InputController(@NonNull Object lock, @NonNull NativeWrapper nativeWrapper,
+    InputController(@NonNull NativeWrapper nativeWrapper,
             @NonNull Handler handler, @NonNull WindowManager windowManager,
             @NonNull DeviceCreationThreadVerifier threadVerifier) {
-        mLock = lock;
         mHandler = handler;
         mNativeWrapper = nativeWrapper;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -233,9 +243,9 @@ class InputController {
     private void closeInputDeviceDescriptorLocked(IBinder token,
             InputDeviceDescriptor inputDeviceDescriptor) {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
-        mNativeWrapper.closeUinput(inputDeviceDescriptor.getFileDescriptor());
+        mNativeWrapper.closeUinput(inputDeviceDescriptor.getNativePointer());
         String phys = inputDeviceDescriptor.getPhys();
-        InputManager.getInstance().removeUniqueIdAssociation(phys);
+        InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
         // Type associations are added in the case of navigation touchpads. Those should be removed
         // once the input device gets closed.
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
@@ -294,7 +304,8 @@ class InputController {
     @GuardedBy("mLock")
     private void updateActivePointerDisplayIdLocked() {
         InputDeviceDescriptor mostRecentlyCreatedMouse = null;
-        for (InputDeviceDescriptor otherInputDeviceDescriptor : mInputDeviceDescriptors.values()) {
+        for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+            InputDeviceDescriptor otherInputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
             if (otherInputDeviceDescriptor.isMouse()) {
                 if (mostRecentlyCreatedMouse == null
                         || (otherInputDeviceDescriptor.getCreationOrderNumber()
@@ -312,13 +323,39 @@ class InputController {
         }
     }
 
+    /**
+     * Validates a device name by checking length and whether a device with the same name
+     * already exists. Throws exceptions if the validation fails.
+     * @param deviceName The name of the device to be validated
+     * @throws DeviceCreationException if {@code deviceName} is not valid.
+     */
+    private void validateDeviceName(String deviceName) throws DeviceCreationException {
+        // Comparison is greater or equal because the device name must fit into a const char*
+        // including the \0-terminator. Therefore the actual number of bytes that can be used
+        // for device name is DEVICE_NAME_MAX_LENGTH - 1
+        if (deviceName.getBytes(StandardCharsets.UTF_8).length >= DEVICE_NAME_MAX_LENGTH) {
+            throw new DeviceCreationException(
+                    "Input device name exceeds maximum length of " + DEVICE_NAME_MAX_LENGTH
+                            + "bytes: " + deviceName);
+        }
+
+        synchronized (mLock) {
+            for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+                if (mInputDeviceDescriptors.valueAt(i).mName.equals(deviceName)) {
+                    throw new DeviceCreationException(
+                            "Input device name already in use: " + deviceName);
+                }
+            }
+        }
+    }
+
     private static String createPhys(@PhysType String type) {
         return String.format("virtual%s:%d", type, sNextPhysId.getAndIncrement());
     }
 
     private void setUniqueIdAssociation(int displayId, String phys) {
         final String displayUniqueId = mDisplayManagerInternal.getDisplayInfo(displayId).uniqueId;
-        InputManager.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
+        InputManagerGlobal.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
     }
 
     boolean sendDpadKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
@@ -329,7 +366,7 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not send key event to input device for given token");
             }
-            return mNativeWrapper.writeDpadKeyEvent(inputDeviceDescriptor.getFileDescriptor(),
+            return mNativeWrapper.writeDpadKeyEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getKeyCode(), event.getAction());
         }
     }
@@ -342,7 +379,7 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not send key event to input device for given token");
             }
-            return mNativeWrapper.writeKeyEvent(inputDeviceDescriptor.getFileDescriptor(),
+            return mNativeWrapper.writeKeyEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getKeyCode(), event.getAction());
         }
     }
@@ -360,7 +397,7 @@ class InputController {
                 throw new IllegalStateException(
                         "Display id associated with this mouse is not currently targetable");
             }
-            return mNativeWrapper.writeButtonEvent(inputDeviceDescriptor.getFileDescriptor(),
+            return mNativeWrapper.writeButtonEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getButtonCode(), event.getAction());
         }
     }
@@ -373,7 +410,7 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not send touch event to input device for given token");
             }
-            return mNativeWrapper.writeTouchEvent(inputDeviceDescriptor.getFileDescriptor(),
+            return mNativeWrapper.writeTouchEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getPointerId(), event.getToolType(), event.getAction(), event.getX(),
                     event.getY(), event.getPressure(), event.getMajorAxisSize());
         }
@@ -392,7 +429,7 @@ class InputController {
                 throw new IllegalStateException(
                         "Display id associated with this mouse is not currently targetable");
             }
-            return mNativeWrapper.writeRelativeEvent(inputDeviceDescriptor.getFileDescriptor(),
+            return mNativeWrapper.writeRelativeEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getRelativeX(), event.getRelativeY());
         }
     }
@@ -410,7 +447,7 @@ class InputController {
                 throw new IllegalStateException(
                         "Display id associated with this mouse is not currently targetable");
             }
-            return mNativeWrapper.writeScrollEvent(inputDeviceDescriptor.getFileDescriptor(),
+            return mNativeWrapper.writeScrollEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getXAxisMovement(), event.getYAxisMovement());
         }
     }
@@ -436,8 +473,9 @@ class InputController {
         fout.println("    InputController: ");
         synchronized (mLock) {
             fout.println("      Active descriptors: ");
-            for (InputDeviceDescriptor inputDeviceDescriptor : mInputDeviceDescriptors.values()) {
-                fout.println("        fd: " + inputDeviceDescriptor.getFileDescriptor());
+            for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+                InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
+                fout.println("        ptr: " + inputDeviceDescriptor.getNativePointer());
                 fout.println("          displayId: " + inputDeviceDescriptor.getDisplayId());
                 fout.println("          creationOrder: "
                         + inputDeviceDescriptor.getCreationOrderNumber());
@@ -450,11 +488,11 @@ class InputController {
     }
 
     @VisibleForTesting
-    void addDeviceForTesting(IBinder deviceToken, int fd, int type, int displayId, String phys,
-            int inputDeviceId) {
+    void addDeviceForTesting(IBinder deviceToken, long ptr, int type, int displayId, String phys,
+            String deviceName, int inputDeviceId) {
         synchronized (mLock) {
-            mInputDeviceDescriptors.put(deviceToken, new InputDeviceDescriptor(fd, () -> {
-            }, type, displayId, phys, inputDeviceId));
+            mInputDeviceDescriptors.put(deviceToken, new InputDeviceDescriptor(ptr, () -> {
+            }, type, displayId, phys, deviceName, inputDeviceId));
         }
     }
 
@@ -467,75 +505,76 @@ class InputController {
         return inputDeviceDescriptors;
     }
 
-    private static native int nativeOpenUinputDpad(String deviceName, int vendorId, int productId,
+    private static native long nativeOpenUinputDpad(String deviceName, int vendorId, int productId,
             String phys);
-    private static native int nativeOpenUinputKeyboard(String deviceName, int vendorId,
+    private static native long nativeOpenUinputKeyboard(String deviceName, int vendorId,
             int productId, String phys);
-    private static native int nativeOpenUinputMouse(String deviceName, int vendorId, int productId,
+    private static native long nativeOpenUinputMouse(String deviceName, int vendorId, int productId,
             String phys);
-    private static native int nativeOpenUinputTouchscreen(String deviceName, int vendorId,
+    private static native long nativeOpenUinputTouchscreen(String deviceName, int vendorId,
             int productId, String phys, int height, int width);
-    private static native boolean nativeCloseUinput(int fd);
-    private static native boolean nativeWriteDpadKeyEvent(int fd, int androidKeyCode, int action);
-    private static native boolean nativeWriteKeyEvent(int fd, int androidKeyCode, int action);
-    private static native boolean nativeWriteButtonEvent(int fd, int buttonCode, int action);
-    private static native boolean nativeWriteTouchEvent(int fd, int pointerId, int toolType,
+    private static native void nativeCloseUinput(long ptr);
+    private static native boolean nativeWriteDpadKeyEvent(long ptr, int androidKeyCode, int action);
+    private static native boolean nativeWriteKeyEvent(long ptr, int androidKeyCode, int action);
+    private static native boolean nativeWriteButtonEvent(long ptr, int buttonCode, int action);
+    private static native boolean nativeWriteTouchEvent(long ptr, int pointerId, int toolType,
             int action, float locationX, float locationY, float pressure, float majorAxisSize);
-    private static native boolean nativeWriteRelativeEvent(int fd, float relativeX,
+    private static native boolean nativeWriteRelativeEvent(long ptr, float relativeX,
             float relativeY);
-    private static native boolean nativeWriteScrollEvent(int fd, float xAxisMovement,
+    private static native boolean nativeWriteScrollEvent(long ptr, float xAxisMovement,
             float yAxisMovement);
 
     /** Wrapper around the static native methods for tests. */
     @VisibleForTesting
     protected static class NativeWrapper {
-        public int openUinputDpad(String deviceName, int vendorId, int productId, String phys) {
+        public long openUinputDpad(String deviceName, int vendorId, int productId, String phys) {
             return nativeOpenUinputDpad(deviceName, vendorId, productId, phys);
         }
 
-        public int openUinputKeyboard(String deviceName, int vendorId, int productId, String phys) {
+        public long openUinputKeyboard(String deviceName, int vendorId, int productId,
+                String phys) {
             return nativeOpenUinputKeyboard(deviceName, vendorId, productId, phys);
         }
 
-        public int openUinputMouse(String deviceName, int vendorId, int productId, String phys) {
+        public long openUinputMouse(String deviceName, int vendorId, int productId, String phys) {
             return nativeOpenUinputMouse(deviceName, vendorId, productId, phys);
         }
 
-        public int openUinputTouchscreen(String deviceName, int vendorId,
+        public long openUinputTouchscreen(String deviceName, int vendorId,
                 int productId, String phys, int height, int width) {
             return nativeOpenUinputTouchscreen(deviceName, vendorId, productId, phys, height,
                     width);
         }
 
-        public boolean closeUinput(int fd) {
-            return nativeCloseUinput(fd);
+        public void closeUinput(long ptr) {
+            nativeCloseUinput(ptr);
         }
 
-        public boolean writeDpadKeyEvent(int fd, int androidKeyCode, int action) {
-            return nativeWriteDpadKeyEvent(fd, androidKeyCode, action);
+        public boolean writeDpadKeyEvent(long ptr, int androidKeyCode, int action) {
+            return nativeWriteDpadKeyEvent(ptr, androidKeyCode, action);
         }
 
-        public boolean writeKeyEvent(int fd, int androidKeyCode, int action) {
-            return nativeWriteKeyEvent(fd, androidKeyCode, action);
+        public boolean writeKeyEvent(long ptr, int androidKeyCode, int action) {
+            return nativeWriteKeyEvent(ptr, androidKeyCode, action);
         }
 
-        public boolean writeButtonEvent(int fd, int buttonCode, int action) {
-            return nativeWriteButtonEvent(fd, buttonCode, action);
+        public boolean writeButtonEvent(long ptr, int buttonCode, int action) {
+            return nativeWriteButtonEvent(ptr, buttonCode, action);
         }
 
-        public boolean writeTouchEvent(int fd, int pointerId, int toolType, int action,
+        public boolean writeTouchEvent(long ptr, int pointerId, int toolType, int action,
                 float locationX, float locationY, float pressure, float majorAxisSize) {
-            return nativeWriteTouchEvent(fd, pointerId, toolType,
+            return nativeWriteTouchEvent(ptr, pointerId, toolType,
                     action, locationX, locationY,
                     pressure, majorAxisSize);
         }
 
-        public boolean writeRelativeEvent(int fd, float relativeX, float relativeY) {
-            return nativeWriteRelativeEvent(fd, relativeX, relativeY);
+        public boolean writeRelativeEvent(long ptr, float relativeX, float relativeY) {
+            return nativeWriteRelativeEvent(ptr, relativeX, relativeY);
         }
 
-        public boolean writeScrollEvent(int fd, float xAxisMovement, float yAxisMovement) {
-            return nativeWriteScrollEvent(fd, xAxisMovement,
+        public boolean writeScrollEvent(long ptr, float xAxisMovement, float yAxisMovement) {
+            return nativeWriteScrollEvent(ptr, xAxisMovement,
                     yAxisMovement);
         }
     }
@@ -560,30 +599,35 @@ class InputController {
 
         private static final AtomicLong sNextCreationOrderNumber = new AtomicLong(1);
 
-        private final int mFd;
+        // Pointer to the native input device object.
+        private final long mPtr;
         private final IBinder.DeathRecipient mDeathRecipient;
         private final @Type int mType;
         private final int mDisplayId;
         private final String mPhys;
+        // The name given to this device by the client. Enforced to be unique within
+        // InputController.
+        private final String mName;
         // The input device id that was associated to the device by the InputReader on device
         // creation.
         private final int mInputDeviceId;
         // Monotonically increasing number; devices with lower numbers were created earlier.
         private final long mCreationOrderNumber;
 
-        InputDeviceDescriptor(int fd, IBinder.DeathRecipient deathRecipient, @Type int type,
-                int displayId, String phys, int inputDeviceId) {
-            mFd = fd;
+        InputDeviceDescriptor(long ptr, IBinder.DeathRecipient deathRecipient, @Type int type,
+                int displayId, String phys, String name, int inputDeviceId) {
+            mPtr = ptr;
             mDeathRecipient = deathRecipient;
             mType = type;
             mDisplayId = displayId;
             mPhys = phys;
+            mName = name;
             mInputDeviceId = inputDeviceId;
             mCreationOrderNumber = sNextCreationOrderNumber.getAndIncrement();
         }
 
-        public int getFileDescriptor() {
-            return mFd;
+        public long getNativePointer() {
+            return mPtr;
         }
 
         public int getType() {
@@ -644,7 +688,7 @@ class InputController {
             mListener = new InputManager.InputDeviceListener() {
                 @Override
                 public void onInputDeviceAdded(int deviceId) {
-                    final InputDevice device = InputManager.getInstance().getInputDevice(
+                    final InputDevice device = InputManagerGlobal.getInstance().getInputDevice(
                             deviceId);
                     Objects.requireNonNull(device, "Newly added input device was null.");
                     if (!device.getName().equals(deviceName)) {
@@ -668,7 +712,7 @@ class InputController {
 
                 }
             };
-            InputManager.getInstance().registerInputDeviceListener(mListener, mHandler);
+            InputManagerGlobal.getInstance().registerInputDeviceListener(mListener, mHandler);
         }
 
         /**
@@ -697,7 +741,7 @@ class InputController {
 
         @Override
         public void close() {
-            InputManager.getInstance().unregisterInputDeviceListener(mListener);
+            InputManagerGlobal.getInstance().unregisterInputDeviceListener(mListener);
         }
     }
 
@@ -726,27 +770,31 @@ class InputController {
      */
     private void createDeviceInternal(@InputDeviceDescriptor.Type int type, String deviceName,
             int vendorId, int productId, IBinder deviceToken, int displayId, String phys,
-            Supplier<Integer> deviceOpener)
+            Supplier<Long> deviceOpener)
             throws DeviceCreationException {
         if (!mThreadVerifier.isValidThread()) {
             throw new IllegalStateException(
                     "Virtual device creation should happen on an auxiliary thread (e.g. binder "
                             + "thread) and not from the handler's thread.");
         }
+        validateDeviceName(deviceName);
 
-        final int fd;
+        final long ptr;
         final BinderDeathRecipient binderDeathRecipient;
 
         final int inputDeviceId;
 
         setUniqueIdAssociation(displayId, phys);
         try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId)) {
-            fd = deviceOpener.get();
-            if (fd < 0) {
+            ptr = deviceOpener.get();
+            // See INVALID_PTR in libs/input/VirtualInputDevice.cpp.
+            if (ptr == 0) {
                 throw new DeviceCreationException(
-                        "A native error occurred when creating touchscreen: " + -fd);
+                        "A native error occurred when creating virtual input device: "
+                                + deviceName);
             }
-            // The fd is valid from here, so ensure that all failures close the fd after this point.
+            // The pointer to the native input device is valid from here, so ensure that all
+            // failures close the device after this point.
             try {
                 inputDeviceId = waiter.waitForDeviceCreation();
 
@@ -758,18 +806,18 @@ class InputController {
                             "Client died before virtual device could be created.", e);
                 }
             } catch (DeviceCreationException e) {
-                mNativeWrapper.closeUinput(fd);
+                mNativeWrapper.closeUinput(ptr);
                 throw e;
             }
         } catch (DeviceCreationException e) {
-            InputManager.getInstance().removeUniqueIdAssociation(phys);
+            InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
             throw e;
         }
 
         synchronized (mLock) {
             mInputDeviceDescriptors.put(deviceToken,
-                    new InputDeviceDescriptor(fd, binderDeathRecipient, type, displayId, phys,
-                            inputDeviceId));
+                    new InputDeviceDescriptor(ptr, binderDeathRecipient, type, displayId, phys,
+                            deviceName, inputDeviceId));
         }
     }
 

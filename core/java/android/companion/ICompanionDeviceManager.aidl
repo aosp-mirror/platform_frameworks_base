@@ -19,6 +19,8 @@ package android.companion;
 import android.app.PendingIntent;
 import android.companion.IAssociationRequestCallback;
 import android.companion.IOnAssociationsChangedListener;
+import android.companion.IOnMessageReceivedListener;
+import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
@@ -67,6 +69,16 @@ interface ICompanionDeviceManager {
 
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
+    void addOnTransportsChangedListener(IOnTransportsChangedListener listener);
+
+    void removeOnTransportsChangedListener(IOnTransportsChangedListener listener);
+
+    void sendMessage(int messageType, in byte[] data, in int[] associationIds);
+
+    void addOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
+
+    void removeOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
+
     void notifyDeviceAppeared(int associationId);
 
     void notifyDeviceDisappeared(int associationId);
@@ -88,4 +100,6 @@ interface ICompanionDeviceManager {
     void enableSystemDataSync(int associationId, int flags);
 
     void disableSystemDataSync(int associationId, int flags);
+
+    void enableSecureTransport(boolean enabled);
 }

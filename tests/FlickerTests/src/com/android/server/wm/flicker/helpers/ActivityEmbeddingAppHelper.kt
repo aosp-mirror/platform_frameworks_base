@@ -17,6 +17,12 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.wm.WindowManagerState.Companion.STATE_RESUMED
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -24,10 +30,6 @@ import androidx.window.extensions.WindowExtensions
 import androidx.window.extensions.WindowExtensionsProvider
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.common.windowmanager.WindowManagerState.Companion.STATE_RESUMED
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume.assumeNotNull
 
 class ActivityEmbeddingAppHelper
@@ -37,6 +39,25 @@ constructor(
     launcherName: String = ActivityOptions.ActivityEmbedding.MainActivity.LABEL,
     component: ComponentNameMatcher = MAIN_ACTIVITY_COMPONENT
 ) : StandardAppHelper(instr, launcherName, component) {
+
+    /**
+     * Clicks the button to launch the secondary activity, which should split with the main activity
+     * based on the split pair rule.
+     */
+    fun launchSecondaryActivity(wmHelper: WindowManagerStateHelper) {
+        val launchButton =
+            uiDevice.wait(
+                Until.findObject(By.res(getPackage(), "launch_secondary_activity_button")),
+                FIND_TIMEOUT
+            )
+        require(launchButton != null) { "Can't find launch secondary activity button on screen." }
+        launchButton.click()
+        wmHelper
+            .StateSyncBuilder()
+            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, STATE_RESUMED)
+            .withActivityState(MAIN_ACTIVITY_COMPONENT, STATE_RESUMED)
+            .waitForAndVerify()
+    }
 
     /**
      * Clicks the button to launch the placeholder primary activity, which should launch the
@@ -62,6 +83,9 @@ constructor(
 
         val MAIN_ACTIVITY_COMPONENT =
             ActivityOptions.ActivityEmbedding.MainActivity.COMPONENT.toFlickerComponent()
+
+        val SECONDARY_ACTIVITY_COMPONENT =
+            ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT.toFlickerComponent()
 
         val PLACEHOLDER_PRIMARY_COMPONENT =
             ActivityOptions.ActivityEmbedding.PlaceholderPrimaryActivity.COMPONENT

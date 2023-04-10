@@ -38,9 +38,9 @@ public class Highlights {
     }
 
     /**
-     * Returns a number of highlight.
+     * Returns the number of highlight.
      *
-     * @return a number of highlight.
+     * @return the number of highlight.
      *
      * @see Builder#addRange(Paint, int, int)
      * @see Builder#addRanges(Paint, int...)
@@ -53,7 +53,7 @@ public class Highlights {
      * Returns a paint used for the i-th highlight.
      *
      * @param index an index of the highlight. Must be between 0 and {@link #getSize()}
-     * @return a paint object
+     * @return the paint object
      *
      * @see Builder#addRange(Paint, int, int)
      * @see Builder#addRanges(Paint, int...)
@@ -72,7 +72,7 @@ public class Highlights {
      * [1, 2, 3, 4].
      *
      * @param index an index of the highlight. Must be between 0 and {@link #getSize()}
-     * @return a paint object
+     * @return the flattened ranges.
      *
      * @see Builder#addRange(Paint, int, int)
      * @see Builder#addRanges(Paint, int...)
@@ -89,6 +89,20 @@ public class Highlights {
 
         /**
          * Add single range highlight.
+         *
+         * The {@link android.widget.TextView} and underlying {@link Layout} draws highlight in the
+         * order of the {@link #addRange} calls.
+         *
+         * For example, the following code draws (1, 2) with red and (2, 5) with blue.
+         * <code>
+         *     val redPaint = Paint().apply { color = Color.RED }
+         *     val bluePaint = Paint().apply { color = Color.BLUE }
+         *     val highlight = Highlights.Builder()
+         *         .addRange(redPaint, 1, 4)
+         *         .addRange(bluePaint, 2, 5)
+         *         .build()
+         * </code>
+         *
          *
          * @param paint a paint object used for drawing highlight path.
          * @param start an inclusive offset of the text.
@@ -110,6 +124,16 @@ public class Highlights {
 
         /**
          * Add multiple ranges highlight.
+         *
+         * For example, the following code draws (1, 2) with red and (2, 5) with blue.
+         * <code>
+         *     val redPaint = Paint().apply { color = Color.RED }
+         *     val bluePaint = Paint().apply { color = Color.BLUE }
+         *     val highlight = Highlights.Builder()
+         *         .addRange(redPaint, 1, 4)
+         *         .addRange(bluePaint, 2, 5)
+         *         .build()
+         * </code>
          *
          * @param paint a paint object used for drawing highlight path.
          * @param ranges a flatten ranges. The {@code 2 * i}-th element is an inclusive start offset

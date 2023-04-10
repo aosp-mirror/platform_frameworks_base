@@ -220,7 +220,7 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
 
         // DO should be marked as able to grant sensors permission during upgrade and should be
         // reported as such via the API.
-        assertThat(dpms.canAdminGrantSensorsPermissionsForUser(ownerUser)).isTrue();
+        assertThat(dpms.canAdminGrantSensorsPermissions()).isTrue();
     }
 
     /**

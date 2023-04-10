@@ -173,7 +173,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"မူရင်း သတ်မှတ်မထားပါ။"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"စာ-မှ-စကားပြောင်းခြင်း ဆက်တင်များ"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"စာ-မှ-စကား ဆက်တင်များ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"စာ-မှ-စကားသို့ အထွက်"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"စကားပြောနှုန်း"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"စာတမ်းအားပြောဆိုသော အမြန်နှုန်း"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ဖြတ်ပိုင်းအနားသတ်များ၊ အနားများ စသဖြင့် ပြပါ။"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL အပြင်အဆင်အတိုင်း ဖြစ်စေခြင်း"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ဘာသာစကားအားလုံးအတွက် RTL အပြင်အဆင်အတိုင်း ဖြစ်စေသည်"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"လမ်းညွှန်ဘား အကြည်"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"လမ်းညွှန်ဘား၏ နောက်ခံအရောင်ကို မူရင်းအားဖြင့် အကြည်ဖြစ်အောင် လုပ်သည်"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ဝင်းဒိုးအဆင့် မှုန်ဝါးမှု ခွင့်ပြုရန်"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA မဖြစ်မနေဖွင့်ခြင်း"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 အက်ပ်များတွင် 4x MSAA ဖွင့်သည်"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ဤဖုန်း"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ဤတက်ဘလက်"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ဤဖုန်း"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ဤစက်ပစ္စည်းတွင် ဖွင့်၍မရပါ"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ပြောင်းရန်အကောင့်ကို အဆင့်မြှင့်ပါ"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ဤနေရာတွင် ဒေါင်းလုဒ်များကို ဖွင့်၍မရပါ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ကြော်ငြာအပြီးတွင် ထပ်စမ်းကြည့်ပါ"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ဤနေရာတွင်ဖွင့်ရန် စက်ပစ္စည်းကိုနှိုးပါ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"စက်ပစ္စည်းက ဖွင့်ခွင့်မပြုပါ"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ဤမီဒီယာကို ဒီမှာဖွင့်၍မရပါ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ချိတ်ဆက်ရာတွင် ပြဿနာရှိပါသည်။ စက်ကိုပိတ်ပြီး ပြန်ဖွင့်ပါ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ကြိုးတပ် အသံစက်ပစ္စည်း"</string>
     <string name="help_label" msgid="3528360748637781274">"အကူအညီနှင့် အကြံပြုချက်"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"နောက်ခလုတ်၏ ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"နောက်ခလုတ်ရှေ့ပြေးအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ဤဆက်တင်သည် လက်ဟန် ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။ အက်ပ်တစ်ခုစီ၏ ဆက်တင်အတွက် enableOnBackInvokedCallback ကို မန်နီးဖက်စ် (manifest) ဖိုင်၌ ဖွင့်ထားရန်လိုအပ်သည်။"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"ဘယ်သို့ရွှေ့ရန်"</item>
+    <item msgid="5425394847942513942">"အောက်သို့ရွှေ့ရန်"</item>
+    <item msgid="7728484337962740316">"ညာသို့ရွှေ့ရန်"</item>
+    <item msgid="324200556467459329">"အပေါ်သို့ရွှေ့ရန်"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

@@ -119,29 +119,15 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         }
 
         final int restrictionSource = enforcingUsers.get(0).getUserRestrictionSource();
-        final int adminUserId = enforcingUsers.get(0).getUserHandle().getIdentifier();
-        if (restrictionSource == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
-            // Check if it is a profile owner of the user under consideration.
-            if (adminUserId == userId) {
-                return getProfileOwner(context, userRestriction, adminUserId);
-            } else {
-                // Check if it is a profile owner of a managed profile of the current user.
-                // Otherwise it is in a separate user and we return a default EnforcedAdmin.
-                final UserInfo parentUser = um.getProfileParent(adminUserId);
-                return (parentUser != null && parentUser.id == userId)
-                        ? getProfileOwner(context, userRestriction, adminUserId)
-                        : EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(userRestriction);
-            }
-        } else if (restrictionSource == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
-            // When the restriction is enforced by device owner, return the device owner admin only
-            // if the admin is for the {@param userId} otherwise return a default EnforcedAdmin.
-            return adminUserId == userId
-                    ? getDeviceOwner(context, userRestriction)
-                    : EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(userRestriction);
+        if (restrictionSource == UserManager.RESTRICTION_SOURCE_SYSTEM) {
+            return null;
         }
 
-        // If the restriction is enforced by system then return null.
-        return null;
+        final EnforcedAdmin admin = getProfileOrDeviceOwner(context, userHandle);
+        if (admin != null) {
+            return admin;
+        }
+        return EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(userRestriction);
     }
 
     public static boolean hasBaseUserRestriction(Context context,

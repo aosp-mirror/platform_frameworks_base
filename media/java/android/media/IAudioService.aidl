@@ -49,6 +49,7 @@ import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
+import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
@@ -106,11 +107,11 @@ interface IAudioService {
     void setStreamVolumeWithAttribution(int streamType, int index, int flags,
             in String callingPackage, in String attributionTag);
 
-    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     void setDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
             in String callingPackage);
 
-    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     VolumeInfo getDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
             in String callingPackage);
 
@@ -138,18 +139,25 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags,
-            String callingPackage, in String attributionTag);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
+    void setVolumeGroupVolumeIndex(int groupId, int index, int flags, String callingPackage,
+            in String attributionTag);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    int getVolumeIndexForAttributes(in AudioAttributes aa);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
+    int getVolumeGroupVolumeIndex(int groupId);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    int getMaxVolumeIndexForAttributes(in AudioAttributes aa);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
+    int getVolumeGroupMaxVolumeIndex(int groupId);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    int getMinVolumeIndexForAttributes(in AudioAttributes aa);
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
+    int getVolumeGroupMinVolumeIndex(int groupId);
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    int getLastAudibleVolumeForVolumeGroup(int groupId);
+
+    boolean isVolumeGroupMuted(int groupId);
+
+    void adjustVolumeGroupVolume(int groupId, int direction, int flags, String callingPackage);
 
     @EnforcePermission("QUERY_AUDIO_STATE")
     int getLastAudibleStreamVolume(int streamType);
@@ -250,6 +258,21 @@ interface IAudioService {
     IRingtonePlayer getRingtonePlayer();
     int getUiSoundsStreamType();
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    List getIndependentStreamTypes();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    int getStreamTypeAlias(int streamType);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isVolumeControlUsingVolumeGroups();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    void setNotifAliasRingForTest(boolean alias);
+
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     void setWiredDeviceConnectionState(in AudioDeviceAttributes aa, int state, String caller);
 
@@ -272,25 +295,25 @@ interface IAudioService {
 
     void lowerVolumeToRs1(String callingPackage);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
-    float getRs2Value();
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    float getOutputRs2UpperBound();
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
-    oneway void setRs2Value(float rs2Value);
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setOutputRs2UpperBound(float rs2Value);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     float getCsd();
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void setCsd(float csd);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void forceUseFrameworkMel(boolean useFrameworkMel);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     boolean isCsdEnabled();
 
     int setHdmiSystemAudioSupported(boolean on);
@@ -405,10 +428,11 @@ interface IAudioService {
 
     oneway void setRttEnabled(in boolean rttEnabled);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     void setDeviceVolumeBehavior(in AudioDeviceAttributes device,
              in int deviceVolumeBehavior, in String pkgName);
 
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     int getDeviceVolumeBehavior(in AudioDeviceAttributes device);
 
     // WARNING: read warning at top of file, new methods that need to be used by native
@@ -621,12 +645,13 @@ interface IAudioService {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     int[] getActiveAssistantServiceUids();
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING,android.Manifest.permission.BLUETOOTH_PRIVILEGED})")
     void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
             in IAudioDeviceVolumeDispatcher cb,
             in String packageName,
             in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
-            boolean handlesvolumeAdjustment);
+            boolean handlesvolumeAdjustment,
+            int volumeBehavior);
 
     AudioHalVersionInfo getHalVersion();
 

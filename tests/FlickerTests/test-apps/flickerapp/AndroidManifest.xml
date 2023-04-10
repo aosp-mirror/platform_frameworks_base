@@ -47,7 +47,7 @@
                   android:theme="@style/CutoutShortEdges"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
                   android:windowSoftInputMode="stateVisible"
-                  android:configChanges="orientation|screenSize"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
                   android:label="ImeAppAutoFocus"
                   android:exported="true">
             <intent-filter>
@@ -83,6 +83,18 @@
                   android:label="NonResizeableActivity"
                   android:exported="true"
                   android:showOnLockScreen="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".NonResizeablePortraitActivity"
+                  android:theme="@style/CutoutNever"
+                  android:resizeableActivity="false"
+                  android:screenOrientation="portrait"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeablePortraitActivity"
+                  android:label="NonResizeablePortraitActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -178,6 +190,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ActivityEmbeddingSecondaryActivity"
+            android:label="ActivityEmbedding Secondary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false"/>
         <activity
             android:name=".ActivityEmbeddingPlaceholderPrimaryActivity"
             android:label="ActivityEmbedding Placeholder Primary"

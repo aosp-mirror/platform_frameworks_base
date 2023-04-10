@@ -134,4 +134,10 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     keyguardPasswordViewController.startAppearAnimation()
     verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
   }
+
+  @Test
+  fun testMessageIsSetWhenReset() {
+    keyguardPasswordViewController.resetState()
+    verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_password)
+  }
 }

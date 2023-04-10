@@ -50,8 +50,7 @@ private const val MAJOR = 10F
  */
 @SysUISingleton
 class UdfpsShell @Inject constructor(
-    commandRegistry: CommandRegistry,
-    private val udfpsOverlay: UdfpsOverlay
+    commandRegistry: CommandRegistry
 ) : Command {
 
     /**
@@ -69,10 +68,6 @@ class UdfpsShell @Inject constructor(
     override fun execute(pw: PrintWriter, args: List<String>) {
         if (args.size == 1 && args[0] == "hide") {
             hideOverlay()
-        } else if (args.size == 2 && args[0] == "udfpsOverlay" && args[1] == "show") {
-            showUdfpsOverlay()
-        } else if (args.size == 2 && args[0] == "udfpsOverlay" && args[1] == "hide") {
-            hideUdfpsOverlay()
         } else if (args.size == 2 && args[0] == "show") {
             showOverlay(getEnrollmentReason(args[1]))
         } else if (args.size == 1 && args[0] == "onUiReady") {
@@ -129,16 +124,6 @@ class UdfpsShell @Inject constructor(
                     }
                 }
         )
-    }
-
-    private fun showUdfpsOverlay() {
-        Log.v(TAG, "showUdfpsOverlay")
-        udfpsOverlay.show(REQUEST_ID)
-    }
-
-    private fun hideUdfpsOverlay() {
-        Log.v(TAG, "hideUdfpsOverlay")
-        udfpsOverlay.hide()
     }
 
     private fun hideOverlay() {

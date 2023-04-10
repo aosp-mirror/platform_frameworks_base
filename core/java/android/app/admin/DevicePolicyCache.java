@@ -19,6 +19,9 @@ import android.annotation.UserIdInt;
 
 import com.android.server.LocalServices;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Stores a copy of the set of device policies maintained by {@link DevicePolicyManager} that
  * can be accessed from any place without risking dead locks.
@@ -56,10 +59,15 @@ public abstract class DevicePolicyCache {
     public abstract int getPermissionPolicy(@UserIdInt int userHandle);
 
     /**
-     * Caches {@link DevicePolicyManager#canAdminGrantSensorsPermissionsForUser(int)} for the
-     * given user.
+     * True if there is an admin on the device who can grant sensor permissions.
      */
-    public abstract boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userHandle);
+    public abstract boolean canAdminGrantSensorsPermissions();
+
+    /**
+     * Returns a list of package names for which all launcher shortcuts should be modified to be
+     * launched in the managed profile and badged accordingly.
+     */
+    public abstract List<String> getLauncherShortcutOverrides();
 
     /**
      * Empty implementation.
@@ -83,8 +91,12 @@ public abstract class DevicePolicyCache {
         }
 
         @Override
-        public boolean canAdminGrantSensorsPermissionsForUser(int userHandle) {
+        public boolean canAdminGrantSensorsPermissions() {
             return false;
+        }
+        @Override
+        public List<String> getLauncherShortcutOverrides() {
+            return new ArrayList<>();
         }
     }
 }

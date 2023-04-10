@@ -99,7 +99,24 @@ public class DreamControllerTest {
         mLooper.dispatchAll();
 
         // Verify that dream service is called to attach.
-        verify(mIDreamService).attach(eq(mToken), eq(false) /*doze*/, any());
+        verify(mIDreamService).attach(eq(mToken), eq(false) /*doze*/,
+                eq(false) /*preview*/, any());
+    }
+
+    @Test
+    public void startDream_attachOnServiceConnectedInPreviewMode() throws RemoteException {
+        // Call dream controller to start dreaming.
+        mDreamController.startDream(mToken, mDreamName, true /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        // Mock service connected.
+        final ServiceConnection serviceConnection = captureServiceConnection();
+        serviceConnection.onServiceConnected(mDreamName, mIBinder);
+        mLooper.dispatchAll();
+
+        // Verify that dream service is called to attach.
+        verify(mIDreamService).attach(eq(mToken), eq(false) /*doze*/,
+                eq(true) /*preview*/, any());
     }
 
     @Test
@@ -129,7 +146,7 @@ public class DreamControllerTest {
 
         // Mock second dream started.
         verify(newDreamService).attach(eq(newToken), eq(false) /*doze*/,
-                mRemoteCallbackCaptor.capture());
+                eq(false) /*preview*/, mRemoteCallbackCaptor.capture());
         mRemoteCallbackCaptor.getValue().sendResult(null /*data*/);
         mLooper.dispatchAll();
 

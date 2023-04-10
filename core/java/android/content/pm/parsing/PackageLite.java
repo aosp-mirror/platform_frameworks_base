@@ -110,10 +110,16 @@ public class PackageLite {
      */
     private final boolean mIsSdkLibrary;
 
+    /**
+     * Indicates if this package allows an installer to declare update ownership of it.
+     */
+    private final boolean mAllowUpdateOwnership;
+
     public PackageLite(String path, String baseApkPath, ApkLite baseApk,
             String[] splitNames, boolean[] isFeatureSplits, String[] usesSplitNames,
             String[] configForSplit, String[] splitApkPaths, int[] splitRevisionCodes,
-            int targetSdk, Set<String>[] requiredSplitTypes, Set<String>[] splitTypes) {
+            int targetSdk, Set<String>[] requiredSplitTypes, Set<String>[] splitTypes,
+            boolean allowUpdateOwnership) {
         // The following paths may be different from the path in ApkLite because we
         // move or rename the APK files. Use parameters to indicate the correct paths.
         mPath = path;
@@ -144,6 +150,7 @@ public class PackageLite {
         mSplitApkPaths = splitApkPaths;
         mSplitRevisionCodes = splitRevisionCodes;
         mTargetSdk = targetSdk;
+        mAllowUpdateOwnership = allowUpdateOwnership;
     }
 
     /**
@@ -414,12 +421,19 @@ public class PackageLite {
         return mIsSdkLibrary;
     }
 
+    /**
+     * Indicates if this package allows an installer to declare update ownership of it.
+     */
+    @DataClass.Generated.Member
+    public boolean isAllowUpdateOwnership() {
+        return mAllowUpdateOwnership;
+    }
+
     @DataClass.Generated(
-            time = 1643132127068L,
+            time = 1680125514341L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/PackageLite.java",
-            inputSignatures =
-                    "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.NonNull java.lang.String mBaseApkPath\nprivate final @android.annotation.Nullable java.lang.String[] mSplitApkPaths\nprivate final @android.annotation.Nullable java.lang.String[] mSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mUsesSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mBaseRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mTargetSdk\nprivate final  int mBaseRevisionCode\nprivate final @android.annotation.Nullable int[] mSplitRevisionCodes\nprivate final  int mInstallLocation\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.Nullable boolean[] mIsFeatureSplits\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mProfileableByShell\nprivate final  boolean mUseEmbeddedDex\nprivate final  boolean mIsSdkLibrary\npublic  java.util.List<java.lang.String> getAllApkPaths()\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass PackageLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.NonNull java.lang.String mBaseApkPath\nprivate final @android.annotation.Nullable java.lang.String[] mSplitApkPaths\nprivate final @android.annotation.Nullable java.lang.String[] mSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mUsesSplitNames\nprivate final @android.annotation.Nullable java.lang.String[] mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mBaseRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String>[] mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mTargetSdk\nprivate final  int mBaseRevisionCode\nprivate final @android.annotation.Nullable int[] mSplitRevisionCodes\nprivate final  int mInstallLocation\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.Nullable boolean[] mIsFeatureSplits\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mProfileableByShell\nprivate final  boolean mUseEmbeddedDex\nprivate final  boolean mIsSdkLibrary\nprivate final  boolean mAllowUpdateOwnership\npublic  java.util.List<java.lang.String> getAllApkPaths()\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass PackageLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

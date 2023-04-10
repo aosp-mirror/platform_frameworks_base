@@ -143,7 +143,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public ComponentName provider;
 
     /**
-     * The default height of the widget when added to a host, in px. The widget will get
+     * The default width of the widget when added to a host, in px. The widget will get
      * at least this width, and will often be given more, depending on the host.
      *
      * <p>This field corresponds to the <code>android:minWidth</code> attribute in

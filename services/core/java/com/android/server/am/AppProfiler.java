@@ -20,6 +20,7 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
@@ -44,7 +45,6 @@ import static com.android.server.am.ActivityManagerService.appendMemInfo;
 import static com.android.server.am.ActivityManagerService.getKsmInfo;
 import static com.android.server.am.ActivityManagerService.stringifyKBSize;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
 
@@ -1005,6 +1005,37 @@ public class AppProfiler {
             mBgHandler.obtainMessage(BgHandler.MEMORY_PRESSURE_CHANGED, mLastMemoryLevel, memFactor)
                     .sendToTarget();
         }
+
+        if (mService.mConstants.USE_MODERN_TRIM) {
+            // Modern trim is not sent based on lowmem state
+            // Dispatch UI_HIDDEN to processes that need it
+            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
+                final ProcessProfileRecord profile = app.mProfile;
+                final IApplicationThread thread;
+                final ProcessStateRecord state = app.mState;
+                if (state.hasProcStateChanged()) {
+                    state.setProcStateChanged(false);
+                }
+                int procState = app.mState.getCurProcState();
+                if (((procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                        && procState < ActivityManager.PROCESS_STATE_CACHED_ACTIVITY)
+                        || app.mState.isSystemNoUi()) && app.mProfile.hasPendingUiClean()) {
+                    // If this application is now in the background and it
+                    // had done UI, then give it the special trim level to
+                    // have it free UI resources.
+                    if ((thread = app.getThread()) != null) {
+                        try {
+                            thread.scheduleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                            app.mProfile.setPendingUiClean(false);
+                        } catch (RemoteException e) {
+
+                        }
+                    }
+                }
+            });
+            return false;
+        }
+
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         boolean allChanged;
@@ -1118,7 +1149,7 @@ public class AppProfiler {
                     Slog.v(TAG_OOM_ADJ, msg + app.processName + " to " + level);
                 }
                 mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
-                        OOM_ADJ_REASON_NONE);
+                        CachedAppOptimizer.UNFREEZE_REASON_TRIM_MEMORY);
                 thread.scheduleTrimMemory(level);
             } catch (RemoteException e) {
             }
@@ -1604,8 +1635,8 @@ public class AppProfiler {
             mService.mServices.newServiceDumperLocked(null, catPw, emptyArgs, 0,
                     false, null).dumpLocked();
             catPw.println();
-            mService.mAtmInternal.dump(
-                    DUMP_ACTIVITIES_CMD, null, catPw, emptyArgs, 0, false, false, null);
+            mService.mAtmInternal.dump(DUMP_ACTIVITIES_CMD, null, catPw, emptyArgs, 0, false, false,
+                    null, INVALID_DISPLAY);
             catPw.flush();
         }
         dropBuilder.append(catSw.toString());
@@ -1831,7 +1862,7 @@ public class AppProfiler {
             final BatteryStatsImpl bstats = mService.mBatteryStatsService.getActiveStatistics();
             synchronized (bstats) {
                 if (haveNewCpuStats) {
-                    if (bstats.startAddingCpuLocked()) {
+                    if (bstats.startAddingCpuStatsLocked()) {
                         int totalUTime = 0;
                         int totalSTime = 0;
                         final int statsCount = mProcessCpuTracker.countStats();
@@ -1877,9 +1908,10 @@ public class AppProfiler {
                         final int irqTime = mProcessCpuTracker.getLastIrqTime();
                         final int softIrqTime = mProcessCpuTracker.getLastSoftIrqTime();
                         final int idleTime = mProcessCpuTracker.getLastIdleTime();
-                        bstats.finishAddingCpuLocked(totalUTime, totalSTime, userTime,
+                        bstats.addCpuStatsLocked(totalUTime, totalSTime, userTime,
                                 systemTime, iowaitTime, irqTime, softIrqTime, idleTime);
                     }
+                    bstats.finishAddingCpuStatsLocked();
                 }
 
                 if (mLastWriteTime < (now - BATTERY_STATS_TIME)) {
@@ -1891,15 +1923,11 @@ public class AppProfiler {
     }
 
     long getCpuTimeForPid(int pid) {
-        synchronized (mProcessCpuTracker) {
-            return mProcessCpuTracker.getCpuTimeForPid(pid);
-        }
+        return mProcessCpuTracker.getCpuTimeForPid(pid);
     }
 
     long getCpuDelayTimeForPid(int pid) {
-        synchronized (mProcessCpuTracker) {
-            return mProcessCpuTracker.getCpuDelayTimeForPid(pid);
-        }
+        return mProcessCpuTracker.getCpuDelayTimeForPid(pid);
     }
 
     List<ProcessCpuTracker.Stats> getCpuStats(Predicate<ProcessCpuTracker.Stats> predicate) {
@@ -2054,7 +2082,7 @@ public class AppProfiler {
                 }
             } else if (instr != null && instr.mProfileFile != null) {
                 profilerInfo = new ProfilerInfo(instr.mProfileFile, null, 0, false, false,
-                        null, false);
+                        null, false, 0);
             }
             if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
                 // We need to do a debuggable check here. See setAgentApp for why the check is
@@ -2064,7 +2092,7 @@ public class AppProfiler {
                     // Do not overwrite already requested agent.
                     if (profilerInfo == null) {
                         profilerInfo = new ProfilerInfo(null, null, 0, false, false,
-                                mAppAgentMap.get(processName), true);
+                                mAppAgentMap.get(processName), true, 0);
                     } else if (profilerInfo.agent == null) {
                         profilerInfo = profilerInfo.setAgent(mAppAgentMap.get(processName), true);
                     }
@@ -2196,7 +2224,9 @@ public class AppProfiler {
                             + " mAutoStopProfiler="
                             + mProfileData.getProfilerInfo().autoStopProfiler
                             + " mStreamingOutput="
-                            + mProfileData.getProfilerInfo().streamingOutput);
+                            + mProfileData.getProfilerInfo().streamingOutput
+                            + " mClockType="
+                            + mProfileData.getProfilerInfo().clockType);
                     pw.println("  mProfileType=" + mProfileType);
                 }
             }

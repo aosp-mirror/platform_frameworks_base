@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowInsets.Type.ime;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static androidx.core.view.WindowInsetsCompat.Type;
 
@@ -32,6 +33,7 @@ import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -58,6 +60,7 @@ import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
@@ -87,6 +90,7 @@ class MenuViewLayer extends FrameLayout implements
     private final AccessibilityManager mAccessibilityManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final IAccessibilityFloatingMenu mFloatingMenu;
+    private final SecureSettings mSecureSettings;
     private final DismissAnimationController mDismissAnimationController;
     private final MenuViewModel mMenuViewModel;
     private final Observer<Boolean> mDockTooltipObserver =
@@ -126,9 +130,16 @@ class MenuViewLayer extends FrameLayout implements
     final Runnable mDismissMenuAction = new Runnable() {
         @Override
         public void run() {
-            Settings.Secure.putStringForUser(getContext().getContentResolver(),
+            mSecureSettings.putStringForUser(
                     Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
                     UserHandle.USER_CURRENT);
+
+            final List<ComponentName> hardwareKeyShortcutComponents =
+                    mAccessibilityManager.getAccessibilityShortcutTargets(
+                                    ACCESSIBILITY_SHORTCUT_KEY)
+                            .stream()
+                            .map(ComponentName::unflattenFromString)
+                            .toList();
 
             // Should disable the corresponding service when the fragment type is
             // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
@@ -136,10 +147,17 @@ class MenuViewLayer extends FrameLayout implements
                     mAccessibilityManager.getEnabledAccessibilityServiceList(
                             AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
             serviceInfoList.forEach(info -> {
-                if (getAccessibilityServiceFragmentType(info) == INVISIBLE_TOGGLE) {
-                    setAccessibilityServiceState(getContext(),
-                            info.getComponentName(), /* enabled= */ false);
+                if (getAccessibilityServiceFragmentType(info) != INVISIBLE_TOGGLE) {
+                    return;
                 }
+
+                final ComponentName serviceComponentName = info.getComponentName();
+                if (hardwareKeyShortcutComponents.contains(serviceComponentName)) {
+                    return;
+                }
+
+                setAccessibilityServiceState(getContext(), serviceComponentName, /* enabled= */
+                        false);
             });
 
             mFloatingMenu.hide();
@@ -147,7 +165,8 @@ class MenuViewLayer extends FrameLayout implements
     };
 
     MenuViewLayer(@NonNull Context context, WindowManager windowManager,
-            AccessibilityManager accessibilityManager, IAccessibilityFloatingMenu floatingMenu) {
+            AccessibilityManager accessibilityManager, IAccessibilityFloatingMenu floatingMenu,
+            SecureSettings secureSettings) {
         super(context);
 
         // Simplifies the translation positioning and animations
@@ -156,8 +175,9 @@ class MenuViewLayer extends FrameLayout implements
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
         mFloatingMenu = floatingMenu;
+        mSecureSettings = secureSettings;
 
-        mMenuViewModel = new MenuViewModel(context, accessibilityManager);
+        mMenuViewModel = new MenuViewModel(context, accessibilityManager, secureSettings);
         mMenuViewAppearance = new MenuViewAppearance(context, windowManager);
         mMenuView = new MenuView(context, mMenuViewModel, mMenuViewAppearance);
         mMenuAnimationController = mMenuView.getMenuAnimationController();

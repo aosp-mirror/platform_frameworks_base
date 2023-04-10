@@ -21,6 +21,12 @@ import android.util.AndroidException;
 
 /**
  * Parent exception for all Binder remote-invocation errors
+ *
+ * Note: not all exceptions from binder services will be subclasses of this.
+ *   For instance, RuntimeException and several subclasses of it may be
+ *   thrown as well as OutOfMemoryException.
+ *
+ * One common subclass is {@link DeadObjectException}.
  */
 public class RemoteException extends AndroidException {
     public RemoteException() {

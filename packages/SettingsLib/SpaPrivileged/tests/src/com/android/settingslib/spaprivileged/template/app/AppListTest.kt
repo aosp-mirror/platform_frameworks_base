@@ -32,7 +32,6 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.widget.ui.SpinnerOption
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppEntry
-import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListData
 import com.android.settingslib.spaprivileged.model.app.IAppListViewModel
 import com.android.settingslib.spaprivileged.tests.testutils.TestAppListModel
@@ -115,7 +114,7 @@ class AppListTest {
     ) {
         composeTestRule.setContent {
             AppListInput(
-                config = AppListConfig(userId = USER_ID, showInstantApps = false),
+                config = AppListConfig(userIds = listOf(USER_ID), showInstantApps = false),
                 listModel = TestAppListModel(enableGrouping = enableGrouping),
                 state = AppListState(
                     showSystem = false.toState(),

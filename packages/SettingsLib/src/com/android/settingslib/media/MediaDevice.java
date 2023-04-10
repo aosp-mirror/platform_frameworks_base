@@ -30,10 +30,21 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-import static android.media.RouteListingPreference.Item.DISABLE_REASON_NONE;
-import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE;
+import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
+import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION_MANAGED;
+import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
+import static android.media.RouteListingPreference.Item.SUBTEXT_DEVICE_LOW_POWER;
+import static android.media.RouteListingPreference.Item.SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_ERROR_UNKNOWN;
+import static android.media.RouteListingPreference.Item.SUBTEXT_NONE;
+import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_TRACK_UNSUPPORTED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_UNAUTHORIZED;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -50,6 +61,8 @@ import androidx.annotation.DoNotInline;
 import androidx.annotation.IntDef;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+
+import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -82,6 +95,17 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         int TYPE_CAST_GROUP_DEVICE = 7;
     }
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SelectionBehavior.SELECTION_BEHAVIOR_NONE,
+            SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER,
+            SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP
+    })
+    public @interface SelectionBehavior {
+        int SELECTION_BEHAVIOR_NONE = 0;
+        int SELECTION_BEHAVIOR_TRANSFER = 1;
+        int SELECTION_BEHAVIOR_GO_TO_APP = 2;
+    }
+
     @VisibleForTesting
     int mType;
 
@@ -106,6 +130,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         setType(info);
     }
 
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     private void setType(MediaRoute2Info info) {
         if (info == null) {
             mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
@@ -194,24 +220,66 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract String getId();
 
     /**
-     * Get disabled reason of device
+     * Get selection behavior of device
      *
-     * @return disabled reason of device
+     * @return selection behavior of device
      */
-    @RouteListingPreference.Item.DisableReason
-    public int getDisableReason() {
+    @SelectionBehavior
+    public int getSelectionBehavior() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
-                ? mItem.getDisableReason() : -1;
+                ? mItem.getSelectionBehavior() : SELECTION_BEHAVIOR_TRANSFER;
     }
 
     /**
-     * Checks if device is has disabled reason
+     * Checks if device is has subtext
      *
-     * @return true if device has disabled reason
+     * @return true if device has subtext
      */
-    public boolean hasDisabledReason() {
+    public boolean hasSubtext() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && mItem != null
+                && mItem.getSubText() != SUBTEXT_NONE;
+    }
+
+    /**
+     * Get subtext of device
+     *
+     * @return subtext of device
+     */
+    @RouteListingPreference.Item.SubText
+    public int getSubtext() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
-                && mItem.getDisableReason() != DISABLE_REASON_NONE;
+                ? mItem.getSubText() : SUBTEXT_NONE;
+    }
+
+    /**
+     * Returns subtext string for current route.
+     *
+     * @return subtext string for this route
+     */
+    public String getSubtextString() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
+                ? Api34Impl.composeSubtext(mItem, mContext) : null;
+    }
+
+    /**
+     * Checks if device has ongoing shared session, which allow user to join
+     *
+     * @return true if device has ongoing session
+     */
+    public boolean hasOngoingSession() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && Api34Impl.hasOngoingSession(mItem);
+    }
+
+    /**
+     * Checks if device is the host for ongoing shared session, which allow user to adjust volume
+     *
+     * @return true if device is the host for ongoing shared session
+     */
+    public boolean isHostForOngoingSession() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && Api34Impl.isHostForOngoingSession(mItem);
     }
 
     /**
@@ -295,6 +363,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      *
      * @return true if the RouteInfo equals TYPE_BLE_HEADSET.
      */
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     public boolean isBLEDevice() {
         return mRouteInfo.getType() == TYPE_BLE_HEADSET;
     }
@@ -510,8 +580,43 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     @RequiresApi(34)
     private static class Api34Impl {
         @DoNotInline
+        static boolean isHostForOngoingSession(RouteListingPreference.Item item) {
+            int flags = item != null ? item.getFlags() : 0;
+            return (flags & FLAG_ONGOING_SESSION) != 0
+                    && (flags & FLAG_ONGOING_SESSION_MANAGED) != 0;
+        }
+
+        @DoNotInline
         static boolean isSuggestedDevice(RouteListingPreference.Item item) {
-            return item != null && item.getFlags() == FLAG_SUGGESTED_ROUTE;
+            return item != null && (item.getFlags() & FLAG_SUGGESTED) != 0;
+        }
+
+        @DoNotInline
+        static boolean hasOngoingSession(RouteListingPreference.Item item) {
+            return item != null && (item.getFlags() & FLAG_ONGOING_SESSION) != 0;
+        }
+
+        @DoNotInline
+        static String composeSubtext(RouteListingPreference.Item item, Context context) {
+            switch (item.getSubText()) {
+                case SUBTEXT_ERROR_UNKNOWN:
+                    return context.getString(R.string.media_output_status_unknown_error);
+                case SUBTEXT_SUBSCRIPTION_REQUIRED:
+                    return context.getString(R.string.media_output_status_require_premium);
+                case SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED:
+                    return context.getString(R.string.media_output_status_not_support_downloads);
+                case SUBTEXT_AD_ROUTING_DISALLOWED:
+                    return context.getString(R.string.media_output_status_try_after_ad);
+                case SUBTEXT_DEVICE_LOW_POWER:
+                    return context.getString(R.string.media_output_status_device_in_low_power_mode);
+                case SUBTEXT_UNAUTHORIZED:
+                    return context.getString(R.string.media_output_status_unauthorized);
+                case SUBTEXT_TRACK_UNSUPPORTED:
+                    return context.getString(R.string.media_output_status_track_unsupported);
+                case SUBTEXT_CUSTOM:
+                    return (String) item.getCustomSubtextMessage();
+            }
+            return "";
         }
     }
 }

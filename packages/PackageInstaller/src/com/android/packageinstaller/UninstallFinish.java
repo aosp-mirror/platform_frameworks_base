@@ -49,6 +49,7 @@ public class UninstallFinish extends BroadcastReceiver {
 
     static final String EXTRA_UNINSTALL_ID = "com.android.packageinstaller.extra.UNINSTALL_ID";
     static final String EXTRA_APP_LABEL = "com.android.packageinstaller.extra.APP_LABEL";
+    static final String EXTRA_IS_CLONE_APP = "com.android.packageinstaller.extra.IS_CLONE_APP";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -84,7 +85,10 @@ public class UninstallFinish extends BroadcastReceiver {
             case PackageInstaller.STATUS_SUCCESS:
                 notificationManager.cancel(uninstallId);
 
-                Toast.makeText(context, context.getString(R.string.uninstall_done_app, appLabel),
+                boolean isCloneApp = intent.getBooleanExtra(EXTRA_IS_CLONE_APP, false);
+                Toast.makeText(context, isCloneApp
+                                ? context.getString(R.string.uninstall_done_clone_app, appLabel)
+                                : context.getString(R.string.uninstall_done_app, appLabel),
                         Toast.LENGTH_LONG).show();
                 return;
             case PackageInstaller.STATUS_FAILURE_BLOCKED: {

@@ -17,29 +17,28 @@
 package com.android.systemui.notetask
 
 import android.app.Activity
-import android.app.KeyguardManager
 import android.app.role.RoleManager
-import android.content.Context
-import android.os.UserManager
-import androidx.core.content.getSystemService
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.notetask.quickaffordance.NoteTaskQuickAffordanceModule
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
+import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import java.util.Optional
 
 /** Compose all dependencies required by Note Task feature. */
 @Module(includes = [NoteTaskQuickAffordanceModule::class])
-internal interface NoteTaskModule {
+interface NoteTaskModule {
 
     @[Binds IntoMap ClassKey(LaunchNoteTaskActivity::class)]
     fun LaunchNoteTaskActivity.bindNoteTaskLauncherActivity(): Activity
+
+    @[Binds IntoMap ClassKey(LaunchNoteTaskManagedProfileProxyActivity::class)]
+    fun LaunchNoteTaskManagedProfileProxyActivity.bindNoteTaskLauncherProxyActivity(): Activity
 
     @[Binds IntoMap ClassKey(CreateNoteTaskShortcutActivity::class)]
     fun CreateNoteTaskShortcutActivity.bindNoteTaskShortcutActivity(): Activity
@@ -51,19 +50,9 @@ internal interface NoteTaskModule {
             featureFlags: FeatureFlags,
             roleManager: RoleManager,
         ): Boolean {
-            val isRoleAvailable = roleManager.isRoleAvailable(NoteTaskIntentResolver.NOTE_ROLE)
+            val isRoleAvailable = roleManager.isRoleAvailable(RoleManager.ROLE_NOTES)
             val isFeatureEnabled = featureFlags.isEnabled(Flags.NOTE_TASKS)
             return isRoleAvailable && isFeatureEnabled
-        }
-
-        @Provides
-        fun provideOptionalKeyguardManager(context: Context): Optional<KeyguardManager> {
-            return Optional.ofNullable(context.getSystemService())
-        }
-
-        @Provides
-        fun provideOptionalUserManager(context: Context): Optional<UserManager> {
-            return Optional.ofNullable(context.getSystemService())
         }
     }
 }

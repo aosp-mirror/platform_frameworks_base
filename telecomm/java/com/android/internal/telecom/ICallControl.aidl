@@ -16,6 +16,7 @@
 
 package com.android.internal.telecom;
 
+import android.os.Bundle;
 import android.telecom.CallControl;
 import android.telecom.CallEndpoint;
 import android.telecom.DisconnectCause;
@@ -26,9 +27,10 @@ import android.os.ResultReceiver;
  */
 oneway interface ICallControl {
     void setActive(String callId, in ResultReceiver callback);
+    void answer(int videoState, String callId, in ResultReceiver callback);
     void setInactive(String callId, in ResultReceiver callback);
     void disconnect(String callId, in DisconnectCause disconnectCause, in ResultReceiver callback);
-    void rejectCall(String callId, in ResultReceiver callback);
     void startCallStreaming(String callId, in ResultReceiver callback);
     void requestCallEndpointChange(in CallEndpoint callEndpoint, in ResultReceiver callback);
+    void sendEvent(String callId, String event, in Bundle extras);
 }

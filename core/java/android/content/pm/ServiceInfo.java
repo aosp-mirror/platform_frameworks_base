@@ -246,8 +246,17 @@ public class ServiceInfo extends ComponentInfo
 
     /**
      * Constant corresponding to {@code mediaProjection} in
-     * the {@link android.R.attr#foregroundServiceType} attribute.
-     * Managing a media projection session, e.g for screen recording or taking screenshots.
+     * the {@link android.R.attr#foregroundServiceType foregroundServiceType} attribute.
+     *
+     * <p>
+     * To capture through {@link android.media.projection.MediaProjection}, an app must start a
+     * foreground service with the type corresponding to this constant. This type should only be
+     * used for {@link android.media.projection.MediaProjection}. Capturing screen contents via
+     * {@link android.media.projection.MediaProjection#createVirtualDisplay(String, int, int, int,
+     * int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback,
+     * android.os.Handler) createVirtualDisplay} conveniently allows recording, presenting screen
+     * contents into a meeting, taking screenshots, or several other scenarios.
+     * </p>
      *
      * <p>Starting foreground service with this type from apps targeting API level
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and later, will require permission
@@ -350,23 +359,23 @@ public class ServiceInfo extends ComponentInfo
     /**
      * Constant corresponding to {@code systemExempted} in
      * the {@link android.R.attr#foregroundServiceType} attribute.
-     * The system exmpted foreground service use cases.
+     * The system exempted foreground service use cases.
      *
      * <p class="note">Note, apps are allowed to use this type only in the following cases:
      * <ul>
      *   <li>App has a UID &lt; {@link android.os.Process#FIRST_APPLICATION_UID}</li>
      *   <li>App is on Doze allowlist</li>
      *   <li>Device is running in <a href="https://android.googlesource.com/platform/frameworks/base/+/master/packages/SystemUI/docs/demo_mode.md">Demo Mode</a></li>
-     *   <li><a href="https://source.android.com/devices/tech/admin/provision">Device owner app</a><li>
-     *   <li><a href="https://source.android.com/devices/tech/admin/managed-profiles">Profile owner apps</a><li>
+     *   <li><a href="https://source.android.com/devices/tech/admin/provision">Device owner app</a></li>
+     *   <li><a href="https://source.android.com/devices/tech/admin/managed-profiles">Profile owner apps</a></li>
      *   <li>Persistent apps</li>
      *   <li><a href="https://source.android.com/docs/core/connect/carrier">Carrier privileged apps</a></li>
      *   <li>Apps that have the {@code android.app.role.RoleManager#ROLE_EMERGENCY} role</li>
      *   <li>Headless system apps</li>
      *   <li><a href="{@docRoot}guide/topics/admin/device-admin">Device admin apps</a></li>
      *   <li>Active VPN apps</li>
-     *   <li>Apps holding {@link Manifest.permission#SCHEDULE_EXACT_ALARM} or
-     *       {@link Manifest.permission#USE_EXACT_ALARM} permission.</li>
+     *   <li>Apps holding {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} or
+     *       {@link android.Manifest.permission#USE_EXACT_ALARM} permission.</li>
      * </ul>
      * </p>
      */
@@ -382,26 +391,29 @@ public class ServiceInfo extends ComponentInfo
      *
      * <p>Unlike other foreground service types, this type is not associated with a specific use
      * case, and it will not require any special permissions
-     * (besides {@link Manifest.permission#FOREGROUND_SERVICE}).
+     * (besides {@link android.Manifest.permission#FOREGROUND_SERVICE}).
      *
      * However, this type has the following restrictions.
      *
      * <ul>
      *     <li>
-     *         The type has a 1 minute timeout.
+     *         The type has a 3 minute timeout.
      *         A foreground service of this type must be stopped within the timeout by
-     *         {@link android.app.Service#stopSelf),
-     *         or {@link android.content.Context#stopService).
-     *         {@link android.app.Service#stopForeground) will also work, which will demote the
+     *         {@link android.app.Service#stopSelf()},
+     *         {@link android.content.Context#stopService(android.content.Intent)}
+     *         or their overloads).
+     *         {@link android.app.Service#stopForeground(int)} will also work,
+     *         which will demote the
      *         service to a "background" service, which will soon be stopped by the system.
      *
-     *         <p>The system will <em>not</em> automatically stop it.
-     *
      *         <p>If the service isn't stopped within the timeout,
-     *         {@link android.app.Service#onTimeout(int)} will be called.
-     *         If the service is still not stopped after the callback,
-     *         the app will be declared an ANR.
+     *         {@link android.app.Service#onTimeout(int)} will be called. Note, even when the
+     *         system calls this callback, it will not stop the service automatically.
+     *         You still need to stop the service using one of the aforementioned
+     *         ways even when you get this callback.
      *
+     *         <p>If the service is still not stopped after the callback,
+     *         the app will be declared an ANR, after a short grace period of several seconds.
      *     <li>
      *         A foreground service of this type cannot be made "sticky"
      *         (see {@link android.app.Service#START_STICKY}). That is, if an app is killed
@@ -415,7 +427,34 @@ public class ServiceInfo extends ComponentInfo
      *         <a href="/guide/components/foreground-services#background-start-restrictions>
      *             Restrictions on background starts
      *         </a>
+     *     <li>
+     *         You can combine multiple foreground services types with {@code |}s, and you can
+     *         combine
+     *         {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
+     *         with other types as well.
+     *         However,
+     *         {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
+     *         is for situations
+     *         where you have no other valid foreground services to use and the timeout is long
+     *         enough for the task, and if you can use other types, there's no point using
+     *         this type.
+     *         For this reason, if
+     *         {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
+     *         is combined with other foreground service types, the system will simply ignore
+     *         it, and as a result,
+     *         none of the above restrictions will apply (e.g. there'll be no timeout).
      * </ul>
+     *
+     * <p>Also note, even though
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
+     * was added
+     * on Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it can be also used on
+     * on prior android versions (just like other new foreground service types can be used).
+     * However, because {@link android.app.Service#onTimeout(int)} did not exist on prior versions,
+     * it will never called on such versions.
+     * Because of this, developers must make sure to stop the foreground service even if
+     * {@link android.app.Service#onTimeout(int)} is not called on such versions.
      *
      * @see android.app.Service#onTimeout(int)
      */

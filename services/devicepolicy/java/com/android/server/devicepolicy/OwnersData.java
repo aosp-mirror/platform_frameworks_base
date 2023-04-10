@@ -66,6 +66,7 @@ class OwnersData {
     private static final String TAG_DEVICE_OWNER_TYPE = "device-owner-type";
     private static final String TAG_DEVICE_OWNER_PROTECTED_PACKAGES =
             "device-owner-protected-packages";
+    private static final String TAG_POLICY_ENGINE_MIGRATION = "policy-engine-migration";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
@@ -83,6 +84,8 @@ class OwnersData {
     private static final String ATTR_PROFILE_OWNER_OF_ORG_OWNED_DEVICE =
             "isPoOrganizationOwnedDevice";
     private static final String ATTR_DEVICE_OWNER_TYPE_VALUE = "value";
+
+    private static final String ATTR_MIGRATED_TO_POLICY_ENGINE = "migratedToPolicyEngine";
 
     // Internal state for the device owner package.
     OwnerInfo mDeviceOwner;
@@ -108,6 +111,8 @@ class OwnersData {
     @Nullable
     SystemUpdateInfo mSystemUpdateInfo;
     private final PolicyPathProvider mPathProvider;
+
+    boolean mMigratedToPolicyEngine = false;
 
     OwnersData(PolicyPathProvider pathProvider) {
         mPathProvider = pathProvider;
@@ -389,6 +394,11 @@ class OwnersData {
                 }
                 out.endTag(null, TAG_FREEZE_PERIOD_RECORD);
             }
+
+            out.startTag(null, TAG_POLICY_ENGINE_MIGRATION);
+            out.attributeBoolean(null, ATTR_MIGRATED_TO_POLICY_ENGINE, mMigratedToPolicyEngine);
+            out.endTag(null, TAG_POLICY_ENGINE_MIGRATION);
+
         }
 
         @Override
@@ -444,6 +454,9 @@ class OwnersData {
                     }
                     mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
                     break;
+                case TAG_POLICY_ENGINE_MIGRATION:
+                    mMigratedToPolicyEngine = parser.getAttributeBoolean(
+                            null, ATTR_MIGRATED_TO_POLICY_ENGINE, false);
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);
                     return false;

@@ -16,6 +16,7 @@
 
 package com.android.server.pm.permission;
 
+import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.CAPTURE_AUDIO_OUTPUT;
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -50,7 +51,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
-import android.healthconnect.HealthConnectManager;
+import android.health.connect.HealthConnectManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -63,6 +64,7 @@ import android.permission.IPermissionManager;
 import android.permission.PermissionCheckerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -94,6 +96,7 @@ import java.util.function.BiFunction;
  * Manages all permissions and handles permissions related tasks.
  */
 public class PermissionManagerService extends IPermissionManager.Stub {
+
     private static final String LOG_TAG = PermissionManagerService.class.getSimpleName();
 
     /** Map of IBinder -> Running AttributionSource */
@@ -967,12 +970,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // the private data in your process; or by you explicitly calling to another
             // app passing the source, in which case you must trust the other side;
 
-            final int callingUid = Binder.getCallingUid();
-            if (source.getUid() != callingUid && mContext.checkPermission(
+            final int callingUid = resolveUid(Binder.getCallingUid());
+            final int sourceUid = resolveUid(source.getUid());
+            if (sourceUid != callingUid && mContext.checkPermission(
                     Manifest.permission.UPDATE_APP_OPS_STATS, /*pid*/ -1, callingUid)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Cannot register attribution source for uid:"
-                        + source.getUid() + " from uid:" + callingUid);
+                        + sourceUid + " from uid:" + callingUid);
             }
 
             final PackageManagerInternal packageManagerInternal = LocalServices.getService(
@@ -981,10 +985,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // TODO(b/234653108): Clean up this UID/package & cross-user check.
             // If calling from the system process, allow registering attribution for package from
             // any user
-            int userId = UserHandle.getUserId((callingUid == Process.SYSTEM_UID ? source.getUid()
+            int userId = UserHandle.getUserId((callingUid == Process.SYSTEM_UID ? sourceUid
                     : callingUid));
             if (packageManagerInternal.getPackageUid(source.getPackageName(), 0, userId)
-                    != source.getUid()) {
+                    != sourceUid) {
                 throw new SecurityException("Cannot register attribution source for package:"
                         + source.getPackageName() + " from uid:" + callingUid);
             }
@@ -1009,6 +1013,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
                 return false;
             }
+        }
+
+        private int resolveUid(int uid) {
+            final VoiceInteractionManagerInternal vimi = LocalServices
+                    .getService(VoiceInteractionManagerInternal.class);
+            if (vimi == null) {
+                return uid;
+            }
+            final VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity
+                    hotwordDetectionServiceIdentity = vimi.getHotwordDetectionServiceIdentity();
+            if (hotwordDetectionServiceIdentity != null
+                    && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+                return hotwordDetectionServiceIdentity.getOwnerUid();
+            }
+            return uid;
         }
     }
 
@@ -1313,7 +1332,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     // Bg location is one-off runtime modifier permission and has no app op
                     if (sPlatformPermissions.containsKey(permission)
                             && !Manifest.permission.ACCESS_BACKGROUND_LOCATION.equals(permission)
-                            && !Manifest.permission.BODY_SENSORS_BACKGROUND.equals(permission)) {
+                            && !Manifest.permission.BODY_SENSORS_BACKGROUND.equals(permission)
+                            && !Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND
+                            .equals(permission)) {
                         Slog.wtf(LOG_TAG, "Platform runtime permission " + permission
                                 + " with no app op defined!");
                     }
@@ -1377,14 +1398,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             boolean permissionGranted = context.checkPermission(permission, /*pid*/ -1,
                     uid) == PackageManager.PERMISSION_GRANTED;
 
-            // Override certain permissions checks for the HotwordDetectionService. This service is
-            // an isolated service, which ordinarily cannot hold permissions.
+            // Override certain permissions checks for the shared isolated process for both
+            // HotwordDetectionService and VisualQueryDetectionService, which ordinarily cannot hold
+            // any permissions.
             // There's probably a cleaner, more generalizable way to do this. For now, this is
             // the only use case for this, so simply override here.
             if (!permissionGranted
                     && Process.isIsolated(uid) // simple check which fails-fast for the common case
                     && (permission.equals(RECORD_AUDIO) || permission.equals(CAPTURE_AUDIO_HOTWORD)
-                    || permission.equals(CAPTURE_AUDIO_OUTPUT))) {
+                    || permission.equals(CAPTURE_AUDIO_OUTPUT) || permission.equals(CAMERA))) {
                 HotwordDetectionServiceProvider hotwordServiceProvider =
                         permissionManagerServiceInt.getHotwordDetectionServiceProvider();
                 permissionGranted = hotwordServiceProvider != null

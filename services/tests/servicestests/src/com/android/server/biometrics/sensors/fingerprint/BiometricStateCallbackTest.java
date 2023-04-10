@@ -144,7 +144,7 @@ public class BiometricStateCallbackTest {
 
     @Test
     public void testAuthentication_enrollmentCallbackNeverNotified() {
-        AuthenticationClient<?> client = mock(AuthenticationClient.class);
+        AuthenticationClient<?, ?> client = mock(AuthenticationClient.class);
         mCallback.onClientFinished(client, true /* success */);
         verify(mBiometricStateListener, never()).onEnrollmentsChanged(anyInt(), anyInt(),
                 anyBoolean());

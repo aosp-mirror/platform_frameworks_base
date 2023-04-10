@@ -120,6 +120,31 @@ public interface RILConstants {
     int BLOCKED_DUE_TO_CALL = 69;                   /* SMS is blocked due to call control */
     int RF_HARDWARE_ISSUE = 70;                     /* RF HW issue is detected */
     int NO_RF_CALIBRATION_INFO = 71;                /* No RF calibration in device */
+    int ENCODING_NOT_SUPPORTED = 72;                /* The encoding scheme is not supported by
+                                                       either the network or the MS. */
+    int FEATURE_NOT_SUPPORTED = 73;                 /* The requesting feature is not supported by
+                                                       the service provider. */
+    int INVALID_CONTACT = 74;                       /* The contact to be added is either not
+                                                       existing or not valid. */
+    int MODEM_INCOMPATIBLE = 75;                    /* The modem of the MS is not compatible with
+                                                       the service provider. */
+    int NETWORK_TIMEOUT = 76;                       /* Modem timeout to receive ACK or response from
+                                                       network after sending a request to it. */
+    int NO_SATELLITE_SIGNAL = 77;                   /* Modem fails to communicate with the satellite
+                                                       network since there is no satellite signal.*/
+    int NOT_SUFFICIENT_ACCOUNT_BALANCE = 78;        /* The request cannot be performed since the
+                                                       subscriber's account balance is not
+                                                       sufficient. */
+    int RADIO_TECHNOLOGY_NOT_SUPPORTED = 79;        /* The radio technology is not supported by the
+                                                       service provider. */
+    int SUBSCRIBER_NOT_AUTHORIZED = 80;             /* The subscription is not authorized to
+                                                       register with the service provider. */
+    int SWITCHED_FROM_SATELLITE_TO_TERRESTRIAL = 81; /* While processing a request from the
+                                                       Framework the satellite modem detects
+                                                       terrestrial signal, aborts the request, and
+                                                       switches to the terrestrial network. */
+    int UNIDENTIFIED_SUBSCRIBER = 82;               /* The subscriber is not registered with the
+                                                       service provider */
 
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
@@ -546,22 +571,6 @@ public interface RILConstants {
     int RIL_REQUEST_UPDATE_IMS_CALL_STATUS = 240;
     int RIL_REQUEST_SET_N1_MODE_ENABLED = 241;
     int RIL_REQUEST_IS_N1_MODE_ENABLED = 242;
-    int RIL_REQUEST_SET_LOCATION_PRIVACY_SETTING = 243;
-    int RIL_REQUEST_GET_LOCATION_PRIVACY_SETTING = 244;
-    int RIL_REQUEST_GET_SATELLITE_CAPABILITIES = 245;
-    int RIL_REQUEST_SET_SATELLITE_POWER = 246;
-    int RIL_REQUEST_GET_SATELLITE_POWER = 247;
-    int RIL_REQUEST_PROVISION_SATELLITE_SERVICE = 248;
-    int RIL_REQUEST_ADD_ALLOWED_SATELLITE_CONTACTS = 249;
-    int RIL_REQUEST_REMOVE_ALLOWED_SATELLITE_CONTACTS = 250;
-    int RIL_REQUEST_SEND_SATELLITE_MESSAGES = 251;
-    int RIL_REQUEST_GET_PENDING_SATELLITE_MESSAGES = 252;
-    int RIL_REQUEST_GET_SATELLITE_MODE = 253;
-    int RIL_REQUEST_SET_SATELLITE_INDICATION_FILTER = 254;
-    int RIL_REQUEST_START_SENDING_SATELLITE_POINTING_INFO = 255;
-    int RIL_REQUEST_STOP_SENDING_SATELLITE_POINTING_INFO = 256;
-    int RIL_REQUEST_GET_MAX_CHARACTERS_PER_SATELLITE_TEXT_MESSAGE = 257;
-    int RIL_REQUEST_GET_TIME_FOR_NEXT_SATELLITE_VISIBILITY = 258;
 
     /* Responses begin */
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
@@ -623,13 +632,6 @@ public interface RILConstants {
     int RIL_UNSOL_RESPONSE_SIM_PHONEBOOK_CHANGED = 1053;
     int RIL_UNSOL_RESPONSE_SIM_PHONEBOOK_RECORDS_RECEIVED = 1054;
     int RIL_UNSOL_SLICING_CONFIG_CHANGED = 1055;
-    int RIL_UNSOL_PENDING_SATELLITE_MESSAGE_COUNT = 1056;
-    int RIL_UNSOL_NEW_SATELLITE_MESSAGES = 1057;
-    int RIL_UNSOL_SATELLITE_MESSAGES_TRANSFER_COMPLETE = 1058;
-    int RIL_UNSOL_SATELLITE_POINTING_INFO_CHANGED = 1059;
-    int RIL_UNSOL_SATELLITE_MODE_CHANGED = 1060;
-    int RIL_UNSOL_SATELLITE_RADIO_TECHNOLOGY_CHANGED = 1061;
-    int RIL_UNSOL_SATELLITE_PROVISION_STATE_CHANGED = 1062;
 
     /* The following unsols are not defined in RIL.h */
     int RIL_UNSOL_HAL_NON_RIL_BASE = 1100;

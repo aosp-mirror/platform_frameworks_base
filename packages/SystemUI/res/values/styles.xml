@@ -315,10 +315,6 @@
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">false</item>
-
-        <!-- Biometrics enroll color style -->
-        <item name="biometricsEnrollStyle">@style/BiometricsEnrollStyle</item>
-
     </style>
 
     <style name="Theme.SystemUI.LightWallpaper">
@@ -378,6 +374,10 @@
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
@@ -678,12 +678,31 @@
 
     <style name="MediaPlayer.Recommendation"/>
 
+    <style name="MediaPlayer.Recommendation.Header">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
+        <item name="android:layout_marginStart">@dimen/qs_media_padding</item>
+        <item name="android:fontFamily">=@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
     <style name="MediaPlayer.Recommendation.AlbumContainer">
         <item name="android:layout_width">@dimen/qs_media_rec_album_size</item>
         <item name="android:layout_height">@dimen/qs_media_rec_album_size</item>
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
         <item name="android:layout_marginBottom">@dimen/qs_media_rec_album_bottom_margin</item>
+    </style>
+
+    <style name="MediaPlayer.Recommendation.AlbumContainer.Updated">
+        <item name="android:layout_width">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minWidth">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minHeight">@dimen/qs_media_rec_album_height_collapsed</item>
+        <item name="android:background">@drawable/qs_media_light_source</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_info_spacing</item>
     </style>
 
     <style name="MediaPlayer.Recommendation.Album">
@@ -741,6 +760,18 @@
     </style>
 
     <!-- Screenshots -->
+    <style name="AppClipsTrampolineActivity">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="AppClipsActivity" parent="LongScreenshotActivity">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
@@ -817,12 +848,10 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
-    <style name="Theme.UserSwitcherActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+    <style name="Theme.UserSwitcherFullscreenDialog" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <item name="android:statusBarColor">@color/user_switcher_fullscreen_bg</item>
         <item name="android:windowBackground">@color/user_switcher_fullscreen_bg</item>
         <item name="android:navigationBarColor">@color/user_switcher_fullscreen_bg</item>
-        <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
     </style>
 
     <style name="Theme.CreateUser" parent="@android:style/Theme.DeviceDefault.NoActionBar">
@@ -1016,7 +1045,7 @@
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">@dimen/dialog_title_text_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">32sp</item>
         <item name="android:gravity">center</item>
@@ -1326,15 +1355,6 @@
         <item name="android:background">@drawable/grant_permissions_buttons_bottom</item>
     </style>
 
-    <style name="BiometricsEnrollStyle">
-        <item name="biometricsEnrollIcon">@color/udfps_enroll_icon</item>
-        <item name="biometricsMovingTargetFill">@color/udfps_moving_target_fill</item>
-        <item name="biometricsMovingTargetFillError">@color/udfps_moving_target_fill_error</item>
-        <item name="biometricsEnrollProgress">@color/udfps_enroll_progress</item>
-        <item name="biometricsEnrollProgressHelp">@color/udfps_enroll_progress_help</item>
-        <item name="biometricsEnrollProgressHelpWithTalkback">@color/udfps_enroll_progress_help_with_talkback</item>
-    </style>
-
     <!-- Magnification styles -->
     <style name="TextAppearance.MagnificationSetting" />
 
@@ -1342,6 +1362,7 @@
         <item name="android:fontFamily">google-sans</item>
         <item name="android:textColor">?androidprv:attr/textColorPrimary</item>
         <item name="android:textSize">@dimen/magnification_setting_text_size</item>
+        <item name="android:singleLine">true</item>
     </style>
 
     <style name="TextAppearance.MagnificationSetting.EditButton">
@@ -1358,5 +1379,24 @@
         <item name="android:textSize">@dimen/magnification_setting_text_size</item>
         <item name="android:lineHeight">@dimen/magnification_setting_button_line_height</item>
         <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="ShortCutButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/shortcut_button_colored</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textColor">?androidprv:attr/textColorSecondary</item>
+    </style>
+
+    <style name="ShortcutHorizontalDivider">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:background">?android:attr/dividerHorizontal</item>
+    </style>
+
+    <style name="ShortcutItemBackground">
+        <item name="android:background">@color/ksh_key_item_new_background</item>
     </style>
 </resources>

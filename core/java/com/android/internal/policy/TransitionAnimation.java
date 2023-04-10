@@ -265,6 +265,34 @@ public class TransitionAnimation {
         }
         return null;
     }
+
+    /** Get animation resId by attribute Id from specific LayoutParams */
+    public int getAnimationResId(LayoutParams lp, int animAttr, int transit) {
+        int resId = Resources.ID_NULL;
+        if (animAttr >= 0) {
+            AttributeCache.Entry ent = getCachedAnimations(lp);
+            if (ent != null) {
+                resId = ent.array.getResourceId(animAttr, 0);
+            }
+        }
+        resId = updateToTranslucentAnimIfNeeded(resId, transit);
+        return resId;
+    }
+
+    /** Get default animation resId */
+    public int getDefaultAnimationResId(int animAttr, int transit) {
+        int resId = Resources.ID_NULL;
+        if (animAttr >= 0) {
+            AttributeCache.Entry ent = getCachedAnimations(DEFAULT_PACKAGE,
+                    mDefaultWindowAnimationStyleResId);
+            if (ent != null) {
+                resId = ent.array.getResourceId(animAttr, 0);
+            }
+        }
+        resId = updateToTranslucentAnimIfNeeded(resId, transit);
+        return resId;
+    }
+
     /**
      * Load animation by attribute Id from a specific AnimationStyle resource.
      *
@@ -1267,6 +1295,17 @@ public class TransitionAnimation {
         }
 
         return set;
+    }
+
+    /** Sets the default attributes of the screenshot layer used for animation. */
+    public static void configureScreenshotLayer(SurfaceControl.Transaction t, SurfaceControl layer,
+            ScreenCapture.ScreenshotHardwareBuffer buffer) {
+        t.setBuffer(layer, buffer.getHardwareBuffer());
+        t.setDataSpace(layer, buffer.getColorSpace().getDataSpace());
+        // Avoid showing dimming effect for HDR content when running animation.
+        if (buffer.containsHdrLayers()) {
+            t.setDimmingEnabled(layer, false);
+        }
     }
 
     /** Returns whether the hardware buffer passed in is marked as protected. */

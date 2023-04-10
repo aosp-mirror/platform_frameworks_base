@@ -255,7 +255,7 @@ public class DozeSensors {
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
                         Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                         mConfig.wakeScreenGestureAvailable()
-                          && mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT),
+                          && mConfig.alwaysOnEnabled(mUserTracker.getUserId()),
                         DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE,
                         false /* reports touch coordinates */,
                         false /* touchscreen */
@@ -296,7 +296,7 @@ public class DozeSensors {
 
     private boolean udfpsLongPressConfigured() {
         return mUdfpsEnrolled
-                && (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT) || mScreenOffUdfpsEnabled);
+                && (mConfig.alwaysOnEnabled(mUserTracker.getUserId()) || mScreenOffUdfpsEnabled);
     }
 
     private boolean quickPickUpConfigured() {
@@ -697,13 +697,13 @@ public class DozeSensors {
         }
 
         protected boolean enabledBySetting() {
-            if (!mConfig.enabled(UserHandle.USER_CURRENT)) {
+            if (!mConfig.enabled(mUserTracker.getUserId())) {
                 return false;
             } else if (TextUtils.isEmpty(mSetting)) {
                 return true;
             }
             return mSecureSettings.getIntForUser(mSetting, mSettingDefault ? 1 : 0,
-                    UserHandle.USER_CURRENT) != 0;
+                    mUserTracker.getUserId()) != 0;
         }
 
         @Override

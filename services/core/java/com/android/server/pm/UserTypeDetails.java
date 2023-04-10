@@ -76,7 +76,7 @@ public final class UserTypeDetails {
     private final @UserInfoFlag int mBaseType;
 
     // TODO(b/143784345): Update doc/name when we clean up UserInfo.
-    /** The {@link UserInfo.UserInfoFlag}s that all users of this type will automatically have. */
+    /** The {@link UserInfoFlag}s to apply by default to newly created users of this type. */
     private final @UserInfoFlag int mDefaultUserInfoPropertyFlags;
 
     /**
@@ -151,20 +151,6 @@ public final class UserTypeDetails {
     private final @Nullable int[] mDarkThemeBadgeColors;
 
     /**
-     * Denotes if the user shares media with its parent user.
-     *
-     * <p> Default value is false
-     */
-    private final boolean mIsMediaSharedWithParent;
-
-    /**
-     * Denotes if the user shares encryption credentials with its parent user.
-     *
-     * <p> Default value is false
-     */
-    private final boolean mIsCredentialSharableWithParent;
-
-    /**
      * The default {@link UserProperties} for the user type.
      * <p> The uninitialized value of each property is implied by {@link UserProperties.Builder}.
      */
@@ -180,8 +166,6 @@ public final class UserTypeDetails {
             @Nullable Bundle defaultSystemSettings,
             @Nullable Bundle defaultSecureSettings,
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
-            boolean isMediaSharedWithParent,
-            boolean isCredentialSharableWithParent,
             @NonNull UserProperties defaultUserProperties) {
         this.mName = name;
         this.mEnabled = enabled;
@@ -201,8 +185,6 @@ public final class UserTypeDetails {
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
-        this.mIsMediaSharedWithParent = isMediaSharedWithParent;
-        this.mIsCredentialSharableWithParent = isCredentialSharableWithParent;
         this.mDefaultUserProperties = defaultUserProperties;
     }
 
@@ -242,7 +224,7 @@ public final class UserTypeDetails {
     }
 
     // TODO(b/143784345): Update comment when UserInfo is reorganized.
-    /** The {@link UserInfo.UserInfoFlag}s that all users of this type will automatically have. */
+    /** The {@link UserInfoFlag}s to apply by default to newly created users of this type. */
     public int getDefaultUserInfoFlags() {
         return mDefaultUserInfoPropertyFlags | mBaseType;
     }
@@ -307,21 +289,6 @@ public final class UserTypeDetails {
             return getBadgeColor(badgeIndex);
         }
         return mDarkThemeBadgeColors[Math.min(badgeIndex, mDarkThemeBadgeColors.length - 1)];
-    }
-
-    /**
-     * Returns true if the user has shared media with parent user or false otherwise.
-     */
-    public boolean isMediaSharedWithParent() {
-        return mIsMediaSharedWithParent;
-    }
-
-    /**
-     * Returns true if the user has shared encryption credential with parent user or
-     * false otherwise.
-     */
-    public boolean isCredentialSharableWithParent() {
-        return mIsCredentialSharableWithParent;
     }
 
 
@@ -437,8 +404,6 @@ public final class UserTypeDetails {
         private @DrawableRes int mIconBadge = Resources.ID_NULL;
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
-        private boolean mIsMediaSharedWithParent = false;
-        private boolean mIsCredentialSharableWithParent = false;
         // Default UserProperties cannot be null but for efficiency we don't initialize it now.
         // If it isn't set explicitly, {@link UserProperties.Builder#build()} will be used.
         private @Nullable UserProperties mDefaultUserProperties = null;
@@ -533,24 +498,6 @@ public final class UserTypeDetails {
         }
 
         /**
-         * Sets shared media property for the user.
-         * @param isMediaSharedWithParent the value to be set, true or false
-         */
-        public Builder setIsMediaSharedWithParent(boolean isMediaSharedWithParent) {
-            mIsMediaSharedWithParent = isMediaSharedWithParent;
-            return this;
-        }
-
-        /**
-         * Sets shared media property for the user.
-         * @param isCredentialSharableWithParent  the value to be set, true or false
-         */
-        public Builder setIsCredentialSharableWithParent(boolean isCredentialSharableWithParent) {
-            mIsCredentialSharableWithParent = isCredentialSharableWithParent;
-            return this;
-        }
-
-        /**
          * Sets (replacing if necessary) the default UserProperties object for this user type.
          * Takes a builder, rather than a built object, to efficiently ensure that a fresh copy of
          * properties is stored (since it later might be modified by UserProperties#updateFromXml).
@@ -579,6 +526,7 @@ public final class UserTypeDetails {
             Preconditions.checkArgument(hasValidPropertyFlags(),
                     "UserTypeDetails " + mName + " has invalid flags: "
                             + Integer.toHexString(mDefaultUserInfoPropertyFlags));
+            checkSystemAndMainUserPreconditions();
             if (hasBadge()) {
                 Preconditions.checkArgument(mBadgeLabels != null && mBadgeLabels.length != 0,
                         "UserTypeDetails " + mName + " has badge but no badgeLabels.");
@@ -609,8 +557,6 @@ public final class UserTypeDetails {
                     mDefaultSystemSettings,
                     mDefaultSecureSettings,
                     mDefaultCrossProfileIntentFilters,
-                    mIsMediaSharedWithParent,
-                    mIsCredentialSharableWithParent,
                     getDefaultUserProperties());
         }
 
@@ -633,14 +579,24 @@ public final class UserTypeDetails {
         // TODO(b/143784345): Refactor this when we clean up UserInfo.
         private boolean hasValidPropertyFlags() {
             final int forbiddenMask =
-                    UserInfo.FLAG_PRIMARY |
-                    UserInfo.FLAG_ADMIN |
                     UserInfo.FLAG_INITIALIZED |
                     UserInfo.FLAG_QUIET_MODE |
                     UserInfo.FLAG_FULL |
                     UserInfo.FLAG_SYSTEM |
                     UserInfo.FLAG_PROFILE;
             return (mDefaultUserInfoPropertyFlags & forbiddenMask) == 0;
+        }
+
+        private void checkSystemAndMainUserPreconditions() {
+            // Primary must be synonymous with System.
+            Preconditions.checkArgument(
+                    ((mBaseType & UserInfo.FLAG_SYSTEM) != 0) ==
+                            ((mDefaultUserInfoPropertyFlags & UserInfo.FLAG_PRIMARY) != 0),
+                    "UserTypeDetails " + mName + " cannot be SYSTEM xor PRIMARY.");
+            // At most one MainUser is ever allowed at a time.
+            Preconditions.checkArgument(
+                    ((mDefaultUserInfoPropertyFlags & UserInfo.FLAG_MAIN) == 0) || mMaxAllowed == 1,
+                    "UserTypeDetails " + mName + " must not sanction more than one MainUser.");
         }
     }
 

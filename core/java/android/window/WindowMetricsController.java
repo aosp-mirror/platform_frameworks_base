@@ -41,6 +41,7 @@ import android.view.WindowMetrics;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * A controller to handle {@link android.view.WindowMetrics} related APIs, which are
@@ -92,16 +93,9 @@ public final class WindowMetricsController {
             windowingMode = winConfig.getWindowingMode();
         }
         final IBinder token = Context.getToken(mContext);
-        final WindowInsets windowInsets = getWindowInsetsFromServerForCurrentDisplay(token,
-                bounds, isScreenRound, windowingMode);
-        return new WindowMetrics(bounds, windowInsets, density);
-    }
-
-    private WindowInsets getWindowInsetsFromServerForCurrentDisplay(
-            IBinder token, Rect bounds, boolean isScreenRound,
-            @WindowConfiguration.WindowingMode int windowingMode) {
-        return getWindowInsetsFromServerForDisplay(mContext.getDisplayId(), token, bounds,
-                isScreenRound, windowingMode);
+        final Supplier<WindowInsets> insetsSupplier = () -> getWindowInsetsFromServerForDisplay(
+                mContext.getDisplayId(), token, bounds, isScreenRound, windowingMode);
+        return new WindowMetrics(new Rect(bounds), insetsSupplier, density);
     }
 
     /**
@@ -128,7 +122,7 @@ public final class WindowMetricsController {
                     isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING,
                     0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
                     WindowManager.LayoutParams.INVALID_WINDOW_TYPE, windowingMode,
-                    null /* typeSideMap */);
+                    null /* idSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

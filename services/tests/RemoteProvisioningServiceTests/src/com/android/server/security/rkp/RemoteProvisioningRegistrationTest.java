@@ -23,6 +23,7 @@ import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -39,6 +40,7 @@ import android.security.rkp.IGetKeyCallback;
 import android.security.rkp.IStoreUpgradedKeyCallback;
 import android.security.rkp.service.RegistrationProxy;
 import android.security.rkp.service.RemotelyProvisionedKey;
+import android.security.rkp.service.RkpProxyException;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -48,8 +50,9 @@ import org.junit.runner.RunWith;
 import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.VoidAnswer4;
 
-import java.time.Duration;
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -104,7 +107,7 @@ public class RemoteProvisioningRegistrationTest {
     }
 
     @Test
-    public void getKeyHandlesError() throws Exception {
+    public void getKeyHandlesArbitraryException() throws Exception {
         Exception expectedException = new Exception("oops!");
         doAnswer(
                 answerGetKeyAsync((keyId, cancelSignal, executor, receiver) ->
@@ -112,8 +115,35 @@ public class RemoteProvisioningRegistrationTest {
                 .when(mRegistrationProxy).getKeyAsync(eq(0), any(), any(), any());
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
         mRegistration.getKey(0, callback);
-        verify(callback).onError(eq(expectedException.getMessage()));
+        verify(callback).onError(eq(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN), eq("oops!"));
         verifyNoMoreInteractions(callback);
+    }
+
+    @Test
+    public void getKeyMapsRkpErrorsCorrectly() throws Exception {
+        Map<Byte, Integer> expectedConversions = Map.of(
+                IGetKeyCallback.ErrorCode.ERROR_UNKNOWN,
+                RkpProxyException.ERROR_UNKNOWN,
+                IGetKeyCallback.ErrorCode.ERROR_REQUIRES_SECURITY_PATCH,
+                RkpProxyException.ERROR_REQUIRES_SECURITY_PATCH,
+                IGetKeyCallback.ErrorCode.ERROR_PENDING_INTERNET_CONNECTIVITY,
+                RkpProxyException.ERROR_PENDING_INTERNET_CONNECTIVITY,
+                IGetKeyCallback.ErrorCode.ERROR_PERMANENT,
+                RkpProxyException.ERROR_PERMANENT);
+
+        for (Field errorField: IGetKeyCallback.ErrorCode.class.getFields()) {
+            byte error = (Byte) errorField.get(null);
+            Exception expectedException = new RkpProxyException(expectedConversions.get(error),
+                    errorField.getName());
+            doAnswer(
+                    answerGetKeyAsync((keyId, cancelSignal, executor, receiver) ->
+                            executor.execute(() -> receiver.onError(expectedException))))
+                    .when(mRegistrationProxy).getKeyAsync(eq(0), any(), any(), any());
+            IGetKeyCallback callback = mock(IGetKeyCallback.class);
+            mRegistration.getKey(0, callback);
+            verify(callback).onError(eq(error), contains(errorField.getName()));
+            verifyNoMoreInteractions(callback);
+        }
     }
 
     @Test
@@ -179,7 +209,8 @@ public class RemoteProvisioningRegistrationTest {
 
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
         mRegistration.getKey(0, callback);
-        verify(callback).onError(eq(expectedException.getMessage()));
+        verify(callback).onError(eq(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN),
+                eq(expectedException.getMessage()));
         assertThrows(IllegalArgumentException.class, () -> mRegistration.cancelGetKey(callback));
         verifyNoMoreInteractions(callback);
     }

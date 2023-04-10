@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.collect
@@ -60,11 +61,7 @@ constructor(
         location: StatusBarLocation,
     ): LocationBasedWifiViewModel {
         val locationViewModel =
-            when (location) {
-                StatusBarLocation.HOME -> wifiViewModel.home
-                StatusBarLocation.KEYGUARD -> wifiViewModel.keyguard
-                StatusBarLocation.QS -> wifiViewModel.qs
-            }
+            viewModelForLocation(wifiViewModel, statusBarPipelineFlags, location)
 
         statusBarIconGroup.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

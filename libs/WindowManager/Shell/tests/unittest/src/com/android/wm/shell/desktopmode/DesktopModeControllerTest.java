@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -417,6 +419,17 @@ public class DesktopModeControllerTest extends ShellTestCase {
         assertThat(wct).isNotNull();
     }
 
+    @Test
+    public void testHandleTransitionRequest_taskOpen_doesNotStartAnotherTransition() {
+        RunningTaskInfo trigger = new RunningTaskInfo();
+        trigger.token = new MockToken().token();
+        trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mController.handleRequest(
+                mock(IBinder.class),
+                new TransitionRequestInfo(TRANSIT_OPEN, trigger, null /* remote */));
+        verifyZeroInteractions(mTransitions);
+    }
+
     private DesktopModeController createController() {
         return new DesktopModeController(mContext, mShellInit, mShellController,
                 mShellTaskOrganizer, mRootTaskDisplayAreaOrganizer, mTransitions,
@@ -446,7 +459,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
         final ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            verify(mTransitions).startTransition(eq(TRANSIT_TO_FRONT), arg.capture(), any());
+            verify(mTransitions).startTransition(eq(TRANSIT_NONE), arg.capture(), any());
         } else {
             verify(mShellTaskOrganizer).applyTransaction(arg.capture());
         }

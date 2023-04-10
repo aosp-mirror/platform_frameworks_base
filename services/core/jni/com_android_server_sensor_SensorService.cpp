@@ -17,10 +17,13 @@
 #define LOG_TAG "NativeSensorService"
 
 #include <android-base/properties.h>
+#include <android_os_NativeHandle.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <core_jni_helpers.h>
+#include <cutils/native_handle.h>
 #include <cutils/properties.h>
 #include <jni.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <sensorservice/SensorService.h>
 #include <string.h>
 #include <utils/Log.h>
@@ -28,17 +31,22 @@
 
 #include <mutex>
 
+#include "android_util_Binder.h"
+
 #define PROXIMITY_ACTIVE_CLASS \
     "com/android/server/sensors/SensorManagerInternal$ProximityActiveListener"
 
 #define RUNTIME_SENSOR_CALLBACK_CLASS \
-    "com/android/server/sensors/SensorManagerInternal$RuntimeSensorStateChangeCallback"
+    "com/android/server/sensors/SensorManagerInternal$RuntimeSensorCallback"
 
 namespace android {
 
 static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnProximityActive;
-static jmethodID sMethodIdOnStateChanged;
+static jmethodID sMethodIdRuntimeSensorOnConfigurationChanged;
+static jmethodID sMethodIdRuntimeSensorOnDirectChannelCreated;
+static jmethodID sMethodIdRuntimeSensorOnDirectChannelDestroyed;
+static jmethodID sMethodIdRuntimeSensorOnDirectChannelConfigured;
 
 class NativeSensorService {
 public:
@@ -47,7 +55,8 @@ public:
     void registerProximityActiveListener();
     void unregisterProximityActiveListener();
     jint registerRuntimeSensor(JNIEnv* env, jint deviceId, jint type, jstring name, jstring vendor,
-                               jobject callback);
+                               jfloat maximumRange, jfloat resolution, jfloat power, jint minDelay,
+                               jint maxDelay, jint flags, jobject callback);
     void unregisterRuntimeSensor(jint handle);
     jboolean sendRuntimeSensorEvent(JNIEnv* env, jint handle, jint type, jlong timestamp,
                                     jfloatArray values);
@@ -67,13 +76,16 @@ private:
     };
     sp<ProximityActiveListenerDelegate> mProximityActiveListenerDelegate;
 
-    class RuntimeSensorCallbackDelegate : public SensorService::RuntimeSensorStateChangeCallback {
+    class RuntimeSensorCallbackDelegate : public SensorService::RuntimeSensorCallback {
     public:
         RuntimeSensorCallbackDelegate(JNIEnv* env, jobject callback);
         ~RuntimeSensorCallbackDelegate();
 
-        void onStateChanged(bool enabled, int64_t samplingPeriodNs,
-                            int64_t batchReportLatencyNs) override;
+        status_t onConfigurationChanged(int32_t handle, bool enabled, int64_t samplingPeriodNs,
+                                        int64_t batchReportLatencyNs) override;
+        int onDirectChannelCreated(int fd) override;
+        void onDirectChannelDestroyed(int channelHandle) override;
+        int onDirectChannelConfigured(int channelHandle, int sensorHandle, int rateLevel) override;
 
     private:
         jobject mCallback;
@@ -108,7 +120,9 @@ void NativeSensorService::unregisterProximityActiveListener() {
 }
 
 jint NativeSensorService::registerRuntimeSensor(JNIEnv* env, jint deviceId, jint type, jstring name,
-                                                jstring vendor, jobject callback) {
+                                                jstring vendor, jfloat maximumRange,
+                                                jfloat resolution, jfloat power, jint minDelay,
+                                                jint maxDelay, jint flags, jobject callback) {
     if (mService == nullptr) {
         ALOGD("Dropping registerRuntimeSensor, sensor service not available.");
         return -1;
@@ -119,6 +133,16 @@ jint NativeSensorService::registerRuntimeSensor(JNIEnv* env, jint deviceId, jint
             .vendor = env->GetStringUTFChars(vendor, 0),
             .version = sizeof(sensor_t),
             .type = type,
+            .maxRange = maximumRange,
+            .resolution = resolution,
+            .power = power,
+            .minDelay = minDelay,
+            .maxDelay = maxDelay,
+#ifdef __LP64__
+            .flags = static_cast<uint64_t>(flags),
+#else
+            .flags = static_cast<uint32_t>(flags),
+#endif
     };
 
     sp<RuntimeSensorCallbackDelegate> callbackDelegate(
@@ -231,12 +255,40 @@ NativeSensorService::RuntimeSensorCallbackDelegate::~RuntimeSensorCallbackDelega
     AndroidRuntime::getJNIEnv()->DeleteGlobalRef(mCallback);
 }
 
-void NativeSensorService::RuntimeSensorCallbackDelegate::onStateChanged(
-        bool enabled, int64_t samplingPeriodNs, int64_t batchReportLatencyNs) {
+status_t NativeSensorService::RuntimeSensorCallbackDelegate::onConfigurationChanged(
+        int32_t handle, bool enabled, int64_t samplingPeriodNs, int64_t batchReportLatencyNs) {
     auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
-    jniEnv->CallVoidMethod(mCallback, sMethodIdOnStateChanged, static_cast<jboolean>(enabled),
-                           static_cast<jint>(ns2us(samplingPeriodNs)),
-                           static_cast<jint>(ns2us(batchReportLatencyNs)));
+    return jniEnv->CallIntMethod(mCallback, sMethodIdRuntimeSensorOnConfigurationChanged,
+                                 static_cast<jint>(handle), static_cast<jboolean>(enabled),
+                                 static_cast<jint>(ns2us(samplingPeriodNs)),
+                                 static_cast<jint>(ns2us(batchReportLatencyNs)));
+}
+
+int NativeSensorService::RuntimeSensorCallbackDelegate::onDirectChannelCreated(int fd) {
+    if (fd <= 0) {
+        return 0;
+    }
+    auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+    jobject jfd = jniCreateFileDescriptor(jniEnv, fd);
+    jobject parcelFileDescriptor = newParcelFileDescriptor(jniEnv, jfd);
+    return jniEnv->CallIntMethod(mCallback, sMethodIdRuntimeSensorOnDirectChannelCreated,
+                                 parcelFileDescriptor);
+}
+
+void NativeSensorService::RuntimeSensorCallbackDelegate::onDirectChannelDestroyed(
+        int channelHandle) {
+    auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+    return jniEnv->CallVoidMethod(mCallback, sMethodIdRuntimeSensorOnDirectChannelDestroyed,
+                                  static_cast<jint>(channelHandle));
+}
+
+int NativeSensorService::RuntimeSensorCallbackDelegate::onDirectChannelConfigured(int channelHandle,
+                                                                                  int sensorHandle,
+                                                                                  int rateLevel) {
+    auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+    return jniEnv->CallIntMethod(mCallback, sMethodIdRuntimeSensorOnDirectChannelConfigured,
+                                 static_cast<jint>(channelHandle), static_cast<jint>(sensorHandle),
+                                 static_cast<jint>(rateLevel));
 }
 
 static jlong startSensorServiceNative(JNIEnv* env, jclass, jobject listener) {
@@ -255,9 +307,12 @@ static void unregisterProximityActiveListenerNative(JNIEnv* env, jclass, jlong p
 }
 
 static jint registerRuntimeSensorNative(JNIEnv* env, jclass, jlong ptr, jint deviceId, jint type,
-                                        jstring name, jstring vendor, jobject callback) {
+                                        jstring name, jstring vendor, jfloat maximumRange,
+                                        jfloat resolution, jfloat power, jint minDelay,
+                                        jint maxDelay, jint flags, jobject callback) {
     auto* service = reinterpret_cast<NativeSensorService*>(ptr);
-    return service->registerRuntimeSensor(env, deviceId, type, name, vendor, callback);
+    return service->registerRuntimeSensor(env, deviceId, type, name, vendor, maximumRange,
+                                          resolution, power, minDelay, maxDelay, flags, callback);
 }
 
 static void unregisterRuntimeSensorNative(JNIEnv* env, jclass, jlong ptr, jint handle) {
@@ -279,7 +334,7 @@ static const JNINativeMethod methods[] = {
         {"unregisterProximityActiveListenerNative", "(J)V",
          reinterpret_cast<void*>(unregisterProximityActiveListenerNative)},
         {"registerRuntimeSensorNative",
-         "(JIILjava/lang/String;Ljava/lang/String;L" RUNTIME_SENSOR_CALLBACK_CLASS ";)I",
+         "(JIILjava/lang/String;Ljava/lang/String;FFFIIIL" RUNTIME_SENSOR_CALLBACK_CLASS ";)I",
          reinterpret_cast<void*>(registerRuntimeSensorNative)},
         {"unregisterRuntimeSensorNative", "(JI)V",
          reinterpret_cast<void*>(unregisterRuntimeSensorNative)},
@@ -292,8 +347,17 @@ int register_android_server_sensor_SensorService(JavaVM* vm, JNIEnv* env) {
     jclass listenerClass = FindClassOrDie(env, PROXIMITY_ACTIVE_CLASS);
     sMethodIdOnProximityActive = GetMethodIDOrDie(env, listenerClass, "onProximityActive", "(Z)V");
     jclass runtimeSensorCallbackClass = FindClassOrDie(env, RUNTIME_SENSOR_CALLBACK_CLASS);
-    sMethodIdOnStateChanged =
-            GetMethodIDOrDie(env, runtimeSensorCallbackClass, "onStateChanged", "(ZII)V");
+    sMethodIdRuntimeSensorOnConfigurationChanged =
+            GetMethodIDOrDie(env, runtimeSensorCallbackClass, "onConfigurationChanged", "(IZII)I");
+    sMethodIdRuntimeSensorOnDirectChannelCreated =
+            GetMethodIDOrDie(env, runtimeSensorCallbackClass, "onDirectChannelCreated",
+                             "(Landroid/os/ParcelFileDescriptor;)I");
+    sMethodIdRuntimeSensorOnDirectChannelDestroyed =
+            GetMethodIDOrDie(env, runtimeSensorCallbackClass, "onDirectChannelDestroyed", "(I)V");
+    sMethodIdRuntimeSensorOnDirectChannelConfigured =
+            GetMethodIDOrDie(env, runtimeSensorCallbackClass, "onDirectChannelConfigured",
+                             "(III)I");
+
     return jniRegisterNativeMethods(env, "com/android/server/sensors/SensorService", methods,
                                     NELEM(methods));
 }

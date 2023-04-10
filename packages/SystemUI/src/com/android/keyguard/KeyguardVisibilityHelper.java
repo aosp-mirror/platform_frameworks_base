@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.AnimatorHandle;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -48,8 +48,8 @@ public class KeyguardVisibilityHelper {
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
+    private AnimatorHandle mKeyguardAnimatorHandle;
     private boolean mLastOccludedState = false;
-    private boolean mIsUnoccludeTransitionFlagEnabled = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
     private final LogBuffer mLogBuffer;
 
@@ -77,10 +77,6 @@ public class KeyguardVisibilityHelper {
         return mKeyguardViewVisibilityAnimating;
     }
 
-    public void setOcclusionTransitionFlagEnabled(boolean enabled) {
-        mIsUnoccludeTransitionFlagEnabled = enabled;
-    }
-
     /**
      * Set the visibility of a keyguard view based on some new state.
      */
@@ -89,6 +85,10 @@ public class KeyguardVisibilityHelper {
             boolean keyguardFadingAway,
             boolean goingToFullShade,
             int oldStatusBarState) {
+        if (mKeyguardAnimatorHandle != null) {
+            mKeyguardAnimatorHandle.cancel();
+            mKeyguardAnimatorHandle = null;
+        }
         mView.animate().cancel();
         boolean isOccluded = mKeyguardStateController.isOccluded();
         mKeyguardViewVisibilityAnimating = false;
@@ -122,7 +122,7 @@ public class KeyguardVisibilityHelper {
                     .setDuration(320)
                     .setInterpolator(Interpolators.ALPHA_IN)
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
-            log("keyguardFadingAway transition w/ Y Aniamtion");
+            log("keyguardFadingAway transition w/ Y Animation");
         } else if (statusBarState == KEYGUARD) {
             if (keyguardFadingAway) {
                 mKeyguardViewVisibilityAnimating = true;
@@ -154,26 +154,11 @@ public class KeyguardVisibilityHelper {
 
                 // Ask the screen off animation controller to animate the keyguard visibility for us
                 // since it may need to be cancelled due to keyguard lifecycle events.
-                mScreenOffAnimationController.animateInKeyguard(
+                mKeyguardAnimatorHandle = mScreenOffAnimationController.animateInKeyguard(
                         mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
-            } else if (!mIsUnoccludeTransitionFlagEnabled && mLastOccludedState && !isOccluded) {
-                // An activity was displayed over the lock screen, and has now gone away
-                log("Unoccluded transition");
-                mView.setVisibility(View.VISIBLE);
-                mView.setAlpha(0f);
-
-                mView.animate()
-                        .setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP)
-                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                        .alpha(1f)
-                        .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
-                        .start();
             } else {
                 log("Direct set Visibility to VISIBLE");
                 mView.setVisibility(View.VISIBLE);
-                if (!mIsUnoccludeTransitionFlagEnabled) {
-                    mView.setAlpha(1f);
-                }
             }
         } else {
             log("Direct set Visibility to GONE");

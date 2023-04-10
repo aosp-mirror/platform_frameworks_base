@@ -16,16 +16,16 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.tools.common.NavBar
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesVisible
@@ -82,20 +82,19 @@ class EnterSplitScreenByDragFromNotification(flicker: FlickerTest) : SplitScreen
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
+    fun cujCompleted() =
+        flicker.splitScreenEntered(primaryApp, sendNotificationApp, fromOtherApp = false)
 
-    @Presubmit
+    @FlakyTest(bugId = 245472831)
     @Test
     fun splitScreenDividerBecomesVisible() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
         flicker.splitScreenDividerBecomesVisible()
     }
 
     // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
     @Presubmit
     @Test
-    fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    fun splitScreenDividerIsVisibleAtEnd() {
         flicker.assertLayersEnd { this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
     }
 
@@ -104,23 +103,6 @@ class EnterSplitScreenByDragFromNotification(flicker: FlickerTest) : SplitScreen
     @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        flicker.assertLayers {
-            this.isInvisible(sendNotificationApp)
-                .then()
-                .isVisible(sendNotificationApp)
-                .then()
-                .isInvisible(sendNotificationApp)
-                .then()
-                .isVisible(sendNotificationApp)
-        }
-    }
-
-    // TODO(b/245472831): Align to legacy transition after shell transition ready.
-    @Presubmit
-    @Test
-    fun secondaryAppLayerBecomesVisible_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
         flicker.layerBecomesVisible(sendNotificationApp)
     }
 
@@ -208,7 +190,7 @@ class EnterSplitScreenByDragFromNotification(flicker: FlickerTest) : SplitScreen
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
         }
     }

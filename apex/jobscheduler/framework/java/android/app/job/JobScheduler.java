@@ -270,6 +270,9 @@ public abstract class JobScheduler {
      * otherwise. Attempting to update a job scheduled in another namespace will not be possible
      * but will instead create or update the job inside the current namespace. A JobScheduler
      * instance dedicated to a namespace must be used to schedule or update jobs in that namespace.
+     *
+     * <p class="note">Since leading and trailing whitespace can lead to hard-to-debug issues,
+     * they will be {@link String#trim() trimmed}. An empty String (after trimming) is not allowed.
      * @see #getNamespace()
      */
     @NonNull
@@ -285,6 +288,15 @@ public abstract class JobScheduler {
     @Nullable
     public String getNamespace() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /** @hide */
+    @Nullable
+    public static String sanitizeNamespace(@Nullable String namespace) {
+        if (namespace == null) {
+            return null;
+        }
+        return namespace.trim().intern();
     }
 
     /**
@@ -454,20 +466,23 @@ public abstract class JobScheduler {
 
     /**
      * Returns {@code true} if the calling app currently holds the
-     * {@link android.Manifest.permission#RUN_LONG_JOBS} permission, allowing it to run long jobs.
+     * {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS} permission, allowing it to run
+     * user-initiated jobs.
      */
-    public boolean canRunLongJobs() {
+    public boolean canRunUserInitiatedJobs() {
         return false;
     }
 
     /**
      * Returns {@code true} if the app currently holds the
-     * {@link android.Manifest.permission#RUN_LONG_JOBS} permission, allowing it to run long jobs.
+     * {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS} permission, allowing it to run
+     * user-initiated jobs.
      * @hide
      * TODO(255371817): consider exposing this to apps who could call
      * {@link #scheduleAsPackage(JobInfo, String, int, String)}
      */
-    public boolean hasRunLongJobsPermission(@NonNull String packageName, @UserIdInt int userId) {
+    public boolean hasRunUserInitiatedJobsPermission(@NonNull String packageName,
+            @UserIdInt int userId) {
         return false;
     }
 
@@ -515,5 +530,6 @@ public abstract class JobScheduler {
             android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void stopUserVisibleJobsForUser(@NonNull String packageName, int userId);
+    public abstract void notePendingUserRequestedAppStop(@NonNull String packageName, int userId,
+            @Nullable String debugReason);
 }

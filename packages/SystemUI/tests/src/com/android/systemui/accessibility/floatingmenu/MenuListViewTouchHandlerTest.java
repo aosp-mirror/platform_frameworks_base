@@ -39,6 +39,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.MotionEventHelper;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissView;
 
 import org.junit.After;
@@ -78,7 +79,8 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                mock(SecureSettings.class));
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 windowManager);
         mStubMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance);

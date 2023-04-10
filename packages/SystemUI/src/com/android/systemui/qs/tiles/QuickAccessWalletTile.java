@@ -62,6 +62,8 @@ import javax.inject.Inject;
 /** Quick settings tile: Quick access wallet **/
 public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
+    public static final String TILE_SPEC = "wallet";
+
     private static final String TAG = "QuickAccessWalletTile";
     private static final String FEATURE_CHROME_OS = "org.chromium.arc";
 

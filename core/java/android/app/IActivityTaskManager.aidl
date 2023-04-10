@@ -28,6 +28,7 @@ import android.app.IAppTask;
 import android.app.IAssistDataReceiver;
 import android.app.IInstrumentationWatcher;
 import android.app.IProcessObserver;
+import android.app.IScreenCaptureObserver;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
@@ -64,12 +65,12 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallback;
 import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRemoteAnimationRunner;
-import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
@@ -348,10 +349,30 @@ interface IActivityTaskManager {
     /**
      * Prepare the back navigation in the server. This setups the leashed for sysui to animate
      * the back gesture and returns the data needed for the animation.
-     * @param focusObserver a remote callback to nofify shell when the focused window lost focus.
+     * @param navigationObserver a remote callback to nofify shell when the focused window is gone,
+                                 or an unexpected transition has happened on the navigation target.
      * @param adaptor a remote animation to be run for the back navigation plays the animation.
      * @return Returns the back navigation info.
      */
     android.window.BackNavigationInfo startBackNavigation(
-            in IWindowFocusObserver focusObserver, in BackAnimationAdapter adaptor);
+            in RemoteCallback navigationObserver, in BackAnimationAdapter adaptor);
+
+    /**
+     * registers a callback to be invoked when the screen is captured.
+     *
+     * @param observer callback to be registered.
+     * @param activityToken The token for the activity to set the callback to.
+     * @hide
+     */
+    void registerScreenCaptureObserver(IBinder activityToken, IScreenCaptureObserver observer);
+
+    /**
+     * unregisters the screen capture callback which was registered with
+     * {@link #registerScreenCaptureObserver(ScreenCaptureObserver)}.
+     *
+     * @param observer callback to be unregistered.
+     * @param activityToken The token for the activity to unset the callback from.
+     * @hide
+     */
+    void unregisterScreenCaptureObserver(IBinder activityToken, IScreenCaptureObserver observer);
 }

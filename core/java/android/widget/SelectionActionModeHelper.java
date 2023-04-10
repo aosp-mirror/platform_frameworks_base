@@ -70,7 +70,7 @@ import java.util.regex.Pattern;
  */
 @UiThread
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public final class SelectionActionModeHelper {
+public class SelectionActionModeHelper {
 
     private static final String LOG_TAG = "SelectActionModeHelper";
 

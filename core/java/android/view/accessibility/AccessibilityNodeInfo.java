@@ -832,6 +832,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_REQUEST_INITIAL_ACCESSIBILITY_FOCUS = 1 << 24;
 
+    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 1 << 25;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -906,6 +908,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
     private final Rect mBoundsInScreen = new Rect();
+    private final Rect mBoundsInWindow = new Rect();
     private int mDrawingOrderInParent;
 
     private CharSequence mPackageName;
@@ -1817,13 +1820,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      *
      * @see AccessibilityEvent#getContentChangeTypes for all content change types.
-     * @param minDurationBetweenContentChanges the minimum duration between content change events.
+     * @param duration the minimum duration between content change events.
      *                                         Negative duration would be treated as zero.
      */
-    public void setMinDurationBetweenContentChanges(
-            @NonNull Duration minDurationBetweenContentChanges) {
+    public void setMinDurationBetweenContentChanges(@NonNull Duration duration) {
         enforceNotSealed();
-        mMinDurationBetweenContentChanges = minDurationBetweenContentChanges.toMillis();
+        mMinDurationBetweenContentChanges = duration.toMillis();
     }
 
     /**
@@ -2154,6 +2156,49 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setBoundsInScreen(Rect bounds) {
         enforceNotSealed();
         mBoundsInScreen.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    }
+
+    /**
+     * Gets the node bounds in window coordinates.
+     * <p>
+     * When magnification is enabled, the bounds in window are scaled up by magnification scale
+     * and the positions are also adjusted according to the offset of magnification viewport.
+     * For example, it returns Rect(-180, -180, 0, 0) for original bounds Rect(10, 10, 100, 100),
+     * when the magnification scale is 2 and offsets for X and Y are both 200.
+     * <p/>
+     *
+     * @param outBounds The output node bounds.
+     */
+    public void getBoundsInWindow(@NonNull Rect outBounds) {
+        outBounds.set(mBoundsInWindow.left, mBoundsInWindow.top,
+                mBoundsInWindow.right, mBoundsInWindow.bottom);
+    }
+
+    /**
+     * Returns the actual rect containing the node bounds in window coordinates.
+     *
+     * @hide Not safe to expose outside the framework.
+     */
+    @NonNull
+    public Rect getBoundsInWindow() {
+        return mBoundsInWindow;
+    }
+
+    /**
+     * Sets the node bounds in window coordinates.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param bounds The node bounds.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setBoundsInWindow(@NonNull Rect bounds) {
+        enforceNotSealed();
+        mBoundsInWindow.set(bounds);
     }
 
     /**
@@ -2549,6 +2594,34 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setEditable(boolean editable) {
         setBooleanProperty(BOOLEAN_PROPERTY_EDITABLE, editable);
+    }
+
+    /**
+     * Gets if the node's accessibility data is considered sensitive.
+     *
+     * @return True if the node's data is considered sensitive, false otherwise.
+     * @see View#isAccessibilityDataSensitive()
+     */
+    public boolean isAccessibilityDataSensitive() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE);
+    }
+
+    /**
+     * Sets whether this node's accessibility data is considered sensitive.
+     *
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an {@link AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param accessibilityDataSensitive True if the node's accessibility data is considered
+     *                                   sensitive.
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @see View#setAccessibilityDataSensitive
+     */
+    public void setAccessibilityDataSensitive(boolean accessibilityDataSensitive) {
+        setBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE,
+                accessibilityDataSensitive);
     }
 
     /**
@@ -4055,6 +4128,11 @@ public class AccessibilityNodeInfo implements Parcelable {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
+        if (!Objects.equals(mBoundsInWindow, DEFAULT.mBoundsInWindow)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
+
         if (!Objects.equals(mActions, DEFAULT.mActions)) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
         if (mMaxTextLength != DEFAULT.mMaxTextLength) nonDefaultFields |= bitAt(fieldIndex);
@@ -4204,6 +4282,13 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeInt(mBoundsInWindow.top);
+            parcel.writeInt(mBoundsInWindow.bottom);
+            parcel.writeInt(mBoundsInWindow.left);
+            parcel.writeInt(mBoundsInWindow.right);
+        }
+
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
             if (mActions != null && !mActions.isEmpty()) {
                 final int actionCount = mActions.size();
 
@@ -4334,6 +4419,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mUniqueId = other.mUniqueId;
         mBoundsInParent.set(other.mBoundsInParent);
         mBoundsInScreen.set(other.mBoundsInScreen);
+        mBoundsInWindow.set(other.mBoundsInWindow);
         mPackageName = other.mPackageName;
         mClassName = other.mClassName;
         mText = other.mText;
@@ -4463,6 +4549,13 @@ public class AccessibilityNodeInfo implements Parcelable {
             mBoundsInScreen.bottom = parcel.readInt();
             mBoundsInScreen.left = parcel.readInt();
             mBoundsInScreen.right = parcel.readInt();
+        }
+
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mBoundsInWindow.top = parcel.readInt();
+            mBoundsInWindow.bottom = parcel.readInt();
+            mBoundsInWindow.left = parcel.readInt();
+            mBoundsInWindow.right = parcel.readInt();
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
@@ -4816,6 +4909,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         builder.append("; boundsInParent: ").append(mBoundsInParent);
         builder.append("; boundsInScreen: ").append(mBoundsInScreen);
+        builder.append("; boundsInWindow: ").append(mBoundsInScreen);
 
         builder.append("; packageName: ").append(mPackageName);
         builder.append("; className: ").append(mClassName);

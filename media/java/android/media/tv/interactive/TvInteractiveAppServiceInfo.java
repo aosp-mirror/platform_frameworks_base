@@ -68,15 +68,9 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
     public static final int INTERACTIVE_APP_TYPE_ATSC = 0x2;
     /** Ginga interactive app type */
     public static final int INTERACTIVE_APP_TYPE_GINGA = 0x4;
-    /**
-     * Targeted Advertisement interactive app type
-     * @hide
-     */
+    /** Targeted Advertisement interactive app type */
     public static final int INTERACTIVE_APP_TYPE_TARGETED_AD = 0x8;
-    /**
-     * Other interactive app type
-     * @hide
-     */
+    /** Other interactive app type */
     public static final int INTERACTIVE_APP_TYPE_OTHER = 0x80000000;
 
     private final ResolveInfo mService;
@@ -180,7 +174,20 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
     }
 
     /**
-     * Gets supported interactive app types
+     * Gets supported interactive app types.
+     *
+     * <p>The supported interactive app types is in a bit map format. For example:
+     * <pre><code>
+     *   int types = tvInteractiveAppInfo.getSupportedTypes();
+     *   if (types & TvInteractiveAppInfo.INTERACTIVE_APP_TYPE_HBBTV != 0) {
+     *     // HbbTV type is supported. Do something...
+     *   }
+     *   if (types & TvInteractiveAppInfo.INTERACTIVE_APP_TYPE_ATSC == 0) {
+     *     // ATSC type is not supported. Do something...
+     *   }
+     * </code></pre>
+     *
+     * @return An int bit map representing supported types.
      */
     @InteractiveAppType
     @NonNull
@@ -189,13 +196,12 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
     }
 
     /**
-     * Gets extra supported interactive app types which are not listed.
+     * Gets custom supported interactive app types which are not listed.
      *
      * @see #getSupportedTypes()
-     * @hide
      */
     @NonNull
-    public List<String> getExtraSupportedTypes() {
+    public List<String> getCustomSupportedTypes() {
         return mExtraTypes;
     }
 

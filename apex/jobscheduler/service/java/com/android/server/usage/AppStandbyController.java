@@ -125,7 +125,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.server.AlarmManagerInternal;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
@@ -268,6 +268,10 @@ public class AppStandbyController
     @GuardedBy("mActiveAdminApps")
     private final SparseArray<Set<String>> mActiveAdminApps = new SparseArray<>();
 
+    /** List of admin protected packages. Can contain {@link android.os.UserHandle#USER_ALL}. */
+    @GuardedBy("mAdminProtectedPackages")
+    private final SparseArray<Set<String>> mAdminProtectedPackages = new SparseArray<>();
+
     /**
      * Set of system apps that are headless (don't have any "front door" activities, enabled or
      * disabled). Presence in this map indicates that the app is a headless system app.
@@ -286,7 +290,7 @@ public class AppStandbyController
 
     /**
      * Map of uids to their current app-op mode for
-     * {@link AppOpsManager#OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY}.
+     * {@link AppOpsManager#OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS}.
      */
     @GuardedBy("mSystemExemptionAppOpMode")
     private final SparseIntArray mSystemExemptionAppOpMode = new SparseIntArray();
@@ -485,14 +489,6 @@ public class AppStandbyController
             | PackageManager.MATCH_DIRECT_BOOT_AWARE
             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
-    /**
-     * Whether we should allow apps into the
-     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket or not.
-     * If false, any attempts to put an app into the bucket will put the app into the
-     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RARE} bucket instead.
-     */
-    private boolean mAllowRestrictedBucket;
-
     private volatile boolean mAppIdleEnabled;
     private volatile boolean mIsCharging;
     private boolean mSystemServicesReady = false;
@@ -592,7 +588,7 @@ public class AppStandbyController
     }
 
     public AppStandbyController(Context context) {
-        this(new Injector(context, JobSchedulerBackgroundThread.get().getLooper()));
+        this(new Injector(context, AppSchedulingModuleThread.get().getLooper()));
     }
 
     AppStandbyController(Injector injector) {
@@ -670,7 +666,7 @@ public class AppStandbyController
             IAppOpsService iAppOpsService = mInjector.getAppOpsService();
             try {
                 iAppOpsService.startWatchingMode(
-                        AppOpsManager.OP_SYSTEM_EXEMPT_FROM_APP_STANDBY,
+                        AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
                         /*packageName=*/ null,
                         new IAppOpsCallback.Stub() {
                             @Override
@@ -965,17 +961,21 @@ public class AppStandbyController
             Slog.d(TAG, "   Checking idle state for " + packageName
                     + " minBucket=" + standbyBucketToString(minBucket));
         }
+        final boolean previouslyIdle, stillIdle;
         if (minBucket <= STANDBY_BUCKET_ACTIVE) {
             // No extra processing needed for ACTIVE or higher since apps can't drop into lower
             // buckets.
             synchronized (mAppIdleLock) {
+                previouslyIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
                 mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
                         minBucket, REASON_MAIN_DEFAULT);
+                stillIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
             }
             maybeInformListeners(packageName, userId, elapsedRealtime,
                     minBucket, REASON_MAIN_DEFAULT, false);
         } else {
             synchronized (mAppIdleLock) {
+                previouslyIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
                 final AppIdleHistory.AppUsageHistory app =
                         mAppIdleHistory.getAppUsageHistory(packageName,
                         userId, elapsedRealtime);
@@ -1050,13 +1050,6 @@ public class AppStandbyController
                         Slog.d(TAG, "Bringing down to RESTRICTED due to timeout");
                     }
                 }
-                if (newBucket == STANDBY_BUCKET_RESTRICTED && !mAllowRestrictedBucket) {
-                    newBucket = STANDBY_BUCKET_RARE;
-                    // Leave the reason alone.
-                    if (DEBUG) {
-                        Slog.d(TAG, "Bringing up from RESTRICTED to RARE due to off switch");
-                    }
-                }
                 if (newBucket > minBucket) {
                     newBucket = minBucket;
                     // Leave the reason alone.
@@ -1073,10 +1066,16 @@ public class AppStandbyController
                 if (oldBucket != newBucket || predictionLate) {
                     mAppIdleHistory.setAppStandbyBucket(packageName, userId,
                             elapsedRealtime, newBucket, reason);
+                    stillIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
                     maybeInformListeners(packageName, userId, elapsedRealtime,
                             newBucket, reason, false);
+                } else {
+                    stillIdle = previouslyIdle;
                 }
             }
+        }
+        if (previouslyIdle != stillIdle) {
+            notifyBatteryStats(packageName, userId, stillIdle);
         }
     }
 
@@ -1234,8 +1233,9 @@ public class AppStandbyController
                     appHistory.currentBucket, reason, userStartedInteracting);
         }
 
-        if (previouslyIdle) {
-            notifyBatteryStats(pkg, userId, false);
+        final boolean stillIdle = appHistory.currentBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
+        if (previouslyIdle != stillIdle) {
+            notifyBatteryStats(pkg, userId, stillIdle);
         }
     }
 
@@ -1369,6 +1369,9 @@ public class AppStandbyController
             synchronized (mActiveAdminApps) {
                 mActiveAdminApps.remove(userId);
             }
+            synchronized (mAdminProtectedPackages) {
+                mAdminProtectedPackages.remove(userId);
+            }
         }
     }
 
@@ -1458,6 +1461,10 @@ public class AppStandbyController
                 return STANDBY_BUCKET_EXEMPTED;
             }
 
+            if (isAdminProtectedPackages(packageName, userId)) {
+                return STANDBY_BUCKET_EXEMPTED;
+            }
+
             if (isActiveNetworkScorer(packageName)) {
                 return STANDBY_BUCKET_EXEMPTED;
             }
@@ -1471,7 +1478,8 @@ public class AppStandbyController
                     }
                 } else {
                     int mode = mAppOpsManager.checkOpNoThrow(
-                            AppOpsManager.OP_SYSTEM_EXEMPT_FROM_APP_STANDBY, uid, packageName);
+                            AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, uid,
+                            packageName);
                     mSystemExemptionAppOpMode.put(uid, mode);
                     if (mode == AppOpsManager.MODE_ALLOWED) {
                         return STANDBY_BUCKET_EXEMPTED;
@@ -1666,7 +1674,7 @@ public class AppStandbyController
 
         final int reason = (REASON_MAIN_MASK & mainReason) | (REASON_SUB_MASK & restrictReason);
         final long nowElapsed = mInjector.elapsedRealtime();
-        final int bucket = mAllowRestrictedBucket ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE;
+        final int bucket = STANDBY_BUCKET_RESTRICTED;
         setAppStandbyBucket(packageName, userId, bucket, reason, nowElapsed, false);
     }
 
@@ -1770,9 +1778,6 @@ public class AppStandbyController
                 Slog.e(TAG, "Tried to set bucket of uninstalled app: " + packageName);
                 return;
             }
-            if (newBucket == STANDBY_BUCKET_RESTRICTED && !mAllowRestrictedBucket) {
-                newBucket = STANDBY_BUCKET_RARE;
-            }
             AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
                     userId, elapsedRealtime);
             boolean predicted = (reason & REASON_MAIN_MASK) == REASON_MAIN_PREDICTED;
@@ -1808,8 +1813,14 @@ public class AppStandbyController
                 reason = REASON_MAIN_FORCED_BY_SYSTEM
                         | (app.bucketingReason & REASON_SUB_MASK)
                         | (reason & REASON_SUB_MASK);
+                final boolean previouslyIdle =
+                        app.currentBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
                 mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
                         newBucket, reason, resetTimeout);
+                final boolean stillIdle = newBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
+                if (previouslyIdle != stillIdle) {
+                    notifyBatteryStats(packageName, userId, stillIdle);
+                }
                 return;
             }
 
@@ -1892,7 +1903,6 @@ public class AppStandbyController
                                 + " due to min timeout");
                     }
                 } else if (newBucket == STANDBY_BUCKET_RARE
-                        && mAllowRestrictedBucket
                         && getBucketForLocked(packageName, userId, elapsedRealtime)
                         == STANDBY_BUCKET_RESTRICTED) {
                     // Prediction doesn't think the app will be used anytime soon and
@@ -1910,8 +1920,13 @@ public class AppStandbyController
 
             // Make sure we don't put the app in a lower bucket than it's supposed to be in.
             newBucket = Math.min(newBucket, getAppMinBucket(packageName, userId));
+            final boolean previouslyIdle = app.currentBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
             mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
                     reason, resetTimeout);
+            final boolean stillIdle = newBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
+            if (previouslyIdle != stillIdle) {
+                notifyBatteryStats(packageName, userId, stillIdle);
+            }
         }
         maybeInformListeners(packageName, userId, elapsedRealtime, newBucket, reason, false);
     }
@@ -1922,6 +1937,17 @@ public class AppStandbyController
         synchronized (mActiveAdminApps) {
             final Set<String> adminPkgs = mActiveAdminApps.get(userId);
             return adminPkgs != null && adminPkgs.contains(packageName);
+        }
+    }
+
+    private boolean isAdminProtectedPackages(String packageName, int userId) {
+        synchronized (mAdminProtectedPackages) {
+            if (mAdminProtectedPackages.contains(UserHandle.USER_ALL)
+                    && mAdminProtectedPackages.get(UserHandle.USER_ALL).contains(packageName)) {
+                return true;
+            }
+            return mAdminProtectedPackages.contains(userId)
+                    && mAdminProtectedPackages.get(userId).contains(packageName);
         }
     }
 
@@ -1949,6 +1975,17 @@ public class AppStandbyController
     }
 
     @Override
+    public void setAdminProtectedPackages(Set<String> packageNames, int userId) {
+        synchronized (mAdminProtectedPackages) {
+            if (packageNames == null || packageNames.isEmpty()) {
+                mAdminProtectedPackages.remove(userId);
+            } else {
+                mAdminProtectedPackages.put(userId, packageNames);
+            }
+        }
+    }
+
+    @Override
     public void onAdminDataAvailable() {
         mAdminDataAvailableLatch.countDown();
     }
@@ -1967,6 +2004,13 @@ public class AppStandbyController
     Set<String> getActiveAdminAppsForTest(int userId) {
         synchronized (mActiveAdminApps) {
             return mActiveAdminApps.get(userId);
+        }
+    }
+
+    @VisibleForTesting
+    Set<String> getAdminProtectedPackagesForTest(int userId) {
+        synchronized (mAdminProtectedPackages) {
+            return mAdminProtectedPackages.get(userId);
         }
     }
 
@@ -2466,8 +2510,6 @@ public class AppStandbyController
 
         pw.println();
         pw.print("mAppIdleEnabled="); pw.print(mAppIdleEnabled);
-        pw.print(" mAllowRestrictedBucket=");
-        pw.print(mAllowRestrictedBucket);
         pw.print(" mIsCharging=");
         pw.print(mIsCharging);
         pw.println();
@@ -2648,12 +2690,6 @@ public class AppStandbyController
             }
         }
 
-        boolean isRestrictedBucketEnabled() {
-            return Global.getInt(mContext.getContentResolver(),
-                    Global.ENABLE_RESTRICTED_BUCKET,
-                    Global.DEFAULT_ENABLE_RESTRICTED_BUCKET) == 1;
-        }
-
         File getDataSystemDirectory() {
             return Environment.getDataSystemDirectory();
         }
@@ -2668,7 +2704,9 @@ public class AppStandbyController
         }
 
         void noteEvent(int event, String packageName, int uid) throws RemoteException {
-            mBatteryStats.noteEvent(event, packageName, uid);
+            if (mBatteryStats != null) {
+                mBatteryStats.noteEvent(event, packageName, uid);
+            }
         }
 
         PackageManagerInternal getPackageManagerInternal() {
@@ -2736,7 +2774,7 @@ public class AppStandbyController
         void registerDeviceConfigPropertiesChangedListener(
                 @NonNull DeviceConfig.OnPropertiesChangedListener listener) {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_APP_STANDBY,
-                    JobSchedulerBackgroundThread.getExecutor(), listener);
+                    AppSchedulingModuleThread.getExecutor(), listener);
         }
 
         void dump(PrintWriter pw) {
@@ -3014,11 +3052,6 @@ public class AppStandbyController
             // APP_STANDBY_ENABLED is a SystemApi that some apps may be watching, so best to
             // leave it in Settings.
             cr.registerContentObserver(Global.getUriFor(Global.APP_STANDBY_ENABLED), false, this);
-            // Leave ENABLE_RESTRICTED_BUCKET as a user-controlled setting which will stay in
-            // Settings.
-            // TODO: make setting user-specific
-            cr.registerContentObserver(Global.getUriFor(Global.ENABLE_RESTRICTED_BUCKET),
-                    false, this);
             // ADAPTIVE_BATTERY_MANAGEMENT_ENABLED is a user setting, so it has to stay in Settings.
             cr.registerContentObserver(Global.getUriFor(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED),
                     false, this);
@@ -3217,10 +3250,6 @@ public class AppStandbyController
                 Slog.d(TAG,
                         "adaptivebat=" + Global.getString(mContext.getContentResolver(),
                                 Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED));
-            }
-
-            synchronized (mAppIdleLock) {
-                mAllowRestrictedBucket = mInjector.isRestrictedBucketEnabled();
             }
 
             setAppIdleEnabled(mInjector.isAppIdleEnabled());

@@ -40,7 +40,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रीनशॉट नहीं लिया जा सका."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"गड़बड़ी की रिपोर्ट <xliff:g id="ID">#%d</xliff:g> की पूरी जानकारी"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"फ़ाइल नाम"</string>
-    <string name="bugreport_info_title" msgid="2306030793918239804">"गड़बड़ी का शीर्षक"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"गड़बड़ी का टाइटल"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"गड़बड़ी का सारांश"</string>
     <string name="save" msgid="4781509040564835759">"सेव करें"</string>
     <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"गड़बड़ी की रिपोर्ट शेयर करें"</string>

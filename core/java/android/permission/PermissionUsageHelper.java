@@ -398,7 +398,8 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             Context userContext = getUserContext(user);
             PackageInfo packageInfo = userContext.getPackageManager().getPackageInfo(
                     packageName,
-                    PackageManager.GET_PERMISSIONS | PackageManager.GET_ATTRIBUTIONS);
+                    PackageManager.PackageInfoFlags.of(
+                            PackageManager.GET_PERMISSIONS | PackageManager.GET_ATTRIBUTIONS_LONG));
             Context pkgContext = userContext.createPackageContext(packageInfo.packageName, 0);
             for (Attribution attribution : packageInfo.attributions) {
                 try {

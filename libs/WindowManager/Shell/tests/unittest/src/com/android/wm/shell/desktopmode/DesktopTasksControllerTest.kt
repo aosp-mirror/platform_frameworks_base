@@ -26,6 +26,8 @@ import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.os.Binder
 import android.testing.AndroidTestingRunner
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionRequestInfo
@@ -35,11 +37,14 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -55,6 +60,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -70,8 +76,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var shellController: ShellController
+    @Mock lateinit var displayController: DisplayController
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
+    @Mock lateinit var syncQueue: SyncTransactionQueue
+    @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock lateinit var transitions: Transitions
+    @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
+    @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
 
     lateinit var mockitoSession: StaticMockitoSession
     lateinit var controller: DesktopTasksController
@@ -102,8 +113,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
             context,
             shellInit,
             shellController,
+            displayController,
             shellTaskOrganizer,
+            syncQueue,
+            rootTaskDisplayAreaOrganizer,
             transitions,
+            enterDesktopTransitionHandler,
+            exitDesktopTransitionHandler,
             desktopModeTaskRepository,
             TestShellExecutor()
         )
@@ -141,7 +157,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -159,7 +175,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -177,7 +193,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
         assertThat(wct.hierarchyOps).hasSize(3)
         // Expect order to be from bottom: home, task1, task2
         wct.assertReorderAt(index = 0, homeTask)
@@ -191,7 +207,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_NONE)
         assertThat(wct.hierarchyOps).hasSize(1)
         wct.assertReorderAt(index = 0, homeTask)
     }
@@ -221,7 +237,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop() {
         val task = setUpFullscreenTask()
         controller.moveToDesktop(task)
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
     }
@@ -241,7 +257,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.moveToDesktop(fullscreenTask)
 
-        with(getLatestWct()) {
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
             assertThat(hierarchyOps).hasSize(3)
             assertReorderSequence(homeTask, freeformTask, fullscreenTask)
             assertThat(changes[fullscreenTask.token.asBinder()]?.windowingMode)
@@ -253,7 +269,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToFullscreen() {
         val task = setUpFreeformTask()
         controller.moveToFullscreen(task)
-        val wct = getLatestWct()
+        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FULLSCREEN)
     }
@@ -415,10 +431,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
         desktopModeTaskRepository.updateVisibleFreeformTasks(task.taskId, visible = false)
     }
 
-    private fun getLatestWct(): WindowContainerTransaction {
+    private fun getLatestWct(
+        @WindowManager.TransitionType expectTransition: Int = TRANSIT_OPEN
+    ): WindowContainerTransaction {
         val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         if (ENABLE_SHELL_TRANSITIONS) {
-            verify(transitions).startTransition(anyInt(), arg.capture(), isNull())
+            verify(transitions).startTransition(eq(expectTransition), arg.capture(), isNull())
         } else {
             verify(shellTaskOrganizer).applyTransaction(arg.capture())
         }

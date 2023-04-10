@@ -31,6 +31,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,6 +58,8 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
 
     @Mock
     private MenuInfoRepository.OnSettingsContentsChanged mMockSettingsContentsChanged;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private MenuInfoRepository mMenuInfoRepository;
     private final List<String> mShortcutTargets = new ArrayList<>();
@@ -69,7 +72,7 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
                 anyInt());
 
         mMenuInfoRepository = new MenuInfoRepository(mContext, mAccessibilityManager,
-                mMockSettingsContentsChanged);
+                mMockSettingsContentsChanged, mSecureSettings);
     }
 
     @After

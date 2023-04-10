@@ -39,6 +39,8 @@ public final class DisplayPortAltModeInfo implements Parcelable {
     private final @DisplayPortAltModeStatus int mPartnerSinkStatus;
     private final @DisplayPortAltModeStatus int mCableStatus;
     private final int mNumLanes;
+    private final boolean mHotPlugDetect;
+    private final @LinkTrainingStatus int mLinkTrainingStatus;
 
     /**
      * Port Partners:
@@ -77,7 +79,7 @@ public final class DisplayPortAltModeInfo implements Parcelable {
      * as one of its capabilities, however may not yet have entered DisplayPort Alt Mode or has been
      * configured for data transmission.
      */
-    public static final int DISPLAYPORT_ALT_MODE_STATUS_CAPABLE = 2;
+    public static final int DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED = 2;
 
     /**
      * Port Partners:
@@ -88,38 +90,66 @@ public final class DisplayPortAltModeInfo implements Parcelable {
      */
     public static final int DISPLAYPORT_ALT_MODE_STATUS_ENABLED = 3;
 
+    /*
+     * Indicates that DisplayPort Alt Mode link training has not initiated or completed.
+     */
+    public static final int LINK_TRAINING_STATUS_UNKNOWN = 0;
+
+    /*
+     * Indicates that DisplayPort Alt Mode link training has completed and the optimal data
+     * transmission settings between the device and the connected port partner have successfully
+     * been negotiated.
+     */
+    public static final int LINK_TRAINING_STATUS_SUCCESS = 1;
+
+    /*
+     * Indicates that DisplayPort Alt Mode link training has completed but no data transmission
+     * settings between the device and the connected port partner could be established, and that the
+     * link initialization has terminated.
+     */
+    public static final int LINK_TRAINING_STATUS_FAILURE = 2;
+
     /** @hide */
     @IntDef(prefix = { "DISPLAYPORT_ALT_MODE_STATUS_" }, value = {
             DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
             DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE,
-            DISPLAYPORT_ALT_MODE_STATUS_CAPABLE,
+            DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED,
             DISPLAYPORT_ALT_MODE_STATUS_ENABLED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisplayPortAltModeStatus {}
 
     /** @hide */
+    @IntDef(prefix = { "LINK_TRAINING_STATUS_" }, value = {
+            LINK_TRAINING_STATUS_UNKNOWN,
+            LINK_TRAINING_STATUS_SUCCESS,
+            LINK_TRAINING_STATUS_FAILURE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LinkTrainingStatus {}
+
+    /** @hide */
     public DisplayPortAltModeInfo() {
         mPartnerSinkStatus = DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
         mCableStatus = DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
         mNumLanes = 0;
+        mHotPlugDetect = false;
+        mLinkTrainingStatus = LINK_TRAINING_STATUS_UNKNOWN;
     }
 
     /** @hide */
     public DisplayPortAltModeInfo(int partnerSinkStatus, int cableStatus,
-            int numLanes) {
+            int numLanes, boolean hotPlugDetect, int linkTrainingStatus) {
         mPartnerSinkStatus = partnerSinkStatus;
         mCableStatus = cableStatus;
         mNumLanes = numLanes;
+        mHotPlugDetect = hotPlugDetect;
+        mLinkTrainingStatus = linkTrainingStatus;
     }
 
     /**
      * Returns the DisplayPort Alt Mode Status for a port partner acting as a sink.
      *
-     * @return {@link #DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_ENABLED}
      */
     public @DisplayPortAltModeStatus int getPartnerSinkStatus() {
         return mPartnerSinkStatus;
@@ -128,10 +158,6 @@ public final class DisplayPortAltModeInfo implements Parcelable {
     /**
      * Returns the DisplayPort Alt Mode Status for the attached cable
      *
-     * @return {@link #DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_ENABLED}
      */
     public @DisplayPortAltModeStatus int getCableStatus() {
         return mCableStatus;
@@ -145,6 +171,21 @@ public final class DisplayPortAltModeInfo implements Parcelable {
         return mNumLanes;
     }
 
+    /**
+     * Returns whether or not the Hot Plug Detect (HPD) value of the connected DisplayPort Alt Mode
+     * partner sink is active.
+     */
+    public boolean isHotPlugDetectActive() {
+        return mHotPlugDetect;
+    }
+
+    /**
+     * Returns the DisplayPort Alt Mode link training status.
+     */
+    public @LinkTrainingStatus int getLinkTrainingStatus() {
+        return mLinkTrainingStatus;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -155,6 +196,8 @@ public final class DisplayPortAltModeInfo implements Parcelable {
         dest.writeInt(mPartnerSinkStatus);
         dest.writeInt(mCableStatus);
         dest.writeInt(mNumLanes);
+        dest.writeBoolean(mHotPlugDetect);
+        dest.writeInt(mLinkTrainingStatus);
     }
 
     @NonNull
@@ -166,6 +209,10 @@ public final class DisplayPortAltModeInfo implements Parcelable {
                 + mCableStatus
                 + " numLanes="
                 + mNumLanes
+                + " hotPlugDetect="
+                + mHotPlugDetect
+                + " linkTrainingStatus="
+                + mLinkTrainingStatus
                 + "}";
     }
 
@@ -180,12 +227,15 @@ public final class DisplayPortAltModeInfo implements Parcelable {
         DisplayPortAltModeInfo other = (DisplayPortAltModeInfo) o;
         return this.mPartnerSinkStatus == other.mPartnerSinkStatus
                 && this.mCableStatus == other.mCableStatus
-                && this.mNumLanes == other.mNumLanes;
+                && this.mNumLanes == other.mNumLanes
+                && this.mHotPlugDetect == other.mHotPlugDetect
+                && this.mLinkTrainingStatus == other.mLinkTrainingStatus;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPartnerSinkStatus, mCableStatus, mNumLanes);
+        return Objects.hash(mPartnerSinkStatus, mCableStatus, mNumLanes, mHotPlugDetect,
+                mLinkTrainingStatus);
     }
 
     public static final @NonNull Parcelable.Creator<DisplayPortAltModeInfo> CREATOR =
@@ -195,7 +245,10 @@ public final class DisplayPortAltModeInfo implements Parcelable {
             int partnerSinkStatus = in.readInt();
             int cableStatus = in.readInt();
             int numLanes = in.readInt();
-            return new DisplayPortAltModeInfo(partnerSinkStatus, cableStatus, numLanes);
+            boolean hotPlugDetect = in.readBoolean();
+            int linkTrainingStatus = in.readInt();
+            return new DisplayPortAltModeInfo(partnerSinkStatus, cableStatus, numLanes,
+                    hotPlugDetect, linkTrainingStatus);
         }
 
         @Override

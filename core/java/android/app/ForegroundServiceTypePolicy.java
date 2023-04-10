@@ -59,6 +59,9 @@ import android.hardware.usb.UsbManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.permission.PermissionCheckerManager;
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -107,9 +110,8 @@ public abstract class ForegroundServiceTypePolicy {
      *
      * @hide
      */
-    // TODO (b/254661666): Change to @EnabledAfter(T)
     @ChangeId
-    @Disabled
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
     @Overridable
     public static final long FGS_TYPE_NONE_DISABLED_CHANGE_ID = 255038118L;
 
@@ -142,11 +144,112 @@ public abstract class ForegroundServiceTypePolicy {
      *
      * @hide
      */
-    // TODO (b/254661666): Change to @EnabledAfter(T)
     @ChangeId
-    @Disabled
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
     @Overridable
     public static final long FGS_TYPE_PERMISSION_CHANGE_ID = 254662522L;
+
+    /**
+     * The prefix for the feature flags of the permission enforcement.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX =
+            "fgs_type_perm_enforcement_flag_";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_DATA_SYNC},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_DATA_SYNC =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "data_sync";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_MEDIA_PLAYBACK =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "media_playback";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_PHONE_CALL},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_PHONE_CALL =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "phone_call";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_LOCATION =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "location";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_CONNECTED_DEVICE =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "connected_device";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_MEDIA_PROJECTION =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "media_projection";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_CAMERA},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_CAMERA =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "camera";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_MICROPHONE =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "microphone";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_HEALTH},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_HEALTH =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "health";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_REMOTE_MESSAGING =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "remote_messaging";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_SYSTEM_EXEMPTED =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "system_exempted";
+
+    /**
+     * The feature flag of the permission enforcement for
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE},
+     * in the namespace of {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER}.
+     */
+    private static final String FGS_TYPE_PERM_ENFORCEMENT_FLAG_SPECIAL_USE =
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PREFIX + "special_use";
 
     /**
      * The policy for the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST}.
@@ -158,8 +261,10 @@ public abstract class ForegroundServiceTypePolicy {
             FOREGROUND_SERVICE_TYPE_MANIFEST,
             FGS_TYPE_NONE_DEPRECATION_CHANGE_ID,
             FGS_TYPE_NONE_DISABLED_CHANGE_ID,
-            null,
-            null
+            null /* allOfPermissions */,
+            null /* anyOfPermissions */,
+            null /* permissionEnforcementFlag */,
+            false /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -172,8 +277,10 @@ public abstract class ForegroundServiceTypePolicy {
             FOREGROUND_SERVICE_TYPE_NONE,
             FGS_TYPE_NONE_DEPRECATION_CHANGE_ID,
             FGS_TYPE_NONE_DISABLED_CHANGE_ID,
-            null,
-            null
+            null /* allOfPermissions */,
+            null /* anyOfPermissions */,
+            null /* permissionEnforcementFlag */,
+            false /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -189,7 +296,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC)
             }, true),
-            null
+            null /* anyOfPermissions */,
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_DATA_SYNC /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -205,7 +314,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK)
             }, true),
-            null
+            null /* anyOfPermissions */,
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_MEDIA_PLAYBACK /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -223,7 +334,9 @@ public abstract class ForegroundServiceTypePolicy {
             }, true),
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.MANAGE_OWN_CALLS)
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_PHONE_CALL /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -242,7 +355,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.ACCESS_COARSE_LOCATION),
                 new RegularPermission(Manifest.permission.ACCESS_FINE_LOCATION),
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_LOCATION /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -270,7 +385,9 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.UWB_RANGING),
                 new UsbDevicePermission(),
                 new UsbAccessoryPermission(),
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_CONNECTED_DEVICE /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -289,7 +406,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.CAPTURE_VIDEO_OUTPUT),
                 new AppOpPermission(AppOpsManager.OP_PROJECT_MEDIA)
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_MEDIA_PROJECTION /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -308,7 +427,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.CAMERA),
                 new RegularPermission(Manifest.permission.SYSTEM_CAMERA),
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_CAMERA /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -331,7 +452,9 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.CAPTURE_TUNER_AUDIO_INPUT),
                 new RegularPermission(Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT),
                 new RegularPermission(Manifest.permission.RECORD_AUDIO),
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_MICROPHONE /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -350,8 +473,11 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.ACTIVITY_RECOGNITION),
                 new RegularPermission(Manifest.permission.BODY_SENSORS),
+                new RegularPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE),
                 new RegularPermission(Manifest.permission.HIGH_SAMPLING_RATE_SENSORS),
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_HEALTH /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -367,7 +493,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING)
             }, true),
-            null
+            null /* anyOfPermissions */,
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_REMOTE_MESSAGING /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -387,8 +515,9 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.SCHEDULE_EXACT_ALARM),
                 new RegularPermission(Manifest.permission.USE_EXACT_ALARM),
                 new AppOpPermission(AppOpsManager.OP_ACTIVATE_VPN),
-                new AppOpPermission(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
-            }, false)
+            }, false),
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_SYSTEM_EXEMPTED /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -401,7 +530,10 @@ public abstract class ForegroundServiceTypePolicy {
             FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
             ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
             ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
-            null /* no type specific permissions */, null /* no type specific permissions */
+            null /* allOfPermissions */,
+            null /* anyOfPermissions */,
+            null /* permissionEnforcementFlag */,
+            false /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -417,7 +549,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT)
             }, true),
-            null
+            null /* anyOfPermissions */,
+            null /* permissionEnforcementFlag */,
+            false /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -433,7 +567,9 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE)
             }, true),
-            null
+            null /* anyOfPermissions */,
+            FGS_TYPE_PERM_ENFORCEMENT_FLAG_SPECIAL_USE /* permissionEnforcementFlag */,
+            true /* permissionEnforcementFlagDefaultValue */
     );
 
     /**
@@ -517,6 +653,14 @@ public abstract class ForegroundServiceTypePolicy {
             @NonNull String packageName, int callerUid, int callerPid, boolean allowWhileInUse,
             @NonNull ForegroundServiceTypePolicyInfo policy);
 
+    /**
+     * Run the given {@code policyFunctor} on the matching policy, if the flag is known
+     * to the policy.
+     *
+     * @hide
+     */
+    public abstract void updatePermissionEnforcementFlagIfNecessary(@NonNull String flag);
+
     @GuardedBy("sLock")
     private static ForegroundServiceTypePolicy sDefaultForegroundServiceTypePolicy = null;
 
@@ -580,9 +724,29 @@ public abstract class ForegroundServiceTypePolicy {
         final @Nullable ForegroundServiceTypePermissions mAnyOfPermissions;
 
         /**
+         * A permission enforcement flag, unlike the {@link #FGS_TYPE_PERMISSION_CHANGE_ID},
+         * here it applies to all apps using this FGS type.
+         */
+        final @Nullable String mPermissionEnforcementFlag;
+
+        /**
+         * The default value to {@link #mPermissionEnforcementFlag}.
+         */
+        final boolean mPermissionEnforcementFlagDefaultValue;
+
+        /**
          * A customized check for the permissions.
          */
         @Nullable ForegroundServiceTypePermission mCustomPermission;
+
+        /**
+         * The value of the permission enforcement flag, will be updated by the system.
+         * If the value is {@code false}, the FGS permission check will be ignored.
+         *
+         * <p>This value could be updated via the DeviceConfig flag specified
+         * in the {@link #mPermissionEnforcementFlag}.</p>
+         */
+        volatile boolean mPermissionEnforcementFlagValue;
 
         /**
          * Not a real change id, but a place holder.
@@ -604,12 +768,17 @@ public abstract class ForegroundServiceTypePolicy {
         public ForegroundServiceTypePolicyInfo(@ForegroundServiceType int type,
                 long deprecationChangeId, long disabledChangeId,
                 @Nullable ForegroundServiceTypePermissions allOfPermissions,
-                @Nullable ForegroundServiceTypePermissions anyOfPermissions) {
+                @Nullable ForegroundServiceTypePermissions anyOfPermissions,
+                @Nullable String permissionEnforcementFlag,
+                boolean permissionEnforcementFlagDefaultValue) {
             mType = type;
             mDeprecationChangeId = deprecationChangeId;
             mDisabledChangeId = disabledChangeId;
             mAllOfPermissions = allOfPermissions;
             mAnyOfPermissions = anyOfPermissions;
+            mPermissionEnforcementFlag = permissionEnforcementFlag;
+            mPermissionEnforcementFlagDefaultValue = permissionEnforcementFlagDefaultValue;
+            mPermissionEnforcementFlagValue = permissionEnforcementFlagDefaultValue;
         }
 
         /**
@@ -653,6 +822,17 @@ public abstract class ForegroundServiceTypePolicy {
                 sb.append(' ');
             }
             return sb;
+        }
+
+        private void updatePermissionEnforcementFlagIfNecessary(@NonNull String flagName) {
+            if (mPermissionEnforcementFlag == null
+                    || !TextUtils.equals(flagName, mPermissionEnforcementFlag)) {
+                return;
+            }
+            mPermissionEnforcementFlagValue = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    mPermissionEnforcementFlag,
+                    mPermissionEnforcementFlagDefaultValue);
         }
 
         /**
@@ -749,6 +929,15 @@ public abstract class ForegroundServiceTypePolicy {
             IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                         ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
             platformCompat.clearOverrideForTest(changeId, packageName);
+        }
+
+        /**
+         * For test only.
+         *
+         * @return The permission enforcement flag.
+         */
+        public @Nullable String getPermissionEnforcementFlagForTest() {
+            return mPermissionEnforcementFlag;
         }
     }
 
@@ -996,6 +1185,12 @@ public abstract class ForegroundServiceTypePolicy {
                 new SparseArray<>();
 
         /**
+         * The map between permission enforcement flag to its permission policy info.
+         */
+        private final ArrayMap<String, ForegroundServiceTypePolicyInfo>
+                mPermissionEnforcementToPolicyInfoMap = new ArrayMap<>();
+
+        /**
          * Constructor
          */
         public DefaultForegroundServiceTypePolicy() {
@@ -1027,10 +1222,15 @@ public abstract class ForegroundServiceTypePolicy {
                     FGS_TYPE_POLICY_SYSTEM_EXEMPTED);
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
                     FGS_TYPE_POLICY_SHORT_SERVICE);
-            mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT,
-                    FGS_TYPE_POLICY_FILE_MANAGEMENT);
+            // TODO (b/271950506): revisit it in the next release.
+            // Hide the file management type for now. If anyone uses it, will default to "none".
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
                     FGS_TYPE_POLICY_SPECIAL_USE);
+            for (int i = 0, size = mForegroundServiceTypePolicies.size(); i < size; i++) {
+                final ForegroundServiceTypePolicyInfo info =
+                        mForegroundServiceTypePolicies.valueAt(i);
+                mPermissionEnforcementToPolicyInfoMap.put(info.mPermissionEnforcementFlag, info);
+            }
         }
 
         @Override
@@ -1058,7 +1258,7 @@ public abstract class ForegroundServiceTypePolicy {
             if (policy.isTypeDisabled(callerUid)) {
                 return FGS_TYPE_POLICY_CHECK_DISABLED;
             }
-            int permissionResult = PERMISSION_DENIED;
+            int permissionResult = PERMISSION_GRANTED;
             // Do we have the permission to start FGS with this type.
             if (policy.mAllOfPermissions != null) {
                 permissionResult = policy.mAllOfPermissions.checkPermissions(context,
@@ -1083,8 +1283,8 @@ public abstract class ForegroundServiceTypePolicy {
                 }
             }
             if (permissionResult != PERMISSION_GRANTED) {
-                return (CompatChanges.isChangeEnabled(
-                        FGS_TYPE_PERMISSION_CHANGE_ID, callerUid))
+                return policy.mPermissionEnforcementFlagValue
+                        && (CompatChanges.isChangeEnabled(FGS_TYPE_PERMISSION_CHANGE_ID, callerUid))
                         ? FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_ENFORCED
                         : FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_PERMISSIVE;
             }
@@ -1093,6 +1293,15 @@ public abstract class ForegroundServiceTypePolicy {
                 return FGS_TYPE_POLICY_CHECK_DEPRECATED;
             }
             return FGS_TYPE_POLICY_CHECK_OK;
+        }
+
+        @Override
+        public void updatePermissionEnforcementFlagIfNecessary(@NonNull String flagName) {
+            final ForegroundServiceTypePolicyInfo info =
+                    mPermissionEnforcementToPolicyInfoMap.get(flagName);
+            if (info != null) {
+                info.updatePermissionEnforcementFlagIfNecessary(flagName);
+            }
         }
     }
 }

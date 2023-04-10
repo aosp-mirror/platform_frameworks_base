@@ -78,7 +78,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private static final boolean DEBUG = true;
     private static final int HANDLE_BROADCAST_FAILED_DELAY = 3000;
 
-    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+    protected final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
 
     final Context mContext;
@@ -95,16 +95,19 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
     private LinearLayout mCastAppLayout;
+    private LinearLayout mMediaMetadataSectionLayout;
     private Button mDoneButton;
     private Button mStopButton;
     private Button mAppButton;
     private int mListMaxHeight;
     private int mItemHeight;
     private WallpaperColors mWallpaperColors;
-    private Executor mExecutor;
     private boolean mShouldLaunchLeBroadcastDialog;
+    private boolean mIsLeBroadcastCallbackRegistered;
 
     MediaOutputBaseAdapter mAdapter;
+
+    protected Executor mExecutor;
 
     private final ViewTreeObserver.OnGlobalLayoutListener mDeviceListLayoutListener = () -> {
         ViewGroup.LayoutParams params = mDeviceListLayout.getLayoutParams();
@@ -240,6 +243,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
         mHeaderIcon = mDialogView.requireViewById(R.id.header_icon);
         mDevicesRecyclerView = mDialogView.requireViewById(R.id.list_result);
+        mMediaMetadataSectionLayout = mDialogView.requireViewById(R.id.media_metadata_section);
         mDeviceListLayout = mDialogView.requireViewById(R.id.device_list);
         mDoneButton = mDialogView.requireViewById(R.id.done);
         mStopButton = mDialogView.requireViewById(R.id.stop);
@@ -255,38 +259,36 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDevicesRecyclerView.setLayoutManager(mLayoutManager);
         mDevicesRecyclerView.setAdapter(mAdapter);
         mDevicesRecyclerView.setHasFixedSize(false);
-        // Init header icon
-        mHeaderIcon.setOnClickListener(v -> onHeaderIconClick());
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
         mStopButton.setOnClickListener(v -> {
             mMediaOutputController.releaseSession();
             dismiss();
         });
-        mAppButton.setOnClickListener(v -> {
-            mBroadcastSender.closeSystemDialogs();
-            if (mMediaOutputController.getAppLaunchIntent() != null) {
-                mContext.startActivity(mMediaOutputController.getAppLaunchIntent());
-            }
-            dismiss();
-        });
+        mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
+        if (mMediaOutputController.isAdvancedLayoutSupported()) {
+            mMediaMetadataSectionLayout.setOnClickListener(
+                    mMediaOutputController::tryToLaunchMediaApplication);
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
         mMediaOutputController.start(this);
-        if(isBroadcastSupported()) {
-            mMediaOutputController.registerLeBroadcastServiceCallBack(mExecutor,
+        if (isBroadcastSupported() && !mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.registerLeBroadcastServiceCallback(mExecutor,
                     mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = true;
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if(isBroadcastSupported()) {
-            mMediaOutputController.unregisterLeBroadcastServiceCallBack(mBroadcastCallback);
+        if (isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = false;
         }
         mMediaOutputController.stop();
     }
@@ -560,7 +562,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     @Override
     public void dismissDialog() {
-        dismiss();
+        mBroadcastSender.closeSystemDialogs();
     }
 
     void onHeaderIconClick() {

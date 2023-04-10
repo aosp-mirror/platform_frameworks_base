@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
  * Representation of an immutable default cross-profile intent filter.
  */
 @Immutable
-final class DefaultCrossProfileIntentFilter {
+public final class DefaultCrossProfileIntentFilter {
 
     @IntDef({
             Direction.TO_PARENT,

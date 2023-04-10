@@ -28,6 +28,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 
+import android.app.ActivityManager;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
@@ -541,7 +542,7 @@ public final class DeviceStateManagerServiceTest {
     }
 
     @Test
-    public void requestState_flagCancelWhenRequesterNotOnTop_onTaskStackChanged()
+    public void requestState_flagCancelWhenRequesterNotOnTop_onTaskMovedToFront()
             throws RemoteException {
         requestState_flagCancelWhenRequesterNotOnTop_common(
                 // When the app is foreground, the state should not change
@@ -549,7 +550,8 @@ public final class DeviceStateManagerServiceTest {
                     int pid = Binder.getCallingPid();
                     when(mWindowProcessController.getPid()).thenReturn(pid);
                     try {
-                        mService.mOverrideRequestTaskStackListener.onTaskStackChanged();
+                        mService.mOverrideRequestTaskStackListener.onTaskMovedToFront(
+                                new ActivityManager.RunningTaskInfo());
                     } catch (RemoteException e) {
                         throw new RuntimeException(e);
                     }
@@ -558,7 +560,8 @@ public final class DeviceStateManagerServiceTest {
                 () -> {
                     when(mWindowProcessController.getPid()).thenReturn(FAKE_PROCESS_ID);
                     try {
-                        mService.mOverrideRequestTaskStackListener.onTaskStackChanged();
+                        mService.mOverrideRequestTaskStackListener.onTaskMovedToFront(
+                                new ActivityManager.RunningTaskInfo());
                     } catch (RemoteException e) {
                         throw new RuntimeException(e);
                     }
@@ -945,13 +948,15 @@ public final class DeviceStateManagerServiceTest {
             }
 
             mListener = listener;
-            mListener.onSupportedDeviceStatesChanged(mSupportedDeviceStates);
+            mListener.onSupportedDeviceStatesChanged(mSupportedDeviceStates,
+                    SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED);
             mListener.onStateChanged(mSupportedDeviceStates[0].getIdentifier());
         }
 
         public void notifySupportedDeviceStates(DeviceState[] supportedDeviceStates) {
             mSupportedDeviceStates = supportedDeviceStates;
-            mListener.onSupportedDeviceStatesChanged(supportedDeviceStates);
+            mListener.onSupportedDeviceStatesChanged(supportedDeviceStates,
+                    SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED);
         }
 
         public void setState(int identifier) {

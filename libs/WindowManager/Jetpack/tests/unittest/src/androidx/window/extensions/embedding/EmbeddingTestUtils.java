@@ -177,6 +177,7 @@ public class EmbeddingTestUtils {
                 1,
                 isVisible,
                 Collections.singletonList(activity.getActivityToken()),
+                new ArrayList<>(),
                 new Point(),
                 false /* isTaskClearedForReuse */,
                 false /* isTaskFragmentClearedForPip */,

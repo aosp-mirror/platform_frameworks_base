@@ -23,6 +23,5 @@
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"अनुमति है"</string>
     <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"अनुमति नहीं है"</string>
     <string name="version_text" msgid="4001669804596458577">"वर्शन <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
-    <!-- no translation found for cloned_app_info_label (1765651167024478391) -->
-    <skip />
+    <string name="cloned_app_info_label" msgid="1765651167024478391">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> का क्लोन"</string>
 </resources>

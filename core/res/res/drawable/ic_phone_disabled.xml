@@ -1,0 +1,25 @@
+<!--
+     Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="48dp"
+        android:height="48dp"
+        android:viewportWidth="48"
+        android:viewportHeight="48"
+        android:tint="?attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M40.65,45.15 L28.9,33.45Q23.55,37.8 18.5,39.925Q13.45,42.05 8.6,42.05Q7.45,42.05 6.7,41.4Q5.95,40.75 5.95,39.75V33Q5.95,32.2 6.45,31.6Q6.95,31 7.7,30.85L13.65,29.55Q14.3,29.4 14.95,29.625Q15.6,29.85 16.1,30.4L20.85,35.3Q22.3,34.6 23.9,33.45Q25.5,32.3 26.75,31.3L3.2,7.7L5.35,5.55L42.8,43.05ZM18.1,36.75 L14.15,32.6Q14.15,32.6 14.15,32.6Q14.15,32.6 14.15,32.6L9,33.65Q9,33.65 9,33.65Q9,33.65 9,33.65V39Q9,39 9,39Q9,39 9,39Q11.25,38.9 13.65,38.3Q16.05,37.7 18.1,36.75ZM33.15,29.15 L31,27Q32.05,25.75 33.125,24.175Q34.2,22.6 35.05,21.3L30.05,16.25Q29.65,15.85 29.5,15.275Q29.35,14.7 29.5,14L30.8,7.75Q30.95,6.95 31.475,6.475Q32,6 32.7,6H39.7Q40.65,6 41.325,6.65Q42,7.3 42,8.25Q42,13.35 39.6,18.975Q37.2,24.6 33.15,29.15ZM36.45,18.45Q37.75,15.45 38.35,13.2Q38.95,10.95 38.9,9Q38.9,9 38.9,9Q38.9,9 38.9,9H33.6Q33.6,9 33.6,9Q33.6,9 33.6,9L32.45,14.45Q32.45,14.45 32.45,14.45Q32.45,14.45 32.45,14.45ZM36.45,18.45Q36.45,18.45 36.45,18.45Q36.45,18.45 36.45,18.45Q36.45,18.45 36.45,18.45Q36.45,18.45 36.45,18.45Q36.45,18.45 36.45,18.45Q36.45,18.45 36.45,18.45Q36.45,18.45 36.45,18.45Q36.45,18.45 36.45,18.45ZM18.1,36.75Q18.1,36.75 18.1,36.75Q18.1,36.75 18.1,36.75Q18.1,36.75 18.1,36.75Q18.1,36.75 18.1,36.75Q18.1,36.75 18.1,36.75Q18.1,36.75 18.1,36.75Q18.1,36.75 18.1,36.75Q18.1,36.75 18.1,36.75Z"/>
+</vector>

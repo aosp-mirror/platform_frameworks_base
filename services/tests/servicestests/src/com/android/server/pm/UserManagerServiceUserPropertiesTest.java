@@ -64,6 +64,9 @@ public class UserManagerServiceUserPropertiesTest {
                 .setUseParentsContacts(false)
                 .setCrossProfileIntentFilterAccessControl(10)
                 .setCrossProfileIntentResolutionStrategy(0)
+                .setMediaSharedWithParent(false)
+                .setCredentialShareableWithParent(true)
+                .setDeleteAppWithParent(false)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
@@ -72,6 +75,9 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setUseParentsContacts(true);
         actualProps.setCrossProfileIntentFilterAccessControl(20);
         actualProps.setCrossProfileIntentResolutionStrategy(1);
+        actualProps.setMediaSharedWithParent(true);
+        actualProps.setCredentialShareableWithParent(false);
+        actualProps.setDeleteAppWithParent(true);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -111,12 +117,15 @@ public class UserManagerServiceUserPropertiesTest {
                 .setStartWithParent(true)
                 .setShowInSettings(3452)
                 .setInheritDevicePolicy(1732)
+                .setMediaSharedWithParent(true)
+                .setDeleteAppWithParent(true)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
         orig.setShowInLauncher(2841);
         orig.setStartWithParent(false);
         orig.setShowInSettings(1437);
         orig.setInheritDevicePolicy(9456);
+        orig.setDeleteAppWithParent(false);
 
         // Test every permission level. (Currently, it's linear so it's easy.)
         for (int permLevel = 0; permLevel < 4; permLevel++) {
@@ -158,6 +167,8 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::getCrossProfileIntentFilterAccessControl, exposeAll);
         assertEqualGetterOrThrows(orig::getCrossProfileIntentResolutionStrategy,
                 copy::getCrossProfileIntentResolutionStrategy, exposeAll);
+        assertEqualGetterOrThrows(orig::getDeleteAppWithParent,
+                copy::getDeleteAppWithParent, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
@@ -169,7 +180,10 @@ public class UserManagerServiceUserPropertiesTest {
 
         // Items with no permission requirements.
         assertEqualGetterOrThrows(orig::getShowInLauncher, copy::getShowInLauncher, true);
-
+        assertEqualGetterOrThrows(orig::isMediaSharedWithParent,
+                copy::isMediaSharedWithParent, true);
+        assertEqualGetterOrThrows(orig::isCredentialShareableWithParent,
+                copy::isCredentialShareableWithParent, true);
     }
 
     /**
@@ -215,5 +229,10 @@ public class UserManagerServiceUserPropertiesTest {
                 .isEqualTo(actual.getCrossProfileIntentFilterAccessControl());
         assertThat(expected.getCrossProfileIntentResolutionStrategy())
                 .isEqualTo(actual.getCrossProfileIntentResolutionStrategy());
+        assertThat(expected.isMediaSharedWithParent())
+                .isEqualTo(actual.isMediaSharedWithParent());
+        assertThat(expected.isCredentialShareableWithParent())
+                .isEqualTo(actual.isCredentialShareableWithParent());
+        assertThat(expected.getDeleteAppWithParent()).isEqualTo(actual.getDeleteAppWithParent());
     }
 }

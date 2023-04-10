@@ -70,6 +70,8 @@ public class TvWindowMenuActionButton extends RelativeLayout {
             setTextAndDescription(textResId);
         }
         typedArray.recycle();
+
+        setIsCustomCloseAction(false);
     }
 
     /**

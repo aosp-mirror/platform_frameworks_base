@@ -55,10 +55,17 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.recents.OverviewProxyService
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -101,6 +108,8 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Captor lateinit var overlayCaptor: ArgumentCaptor<View>
     @Captor lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
+    private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
+    private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     private val executor = FakeExecutor(FakeSystemClock())
     private lateinit var overlayController: ISidefpsController
     private lateinit var sideFpsController: SideFpsController
@@ -121,6 +130,17 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        keyguardBouncerRepository = FakeKeyguardBouncerRepository()
+        alternateBouncerInteractor =
+            AlternateBouncerInteractor(
+                mock(StatusBarStateController::class.java),
+                mock(KeyguardStateController::class.java),
+                keyguardBouncerRepository,
+                FakeBiometricSettingsRepository(),
+                FakeDeviceEntryFingerprintAuthRepository(),
+                FakeSystemClock(),
+            )
+
         context.addMockSystemService(DisplayManager::class.java, displayManager)
         context.addMockSystemService(WindowManager::class.java, windowManager)
 
@@ -217,7 +237,9 @@ class SideFpsControllerTest : SysuiTestCase() {
                 displayManager,
                 executor,
                 handler,
-                dumpManager
+                alternateBouncerInteractor,
+                TestCoroutineScope(),
+                dumpManager,
             )
 
         overlayController =
@@ -238,6 +260,17 @@ class SideFpsControllerTest : SysuiTestCase() {
         overlayController.hide(SENSOR_ID)
         executor.runAllReady()
         verify(displayManager).unregisterDisplayListener(any())
+    }
+
+    @Test
+    fun testShowOverlayReasonWhenDisplayChanged() = testWithDisplay {
+        sideFpsController.show(SideFpsUiRequestSource.AUTO_SHOW, REASON_AUTH_KEYGUARD)
+        executor.runAllReady()
+        sideFpsController.orientationListener.onDisplayChanged(1 /* displayId */)
+        executor.runAllReady()
+
+        assertThat(sideFpsController.orientationReasonListener.reason)
+            .isEqualTo(REASON_AUTH_KEYGUARD)
     }
 
     @Test
@@ -307,7 +340,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_0 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForXAlignedSensor_90() =
@@ -315,7 +350,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_90 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForXAlignedSensor_180() =
@@ -323,7 +360,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_180 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarCollapsedDownForXAlignedSensor_180() =
@@ -332,7 +371,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_180 },
             windowInsets = insetsForSmallNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun hidesSfpsIndicatorWhenOccludingTaskbarForXAlignedSensor_180() =
@@ -341,7 +382,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_180 },
             windowInsets = insetsForLargeNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForXAlignedSensor_270() =
@@ -349,7 +392,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_270 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForXAlignedSensor_InReverseDefaultRotation_0() =
@@ -357,7 +402,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_0 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForXAlignedSensor_InReverseDefaultRotation_90() =
@@ -365,7 +412,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_90 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarCollapsedDownForXAlignedSensor_InReverseDefaultRotation_90() =
@@ -374,7 +423,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_90 },
             windowInsets = insetsForSmallNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun hidesSfpsIndicatorWhenOccludingTaskbarForXAlignedSensor_InReverseDefaultRotation_90() =
@@ -383,7 +434,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_90 },
             windowInsets = insetsForLargeNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForXAlignedSensor_InReverseDefaultRotation_180() =
@@ -391,7 +444,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_180 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForXAlignedSensor_InReverseDefaultRotation_270() =
@@ -399,7 +454,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_270 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForYAlignedSensor_0() =
@@ -407,7 +464,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.Y_ALIGNED,
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_0 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForYAlignedSensor_90() =
@@ -415,7 +474,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.Y_ALIGNED,
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_90 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForYAlignedSensor_180() =
@@ -433,7 +494,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.Y_ALIGNED,
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_270 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarCollapsedDownForYAlignedSensor_270() =
@@ -442,7 +505,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_270 },
             windowInsets = insetsForSmallNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun hidesSfpsIndicatorWhenOccludingTaskbarForYAlignedSensor_270() =
@@ -451,7 +516,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = false,
             { rotation = Surface.ROTATION_270 },
             windowInsets = insetsForLargeNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForYAlignedSensor_InReverseDefaultRotation_0() =
@@ -459,7 +526,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.Y_ALIGNED,
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_0 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForYAlignedSensor_InReverseDefaultRotation_90() =
@@ -477,7 +546,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.Y_ALIGNED,
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_180 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarCollapsedDownForYAlignedSensor_InReverseDefaultRotation_180() =
@@ -486,7 +557,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_180 },
             windowInsets = insetsForSmallNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     @Test
     fun hidesSfpsIndicatorWhenOccludingTaskbarForYAlignedSensor_InReverseDefaultRotation_180() =
@@ -495,7 +568,9 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_180 },
             windowInsets = insetsForLargeNavbar()
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = false)
+        }
 
     @Test
     fun showsSfpsIndicatorWithTaskbarForYAlignedSensor_InReverseDefaultRotation_270() =
@@ -503,10 +578,32 @@ class SideFpsControllerTest : SysuiTestCase() {
             deviceConfig = DeviceConfig.Y_ALIGNED,
             isReverseDefaultRotation = true,
             { rotation = Surface.ROTATION_270 }
-        ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
+        ) {
+            verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
+        }
 
     private fun verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible: Boolean) {
         sideFpsController.overlayOffsets = sensorLocation
+    }
+
+    fun alternateBouncerVisibility_showAndHideSideFpsUI() = testWithDisplay {
+        // WHEN alternate bouncer is visible
+        keyguardBouncerRepository.setAlternateVisible(true)
+        executor.runAllReady()
+
+        // THEN side fps shows UI
+        verify(windowManager).addView(any(), any())
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN alternate bouncer is no longer visible
+        keyguardBouncerRepository.setAlternateVisible(false)
+        executor.runAllReady()
+
+        // THEN side fps UI is hidden
+        verify(windowManager).removeView(any())
+    }
+
+    private fun hidesWithTaskbar(visible: Boolean) {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
@@ -515,7 +612,7 @@ class SideFpsControllerTest : SysuiTestCase() {
 
         verify(windowManager).addView(any(), any())
         verify(windowManager, never()).removeView(any())
-        verify(sideFpsView).visibility = if (sfpsViewVisible) View.VISIBLE else View.GONE
+        verify(sideFpsView).visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     /**

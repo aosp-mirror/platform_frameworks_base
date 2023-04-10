@@ -19,14 +19,14 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ShowWhenLockedAppHelper
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,8 +46,7 @@ import org.junit.runners.Parameterized
 @Postsubmit
 class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
     OpenAppFromLockNotificationCold(flicker) {
-    private val showWhenLockedApp: ShowWhenLockedAppHelper =
-        ShowWhenLockedAppHelper(instrumentation)
+    private val showWhenLockedApp = ShowWhenLockedAppHelper(instrumentation)
 
     // Although we are technically still locked here, the overlay app means we should open the
     // notification shade as if we were unlocked.
@@ -113,6 +112,10 @@ class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
     @FlakyTest(bugId = 209599395)
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    @FlakyTest(bugId = 266730606)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         /**

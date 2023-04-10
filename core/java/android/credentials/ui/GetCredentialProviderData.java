@@ -38,19 +38,20 @@ public final class GetCredentialProviderData extends ProviderData implements Par
     private final List<Entry> mCredentialEntries;
     @NonNull
     private final List<Entry> mActionChips;
-    @Nullable
-    private final Entry mAuthenticationEntry;
+    @NonNull
+    private final List<AuthenticationEntry> mAuthenticationEntries;
     @Nullable
     private final Entry mRemoteEntry;
 
     public GetCredentialProviderData(
             @NonNull String providerFlattenedComponentName, @NonNull List<Entry> credentialEntries,
-            @NonNull List<Entry> actionChips, @Nullable Entry authenticationEntry,
+            @NonNull List<Entry> actionChips,
+            @NonNull List<AuthenticationEntry> authenticationEntries,
             @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
         mCredentialEntries = credentialEntries;
         mActionChips = actionChips;
-        mAuthenticationEntry = authenticationEntry;
+        mAuthenticationEntries = authenticationEntries;
         mRemoteEntry = remoteEntry;
     }
 
@@ -64,9 +65,9 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         return mActionChips;
     }
 
-    @Nullable
-    public Entry getAuthenticationEntry() {
-        return mAuthenticationEntry;
+    @NonNull
+    public List<AuthenticationEntry> getAuthenticationEntries() {
+        return mAuthenticationEntries;
     }
 
     @Nullable
@@ -87,8 +88,10 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         mActionChips = actionChips;
         AnnotationValidations.validate(NonNull.class, null, mActionChips);
 
-        Entry authenticationEntry = in.readTypedObject(Entry.CREATOR);
-        mAuthenticationEntry = authenticationEntry;
+        List<AuthenticationEntry> authenticationEntries  = new ArrayList<>();
+        in.readTypedList(authenticationEntries, AuthenticationEntry.CREATOR);
+        mAuthenticationEntries = authenticationEntries;
+        AnnotationValidations.validate(NonNull.class, null, mAuthenticationEntries);
 
         Entry remoteEntry = in.readTypedObject(Entry.CREATOR);
         mRemoteEntry = remoteEntry;
@@ -99,7 +102,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         super.writeToParcel(dest, flags);
         dest.writeTypedList(mCredentialEntries);
         dest.writeTypedList(mActionChips);
-        dest.writeTypedObject(mAuthenticationEntry, flags);
+        dest.writeTypedList(mAuthenticationEntries);
         dest.writeTypedObject(mRemoteEntry, flags);
     }
 
@@ -131,7 +134,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         @NonNull private String mProviderFlattenedComponentName;
         @NonNull private List<Entry> mCredentialEntries = new ArrayList<>();
         @NonNull private List<Entry> mActionChips = new ArrayList<>();
-        @Nullable private Entry mAuthenticationEntry = null;
+        @NonNull private List<AuthenticationEntry> mAuthenticationEntries = new ArrayList<>();
         @Nullable private Entry mRemoteEntry = null;
 
         /** Constructor with required properties. */
@@ -155,8 +158,9 @@ public final class GetCredentialProviderData extends ProviderData implements Par
 
         /** Sets the authentication entry to be displayed to the user. */
         @NonNull
-        public Builder setAuthenticationEntry(@Nullable Entry authenticationEntry) {
-            mAuthenticationEntry = authenticationEntry;
+        public Builder setAuthenticationEntries(
+                @NonNull List<AuthenticationEntry> authenticationEntry) {
+            mAuthenticationEntries = authenticationEntry;
             return this;
         }
 
@@ -171,7 +175,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         @NonNull
         public GetCredentialProviderData build() {
             return new GetCredentialProviderData(mProviderFlattenedComponentName,
-                    mCredentialEntries, mActionChips, mAuthenticationEntry, mRemoteEntry);
+                    mCredentialEntries, mActionChips, mAuthenticationEntries, mRemoteEntry);
         }
     }
 }

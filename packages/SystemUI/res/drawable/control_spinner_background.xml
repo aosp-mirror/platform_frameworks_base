@@ -23,7 +23,7 @@
     <item
         android:drawable="@drawable/ic_ksh_key_down"
         android:gravity="end|bottom"
-        android:paddingBottom="6dp"
+        android:bottom="4dp"
         android:width="24dp"
         android:height="24dp"
         android:end="12dp" />

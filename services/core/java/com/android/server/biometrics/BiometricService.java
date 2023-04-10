@@ -62,6 +62,7 @@ import android.provider.Settings;
 import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -563,6 +564,14 @@ public class BiometricService extends SystemService {
                 }
             }
 
+            // Set the default subtitle if necessary.
+            if (promptInfo.isUseDefaultSubtitle()) {
+                if (TextUtils.isEmpty(promptInfo.getSubtitle())) {
+                    promptInfo.setSubtitle(getContext()
+                            .getString(R.string.biometric_dialog_default_subtitle));
+                }
+            }
+
             final long requestId = mRequestCounter.get();
             mHandler.post(() -> handleAuthenticate(
                     token, requestId, operationId, userId, receiver, opPackageName, promptInfo));
@@ -630,13 +639,16 @@ public class BiometricService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
-        public synchronized void registerAuthenticator(int id, int modality,
-                @Authenticators.Types int strength,
+        public synchronized void registerAuthenticator(int modality,
+                @NonNull SensorPropertiesInternal props,
                 @NonNull IBiometricAuthenticator authenticator) {
 
             super.registerAuthenticator_enforcePermission();
 
-            Slog.d(TAG, "Registering ID: " + id
+            @Authenticators.Types final int strength =
+                    Utils.propertyStrengthToAuthenticatorStrength(props.sensorStrength);
+
+            Slog.d(TAG, "Registering ID: " + props.sensorId
                     + " Modality: " + modality
                     + " Strength: " + strength);
 
@@ -657,12 +669,12 @@ public class BiometricService extends SystemService {
             }
 
             for (BiometricSensor sensor : mSensors) {
-                if (sensor.id == id) {
+                if (sensor.id == props.sensorId) {
                     throw new IllegalStateException("Cannot register duplicate authenticator");
                 }
             }
 
-            mSensors.add(new BiometricSensor(getContext(), id, modality, strength, authenticator) {
+            mSensors.add(new BiometricSensor(getContext(), modality, props, authenticator) {
                 @Override
                 boolean confirmationAlwaysRequired(int userId) {
                     return mSettingObserver.getConfirmationAlwaysRequired(modality, userId);
@@ -1352,13 +1364,17 @@ public class BiometricService extends SystemService {
         return null;
     }
 
-    private void dumpInternal(PrintWriter pw) {
+    private void dumpInternal(PrintWriter printWriter) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter);
+
         pw.println("Legacy Settings: " + mSettingObserver.mUseLegacyFaceOnlySettings);
         pw.println();
 
         pw.println("Sensors:");
         for (BiometricSensor sensor : mSensors) {
-            pw.println(" " + sensor);
+            pw.increaseIndent();
+            sensor.dump(pw);
+            pw.decreaseIndent();
         }
         pw.println();
         pw.println("CurrentSession: " + mAuthSession);

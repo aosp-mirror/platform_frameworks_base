@@ -23,6 +23,8 @@ import com.android.systemui.util.settings.SettingsUtilModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
+import javax.inject.Named
 
 @Module(includes = [
     FeatureFlagsDebugStartableModule::class,
@@ -35,7 +37,8 @@ abstract class FlagsModule {
     abstract fun bindsFeatureFlagDebug(impl: FeatureFlagsDebug): FeatureFlags
 
     @Binds
-    abstract fun bindsRestarter(debugRestarter: FeatureFlagsDebugRestarter): Restarter
+    @IntoSet
+    abstract fun bindsScreenIdleCondition(impl: ScreenIdleCondition): ConditionalRestarter.Condition
 
     @Module
     companion object {
@@ -44,5 +47,10 @@ abstract class FlagsModule {
         fun provideFlagManager(context: Context, @Main handler: Handler): FlagManager {
             return FlagManager(context, handler)
         }
+
+        @JvmStatic
+        @Provides
+        @Named(ConditionalRestarter.RESTART_DELAY)
+        fun provideRestartDelaySec(): Long = 1
     }
 }

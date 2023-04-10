@@ -22,7 +22,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.BLASTSyncEngine.METHOD_BLAST;
 import static com.android.server.wm.BLASTSyncEngine.METHOD_NONE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -363,7 +362,8 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = startSyncSet(bse, listener, METHOD_NONE);
+        final int id = startSyncSet(bse, listener);
+        bse.setSyncMethod(id, METHOD_NONE);
         bse.addToSyncSet(id, mAppWindow.mToken);
         mAppWindow.prepareSync();
         assertFalse(mAppWindow.shouldSyncWithBuffers());
@@ -373,12 +373,7 @@ public class SyncEngineTests extends WindowTestsBase {
 
     static int startSyncSet(BLASTSyncEngine engine,
             BLASTSyncEngine.TransactionReadyListener listener) {
-        return startSyncSet(engine, listener, METHOD_BLAST);
-    }
-
-    static int startSyncSet(BLASTSyncEngine engine,
-            BLASTSyncEngine.TransactionReadyListener listener, int method) {
-        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "", method);
+        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "Test");
     }
 
     static class TestWindowContainer extends WindowContainer {

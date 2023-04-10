@@ -206,6 +206,8 @@ final class DefaultPermissionGrantPolicy {
     static {
         SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS);
         SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_BACKGROUND);
+        SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE);
+        SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND);
     }
 
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();
@@ -1083,7 +1085,7 @@ final class DefaultPermissionGrantPolicy {
     public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to active LUI app for user:" + userId);
         grantSystemFixedPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
-                CAMERA_PERMISSIONS);
+                CAMERA_PERMISSIONS, NOTIFICATION_PERMISSIONS);
     }
 
     public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {

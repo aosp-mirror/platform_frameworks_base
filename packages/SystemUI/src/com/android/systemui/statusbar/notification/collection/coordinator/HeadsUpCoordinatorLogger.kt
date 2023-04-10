@@ -70,11 +70,21 @@ class HeadsUpCoordinatorLogger constructor(
         })
     }
 
-    fun logEntryUpdatedToFullScreen(key: String) {
+    fun logEntryUpdatedToFullScreen(key: String, reason: String) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
+            str2 = reason
         }, {
-            "updating entry to launch full screen intent: $str1"
+            "updating entry to launch full screen intent: $str1 because $str2"
+        })
+    }
+
+    fun logEntryDisqualifiedFromFullScreen(key: String, reason: String) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = key
+            str2 = reason
+        }, {
+            "updated entry no longer qualifies for full screen intent: $str1 because $str2"
         })
     }
 

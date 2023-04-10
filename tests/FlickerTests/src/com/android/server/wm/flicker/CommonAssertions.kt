@@ -18,12 +18,13 @@
 
 package com.android.server.wm.flicker
 
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.common.IComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
-import com.android.server.wm.traces.common.windowmanager.WindowManagerTrace
+import android.tools.common.PlatformConsts
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.datatypes.component.IComponentNameMatcher
+import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.wm.WindowManagerTrace
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.helpers.WindowUtils
 
 /**
  * Checks that [ComponentNameMatcher.STATUS_BAR] window is visible and above the app windows in all
@@ -208,7 +209,7 @@ fun FlickerTest.statusBarLayerPositionAtStart(
     wmTrace: WindowManagerTrace? = this.reader.readWmTrace()
 ) {
     // collect navbar position for the equivalent WM state
-    val state = wmTrace?.firstOrNull() ?: error("WM state missing in $this")
+    val state = wmTrace?.entries?.firstOrNull() ?: error("WM state missing in $this")
     val display = state.getDisplay(PlatformConsts.DEFAULT_DISPLAY) ?: error("Display not found")
     val navBarPosition = WindowUtils.getExpectedStatusBarPosition(display)
     assertLayersStart {
@@ -224,7 +225,7 @@ fun FlickerTest.statusBarLayerPositionAtEnd(
     wmTrace: WindowManagerTrace? = this.reader.readWmTrace()
 ) {
     // collect navbar position for the equivalent WM state
-    val state = wmTrace?.lastOrNull() ?: error("WM state missing in $this")
+    val state = wmTrace?.entries?.lastOrNull() ?: error("WM state missing in $this")
     val display = state.getDisplay(PlatformConsts.DEFAULT_DISPLAY) ?: error("Display not found")
     val navBarPosition = WindowUtils.getExpectedStatusBarPosition(display)
     assertLayersEnd {
@@ -257,9 +258,9 @@ fun FlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(component: ICompon
             if (snapshotLayers.isNotEmpty()) {
                 val visibleAreas =
                     snapshotLayers
-                        .mapNotNull { snapshotLayer -> snapshotLayer.layer?.visibleRegion }
+                        .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
                         .toTypedArray()
-                val snapshotRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
+                val snapshotRegion = RegionSubject(visibleAreas, timestamp)
                 val appVisibleRegion = it.visibleRegion(component)
                 if (snapshotRegion.region.isNotEmpty) {
                     snapshotRegion.coversExactly(appVisibleRegion.region)
@@ -279,21 +280,28 @@ fun FlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(component: ICompon
  *
  * @param originalLayer
  * ```
+ *
  * Layer that should be visible at the start
+ *
  * @param newLayer Layer that should be visible at the end
  * @param ignoreEntriesWithRotationLayer If entries with a visible rotation layer should be ignored
+ *
  * ```
  *      when checking the transition. If true we will not fail the assertion if a rotation layer is
  *      visible to fill the gap between the [originalLayer] being visible and the [newLayer] being
  *      visible.
  * @param ignoreSnapshot
  * ```
+ *
  * If the snapshot layer should be ignored during the transition
+ *
  * ```
  *     (useful mostly for app launch)
  * @param ignoreSplashscreen
  * ```
+ *
  * If the splashscreen layer should be ignored during the transition.
+ *
  * ```
  *      If true then we will allow for a splashscreen to be shown before the layer is shown,
  *      otherwise we won't and the layer must appear immediately.

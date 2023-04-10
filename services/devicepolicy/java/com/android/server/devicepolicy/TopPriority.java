@@ -17,7 +17,10 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
+import android.app.admin.Authority;
+import android.app.admin.PolicyValue;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +37,7 @@ final class TopPriority<V> extends ResolutionMechanism<V> {
     }
 
     @Override
-    V resolve(@NonNull LinkedHashMap<EnforcingAdmin, V> adminPolicies) {
+    PolicyValue<V> resolve(@NonNull LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminPolicies) {
         if (adminPolicies.isEmpty()) {
             return null;
         }
@@ -46,8 +49,22 @@ final class TopPriority<V> extends ResolutionMechanism<V> {
             }
         }
         // Return first set policy if no known authority is found
-        Map.Entry<EnforcingAdmin, V> policy = adminPolicies.entrySet().stream().findFirst().get();
+        Map.Entry<EnforcingAdmin, PolicyValue<V>> policy =
+                adminPolicies.entrySet().stream().findFirst().get();
         return policy.getValue();
+    }
+
+    @Override
+    android.app.admin.TopPriority<V> getParcelableResolutionMechanism() {
+        return new android.app.admin.TopPriority<>(getParcelableAuthorities());
+    }
+
+    private List<Authority> getParcelableAuthorities() {
+        List<Authority> authorities = new ArrayList<>();
+        for (String authority : mHighestToLowestPriorityAuthorities) {
+            authorities.add(EnforcingAdmin.getParcelableAuthority(authority));
+        }
+        return authorities;
     }
 
     @Override

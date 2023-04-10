@@ -21,6 +21,7 @@ import static androidx.window.util.ExtensionHelper.isZero;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.hardware.devicestate.DeviceStateManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -33,7 +34,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** A representation of a folding feature for both Extension and Sidecar.
+/**
+ * A representation of a folding feature for both Extension and Sidecar.
  * For Sidecar this is the same as combining {@link androidx.window.sidecar.SidecarDeviceState} and
  * {@link androidx.window.sidecar.SidecarDisplayFeature}. For Extensions this is the mirror of
  * {@link androidx.window.extensions.layout.FoldingFeature}.
@@ -67,10 +69,11 @@ public final class CommonFoldingFeature {
     public static final int COMMON_STATE_UNKNOWN = -1;
 
     /**
-     * A common state to represent a FLAT hinge. This is needed because the definitions in Sidecar
-     * and Extensions do not match exactly.
+     * A common state that contains no folding features. For example, an in-folding device in the
+     * "closed" device state.
      */
-    public static final int COMMON_STATE_FLAT = 3;
+    public static final int COMMON_STATE_NO_FOLDING_FEATURES = 1;
+
     /**
      * A common state to represent a HALF_OPENED hinge. This is needed because the definitions in
      * Sidecar and Extensions do not match exactly.
@@ -78,9 +81,27 @@ public final class CommonFoldingFeature {
     public static final int COMMON_STATE_HALF_OPENED = 2;
 
     /**
-     * The possible states for a folding hinge.
+     * A common state to represent a FLAT hinge. This is needed because the definitions in Sidecar
+     * and Extensions do not match exactly.
      */
-    @IntDef({COMMON_STATE_UNKNOWN, COMMON_STATE_FLAT, COMMON_STATE_HALF_OPENED})
+    public static final int COMMON_STATE_FLAT = 3;
+
+    /**
+     * A common state where the hinge state should be derived using the base state from
+     * {@link DeviceStateManager.DeviceStateCallback#onBaseStateChanged(int)} instead of the
+     * emulated state. This is an internal state and must not be passed to clients.
+     */
+    public static final int COMMON_STATE_USE_BASE_STATE = 1000;
+
+    /**
+     * The possible states for a folding hinge. Common in this context means normalized between
+     * extensions and sidecar.
+     */
+    @IntDef({COMMON_STATE_UNKNOWN,
+            COMMON_STATE_NO_FOLDING_FEATURES,
+            COMMON_STATE_HALF_OPENED,
+            COMMON_STATE_FLAT,
+            COMMON_STATE_USE_BASE_STATE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {
     }
@@ -167,7 +188,7 @@ public final class CommonFoldingFeature {
             }
             String stateString = featureMatcher.group(6);
             stateString = stateString == null ? "" : stateString;
-            final int state;
+            @State final int state;
             switch (stateString) {
                 case PATTERN_STATE_FLAT:
                     state = COMMON_STATE_FLAT;
@@ -191,8 +212,8 @@ public final class CommonFoldingFeature {
     @NonNull
     private final Rect mRect;
 
-    CommonFoldingFeature(int type, int state, @NonNull Rect rect) {
-        assertValidState(state);
+    CommonFoldingFeature(int type, @State int state, @NonNull Rect rect) {
+        assertReportableState(state);
         this.mType = type;
         this.mState = state;
         if (rect.width() == 0 && rect.height() == 0) {
@@ -231,13 +252,22 @@ public final class CommonFoldingFeature {
     }
 
     @Override
+    public String toString() {
+        return "CommonFoldingFeature=[Type: " + mType + ", state: " + mState + "]";
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(mType, mState, mRect);
     }
 
-    private static void assertValidState(@Nullable Integer state) {
-        if (state != null && state != COMMON_STATE_FLAT
-                && state != COMMON_STATE_HALF_OPENED && state != COMMON_STATE_UNKNOWN) {
+    /**
+     * Checks if the provided folding feature state should be reported to clients. See
+     * {@link androidx.window.extensions.layout.FoldingFeature}
+     */
+    private static void assertReportableState(@State int state) {
+        if (state != COMMON_STATE_FLAT && state != COMMON_STATE_HALF_OPENED
+                && state != COMMON_STATE_UNKNOWN) {
             throw new IllegalArgumentException("Invalid state: " + state
                     + "must be either COMMON_STATE_FLAT or COMMON_STATE_HALF_OPENED");
         }

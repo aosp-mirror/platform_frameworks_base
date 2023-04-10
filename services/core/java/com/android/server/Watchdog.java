@@ -56,6 +56,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.StackTracesDumpHelper;
 import com.android.server.am.TraceErrorLogger;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.wm.SurfaceAnimationThread;
@@ -159,15 +160,25 @@ public class Watchdog implements Dumpable {
     );
 
     public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
+            "android.hardware.audio.core.IModule/",
+            "android.hardware.audio.core.IConfig/",
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
+            "android.hardware.bluetooth.IBluetoothHci/",
+            "android.hardware.camera.provider.ICameraProvider/",
+            "android.hardware.gnss.IGnss/",
+            "android.hardware.graphics.allocator.IAllocator/",
             "android.hardware.graphics.composer3.IComposer/",
+            "android.hardware.health.IHealth/",
             "android.hardware.input.processor.IInputProcessor/",
             "android.hardware.light.ILights/",
+            "android.hardware.neuralnetworks.IDevice/",
             "android.hardware.power.IPower/",
             "android.hardware.power.stats.IPowerStats/",
+            "android.hardware.sensors.ISensors/",
             "android.hardware.vibrator.IVibrator/",
-            "android.hardware.vibrator.IVibratorManager/"
+            "android.hardware.vibrator.IVibratorManager/",
+            "android.system.suspend.ISystemSuspend/",
     };
 
     private static Watchdog sWatchdog;
@@ -870,7 +881,8 @@ public class Watchdog implements Dumpable {
                 CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
         final UUID errorId = mTraceErrorLogger.generateErrorId();
         if (mTraceErrorLogger.isAddErrorIdEnabled()) {
-            mTraceErrorLogger.addErrorIdToTrace("system_server", errorId);
+            mTraceErrorLogger.addProcessInfoAndErrorIdToTrace("system_server", Process.myPid(),
+                    errorId);
             mTraceErrorLogger.addSubjectToTrace(subject, errorId);
         }
 
@@ -894,7 +906,7 @@ public class Watchdog implements Dumpable {
         report.append(ResourcePressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
         StringWriter tracesFileException = new StringWriter();
-        final File stack = ActivityManagerService.dumpStackTraces(
+        final File stack = StackTracesDumpHelper.dumpStackTraces(
                 pids, processCpuTracker, new SparseBooleanArray(),
                 CompletableFuture.completedFuture(getInterestingNativePids()), tracesFileException,
                 subject, criticalEvents, Runnable::run, /* latencyTracker= */null);

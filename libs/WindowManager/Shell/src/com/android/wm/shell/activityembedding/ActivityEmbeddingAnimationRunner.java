@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
 import android.window.TransitionInfo;
@@ -42,7 +43,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.common.ScreenshotUtils;
-import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,11 +131,13 @@ class ActivityEmbeddingAnimationRunner {
             animator.addUpdateListener((anim) -> {
                 // Update all adapters in the same transaction.
                 final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
                 for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
                     adapter.onAnimationUpdate(t, animator.getCurrentPlayTime());
                 }
                 t.apply();
             });
+            prepareForFirstFrame(startTransaction, adapters);
         }
         animator.setDuration(duration);
         animator.addListener(new Animator.AnimatorListener() {
@@ -181,7 +184,7 @@ class ActivityEmbeddingAnimationRunner {
         if (isChangeTransition) {
             return createChangeAnimationAdapters(info, startTransaction);
         }
-        if (Transitions.isClosingType(info.getType())) {
+        if (TransitionUtil.isClosingType(info.getType())) {
             return createCloseAnimationAdapters(info);
         }
         return createOpenAnimationAdapters(info);
@@ -216,7 +219,7 @@ class ActivityEmbeddingAnimationRunner {
         final Rect openingWholeScreenBounds = new Rect();
         final Rect closingWholeScreenBounds = new Rect();
         for (TransitionInfo.Change change : info.getChanges()) {
-            if (Transitions.isOpeningType(change.getMode())) {
+            if (TransitionUtil.isOpeningType(change.getMode())) {
                 openingChanges.add(change);
                 openingWholeScreenBounds.union(change.getEndAbsBounds());
             } else {
@@ -248,6 +251,15 @@ class ActivityEmbeddingAnimationRunner {
         return adapters;
     }
 
+    /** Sets the first frame to the {@code startTransaction} to avoid any flicker on start. */
+    private void prepareForFirstFrame(@NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull List<ActivityEmbeddingAnimationAdapter> adapters) {
+        startTransaction.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
+            adapter.prepareForFirstFrame(startTransaction);
+        }
+    }
+
     /** Adds edge extension to the surfaces that have such an animation property. */
     private void addEdgeExtensionIfNeeded(@NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
@@ -259,7 +271,7 @@ class ActivityEmbeddingAnimationRunner {
                 continue;
             }
             final TransitionInfo.Change change = adapter.mChange;
-            if (Transitions.isOpeningType(adapter.mChange.getMode())) {
+            if (TransitionUtil.isOpeningType(adapter.mChange.getMode())) {
                 // Need to screenshot after startTransaction is applied otherwise activity
                 // may not be visible or ready yet.
                 postStartTransactionCallbacks.add(
@@ -331,7 +343,7 @@ class ActivityEmbeddingAnimationRunner {
                 // When the parent window is also included in the transition as an opening window,
                 // we would like to animate the parent window instead.
                 final TransitionInfo.Change parentChange = info.getChange(parentToken);
-                if (parentChange != null && Transitions.isOpeningType(parentChange.getMode())) {
+                if (parentChange != null && TransitionUtil.isOpeningType(parentChange.getMode())) {
                     // We won't create a separate animation for the parent, but to animate the
                     // parent for the child resizing.
                     handledChanges.add(parentChange);
@@ -392,7 +404,7 @@ class ActivityEmbeddingAnimationRunner {
                 // No-op if it will be covered by the changing parent window, or it is a changing
                 // window without bounds change.
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
-            } else if (Transitions.isClosingType(change.getMode())) {
+            } else if (TransitionUtil.isClosingType(change.getMode())) {
                 animation = mAnimationSpec.createChangeBoundsCloseAnimation(change, parentBounds);
                 shouldShouldBackgroundColor = false;
             } else {
@@ -457,7 +469,7 @@ class ActivityEmbeddingAnimationRunner {
                 // When the parent window is also included in the transition as an opening window,
                 // we would like to animate the parent window instead.
                 final TransitionInfo.Change parentChange = info.getChange(parentToken);
-                if (parentChange != null && Transitions.isOpeningType(parentChange.getMode())) {
+                if (parentChange != null && TransitionUtil.isOpeningType(parentChange.getMode())) {
                     changingChanges.add(parentChange);
                 }
             }
@@ -479,8 +491,8 @@ class ActivityEmbeddingAnimationRunner {
                 // No-op if it will be covered by the changing parent window.
                 continue;
             }
-            hasOpeningWindow |= Transitions.isOpeningType(change.getMode());
-            hasClosingWindow |= Transitions.isClosingType(change.getMode());
+            hasOpeningWindow |= TransitionUtil.isOpeningType(change.getMode());
+            hasClosingWindow |= TransitionUtil.isClosingType(change.getMode());
         }
         return hasOpeningWindow && hasClosingWindow;
     }

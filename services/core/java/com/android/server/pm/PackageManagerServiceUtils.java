@@ -24,6 +24,7 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
@@ -31,16 +32,18 @@ import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
 import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
+import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Disabled;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -94,6 +97,7 @@ import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.Watchdog;
+import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -186,7 +190,7 @@ public class PackageManagerServiceUtils {
      * allow 3P apps to trigger internal-only functionality.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @Disabled  /* Revert enforcement: b/274147456 */
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -1152,8 +1156,8 @@ public class PackageManagerServiceUtils {
                 throw new IOException("Root has not present");
             }
             return ApkChecksums.verityHashForFile(new File(filename), hashInfo.rawRootHash);
-        } catch (IOException ignore) {
-            Slog.e(TAG, "ERROR: could not load root hash from incremental install");
+        } catch (IOException e) {
+            Slog.i(TAG, "Could not obtain verity root hash", e);
         }
         return null;
     }
@@ -1186,12 +1190,6 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
-            // Only enforce filter matching if target app's target SDK >= T
-            if (!compat.isChangeEnabledInternal(
-                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo)) {
-                continue;
-            }
-
             final ParsedMainComponent comp;
             if (info instanceof ActivityInfo) {
                 if (isReceiver) {
@@ -1210,6 +1208,10 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
+            // Only enforce filter matching if target app's target SDK >= T
+            final boolean enforce = compat.isChangeEnabledInternal(
+                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo);
+
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
@@ -1219,14 +1221,19 @@ public class PackageManagerServiceUtils {
                 }
             }
             if (!match) {
-                Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
-                Slog.w(TAG, "Access blocked: " + comp.getComponentName());
-                if (DEBUG_INTENT_MATCHING) {
-                    Slog.v(TAG, "Component intent filters:");
-                    comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
-                    Slog.v(TAG, "-----------------------------");
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
+                        filterCallingUid, intent, resolvedType, enforce);
+                if (enforce) {
+                    Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
+                    Slog.w(TAG, "Access blocked: " + comp.getComponentName());
+                    if (DEBUG_INTENT_MATCHING) {
+                        Slog.v(TAG, "Component intent filters:");
+                        comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
+                        Slog.v(TAG, "-----------------------------");
+                    }
+                    resolveInfos.remove(i);
                 }
-                resolveInfos.remove(i);
             }
         }
     }
@@ -1372,7 +1379,29 @@ public class PackageManagerServiceUtils {
      */
     public static boolean isSystemOrRoot() {
         final int uid = Binder.getCallingUid();
+        return isSystemOrRoot(uid);
+    }
+
+    /**
+     * Check if a UID is system UID or root's UID.
+     */
+    public static boolean isSystemOrRoot(int uid) {
         return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID;
+    }
+
+    /**
+     * Check if a UID is non-system UID adopted shell permission.
+     */
+    public static boolean isAdoptedShell(int uid, Context context) {
+        return uid != Process.SYSTEM_UID && context.checkCallingOrSelfPermission(
+                Manifest.permission.USE_SYSTEM_DATA_LOADERS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Check if a UID is system UID or shell's UID.
+     */
+    public static boolean isRootOrShell(int uid) {
+        return uid == Process.ROOT_UID || uid == Process.SHELL_UID;
     }
 
     /**
@@ -1496,5 +1525,12 @@ public class PackageManagerServiceUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Check if package name is com.android.shell or is null.
+     */
+    public static boolean isInstalledByAdb(String initiatingPackageName) {
+        return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
     }
 }

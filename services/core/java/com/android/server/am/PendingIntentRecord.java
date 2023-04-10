@@ -32,6 +32,7 @@ import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.Overridable;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -65,9 +66,11 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     /** If enabled BAL are prevented by default in applications targeting U and later. */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @Overridable
     private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER = 244637991;
     private static final String ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER =
-            "enable_default_rescind_bal_privileges_from_pending_intent_sender";
+            "DefaultRescindBalPrivilegesFromPendingIntentSender__"
+                    + "enable_default_rescind_bal_privileges_from_pending_intent_sender";
 
     public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
@@ -450,16 +453,11 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 resolvedType = key.requestResolvedType;
             }
 
-            // Apply any launch flags from the ActivityOptions. This is used only by SystemUI
-            // to ensure that we can launch the pending intent with a consistent launch mode even
-            // if the provided PendingIntent is immutable (ie. to force an activity to launch into
-            // a new task, or to launch multiple instances if supported by the app)
+            // Apply any launch flags from the ActivityOptions. This is to ensure that the caller
+            // can specify a consistent launch mode even if the PendingIntent is immutable
             final ActivityOptions opts = ActivityOptions.fromBundle(options);
             if (opts != null) {
-                // TODO(b/254490217): Move this check into SafeActivityOptions
-                if (controller.mAtmInternal.isCallerRecents(Binder.getCallingUid())) {
-                    finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
-                }
+                finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
             }
 
             // Extract options before clearing calling identity

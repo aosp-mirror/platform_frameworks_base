@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ public final class Counter {
 
     /**
      * Increments Telemetry Express Counter metric by 1
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
      * @hide
      */
     public static void logIncrement(@NonNull String metricId) {
@@ -35,13 +36,36 @@ public final class Counter {
     }
 
     /**
+     * Increments Telemetry Express Counter metric by 1
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
+     * @param uid used as a dimension for the count metric
+     * @hide
+     */
+    public static void logIncrementWithUid(@NonNull String metricId, int uid) {
+        logIncrementWithUid(metricId, uid, 1);
+    }
+
+    /**
      * Increments Telemetry Express Counter metric by arbitrary value
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
+     * @param amount to increment counter
      * @hide
      */
     public static void logIncrement(@NonNull String metricId, long amount) {
-        final long metricIdHash = hashString(metricId);
+        final long metricIdHash = Utils.hashString(metricId);
         FrameworkStatsLog.write(FrameworkStatsLog.EXPRESS_EVENT_REPORTED, metricIdHash, amount);
     }
 
-    private static native long hashString(String stringToHash);
+    /**
+     * Increments Telemetry Express Counter metric by arbitrary value
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
+     * @param uid used as a dimension for the count metric
+     * @param amount to increment counter
+     * @hide
+     */
+    public static void logIncrementWithUid(@NonNull String metricId, int uid, long amount) {
+        final long metricIdHash = Utils.hashString(metricId);
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.EXPRESS_UID_EVENT_REPORTED, metricIdHash, amount, uid);
+    }
 }

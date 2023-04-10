@@ -353,6 +353,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_NEVER = 0 << 21,
     GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
     GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
+    GWP_ASAN_LEVEL_DEFAULT = 3 << 21,
     NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23,
     PROFILEABLE = 1 << 24,
 };
@@ -1804,10 +1805,15 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     if (!is_system_server && getuid() == 0) {
         const int rc = createProcessGroup(uid, getpid());
         if (rc != 0) {
-            fail_fn(rc == -EROFS ? CREATE_ERROR("createProcessGroup failed, kernel missing "
-                                                "CONFIG_CGROUP_CPUACCT?")
-                                 : CREATE_ERROR("createProcessGroup(%d, %d) failed: %s", uid,
-                                                /* pid= */ 0, strerror(-rc)));
+            if (rc == -ESRCH) {
+                // If process is dead, treat this as a non-fatal error
+                ALOGE("createProcessGroup(%d, %d) failed: %s", uid, /* pid= */ 0, strerror(-rc));
+            } else {
+                fail_fn(rc == -EROFS ? CREATE_ERROR("createProcessGroup failed, kernel missing "
+                                                    "CONFIG_CGROUP_CPUACCT?")
+                                     : CREATE_ERROR("createProcessGroup(%d, %d) failed: %s", uid,
+                                                    /* pid= */ 0, strerror(-rc)));
+            }
         }
     }
 
@@ -1928,10 +1934,18 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
 
     const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
     android_mallopt_gwp_asan_options_t gwp_asan_options;
+    const char* kGwpAsanAppRecoverableSysprop =
+            "persist.device_config.memory_safety_native.gwp_asan_recoverable_apps";
     // The system server doesn't have its nice name set by the time SpecializeCommon is called.
     gwp_asan_options.program_name = nice_name_ptr ?: process_name;
     switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
         default:
+        case RuntimeFlags::GWP_ASAN_LEVEL_DEFAULT:
+            gwp_asan_options.desire = GetBoolProperty(kGwpAsanAppRecoverableSysprop, true)
+                    ? Action::TURN_ON_FOR_APP_SAMPLED_NON_CRASHING
+                    : Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
+            break;
         case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
             gwp_asan_options.desire = Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
             android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
@@ -2282,7 +2296,9 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
     // region shared with the child process we reduce the number of pages that
     // transition to the private-dirty state when malloc adjusts the meta-data
     // on each of the pages it is managing after the fork.
-    mallopt(M_PURGE, 0);
+    if (mallopt(M_PURGE_ALL, 0) != 1) {
+      mallopt(M_PURGE, 0);
+    }
   }
 
   pid_t pid = fork();
@@ -2294,7 +2310,7 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
       setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MIN);
     }
 
-#if defined(__BIONIC__)
+#if defined(__BIONIC__) && !defined(NO_RESET_STACK_PROTECTOR)
     // Reset the stack guard for the new process.
     android_reset_stack_guards();
 #endif

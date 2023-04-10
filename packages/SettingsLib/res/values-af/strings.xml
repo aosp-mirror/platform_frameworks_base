@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Wys snitgrense, kantlyne, ens."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Dwing RTL-uitlegrigting"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Dwing skermuitlegrigting na RTL vir alle locales"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Deursigtige navigasiebalk"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Maak navigasiebalk se agtergrondkleur by verstek deursigtig"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Laat venstervlakwasighede toe"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Dwing 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktiveer 4x MSAA in OpenGL ES 2.0-programme"</string>
@@ -522,7 +524,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en onthounotas"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Laat toe dat wekkers en onthounotas gestel word"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en onthounotas"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie program toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die program op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie program geskeduleer is, nie werk nie."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie app toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die app op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie app geskeduleer is, nie werk nie."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"skedule, wekker, onthounota, horlosie"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Skakel aan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Skakel Moenie steur nie aan"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Hierdie foon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Hierdie tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Hierdie foon"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan nie op hierdie toestel speel nie"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Gradeer rekening op om oor te skakel"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan nie aflaaie hier speel nie"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Probeer weer ná die advertensie"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Maak toestel wakker om hier te speel"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Toestel is nie goedgekeur om te speel nie"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Kan nie hierdie media hier speel nie"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kan nie koppel nie. Skakel toestel af en weer aan"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedrade oudiotoestel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hulp en terugvoer"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Voorspellingteruggebaaranimasies"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Aktiveer stelselanimasies vir voorspellingteruggebaar."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Hierdie instelling aktiveer stelselanimasies vir voorspellinggebaaranimasie. Dit vereis dat enableOnBackInvokedCallback per program op waar gestel word in die manifeslêer."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Skuif links"</item>
+    <item msgid="5425394847942513942">"Skuif af"</item>
+    <item msgid="7728484337962740316">"Skuif regs"</item>
+    <item msgid="324200556467459329">"Skuif op"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

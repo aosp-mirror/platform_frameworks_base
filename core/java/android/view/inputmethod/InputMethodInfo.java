@@ -18,10 +18,12 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -38,6 +40,7 @@ import android.icu.util.ULocale;
 import android.inputmethodservice.InputMethodService;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Printer;
 import android.util.Slog;
@@ -71,6 +74,32 @@ import java.util.List;
  * @attr ref android.R.styleable#InputMethod_configChanges
  */
 public final class InputMethodInfo implements Parcelable {
+
+    /**
+     * {@link Intent#getAction() Intent action} for IME that
+     * {@link #supportsStylusHandwriting() supports stylus handwriting}.
+     *
+     * @see #createStylusHandwritingSettingsActivityIntent().
+     */
+    public static final String ACTION_STYLUS_HANDWRITING_SETTINGS =
+            "android.view.inputmethod.action.STYLUS_HANDWRITING_SETTINGS";
+
+    /**
+     * Maximal length of a component name
+     * @hide
+     */
+    @TestApi
+    public static final int COMPONENT_NAME_MAX_LENGTH = 1000;
+
+    /**
+     * The maximum amount of IMEs that are loaded per package (in order).
+     * If a package contains more IMEs, they will be ignored and cannot be enabled.
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("MinMaxConstant")
+    public static final int MAX_IMES_PER_PACKAGE = 20;
+
     static final String TAG = "InputMethodInfo";
 
     /**
@@ -152,6 +181,11 @@ public final class InputMethodInfo implements Parcelable {
      */
     private final boolean mSupportsStylusHandwriting;
 
+    /**
+     * The stylus handwriting setting activity's name, used by the system settings to
+     * launch the stylus handwriting specific setting activity of this input method.
+     */
+    private final String mStylusHandwritingSettingsActivityAttr;
 
     /**
      * @param service the {@link ResolveInfo} corresponds in which the IME is implemented.
@@ -203,6 +237,7 @@ public final class InputMethodInfo implements Parcelable {
 
         PackageManager pm = context.getPackageManager();
         String settingsActivityComponent = null;
+        String stylusHandwritingSettingsActivity = null;
         boolean isVrOnly;
         int isDefaultResId = 0;
 
@@ -234,6 +269,13 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.InputMethod_settingsActivity);
+            if ((si.name != null && si.name.length() > COMPONENT_NAME_MAX_LENGTH) || (
+                    settingsActivityComponent != null
+                            && settingsActivityComponent.length() > COMPONENT_NAME_MAX_LENGTH)) {
+                throw new XmlPullParserException(
+                        "Activity name exceeds maximum of 1000 characters");
+            }
+
             isVrOnly = sa.getBoolean(com.android.internal.R.styleable.InputMethod_isVrOnly, false);
             isDefaultResId = sa.getResourceId(
                     com.android.internal.R.styleable.InputMethod_isDefault, 0);
@@ -253,6 +295,8 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod_configChanges, 0);
             mSupportsStylusHandwriting = sa.getBoolean(
                     com.android.internal.R.styleable.InputMethod_supportsStylusHandwriting, false);
+            stylusHandwritingSettingsActivity = sa.getString(
+                    com.android.internal.R.styleable.InputMethod_stylusHandwritingSettingsActivity);
             sa.recycle();
 
             final int depth = parser.getDepth();
@@ -328,6 +372,7 @@ public final class InputMethodInfo implements Parcelable {
         }
         mSubtypes = new InputMethodSubtypeArray(subtypes);
         mSettingsActivityName = settingsActivityComponent;
+        mStylusHandwritingSettingsActivityAttr = stylusHandwritingSettingsActivity;
         mIsDefaultResId = isDefaultResId;
         mIsAuxIme = isAuxIme;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
@@ -359,6 +404,7 @@ public final class InputMethodInfo implements Parcelable {
         mHandledConfigChanges = source.mHandledConfigChanges;
         mSupportsStylusHandwriting = source.mSupportsStylusHandwriting;
         mForceDefault = source.mForceDefault;
+        mStylusHandwritingSettingsActivityAttr = source.mStylusHandwritingSettingsActivityAttr;
     }
 
     InputMethodInfo(Parcel source) {
@@ -376,6 +422,7 @@ public final class InputMethodInfo implements Parcelable {
         mSubtypes = new InputMethodSubtypeArray(source);
         mHandledConfigChanges = source.readInt();
         mSupportsStylusHandwriting = source.readBoolean();
+        mStylusHandwritingSettingsActivityAttr = source.readString8();
         mForceDefault = false;
     }
 
@@ -389,7 +436,25 @@ public final class InputMethodInfo implements Parcelable {
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
                 false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
                 0 /* handledConfigChanges */, false /* supportsStylusHandwriting */,
+                null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
+    }
+
+    /**
+     * Test API for creating a built-in input method to verify stylus handwriting.
+     * @hide
+     */
+    @TestApi
+    public InputMethodInfo(@NonNull String packageName, @NonNull String className,
+            @NonNull CharSequence label, @NonNull String settingsActivity,
+            boolean supportStylusHandwriting,
+            @NonNull String stylusHandwritingSettingsActivityAttr) {
+        this(buildFakeResolveInfo(packageName, className, label), false /* isAuxIme */,
+                settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
+                false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
+                false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
+                0 /* handledConfigChanges */, supportStylusHandwriting,
+                stylusHandwritingSettingsActivityAttr, false /* inlineSuggestionsEnabled */);
     }
 
     /**
@@ -405,6 +470,7 @@ public final class InputMethodInfo implements Parcelable {
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
                 false /* inlineSuggestionsEnabled */, false /* isVrOnly */, handledConfigChanges,
                 false /* supportsStylusHandwriting */,
+                null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
     }
 
@@ -419,6 +485,7 @@ public final class InputMethodInfo implements Parcelable {
                 true /* supportsSwitchingToNextInputMethod */, false /* inlineSuggestionsEnabled */,
                 false /* isVrOnly */, 0 /* handledconfigChanges */,
                 false /* supportsStylusHandwriting */,
+                null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
     }
 
@@ -432,6 +499,7 @@ public final class InputMethodInfo implements Parcelable {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
                 supportsSwitchingToNextInputMethod, false /* inlineSuggestionsEnabled */, isVrOnly,
                 0 /* handledConfigChanges */, false /* supportsStylusHandwriting */,
+                null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
     }
 
@@ -443,6 +511,7 @@ public final class InputMethodInfo implements Parcelable {
             List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
             boolean supportsSwitchingToNextInputMethod, boolean inlineSuggestionsEnabled,
             boolean isVrOnly, int handledConfigChanges, boolean supportsStylusHandwriting,
+            String stylusHandwritingSettingsActivityAttr,
             boolean supportsInlineSuggestionsWithTouchExploration) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
@@ -461,6 +530,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsVrOnly = isVrOnly;
         mHandledConfigChanges = handledConfigChanges;
         mSupportsStylusHandwriting = supportsStylusHandwriting;
+        mStylusHandwritingSettingsActivityAttr = stylusHandwritingSettingsActivityAttr;
     }
 
     private static ResolveInfo buildFakeResolveInfo(String packageName, String className,
@@ -550,6 +620,7 @@ public final class InputMethodInfo implements Parcelable {
      *
      * <p>A null will be returned if there is no settings activity associated
      * with the input method.</p>
+     * @see #createStylusHandwritingSettingsActivityIntent()
      */
     public String getSettingsActivity() {
         return mSettingsActivityName;
@@ -622,9 +693,39 @@ public final class InputMethodInfo implements Parcelable {
     /**
      * Returns if IME supports handwriting using stylus input.
      * @attr ref android.R.styleable#InputMethod_supportsStylusHandwriting
+     * @see #createStylusHandwritingSettingsActivityIntent()
      */
     public boolean supportsStylusHandwriting() {
         return mSupportsStylusHandwriting;
+    }
+
+    /**
+     * Returns {@link Intent} for stylus handwriting settings activity with
+     * {@link Intent#getAction() Intent action} {@link #ACTION_STYLUS_HANDWRITING_SETTINGS}
+     * if IME {@link #supportsStylusHandwriting() supports stylus handwriting}, else
+     * <code>null</code> if there are no associated settings for stylus handwriting / handwriting
+     * is not supported or if
+     * {@link android.R.styleable#InputMethod_stylusHandwritingSettingsActivity} is not defined.
+     *
+     * <p>To launch stylus settings, use this method to get the {@link android.content.Intent} to
+     * launch the stylus handwriting settings activity.</p>
+     * <p>e.g.<pre><code>startActivity(createStylusHandwritingSettingsActivityIntent());</code>
+     * </pre></p>
+     *
+     * @attr ref R.styleable#InputMethod_stylusHandwritingSettingsActivity
+     * @see #getSettingsActivity()
+     * @see #supportsStylusHandwriting()
+     */
+    @Nullable
+    public Intent createStylusHandwritingSettingsActivityIntent() {
+        if (TextUtils.isEmpty(mStylusHandwritingSettingsActivityAttr)
+                || !mSupportsStylusHandwriting) {
+            return null;
+        }
+        // TODO(b/210039666): consider returning null if component is not enabled.
+        return new Intent(ACTION_STYLUS_HANDWRITING_SETTINGS).setComponent(
+                new ComponentName(getServiceInfo().packageName,
+                        mStylusHandwritingSettingsActivityAttr));
     }
 
     public void dump(Printer pw, String prefix) {
@@ -637,7 +738,9 @@ public final class InputMethodInfo implements Parcelable {
                 + mSupportsInlineSuggestionsWithTouchExploration
                 + " mSuppressesSpellChecker=" + mSuppressesSpellChecker
                 + " mShowInInputMethodPicker=" + mShowInInputMethodPicker
-                + " mSupportsStylusHandwriting=" + mSupportsStylusHandwriting);
+                + " mSupportsStylusHandwriting=" + mSupportsStylusHandwriting
+                + " mStylusHandwritingSettingsActivityAttr="
+                        + mStylusHandwritingSettingsActivityAttr);
         pw.println(prefix + "mIsDefaultResId=0x"
                 + Integer.toHexString(mIsDefaultResId));
         pw.println(prefix + "Service:");
@@ -752,6 +855,7 @@ public final class InputMethodInfo implements Parcelable {
         mSubtypes.writeToParcel(dest);
         dest.writeInt(mHandledConfigChanges);
         dest.writeBoolean(mSupportsStylusHandwriting);
+        dest.writeString8(mStylusHandwritingSettingsActivityAttr);
     }
 
     /**

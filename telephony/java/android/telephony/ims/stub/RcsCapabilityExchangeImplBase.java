@@ -27,6 +27,7 @@ import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.SipDetails;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -205,6 +206,12 @@ public class RcsCapabilityExchangeImplBase {
          * when the Telephony stack has crashed.
          */
         default void onNetworkResponse(@NonNull SipDetails details) throws ImsException {
+            if (TextUtils.isEmpty(details.getReasonHeaderText())) {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase());
+            } else {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase(),
+                        details.getReasonHeaderCause(), details.getReasonHeaderText());
+            }
         }
     }
 
@@ -338,7 +345,14 @@ public class RcsCapabilityExchangeImplBase {
          * {@link RcsFeature} has not received the {@link ImsFeature#onFeatureReady()} callback.
          * This may also happen in rare cases when the Telephony stack has crashed.
          */
-        default void onNetworkResponse(@NonNull SipDetails details) throws ImsException {};
+        default void onNetworkResponse(@NonNull SipDetails details) throws ImsException {
+            if (TextUtils.isEmpty(details.getReasonHeaderText())) {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase());
+            } else {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase(),
+                        details.getReasonHeaderCause(), details.getReasonHeaderText());
+            }
+        };
 
         /**
          * Notify the framework of the latest XML PIDF documents included in the network response

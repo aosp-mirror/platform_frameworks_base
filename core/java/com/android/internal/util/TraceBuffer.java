@@ -193,7 +193,7 @@ public class TraceBuffer<P, S extends P, T extends P> {
     }
 
     /**
-     * Removes all elements form the buffer
+     * Removes all elements from the buffer
      */
     public void resetBuffer() {
         synchronized (mBufferLock) {

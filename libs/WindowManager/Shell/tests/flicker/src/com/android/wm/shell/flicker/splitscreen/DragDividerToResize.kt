@@ -19,12 +19,11 @@ package com.android.wm.shell.flicker.splitscreen
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
@@ -86,16 +85,14 @@ class DragDividerToResize(flicker: FlickerTest) : SplitScreenBase(flicker) {
 
     @Presubmit
     @Test
-    fun primaryAppLayerKeepVisible() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        flicker.layerKeepVisible(primaryApp)
-    }
-
-    @FlakyTest(bugId = 263213649)
-    @Test
-    fun primaryAppLayerKeepVisible_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        flicker.layerKeepVisible(primaryApp)
+    fun primaryAppLayerVisibilityChanges() {
+        flicker.assertLayers {
+            this.isVisible(secondaryApp)
+                .then()
+                .isInvisible(secondaryApp)
+                .then()
+                .isVisible(secondaryApp)
+        }
     }
 
     @Presubmit
@@ -116,21 +113,9 @@ class DragDividerToResize(flicker: FlickerTest) : SplitScreenBase(flicker) {
     @Test
     fun secondaryAppWindowKeepVisible() = flicker.appWindowKeepVisible(secondaryApp)
 
-    @Presubmit
+    @FlakyTest(bugId = 245472831)
     @Test
     fun primaryAppBoundsChanges() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        flicker.splitAppLayerBoundsChanges(
-            primaryApp,
-            landscapePosLeft = true,
-            portraitPosTop = false
-        )
-    }
-
-    @FlakyTest(bugId = 263213649)
-    @Test
-    fun primaryAppBoundsChanges_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
         flicker.splitAppLayerBoundsChanges(
             primaryApp,
             landscapePosLeft = true,
@@ -146,11 +131,6 @@ class DragDividerToResize(flicker: FlickerTest) : SplitScreenBase(flicker) {
             landscapePosLeft = false,
             portraitPosTop = true
         )
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 263213649)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

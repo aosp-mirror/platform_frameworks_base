@@ -21,8 +21,8 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.service.credentials.CredentialProviderInfo;
-import android.util.Log;
+import android.credentials.CredentialProviderInfo;
+import android.service.credentials.CredentialProviderInfoFactory;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -40,14 +40,15 @@ public final class CredentialManagerServiceImpl extends
 
     // TODO(b/210531) : Make final when update flow is fixed
     @GuardedBy("mLock")
-    @NonNull private CredentialProviderInfo mInfo;
+    @NonNull
+    private CredentialProviderInfo mInfo;
 
     CredentialManagerServiceImpl(
             @NonNull CredentialManagerService master,
             @NonNull Object lock, int userId, String serviceName)
             throws PackageManager.NameNotFoundException {
         super(master, lock, userId);
-        Log.i(TAG, "in CredentialManagerServiceImpl constructed with: " + serviceName);
+        Slog.d(TAG, "CredentialManagerServiceImpl constructed for: " + serviceName);
         synchronized (mLock) {
             newServiceInfoLocked(ComponentName.unflattenFromString(serviceName));
         }
@@ -62,10 +63,8 @@ public final class CredentialManagerServiceImpl extends
             @NonNull CredentialManagerService master,
             @NonNull Object lock, int userId, CredentialProviderInfo providerInfo) {
         super(master, lock, userId);
-        Log.i(TAG, "in CredentialManagerServiceImpl constructed with system constructor: "
-                + providerInfo.isSystemProvider()
-                + " , " + providerInfo.getServiceInfo() == null ? "" :
-                providerInfo.getServiceInfo().getComponentName().flattenToString());
+        Slog.d(TAG, "CredentialManagerServiceImpl constructed for: "
+                + providerInfo.getServiceInfo().getComponentName().flattenToString());
         mInfo = providerInfo;
     }
 
@@ -75,32 +74,32 @@ public final class CredentialManagerServiceImpl extends
             throws PackageManager.NameNotFoundException {
         // TODO : Test update flows with multiple providers
         if (mInfo != null) {
-            Log.i(TAG, "newServiceInfoLocked with : "
+            Slog.d(TAG, "newServiceInfoLocked, mInfo not null : "
                     + mInfo.getServiceInfo().getComponentName().flattenToString() + " , "
-                    + serviceComponent.getPackageName());
+                    + serviceComponent.flattenToString());
         } else {
-            Log.i(TAG, "newServiceInfoLocked with null mInfo , "
-                    + serviceComponent.getPackageName());
+            Slog.d(TAG, "newServiceInfoLocked, mInfo null, "
+                    + serviceComponent.flattenToString());
         }
-        mInfo = new CredentialProviderInfo(
+        mInfo = CredentialProviderInfoFactory.create(
                 getContext(), serviceComponent,
                 mUserId, /*isSystemProvider=*/false);
         return mInfo.getServiceInfo();
     }
 
     /**
-     * Starts a provider session and associates it with the given request session. */
+     * Starts a provider session and associates it with the given request session.
+     */
     @Nullable
     @GuardedBy("mLock")
     public ProviderSession initiateProviderSessionForRequestLocked(
             RequestSession requestSession, List<String> requestOptions) {
         if (!requestOptions.isEmpty() && !isServiceCapableLocked(requestOptions)) {
-            Log.i(TAG, "Service is not capable");
+            Slog.d(TAG, "Service does not have the required capabilities");
             return null;
         }
-        Slog.i(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl");
         if (mInfo == null) {
-            Slog.i(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl, "
+            Slog.w(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl, "
                     + "but mInfo is null. This shouldn't happen");
             return null;
         }
@@ -113,15 +112,11 @@ public final class CredentialManagerServiceImpl extends
     @GuardedBy("mLock")
     boolean isServiceCapableLocked(List<String> requestedOptions) {
         if (mInfo == null) {
-            Slog.i(TAG, "in isServiceCapable, mInfo is null");
             return false;
         }
         for (String capability : requestedOptions) {
             if (mInfo.hasCapability(capability)) {
-                Slog.i(TAG, "Provider can handle: " + capability);
                 return true;
-            } else {
-                Slog.i(TAG, "Provider cannot handle: " + capability);
             }
         }
         return false;
@@ -145,7 +140,7 @@ public final class CredentialManagerServiceImpl extends
             try {
                 newServiceInfoLocked(mInfo.getServiceInfo().getComponentName());
             } catch (PackageManager.NameNotFoundException e) {
-                Log.i(TAG, "Issue while updating serviceInfo: " + e.getMessage());
+                Slog.e(TAG, "Issue while updating serviceInfo: " + e.getMessage());
             }
         }
     }

@@ -53,7 +53,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     private boolean mQsDisabled;
     private int mContentHorizontalPadding = -1;
     private boolean mClippingEnabled;
-    private boolean mUseCombinedHeaders;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -66,10 +65,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-    }
-
-    void setUseCombinedHeaders(boolean useCombinedHeaders) {
-        mUseCombinedHeaders = useCombinedHeaders;
     }
 
     @Override
@@ -150,8 +145,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     void updateResources(QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         int topPadding = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
-        if (mUseCombinedHeaders
-                && !LargeScreenUtils.shouldUseLargeScreenShadeHeader(mContext.getResources())) {
+        if (!LargeScreenUtils.shouldUseLargeScreenShadeHeader(mContext.getResources())) {
             topPadding = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         }

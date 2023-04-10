@@ -45,7 +45,7 @@ constructor(
      *
      * @param successCallback is called when the user creation is successful.
      * @param errorCallback is called when userManager.createUser returns null. (Exceptions are not
-     * handled by this class)
+     *   handled by this class)
      */
     fun createUser(
         userName: String?,
@@ -85,6 +85,10 @@ constructor(
 
     fun setUserAdmin(userId: Int) {
         userManager.setUserAdmin(userId)
+    }
+
+    fun isUserAdmin(): Boolean {
+        return userManager.isAdminUser
     }
 
     fun isMultipleAdminEnabled(): Boolean {

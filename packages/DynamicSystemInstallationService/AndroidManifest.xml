@@ -21,12 +21,7 @@
             android:exported="true"
             android:permission="android.permission.INSTALL_DYNAMIC_SYSTEM"
             android:foregroundServiceType="systemExempted"
-            android:process=":dynsystem">
-            <intent-filter>
-                <action android:name="android.os.image.action.NOTIFY_IF_IN_USE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </service>
+            android:process=":dynsystem" />
 
         <activity android:name=".VerificationActivity"
             android:exported="true"

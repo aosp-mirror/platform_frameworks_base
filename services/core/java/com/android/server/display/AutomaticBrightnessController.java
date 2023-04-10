@@ -50,7 +50,12 @@ import com.android.server.display.brightness.BrightnessEvent;
 
 import java.io.PrintWriter;
 
-class AutomaticBrightnessController {
+/**
+ * Manages the associated display brightness when in auto-brightness mode. This is also
+ * responsible for managing the brightness lux-nits mapping strategies. Internally also listens to
+ * the LightSensor and adjusts the system brightness in case of changes in the surrounding lux.
+ */
+public class AutomaticBrightnessController {
     private static final String TAG = "AutomaticBrightnessController";
 
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
@@ -70,10 +75,11 @@ class AutomaticBrightnessController {
 
     private static final int MSG_UPDATE_AMBIENT_LUX = 1;
     private static final int MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE = 2;
-    private static final int MSG_INVALIDATE_SHORT_TERM_MODEL = 3;
+    private static final int MSG_INVALIDATE_CURRENT_SHORT_TERM_MODEL = 3;
     private static final int MSG_UPDATE_FOREGROUND_APP = 4;
     private static final int MSG_UPDATE_FOREGROUND_APP_SYNC = 5;
     private static final int MSG_RUN_UPDATE = 6;
+    private static final int MSG_INVALIDATE_PAUSED_SHORT_TERM_MODEL = 7;
 
     // Callbacks for requesting updates to the display's power state
     private final Callbacks mCallbacks;
@@ -196,6 +202,11 @@ class AutomaticBrightnessController {
     // available.
     private float mScreenAutoBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
+    // The screen brightness level before clamping and throttling. This value needs to be stored
+    // for concurrent displays mode and passed to the additional displays which will do their own
+    // clamping and throttling.
+    private float mRawScreenAutoBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+
     // The current display policy. This is useful, for example,  for knowing when we're dozing,
     // where the light sensor may not be available.
     private int mDisplayPolicy = DisplayPowerRequest.POLICY_OFF;
@@ -206,12 +217,11 @@ class AutomaticBrightnessController {
     private float mBrightnessAdjustmentSampleOldLux;
     private float mBrightnessAdjustmentSampleOldBrightness;
 
-    // When the short term model is invalidated, we don't necessarily reset it (i.e. clear the
-    // user's adjustment) immediately, but wait for a drastic enough change in the ambient light.
-    // The anchor determines what were the light levels when the user has set their preference, and
-    // we use a relative threshold to determine when to revert to the OEM curve.
-    private boolean mShortTermModelValid;
-    private float mShortTermModelAnchor;
+    // The short term models, current and previous. Eg, we might use the "paused" one to save out
+    // the interactive short term model when switching to idle screen brightness mode, and
+    // vice-versa.
+    private final ShortTermModel mShortTermModel;
+    private final ShortTermModel mPausedShortTermModel;
 
     // Controls High Brightness Mode.
     private HighBrightnessModeController mHbmController;
@@ -299,8 +309,8 @@ class AutomaticBrightnessController {
         mAmbientBrightnessThresholdsIdle = ambientBrightnessThresholdsIdle;
         mScreenBrightnessThresholds = screenBrightnessThresholds;
         mScreenBrightnessThresholdsIdle = screenBrightnessThresholdsIdle;
-        mShortTermModelValid = true;
-        mShortTermModelAnchor = -1;
+        mShortTermModel = new ShortTermModel();
+        mPausedShortTermModel = new ShortTermModel();
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer =
             new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizonLong, mClock);
@@ -380,6 +390,10 @@ class AutomaticBrightnessController {
         return mScreenAutoBrightness;
     }
 
+    float getRawAutomaticScreenBrightness() {
+        return mRawScreenAutoBrightness;
+    }
+
     public boolean hasValidAmbientLux() {
         return mAmbientLuxValid;
     }
@@ -393,7 +407,6 @@ class AutomaticBrightnessController {
             boolean userChangedAutoBrightnessAdjustment, int displayPolicy,
             boolean shouldResetShortTermModel) {
         mState = state;
-        mHbmController.setAutoBrightnessEnabled(mState);
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
@@ -457,7 +470,6 @@ class AutomaticBrightnessController {
         mHandler.sendEmptyMessage(MSG_RUN_UPDATE);
     }
 
-    @VisibleForTesting
     float getAmbientLux() {
         return mAmbientLux;
     }
@@ -480,10 +492,10 @@ class AutomaticBrightnessController {
             Slog.d(TAG, "Display policy transitioning from " + oldPolicy + " to " + policy);
         }
         if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy) && !isInIdleMode()) {
-            mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_SHORT_TERM_MODEL,
+            mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_CURRENT_SHORT_TERM_MODEL,
                     mCurrentBrightnessMapper.getShortTermModelTimeout());
         } else if (isInteractivePolicy(policy) && !isInteractivePolicy(oldPolicy)) {
-            mHandler.removeMessages(MSG_INVALIDATE_SHORT_TERM_MODEL);
+            mHandler.removeMessages(MSG_INVALIDATE_CURRENT_SHORT_TERM_MODEL);
         }
         return true;
     }
@@ -504,25 +516,13 @@ class AutomaticBrightnessController {
 
     private boolean setScreenBrightnessByUser(float lux, float brightness) {
         mCurrentBrightnessMapper.addUserDataPoint(lux, brightness);
-        mShortTermModelValid = true;
-        mShortTermModelAnchor = lux;
-        if (mLoggingEnabled) {
-            Slog.d(TAG, "ShortTermModel: anchor=" + mShortTermModelAnchor);
-        }
+        mShortTermModel.setUserBrightness(lux, brightness);
         return true;
     }
 
     public void resetShortTermModel() {
         mCurrentBrightnessMapper.clearUserDataPoints();
-        mShortTermModelValid = true;
-        mShortTermModelAnchor = -1;
-    }
-
-    private void invalidateShortTermModel() {
-        if (mLoggingEnabled) {
-            Slog.d(TAG, "ShortTermModel: invalidate user data");
-        }
-        mShortTermModelValid = false;
+        mShortTermModel.reset();
     }
 
     public boolean setBrightnessConfiguration(BrightnessConfiguration configuration,
@@ -583,8 +583,12 @@ class AutomaticBrightnessController {
             pw.println("  mShortTermModelTimeout(idle)="
                     + mIdleModeBrightnessMapper.getShortTermModelTimeout());
         }
-        pw.println("  mShortTermModelAnchor=" + mShortTermModelAnchor);
-        pw.println("  mShortTermModelValid=" + mShortTermModelValid);
+        pw.println("  mShortTermModel=");
+        mShortTermModel.dump(pw);
+        pw.println("  mPausedShortTermModel=");
+        mPausedShortTermModel.dump(pw);
+
+        pw.println();
         pw.println("  mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
         pw.println("  mBrightnessAdjustmentSampleOldLux=" + mBrightnessAdjustmentSampleOldLux);
         pw.println("  mBrightnessAdjustmentSampleOldBrightness="
@@ -653,6 +657,7 @@ class AutomaticBrightnessController {
                 mPreThresholdLux = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }
             mScreenAutoBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            mRawScreenAutoBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mPreThresholdBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mRecentLightSamples = 0;
             mAmbientLightRingBuffer.clear();
@@ -727,15 +732,9 @@ class AutomaticBrightnessController {
         }
         mHbmController.onAmbientLuxChange(mAmbientLux);
 
+
         // If the short term model was invalidated and the change is drastic enough, reset it.
-        if (!mShortTermModelValid && mShortTermModelAnchor != -1) {
-            if (mCurrentBrightnessMapper.shouldResetShortTermModel(
-                    mAmbientLux, mShortTermModelAnchor)) {
-                resetShortTermModel();
-            } else {
-                mShortTermModelValid = true;
-            }
-        }
+        mShortTermModel.maybeReset(mAmbientLux);
     }
 
     private float calculateAmbientLux(long now, long horizon) {
@@ -883,7 +882,7 @@ class AutomaticBrightnessController {
             if (mLoggingEnabled) {
                 Slog.d(TAG, "updateAmbientLux: "
                         + ((mFastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
-                        + "mBrighteningLuxThreshold=" + mAmbientBrighteningThreshold + ", "
+                        + "mAmbientBrighteningThreshold=" + mAmbientBrighteningThreshold + ", "
                         + "mAmbientDarkeningThreshold=" + mAmbientDarkeningThreshold + ", "
                         + "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", "
                         + "mAmbientLux=" + mAmbientLux);
@@ -915,6 +914,7 @@ class AutomaticBrightnessController {
 
         float value = mCurrentBrightnessMapper.getBrightness(mAmbientLux, mForegroundAppPackageName,
                 mForegroundAppCategory);
+        mRawScreenAutoBrightness = value;
         float newScreenAutoBrightness = clampScreenBrightness(value);
 
         // The min/max range can change for brightness due to HBM. See if the current brightness
@@ -1104,8 +1104,29 @@ class AutomaticBrightnessController {
             return;
         }
         Slog.i(TAG, "Switching to Idle Screen Brightness Mode");
+        // Stash short term model
+        ShortTermModel tempShortTermModel = new ShortTermModel();
+        tempShortTermModel.set(mCurrentBrightnessMapper.getUserLux(),
+                mCurrentBrightnessMapper.getUserBrightness(), /* valid= */ true);
+
+        // Send delayed timeout
+        mHandler.sendEmptyMessageAtTime(MSG_INVALIDATE_PAUSED_SHORT_TERM_MODEL,
+                mClock.uptimeMillis()
+                        + mCurrentBrightnessMapper.getShortTermModelTimeout());
+
+        Slog.i(TAG, "mPreviousShortTermModel" + mPausedShortTermModel);
+        // new brightness mapper
         mCurrentBrightnessMapper = mIdleModeBrightnessMapper;
-        resetShortTermModel();
+
+        // if previous stm has been invalidated, and lux has drastically changed, just use
+        // the new, reset stm.
+        // if previous stm is still valid then revalidate it
+        if (mPausedShortTermModel != null && !mPausedShortTermModel.maybeReset(mAmbientLux)) {
+            setScreenBrightnessByUser(mPausedShortTermModel.mAnchor,
+                    mPausedShortTermModel.mBrightness);
+        }
+        mPausedShortTermModel.copyFrom(tempShortTermModel);
+
         update();
     }
 
@@ -1114,8 +1135,28 @@ class AutomaticBrightnessController {
             return;
         }
         Slog.i(TAG, "Switching to Interactive Screen Brightness Mode");
+        ShortTermModel tempShortTermModel = new ShortTermModel();
+        tempShortTermModel.set(mCurrentBrightnessMapper.getUserLux(),
+                mCurrentBrightnessMapper.getUserBrightness(), /* valid= */ true);
+        mHandler.removeMessages(MSG_INVALIDATE_PAUSED_SHORT_TERM_MODEL);
+        // Send delayed timeout
+        mHandler.sendEmptyMessageAtTime(MSG_INVALIDATE_PAUSED_SHORT_TERM_MODEL,
+                mClock.uptimeMillis()
+                        + mCurrentBrightnessMapper.getShortTermModelTimeout());
+        Slog.i(TAG, "mPreviousShortTermModel" + mPausedShortTermModel.toString());
+
+        // restore interactive mapper.
         mCurrentBrightnessMapper = mInteractiveModeBrightnessMapper;
-        resetShortTermModel();
+
+        // if previous stm has been invalidated, and lux has drastically changed, just use
+        // the new, reset stm.
+        // if previous stm is still valid then revalidate it
+        if (!mPausedShortTermModel.maybeReset(mAmbientLux)) {
+            setScreenBrightnessByUser(mPausedShortTermModel.mAnchor,
+                    mPausedShortTermModel.mBrightness);
+        }
+        mPausedShortTermModel.copyFrom(tempShortTermModel);
+
         update();
     }
 
@@ -1124,6 +1165,14 @@ class AutomaticBrightnessController {
             return mCurrentBrightnessMapper.convertToNits(brightness);
         } else {
             return -1.0f;
+        }
+    }
+
+    public float convertToFloatScale(float nits) {
+        if (mCurrentBrightnessMapper != null) {
+            return mCurrentBrightnessMapper.convertToFloatScale(nits);
+        } else {
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         }
     }
 
@@ -1140,6 +1189,77 @@ class AutomaticBrightnessController {
         if (applyAdjustment) {
             setScreenBrightnessByUser(getAutomaticScreenBrightness());
         }
+    }
+
+    private class ShortTermModel {
+        // When the short term model is invalidated, we don't necessarily reset it (i.e. clear the
+        // user's adjustment) immediately, but wait for a drastic enough change in the ambient
+        // light.
+        // The anchor determines what were the light levels when the user has set their preference,
+        // and we use a relative threshold to determine when to revert to the OEM curve.
+        private float mAnchor = -1f;
+        private float mBrightness;
+        private boolean mIsValid = true;
+
+        private void reset() {
+            mAnchor = -1f;
+            mBrightness = -1f;
+            mIsValid = true;
+        }
+
+        private void invalidate() {
+            mIsValid = false;
+            if (mLoggingEnabled) {
+                Slog.d(TAG, "ShortTermModel: invalidate user data");
+            }
+        }
+
+        private void setUserBrightness(float lux, float brightness) {
+            mAnchor = lux;
+            mBrightness = brightness;
+            mIsValid = true;
+            if (mLoggingEnabled) {
+                Slog.d(TAG, "ShortTermModel: anchor=" + mAnchor);
+            }
+        }
+
+        private boolean maybeReset(float currentLux) {
+            // If the short term model was invalidated and the change is drastic enough, reset it.
+            // Otherwise, we revalidate it.
+            if (!mIsValid && mAnchor != -1) {
+                if (mCurrentBrightnessMapper != null
+                        && mCurrentBrightnessMapper.shouldResetShortTermModel(
+                        currentLux, mAnchor)) {
+                    resetShortTermModel();
+                } else {
+                    mIsValid = true;
+                }
+                return mIsValid;
+            }
+            return false;
+        }
+
+        private void set(float anchor, float brightness, boolean valid) {
+            mAnchor = anchor;
+            mBrightness = brightness;
+            mIsValid = valid;
+        }
+        private void copyFrom(ShortTermModel from) {
+            mAnchor = from.mAnchor;
+            mBrightness = from.mBrightness;
+            mIsValid = from.mIsValid;
+        }
+
+        public String toString() {
+            return " mAnchor: " + mAnchor
+                    + "\n mBrightness: " + mBrightness
+                    + "\n mIsValid: " + mIsValid;
+        }
+
+        void dump(PrintWriter pw) {
+            pw.println(this);
+        }
+
     }
 
     private final class AutomaticBrightnessHandler extends Handler {
@@ -1162,8 +1282,8 @@ class AutomaticBrightnessController {
                     collectBrightnessAdjustmentSample();
                     break;
 
-                case MSG_INVALIDATE_SHORT_TERM_MODEL:
-                    invalidateShortTermModel();
+                case MSG_INVALIDATE_CURRENT_SHORT_TERM_MODEL:
+                    mShortTermModel.invalidate();
                     break;
 
                 case MSG_UPDATE_FOREGROUND_APP:
@@ -1172,6 +1292,10 @@ class AutomaticBrightnessController {
 
                 case MSG_UPDATE_FOREGROUND_APP_SYNC:
                     updateForegroundAppSync();
+                    break;
+
+                case MSG_INVALIDATE_PAUSED_SHORT_TERM_MODEL:
+                    mPausedShortTermModel.invalidate();
                     break;
             }
         }

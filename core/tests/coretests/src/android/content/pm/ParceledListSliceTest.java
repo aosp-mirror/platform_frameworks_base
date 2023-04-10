@@ -16,8 +16,11 @@
 
 package android.content.pm;
 
+import static org.junit.Assert.assertThrows;
+
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ServiceSpecificException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.LargeTest;
@@ -111,6 +114,34 @@ public class ParceledListSliceTest extends TestCase {
             assertEquals((i * 5) + 2, slice.getList().get(i).mFieldC);
             assertEquals((i * 5) + 3, slice.getList().get(i).mFieldD);
             assertEquals((i * 5) + 4, slice.getList().get(i).mFieldE);
+        }
+    }
+
+    /**
+     * Test that exceptions created when parcelling data in the service are really
+     * sent to the client and re-thrown.
+     */
+    public void testThrownException() throws Exception {
+        final List<ThrowingObject> throwers = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            throwers.add(new ThrowingObject(/* throws= */ false));
+        }
+        throwers.add(new ThrowingObject(/* throws= */ true));
+
+        final ParceledListSlice<ThrowingObject> src = new ParceledListSlice<>(throwers);
+        src.setInlineCountLimit(1);
+
+        Parcel parcel = Parcel.obtain();
+        try {
+            parcel.writeParcelable(src, 0);
+            parcel.setDataPosition(0);
+
+            assertThrows(ServiceSpecificException.class, () -> {
+                final ParceledListSlice<ThrowingObject> dst =
+                        parcel.readParcelable(getClass().getClassLoader());
+            });
+        } finally {
+            parcel.recycle();
         }
     }
 
@@ -232,6 +263,40 @@ public class ParceledListSliceTest extends TestCase {
             @Override
             public BaseObject[] newArray(int size) {
                 return new BaseObject[size];
+            }
+        };
+    }
+
+    public static class ThrowingObject implements Parcelable {
+
+        private final boolean mShouldThrow;
+
+        public ThrowingObject(boolean shouldThrow) {
+            mShouldThrow = shouldThrow;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            if (mShouldThrow) {
+                throw new ServiceSpecificException(1234);
+            }
+            dest.writeBoolean(mShouldThrow);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<ThrowingObject> CREATOR = new Creator<ThrowingObject>() {
+            @Override
+            public ThrowingObject createFromParcel(Parcel source) {
+                return new ThrowingObject(source.readBoolean());
+            }
+
+            @Override
+            public ThrowingObject[] newArray(int size) {
+                return new ThrowingObject[size];
             }
         };
     }

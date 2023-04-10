@@ -17,7 +17,6 @@ package com.android.internal.notification;
 import static android.app.admin.DevicePolicyResources.Strings.Core.NOTIFICATION_CHANNEL_DEVICE_ADMIN;
 
 import android.app.INotificationManager;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
@@ -25,7 +24,6 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.os.RemoteException;
-import android.provider.Settings;
 
 import com.android.internal.R;
 
@@ -78,9 +76,7 @@ public class SystemNotificationChannels {
         final NotificationChannel physicalKeyboardChannel = new NotificationChannel(
                 PHYSICAL_KEYBOARD,
                 context.getString(R.string.notification_channel_physical_keyboard),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        physicalKeyboardChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
-                Notification.AUDIO_ATTRIBUTES_DEFAULT);
+                NotificationManager.IMPORTANCE_LOW);
         physicalKeyboardChannel.setBlockable(true);
         channelsList.add(physicalKeyboardChannel);
 

@@ -47,6 +47,8 @@ final class IncrementalProgressListener extends IPackageLoadingProgressCallback.
                     state -> state.setLoadingProgress(progress));
             // Only report the state change when loading state changes from loading to not
             if (Math.abs(1.0f - progress) < 0.00000001f) {
+                mPm.commitPackageStateMutation(null, mPackageName,
+                        state -> state.setLoadingCompletedTime(System.currentTimeMillis()));
                 // Unregister progress listener
                 mPm.mIncrementalManager
                         .unregisterLoadingProgressCallbacks(packageState.getPathString());

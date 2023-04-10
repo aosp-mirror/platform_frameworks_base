@@ -263,7 +263,7 @@ public class RemoteViewsAdapterTest {
 
         @Override
         public IServiceConnection getServiceDispatcher(
-                ServiceConnection conn, Handler handler, int flags) {
+                ServiceConnection conn, Handler handler, long flags) {
             this.conn.set(conn);
             this.handler.set(handler);
             boundCount++;

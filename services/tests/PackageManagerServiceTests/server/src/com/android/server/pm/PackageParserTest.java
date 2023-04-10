@@ -753,7 +753,7 @@ public class PackageParserTest {
                 .setPVersionCode(pkg.getLongVersionCode())
                 .setPkgFlags(PackageInfoUtils.appInfoFlags(pkg, null))
                 .setPrivateFlags(PackageInfoUtils.appInfoPrivateFlags(pkg, null))
-                .setSharedUserId(pkg.getSharedUserLabelRes())
+                .setSharedUserId(pkg.getSharedUserLabelResourceId())
                 .build();
     }
 
@@ -763,13 +763,13 @@ public class PackageParserTest {
         assertEquals(a.getBaseRevisionCode(), b.getBaseRevisionCode());
         assertEquals(a.isHardwareAccelerated(), b.isHardwareAccelerated());
         assertEquals(a.getLongVersionCode(), b.getLongVersionCode());
-        assertEquals(a.getSharedUserLabelRes(), b.getSharedUserLabelRes());
+        assertEquals(a.getSharedUserLabelResourceId(), b.getSharedUserLabelResourceId());
         assertEquals(a.getInstallLocation(), b.getInstallLocation());
         assertEquals(a.isCoreApp(), b.isCoreApp());
         assertEquals(a.isRequiredForAllUsers(), b.isRequiredForAllUsers());
         assertEquals(a.getCompileSdkVersion(), b.getCompileSdkVersion());
         assertEquals(a.getCompileSdkVersionCodeName(), b.getCompileSdkVersionCodeName());
-        assertEquals(a.isUse32BitAbi(), b.isUse32BitAbi());
+        assertEquals(a.is32BitAbiPreferred(), b.is32BitAbiPreferred());
         assertEquals(a.getPackageName(), b.getPackageName());
         assertArrayEquals(a.getSplitNames(), b.getSplitNames());
         assertEquals(a.getVolumeUuid(), b.getVolumeUuid());
@@ -1039,7 +1039,7 @@ public class PackageParserTest {
 
         ((ParsedPackage) pkg.setBaseRevisionCode(100)
                 .setHardwareAccelerated(true)
-                .setSharedUserLabelRes(100)
+                .setSharedUserLabelResourceId(100)
                 .setInstallLocation(100)
                 .setRequiredForAllUsers(true)
                 .asSplit(
@@ -1048,7 +1048,7 @@ public class PackageParserTest {
                         new int[]{100},
                         null
                 )
-                .setUse32BitAbi(true)
+                .set32BitAbiPreferred(true)
                 .setVolumeUuid("d52ef59a-7def-4541-bf21-4c28ed4b65a0")
                 .addPermission(permission)
                 .addPermissionGroup(new ParsedPermissionGroupImpl())

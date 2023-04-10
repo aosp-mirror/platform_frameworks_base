@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import android.database.ContentObserver
 import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.expansionChanges
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -35,20 +36,25 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
+import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.statusbar.policy.headsUpEvents
 import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.settings.SettingsProxy
+import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -60,6 +66,7 @@ class KeyguardCoordinator
 @Inject
 constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
+    private val headsUpManager: HeadsUpManager,
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
     private val keyguardRepository: KeyguardRepository,
     private val notifPipelineFlags: NotifPipelineFlags,
@@ -87,18 +94,68 @@ constructor(
     private fun attachUnseenFilter(pipeline: NotifPipeline) {
         pipeline.addFinalizeFilter(unseenNotifFilter)
         pipeline.addCollectionListener(collectionListener)
-        scope.launch { clearUnseenWhenKeyguardIsDismissed() }
+        scope.launch { trackUnseenNotificationsWhileUnlocked() }
         scope.launch { invalidateWhenUnseenSettingChanges() }
     }
 
-    private suspend fun clearUnseenWhenKeyguardIsDismissed() {
-        // Use collectLatest so that the suspending block is cancelled if isKeyguardShowing changes
-        // during the timeout period
+    private suspend fun trackUnseenNotificationsWhileUnlocked() {
+        // Use collectLatest so that trackUnseenNotifications() is cancelled when the keyguard is
+        // showing again
+        var clearUnseenOnUnlock = false
         keyguardRepository.isKeyguardShowing.collectLatest { isKeyguardShowing ->
-            if (!isKeyguardShowing) {
+            if (isKeyguardShowing) {
+                // Wait for the user to spend enough time on the lock screen before clearing unseen
+                // set when unlocked
+                awaitTimeSpentNotDozing(SEEN_TIMEOUT)
+                clearUnseenOnUnlock = true
+            } else {
                 unseenNotifFilter.invalidateList("keyguard no longer showing")
-                delay(SEEN_TIMEOUT)
+                if (clearUnseenOnUnlock) {
+                    clearUnseenOnUnlock = false
+                    unseenNotifications.clear()
+                }
+                trackUnseenNotifications()
+            }
+        }
+    }
+
+    private suspend fun awaitTimeSpentNotDozing(duration: Duration) {
+        keyguardRepository.isDozing
+            // Use transformLatest so that the timeout delay is cancelled if the device enters doze,
+            // and is restarted when doze ends.
+            .transformLatest { isDozing ->
+                if (!isDozing) {
+                    delay(duration)
+                    // Signal timeout has completed
+                    emit(Unit)
+                }
+            }
+            // Suspend until the first emission
+            .first()
+    }
+
+    private suspend fun trackUnseenNotifications() {
+        coroutineScope {
+            launch { clearUnseenNotificationsWhenShadeIsExpanded() }
+            launch { markHeadsUpNotificationsAsSeen() }
+        }
+    }
+
+    private suspend fun clearUnseenNotificationsWhenShadeIsExpanded() {
+        statusBarStateController.expansionChanges.collect { isExpanded ->
+            if (isExpanded) {
                 unseenNotifications.clear()
+            }
+        }
+    }
+
+    private suspend fun markHeadsUpNotificationsAsSeen() {
+        headsUpManager.allEntries
+            .filter { it.isRowPinned }
+            .forEach { unseenNotifications.remove(it) }
+        headsUpManager.headsUpEvents.collect { (entry, isHun) ->
+            if (isHun) {
+                unseenNotifications.remove(entry)
             }
         }
     }
@@ -106,18 +163,18 @@ constructor(
     private suspend fun invalidateWhenUnseenSettingChanges() {
         secureSettings
             // emit whenever the setting has changed
-            .settingChangesForUser(
-                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+            .observerFlow(
                 UserHandle.USER_ALL,
+                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
             )
             // perform a query immediately
             .onStart { emit(Unit) }
             // for each change, lookup the new value
             .map {
-                secureSettings.getBoolForUser(
+                secureSettings.getIntForUser(
                     Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
                     UserHandle.USER_CURRENT,
-                )
+                ) == 1
             }
             // perform lookups on the bg thread pool
             .flowOn(bgDispatcher)
@@ -136,13 +193,17 @@ constructor(
     private val collectionListener =
         object : NotifCollectionListener {
             override fun onEntryAdded(entry: NotificationEntry) {
-                if (keyguardRepository.isKeyguardShowing()) {
+                if (
+                    keyguardRepository.isKeyguardShowing() || !statusBarStateController.isExpanded
+                ) {
                     unseenNotifications.add(entry)
                 }
             }
 
             override fun onEntryUpdated(entry: NotificationEntry) {
-                if (keyguardRepository.isKeyguardShowing()) {
+                if (
+                    keyguardRepository.isKeyguardShowing() || !statusBarStateController.isExpanded
+                ) {
                     unseenNotifications.add(entry)
                 }
             }
@@ -215,15 +276,3 @@ constructor(
         private val SEEN_TIMEOUT = 5.seconds
     }
 }
-
-private fun SettingsProxy.settingChangesForUser(name: String, userHandle: Int): Flow<Unit> =
-    conflatedCallbackFlow {
-        val observer =
-            object : ContentObserver(null) {
-                override fun onChange(selfChange: Boolean) {
-                    trySend(Unit)
-                }
-            }
-        registerContentObserverForUser(name, observer, userHandle)
-        awaitClose { unregisterContentObserver(observer) }
-    }

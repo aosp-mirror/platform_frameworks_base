@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"显示剪辑边界、边距等。"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"强制使用从右到左的布局方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"强制将所有语言区域的屏幕布局方向改为从右到左"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"透明导航栏"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"默认将导航栏背景颜色设为透明"</string>
     <string name="window_blurs" msgid="6831008984828425106">"允许窗口级模糊处理"</string>
     <string name="force_msaa" msgid="4081288296137775550">"强制启用 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"在 OpenGL ES 2.0 应用中启用 4x MSAA"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"这部手机"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"这台平板电脑"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"这部手机"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"无法在此设备上播放"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"升级帐号后才能切换"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"无法在此设备上播放下载的内容"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"广告之后重试"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"若要在此设备上播放，请唤醒设备"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"设备未获准播放"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"无法在此设备上播放该媒体内容"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
     <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"预见式返回动画"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"启用系统动画作为预见式返回动画。"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"此设置将启用系统动画作为预测性手势动画。这要求在清单文件中将单个应用的 enableOnBackInvokedCallback 设为 true。"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"左移"</item>
+    <item msgid="5425394847942513942">"下移"</item>
+    <item msgid="7728484337962740316">"右移"</item>
+    <item msgid="324200556467459329">"上移"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

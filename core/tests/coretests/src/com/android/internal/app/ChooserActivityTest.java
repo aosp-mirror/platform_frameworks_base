@@ -446,7 +446,7 @@ public class ChooserActivityTest {
         onView(withIdFromRuntimeResource("profile_button")).check(doesNotExist());
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -501,7 +501,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(6));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -541,7 +541,7 @@ public class ChooserActivityTest {
         verify(ChooserActivityOverrideData.getInstance().resolverListController, times(1))
                 .topK(any(List.class), anyInt());
         assertThat(activity.getIsSelected(), is(false));
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             return true;
         };
         ResolveInfo toChoose = resolvedComponentInfos.get(0).getResolveInfoAt(0);
@@ -592,7 +592,7 @@ public class ChooserActivityTest {
     @Test
     public void autoLaunchSingleResult() throws InterruptedException {
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -638,7 +638,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(1));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -681,7 +681,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(2));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -719,7 +719,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(2));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -1949,7 +1949,7 @@ public class ChooserActivityTest {
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2127,7 +2127,7 @@ public class ChooserActivityTest {
         onView(withIdFromRuntimeResource("profile_button")).check(doesNotExist());
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2513,7 +2513,7 @@ public class ChooserActivityTest {
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2543,7 +2543,7 @@ public class ChooserActivityTest {
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2569,7 +2569,7 @@ public class ChooserActivityTest {
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2597,7 +2597,7 @@ public class ChooserActivityTest {
         Intent chooserIntent = createChooserIntent(createSendTextIntent(),
                 new Intent[] {new Intent("action.fake")});
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };

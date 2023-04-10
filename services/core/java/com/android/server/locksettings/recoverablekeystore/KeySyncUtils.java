@@ -21,6 +21,7 @@ import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.security.SecureBox;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

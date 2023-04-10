@@ -39,21 +39,23 @@
 #include <SkShader.h>
 #include <SkTextBlob.h>
 #include <SkVertices.h>
+#include <log/log.h>
+#include <ui/FatVector.h>
 
 #include <memory>
 #include <optional>
 #include <utility>
 
 #include "CanvasProperty.h"
+#include "Mesh.h"
 #include "NinePatchUtils.h"
 #include "VectorDrawable.h"
+#include "effects/GainmapRenderer.h"
 #include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
 #include "hwui/PaintFilter.h"
-#include <log/log.h>
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/HolePunch.h"
-#include <ui/FatVector.h>
 
 namespace android {
 
@@ -572,8 +574,14 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
     applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawVertices(vertices, mode, p); });
 }
 
-void SkiaCanvas::drawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint) {
-    mCanvas->drawMesh(mesh, blender, paint);
+void SkiaCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Paint& paint) {
+    GrDirectContext* context = nullptr;
+    auto recordingContext = mCanvas->recordingContext();
+    if (recordingContext) {
+        context = recordingContext->asDirectContext();
+    }
+    mesh.updateSkMesh(context);
+    mCanvas->drawMesh(mesh.getSkMesh(), blender, paint);
 }
 
 // ----------------------------------------------------------------------------
@@ -582,18 +590,25 @@ void SkiaCanvas::drawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const Sk
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     auto image = bitmap.makeImage();
+
+    if (bitmap.hasGainmap()) {
+        Paint gainmapPaint = paint ? *paint : Paint();
+        sk_sp<SkShader> gainmapShader = uirenderer::MakeGainmapShader(
+                image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
+                SkTileMode::kClamp, SkTileMode::kClamp, gainmapPaint.sampling());
+        gainmapPaint.setShader(gainmapShader);
+        return drawRect(left, top, left + bitmap.width(), top + bitmap.height(), gainmapPaint);
+    }
+
     applyLooper(paint, [&](const Paint& p) {
         mCanvas->drawImage(image, left, top, p.sampling(), &p);
     });
 }
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) {
-    auto image = bitmap.makeImage();
     SkAutoCanvasRestore acr(mCanvas, true);
     mCanvas->concat(matrix);
-    applyLooper(paint, [&](const Paint& p) {
-        mCanvas->drawImage(image, 0, 0, p.sampling(), &p);
-    });
+    drawBitmap(bitmap, 0, 0, paint);
 }
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
@@ -602,6 +617,16 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float s
     auto image = bitmap.makeImage();
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
+
+    if (bitmap.hasGainmap()) {
+        Paint gainmapPaint = paint ? *paint : Paint();
+        sk_sp<SkShader> gainmapShader = uirenderer::MakeGainmapShader(
+                image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
+                SkTileMode::kClamp, SkTileMode::kClamp, gainmapPaint.sampling());
+        gainmapShader = gainmapShader->makeWithLocalMatrix(SkMatrix::RectToRect(srcRect, dstRect));
+        gainmapPaint.setShader(gainmapShader);
+        return drawRect(dstLeft, dstTop, dstRight, dstBottom, gainmapPaint);
+    }
 
     applyLooper(paint, [&](const Paint& p) {
         mCanvas->drawImageRect(image, srcRect, dstRect, p.sampling(), &p,
@@ -738,10 +763,6 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
 
 double SkiaCanvas::drawAnimatedImage(AnimatedImageDrawable* imgDrawable) {
     return imgDrawable->drawStaging(mCanvas);
-}
-
-void SkiaCanvas::drawLottie(LottieDrawable* lottieDrawable) {
-    lottieDrawable->drawStaging(mCanvas);
 }
 
 void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {

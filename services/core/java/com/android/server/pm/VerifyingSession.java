@@ -26,7 +26,6 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.os.PowerWhitelistManager.REASON_PACKAGE_VERIFIER;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
@@ -408,7 +407,7 @@ final class VerifyingSession {
         final int numRequiredVerifierPackages = requiredVerifierPackages.size();
         for (int i = numRequiredVerifierPackages - 1; i >= 0; i--) {
             if (!snapshot.isApplicationEffectivelyEnabled(requiredVerifierPackages.get(i),
-                    SYSTEM_UID)) {
+                    verifierUser)) {
                 Slog.w(TAG,
                         "Required verifier: " + requiredVerifierPackages.get(i) + " is disabled");
                 requiredVerifierPackages.remove(i);
@@ -653,20 +652,33 @@ final class VerifyingSession {
 
     private boolean isAdbVerificationEnabled(PackageInfoLite pkgInfoLite, int userId,
             boolean requestedDisableVerification) {
+        boolean verifierIncludeAdb = android.provider.Settings.Global.getInt(
+                mPm.mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
+
         if (mPm.isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
+            if (!verifierIncludeAdb) {
+                Slog.w(TAG, "Force verification of ADB install because of user restriction.");
+            }
             return true;
         }
-        // Check if the developer wants to skip verification for ADB installs
+
+        // Check if the verification disabled globally, first.
+        if (!verifierIncludeAdb) {
+            return false;
+        }
+
+        // Check if the developer wants to skip verification for ADB installs.
         if (requestedDisableVerification) {
             if (!packageExists(pkgInfoLite.packageName)) {
-                // Always verify fresh install
+                // Always verify fresh install.
                 return true;
             }
-            // Only skip when apk is debuggable
+            // Only skip when apk is debuggable.
             return !pkgInfoLite.debuggable;
         }
-        return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
-                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
+
+        return true;
     }
 
     /**
@@ -681,12 +693,15 @@ final class VerifyingSession {
         }
 
         final int installerUid = mVerificationInfo == null ? -1 : mVerificationInfo.mInstallerUid;
+        final boolean requestedDisableVerification =
+                (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
 
         // Check if installing from ADB
         if ((mInstallFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
-            boolean requestedDisableVerification =
-                    (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
             return isAdbVerificationEnabled(pkgInfoLite, userId, requestedDisableVerification);
+        } else if (requestedDisableVerification) {
+            // Skip verification for non-adb installs
+            return false;
         }
 
         // only when not installed from ADB, skip verification for instant apps when

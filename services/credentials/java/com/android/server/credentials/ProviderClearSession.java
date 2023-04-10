@@ -20,11 +20,12 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.credentials.ClearCredentialStateException;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
+import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.ClearCredentialStateRequest;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 import android.util.Slog;
 
@@ -42,7 +43,8 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     private ClearCredentialStateException mProviderException;
 
     /** Creates a new provider session to be used by the request session. */
-    @Nullable public static ProviderClearSession createNewSession(
+    @Nullable
+    public static ProviderClearSession createNewSession(
             Context context,
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
@@ -53,7 +55,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
                         clearRequestSession.mClientRequest,
                         clearRequestSession.mClientAppInfo);
         return new ProviderClearSession(context, providerInfo, clearRequestSession, userId,
-                    remoteCredentialService, providerRequest);
+                remoteCredentialService, providerRequest);
     }
 
     @Nullable
@@ -72,7 +74,8 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
             ProviderInternalCallback callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             ClearCredentialStateRequest providerRequest) {
-        super(context, info, providerRequest, callbacks, userId, remoteCredentialService);
+        super(context, providerRequest, callbacks, info.getComponentName(),
+                userId, remoteCredentialService);
         setStatus(Status.PENDING);
     }
 
@@ -80,7 +83,8 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     public void onProviderResponseSuccess(@Nullable Void response) {
         Log.i(TAG, "in onProviderResponseSuccess");
         mProviderResponseSet = true;
-        updateStatusAndInvokeCallback(Status.COMPLETE);
+        updateStatusAndInvokeCallback(Status.COMPLETE,
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when the provider response resulted in a failure. */
@@ -89,18 +93,26 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
         if (exception instanceof ClearCredentialStateException) {
             mProviderException = (ClearCredentialStateException) exception;
         }
-        updateStatusAndInvokeCallback(toStatus(errorCode));
+        mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
+        updateStatusAndInvokeCallback(toStatus(errorCode),
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when provider service dies. */
     @Override // Callback from the remote provider
     public void onProviderServiceDied(RemoteCredentialService service) {
-        if (service.getComponentName().equals(mProviderInfo.getServiceInfo().getComponentName())) {
-            updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
+        if (service.getComponentName().equals(mComponentName)) {
+            updateStatusAndInvokeCallback(Status.SERVICE_DEAD,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "
                     + "this should not happen");
         }
+    }
+
+    @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        mProviderCancellationSignal = cancellation;
     }
 
     @Nullable
@@ -114,5 +126,13 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     protected void onUiEntrySelected(String entryType, String entryId,
             ProviderPendingIntentResponse providerPendingIntentResponse) {
         //Not applicable for clearCredential as response is not picked by the user
+    }
+
+    @Override
+    protected void invokeSession() {
+        if (mRemoteCredentialService != null) {
+            startCandidateMetrics();
+            mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
+        }
     }
 }

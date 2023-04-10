@@ -28,6 +28,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.PropertyInvalidatedCache;
+import android.app.RemoteLockscreenValidationResult;
+import android.app.RemoteLockscreenValidationSession;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
@@ -48,6 +50,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -62,6 +65,7 @@ import com.google.android.collect.Lists;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -112,6 +116,19 @@ public class LockPatternUtils {
     public static final int CREDENTIAL_TYPE_PIN = 3;
     public static final int CREDENTIAL_TYPE_PASSWORD = 4;
 
+    // This is the value of pin length whenever pin length is not available
+    public static final int PIN_LENGTH_UNAVAILABLE = -1;
+
+    // This is the minimum pin length at which auto confirmation is supported
+    public static final int MIN_AUTO_PIN_REQUIREMENT_LENGTH = 6;
+
+    /**
+     * Header used for the encryption and decryption of the device credential for
+     * remote device lockscreen validation.
+     */
+    public static final byte[] ENCRYPTED_REMOTE_CREDENTIALS_HEADER =
+            "encrypted_remote_credentials".getBytes(StandardCharsets.UTF_8);
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CREDENTIAL_TYPE_"}, value = {
             CREDENTIAL_TYPE_NONE,
@@ -121,6 +138,21 @@ public class LockPatternUtils {
             // CREDENTIAL_TYPE_PASSWORD_OR_PIN is missing on purpose.
     })
     public @interface CredentialType {}
+
+    public static String credentialTypeToString(int credentialType) {
+        switch (credentialType) {
+            case CREDENTIAL_TYPE_NONE:
+                return "NONE";
+            case CREDENTIAL_TYPE_PATTERN:
+                return "PATTERN";
+            case CREDENTIAL_TYPE_PIN:
+                return "PIN";
+            case CREDENTIAL_TYPE_PASSWORD:
+                return "PASSWORD";
+            default:
+                return "UNKNOWN_" + credentialType;
+        }
+    }
 
     /**
      * Flag provided to {@link #verifyCredential(LockscreenCredential, int, int)} . If set, the
@@ -157,14 +189,24 @@ public class LockPatternUtils {
     private static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
 
+    private static final String LOCK_PIN_ENHANCED_PRIVACY = "pin_enhanced_privacy";
+
     private static final String LOCK_SCREEN_DEVICE_OWNER_INFO = "lockscreen.device_owner_info";
 
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
     private static final String KNOWN_TRUST_AGENTS = "lockscreen.knowntrustagents";
     private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
 
+    public static final String AUTO_PIN_CONFIRM = "lockscreen.auto_pin_confirm";
+
     public static final String CURRENT_LSKF_BASED_PROTECTOR_ID_KEY = "sp-handle";
     public static final String PASSWORD_HISTORY_DELIMITER = ",";
+
+    /**
+     * drives the pin auto confirmation feature availability in code logic.
+     */
+    public static final String FLAG_ENABLE_AUTO_PIN_CONFIRMATION =
+            "AutoPinConfirmation__enable_auto_pin_confirmation";
 
     @UnsupportedAppUsage
     private final Context mContext;
@@ -566,6 +608,21 @@ public class LockPatternUtils {
     }
 
     /**
+     * Returns the length of the PIN set by a particular user.
+     * @param userId user id of the user whose pin length we have to return
+     * @return
+     *       A. the length of the pin set by user if it is currently available
+     *       B. PIN_LENGTH_UNAVAILABLE if it is not available or if an exception occurs
+     */
+    public int getPinLength(int userId) {
+        try {
+            return getLockSettings().getPinLength(userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not fetch PIN length " + e);
+            return PIN_LENGTH_UNAVAILABLE;
+        }
+    }
+    /**
      * Records that the user has chosen a pattern at some time, even if the pattern is
      * currently cleared.
      */
@@ -625,6 +682,38 @@ public class LockPatternUtils {
         return getBoolean(DISABLE_LOCKSCREEN_KEY, false, userId)
                 || disabledByDefault
                 || isDemoUser;
+    }
+
+    /**
+     * Sets the pin auto confirm capability to enabled or disabled
+     * @param enabled enables pin auto confirm capability when true
+     * @param userId user ID of the user this has effect on
+     */
+    public void setAutoPinConfirm(boolean enabled, int userId) {
+        setBoolean(AUTO_PIN_CONFIRM, enabled, userId);
+    }
+
+    /**
+     * Determines if the auto pin confirmation feature is enabled or not for current user
+     * If setting is not available, the default behaviour is disabled
+     * @param userId user ID of the user this has effect on
+     *
+     * @return true, if the entered pin should be auto confirmed
+     */
+    public boolean isAutoPinConfirmEnabled(int userId) {
+        return getBoolean(AUTO_PIN_CONFIRM, /* defaultValue= */ false, userId);
+    }
+
+    /**
+     * Whether the auto pin feature logic is available or not.
+     * @return true, if deviceConfig flag is set to true or the flag is not propagated and
+     * defaultValue is true.
+     */
+    public static boolean isAutoPinConfirmFeatureAvailable() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION,
+                FLAG_ENABLE_AUTO_PIN_CONFIRMATION,
+                /* defaultValue= */ false);
     }
 
     /** Returns if the given quality maps to an alphabetic password */
@@ -963,6 +1052,27 @@ public class LockPatternUtils {
 
     public boolean isVisiblePatternEverChosen(int userId) {
         return getString(Settings.Secure.LOCK_PATTERN_VISIBLE, userId) != null;
+    }
+
+    /**
+     * @return Whether enhanced pin privacy is enabled.
+     */
+    public boolean isPinEnhancedPrivacyEnabled(int userId) {
+        return getBoolean(LOCK_PIN_ENHANCED_PRIVACY, false, userId);
+    }
+
+    /**
+     * Set whether enhanced pin privacy is enabled.
+     */
+    public void setPinEnhancedPrivacyEnabled(boolean enabled, int userId) {
+        setBoolean(LOCK_PIN_ENHANCED_PRIVACY, enabled, userId);
+    }
+
+    /**
+     * @return Whether enhanced pin privacy was ever chosen.
+     */
+    public boolean isPinEnhancedPrivacyEverChosen(int userId) {
+        return getString(LOCK_PIN_ENHANCED_PRIVACY, userId) != null;
     }
 
     /**
@@ -1760,5 +1870,30 @@ public class LockPatternUtils {
 
     public void removeUser(@UserIdInt int userId) {
         getLockSettingsInternal().removeUser(userId);
+    }
+
+   /**
+     * Starts a session to verify lockscreen credentials provided by a remote device.
+     */
+    @NonNull
+    public RemoteLockscreenValidationSession startRemoteLockscreenValidation() {
+        try {
+            return getLockSettings().startRemoteLockscreenValidation();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+   /**
+     * Verifies credentials guess from a remote device.
+     */
+    @NonNull
+    public RemoteLockscreenValidationResult validateRemoteLockscreen(
+            @NonNull byte[] encryptedCredential) {
+        try {
+            return getLockSettings().validateRemoteLockscreen(encryptedCredential);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

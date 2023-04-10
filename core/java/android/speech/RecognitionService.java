@@ -37,7 +37,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Pair;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -110,13 +109,16 @@ public abstract class RecognitionService extends Service {
                     dispatchClearCallback((IRecognitionListener) msg.obj);
                     break;
                 case MSG_CHECK_RECOGNITION_SUPPORT:
-                    Pair<Intent, IRecognitionSupportCallback> intentAndListener =
-                            (Pair<Intent, IRecognitionSupportCallback>) msg.obj;
+                    CheckRecognitionSupportArgs checkArgs = (CheckRecognitionSupportArgs) msg.obj;
                     dispatchCheckRecognitionSupport(
-                            intentAndListener.first, intentAndListener.second);
+                            checkArgs.mIntent, checkArgs.callback, checkArgs.mAttributionSource);
                     break;
                 case MSG_TRIGGER_MODEL_DOWNLOAD:
-                    dispatchTriggerModelDownload((Intent) msg.obj);
+                    ModelDownloadArgs modelDownloadArgs = (ModelDownloadArgs) msg.obj;
+                    dispatchTriggerModelDownload(
+                            modelDownloadArgs.mIntent,
+                            modelDownloadArgs.mAttributionSource,
+                            modelDownloadArgs.mListener);
                     break;
             }
         }
@@ -142,6 +144,10 @@ public abstract class RecognitionService extends Service {
                 if (preflightPermissionCheckPassed) {
                     currentCallback = new Callback(listener, attributionSource);
                     sessionState = new SessionState(currentCallback);
+                    mSessions.put(listener.asBinder(), sessionState);
+                    if (DBG) {
+                        Log.d(TAG, "Added a new session to the map, pending permission checks");
+                    }
                     RecognitionService.this.onStartListening(intent, currentCallback);
                 }
 
@@ -151,16 +157,12 @@ public abstract class RecognitionService extends Service {
                     if (preflightPermissionCheckPassed) {
                         // If start listening was attempted, cancel the callback.
                         RecognitionService.this.onCancel(currentCallback);
+                        mSessions.remove(listener.asBinder());
                         finishDataDelivery(sessionState);
                         sessionState.reset();
                     }
                     Log.i(TAG, "#startListening received from a caller "
                             + "without permission " + Manifest.permission.RECORD_AUDIO + ".");
-                } else {
-                    if (DBG) {
-                        Log.d(TAG, "Added a new session to the map.");
-                    }
-                    mSessions.put(listener.asBinder(), sessionState);
                 }
             } else {
                 listener.onError(SpeechRecognizer.ERROR_CLIENT);
@@ -211,12 +213,62 @@ public abstract class RecognitionService extends Service {
     }
 
     private void dispatchCheckRecognitionSupport(
-            Intent intent, IRecognitionSupportCallback callback) {
-        RecognitionService.this.onCheckRecognitionSupport(intent, new SupportCallback(callback));
+            Intent intent, IRecognitionSupportCallback callback,
+            AttributionSource attributionSource) {
+        RecognitionService.this.onCheckRecognitionSupport(
+                intent,
+                attributionSource,
+                new SupportCallback(callback));
     }
 
-    private void dispatchTriggerModelDownload(Intent intent) {
-        RecognitionService.this.onTriggerModelDownload(intent);
+    private void dispatchTriggerModelDownload(
+            Intent intent,
+            AttributionSource attributionSource,
+            IModelDownloadListener listener) {
+        if (listener == null) {
+            RecognitionService.this.onTriggerModelDownload(intent, attributionSource);
+        } else {
+            RecognitionService.this.onTriggerModelDownload(
+                    intent,
+                    attributionSource,
+                    new ModelDownloadListener() {
+                        @Override
+                        public void onProgress(int completedPercent) {
+                            try {
+                                listener.onProgress(completedPercent);
+                            } catch (RemoteException e) {
+                                throw e.rethrowFromSystemServer();
+                            }
+                        }
+
+                        @Override
+                        public void onSuccess() {
+                            try {
+                                listener.onSuccess();
+                            } catch (RemoteException e) {
+                                throw e.rethrowFromSystemServer();
+                            }
+                        }
+
+                        @Override
+                        public void onScheduled() {
+                            try {
+                                listener.onScheduled();
+                            } catch (RemoteException e) {
+                                throw e.rethrowFromSystemServer();
+                            }
+                        }
+
+                        @Override
+                        public void onError(int error) {
+                            try {
+                                listener.onError(error);
+                            } catch (RemoteException e) {
+                                throw e.rethrowFromSystemServer();
+                            }
+                        }
+                    });
+        }
     }
 
     private static class StartListeningArgs {
@@ -230,6 +282,36 @@ public abstract class RecognitionService extends Service {
             this.mIntent = intent;
             this.mListener = listener;
             this.mAttributionSource = attributionSource;
+        }
+    }
+
+    private static class CheckRecognitionSupportArgs {
+        public final Intent mIntent;
+        public final IRecognitionSupportCallback callback;
+        public final AttributionSource mAttributionSource;
+
+        private CheckRecognitionSupportArgs(
+                Intent intent,
+                IRecognitionSupportCallback callback,
+                AttributionSource attributionSource) {
+            this.mIntent = intent;
+            this.callback = callback;
+            this.mAttributionSource = attributionSource;
+        }
+    }
+
+    private static class ModelDownloadArgs {
+        final Intent mIntent;
+        final AttributionSource mAttributionSource;
+        @Nullable final IModelDownloadListener mListener;
+
+        private ModelDownloadArgs(
+                Intent intent,
+                AttributionSource attributionSource,
+                @Nullable IModelDownloadListener listener) {
+            this.mIntent = intent;
+            this.mAttributionSource = attributionSource;
+            this.mListener = listener;
         }
     }
 
@@ -298,12 +380,80 @@ public abstract class RecognitionService extends Service {
     }
 
     /**
+     * Queries the service on whether it would support a {@link #onStartListening(Intent, Callback)}
+     * for the same {@code recognizerIntent}.
+     *
+     * <p>The service will notify the caller about the level of support or error via
+     * {@link SupportCallback}.
+     *
+     * <p>If the service does not offer the support check it will notify the caller with
+     * {@link SpeechRecognizer#ERROR_CANNOT_CHECK_SUPPORT}.
+     *
+     * <p>Provides the calling AttributionSource to the service implementation so that permissions
+     * and bandwidth could be correctly blamed.</p>
+     */
+    public void onCheckRecognitionSupport(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource,
+            @NonNull SupportCallback supportCallback) {
+        onCheckRecognitionSupport(recognizerIntent, supportCallback);
+    }
+
+    /**
      * Requests the download of the recognizer support for {@code recognizerIntent}.
      */
     public void onTriggerModelDownload(@NonNull Intent recognizerIntent) {
         if (DBG) {
             Log.i(TAG, String.format("#downloadModel [%s]", recognizerIntent));
         }
+    }
+
+    /**
+     * Requests the download of the recognizer support for {@code recognizerIntent}.
+     *
+     * <p>Provides the calling AttributionSource to the service implementation so that permissions
+     * and bandwidth could be correctly blamed.</p>
+     */
+    public void onTriggerModelDownload(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource) {
+        onTriggerModelDownload(recognizerIntent);
+    }
+
+    /**
+     * Requests the download of the recognizer support for {@code recognizerIntent}.
+     *
+     * <p> Provides the calling {@link AttributionSource} to the service implementation so that
+     * permissions and bandwidth could be correctly blamed.
+     *
+     * <p> Client will receive the progress updates via the given {@link ModelDownloadListener}:
+     *
+     * <li> If the model is already available, {@link ModelDownloadListener#onSuccess()} will be
+     * called directly. The model can be safely used afterwards.
+     *
+     * <li> If the {@link RecognitionService} has started the download,
+     * {@link ModelDownloadListener#onProgress(int)} will be called an unspecified (zero or more)
+     * number of times until the download is complete.
+     * When the download finishes, {@link ModelDownloadListener#onSuccess()} will be called.
+     * The model can be safely used afterwards.
+     *
+     * <li> If the {@link RecognitionService} has only scheduled the download, but won't satisfy it
+     * immediately, {@link ModelDownloadListener#onScheduled()} will be called.
+     * There will be no further updates on this listener.
+     *
+     * <li> If the request fails at any time due to a network or scheduling error,
+     * {@link ModelDownloadListener#onError(int)} will be called.
+     *
+     * @param recognizerIntent contains parameters for the recognition to be performed. The intent
+     *        may also contain optional extras, see {@link RecognizerIntent}.
+     * @param attributionSource the attribution source of the caller.
+     * @param listener on which to receive updates about the model download request.
+     */
+    public void onTriggerModelDownload(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource,
+            @NonNull ModelDownloadListener listener) {
+        listener.onError(SpeechRecognizer.ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS);
     }
 
     @Override
@@ -480,6 +630,39 @@ public abstract class RecognitionService extends Service {
         }
 
         /**
+         * The service should call this method when the language detection (and switching)
+         * results are available. This method can be called on any number of occasions
+         * at any time between {@link #beginningOfSpeech()} and {@link #endOfSpeech()},
+         * depending on the speech recognition service implementation.
+         *
+         * @param results the returned language detection (and switching) results.
+         *        <p> To retrieve the most confidently detected language IETF tag
+         *        (as defined by BCP 47, e.g., "en-US", "de-DE"),
+         *        use {@link Bundle#getString(String)}
+         *        with {@link SpeechRecognizer#DETECTED_LANGUAGE} as the parameter.
+         *        <p> To retrieve the language detection confidence level represented by a value
+         *        prefixed by {@code LANGUAGE_DETECTION_CONFIDENCE_LEVEL_} defined in
+         *        {@link SpeechRecognizer}, use {@link Bundle#getInt(String)} with
+         *        {@link SpeechRecognizer#LANGUAGE_DETECTION_CONFIDENCE_LEVEL} as the parameter.
+         *        <p> To retrieve the alternative locales for the same language
+         *        retrieved by the key {@link SpeechRecognizer#DETECTED_LANGUAGE},
+         *        use {@link Bundle#getStringArrayList(String)}
+         *        with {@link SpeechRecognizer#TOP_LOCALE_ALTERNATIVES} as the parameter.
+         *        <p> To retrieve the language switching results represented by a value
+         *        prefixed by {@code LANGUAGE_SWITCH_RESULT_}
+         *        and defined in {@link SpeechRecognizer}, use {@link Bundle#getInt(String)}
+         *        with {@link SpeechRecognizer#LANGUAGE_SWITCH_RESULT} as the parameter.
+         */
+        @SuppressLint("CallbackMethodName") // For consistency with existing methods.
+        public void languageDetection(@NonNull Bundle results) {
+            try {
+                mListener.onLanguageDetection(results);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Return the Linux uid assigned to the process that sent you the current transaction that
          * is being processed. This is obtained from {@link Binder#getCallingUid()}.
          */
@@ -524,7 +707,8 @@ public abstract class RecognitionService extends Service {
     public static class SupportCallback {
         private final IRecognitionSupportCallback mCallback;
 
-        private SupportCallback(IRecognitionSupportCallback callback) {
+        private SupportCallback(
+                IRecognitionSupportCallback callback) {
             this.mCallback = callback;
         }
 
@@ -596,22 +780,32 @@ public abstract class RecognitionService extends Service {
 
         @Override
         public void checkRecognitionSupport(
-                Intent recognizerIntent, IRecognitionSupportCallback callback) {
+                Intent recognizerIntent,
+                @NonNull AttributionSource attributionSource,
+                IRecognitionSupportCallback callback) {
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
                 service.mHandler.sendMessage(
                         Message.obtain(service.mHandler, MSG_CHECK_RECOGNITION_SUPPORT,
-                                Pair.create(recognizerIntent, callback)));
+                                new CheckRecognitionSupportArgs(
+                                        recognizerIntent, callback, attributionSource)));
             }
         }
 
         @Override
-        public void triggerModelDownload(Intent recognizerIntent) {
+        public void triggerModelDownload(
+                Intent recognizerIntent,
+                @NonNull AttributionSource attributionSource,
+                IModelDownloadListener listener) {
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
                 service.mHandler.sendMessage(
                         Message.obtain(
-                                service.mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
+                                service.mHandler, MSG_TRIGGER_MODEL_DOWNLOAD,
+                                new ModelDownloadArgs(
+                                        recognizerIntent,
+                                        attributionSource,
+                                        listener)));
             }
         }
 

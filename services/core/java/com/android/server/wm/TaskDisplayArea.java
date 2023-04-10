@@ -49,6 +49,7 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -403,9 +404,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                     this /* child */, true /* includingParents */);
         }
 
-        child.updateTaskMovement(moveToTop, targetPosition);
-
-        mDisplayContent.layoutAndAssignWindowLayersIfNeeded();
+        child.updateTaskMovement(moveToTop, moveToBottom, targetPosition);
 
         // The insert position may be adjusted to non-top when there is always-on-top root task.
         // Since the original position is preferred to be top, the root task should have higher
@@ -435,7 +434,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
     }
 
-    void onLeafTaskMoved(Task t, boolean toTop) {
+    void onLeafTaskMoved(Task t, boolean toTop, boolean toBottom) {
+        if (toBottom) {
+            mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
+                    t.getTaskInfo());
+        }
+
         if (!toTop) {
             if (t.mTaskId == mLastLeafTaskToFrontId) {
                 mLastLeafTaskToFrontId = INVALID_TASK_ID;
@@ -1222,7 +1226,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         // Clear last paused activity if focused root task changed while sleeping, so that the
         // top activity of current focused task can be resumed.
-        if (mDisplayContent.isSleeping()) {
+        if (mDisplayContent.isSleeping() && currentFocusedTask != null) {
             currentFocusedTask.clearLastPausedActivity();
         }
 
@@ -1483,7 +1487,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     private boolean isLargeEnoughForMultiWindow() {
         return getConfiguration().smallestScreenWidthDp
-                >= mAtmService.mLargeScreenSmallestScreenWidthDp;
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
     }
 
     boolean isTopRootTask(Task rootTask) {
@@ -1879,7 +1883,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Only allow to specify orientation if this TDA is the last focused one on this logical
         // display that can request orientation request.
         return mDisplayContent.getOrientationRequestingTaskDisplayArea() == this
-                && !getIgnoreOrientationRequest(orientation);
+                && !shouldIgnoreOrientationRequest(orientation);
     }
 
     void clearPreferredTopFocusableRootTask() {

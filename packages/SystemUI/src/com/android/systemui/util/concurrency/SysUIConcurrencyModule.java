@@ -115,6 +115,17 @@ public abstract class SysUIConcurrencyModule {
     }
 
     /**
+     * Provide a Long running Executor.
+     */
+    @Provides
+    @SysUISingleton
+    @LongRunning
+    public static DelayableExecutor provideLongRunningDelayableExecutor(
+            @LongRunning Looper looper) {
+        return new ExecutorImpl(looper);
+    }
+
+    /**
      * Provide a Background-Thread Executor.
      */
     @Provides

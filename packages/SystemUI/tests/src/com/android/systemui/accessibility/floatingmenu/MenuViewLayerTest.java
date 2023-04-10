@@ -22,7 +22,6 @@ import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 
-import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.systemui.accessibility.floatingmenu.MenuViewLayer.LayerIndex;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -54,6 +53,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,6 +100,9 @@ public class MenuViewLayerTest extends SysuiTestCase {
     private IAccessibilityFloatingMenu mFloatingMenu;
 
     @Mock
+    private SecureSettings mSecureSettings;
+
+    @Mock
     private WindowManager mStubWindowManager;
 
     @Mock
@@ -114,7 +117,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         doReturn(mWindowMetrics).when(mStubWindowManager).getCurrentWindowMetrics();
 
         mMenuViewLayer = new MenuViewLayer(mContext, mStubWindowManager, mStubAccessibilityManager,
-                mFloatingMenu);
+                mFloatingMenu, mSecureSettings);
         mMenuView = (MenuView) mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
         mMenuAnimationController = mMenuView.getMenuAnimationController();
 
@@ -162,51 +165,44 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
-    public void tiggerDismissMenuAction_hideFloatingMenu() {
+    public void triggerDismissMenuAction_hideFloatingMenu() {
         mMenuViewLayer.mDismissMenuAction.run();
 
         verify(mFloatingMenu).hide();
     }
 
     @Test
-    public void tiggerDismissMenuAction_matchA11yButtonTargetsResult() {
-        Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                MAGNIFICATION_COMPONENT_NAME.flattenToString(), UserHandle.USER_CURRENT);
-
+    public void triggerDismissMenuAction_matchA11yButtonTargetsResult() {
         mMenuViewLayer.mDismissMenuAction.run();
-        final String value =
-                Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, UserHandle.USER_CURRENT);
-
-        assertThat(value).isEqualTo("");
+        verify(mSecureSettings).putStringForUser(
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
+                UserHandle.USER_CURRENT);
     }
 
     @Test
-    public void tiggerDismissMenuAction_matchEnabledA11yServicesResult() {
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
-        final ResolveInfo resolveInfo = new ResolveInfo();
-        final ServiceInfo serviceInfo = new ServiceInfo();
-        final ApplicationInfo applicationInfo = new ApplicationInfo();
-        resolveInfo.serviceInfo = serviceInfo;
-        serviceInfo.applicationInfo = applicationInfo;
-        applicationInfo.targetSdkVersion = Build.VERSION_CODES.R;
-        final AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
-        accessibilityServiceInfo.setResolveInfo(resolveInfo);
-        accessibilityServiceInfo.flags = AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
-        final List<AccessibilityServiceInfo> serviceInfoList = new ArrayList<>();
-        accessibilityServiceInfo.setComponentName(TEST_SELECT_TO_SPEAK_COMPONENT_NAME);
-        serviceInfoList.add(accessibilityServiceInfo);
-        when(mStubAccessibilityManager.getEnabledAccessibilityServiceList(
-                AccessibilityServiceInfo.FEEDBACK_ALL_MASK)).thenReturn(serviceInfoList);
+    public void triggerDismissMenuAction_matchEnabledA11yServicesResult() {
+        setupEnabledAccessibilityServiceList();
 
         mMenuViewLayer.mDismissMenuAction.run();
         final String value = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
 
         assertThat(value).isEqualTo("");
+    }
+
+    @Test
+    public void triggerDismissMenuAction_hasHardwareKeyShortcut_keepEnabledStatus() {
+        setupEnabledAccessibilityServiceList();
+        final List<String> stubShortcutTargets = new ArrayList<>();
+        stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
+        when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
+                AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY)).thenReturn(stubShortcutTargets);
+
+        mMenuViewLayer.mDismissMenuAction.run();
+        final String value = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+
+        assertThat(value).isEqualTo(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
     }
 
     @Test
@@ -242,6 +238,27 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
         assertThat(mMenuView.getTranslationX()).isEqualTo(0);
         assertThat(mMenuView.getTranslationY()).isEqualTo(menuTop);
+    }
+
+    private void setupEnabledAccessibilityServiceList() {
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
+
+        final ResolveInfo resolveInfo = new ResolveInfo();
+        final ServiceInfo serviceInfo = new ServiceInfo();
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        resolveInfo.serviceInfo = serviceInfo;
+        serviceInfo.applicationInfo = applicationInfo;
+        applicationInfo.targetSdkVersion = Build.VERSION_CODES.R;
+        final AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
+        accessibilityServiceInfo.setResolveInfo(resolveInfo);
+        accessibilityServiceInfo.flags = AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+        final List<AccessibilityServiceInfo> serviceInfoList = new ArrayList<>();
+        accessibilityServiceInfo.setComponentName(TEST_SELECT_TO_SPEAK_COMPONENT_NAME);
+        serviceInfoList.add(accessibilityServiceInfo);
+        when(mStubAccessibilityManager.getEnabledAccessibilityServiceList(
+                AccessibilityServiceInfo.FEEDBACK_ALL_MASK)).thenReturn(serviceInfoList);
     }
 
     private void dispatchShowingImeInsets() {

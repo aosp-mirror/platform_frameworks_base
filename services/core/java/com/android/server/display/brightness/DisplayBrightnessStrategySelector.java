@@ -28,6 +28,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
+import com.android.server.display.brightness.strategy.FollowerBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OverrideBrightnessStrategy;
 import com.android.server.display.brightness.strategy.ScreenOffBrightnessStrategy;
@@ -55,6 +56,8 @@ public class DisplayBrightnessStrategySelector {
     private final TemporaryBrightnessStrategy mTemporaryBrightnessStrategy;
     // The brightness strategy used to manage the brightness state when boost is requested
     private final BoostBrightnessStrategy mBoostBrightnessStrategy;
+    // The brightness strategy used for additional displays
+    private final FollowerBrightnessStrategy mFollowerBrightnessStrategy;
     // The brightness strategy used to manage the brightness state when the request is invalid.
     private final InvalidBrightnessStrategy mInvalidBrightnessStrategy;
 
@@ -76,6 +79,7 @@ public class DisplayBrightnessStrategySelector {
         mOverrideBrightnessStrategy = injector.getOverrideBrightnessStrategy();
         mTemporaryBrightnessStrategy = injector.getTemporaryBrightnessStrategy();
         mBoostBrightnessStrategy = injector.getBoostBrightnessStrategy();
+        mFollowerBrightnessStrategy = injector.getFollowerBrightnessStrategy(displayId);
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
@@ -93,10 +97,13 @@ public class DisplayBrightnessStrategySelector {
         DisplayBrightnessStrategy displayBrightnessStrategy = mInvalidBrightnessStrategy;
         if (targetDisplayState == Display.STATE_OFF) {
             displayBrightnessStrategy = mScreenOffBrightnessStrategy;
-        } else if (displayPowerRequest.boostScreenBrightness) {
-            displayBrightnessStrategy = mBoostBrightnessStrategy;
         } else if (shouldUseDozeBrightnessStrategy(displayPowerRequest)) {
             displayBrightnessStrategy = mDozeBrightnessStrategy;
+        } else if (BrightnessUtils.isValidBrightnessValue(
+                mFollowerBrightnessStrategy.getBrightnessToFollow())) {
+            displayBrightnessStrategy = mFollowerBrightnessStrategy;
+        } else if (displayPowerRequest.boostScreenBrightness) {
+            displayBrightnessStrategy = mBoostBrightnessStrategy;
         } else if (BrightnessUtils
                 .isValidBrightnessValue(displayPowerRequest.screenBrightnessOverride)) {
             displayBrightnessStrategy = mOverrideBrightnessStrategy;
@@ -117,6 +124,10 @@ public class DisplayBrightnessStrategySelector {
 
     public TemporaryBrightnessStrategy getTemporaryDisplayBrightnessStrategy() {
         return mTemporaryBrightnessStrategy;
+    }
+
+    public FollowerBrightnessStrategy getFollowerDisplayBrightnessStrategy() {
+        return mFollowerBrightnessStrategy;
     }
 
     /**
@@ -178,6 +189,10 @@ public class DisplayBrightnessStrategySelector {
 
         BoostBrightnessStrategy getBoostBrightnessStrategy() {
             return new BoostBrightnessStrategy();
+        }
+
+        FollowerBrightnessStrategy getFollowerBrightnessStrategy(int displayId) {
+            return new FollowerBrightnessStrategy(displayId);
         }
 
         InvalidBrightnessStrategy getInvalidBrightnessStrategy() {

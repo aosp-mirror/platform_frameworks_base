@@ -26,10 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"App installata."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vuoi installare questa app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vuoi aggiornare questa app?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vuoi aggiornare questa app da <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nGeneralmente l\'app riceve gli aggiornamenti da <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Se la aggiorni da un\'origine diversa, in futuro potresti ricevere gli aggiornamenti da qualsiasi origine sul telefono. La funzionalità dell\'app potrebbe cambiare."</string>
     <string name="install_failed" msgid="5777824004474125469">"App non installata."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"È stata bloccata l\'installazione del pacchetto."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"App non installata poiché il pacchetto è in conflitto con un pacchetto esistente."</string>
@@ -45,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Questo utente non può installare app sconosciute"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"L\'utente non è autorizzato a installare app"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Aggiorna comunque"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gestisci app"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Spazio esaurito"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Impossibile installare <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera dello spazio e riprova."</string>
@@ -72,6 +70,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Disinstallazione di <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Disinstallazione completata."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"App <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> disinstallata"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Clone di <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> eliminato"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Disinstallazione non riuscita."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Impossibile disinstallare <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Eliminazione del clone di <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> in corso…"</string>

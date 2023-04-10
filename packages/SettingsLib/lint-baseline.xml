@@ -3,915 +3,202 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 29): `android.telephony.ims.ImsMmTelManager#getRegistrationState`"
-        errorLine1="            imsMmTelManager.getRegistrationState(executors, stateCallback);"
-        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/deviceinfo/AbstractImsStatusPreferenceController.java"
-            line="116"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.hotspot2.PasspointConfiguration#getUniqueId`"
-        errorLine1="        mPasspointUniqueId = config.getUniqueId();"
-        errorLine2="                                    ~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="379"
-            column="37"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.hotspot2.PasspointConfiguration#getSubscriptionExpirationTimeMillis`"
-        errorLine1="        mSubscriptionExpirationTimeInMillis = config.getSubscriptionExpirationTimeMillis();"
-        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="382"
-            column="54"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.hotspot2.PasspointConfiguration#isOsuProvisioned`"
-        errorLine1="        if (config.isOsuProvisioned()) {"
-        errorLine2="                   ~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="383"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiConfiguration#getKey`"
-        errorLine1="        mPasspointUniqueId = config.getKey();"
-        errorLine2="                                    ~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="400"
-            column="37"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiManager#calculateSignalLevel`"
-        errorLine1="        int difference = wifiManager.calculateSignalLevel(other.mRssi)"
-        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="481"
-            column="38"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiManager#calculateSignalLevel`"
-        errorLine1="                - wifiManager.calculateSignalLevel(mRssi);"
-        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="482"
-            column="31"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiConfiguration#getKey`"
-        errorLine1="            return getKey(config.getKey());"
-        errorLine2="                                 ~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="707"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiConfiguration#getKey`"
-        errorLine1="            return (isPasspoint() &amp;&amp; config.getKey().equals(mConfig.getKey()));"
-        errorLine2="                                            ~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="796"
-            column="45"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiConfiguration#getKey`"
-        errorLine1="            return (isPasspoint() &amp;&amp; config.getKey().equals(mConfig.getKey()));"
-        errorLine2="                                                                    ~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="796"
-            column="69"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiManager#calculateSignalLevel`"
-        errorLine1="        return getWifiManager().calculateSignalLevel(mRssi);"
-        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="903"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.hotspot2.PasspointConfiguration#getUniqueId`"
-        errorLine1="            String uniqueId = passpointConfig.getUniqueId();"
-        errorLine2="                                              ~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="1988"
-            column="47"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiConfiguration#getKey`"
-        errorLine1="                if (TextUtils.equals(config.getKey(), uniqueId)) {"
-        errorLine2="                                            ~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/AccessPoint.java"
-            line="1992"
-            column="45"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.util.SparseArray#contains`"
-        errorLine1="        return mEntriesMap.contains(userId);"
-        errorLine2="                           ~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/applications/ApplicationsState.java"
-            line="1503"
-            column="28"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.bluetooth.BluetoothDevice#getAlias`"
-        errorLine1="                    + mDevice.getAlias() + &quot;, newProfileState &quot; + newProfileState);"
-        errorLine2="                              ~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.bluetooth.BluetoothDevice#setAlias`">
         <location
             file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java"
-            line="155"
-            column="31"/>
+            line="584"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 29): `android.bluetooth.BluetoothDevice#getAlias`"
-        errorLine1="        final String aliasName = mDevice.getAlias();"
-        errorLine2="                                         ~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.net.wifi.WifiInfo#getSubscriptionId`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java"
-            line="431"
-            column="42"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiStatusTracker.java"
+            line="248"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.bluetooth.BluetoothDevice#setAlias`"
-        errorLine1="            mDevice.setAlias(name);"
-        errorLine2="                    ~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.net.wifi.WifiInfo#getSubscriptionId`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java"
-            line="442"
-            column="21"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiStatusTracker.java"
+            line="278"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 29): `android.bluetooth.BluetoothDevice#getAlias`"
-        errorLine1="        return !TextUtils.isEmpty(mDevice.getAlias());"
-        errorLine2="                                          ~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java"
-            line="489"
-            column="43"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.bluetooth.BluetoothDevice#getAlias`"
-        errorLine1="            Log.d(TAG, &quot;updating profiles for &quot; + mDevice.getAlias());"
-        errorLine2="                                                          ~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java"
-            line="638"
-            column="59"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.bluetooth.BluetoothDevice#getAlias`"
-        errorLine1="        String name = device.getAlias();"
-        errorLine2="                             ~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDeviceManager.java"
-            line="171"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.net.wifi.WifiManager.SubsystemRestartTrackingCallback`"
-        errorLine1="            new SubsystemRestartTrackingCallback() {"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.net.wifi.WifiManager#registerSubsystemRestartTrackingCallback`">
         <location
             file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
-            line="62"
-            column="17"/>
+            line="201"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback`"
-        errorLine1="    private class MobileTelephonyCallback extends TelephonyCallback implements"
-        errorLine2="                                                  ~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.net.wifi.WifiManager#unregisterSubsystemRestartTrackingCallback`">
         <location
             file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
-            line="77"
-            column="51"/>
+            line="208"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.net.wifi.WifiManager#registerSubsystemRestartTrackingCallback`"
-        errorLine1="        mWifiManager.registerSubsystemRestartTrackingCallback(new HandlerExecutor(mHandler),"
-        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.os.UserManager#isUserForeground`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
-            line="197"
-            column="22"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/enterprise/ManagedDeviceActionDisabledByAdminController.java"
+            line="78"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.net.wifi.WifiManager#unregisterSubsystemRestartTrackingCallback`"
-        errorLine1="        mWifiManager.unregisterSubsystemRestartTrackingCallback("
-        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
-            line="202"
-            column="22"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.telephony.TelephonyManager#registerTelephonyCallback`"
-        errorLine1="        mTelephonyManager.registerTelephonyCallback(new HandlerExecutor(mHandler),"
-        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
-            line="207"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.telephony.TelephonyManager#unregisterTelephonyCallback`"
-        errorLine1="        mTelephonyManager.unregisterTelephonyCallback(mTelephonyCallback);"
-        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
-            line="212"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.telephony.TelephonyManager#isDataCapable`"
-        errorLine1="        return getTelephonyManager().isDataCapable()"
-        errorLine2="                                     ~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/net/DataUsageController.java"
-            line="236"
-            column="38"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.telephony.TelephonyManager#getSubscriptionId`"
-        errorLine1="        final int mobileDefaultSubId = telephonyManager.getSubscriptionId();"
-        errorLine2="                                                        ~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/net/DataUsageUtils.java"
-            line="41"
-            column="57"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getName`"
-        errorLine1="        return mRouteInfo.getName().toString();"
-        errorLine2="                          ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaDevice.java"
-            line="51"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getClientPackageName`"
-        errorLine1="        return mRouteInfo.getClientPackageName() != null"
-        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaDevice.java"
-            line="56"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getFeatures`"
-        errorLine1="        final List&lt;String> features = mRouteInfo.getFeatures();"
-        errorLine2="                                                 ~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaDevice.java"
-            line="93"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getId`"
-        errorLine1="        if (info != null &amp;&amp; info.getSelectableRoutes().contains(device.mRouteInfo.getId())) {"
-        errorLine2="                                                                                  ~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="131"
-            column="83"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getSelectableRoutes`"
-        errorLine1="        if (info != null &amp;&amp; info.getSelectableRoutes().contains(device.mRouteInfo.getId())) {"
-        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="131"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getId`"
-        errorLine1="        if (info != null &amp;&amp; info.getSelectedRoutes().contains(device.mRouteInfo.getId())) {"
-        errorLine2="                                                                                ~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="162"
-            column="81"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getSelectedRoutes`"
-        errorLine1="        if (info != null &amp;&amp; info.getSelectedRoutes().contains(device.mRouteInfo.getId())) {"
-        errorLine2="                                 ~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="162"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getName`"
-        errorLine1="                Log.d(TAG, route.getName() + &quot; is deselectable for &quot; + mPackageName);"
-        errorLine2="                                 ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="238"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getVolumeMax`"
-        errorLine1="            return info.getVolumeMax();"
-        errorLine2="                        ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="320"
-            column="25"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getVolume`"
-        errorLine1="            return info.getVolume();"
-        errorLine2="                        ~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="341"
-            column="25"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getName`"
-        errorLine1="            return info.getName();"
-        errorLine2="                        ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="357"
-            column="25"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getName`"
-        errorLine1="                Log.d(TAG, &quot;buildAllRoutes() route : &quot; + route.getName() + &quot;, volume : &quot;"
-        errorLine2="                                                               ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="408"
-            column="64"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getVolume`"
-        errorLine1="                        + route.getVolume() + &quot;, type : &quot; + route.getType());"
-        errorLine2="                                ~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="409"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#isSystemRoute`"
-        errorLine1="            if (route.isSystemRoute()) {"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="411"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getName`"
-        errorLine1="                Log.d(TAG, &quot;buildAvailableRoutes() route : &quot; + route.getName() + &quot;, volume : &quot;"
-        errorLine2="                                                                     ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="424"
-            column="70"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getVolume`"
-        errorLine1="                        + route.getVolume() + &quot;, type : &quot; + route.getType());"
-        errorLine2="                                ~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="425"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getId`"
-        errorLine1="                        &amp;&amp; getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())"
-        errorLine2="                                                                                      ~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="444"
-            column="87"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getSelectedRoutes`"
-        errorLine1="                        &amp;&amp; getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())"
-        errorLine2="                                                   ~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="444"
-            column="52"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getName`"
-        errorLine1="                Log.d(TAG, &quot;onTransferred() oldSession : &quot; + oldSession.getName()"
-        errorLine2="                                                                        ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="509"
-            column="73"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getName`"
-        errorLine1="                        + &quot;, newSession : &quot; + newSession.getName());"
-        errorLine2="                                                         ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/InfoMediaManager.java"
-            line="510"
-            column="58"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.RoutingSessionInfo#getId`"
-        errorLine1="            if (TextUtils.equals(sessionId, info.getId())) {"
-        errorLine2="                                                 ~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/LocalMediaManager.java"
-            line="342"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getVolumeMax`"
-        errorLine1="        return mRouteInfo.getVolumeMax();"
-        errorLine2="                          ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/MediaDevice.java"
-            line="221"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getVolume`"
-        errorLine1="        return mRouteInfo.getVolume();"
-        errorLine2="                          ~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/MediaDevice.java"
-            line="234"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getClientPackageName`"
-        errorLine1="        return mRouteInfo.getClientPackageName();"
-        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/MediaDevice.java"
-            line="247"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getFeatures`"
-        errorLine1="        return mRouteInfo.getFeatures();"
-        errorLine2="                          ~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/MediaDevice.java"
-            line="387"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getId`"
-        errorLine1="        return route.getId();"
-        errorLine2="                     ~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/MediaDeviceUtils.java"
-            line="57"
-            column="22"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.telephony.TelephonyDisplayInfo#getOverrideNetworkType`"
-        errorLine1="        if (telephonyDisplayInfo.getOverrideNetworkType()"
-        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileMappings.java"
-            line="42"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.telephony.TelephonyDisplayInfo#getNetworkType`"
-        errorLine1="            return toIconKey(telephonyDisplayInfo.getNetworkType());"
-        errorLine2="                                                  ~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileMappings.java"
-            line="44"
-            column="51"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.telephony.TelephonyDisplayInfo#getOverrideNetworkType`"
-        errorLine1="            return toDisplayIconKey(telephonyDisplayInfo.getOverrideNetworkType());"
-        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileMappings.java"
-            line="46"
-            column="58"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.telephony.TelephonyManager#registerTelephonyCallback`"
-        errorLine1="            mPhone.registerTelephonyCallback(mReceiverHandler::post, mTelephonyCallback);"
-        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="80"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.telephony.TelephonyManager#unregisterTelephonyCallback`"
-        errorLine1="            mPhone.unregisterTelephonyCallback(mTelephonyCallback);"
-        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="82"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback`"
-        errorLine1="    public class MobileTelephonyCallback extends TelephonyCallback implements"
-        errorLine2="                                                 ~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="109"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback.ServiceStateListener`"
-        errorLine1="            TelephonyCallback.ServiceStateListener,"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="110"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback.SignalStrengthsListener`"
-        errorLine1="            TelephonyCallback.SignalStrengthsListener,"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="111"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback.DataConnectionStateListener`"
-        errorLine1="            TelephonyCallback.DataConnectionStateListener,"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="112"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback.DataActivityListener`"
-        errorLine1="            TelephonyCallback.DataActivityListener,"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="113"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback.CarrierNetworkListener`"
-        errorLine1="            TelephonyCallback.CarrierNetworkListener,"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="114"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener`"
-        errorLine1="            TelephonyCallback.ActiveDataSubscriptionIdListener,"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="115"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Class requires API level 31 (current min is 29): `android.telephony.TelephonyCallback.DisplayInfoListener`"
-        errorLine1="            TelephonyCallback.DisplayInfoListener{"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="116"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.telephony.SubscriptionManager#getActiveDataSubscriptionId`"
-        errorLine1="            return SubscriptionManager.getActiveDataSubscriptionId();"
-        errorLine2="                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
-            line="207"
-            column="40"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 29): `com.google.android.collect.Lists#newArrayList`"
-        errorLine1="    private ArrayList&lt;NetworkPolicy> mPolicies = Lists.newArrayList();"
-        errorLine2="                                                       ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/NetworkPolicyEditor.java"
-            line="54"
-            column="56"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.media.MediaRoute2Info#getName`"
-        errorLine1="                name = mRouteInfo.getName();"
-        errorLine2="                                  ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/media/PhoneMediaDevice.java"
-            line="71"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.app.admin.DevicePolicyManager#isOrganizationOwnedDeviceWithManagedProfile`"
-        errorLine1="            if (profileAdmin != null &amp;&amp; dpm.isOrganizationOwnedDeviceWithManagedProfile()) {"
-        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/RestrictedLockUtilsInternal.java"
-            line="280"
-            column="45"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.content.Context#bindServiceAsUser`"
-        errorLine1="        mContext.bindServiceAsUser(mServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE,"
-        errorLine2="                 ~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/suggestions/SuggestionController.java"
-            line="83"
-            column="18"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `new android.net.NetworkInfo`"
-        errorLine1="            mNetworkInfo = new NetworkInfo("
-        errorLine2="                           ~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/TestAccessPointBuilder.java"
-            line="110"
-            column="28"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiManager#getMaxSignalLevel`"
-        errorLine1="        int maxSignalLevel = wifiManager.getMaxSignalLevel();"
-        errorLine2="                                         ~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/TestAccessPointBuilder.java"
-            line="131"
-            column="42"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.telephony.TelephonyManager#isDataCapable`"
-        errorLine1="        return !context.getSystemService(TelephonyManager.class).isDataCapable();"
-        errorLine2="                                                                 ~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.telephony.TelephonyManager#isDataCapable`">
         <location
             file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/Utils.java"
-            line="447"
-            column="66"/>
+            line="498"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.NetworkRequest.Builder#clearCapabilities`"
-        errorLine1="            .clearCapabilities()"
-        errorLine2="             ~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.telephony.TelephonyManager#isDataCapable`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiStatusTracker.java"
-            line="72"
-            column="14"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/net/DataUsageController.java"
+            line="225"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.net.wifi.WifiInfo#getSubscriptionId`"
-        errorLine1="                    subId = mWifiInfo.getSubscriptionId();"
-        errorLine2="                                      ~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.telephony.TelephonyManager#registerTelephonyCallback`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiStatusTracker.java"
-            line="231"
-            column="39"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
+            line="215"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.net.wifi.WifiInfo#getSubscriptionId`"
-        errorLine1="                subId = mWifiInfo.getSubscriptionId();"
-        errorLine2="                                  ~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.telephony.TelephonyManager#registerTelephonyCallback`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiStatusTracker.java"
-            line="263"
-            column="35"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="86"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiManager#calculateSignalLevel`"
-        errorLine1="        level = mWifiManager.calculateSignalLevel(rssi);"
-        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.telephony.TelephonyManager#unregisterTelephonyCallback`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiStatusTracker.java"
-            line="279"
-            column="30"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
+            line="222"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.NetworkRequest.Builder#clearCapabilities`"
-        errorLine1="                .clearCapabilities()"
-        errorLine2="                 ~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 30): `android.telephony.TelephonyManager#unregisterTelephonyCallback`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiTracker.java"
-            line="243"
-            column="18"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="88"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 29): `android.net.wifi.WifiInfo#getWifiStandard`"
-        errorLine1="            visibility.append(&quot; standard = &quot;).append(info.getWifiStandard());"
-        errorLine2="                                                          ~~~~~~~~~~~~~~~">
+        message="Call requires API level 34 (current min is 30): `android.os.UserManager#isAdminUser`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/wifi/WifiUtils.java"
-            line="104"
-            column="59"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/development/AbstractEnableAdbPreferenceController.java"
+            line="66"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level S (current min is 29): `android.os.UserManager#isUserForeground`"
-        errorLine1="                .getSystemService(UserManager.class).isUserForeground();"
-        errorLine2="                                                     ~~~~~~~~~~~~~~~~">
+        message="Call requires API level 34 (current min is 30): `android.os.UserManager#isAdminUser`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/enterprise/ManagedDeviceActionDisabledByAdminController.java"
-            line="120"
-            column="54"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/development/DevelopmentSettingsEnabler.java"
+            line="49"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 31 (current min is 29): `android.os.UserManager#isUserForeground`"
-        errorLine1="                .getSystemService(UserManager.class).isUserForeground();"
-        errorLine2="                                                     ~~~~~~~~~~~~~~~~">
+        message="Call requires API level 34 (current min is 30): `android.os.UserManager#isAdminUser`">
         <location
-            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/enterprise/ManagedDeviceActionDisabledByAdminController.java"
-            line="120"
-            column="54"/>
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/deviceinfo/AbstractSimStatusImeiInfoPreferenceController.java"
+            line="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.net.wifi.WifiManager.SubsystemRestartTrackingCallback`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
+            line="64"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="125"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.CarrierNetworkListener`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="124"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.DataActivityListener`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="123"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.DataConnectionStateListener`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="122"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.DisplayInfoListener`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="126"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.ServiceStateListener`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="120"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.SignalStrengthsListener`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="121"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/connectivity/ConnectivitySubsystemsRecoveryManager.java"
+            line="79"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback`">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/mobile/MobileStatusTracker.java"
+            line="119"/>
     </issue>
 
 </issues>

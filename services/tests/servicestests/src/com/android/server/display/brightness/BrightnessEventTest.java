@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class BrightnessEventTest {
+    private static final String DISPLAY_BRIGHTNESS_STRATEGY_NAME = "strategy_name";
     private BrightnessEvent mBrightnessEvent;
 
     @Before
@@ -53,6 +54,7 @@ public final class BrightnessEventTest {
         mBrightnessEvent.setFlags(0);
         mBrightnessEvent.setAdjustmentFlags(0);
         mBrightnessEvent.setAutomaticBrightnessEnabled(true);
+        mBrightnessEvent.setDisplayBrightnessStrategyName(DISPLAY_BRIGHTNESS_STRATEGY_NAME);
     }
 
     @Test
@@ -70,7 +72,8 @@ public final class BrightnessEventTest {
                 "BrightnessEvent: disp=1, physDisp=test, brt=0.6, initBrt=25.0, rcmdBrt=0.6,"
                 + " preBrt=NaN, lux=100.0, preLux=150.0, hbmMax=0.62, hbmMode=off, rbcStrength=-1,"
                 + " thrmMax=0.65, powerFactor=0.2, wasShortTermModelActive=true, flags=,"
-                + " reason=doze [ low_pwr ], autoBrightness=true";
+                + " reason=doze [ low_pwr ], autoBrightness=true, strategy="
+                        + DISPLAY_BRIGHTNESS_STRATEGY_NAME;
         assertEquals(expectedString, actualString);
     }
 

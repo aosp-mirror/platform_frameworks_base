@@ -45,10 +45,11 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -488,6 +489,62 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(mAtm.getLifecycleManager(), never())
                 .scheduleTransaction(any(), any(), isA(ActivityConfigurationChangeItem.class));
+    }
+
+    @Test
+    public void testDeskModeChange_doesNotRelaunch() throws RemoteException {
+        mWm.mSkipActivityRelaunchWhenDocking = true;
+
+        final ActivityRecord activity = createActivityWithTask();
+        // The activity will already be relaunching out of the gate, finish the relaunch so we can
+        // test properly.
+        activity.finishRelaunching();
+        // Clear out any calls to scheduleTransaction from launching the activity.
+        reset(mAtm.getLifecycleManager());
+
+        final Task task = activity.getTask();
+        activity.setState(RESUMED, "Testing");
+
+        // Send a desk UI mode config update.
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.uiMode |= UI_MODE_TYPE_DESK;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+        ensureActivityConfiguration(activity);
+
+        // The activity shouldn't start relaunching since it doesn't have any desk resources.
+        assertFalse(activity.isRelaunching());
+
+        // The configuration change is still sent to the activity, even if it doesn't relaunch.
+        final ActivityConfigurationChangeItem expected =
+                ActivityConfigurationChangeItem.obtain(newConfig);
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(
+                eq(activity.app.getThread()), eq(activity.token), eq(expected));
+    }
+
+    @Test
+    public void testDeskModeChange_relaunchesWithDeskResources() {
+        mWm.mSkipActivityRelaunchWhenDocking = true;
+
+        final ActivityRecord activity = createActivityWithTask();
+        // The activity will already be relaunching out of the gate, finish the relaunch so we can
+        // test properly.
+        activity.finishRelaunching();
+
+        // Activities with desk resources should get relaunched when a UI_MODE_TYPE_DESK change
+        // comes in.
+        doReturn(true).when(activity).hasDeskResources();
+
+        final Task task = activity.getTask();
+        activity.setState(RESUMED, "Testing");
+
+        // Send a desk UI mode config update.
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.uiMode |= UI_MODE_TYPE_DESK;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+        ensureActivityConfiguration(activity);
+
+        // The activity will relaunch since it has desk resources.
+        assertTrue(activity.isRelaunching());
     }
 
     @Test
@@ -1205,6 +1262,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                     any(ClientTransaction.class));
         } catch (RemoteException ignored) {
         }
+
+        assertNull(targetActivity.results);
     }
 
     @Test
@@ -2324,6 +2383,32 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testActivityServiceConnectionsHolder() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityServiceConnectionsHolder<Object> holder =
+                mAtm.mInternal.getServiceConnectionsHolder(activity.token);
+        assertNotNull(holder);
+        final Object connection = new Object();
+        holder.addConnection(connection);
+        assertTrue(holder.isActivityVisible());
+        final int[] count = new int[1];
+        final Consumer<Object> c = conn -> count[0]++;
+        holder.forEachConnection(c);
+        assertEquals(1, count[0]);
+
+        holder.removeConnection(connection);
+        holder.forEachConnection(c);
+        assertEquals(1, count[0]);
+
+        activity.setVisibleRequested(false);
+        activity.setState(STOPPED, "test");
+        assertFalse(holder.isActivityVisible());
+
+        activity.removeImmediately();
+        assertNull(mAtm.mInternal.getServiceConnectionsHolder(activity.token));
+    }
+
+    @Test
     public void testTransferLaunchCookieWhenFinishing() {
         final ActivityRecord activity1 = createActivityWithTask();
         final Binder launchCookie = new Binder();
@@ -2351,7 +2436,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setScreenOrientation(SCREEN_ORIENTATION_BEHIND)
                 .build();
         final int topOrientation = activityTop.getRequestedConfigurationOrientation();
-        assertEquals(SCREEN_ORIENTATION_PORTRAIT, topOrientation);
+        assertEquals(ORIENTATION_PORTRAIT, topOrientation);
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,
@@ -2871,7 +2956,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Make the top one invisible, and try transferring the starting window from the top to the
         // bottom one.
-        activityTop.setVisibility(false, false);
+        activityTop.setVisibility(false);
         activityBottom.transferStartingWindowFromHiddenAboveTokenIfNeeded();
         waitUntilHandlersIdle();
 
@@ -3177,18 +3262,18 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testImeInsetsFrozenFlag_resetWhenReportedToBeImeInputTarget() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
-        InsetsSource imeSource = new InsetsSource(ITYPE_IME, ime());
+        InsetsSource imeSource = new InsetsSource(ID_IME, ime());
         app.mAboveInsetsState.addSource(imeSource);
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.updateImeInputAndControlTarget(app);
 
         InsetsState state = app.getInsetsState();
-        assertFalse(state.getSource(imeSource.getId()).isVisible());
-        assertTrue(state.getSource(imeSource.getId()).getFrame().isEmpty());
+        assertFalse(state.getOrCreateSource(imeSource.getId(), ime()).isVisible());
+        assertTrue(state.getOrCreateSource(imeSource.getId(), ime()).getFrame().isEmpty());
 
         // Simulate app is closing and expect IME insets is frozen.
         mDisplayContent.mOpeningApps.clear();
@@ -3211,8 +3296,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);
         state = app.getInsetsState();
-        assertTrue(state.getSource(ITYPE_IME).isVisible());
-        assertEquals(state.getSource(ITYPE_IME).getFrame(), imeSource.getFrame());
+        assertTrue(state.peekSource(ID_IME).isVisible());
+        assertEquals(state.peekSource(ID_IME).getFrame(), imeSource.getFrame());
     }
 
     @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
@@ -3222,7 +3307,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
         final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
 
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
@@ -3237,7 +3322,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.getInsetsStateController().onInsetsModified(app1);
 
         // Verify app1's IME insets is visible and app2's IME insets frozen flag set.
-        assertTrue(app1.getInsetsState().peekSource(ITYPE_IME).isVisible());
+        assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
         assertTrue(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Simulate switching to app2 to make it visible to be IME targets.
@@ -3256,7 +3341,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
                 insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
                 anyBoolean());
-        assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
     }
 
     @Test
@@ -3288,7 +3373,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         makeWindowVisibleAndDrawn(app1, app2);
 
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
-        controller.getSourceProvider(ITYPE_IME).setWindowContainer(
+        controller.getImeSourceProvider().setWindowContainer(
                 ime, null, null);
         ime.getControllableInsetProvider().setServerVisible(true);
 
@@ -3306,8 +3391,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         controller.onInsetsModified(app1);
 
         // Expect all activities in split-screen will get IME insets visible state
-        assertTrue(app1.getInsetsState().peekSource(ITYPE_IME).isVisible());
-        assertTrue(app2.getInsetsState().peekSource(ITYPE_IME).isVisible());
+        assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
+        assertTrue(app2.getInsetsState().peekSource(ID_IME).isVisible());
     }
 
     @Test

@@ -25,6 +25,8 @@ import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROA
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 import static com.android.server.am.BroadcastRecord.calculateBlockedUntilTerminalCount;
+import static com.android.server.am.BroadcastRecord.calculateDeferUntilActive;
+import static com.android.server.am.BroadcastRecord.calculateUrgent;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -38,6 +40,7 @@ import static org.mockito.Mockito.doReturn;
 import android.app.ActivityManagerInternal;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -55,6 +58,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.am.BroadcastDispatcher.DeferredBootCompletedBroadcastPerUser;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -85,6 +89,15 @@ public class BroadcastRecordTest {
     private static final String PACKAGE4 = "pkg4";
     private static final String[] PACKAGE_LIST = new String[] {PACKAGE1, PACKAGE2, PACKAGE3,
             PACKAGE4};
+
+    private static final int SYSTEM_UID = android.os.Process.SYSTEM_UID;
+    private static final int APP_UID = android.os.Process.FIRST_APPLICATION_UID;
+
+    private static final BroadcastOptions OPT_DEFAULT = BroadcastOptions.makeBasic();
+    private static final BroadcastOptions OPT_NONE = BroadcastOptions.makeBasic()
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_NONE);
+    private static final BroadcastOptions OPT_UNTIL_ACTIVE = BroadcastOptions.makeBasic()
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
 
     @Mock ActivityManagerInternal mActivityManagerInternal;
     @Mock BroadcastQueue mQueue;
@@ -210,6 +223,75 @@ public class BroadcastRecordTest {
         assertTrue(isReceiverEquals(info, info));
         assertTrue(isReceiverEquals(info, createResolveInfo(PACKAGE1, getAppId(1))));
         assertFalse(isReceiverEquals(info, createResolveInfo(PACKAGE2, getAppId(2))));
+    }
+
+    @Test
+    public void testCalculateUrgent() {
+        final Intent intent = new Intent();
+        final Intent intentForeground = new Intent()
+                .setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+        assertFalse(calculateUrgent(intent, null));
+        assertTrue(calculateUrgent(intentForeground, null));
+
+        {
+            final BroadcastOptions opts = BroadcastOptions.makeBasic();
+            assertFalse(calculateUrgent(intent, opts));
+        }
+        {
+            final BroadcastOptions opts = BroadcastOptions.makeBasic();
+            opts.setInteractive(true);
+            assertTrue(calculateUrgent(intent, opts));
+        }
+        {
+            final BroadcastOptions opts = BroadcastOptions.makeBasic();
+            opts.setAlarmBroadcast(true);
+            assertTrue(calculateUrgent(intent, opts));
+        }
+    }
+
+    @Test
+    public void testCalculateDeferUntilActive_App() {
+        // Verify non-urgent behavior
+        assertFalse(calculateDeferUntilActive(APP_UID, null, null, false, false));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_DEFAULT, null, false, false));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_NONE, null, false, false));
+        assertTrue(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, null, false, false));
+
+        // Verify urgent behavior
+        assertFalse(calculateDeferUntilActive(APP_UID, null, null, false, true));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_DEFAULT, null, false, true));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_NONE, null, false, true));
+        assertTrue(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, null, false, true));
+    }
+
+    @Test
+    public void testCalculateDeferUntilActive_System() {
+        BroadcastRecord.CORE_DEFER_UNTIL_ACTIVE = true;
+
+        // Verify non-urgent behavior
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, null, null, false, false));
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, OPT_DEFAULT, null, false, false));
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, OPT_NONE, null, false, false));
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, OPT_UNTIL_ACTIVE, null, false, false));
+
+        // Verify urgent behavior
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, null, null, false, true));
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, OPT_DEFAULT, null, false, true));
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, OPT_NONE, null, false, true));
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, OPT_UNTIL_ACTIVE, null, false, true));
+    }
+
+    @Test
+    public void testCalculateDeferUntilActive_Overrides() {
+        final IIntentReceiver resultTo = new IIntentReceiver.Default();
+
+        // Ordered broadcasts never deferred; requested option is ignored
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, null, true, false));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, resultTo, true, false));
+
+        // Unordered with result is always deferred; requested option is ignored
+        assertTrue(calculateDeferUntilActive(APP_UID, OPT_NONE, resultTo, false, false));
     }
 
     @Test

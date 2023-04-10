@@ -3511,7 +3511,15 @@ public class TelephonyManager {
     public static final String ACTION_SECRET_CODE = "android.telephony.action.SECRET_CODE";
 
     /**
-     * @return true if a ICC card is present
+     * This API is used to check if there is an ICC card present in the device.
+     *
+     * An ICC card is a smart card that contains a subscriber identity module (SIM) and is used
+     * to identify and authenticate users to a mobile network.
+     *
+     * Note: In case of embedded SIM there is an ICC card always present irrespective
+     * of whether an active SIM profile is present or not so this API would always return true.
+     *
+     * @return true if a ICC card is present.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public boolean hasIccCard() {
@@ -6000,6 +6008,7 @@ public class TelephonyManager {
      * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
      * @return the IMPI, or null if not present or not loaded
      * @hide
+     * @deprecated use {@link #getImsPrivateUserIdentity()}
      */
     @UnsupportedAppUsage
     public String getIsimImpi() {
@@ -6014,6 +6023,35 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             return null;
+        }
+    }
+
+    /**
+     * Returns the IMS private user identity (IMPI) of the subscription that was loaded from the
+     * ISIM records {@link #APPTYPE_ISIM}. This value is fetched from the Elementary file EF_IMPI.
+     * The contents of the file is a <b>Ip Multimedia Service Private User Identity</b> of the user
+     * as defined in the section 4.2.2 of 3GPP TS 131 103.
+     *
+     * @return IMPI (IMS private user identity) of type string.
+     * @throws IllegalStateException in case the ISIM has’t been loaded
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    public String getImsPrivateUserIdentity() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                Rlog.e(TAG, "getImsPrivateUserIdentity(): IPhoneSubInfo instance is NULL");
+                throw new RuntimeException("IMPI error: Subscriber Info is null");
+            }
+            return info.getImsPrivateUserIdentity(getSubId(), getOpPackageName(),
+                    getAttributionTag());
+        } catch (RemoteException | NullPointerException | IllegalArgumentException ex) {
+            Rlog.e(TAG, "getImsPrivateUserIdentity() Exception = " + ex);
+            throw new RuntimeException(ex.getMessage());
         }
     }
 
@@ -6050,6 +6088,7 @@ public class TelephonyManager {
      * @return an array of IMPU strings, with one IMPU per string, or null if
      *      not present or not loaded
      * @hide
+     * @deprecated use {@link #getImsPublicUserIdentities()}
      */
     @UnsupportedAppUsage
     @Nullable
@@ -6067,6 +6106,39 @@ public class TelephonyManager {
             // This could happen before phone restarts due to crashing
             return null;
         }
+    }
+
+    /**
+     * Returns the IMS public user identities (IMPU) of the subscription that was loaded from the
+     * ISIM records {@link #APPTYPE_ISIM}. This value is fetched from the Elementary file EF_IMPU.
+     * The contents of the file are <b>Ip Multimedia Service Public User Identities</b> of the user
+     * as defined in the section 4.2.4 of 3GPP TS 131 103. It contains one or more records.
+     *
+     * @return List of public user identities of type android.net.Uri or empty list  if
+     *         EF_IMPU is not available.
+     * @throws IllegalStateException in case the ISIM hasn’t been loaded
+     * @throws SecurityException if the caller does not have the required permission/privilege
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_PHONE_NUMBERS,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    public List<Uri> getImsPublicUserIdentities() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                throw new RuntimeException("IMPU error: Subscriber Info is null");
+            }
+            return info.getImsPublicUserIdentities(getSubId(), getOpPackageName(),
+                    getAttributionTag());
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            Rlog.e(TAG, "getImsPublicUserIdentities Exception = " + ex);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getImsPublicUserIdentities Exception = " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return Collections.EMPTY_LIST;
     }
 
     /**
@@ -9432,7 +9504,6 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
             ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
-            ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -9471,15 +9542,6 @@ public class TelephonyManager {
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
 
     /**
-     * To indicate allowed network type change is requested by an update to the
-     * {@link android.os.UserManager.DISALLOW_CELLULAR_2G} user restriction.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS = 4;
-
-    /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
      * network change.
      * <p>Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
@@ -9503,7 +9565,6 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE} permissions.
      * <ol>
      *     <li>{@code TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}</li>
-     *     <li>{@code TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS}</li>
      * </ol>
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -9578,7 +9639,6 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
-            case ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS:
                 return true;
         }
         return false;
@@ -14842,7 +14902,10 @@ public class TelephonyManager {
 
     /**
      * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
-     * the country code in ISO-3166-1 alpha-2 format.
+     * the country code in ISO-3166-1 alpha-2 format. This is the same country code returned by
+     * {@link #getNetworkCountryIso()}. This might be an empty string when the country code is not
+     * available.
+     *
      * <p class="note">
      * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
      */
@@ -14851,11 +14914,11 @@ public class TelephonyManager {
 
     /**
      * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
-     * last known the country code in ISO-3166-1 alpha-2 format.
+     * last known the country code in ISO-3166-1 alpha-2 format. This might be an empty string when
+     * the country code was never available. The last known country code persists across reboot.
+     *
      * <p class="note">
      * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
-     *
-     * @hide
      */
     public static final String EXTRA_LAST_KNOWN_NETWORK_COUNTRY =
             "android.telephony.extra.LAST_KNOWN_NETWORK_COUNTRY";
@@ -15077,14 +15140,6 @@ public class TelephonyManager {
     @TestApi
     public static final int HAL_SERVICE_IMS = 7;
 
-    /**
-     * HAL service type that supports the HAL APIs implementation of IRadioSatellite
-     * {@link RadioSatelliteProxy}
-     * @hide
-     */
-    @TestApi
-    public static final int HAL_SERVICE_SATELLITE = 8;
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"HAL_SERVICE_"},
@@ -15097,7 +15152,6 @@ public class TelephonyManager {
                     HAL_SERVICE_SIM,
                     HAL_SERVICE_VOICE,
                     HAL_SERVICE_IMS,
-                    HAL_SERVICE_SATELLITE
             })
     public @interface HalService {}
 
@@ -16355,6 +16409,7 @@ public class TelephonyManager {
 
     /**
      * Setup sIPhoneSubInfo for testing.
+     *
      * @hide
      */
     @VisibleForTesting
@@ -16365,9 +16420,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Whether device can connect to 5G network when two SIMs are active.
+     * Setup sISub for testing.
+     *
      * @hide
-     * TODO b/153669716: remove or make system API.
+     */
+    @VisibleForTesting
+    public static void setupISubForTest(ISub iSub) {
+        synchronized (sCacheLock) {
+            sISub = iSub;
+        }
+    }
+
+    /**
+     * Whether device can connect to 5G network when two SIMs are active.
+     *
+     * @hide TODO b/153669716: remove or make system API.
      */
     public boolean canConnectTo5GInDsdsMode() {
         ITelephony telephony = getITelephony();
@@ -17847,6 +17914,97 @@ public class TelephonyManager {
     }
 
     /**
+     * Captures parameters for collection of emergency
+     * call diagnostic data
+     * @hide
+     */
+    public static class EmergencyCallDiagnosticParams {
+
+       private boolean mCollectTelecomDumpSys;
+       private boolean mCollectTelephonyDumpsys;
+       private boolean mCollectLogcat;
+
+        //logcat lines with this time or greater are collected
+        //how much is collected is dependent on internal implementation.
+        //Time represented as milliseconds since January 1, 1970 UTC
+        private long mLogcatStartTimeMillis;
+
+
+        public boolean isTelecomDumpSysCollectionEnabled() {
+            return mCollectTelecomDumpSys;
+        }
+
+        public void setTelecomDumpSysCollection(boolean collectTelecomDumpSys) {
+            mCollectTelecomDumpSys = collectTelecomDumpSys;
+        }
+
+        public boolean isTelephonyDumpSysCollectionEnabled() {
+            return mCollectTelephonyDumpsys;
+        }
+
+        public void setTelephonyDumpSysCollection(boolean collectTelephonyDumpsys) {
+            mCollectTelephonyDumpsys = collectTelephonyDumpsys;
+        }
+
+        public boolean isLogcatCollectionEnabled() {
+            return mCollectLogcat;
+        }
+
+        public long getLogcatStartTime()
+        {
+            return mLogcatStartTimeMillis;
+        }
+
+        public void setLogcatCollection(boolean collectLogcat, long startTimeMillis) {
+            mCollectLogcat = collectLogcat;
+            if(mCollectLogcat)
+            {
+                mLogcatStartTimeMillis = startTimeMillis;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "EmergencyCallDiagnosticParams{" +
+                    "mCollectTelecomDumpSys=" + mCollectTelecomDumpSys +
+                    ", mCollectTelephonyDumpsys=" + mCollectTelephonyDumpsys +
+                    ", mCollectLogcat=" + mCollectLogcat +
+                    ", mLogcatStartTimeMillis=" + mLogcatStartTimeMillis +
+                    '}';
+        }
+    }
+
+    /**
+     * Request telephony to persist state for debugging emergency call failures.
+     *
+     * @param dropboxTag Tag to use when persisting data to dropbox service.
+     *
+     * @see params Parameters controlling what is collected
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void persistEmergencyCallDiagnosticData(@NonNull String dropboxTag,
+            @NonNull EmergencyCallDiagnosticParams params) {
+        try {
+            ITelephony telephony = ITelephony.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .get());
+            if (telephony != null) {
+                telephony.persistEmergencyCallDiagnosticData(dropboxTag,
+                        params.isLogcatCollectionEnabled(),
+                        params.getLogcatStartTime(),
+                        params.isTelecomDumpSysCollectionEnabled(),
+                        params.isTelephonyDumpSysCollectionEnabled());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while persistEmergencyCallDiagnosticData: " + e);
+        }
+    }
+
+    /**
      * Set the UE's ability to accept/reject null ciphered and null integrity-protected connections.
      *
      * The modem is required to ignore this in case of an emergency call.
@@ -17968,6 +18126,87 @@ public class TelephonyManager {
      */
     @SystemApi
     public static final int CELL_BROADCAST_RESULT_FAIL_ACTIVATION = 3;
+
+    /**
+     * Callback mode type
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"EMERGENCY_CALLBACK_MODE_"}, value = {
+            EMERGENCY_CALLBACK_MODE_CALL,
+            EMERGENCY_CALLBACK_MODE_SMS})
+    public @interface EmergencyCallbackModeType {}
+
+    /**
+     * The callback mode is due to emergency call.
+     * @hide
+     */
+    public static final int EMERGENCY_CALLBACK_MODE_CALL = 1;
+
+    /**
+     * The callback mode is due to emergency SMS.
+     * @hide
+     */
+    public static final int EMERGENCY_CALLBACK_MODE_SMS = 2;
+
+    /**
+     * The reason for changing callback mode.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"STOP_REASON_"},
+            value = {
+                    STOP_REASON_UNKNOWN,
+                    STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED,
+                    STOP_REASON_NORMAL_SMS_SENT,
+                    STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED,
+                    STOP_REASON_EMERGENCY_SMS_SENT,
+                    STOP_REASON_TIMER_EXPIRED,
+                    STOP_REASON_USER_ACTION,
+            })
+    public @interface EmergencyCallbackModeStopReason {}
+
+    /**
+     * unknown reason.
+     * @hide
+     */
+    public static final int STOP_REASON_UNKNOWN = 0;
+
+    /**
+     * The call back mode is exited due to a new normal call is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED = 1;
+
+    /**
+     * The call back mode is exited due to a new normal SMS is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_NORMAL_SMS_SENT = 2;
+
+    /**
+     * The call back mode is exited due to a new emergency call is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED = 3;
+
+    /**
+     * The call back mode is exited due to a new emergency SMS is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_EMERGENCY_SMS_SENT = 4;
+
+    /**
+     * The call back mode is exited due to timer expiry.
+     * @hide
+     */
+    public static final int STOP_REASON_TIMER_EXPIRED = 5;
+
+    /**
+     * The call back mode is exited due to user action.
+     * @hide
+     */
+    public static final int STOP_REASON_USER_ACTION = 6;
 
     /**
      * Set reception of cell broadcast messages with the list of the given ranges

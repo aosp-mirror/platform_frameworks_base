@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -182,6 +183,7 @@ public class AccessibilityManagerServiceTest {
 
         mA11yms = new AccessibilityManagerService(
                 mTestableContext,
+                mHandler,
                 mMockPackageManager,
                 mMockSecurityPolicy,
                 mMockSystemActionPerformer,
@@ -282,19 +284,31 @@ public class AccessibilityManagerServiceTest {
         verify(mProxyManager).registerProxy(eq(mMockServiceClient), eq(TEST_DISPLAY),
                 eq(mTestableContext), anyInt(), any(), eq(mMockSecurityPolicy),
                 eq(mA11yms), eq(mA11yms.getTraceManager()),
-                eq(mMockWindowManagerService), eq(mMockA11yWindowManager));
+                eq(mMockWindowManagerService));
     }
 
     @SmallTest
     @Test
-    public void testRegisterProxyWithoutPermission() throws Exception {
+    public void testRegisterProxyWithoutA11yPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any());
+    }
+
+    @SmallTest
+    @Test
+    public void testRegisterProxyWithoutDevicePermission() throws Exception {
+        doThrow(SecurityException.class).when(mMockSecurityPolicy)
+                .enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+                any(), any(), any());
     }
 
     @SmallTest
@@ -303,7 +317,7 @@ public class AccessibilityManagerServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.DEFAULT_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any());
     }
 
     @SmallTest
@@ -312,7 +326,7 @@ public class AccessibilityManagerServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.INVALID_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any());
     }
 
     @SmallTest
@@ -326,9 +340,20 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    public void testUnRegisterProxyWithoutPermission() throws Exception {
+    public void testUnRegisterProxyWithoutA11yPermission() {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.unregisterProxyForDisplay(TEST_DISPLAY));
+        verify(mProxyManager, never()).unregisterProxy(TEST_DISPLAY);
+    }
+
+    @SmallTest
+    @Test
+    public void testUnRegisterProxyWithoutDevicePermission() {
+        doThrow(SecurityException.class).when(mMockSecurityPolicy)
+                .enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.unregisterProxyForDisplay(TEST_DISPLAY));
@@ -364,6 +389,7 @@ public class AccessibilityManagerServiceTest {
         );
 
         mA11yms.onMagnificationTransitionEndedLocked(Display.DEFAULT_DISPLAY, true);
+        mHandler.sendAllMessages();
 
         ArgumentCaptor<Display> displayCaptor = ArgumentCaptor.forClass(Display.class);
         verify(mInputFilter, timeout(100)).refreshMagnificationMode(displayCaptor.capture());
@@ -427,6 +453,40 @@ public class AccessibilityManagerServiceTest {
         mA11yms.readMagnificationFollowTypingLocked(userState);
 
         verify(mMockMagnificationController).setMagnificationFollowTypingEnabled(false);
+    }
+
+    @Test
+    public void testSettingsAlwaysOn_setEnabled_featureFlagDisabled_doNothing() {
+        when(mMockMagnificationController.isAlwaysOnMagnificationFeatureFlagEnabled())
+                .thenReturn(false);
+
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        Settings.Secure.putIntForUser(
+                mTestableContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
+                1, mA11yms.getCurrentUserIdLocked());
+
+        mA11yms.readAlwaysOnMagnificationLocked(userState);
+
+        verify(mMockMagnificationController, never()).setAlwaysOnMagnificationEnabled(anyBoolean());
+    }
+
+    @Test
+    public void testSettingsAlwaysOn_setEnabled_featureFlagEnabled_propagateToController() {
+        when(mMockMagnificationController.isAlwaysOnMagnificationFeatureFlagEnabled())
+                .thenReturn(true);
+
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        Settings.Secure.putIntForUser(
+                mTestableContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
+                1, mA11yms.getCurrentUserIdLocked());
+
+        mA11yms.readAlwaysOnMagnificationLocked(userState);
+
+        verify(mMockMagnificationController).setAlwaysOnMagnificationEnabled(eq(true));
     }
 
     @SmallTest

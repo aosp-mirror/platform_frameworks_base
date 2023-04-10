@@ -16,12 +16,14 @@
 package android.net.vcn;
 
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.server.vcn.util.PersistableBundleUtils.INTEGER_DESERIALIZER;
 import static com.android.server.vcn.util.PersistableBundleUtils.INTEGER_SERIALIZER;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -37,6 +39,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -54,11 +60,23 @@ import java.util.Set;
 public final class VcnConfig implements Parcelable {
     @NonNull private static final String TAG = VcnConfig.class.getSimpleName();
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = {"TRANSPORT_"},
+            value = {
+                NetworkCapabilities.TRANSPORT_CELLULAR,
+                NetworkCapabilities.TRANSPORT_WIFI,
+            })
+    @Target({ElementType.TYPE_USE})
+    public @interface VcnUnderlyingNetworkTransport {}
+
     private static final Set<Integer> ALLOWED_TRANSPORTS = new ArraySet<>();
 
     static {
         ALLOWED_TRANSPORTS.add(TRANSPORT_WIFI);
         ALLOWED_TRANSPORTS.add(TRANSPORT_CELLULAR);
+        ALLOWED_TRANSPORTS.add(TRANSPORT_TEST);
     }
 
     private static final String PACKAGE_NAME_KEY = "mPackageName";
@@ -139,6 +157,11 @@ public final class VcnConfig implements Parcelable {
                                 + transport
                                 + " which might be from a new version of VcnConfig");
             }
+
+            if (transport == TRANSPORT_TEST && !mIsTestModeProfile) {
+                throw new IllegalArgumentException(
+                        "Found TRANSPORT_TEST in a non-test-mode profile");
+            }
         }
     }
 
@@ -164,7 +187,7 @@ public final class VcnConfig implements Parcelable {
      * @see Builder#setRestrictedUnderlyingNetworkTransports(Set)
      */
     @NonNull
-    public Set<Integer> getRestrictedUnderlyingNetworkTransports() {
+    public Set<@VcnUnderlyingNetworkTransport Integer> getRestrictedUnderlyingNetworkTransports() {
         return Collections.unmodifiableSet(mRestrictedTransports);
     }
 
@@ -308,16 +331,20 @@ public final class VcnConfig implements Parcelable {
         /**
          * Sets transports that will be restricted by the VCN.
          *
-         * @param transports transports that will be restricted by VCN. Networks that include any
-         *     of the transports will be marked as restricted. Only {@link
-         *     NetworkCapabilities#TRANSPORT_WIFI} and {@link
-         *     NetworkCapabilities#TRANSPORT_CELLULAR} are allowed. {@link
+         * <p>In general, apps will not be able to bind to, or use a restricted network. In other
+         * words, unless the network type is marked restricted, any app can opt to use underlying
+         * networks, instead of through the VCN.
+         *
+         * @param transports transports that will be restricted by VCN. Networks that include any of
+         *     the transports will be marked as restricted. {@link
          *     NetworkCapabilities#TRANSPORT_WIFI} is marked restricted by default.
          * @return this {@link Builder} instance, for chaining
          * @throws IllegalArgumentException if the input contains unsupported transport types.
+         * @see NetworkCapabilities#NET_CAPABILITY_NOT_RESTRICTED
          */
         @NonNull
-        public Builder setRestrictedUnderlyingNetworkTransports(@NonNull Set<Integer> transports) {
+        public Builder setRestrictedUnderlyingNetworkTransports(
+                @NonNull Set<@VcnUnderlyingNetworkTransport Integer> transports) {
             validateRestrictedTransportsOrThrow(transports);
 
             mRestrictedTransports.clear();

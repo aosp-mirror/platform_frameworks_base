@@ -74,7 +74,7 @@ class NotificationContentViewTest : SysuiTestCase() {
         doReturn(10).whenever(spyRow).intrinsicHeight
 
         with(view) {
-            initialize(mPeopleNotificationIdentifier, mock(), mock(), mock())
+            initialize(mPeopleNotificationIdentifier, mock(), mock(), mock(), mock())
             setContainingNotification(spyRow)
             setHeights(/* smallHeight= */ 10, /* headsUpMaxHeight= */ 20, /* maxHeight= */ 30)
             contractedChild = createViewWithHeight(10)

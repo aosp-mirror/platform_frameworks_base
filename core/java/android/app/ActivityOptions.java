@@ -88,6 +88,16 @@ public class ActivityOptions extends ComponentOptions {
      */
     public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
 
+    /** No explicit value chosen. The system will decide whether to grant privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+    /** Allow the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+    /** Deny the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+
     /**
      * The package name that created the options.
      * @hide
@@ -333,6 +343,20 @@ public class ActivityOptions extends ComponentOptions {
             "android:activity.applyActivityFlagsForBubbles";
 
     /**
+     * Indicates to apply {@link Intent#FLAG_ACTIVITY_MULTIPLE_TASK} to the launching shortcut.
+     * @hide
+     */
+    private static final String KEY_APPLY_MULTIPLE_TASK_FLAG_FOR_SHORTCUT =
+            "android:activity.applyMultipleTaskFlagForShortcut";
+
+    /**
+     * Indicates to apply {@link Intent#FLAG_ACTIVITY_NO_USER_ACTION} to the launching shortcut.
+     * @hide
+     */
+    private static final String KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT =
+            "android:activity.applyNoUserActionFlagForShortcut";
+
+    /**
      * For Activity transitions, the calling Activity's TransitionListener used to
      * notify the called Activity when the shared element and the exit transitions
      * complete.
@@ -387,8 +411,8 @@ public class ActivityOptions extends ComponentOptions {
     /** See {@link #setDismissKeyguard()}. */
     private static final String KEY_DISMISS_KEYGUARD = "android.activity.dismissKeyguard";
 
-    private static final String KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE =
-            "android.activity.ignorePendingIntentCreatorForegroundState";
+    private static final String KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE =
+            "android.activity.pendingIntentCreatorBackgroundActivityStartMode";
 
     /**
      * @see #setLaunchCookie
@@ -466,6 +490,8 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mShareIdentity = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mApplyActivityFlagsForBubbles;
+    private boolean mApplyMultipleTaskFlagForShortcut;
+    private boolean mApplyNoUserActionFlagForShortcut;
     private boolean mTaskAlwaysOnTop;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
@@ -489,7 +515,9 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
     private boolean mDismissKeyguard;
-    private boolean mIgnorePendingIntentCreatorForegroundState;
+    @BackgroundActivityStartMode
+    private int mPendingIntentCreatorBackgroundActivityStartMode =
+            MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
     private boolean mDisableStartingWindow;
 
     /**
@@ -1266,6 +1294,10 @@ public class ActivityOptions extends ComponentOptions {
                 KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING, false);
         mApplyActivityFlagsForBubbles = opts.getBoolean(
                 KEY_APPLY_ACTIVITY_FLAGS_FOR_BUBBLES, false);
+        mApplyMultipleTaskFlagForShortcut = opts.getBoolean(
+                KEY_APPLY_MULTIPLE_TASK_FLAG_FOR_SHORTCUT, false);
+        mApplyNoUserActionFlagForShortcut = opts.getBoolean(
+                KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT, false);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
             mAnimSpecs = new AppTransitionAnimationSpec[specs.length];
@@ -1297,8 +1329,9 @@ public class ActivityOptions extends ComponentOptions {
         mIsEligibleForLegacyPermissionPrompt =
                 opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
         mDismissKeyguard = opts.getBoolean(KEY_DISMISS_KEYGUARD);
-        mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
-                KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
+        mPendingIntentCreatorBackgroundActivityStartMode = opts.getInt(
+                KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
+                MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
     }
 
@@ -1893,6 +1926,26 @@ public class ActivityOptions extends ComponentOptions {
         return mApplyActivityFlagsForBubbles;
     }
 
+    /** @hide */
+    public void setApplyMultipleTaskFlagForShortcut(boolean apply) {
+        mApplyMultipleTaskFlagForShortcut = apply;
+    }
+
+    /** @hide */
+    public boolean isApplyMultipleTaskFlagForShortcut() {
+        return mApplyMultipleTaskFlagForShortcut;
+    }
+
+    /** @hide */
+    public void setApplyNoUserActionFlagForShortcut(boolean apply) {
+        mApplyNoUserActionFlagForShortcut = apply;
+    }
+
+    /** @hide */
+    public boolean isApplyNoUserActionFlagForShortcut() {
+        return mApplyNoUserActionFlagForShortcut;
+    }
+
     /**
      * Sets a launch cookie that can be used to track the activity and task that are launch as a
      * result of this option. If the launched activity is a trampoline that starts another activity
@@ -1997,19 +2050,40 @@ public class ActivityOptions extends ComponentOptions {
 
     /**
      * Sets background activity launch logic won't use pending intent creator foreground state.
+     *
      * @hide
+     * @deprecated use {@link #setPendingIntentCreatorBackgroundActivityStartMode(int)} instead
      */
-    public void setIgnorePendingIntentCreatorForegroundState(boolean state) {
-        mIgnorePendingIntentCreatorForegroundState = state;
+    @Deprecated
+    public ActivityOptions setIgnorePendingIntentCreatorForegroundState(boolean ignore) {
+        mPendingIntentCreatorBackgroundActivityStartMode = ignore
+                ? MODE_BACKGROUND_ACTIVITY_START_DENIED : MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+        return this;
     }
 
     /**
-     * @return whether background activity launch logic should use pending intent creator
-     * foreground state.
-     * @hide
+     * Allow a {@link PendingIntent} to use the privilege of its creator to start background
+     * activities.
+     *
+     * @param mode the {@link android.app.ComponentOptions.BackgroundActivityStartMode} being set
+     * @throws IllegalArgumentException is the value is not a valid
+     * {@link android.app.ComponentOptions.BackgroundActivityStartMode}
      */
-    public boolean getIgnorePendingIntentCreatorForegroundState() {
-        return mIgnorePendingIntentCreatorForegroundState;
+    @NonNull
+    public ActivityOptions setPendingIntentCreatorBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int mode) {
+        mPendingIntentCreatorBackgroundActivityStartMode = mode;
+        return this;
+    }
+
+    /**
+     * Returns the mode to start background activities granted by the creator of the
+     * {@link PendingIntent}.
+     *
+     * @return the {@link android.app.ComponentOptions.BackgroundActivityStartMode} currently set
+     */
+    public @BackgroundActivityStartMode int getPendingIntentCreatorBackgroundActivityStartMode() {
+        return mPendingIntentCreatorBackgroundActivityStartMode;
     }
 
     /**
@@ -2228,6 +2302,13 @@ public class ActivityOptions extends ComponentOptions {
         if (mApplyActivityFlagsForBubbles) {
             b.putBoolean(KEY_APPLY_ACTIVITY_FLAGS_FOR_BUBBLES, mApplyActivityFlagsForBubbles);
         }
+        if (mApplyMultipleTaskFlagForShortcut) {
+            b.putBoolean(KEY_APPLY_MULTIPLE_TASK_FLAG_FOR_SHORTCUT,
+                    mApplyMultipleTaskFlagForShortcut);
+        }
+        if (mApplyNoUserActionFlagForShortcut) {
+            b.putBoolean(KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT, true);
+        }
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
         }
@@ -2283,9 +2364,10 @@ public class ActivityOptions extends ComponentOptions {
         if (mDismissKeyguard) {
             b.putBoolean(KEY_DISMISS_KEYGUARD, mDismissKeyguard);
         }
-        if (mIgnorePendingIntentCreatorForegroundState) {
-            b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,
-                    mIgnorePendingIntentCreatorForegroundState);
+        if (mPendingIntentCreatorBackgroundActivityStartMode
+                != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+            b.putInt(KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
+                    mPendingIntentCreatorBackgroundActivityStartMode);
         }
         if (mDisableStartingWindow) {
             b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
@@ -2428,12 +2510,37 @@ public class ActivityOptions extends ComponentOptions {
         return super.getPendingIntentBackgroundActivityStartMode();
     }
 
+    /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     *
+     * @deprecated use #setPendingIntentBackgroundActivityStartMode(int) to set the full range
+     * of states
+     */
+    @Override
+    @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller can start
+     * background activities.
+     *
+     * @deprecated use {@link #getPendingIntentBackgroundActivityStartMode()} since for apps
+     * targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or higher this value might
+     * not match the actual behavior if the value was not explicitly set.
+     */
+    @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return super.isPendingIntentBackgroundActivityLaunchAllowed();
+    }
+
     /** @hide */
     @Override
     public String toString() {
         return "ActivityOptions(" + hashCode() + "), mPackageName=" + mPackageName
                 + ", mAnimationType=" + mAnimationType + ", mStartX=" + mStartX + ", mStartY="
-                + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
+                + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight + ", mLaunchDisplayId="
+                + mLaunchDisplayId;
     }
 
     /**

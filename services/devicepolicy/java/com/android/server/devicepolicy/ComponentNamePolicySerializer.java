@@ -18,6 +18,8 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.ComponentNamePolicyValue;
+import android.app.admin.PolicyKey;
 import android.content.ComponentName;
 import android.util.Log;
 
@@ -28,33 +30,33 @@ import java.io.IOException;
 import java.util.Objects;
 
 final class ComponentNamePolicySerializer extends PolicySerializer<ComponentName> {
-    private static final String ATTR_PACKAGE_NAME = ":package-name";
-    private static final String ATTR_CLASS_NAME = ":class-name";
+
+    private static final String TAG = "ComponentNamePolicySerializer";
+
+    private static final String ATTR_PACKAGE_NAME = "package-name";
+    private static final String ATTR_CLASS_NAME = "class-name";
 
     @Override
-    void saveToXml(
-            TypedXmlSerializer serializer, String attributeNamePrefix, @NonNull ComponentName value)
-            throws IOException {
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
+            @NonNull ComponentName value) throws IOException {
         Objects.requireNonNull(value);
         serializer.attribute(
-                /* namespace= */ null,
-                attributeNamePrefix + ATTR_PACKAGE_NAME, value.getPackageName());
+                /* namespace= */ null, ATTR_PACKAGE_NAME, value.getPackageName());
         serializer.attribute(
-                /* namespace= */ null,
-                attributeNamePrefix + ATTR_CLASS_NAME, value.getClassName());
+                /* namespace= */ null, ATTR_CLASS_NAME, value.getClassName());
     }
 
     @Nullable
     @Override
-    ComponentName readFromXml(TypedXmlPullParser parser, String attributeNamePrefix) {
+    ComponentNamePolicyValue readFromXml(TypedXmlPullParser parser) {
         String packageName = parser.getAttributeValue(
-                /* namespace= */ null, attributeNamePrefix + ATTR_PACKAGE_NAME);
+                /* namespace= */ null, ATTR_PACKAGE_NAME);
         String className = parser.getAttributeValue(
-                /* namespace= */ null, attributeNamePrefix + ATTR_CLASS_NAME);
+                /* namespace= */ null, ATTR_CLASS_NAME);
         if (packageName == null || className == null) {
-            Log.e(DevicePolicyEngine.TAG, "Error parsing ComponentName policy.");
+            Log.e(TAG, "Error parsing ComponentName policy.");
             return null;
         }
-        return new ComponentName(packageName, className);
+        return new ComponentNamePolicyValue(new ComponentName(packageName, className));
     }
 }

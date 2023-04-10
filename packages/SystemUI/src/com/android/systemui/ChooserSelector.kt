@@ -34,7 +34,7 @@ class ChooserSelector @Inject constructor(
     override fun start() {
         coroutineScope.launch {
             val listener = FlagListenable.Listener { event ->
-                if (event.flagId == Flags.CHOOSER_UNBUNDLED.id) {
+                if (event.flagName == Flags.CHOOSER_UNBUNDLED.name) {
                     launch { updateUnbundledChooserEnabled() }
                     event.requestNoRestart()
                 }

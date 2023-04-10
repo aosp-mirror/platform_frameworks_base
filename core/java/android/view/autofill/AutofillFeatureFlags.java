@@ -145,21 +145,32 @@ public class AutofillFeatureFlags {
      * <p>For example, a list with only 1 package would be, {@code Package1:;}. A list with one
      * denied activity {@code Activity1} under {@code Package1} and a full denied package
      * {@code Package2} would be {@code Package1:Activity1;Package2:;}
-     *
-     * @hide
      */
-    @TestApi
     public static final String DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW =
             "package_deny_list_for_unimportant_view";
 
     /**
-     * Whether the heuristics check for view is enabled
+     * Sets the list of activities and packages allowed for autofill. The format is same with
+     * {@link #DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW}
      *
      * @hide
      */
-    @TestApi
+    public static final String DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST =
+            "package_and_activity_allowlist_for_triggering_fill_request";
+
+    /**
+     * Whether the heuristics check for view is enabled
+     */
     public static final String DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW =
             "trigger_fill_request_on_unimportant_view";
+
+    /**
+     * Whether to apply heuristic check on important views.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_FILTERED_IMPORTANT_VIEWS =
+            "trigger_fill_request_on_filtered_important_views";
 
     /**
      * Continas imeAction ids that is irrelevant for autofill. For example, ime_action_search. We
@@ -169,14 +180,80 @@ public class AutofillFeatureFlags {
      *
      * <p> For example, a imeAction list could be "2,3,4", corresponding to ime_action definition
      * in {@link android.view.inputmethod.EditorInfo.java}</p>
-     *
-     * @hide
      */
-    @TestApi
     @SuppressLint("IntentName")
     public static final String DEVICE_CONFIG_NON_AUTOFILLABLE_IME_ACTION_IDS =
             "non_autofillable_ime_action_ids";
+
+    /**
+     * Whether to enable autofill on all view types (not just checkbox, spinner, datepicker etc...)
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES =
+            "should_enable_autofill_on_all_view_types";
+
+    /**
+     * Whether to enable multi-line filter when checking if view is autofillable
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_MULTILINE_FILTER_ENABLED =
+            "multiline_filter_enabled";
+
+    /**
+     * Whether include all autofill type not none views in assist structure
+     *
+     * @hide
+     */
+    public static final String
+        DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE =
+            "include_all_autofill_type_not_none_views_in_assist_structure";
+
+    /**
+     * Whether include all views in assist structure
+     *
+     * @hide
+     */
+    public static final String
+        DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE =
+            "include_all_views_in_assist_structure";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
+
+
+    // START AUTOFILL PCC CLASSIFICATION FLAGS
+
+    /**
+     * Sets the fill dialog feature enabled or not.
+     */
+    public static final String DEVICE_CONFIG_AUTOFILL_PCC_CLASSIFICATION_ENABLED =
+            "pcc_classification_enabled";
+
+    /**
+     * Give preference to autofill provider's detection.
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC = "prefer_provider_over_pcc";
+
+    /**
+     * Indicates the Autofill Hints that would be requested by the service from the Autofill
+     * Provider.
+     */
+    public static final String DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS =
+            "pcc_classification_hints";
+
+    /**
+     * Use data from secondary source if primary not present .
+     * For eg: if we prefer PCC over provider, and PCC detection didn't classify a field, however,
+     * autofill provider did, this flag would decide whether we use that result, and show some
+     * presentation for that particular field.
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PCC_USE_FALLBACK = "pcc_use_fallback";
+
+    // END AUTOFILL PCC CLASSIFICATION FLAGS
+
 
     /**
      * Sets a value of delay time to show up the inline tooltip view.
@@ -191,6 +268,7 @@ public class AutofillFeatureFlags {
     private static final boolean DEFAULT_HAS_FILL_DIALOG_UI_FEATURE = false;
     private static final String DEFAULT_FILL_DIALOG_ENABLED_HINTS = "";
 
+
     // CREDENTIAL MANAGER DEFAULTS
     // Credential manager is enabled by default so as to allow testing by app developers
     private static final boolean DEFAULT_CREDENTIAL_MANAGER_ENABLED = true;
@@ -198,6 +276,14 @@ public class AutofillFeatureFlags {
     private static final boolean DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG = false;
     private static final boolean DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_SAVE_DIALOG = false;
     // END CREDENTIAL MANAGER DEFAULTS
+
+
+    // AUTOFILL PCC CLASSIFICATION FLAGS DEFAULTS
+    // Default for whether the pcc classification is enabled for autofill.
+    /** @hide */
+    public static final boolean DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED = false;
+    // END AUTOFILL PCC CLASSIFICATION FLAGS DEFAULTS
+
 
     private AutofillFeatureFlags() {};
 
@@ -281,6 +367,28 @@ public class AutofillFeatureFlags {
     }
 
     /**
+     * Whether to apply heuristic check on important views before triggering fill request
+     *
+     * @hide
+     */
+    public static boolean isTriggerFillRequestOnFilteredImportantViewsEnabled() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_FILTERED_IMPORTANT_VIEWS, false);
+    }
+
+    /**
+     * Whether to enable autofill on all view types.
+     *
+     * @hide
+     */
+    public static boolean shouldEnableAutofillOnAllViewTypes(){
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES, false);
+    }
+
+    /**
      * Get the non-autofillable ime actions from flag. This will be used in filtering
      * condition to trigger fill request.
      *
@@ -293,7 +401,10 @@ public class AutofillFeatureFlags {
     }
 
     /**
-     * Get denylist string from flag
+     * Get denylist string from flag.
+     *
+     * Note: This denylist works both on important view and not important views. The flag used here
+     * is legacy flag which will be replaced with soon.
      *
      * @hide
      */
@@ -302,4 +413,66 @@ public class AutofillFeatureFlags {
             DeviceConfig.NAMESPACE_AUTOFILL,
             DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW, "");
     }
+
+    /**
+     * Get autofill allowlist from flag
+     *
+     * @hide
+     */
+    public static String getAllowlistStringFromFlag() {
+        return DeviceConfig.getString(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST, "");
+    }
+    /**
+     * Whether include all views that have autofill type not none in assist structure.
+     *
+     * @hide
+     */
+    public static boolean shouldIncludeAllViewsAutofillTypeNotNoneInAssistStructrue() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE, false);
+    }
+
+    /**
+     * Whether include all views in assist structure.
+     *
+     * @hide
+     */
+    public static boolean shouldIncludeAllChildrenViewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE, false);
+    }
+
+
+    /**
+     * Whether should enable multi-line filter
+     *
+     * @hide
+     */
+    public static boolean shouldEnableMultilineFilter() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_MULTILINE_FILTER_ENABLED, false);
+    }
+
+    // START AUTOFILL PCC CLASSIFICATION FUNCTIONS
+
+    /**
+     * Whether Autofill PCC Detection is enabled.
+     *
+     * @hide
+     */
+    public static boolean isAutofillPccClassificationEnabled() {
+        // TODO(b/266379948): Add condition for checking whether device has PCC first
+
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_AUTOFILL_PCC_CLASSIFICATION_ENABLED,
+                DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED);
+    }
+
+    // END AUTOFILL PCC CLASSIFICATION FUNCTIONS
 }

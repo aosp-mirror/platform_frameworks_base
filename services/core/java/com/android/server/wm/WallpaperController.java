@@ -37,6 +37,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDING_TIMEOUT;
 
 import android.annotation.Nullable;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -45,6 +46,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -72,7 +74,7 @@ import java.util.function.Consumer;
 class WallpaperController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperController" : TAG_WM;
     private WindowManagerService mService;
-    private final DisplayContent mDisplayContent;
+    private DisplayContent mDisplayContent;
 
     private final ArrayList<WallpaperWindowToken> mWallpaperTokens = new ArrayList<>();
 
@@ -120,9 +122,19 @@ class WallpaperController {
 
     private boolean mShouldOffsetWallpaperCenter;
 
+    final boolean mIsLockscreenLiveWallpaperEnabled;
+
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         if ((w.mAttrs.type == TYPE_WALLPAPER)) {
             if (mFindResults.topWallpaper == null || mFindResults.resetTopWallpaper) {
+                WallpaperWindowToken token = w.mToken.asWallpaperToken();
+                if (token == null) {
+                    Slog.w(TAG, "Window " + w + " has wallpaper type but not wallpaper token");
+                    return false;
+                }
+                if (!token.canShowWhenLocked() && mDisplayContent.isKeyguardLocked()) {
+                    return false;
+                }
                 mFindResults.setTopWallpaper(w);
                 mFindResults.resetTopWallpaper = false;
             }
@@ -150,14 +162,6 @@ class WallpaperController {
         }
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": isOnScreen=" + w.isOnScreen()
                 + " mDrawState=" + w.mWinAnimator.mDrawState);
-
-        if (w.mWillReplaceWindow && mWallpaperTarget == null
-                && !mFindResults.useTopWallpaperAsTarget) {
-            // When we are replacing a window and there was wallpaper before replacement, we want to
-            // keep the window until the new windows fully appear and can determine the visibility,
-            // to avoid flickering.
-            mFindResults.setUseTopWallpaperAsTarget(true);
-        }
 
         final WindowContainer animatingContainer = w.mActivityRecord != null
                 ? w.mActivityRecord.getAnimatingContainer() : null;
@@ -249,11 +253,14 @@ class WallpaperController {
     WallpaperController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
-        mMaxWallpaperScale = service.mContext.getResources()
-                .getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
-        mShouldOffsetWallpaperCenter = service.mContext.getResources()
-                .getBoolean(
+        Resources resources = service.mContext.getResources();
+        mMaxWallpaperScale =
+                resources.getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
+        mShouldOffsetWallpaperCenter =
+                resources.getBoolean(
                         com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
+        mIsLockscreenLiveWallpaperEnabled =
+                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", false);
     }
 
     void resetLargestDisplay(Display display) {
@@ -753,10 +760,10 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
-    private void updateWallpaperTokens(boolean visible) {
+    private void updateWallpaperTokens(boolean visibility, boolean locked) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visible);
+            token.updateWallpaperWindows(visibility && (!locked || token.canShowWhenLocked()));
         }
     }
 
@@ -794,7 +801,13 @@ class WallpaperController {
             }
         }
 
-        updateWallpaperTokens(visible);
+        // Keep both wallpapers visible unless the keyguard is locked (then hide private wp)
+        updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
+
+        if (DEBUG_WALLPAPER) {
+            Slog.v(TAG, "adjustWallpaperWindows: wallpaper visibility " + visible
+                    + ", lock visibility " + mDisplayContent.isKeyguardLocked());
+        }
 
         if (visible && mLastFrozen != mFindResults.isWallpaperTargetForLetterbox) {
             mLastFrozen = mFindResults.isWallpaperTargetForLetterbox;
@@ -895,7 +908,6 @@ class WallpaperController {
     void removeWallpaperToken(WallpaperWindowToken token) {
         mWallpaperTokens.remove(token);
     }
-
 
     @VisibleForTesting
     boolean canScreenshotWallpaper() {

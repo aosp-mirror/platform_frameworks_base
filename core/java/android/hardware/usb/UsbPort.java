@@ -54,7 +54,7 @@ import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_OTHER;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE;
-import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_CAPABLE;
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_ENABLED;
 
 import android.Manifest;
@@ -807,8 +807,8 @@ public final class UsbPort {
                 return "Unknown";
             case DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE:
                 return "Not Capable";
-            case DISPLAYPORT_ALT_MODE_STATUS_CAPABLE:
-                return "Capable";
+            case DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED:
+                return "Capable-Disabled";
             case DISPLAYPORT_ALT_MODE_STATUS_ENABLED:
                 return "Enabled";
             default:

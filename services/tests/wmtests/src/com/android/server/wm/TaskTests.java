@@ -535,6 +535,34 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(reqBounds.height(), task.getBounds().height());
     }
 
+    /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
+    @Test
+    public void testBoundsOnModeChangeFreeformToFullscreen() {
+        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
+        Task rootTask = new TaskBuilder(mSupervisor).setDisplay(display).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        Task task = rootTask.getBottomMostTask();
+        task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        DisplayInfo info = new DisplayInfo();
+        display.mDisplay.getDisplayInfo(info);
+        final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
+        final Rect freeformBounds = new Rect(fullScreenBounds);
+        freeformBounds.inset((int) (freeformBounds.width() * 0.2),
+                (int) (freeformBounds.height() * 0.2));
+        task.setBounds(freeformBounds);
+
+        assertEquals(freeformBounds, task.getBounds());
+
+        // FULLSCREEN inherits bounds
+        rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertEquals(fullScreenBounds, task.getBounds());
+        assertEquals(freeformBounds, task.mLastNonFullscreenBounds);
+
+        // FREEFORM restores bounds
+        rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(freeformBounds, task.getBounds());
+    }
+
     /**
      * Tests that a task with forced orientation has orientation-consistent bounds within the
      * parent.
@@ -1300,17 +1328,16 @@ public class TaskTests extends WindowTestsBase {
         spyOn(persister);
 
         final Task task = getTestTask();
-        task.setHasBeenVisible(false);
+        task.setHasBeenVisible(true);
         task.getDisplayContent()
                 .getDefaultTaskDisplayArea()
-                .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
-        task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                .setWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
         final DisplayContent oldDisplay = task.getDisplayContent();
 
         LaunchParamsController.LaunchParams params = new LaunchParamsController.LaunchParams();
-        params.mWindowingMode = WINDOWING_MODE_UNDEFINED;
         persister.getLaunchParams(task, null, params);
-        assertEquals(WINDOWING_MODE_UNDEFINED, params.mWindowingMode);
+        assertEquals(WINDOWING_MODE_FREEFORM, params.mWindowingMode);
 
         task.setHasBeenVisible(true);
         task.removeImmediately();
@@ -1318,7 +1345,7 @@ public class TaskTests extends WindowTestsBase {
         verify(persister).saveTask(task, oldDisplay);
 
         persister.getLaunchParams(task, null, params);
-        assertEquals(WINDOWING_MODE_FULLSCREEN, params.mWindowingMode);
+        assertEquals(WINDOWING_MODE_FREEFORM, params.mWindowingMode);
     }
 
     @Test

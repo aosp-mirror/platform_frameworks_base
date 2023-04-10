@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.Bundle
+import android.os.UserHandle
 import android.service.chooser.ChooserTarget
 import android.view.View
 import android.widget.FrameLayout
@@ -73,7 +74,8 @@ class ChooserListAdapterTest {
             selectableTargetInfoCommunicator,
             packageManager,
             chooserActivityLogger,
-            taskProvider
+            null,
+            taskProvider,
         )
 
     @Test
@@ -160,6 +162,7 @@ private class ChooserListAdapterOverride(
     selectableTargetInfoCommunicator: SelectableTargetInfoCommunicator?,
     packageManager: PackageManager?,
     chooserActivityLogger: ChooserActivityLogger?,
+    initialIntentsUserHandle: UserHandle?,
     private val taskProvider: (SelectableTargetInfo?) -> LoadDirectShareIconTask
 ) : ChooserListAdapter(
     context,
@@ -171,7 +174,8 @@ private class ChooserListAdapterOverride(
     chooserListCommunicator,
     selectableTargetInfoCommunicator,
     packageManager,
-    chooserActivityLogger
+    chooserActivityLogger,
+    initialIntentsUserHandle,
 ) {
     override fun createLoadDirectShareIconTask(
         info: SelectableTargetInfo?

@@ -32,7 +32,12 @@ import android.os.Parcelable;
  * #getRefreshPeriodNano()}. If the system does not render a frame every refresh
  * period the user will see irregular window transitions. The time when the frame was
  * actually presented on the display by calling {@link #getFramePresentedTimeNano(int)}.
+ *
+ * @deprecated Use Shared
+ *             <a href="https://perfetto.dev/docs/data-sources/frametimeline">FrameTimeline</a>
+ *             jank metrics instead.
  */
+@Deprecated
 public final class WindowAnimationFrameStats extends FrameStats implements Parcelable {
     /**
      * @hide

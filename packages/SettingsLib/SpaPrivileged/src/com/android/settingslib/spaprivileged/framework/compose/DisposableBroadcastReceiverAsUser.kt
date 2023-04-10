@@ -33,7 +33,6 @@ import com.android.settingslib.spa.framework.compose.LifecycleEffect
 fun DisposableBroadcastReceiverAsUser(
     intentFilter: IntentFilter,
     userHandle: UserHandle,
-    onStart: () -> Unit = {},
     onReceive: (Intent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -49,7 +48,6 @@ fun DisposableBroadcastReceiverAsUser(
             context.registerReceiverAsUser(
                 broadcastReceiver, userHandle, intentFilter, null, null
             )
-            onStart()
         },
         onStop = {
             context.unregisterReceiver(broadcastReceiver)

@@ -54,6 +54,20 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
         return new TableResponse(in);
     }
 
+    /**
+     * Constructs a TableResponse with a table URI.
+     *
+     * @param requestId The ID is used to associate the response with the request.
+     * @param sequence The sequence number which indicates the order of related responses.
+     * @param responseResult The result for the response. It's one of {@link #RESPONSE_RESULT_OK},
+     *                       {@link #RESPONSE_RESULT_CANCEL}, {@link #RESPONSE_RESULT_ERROR}.
+     * @param tableUri The URI of the table in the database.
+     * @param version The version number of requested table.
+     * @param size The Size number of table in bytes.
+     *
+     * @deprecated use {@link Builder} instead.
+     */
+    @Deprecated
     public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
             @Nullable Uri tableUri, int version, int size) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
@@ -64,26 +78,140 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
         mTableSharedMemory = null;
     }
 
-    /** @hide */
-    public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            @NonNull byte[] tableByteArray, int version, int size) {
+    /**
+     * Constructs a TableResponse.
+     *
+     * @param requestId The ID is used to associate the response with the request.
+     * @param sequence The sequence number which indicates the order of related responses.
+     * @param responseResult The result for the response. It's one of {@link #RESPONSE_RESULT_OK},
+     *                       {@link #RESPONSE_RESULT_CANCEL}, {@link #RESPONSE_RESULT_ERROR}.
+     * @param tableSharedMemory The shared memory which stores the table. The table size can be
+     *                          large so using a shared memory optimizes the data
+     *                          communication between the table data source and the receiver. The
+     *                          structure syntax of the table depends on the table name in
+     *                          {@link TableRequest#getTableName()} and the corresponding standard.
+     * @param version The version number of requested table.
+     * @param size The Size number of table in bytes.
+     * @param tableUri The URI of the table in the database.
+     * @param tableByteArray The byte array which stores the table in bytes. The structure and
+     *                       syntax of the table depends on the table name in
+     * @param tableSharedMemory The shared memory which stores the table. The table size can be
+     *                          large so using a shared memory optimizes the data
+     *                          communication between the table data source and the receiver. The
+     *                          structure syntax of the table depends on the table name in
+     *                          {@link TableRequest#getTableName()} and the corresponding standard.
+     */
+    private TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            int version, int size, Uri tableUri, byte[] tableByteArray,
+            SharedMemory tableSharedMemory) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mVersion = version;
         mSize = size;
-        mTableUri = null;
+        mTableUri = tableUri;
         mTableByteArray = tableByteArray;
-        mTableSharedMemory = null;
+        mTableSharedMemory = tableSharedMemory;
     }
 
-    /** @hide */
-    public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            @NonNull SharedMemory tableSharedMemory, int version, int size) {
-        super(RESPONSE_TYPE, requestId, sequence, responseResult);
-        mVersion = version;
-        mSize = size;
-        mTableUri = null;
-        mTableByteArray = null;
-        mTableSharedMemory = tableSharedMemory;
+    /**
+     * Builder for {@link TableResponse}.
+     */
+    public static final class Builder {
+        private final int mRequestId;
+        private final int mSequence;
+        @ResponseResult
+        private final int mResponseResult;
+        private final int mVersion;
+        private final int mSize;
+        private Uri mTableUri;
+        private byte[] mTableByteArray;
+        private SharedMemory mTableSharedMemory;
+
+        /**
+         * Constructs a Builder object of {@link TableResponse}.
+         *
+         * @param requestId The ID is used to associate the response with the request.
+         * @param sequence The sequence number which indicates the order of related responses.
+         * @param responseResult The result for the response. It's one of
+         *                       {@link #RESPONSE_RESULT_OK}, {@link #RESPONSE_RESULT_CANCEL},
+         *                       {@link #RESPONSE_RESULT_ERROR}.
+         * @param version The version number of requested table.
+         * @param size The Size number of table in bytes.
+         */
+        public Builder(int requestId, int sequence, @ResponseResult int responseResult, int version,
+                int size) {
+            mRequestId = requestId;
+            mSequence = sequence;
+            mResponseResult = responseResult;
+            mVersion = version;
+            mSize = size;
+        }
+
+        /**
+         * Sets table URI.
+         *
+         * <p>For a single builder instance, at most one of table URI, table byte array, and table
+         * shared memory can be set. If more than one are set, only the last call takes precedence
+         * and others are reset to {@code null}.
+         *
+         * @param uri The URI of the table.
+         */
+        @NonNull
+        public Builder setTableUri(@NonNull Uri uri) {
+            mTableUri = uri;
+            mTableByteArray = null;
+            mTableSharedMemory = null;
+            return this;
+        }
+
+        /**
+         * Sets table byte array.
+         *
+         * <p>For a single builder instance, at most one of table URI, table byte array, and table
+         * shared memory can be set. If more than one are set, only the last call takes precedence
+         * and others are reset to {@code null}.
+         *
+         * @param bytes The byte array which stores the table in bytes. The structure and
+         *              syntax of the table depends on the table name in
+         *              {@link TableRequest#getTableName()} and the corresponding standard.
+         */
+        @NonNull
+        public Builder setTableByteArray(@NonNull byte[] bytes) {
+            mTableByteArray = bytes;
+            mTableUri = null;
+            mTableSharedMemory = null;
+            return this;
+        }
+
+
+        /**
+         * Sets table shared memory.
+         *
+         * <p>For a single builder instance, at most one of table URI, table byte array, and table
+         * shared memory can be set. If more than one are set, only the last call takes precedence
+         * and others are reset to {@code null}.
+         *
+         * @param sharedMemory The shared memory which stores the table. The table size can be
+         *                     large so using a shared memory optimizes the data
+         *                     communication between the table data source and the receiver. The
+         *                     structure syntax of the table depends on the table name in
+         *                     {@link TableRequest#getTableName()} and the corresponding standard.
+         */
+        @NonNull
+        public Builder setTableSharedMemory(@NonNull SharedMemory sharedMemory) {
+            mTableSharedMemory = sharedMemory;
+            mTableUri = null;
+            mTableByteArray = null;
+            return this;
+        }
+
+        /**
+         * Builds a {@link TableResponse} object.
+         */
+        @NonNull
+        public TableResponse build() {
+            return new TableResponse(mRequestId, mSequence, mResponseResult, mVersion, mSize,
+                    mTableUri, mTableByteArray, mTableSharedMemory);
+        }
     }
 
     TableResponse(Parcel source) {
@@ -115,7 +243,6 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
      *
      * @return the table data as a byte array, or {@code null} if the data is not stored as a byte
      *         array.
-     * @hide
      */
     @Nullable
     public byte[] getTableByteArray() {
@@ -125,9 +252,14 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
     /**
      * Gets the data of the table as a {@link SharedMemory} object.
      *
+     * <p> This data lives in a {@link SharedMemory} instance because of the potentially large
+     * amount of data needed to store the table. This optimizes the data communication between the
+     * table data source and the receiver.
+     *
      * @return the table data as a {@link SharedMemory} object, or {@code null} if the data is not
      *         stored in shared memory.
-     * @hide
+     *
+     * @see SharedMemory#map(int, int, int)
      */
     @Nullable
     public SharedMemory getTableSharedMemory() {

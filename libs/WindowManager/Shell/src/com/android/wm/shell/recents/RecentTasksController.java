@@ -24,13 +24,18 @@ import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RE
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.IApplicationThread;
+import android.app.PendingIntent;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.IRecentsAnimationRunner;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -79,6 +84,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private final TaskStackListenerImpl mTaskStackListener;
     private final RecentTasksImpl mImpl = new RecentTasksImpl();
     private final ActivityTaskManager mActivityTaskManager;
+    private RecentsTransitionHandler mTransitionHandler = null;
     private IRecentTasksListener mListener;
     private final boolean mIsDesktopMode;
 
@@ -148,6 +154,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
         mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTaskListener(this));
+    }
+
+    void setTransitionHandler(RecentsTransitionHandler handler) {
+        mTransitionHandler = handler;
     }
 
     /**
@@ -308,7 +318,6 @@ public class RecentTasksController implements TaskStackListenerCallback,
             rawMapping.put(taskInfo.taskId, taskInfo);
         }
 
-        boolean desktopModeActive = DesktopModeStatus.isActive(mContext);
         ArrayList<ActivityManager.RecentTaskInfo> freeformTasks = new ArrayList<>();
 
         // Pull out the pairs as we iterate back in the list
@@ -320,7 +329,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            if (desktopModeActive && mDesktopModeTaskRepository.isPresent()
+            if (DesktopModeStatus.isProto2Enabled() && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
                 freeformTasks.add(taskInfo);
@@ -328,7 +337,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
 
             final int pairedTaskId = mSplitTasks.get(taskInfo.taskId);
-            if (!desktopModeActive && pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
+            if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
                     pairedTaskId)) {
                 final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
                 rawMapping.remove(pairedTaskId);
@@ -492,6 +501,19 @@ public class RecentTasksController implements TaskStackListenerCallback,
                             .toArray(new ActivityManager.RunningTaskInfo[0]),
                     true /* blocking */);
             return tasks[0];
+        }
+
+        @Override
+        public void startRecentsTransition(PendingIntent intent, Intent fillIn, Bundle options,
+                IApplicationThread appThread, IRecentsAnimationRunner listener) {
+            if (mController.mTransitionHandler == null) {
+                Slog.e(TAG, "Used shell-transitions startRecentsTransition without"
+                        + " shell-transitions");
+                return;
+            }
+            executeRemoteCallWithTaskPermission(mController, "startRecentsTransition",
+                    (controller) -> controller.mTransitionHandler.startRecentsTransition(
+                            intent, fillIn, options, appThread, listener));
         }
     }
 }

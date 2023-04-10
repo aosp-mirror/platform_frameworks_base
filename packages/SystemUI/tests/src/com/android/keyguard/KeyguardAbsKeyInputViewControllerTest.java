@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -149,5 +150,18 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         verify(mKeyguardMessageAreaController).setMessage(
                 getContext().getResources().getString(R.string.kg_prompt_reason_restart_password),
                 false);
+    }
+
+
+    @Test
+    public void testReset() {
+        mKeyguardAbsKeyInputViewController.reset();
+        verify(mKeyguardMessageAreaController).setMessage("", false);
+    }
+
+    @Test
+    public void testResume() {
+        mKeyguardAbsKeyInputViewController.onResume(KeyguardSecurityView.VIEW_REVEALED);
+        verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt());
     }
 }

@@ -35,7 +35,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
-import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -126,7 +125,7 @@ public class BrightnessTracker {
     private static final int MSG_BRIGHTNESS_CHANGED = 1;
     private static final int MSG_STOP_SENSOR_LISTENER = 2;
     private static final int MSG_START_SENSOR_LISTENER = 3;
-    private static final int MSG_BRIGHTNESS_CONFIG_CHANGED = 4;
+    private static final int MSG_SHOULD_COLLECT_COLOR_SAMPLE_CHANGED = 4;
     private static final int MSG_SENSOR_CHANGED = 5;
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
@@ -162,7 +161,7 @@ public class BrightnessTracker {
     private boolean mColorSamplingEnabled;
     private int mNoFramesToSample;
     private float mFrameRate;
-    private BrightnessConfiguration mBrightnessConfiguration;
+    private boolean mShouldCollectColorSample = false;
     // End of block of members that should only be accessed on the mBgHandler thread.
 
     private @UserIdInt int mCurrentUserId = UserHandle.USER_NULL;
@@ -208,9 +207,9 @@ public class BrightnessTracker {
     /**
      * Update tracker with new brightness configuration.
      */
-    public void setBrightnessConfiguration(BrightnessConfiguration brightnessConfiguration) {
-        mBgHandler.obtainMessage(MSG_BRIGHTNESS_CONFIG_CHANGED,
-                brightnessConfiguration).sendToTarget();
+    public void setShouldCollectColorSample(boolean shouldCollectColorSample) {
+        mBgHandler.obtainMessage(MSG_SHOULD_COLLECT_COLOR_SAMPLE_CHANGED,
+                shouldCollectColorSample).sendToTarget();
     }
 
     private void backgroundStart(float initialBrightness) {
@@ -320,7 +319,7 @@ public class BrightnessTracker {
      * Notify the BrightnessTracker that the user has changed the brightness of the display.
      */
     public void notifyBrightnessChanged(float brightness, boolean userInitiated,
-            float powerBrightnessFactor, boolean isUserSetBrightness,
+            float powerBrightnessFactor, boolean wasShortTermModelActive,
             boolean isDefaultBrightnessConfig, String uniqueDisplayId, float[] luxValues,
             long[] luxTimestamps) {
         if (DEBUG) {
@@ -329,7 +328,7 @@ public class BrightnessTracker {
         }
         Message m = mBgHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED,
                 userInitiated ? 1 : 0, 0 /*unused*/, new BrightnessChangeValues(brightness,
-                        powerBrightnessFactor, isUserSetBrightness, isDefaultBrightnessConfig,
+                        powerBrightnessFactor, wasShortTermModelActive, isDefaultBrightnessConfig,
                         mInjector.currentTimeMillis(), uniqueDisplayId, luxValues, luxTimestamps));
         m.sendToTarget();
     }
@@ -343,7 +342,7 @@ public class BrightnessTracker {
     }
 
     private void handleBrightnessChanged(float brightness, boolean userInitiated,
-            float powerBrightnessFactor, boolean isUserSetBrightness,
+            float powerBrightnessFactor, boolean wasShortTermModelActive,
             boolean isDefaultBrightnessConfig, long timestamp, String uniqueDisplayId,
             float[] luxValues, long[] luxTimestamps) {
         BrightnessChangeEvent.Builder builder;
@@ -368,7 +367,7 @@ public class BrightnessTracker {
             builder.setBrightness(brightness);
             builder.setTimeStamp(timestamp);
             builder.setPowerBrightnessFactor(powerBrightnessFactor);
-            builder.setUserBrightnessPoint(isUserSetBrightness);
+            builder.setUserBrightnessPoint(wasShortTermModelActive);
             builder.setIsDefaultBrightnessConfig(isDefaultBrightnessConfig);
             builder.setUniqueDisplayId(uniqueDisplayId);
 
@@ -827,8 +826,7 @@ public class BrightnessTracker {
         if (!mInjector.isBrightnessModeAutomatic(mContentResolver)
                 || !mInjector.isInteractive(mContext)
                 || mColorSamplingEnabled
-                || mBrightnessConfiguration == null
-                || !mBrightnessConfiguration.shouldCollectColorSamples()) {
+                || !mShouldCollectColorSample) {
             return;
         }
 
@@ -997,7 +995,7 @@ public class BrightnessTracker {
                     BrightnessChangeValues values = (BrightnessChangeValues) msg.obj;
                     boolean userInitiatedChange = (msg.arg1 == 1);
                     handleBrightnessChanged(values.brightness, userInitiatedChange,
-                            values.powerBrightnessFactor, values.isUserSetBrightness,
+                            values.powerBrightnessFactor, values.wasShortTermModelActive,
                             values.isDefaultBrightnessConfig, values.timestamp,
                             values.uniqueDisplayId, values.luxValues, values.luxTimestamps);
                     break;
@@ -1009,14 +1007,11 @@ public class BrightnessTracker {
                     stopSensorListener();
                     disableColorSampling();
                     break;
-                case MSG_BRIGHTNESS_CONFIG_CHANGED:
-                    mBrightnessConfiguration = (BrightnessConfiguration) msg.obj;
-                    boolean shouldCollectColorSamples =
-                            mBrightnessConfiguration != null
-                                    && mBrightnessConfiguration.shouldCollectColorSamples();
-                    if (shouldCollectColorSamples && !mColorSamplingEnabled) {
+                case MSG_SHOULD_COLLECT_COLOR_SAMPLE_CHANGED:
+                    mShouldCollectColorSample = (boolean) msg.obj;
+                    if (mShouldCollectColorSample && !mColorSamplingEnabled) {
                         enableColorSampling();
-                    } else if (!shouldCollectColorSamples && mColorSamplingEnabled) {
+                    } else if (!mShouldCollectColorSample && mColorSamplingEnabled) {
                         disableColorSampling();
                     }
                     break;
@@ -1031,7 +1026,7 @@ public class BrightnessTracker {
     private static class BrightnessChangeValues {
         public final float brightness;
         public final float powerBrightnessFactor;
-        public final boolean isUserSetBrightness;
+        public final boolean wasShortTermModelActive;
         public final boolean isDefaultBrightnessConfig;
         public final long timestamp;
         public final String uniqueDisplayId;
@@ -1039,11 +1034,11 @@ public class BrightnessTracker {
         public final long[] luxTimestamps;
 
         BrightnessChangeValues(float brightness, float powerBrightnessFactor,
-                boolean isUserSetBrightness, boolean isDefaultBrightnessConfig,
+                boolean wasShortTermModelActive, boolean isDefaultBrightnessConfig,
                 long timestamp, String uniqueDisplayId, float[] luxValues, long[] luxTimestamps) {
             this.brightness = brightness;
             this.powerBrightnessFactor = powerBrightnessFactor;
-            this.isUserSetBrightness = isUserSetBrightness;
+            this.wasShortTermModelActive = wasShortTermModelActive;
             this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
             this.timestamp = timestamp;
             this.uniqueDisplayId = uniqueDisplayId;

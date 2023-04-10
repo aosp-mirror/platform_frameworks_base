@@ -920,12 +920,18 @@ public abstract class ContentResolver implements ContentInterface {
             return null;
         }
 
-        // XXX would like to have an acquireExistingUnstableProvider for this.
-        IContentProvider provider = acquireExistingProvider(url);
+        IContentProvider provider = null;
+        try {
+            provider = acquireProvider(url);
+        } catch (Exception e) {
+            // if unable to acquire the provider, then it should try to get the type
+            // using getTypeAnonymous via ActivityManagerService
+        }
         if (provider != null) {
             try {
                 final StringResultListener resultListener = new StringResultListener();
-                provider.getTypeAsync(url, new RemoteCallback(resultListener));
+                provider.getTypeAsync(mContext.getAttributionSource(),
+                        url, new RemoteCallback(resultListener));
                 resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
                 if (resultListener.exception != null) {
                     throw resultListener.exception;
@@ -939,7 +945,11 @@ public abstract class ContentResolver implements ContentInterface {
                 Log.w(TAG, "Failed to get type for: " + url + " (" + e.getMessage() + ")");
                 return null;
             } finally {
-                releaseProvider(provider);
+                try {
+                    releaseProvider(provider);
+                } catch (java.lang.NullPointerException e) {
+                    // does nothing, Binder connection already null
+                }
             }
         }
 
@@ -949,7 +959,7 @@ public abstract class ContentResolver implements ContentInterface {
 
         try {
             final StringResultListener resultListener = new StringResultListener();
-            ActivityManager.getService().getProviderMimeTypeAsync(
+            ActivityManager.getService().getMimeTypeFilterAsync(
                     ContentProvider.getUriWithoutUserId(url),
                     resolveUserId(url),
                     new RemoteCallback(resultListener));
@@ -1059,7 +1069,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            return provider.getStreamTypes(url, mimeTypeFilter);
+            return provider.getStreamTypes(mContext.getAttributionSource(), url, mimeTypeFilter);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.

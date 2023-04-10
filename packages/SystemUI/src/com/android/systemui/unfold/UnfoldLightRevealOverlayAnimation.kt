@@ -22,7 +22,7 @@ import android.graphics.PixelFormat
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
 import android.hardware.display.DisplayManager
-import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.os.Handler
 import android.os.Looper
 import android.os.Trace
@@ -38,6 +38,7 @@ import android.view.WindowlessWindowManager
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.LinearLightRevealEffect
@@ -68,6 +69,7 @@ constructor(
     @Main private val executor: Executor,
     private val threadFactory: ThreadFactory,
     private val rotationChangeProvider: RotationChangeProvider,
+    private val displayTracker: DisplayTracker
 ) {
 
     private val transitionListener = TransitionListener()
@@ -85,6 +87,7 @@ constructor(
     private var isFolded: Boolean = false
     private var isUnfoldHandled: Boolean = true
     private var overlayAddReason: AddOverlayReason? = null
+    private var isTouchBlocked: Boolean = true
 
     private var currentRotation: Int = context.display!!.rotation
 
@@ -104,7 +107,7 @@ constructor(
                 .setName("unfold-overlay-container")
 
         displayAreaHelper.get().attachToRootDisplayArea(
-            Display.DEFAULT_DISPLAY,
+            displayTracker.defaultDisplayId,
             containerBuilder
         ) { builder ->
             executor.execute {
@@ -164,7 +167,8 @@ constructor(
 
         overlayAddReason = reason
 
-        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm)
+        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm,
+                "UnfoldLightRevealOverlayAnimation")
         val params = getLayoutParams()
         val newView =
             LightRevealScrim(
@@ -251,13 +255,39 @@ constructor(
         params.layoutInDisplayCutoutMode =
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         params.fitInsetsTypes = 0
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+
+        val touchFlags =
+            if (isTouchBlocked) {
+                // Touchable by default, so it will block the touches
+                0
+            } else {
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            }
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or touchFlags
         params.setTrustedOverlay()
 
         val packageName: String = context.opPackageName
         params.packageName = packageName
 
         return params
+    }
+
+    private fun updateTouchBlockIfNeeded(progress: Float) {
+        // When unfolding unblock touches a bit earlier than the animation end as the
+        // interpolation has a long tail of very slight movement at the end which should not
+        // affect much the usage of the device
+        val shouldBlockTouches =
+            if (overlayAddReason == UNFOLD) {
+                progress < UNFOLD_BLOCK_TOUCHES_UNTIL_PROGRESS
+            } else {
+                true
+            }
+
+        if (isTouchBlocked != shouldBlockTouches) {
+            isTouchBlocked = shouldBlockTouches
+
+            traceSection("$TAG#relayoutToUpdateTouch") { root?.relayout(getLayoutParams()) }
+        }
     }
 
     private fun createLightRevealEffect(): LightRevealEffect {
@@ -286,7 +316,10 @@ constructor(
     private inner class TransitionListener : TransitionProgressListener {
 
         override fun onTransitionProgress(progress: Float) {
-            executeInBackground { scrimView?.revealAmount = calculateRevealAmount(progress) }
+            executeInBackground {
+                scrimView?.revealAmount = calculateRevealAmount(progress)
+                updateTouchBlockIfNeeded(progress)
+            }
         }
 
         override fun onTransitionFinished() {
@@ -299,7 +332,7 @@ constructor(
                 executeInBackground { addOverlay(reason = FOLD) }
             }
             // Disable input dispatching during transition.
-            InputManager.getInstance().cancelCurrentTouch()
+            InputManagerGlobal.getInstance().cancelCurrentTouch()
         }
     }
 
@@ -358,5 +391,7 @@ constructor(
         // constants for revealAmount.
         const val TRANSPARENT = 1f
         const val BLACK = 0f
+
+        private const val UNFOLD_BLOCK_TOUCHES_UNTIL_PROGRESS = 0.8f
     }
 }

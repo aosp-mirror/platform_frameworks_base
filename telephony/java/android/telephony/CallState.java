@@ -285,12 +285,12 @@ public final class CallState implements Parcelable {
     /**
      * Builder of {@link CallState}
      *
-     * <p>The example below shows how you might create a new {@code CallState}:
+     * <p>The example below shows how you might create a new {@code CallState}. A precise call state
+     * {@link PreciseCallStates} is mandatory to build a CallState.
      *
      * <pre><code>
      *
-     * CallState = new CallState.Builder()
-     *     .setCallState(3)
+     * CallState = new CallState.Builder({@link PreciseCallStates})
      *     .setNetworkType({@link TelephonyManager#NETWORK_TYPE_LTE})
      *     .setCallQuality({@link CallQuality})
      *     .setImsCallSessionId({@link String})

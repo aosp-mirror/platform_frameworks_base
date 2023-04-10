@@ -16,12 +16,18 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+import static android.content.PermissionChecker.checkCallingOrSelfPermissionForPreflight;
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
@@ -29,6 +35,7 @@ import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -36,6 +43,7 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -82,9 +90,11 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.window.IDumpCallback;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -99,12 +109,23 @@ import com.android.server.SystemService;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -112,6 +133,15 @@ import java.util.concurrent.ExecutionException;
  * managed profiles.
  */
 public class LauncherAppsService extends SystemService {
+    private static final String WM_TRACE_DIR = "/data/misc/wmtrace/";
+    private static final String VC_FILE_SUFFIX = ".vc";
+
+    private static final Set<PosixFilePermission> WM_TRACE_FILE_PERMISSIONS = Set.of(
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.OTHERS_READ,
+            PosixFilePermission.OWNER_READ
+    );
 
     private final LauncherAppsImpl mLauncherAppsImpl;
 
@@ -184,6 +214,8 @@ public class LauncherAppsService extends SystemService {
         private PackageInstallerService mPackageInstallerService;
 
         final LauncherAppsServiceInternal mInternal;
+
+        private RemoteCallbackList<IDumpCallback> mDumpCallbacks = new RemoteCallbackList<>();
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
@@ -620,7 +652,7 @@ public class LauncherAppsService extends SystemService {
                     // package does not exist; should not happen
                     return null;
                 }
-                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo);
+                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -673,7 +705,7 @@ public class LauncherAppsService extends SystemService {
                     continue;
                 }
                 results.add(new LauncherActivityInfoInternal(ri.activityInfo,
-                        incrementalStatesInfo));
+                        incrementalStatesInfo, user));
             }
             return results;
         }
@@ -1075,6 +1107,55 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        @NonNull
+        public Map<String, LauncherActivityInfoInternal> getActivityOverrides(String callingPackage,
+                int userId) {
+            ensureShortcutPermission(callingPackage);
+            int callingUid = Binder.getCallingUid();
+            final long callerIdentity = Binder.clearCallingIdentity();
+            try {
+                Map<String, LauncherActivityInfoInternal> shortcutOverridesInfo = new ArrayMap<>();
+                UserHandle managedUserHandle = getManagedProfile(userId);
+                if (managedUserHandle == null) {
+                    return shortcutOverridesInfo;
+                }
+
+                List<String> packagesToOverride =
+                        DevicePolicyCache.getInstance().getLauncherShortcutOverrides();
+                for (String packageName : packagesToOverride) {
+                    Intent intent = new Intent(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_LAUNCHER)
+                            .setPackage(packageName);
+
+                    List<LauncherActivityInfoInternal> possibleShortcutOverrides =
+                            queryIntentLauncherActivities(
+                                    intent,
+                                    callingUid,
+                                    managedUserHandle
+                            );
+
+                    if (!possibleShortcutOverrides.isEmpty()) {
+                        shortcutOverridesInfo.put(packageName, possibleShortcutOverrides.get(0));
+                    }
+                }
+                return shortcutOverridesInfo;
+            } finally {
+                Binder.restoreCallingIdentity(callerIdentity);
+            }
+        }
+
+
+        @Nullable
+        private UserHandle getManagedProfile(int userId) {
+            for (UserInfo profile : mUm.getProfiles(userId)) {
+                if (profile.isManagedProfile()) {
+                    return profile.getUserHandle();
+                }
+            }
+            return null;
+        }
+
+        @Override
         public boolean startShortcut(String callingPackage, String packageName, String featureId,
                 String shortcutId, Rect sourceBounds, Bundle startActivityOptions,
                 int targetUserId) {
@@ -1114,12 +1195,19 @@ public class LauncherAppsService extends SystemService {
 
             // Flag for bubble
             ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
-            if (options != null && options.isApplyActivityFlagsForBubbles()) {
-                // Flag for bubble to make behaviour match documentLaunchMode=always.
-                intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+            if (options != null) {
+                if (options.isApplyActivityFlagsForBubbles()) {
+                    // Flag for bubble to make behaviour match documentLaunchMode=always.
+                    intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                    intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                }
+                if (options.isApplyMultipleTaskFlagForShortcut()) {
+                    intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                }
+                if (options.isApplyNoUserActionFlagForShortcut()) {
+                    intents[0].addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+                }
             }
-
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intents[0].setSourceBounds(sourceBounds);
 
@@ -1143,7 +1231,8 @@ public class LauncherAppsService extends SystemService {
             final int code;
             try {
                 code = mActivityTaskManagerInternal.startActivitiesAsPackage(publisherPackage,
-                        publishedFeatureId, userId, intents, startActivityOptions);
+                        publishedFeatureId, userId, intents,
+                        getActivityOptionsForLauncher(startActivityOptions));
                 if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
                 } else {
@@ -1156,6 +1245,23 @@ public class LauncherAppsService extends SystemService {
                 }
                 return false;
             }
+        }
+
+        private Bundle getActivityOptionsForLauncher(Bundle startActivityOptions) {
+            // starting a shortcut implies the user's consent, so grant the launchers/senders BAL
+            // privileges (unless the caller explicitly defined the behavior)
+            if (startActivityOptions == null) {
+                return ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                                MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            ActivityOptions activityOptions = ActivityOptions.fromBundle(startActivityOptions);
+            if (activityOptions.getPendingIntentBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                // only override if the property was not explicitly set
+                return activityOptions.setPendingIntentBackgroundActivityStartMode(
+                        MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            return startActivityOptions;
         }
 
         @Override
@@ -1216,8 +1322,8 @@ public class LauncherAppsService extends SystemService {
             i.setSourceBounds(sourceBounds);
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK, opts,
-                    userId);
+                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
+                    getActivityOptionsForLauncher(opts), userId);
         }
 
         @Override
@@ -1264,7 +1370,8 @@ public class LauncherAppsService extends SystemService {
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, launchIntent, /* resultTo= */ null,
-                    Intent.FLAG_ACTIVITY_NEW_TASK, opts, user.getIdentifier());
+                    Intent.FLAG_ACTIVITY_NEW_TASK, getActivityOptionsForLauncher(opts),
+                    user.getIdentifier());
         }
 
         /**
@@ -1347,7 +1454,67 @@ public class LauncherAppsService extends SystemService {
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, intent, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
-                    opts, user.getIdentifier());
+                    getActivityOptionsForLauncher(opts), user.getIdentifier());
+        }
+
+
+        /**
+         * Using a pipe, outputs view capture data to the wmtrace dir
+         */
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            super.dump(fd, pw, args);
+
+            // Before the wmtrace directory is picked up by dumpstate service, some processes need
+            // to write their data to that location. They can do that via these dumpCallbacks.
+            int i = mDumpCallbacks.beginBroadcast();
+            while (i > 0) {
+                i--;
+                dumpDataToWmTrace((String) mDumpCallbacks.getBroadcastCookie(i) + "_" + i,
+                        mDumpCallbacks.getBroadcastItem(i));
+            }
+            mDumpCallbacks.finishBroadcast();
+        }
+
+        private void dumpDataToWmTrace(String name, IDumpCallback cb) {
+            ParcelFileDescriptor[] pipe;
+            try {
+                pipe = ParcelFileDescriptor.createPipe();
+                cb.onDump(pipe[1]);
+            } catch (IOException | RemoteException e) {
+                Log.d(TAG, "failed to pipe view capture data", e);
+                return;
+            }
+
+            Path path = Paths.get(WM_TRACE_DIR + Paths.get(name + VC_FILE_SUFFIX).getFileName());
+            try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pipe[0])) {
+                Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
+                Files.setPosixFilePermissions(path, WM_TRACE_FILE_PERMISSIONS);
+            } catch (IOException e) {
+                Log.d(TAG, "failed to write data to file in wmtrace dir", e);
+            }
+        }
+
+        @RequiresPermission(READ_FRAME_BUFFER)
+        @Override
+        public void registerDumpCallback(IDumpCallback cb) {
+            int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
+            if (PERMISSION_GRANTED == status) {
+                String name = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
+                mDumpCallbacks.register(cb, name);
+            } else {
+                Log.w(TAG, "caller lacks permissions to registerDumpCallback");
+            }
+        }
+
+        @RequiresPermission(READ_FRAME_BUFFER)
+        @Override
+        public void unRegisterDumpCallback(IDumpCallback cb) {
+            int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
+            if (PERMISSION_GRANTED == status) {
+                mDumpCallbacks.unregister(cb);
+            } else {
+                Log.w(TAG, "caller lacks permissions to unRegisterDumpCallback");
+            }
         }
 
         /** Checks if user is a profile of or same as listeningUser.

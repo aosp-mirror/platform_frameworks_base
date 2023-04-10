@@ -29,6 +29,8 @@ val AIDL_PERMISSION_ANNOTATIONS = listOf(
 const val BINDER_CLASS = "android.os.Binder"
 const val IINTERFACE_INTERFACE = "android.os.IInterface"
 
+const val AIDL_PERMISSION_HELPER_SUFFIX = "_enforcePermission"
+
 /**
  * If a non java (e.g. c++) backend is enabled, the @EnforcePermission
  * annotation cannot be used.  At time of writing, the mechanism

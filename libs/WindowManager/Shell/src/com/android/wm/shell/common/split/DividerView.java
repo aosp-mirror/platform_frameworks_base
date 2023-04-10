@@ -37,6 +37,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -57,9 +58,6 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 public class DividerView extends FrameLayout implements View.OnTouchListener {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
-
-    /** The task bar expanded height. Used to determine whether to insets divider bounds or not. */
-    private float mExpandedTaskBarHeight;
 
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
@@ -215,16 +213,19 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
 
     void onInsetsChanged(InsetsState insetsState, boolean animate) {
         mSplitLayout.getDividerBounds(mTempRect);
-        final InsetsSource taskBarInsetsSource =
-                insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
         // Only insets the divider bar with task bar when it's expanded so that the rounded corners
         // will be drawn against task bar.
         // But there is no need to do it when IME showing because there are no rounded corners at
         // the bottom. This also avoids the problem of task bar height not changing when IME
         // floating.
-        if (!insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME)
-                && taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
-            mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));
+        if (!insetsState.isSourceOrDefaultVisible(InsetsSource.ID_IME, WindowInsets.Type.ime())) {
+            for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
+                final InsetsSource source = insetsState.sourceAt(i);
+                if (source.getType() == WindowInsets.Type.navigationBars()
+                        && source.insetsRoundedCornerFrame()) {
+                    mTempRect.inset(source.calculateVisibleInsets(mTempRect));
+                }
+            }
         }
 
         if (!mTempRect.equals(mDividerBounds)) {
@@ -249,8 +250,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mDividerBar = findViewById(R.id.divider_bar);
         mHandle = findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
-        mExpandedTaskBarHeight = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.taskbar_frame_height);
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
@@ -372,7 +371,14 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mViewHost.relayout(lp);
     }
 
-    void setInteractive(boolean interactive, String from) {
+    /**
+     * Set divider should interactive to user or not.
+     *
+     * @param interactive divider interactive.
+     * @param hideHandle divider handle hidden or not, only work when interactive is false.
+     * @param from caller from where.
+     */
+    void setInteractive(boolean interactive, boolean hideHandle, String from) {
         if (interactive == mInteractive) return;
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                 "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
@@ -388,7 +394,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             mMoving = false;
         }
         releaseTouching();
-        mHandle.setVisibility(mInteractive ? View.VISIBLE : View.INVISIBLE);
+        mHandle.setVisibility(!mInteractive && hideHandle ? View.INVISIBLE : View.VISIBLE);
     }
 
     private boolean isLandscape() {

@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -102,6 +103,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public UiAutomationConnection() {
+        Log.d(TAG, "Created on user " + Process.myUserHandle());
     }
 
     @Override
@@ -161,7 +163,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 mWindowManager.syncInputTransactions(waitForAnimations);
             }
 
-            final boolean result = InputManager.getInstance().injectInputEvent(event,
+            final boolean result = InputManagerGlobal.getInstance().injectInputEvent(event,
                     sync ? InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
                             : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
 

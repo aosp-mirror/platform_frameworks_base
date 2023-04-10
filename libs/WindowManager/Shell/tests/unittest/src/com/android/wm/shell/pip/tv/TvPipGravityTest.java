@@ -26,7 +26,9 @@ import static org.junit.Assert.assertEquals;
 import android.view.Gravity;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +47,8 @@ public class TvPipGravityTest extends ShellTestCase {
 
     private TvPipBoundsState mTvPipBoundsState;
     private TvPipBoundsAlgorithm mTvPipBoundsAlgorithm;
+    private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipDisplayLayoutState mPipDisplayLayoutState;
 
     @Before
     public void setUp() {
@@ -52,9 +56,12 @@ public class TvPipGravityTest extends ShellTestCase {
             return;
         }
         MockitoAnnotations.initMocks(this);
-        mTvPipBoundsState = new TvPipBoundsState(mContext);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mTvPipBoundsState = new TvPipBoundsState(mContext, mPipSizeSpecHandler,
+                mPipDisplayLayoutState);
         mTvPipBoundsAlgorithm = new TvPipBoundsAlgorithm(mContext, mTvPipBoundsState,
-                mMockPipSnapAlgorithm);
+                mMockPipSnapAlgorithm, mPipSizeSpecHandler);
 
         setRTL(false);
     }

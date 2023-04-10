@@ -32,6 +32,7 @@ import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
+import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
 import android.media.permission.ClearCallingIdentityContext;
@@ -52,6 +53,7 @@ import com.android.internal.app.ISoundTriggerSession;
 import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -92,8 +94,21 @@ public final class SoundTriggerManager {
             originatorIdentity.packageName = ActivityThread.currentOpPackageName();
 
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-                mSoundTriggerSession = soundTriggerService.attachAsOriginator(originatorIdentity,
-                        mBinderToken);
+                ModuleProperties moduleProperties = soundTriggerService
+                        .listModuleProperties(originatorIdentity)
+                        .stream()
+                        .filter(prop -> !prop.getSupportedModelArch()
+                                .equals(SoundTrigger.FAKE_HAL_ARCH))
+                        .findFirst()
+                        .orElse(null);
+                if (moduleProperties != null) {
+                    mSoundTriggerSession = soundTriggerService.attachAsOriginator(
+                                                originatorIdentity,
+                                                moduleProperties,
+                                                mBinderToken);
+                } else {
+                    mSoundTriggerSession = null;
+                }
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -104,9 +119,15 @@ public final class SoundTriggerManager {
 
     /**
      * Updates the given sound trigger model.
+     * @deprecated replace with {@link #loadSoundModel}
+     * SoundTriggerService model database will be removed
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @Deprecated
     public void updateModel(Model model) {
+        if (mSoundTriggerSession == null) {
+            throw new IllegalStateException("No underlying SoundTriggerModule available");
+        }
         try {
             mSoundTriggerSession.updateSoundModel(model.getGenericSoundModel());
         } catch (RemoteException e) {
@@ -119,10 +140,15 @@ public final class SoundTriggerManager {
      *
      * @param soundModelId UUID associated with a loaded model
      * @return {@link SoundTriggerManager.Model} associated with UUID soundModelId
+     * @deprecated SoundTriggerService model database will be removed
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @Nullable
+    @Deprecated
     public Model getModel(UUID soundModelId) {
+        if (mSoundTriggerSession == null) {
+            throw new IllegalStateException("No underlying SoundTriggerModule available");
+        }
         try {
             GenericSoundModel model =
                     mSoundTriggerSession.getSoundModel(new ParcelUuid(soundModelId));
@@ -138,9 +164,16 @@ public final class SoundTriggerManager {
 
     /**
      * Deletes the sound model represented by the provided UUID.
+     * @deprecated replace with {@link #unloadSoundModel}
+     * SoundTriggerService model database will be removed
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @Deprecated
     public void deleteModel(UUID soundModelId) {
+        if (mSoundTriggerSession == null) {
+            throw new IllegalStateException("No underlying SoundTriggerModule available");
+        }
+
         try {
             mSoundTriggerSession.deleteSoundModel(new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
@@ -159,12 +192,16 @@ public final class SoundTriggerManager {
      * @param handler The Handler to use for the callback operations. A null value will use the
      * current thread's Looper.
      * @return Instance of {@link SoundTriggerDetector} or null on error.
+     * @deprecated Use {@link SoundTriggerManager} directly. SoundTriggerDetector does not
+     * ensure callbacks are delivered, and its model state is prone to mismatch.
+     * It will be removed in a subsequent release.
      */
     @Nullable
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public SoundTriggerDetector createSoundTriggerDetector(UUID soundModelId,
             @NonNull SoundTriggerDetector.Callback callback, @Nullable Handler handler) {
-        if (soundModelId == null) {
+        if (soundModelId == null || mSoundTriggerSession == null) {
             return null;
         }
 
@@ -172,11 +209,16 @@ public final class SoundTriggerManager {
         if (oldInstance != null) {
             // Shutdown old instance.
         }
-        SoundTriggerDetector newInstance = new SoundTriggerDetector(mSoundTriggerSession,
-                soundModelId, callback, handler);
-        mReceiverInstanceMap.put(soundModelId, newInstance);
-        return newInstance;
-    }
+        try {
+            SoundTriggerDetector newInstance = new SoundTriggerDetector(mSoundTriggerSession,
+                    mSoundTriggerSession.getSoundModel(new ParcelUuid(soundModelId)),
+                    callback, handler);
+            mReceiverInstanceMap.put(soundModelId, newInstance);
+            return newInstance;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+   }
 
     /**
      * Class captures the data and fields that represent a non-keyphrase sound model. Use the
@@ -325,7 +367,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     public int loadSoundModel(SoundModel soundModel) {
-        if (soundModel == null) {
+        if (soundModel == null || mSoundTriggerSession == null) {
             return STATUS_ERROR;
         }
 
@@ -372,7 +414,9 @@ public final class SoundTriggerManager {
         Preconditions.checkNotNull(soundModelId);
         Preconditions.checkNotNull(detectionService);
         Preconditions.checkNotNull(config);
-
+        if (mSoundTriggerSession == null) {
+            return STATUS_ERROR;
+        }
         try {
             return mSoundTriggerSession.startRecognitionForService(new ParcelUuid(soundModelId),
                 params, detectionService, config);
@@ -388,7 +432,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int stopRecognition(UUID soundModelId) {
-        if (soundModelId == null) {
+        if (soundModelId == null || mSoundTriggerSession == null) {
             return STATUS_ERROR;
         }
         try {
@@ -405,7 +449,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int unloadSoundModel(UUID soundModelId) {
-        if (soundModelId == null) {
+        if (soundModelId == null || mSoundTriggerSession == null) {
             return STATUS_ERROR;
         }
         try {
@@ -423,7 +467,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     public boolean isRecognitionActive(UUID soundModelId) {
-        if (soundModelId == null) {
+        if (soundModelId == null || mSoundTriggerSession == null) {
             return false;
         }
         try {
@@ -458,7 +502,7 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
     public int getModelState(UUID soundModelId) {
-        if (soundModelId == null) {
+        if (soundModelId == null || mSoundTriggerSession == null) {
             return STATUS_ERROR;
         }
         try {
@@ -475,8 +519,10 @@ public final class SoundTriggerManager {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @Nullable
-    public SoundTrigger.ModuleProperties getModuleProperties() {
-
+    public ModuleProperties getModuleProperties() {
+        if (mSoundTriggerSession == null) {
+            return null;
+        }
         try {
             return mSoundTriggerSession.getModuleProperties();
         } catch (RemoteException e) {
@@ -503,6 +549,10 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public int setParameter(@Nullable UUID soundModelId,
             @ModelParams int modelParam, int value) {
+        if (mSoundTriggerSession == null) {
+            return SoundTrigger.STATUS_INVALID_OPERATION;
+        }
+
         try {
             return mSoundTriggerSession.setParameter(new ParcelUuid(soundModelId), modelParam,
                     value);
@@ -526,6 +576,10 @@ public final class SoundTriggerManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public int getParameter(@NonNull UUID soundModelId,
             @ModelParams int modelParam) {
+        if (mSoundTriggerSession == null) {
+            throw new IllegalArgumentException("Sound model is not loaded: "
+                            + soundModelId.toString());
+        }
         try {
             return mSoundTriggerSession.getParameter(new ParcelUuid(soundModelId), modelParam);
         } catch (RemoteException e) {
@@ -546,6 +600,9 @@ public final class SoundTriggerManager {
     @Nullable
     public ModelParamRange queryParameter(@Nullable UUID soundModelId,
             @ModelParams int modelParam) {
+        if (mSoundTriggerSession == null) {
+            return null;
+        }
         try {
             return mSoundTriggerSession.queryParameter(new ParcelUuid(soundModelId), modelParam);
         } catch (RemoteException e) {

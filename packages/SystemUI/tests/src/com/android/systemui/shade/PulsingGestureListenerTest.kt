@@ -29,6 +29,7 @@ import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.tuner.TunerService.Tunable
@@ -69,6 +70,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     private lateinit var statusBarStateController: StatusBarStateController
     @Mock
     private lateinit var shadeLogger: ShadeLogger
+    @Mock
+    private lateinit var userTracker: UserTracker
 
     private lateinit var tunableCaptor: ArgumentCaptor<Tunable>
     private lateinit var underTest: PulsingGestureListener
@@ -85,6 +88,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
                 ambientDisplayConfiguration,
                 statusBarStateController,
                 shadeLogger,
+                userTracker,
                 tunerService,
                 dumpManager
         )

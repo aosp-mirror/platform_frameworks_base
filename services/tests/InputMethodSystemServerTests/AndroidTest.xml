@@ -21,6 +21,7 @@
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
         <option name="test-file-name" value="FrameworksInputMethodSystemServerTests.apk" />
+        <option name="test-file-name" value="SimpleTestIme.apk" />
     </target_preparer>
 
     <option name="test-tag" value="FrameworksInputMethodSystemServerTests" />

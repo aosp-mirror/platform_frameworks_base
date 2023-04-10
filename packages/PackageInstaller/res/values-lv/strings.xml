@@ -26,10 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Lietotne ir instalēta."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vai vēlaties instalēt šo lietotni?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vai vēlaties atjaunināt šo lietotni?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vai atjaunināt šo lietotni, izmantojot “<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>”?\n\nŠī lietotne parasti saņem atjauninājumus no “<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>”. Veicot atjaunināšanu no cita avota, iespējams, turpmāk tālrunī saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties."</string>
     <string name="install_failed" msgid="5777824004474125469">"Lietotne nav instalēta."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakotnes instalēšana tika bloķēta."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Lietotne netika instalēta, jo pastāv pakotnes konflikts ar esošu pakotni."</string>
@@ -45,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Šis lietotājs nevar instalēt nezināmas lietotnes"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Šim lietotājam nav atļauts instalēt lietotnes"</string>
     <string name="ok" msgid="7871959885003339302">"Labi"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Tik un tā atjaunināt"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Pārv. lietotnes"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nav brīvas vietas"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Lietotni <xliff:g id="APP_NAME">%1$s</xliff:g> nevarēja instalēt. Atbrīvojiet vietu un mēģiniet vēlreiz."</string>
@@ -72,6 +70,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Notiek lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> atinstalēšana…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Atinstalēšana ir pabeigta."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Lietotne <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ir atinstalēta"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Izdzēsts lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klons"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Atinstalēšana neizdevās."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> atinstalēšana nebija sekmīga."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Notiek lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klona dzēšana…"</string>

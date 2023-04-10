@@ -60,7 +60,7 @@ import com.android.systemui.people.ui.viewmodel.PeopleViewModel
  *
  * @param viewModel the [PeopleViewModel] that should be composed.
  * @param onResult the callback called with the result of this screen. Callers should usually finish
- * the Activity/Fragment/View hosting this Composable once a result is available.
+ *   the Activity/Fragment/View hosting this Composable once a result is available.
  */
 @Composable
 fun PeopleScreen(

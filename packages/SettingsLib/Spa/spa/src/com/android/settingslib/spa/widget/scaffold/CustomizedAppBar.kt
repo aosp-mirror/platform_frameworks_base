@@ -50,6 +50,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +63,7 @@ import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
@@ -106,7 +109,7 @@ internal fun CustomizedLargeTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     TwoRowsTopAppBar(
-        title = { Title(title = title, maxLines = 2) },
+        title = { Title(title = title, maxLines = 3) },
         titleTextStyle = MaterialTheme.typography.displaySmall,
         smallTitleTextStyle = MaterialTheme.typography.titleMedium,
         titleBottomPadding = LargeTitleBottomPadding,
@@ -116,7 +119,6 @@ internal fun CustomizedLargeTopAppBar(
         actions = actions,
         colors = topAppBarColors(),
         windowInsets = TopAppBarDefaults.windowInsets,
-        maxHeight = 176.dp,
         pinnedHeight = ContainerHeight,
         scrollBehavior = scrollBehavior,
     )
@@ -258,8 +260,8 @@ private fun SingleRowTopAppBar(
  * A two-rows top app bar that is designed to be called by the Large and Medium top app bar
  * composables.
  *
- * @throws [IllegalArgumentException] if the given [maxHeight] is equal or smaller than the
- * [pinnedHeight]
+ * @throws [IllegalArgumentException] if the given [MaxHeightWithoutTitle] is equal or smaller than
+ * the [pinnedHeight]
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -274,29 +276,30 @@ private fun TwoRowsTopAppBar(
     actions: @Composable RowScope.() -> Unit,
     windowInsets: WindowInsets,
     colors: TopAppBarColors,
-    maxHeight: Dp,
     pinnedHeight: Dp,
     scrollBehavior: TopAppBarScrollBehavior?
 ) {
-    if (maxHeight <= pinnedHeight) {
+    if (MaxHeightWithoutTitle <= pinnedHeight) {
         throw IllegalArgumentException(
             "A TwoRowsTopAppBar max height should be greater than its pinned height"
         )
     }
     val pinnedHeightPx: Float
-    val maxHeightPx: Float
+    val density = LocalDensity.current
+    val maxHeightPx = density.run {
+        remember { mutableStateOf((MaxHeightWithoutTitle + DefaultTitleHeight).toPx()) }
+    }
     val titleBottomPaddingPx: Int
-    LocalDensity.current.run {
+    density.run {
         pinnedHeightPx = pinnedHeight.toPx()
-        maxHeightPx = maxHeight.toPx()
         titleBottomPaddingPx = titleBottomPadding.roundToPx()
     }
 
     // Sets the app bar's height offset limit to hide just the bottom title area and keep top title
     // visible when collapsed.
     SideEffect {
-        if (scrollBehavior?.state?.heightOffsetLimit != pinnedHeightPx - maxHeightPx) {
-            scrollBehavior?.state?.heightOffsetLimit = pinnedHeightPx - maxHeightPx
+        if (scrollBehavior?.state?.heightOffsetLimit != pinnedHeightPx - maxHeightPx.value) {
+            scrollBehavior?.state?.heightOffsetLimit = pinnedHeightPx - maxHeightPx.value
         }
     }
 
@@ -366,12 +369,19 @@ private fun TwoRowsTopAppBar(
             )
             TopAppBarLayout(
                 modifier = Modifier.clipToBounds(),
-                heightPx = maxHeightPx - pinnedHeightPx + (scrollBehavior?.state?.heightOffset
-                    ?: 0f),
+                heightPx = maxHeightPx.value - pinnedHeightPx +
+                    (scrollBehavior?.state?.heightOffset ?: 0f),
                 navigationIconContentColor = colors.navigationIconContentColor,
                 titleContentColor = colors.titleContentColor,
                 actionIconContentColor = colors.actionIconContentColor,
-                title = title,
+                title = {
+                    Box(modifier = Modifier.onGloballyPositioned { coordinates ->
+                        density.run {
+                            maxHeightPx.value =
+                                MaxHeightWithoutTitle.toPx() + coordinates.size.height.toFloat()
+                        }
+                    }) { title() }
+                },
                 titleTextStyle = titleTextStyle,
                 titleAlpha = bottomTitleAlpha,
                 titleVerticalArrangement = Arrangement.Bottom,
@@ -598,6 +608,8 @@ private suspend fun settleAppBar(
 // Medium or Large app bar.
 private val TopTitleAlphaEasing = CubicBezierEasing(.8f, 0f, .8f, .15f)
 
+private val MaxHeightWithoutTitle = 124.dp
+private val DefaultTitleHeight = 52.dp
 private val ContainerHeight = 56.dp
 private val LargeTitleBottomPadding = 28.dp
 private val TopAppBarHorizontalPadding = 4.dp

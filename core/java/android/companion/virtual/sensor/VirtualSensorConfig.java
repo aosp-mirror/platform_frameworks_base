@@ -16,51 +16,74 @@
 
 package android.companion.virtual.sensor;
 
-import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
-import android.annotation.CallbackExecutor;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.hardware.Sensor;
+import android.hardware.SensorDirectChannel;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.time.Duration;
 import java.util.Objects;
-import java.util.concurrent.Executor;
+
 
 /**
  * Configuration for creation of a virtual sensor.
+ *
  * @see VirtualSensor
+ *
  * @hide
  */
 @SystemApi
 public final class VirtualSensorConfig implements Parcelable {
+    private static final String TAG = "VirtualSensorConfig";
+
+    // Mask for direct mode highest rate level, bit 7, 8, 9.
+    private static final int DIRECT_REPORT_MASK = 0x380;
+    private static final int DIRECT_REPORT_SHIFT = 7;
+
+    // Mask for supported direct channel, bit 10, 11
+    private static final int DIRECT_CHANNEL_SHIFT = 10;
 
     private final int mType;
     @NonNull
     private final String mName;
     @Nullable
     private final String mVendor;
-    @Nullable
-    private final IVirtualSensorStateChangeCallback mStateChangeCallback;
+    private final float mMaximumRange;
+    private final float mResolution;
+    private final float mPower;
+    private final int mMinDelay;
+    private final int mMaxDelay;
+
+    private final int mFlags;
 
     private VirtualSensorConfig(int type, @NonNull String name, @Nullable String vendor,
-            @Nullable IVirtualSensorStateChangeCallback stateChangeCallback) {
+            float maximumRange, float resolution, float power, int minDelay, int maxDelay,
+            int flags) {
         mType = type;
         mName = name;
         mVendor = vendor;
-        mStateChangeCallback = stateChangeCallback;
+        mMaximumRange = maximumRange;
+        mResolution = resolution;
+        mPower = power;
+        mMinDelay = minDelay;
+        mMaxDelay = maxDelay;
+        mFlags = flags;
     }
 
     private VirtualSensorConfig(@NonNull Parcel parcel) {
         mType = parcel.readInt();
         mName = parcel.readString8();
         mVendor = parcel.readString8();
-        mStateChangeCallback =
-                IVirtualSensorStateChangeCallback.Stub.asInterface(parcel.readStrongBinder());
+        mMaximumRange = parcel.readFloat();
+        mResolution = parcel.readFloat();
+        mPower = parcel.readFloat();
+        mMinDelay = parcel.readInt();
+        mMaxDelay = parcel.readInt();
+        mFlags = parcel.readInt();
     }
 
     @Override
@@ -73,8 +96,12 @@ public final class VirtualSensorConfig implements Parcelable {
         parcel.writeInt(mType);
         parcel.writeString8(mName);
         parcel.writeString8(mVendor);
-        parcel.writeStrongBinder(
-                mStateChangeCallback != null ? mStateChangeCallback.asBinder() : null);
+        parcel.writeFloat(mMaximumRange);
+        parcel.writeFloat(mResolution);
+        parcel.writeFloat(mPower);
+        parcel.writeInt(mMinDelay);
+        parcel.writeInt(mMaxDelay);
+        parcel.writeInt(mFlags);
     }
 
     /**
@@ -97,6 +124,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
     /**
      * Returns the vendor string of the sensor.
+     *
      * @see Builder#setVendor
      */
     @Nullable
@@ -105,12 +133,87 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns the callback to get notified about changes in the sensor listeners.
+     * Returns the maximum range of the sensor in the sensor's unit.
+     *
+     * @see Sensor#getMaximumRange
+     */
+    public float getMaximumRange() {
+        return mMaximumRange;
+    }
+
+    /**
+     * Returns the resolution of the sensor in the sensor's unit.
+     *
+     * @see Sensor#getResolution
+     */
+    public float getResolution() {
+        return mResolution;
+    }
+
+    /**
+     * Returns the power in mA used by this sensor while in use.
+     *
+     * @see Sensor#getPower
+     */
+    public float getPower() {
+        return mPower;
+    }
+
+    /**
+     * Returns the minimum delay allowed between two events in microseconds, or zero depending on
+     * the sensor type.
+     *
+     * @see Sensor#getMinDelay
+     */
+    public int getMinDelay() {
+        return mMinDelay;
+    }
+
+    /**
+     * Returns the maximum delay between two sensor events in microseconds.
+     *
+     * @see Sensor#getMaxDelay
+     */
+    public int getMaxDelay() {
+        return mMaxDelay;
+    }
+
+    /**
+     * Returns the highest supported direct report mode rate level of the sensor.
+     *
+     * @see Sensor#getHighestDirectReportRateLevel()
+     */
+    @SensorDirectChannel.RateLevel
+    public int getHighestDirectReportRateLevel() {
+        int rateLevel = ((mFlags & DIRECT_REPORT_MASK) >> DIRECT_REPORT_SHIFT);
+        return rateLevel <= SensorDirectChannel.RATE_VERY_FAST
+                ? rateLevel : SensorDirectChannel.RATE_VERY_FAST;
+    }
+
+    /**
+     * Returns a combination of all supported direct channel types.
+     *
+     * @see Builder#setDirectChannelTypesSupported(int)
+     * @see Sensor#isDirectChannelTypeSupported(int)
+     */
+    public @SensorDirectChannel.MemoryType int getDirectChannelTypesSupported() {
+        int memoryTypes = 0;
+        if ((mFlags & (1 << DIRECT_CHANNEL_SHIFT)) > 0) {
+            memoryTypes |= SensorDirectChannel.TYPE_MEMORY_FILE;
+        }
+        if ((mFlags & (1 << (DIRECT_CHANNEL_SHIFT + 1))) > 0) {
+            memoryTypes |= SensorDirectChannel.TYPE_HARDWARE_BUFFER;
+        }
+        return memoryTypes;
+    }
+
+    /**
+     * Returns the sensor flags.
+     *
      * @hide
      */
-    @Nullable
-    public IVirtualSensorStateChangeCallback getStateChangeCallback() {
-        return mStateChangeCallback;
+    public int getFlags() {
+        return mFlags;
     }
 
     /**
@@ -118,46 +221,33 @@ public final class VirtualSensorConfig implements Parcelable {
      */
     public static final class Builder {
 
+        private static final int FLAG_MEMORY_FILE_DIRECT_CHANNEL_SUPPORTED =
+                1 << DIRECT_CHANNEL_SHIFT;
         private final int mType;
         @NonNull
         private final String mName;
         @Nullable
         private String mVendor;
-        @Nullable
-        private IVirtualSensorStateChangeCallback mStateChangeCallback;
-
-        private static class SensorStateChangeCallbackDelegate
-                extends IVirtualSensorStateChangeCallback.Stub {
-            @NonNull
-            private final Executor mExecutor;
-            @NonNull
-            private final VirtualSensor.SensorStateChangeCallback mCallback;
-
-            SensorStateChangeCallbackDelegate(@NonNull @CallbackExecutor Executor executor,
-                    @NonNull VirtualSensor.SensorStateChangeCallback callback) {
-                mCallback = callback;
-                mExecutor = executor;
-            }
-            @Override
-            public void onStateChanged(boolean enabled, int samplingPeriodMicros,
-                    int batchReportLatencyMicros) {
-                final Duration samplingPeriod =
-                        Duration.ofNanos(MICROSECONDS.toNanos(samplingPeriodMicros));
-                final Duration batchReportingLatency =
-                        Duration.ofNanos(MICROSECONDS.toNanos(batchReportLatencyMicros));
-                mExecutor.execute(() -> mCallback.onStateChanged(
-                        enabled, samplingPeriod, batchReportingLatency));
-            }
-        }
+        private float mMaximumRange;
+        private float mResolution;
+        private float mPower;
+        private int mMinDelay;
+        private int mMaxDelay;
+        private int mFlags;
+        @SensorDirectChannel.RateLevel
+        int mHighestDirectReportRateLevel;
 
         /**
          * Creates a new builder.
          *
          * @param type The type of the sensor, matching {@link Sensor#getType}.
          * @param name The name of the sensor. Must be unique among all sensors with the same type
-         * that belong to the same virtual device.
+         *   that belong to the same virtual device.
          */
-        public Builder(int type, @NonNull String name) {
+        public Builder(@IntRange(from = 1) int type, @NonNull String name) {
+            if (type <= 0) {
+                throw new IllegalArgumentException("Virtual sensor type must be positive");
+            }
             mType = type;
             mName = Objects.requireNonNull(name);
         }
@@ -167,7 +257,20 @@ public final class VirtualSensorConfig implements Parcelable {
          */
         @NonNull
         public VirtualSensorConfig build() {
-            return new VirtualSensorConfig(mType, mName, mVendor, mStateChangeCallback);
+            if (mHighestDirectReportRateLevel > 0) {
+                if ((mFlags & FLAG_MEMORY_FILE_DIRECT_CHANNEL_SUPPORTED) == 0) {
+                    throw new IllegalArgumentException("Setting direct channel type is required "
+                            + "for sensors with direct channel support.");
+                }
+                mFlags |= mHighestDirectReportRateLevel << DIRECT_REPORT_SHIFT;
+            }
+            if ((mFlags & FLAG_MEMORY_FILE_DIRECT_CHANNEL_SUPPORTED) > 0
+                    && mHighestDirectReportRateLevel == 0) {
+                throw new IllegalArgumentException("Highest direct report rate level is "
+                        + "required for sensors with direct channel support.");
+            }
+            return new VirtualSensorConfig(mType, mName, mVendor, mMaximumRange, mResolution,
+                    mPower, mMinDelay, mMaxDelay, mFlags);
         }
 
         /**
@@ -180,20 +283,95 @@ public final class VirtualSensorConfig implements Parcelable {
         }
 
         /**
-         * Sets the callback to get notified about changes in the sensor listeners.
+         * Sets the maximum range of the sensor in the sensor's unit.
          *
-         * @param executor The executor where the callback is executed on.
-         * @param callback The callback to get notified when the state of the sensor
-         * listeners has changed, see {@link VirtualSensor.SensorStateChangeCallback}
+         * @see Sensor#getMaximumRange
          */
-        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
-        public VirtualSensorConfig.Builder setStateChangeCallback(
-                @NonNull @CallbackExecutor Executor executor,
-                @NonNull VirtualSensor.SensorStateChangeCallback callback) {
-            mStateChangeCallback = new SensorStateChangeCallbackDelegate(
-                    Objects.requireNonNull(executor),
-                    Objects.requireNonNull(callback));
+        public VirtualSensorConfig.Builder setMaximumRange(float maximumRange) {
+            mMaximumRange = maximumRange;
+            return this;
+        }
+
+        /**
+         * Sets the resolution of the sensor in the sensor's unit.
+         *
+         * @see Sensor#getResolution
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setResolution(float resolution) {
+            mResolution = resolution;
+            return this;
+        }
+
+        /**
+         * Sets the power in mA used by this sensor while in use.
+         *
+         * @see Sensor#getPower
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setPower(float power) {
+            mPower = power;
+            return this;
+        }
+
+        /**
+         * Sets the minimum delay allowed between two events in microseconds.
+         *
+         * @see Sensor#getMinDelay
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setMinDelay(int minDelay) {
+            mMinDelay = minDelay;
+            return this;
+        }
+
+        /**
+         * Sets the maximum delay between two sensor events in microseconds.
+         *
+         * @see Sensor#getMaxDelay
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setMaxDelay(int maxDelay) {
+            mMaxDelay = maxDelay;
+            return this;
+        }
+
+        /**
+         * Sets the highest supported rate level for direct sensor report.
+         *
+         * @see VirtualSensorConfig#getHighestDirectReportRateLevel()
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setHighestDirectReportRateLevel(
+                @SensorDirectChannel.RateLevel int rateLevel) {
+            mHighestDirectReportRateLevel = rateLevel;
+            return this;
+        }
+
+        /**
+         * Sets whether direct sensor channel of the given types is supported.
+         *
+         * @param memoryTypes A combination of {@link SensorDirectChannel.MemoryType} flags
+         *   indicating the types of shared memory supported for creating direct channels. Only
+         *   {@link SensorDirectChannel#TYPE_MEMORY_FILE} direct channels may be supported for
+         *   virtual sensors.
+         * @throws IllegalArgumentException if {@link SensorDirectChannel#TYPE_HARDWARE_BUFFER} is
+         *   set to be supported.
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setDirectChannelTypesSupported(
+                @SensorDirectChannel.MemoryType int memoryTypes) {
+            if ((memoryTypes & SensorDirectChannel.TYPE_MEMORY_FILE) > 0) {
+                mFlags |= FLAG_MEMORY_FILE_DIRECT_CHANNEL_SUPPORTED;
+            } else {
+                mFlags &= ~FLAG_MEMORY_FILE_DIRECT_CHANNEL_SUPPORTED;
+            }
+            if ((memoryTypes & ~SensorDirectChannel.TYPE_MEMORY_FILE) > 0) {
+                throw new IllegalArgumentException(
+                        "Only TYPE_MEMORY_FILE direct channels can be supported for virtual "
+                                + "sensors.");
+            }
             return this;
         }
     }

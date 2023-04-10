@@ -415,4 +415,27 @@ public class RequiresPermissionCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testInvalidFunctions() {
+        compilationHelper
+                .addSourceFile("/android/annotation/RequiresPermission.java")
+                .addSourceFile("/android/annotation/SuppressLint.java")
+                .addSourceFile("/android/content/Context.java")
+                .addSourceLines("Example.java",
+                        "import android.annotation.RequiresPermission;",
+                        "import android.annotation.SuppressLint;",
+                        "import android.content.Context;",
+                        "class Foo extends Context {",
+                        "  private static final String RED = \"red\";",
+                        "  public void checkPermission() {",
+                        "  }",
+                        "  @RequiresPermission(RED)",
+                        "  // BUG: Diagnostic contains:",
+                        "  public void exampleScoped(Context context) {",
+                        "    checkPermission();",
+                        "  }",
+                        "}")
+                .doTest();
+    }
 }

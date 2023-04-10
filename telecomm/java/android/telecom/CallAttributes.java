@@ -58,6 +58,9 @@ public final class CallAttributes implements Parcelable {
     /** @hide **/
     public static final String CALL_CAPABILITIES_KEY = "TelecomCapabilities";
 
+    /** @hide **/
+    public static final String CALLER_PID = "CallerPid";
+
     private CallAttributes(@NonNull PhoneAccountHandle phoneAccountHandle,
             @NonNull CharSequence displayName,
             @NonNull Uri address,
@@ -116,13 +119,13 @@ public final class CallAttributes implements Parcelable {
      */
     public static final int SUPPORTS_STREAM = 1 << 2;
     /**
-     * The call can be completely transferred from one endpoint to another
+     * The call can be completely transferred from one endpoint to another.
      */
     public static final int SUPPORTS_TRANSFER = 1 << 3;
 
     /**
      * Build an instance of {@link CallAttributes}. In order to build a valid instance, a
-     * {@link PhoneAccountHandle}, call {@link Direction}, display name, and {@link Uri} address
+     * {@link PhoneAccountHandle}, call direction, display name, and {@link Uri} address
      * are required.
      *
      * <p>
@@ -165,7 +168,8 @@ public final class CallAttributes implements Parcelable {
         }
 
         /**
-         * @param callType see {@link CallType} for valid arguments
+         * Sets the type of call; uses to indicate if a call is a video call or audio call.
+         * @param callType The call type.
          * @return Builder
          */
         @NonNull
@@ -180,7 +184,9 @@ public final class CallAttributes implements Parcelable {
         }
 
         /**
-         * @param callCapabilities see {@link CallCapability} for valid arguments
+         * Sets the capabilities of this call.  Use this to indicate whether your app supports
+         * holding, streaming and call transfers.
+         * @param callCapabilities Bitmask of call capabilities.
          * @return Builder
          */
         @NonNull

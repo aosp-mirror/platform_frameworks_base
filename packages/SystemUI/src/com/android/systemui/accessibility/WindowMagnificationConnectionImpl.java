@@ -39,13 +39,11 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     private IWindowMagnificationConnectionCallback mConnectionCallback;
     private final WindowMagnification mWindowMagnification;
     private final Handler mHandler;
-    private final ModeSwitchesController mModeSwitchesController;
 
     WindowMagnificationConnectionImpl(@NonNull WindowMagnification windowMagnification,
-            @Main Handler mainHandler, ModeSwitchesController modeSwitchesController) {
+            @Main Handler mainHandler) {
         mWindowMagnification = windowMagnification;
         mHandler = mainHandler;
-        mModeSwitchesController = modeSwitchesController;
     }
 
     @Override
@@ -86,13 +84,18 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     @Override
     public void showMagnificationButton(int displayId, int magnificationMode) {
         mHandler.post(
-                () -> mModeSwitchesController.showButton(displayId, magnificationMode));
+                () -> mWindowMagnification.showMagnificationButton(displayId, magnificationMode));
     }
 
     @Override
     public void removeMagnificationButton(int displayId) {
         mHandler.post(
-                () -> mModeSwitchesController.removeButton(displayId));
+                () -> mWindowMagnification.removeMagnificationButton(displayId));
+    }
+
+    @Override
+    public void removeMagnificationSettingsPanel(int display) {
+        mHandler.post(() -> mWindowMagnification.hideMagnificationSettingsPanel(display));
     }
 
     @Override

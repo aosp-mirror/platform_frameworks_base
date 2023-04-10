@@ -73,7 +73,7 @@ public abstract class PluginsModule {
         return new PluginInstance.Factory(
                 PluginModule.class.getClassLoader(),
                 new PluginInstance.InstanceFactory<>(),
-                new PluginInstance.VersionChecker(),
+                new PluginInstance.VersionCheckerImpl(),
                 privilegedPlugins,
                 isDebug);
     }
@@ -121,6 +121,6 @@ public abstract class PluginsModule {
     @Provides
     @Named(PLUGIN_PRIVILEGED)
     static List<String> providesPrivilegedPlugins(Context context) {
-        return Arrays.asList(context.getResources().getStringArray(R.array.config_pluginWhitelist));
+        return Arrays.asList(context.getResources().getStringArray(R.array.config_pluginAllowlist));
     }
 }

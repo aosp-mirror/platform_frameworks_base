@@ -245,13 +245,13 @@ class WindowSurfaceController {
         t.setColorSpaceAgnostic(mSurfaceControl, agnostic);
     }
 
-    boolean showRobustly(SurfaceControl.Transaction t) {
+    void showRobustly(SurfaceControl.Transaction t) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SHOW (performLayout): %s", title);
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                 + " during relayout");
 
         if (mSurfaceShown) {
-            return true;
+            return;
         }
 
         setShown(true);
@@ -262,7 +262,6 @@ class WindowSurfaceController {
                     dc.mDisplayId, 1 /* request shown */,
                     String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
         }
-        return true;
     }
 
     boolean clearWindowContentFrameStats() {

@@ -41,6 +41,8 @@ class WallpaperWindowToken extends WindowToken {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperWindowToken" : TAG_WM;
 
+    private boolean mShowWhenLocked = false;
+
     WallpaperWindowToken(WindowManagerService service, IBinder token, boolean explicit,
             DisplayContent dc, boolean ownerCanManageAppTokens) {
         this(service, token, explicit, dc, ownerCanManageAppTokens, null /* options */);
@@ -63,6 +65,33 @@ class WallpaperWindowToken extends WindowToken {
     void setExiting(boolean animateExit) {
         super.setExiting(animateExit);
         mDisplayContent.mWallpaperController.removeWallpaperToken(this);
+    }
+
+    /**
+     * Controls whether this wallpaper shows underneath the keyguard or is hidden and only
+     * revealed once keyguard is dismissed.
+     */
+    void setShowWhenLocked(boolean showWhenLocked) {
+        if (showWhenLocked == mShowWhenLocked) {
+            return;
+        }
+        mShowWhenLocked = showWhenLocked;
+        if (mDisplayContent.mWallpaperController.mIsLockscreenLiveWallpaperEnabled) {
+            // Move the window token to the front (private) or back (showWhenLocked). This is
+            // possible
+            // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER
+            // windows.
+            final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
+
+            // Note: Moving all the way to the front or back breaks ordering based on addition
+            // times.
+            // We should never have more than one non-animating token of each type.
+            getParent().positionChildAt(position, this /* child */, false /*includingParents */);
+        }
+    }
+
+    boolean canShowWhenLocked() {
+        return mShowWhenLocked;
     }
 
     void sendWindowWallpaperCommand(
@@ -99,7 +128,6 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    /** Returns {@code true} if visibility is changed. */
     void updateWallpaperWindows(boolean visible) {
         boolean changed = false;
         if (mVisibleRequested != visible) {
@@ -117,6 +145,10 @@ class WallpaperWindowToken extends WindowToken {
                     linkFixedRotationTransform(wallpaperTarget.mToken);
                 }
             }
+            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
+            // when finishing transition. Otherwise commitVisibility() is already called from above
+            // setVisibility().
+            return;
         }
 
         final WindowState wallpaperTarget =

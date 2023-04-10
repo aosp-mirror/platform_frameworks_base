@@ -122,6 +122,12 @@
        Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
+    <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, to locate the sensor (tablet) for accessibility (not shown on the screen). [CHAR LIMIT=NONE]-->
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet">The fingerprint sensor is on the power button. It’s the flat button next to the raised volume button on the edge of the tablet.</string>
+    <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, to locate the sensor (device) for accessibility (not shown on the screen). [CHAR LIMIT=NONE]-->
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device">The fingerprint sensor is on the power button. It’s the flat button next to the raised volume button on the edge of the device.</string>
+    <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, to locate the sensor (default) for accessibility (not shown on the screen). [CHAR LIMIT=NONE]-->
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default">The fingerprint sensor is on the power button. It’s the flat button next to the raised volume button on the edge of the phone.</string>
 
     <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
     <string name="global_action_lock_message" product="default">Unlock your phone for more options</string>
@@ -134,4 +140,7 @@
     <string name="media_transfer_playing_this_device" product="default">Playing on this phone</string>
     <!-- Text informing the user that their media is now playing on this tablet device. [CHAR LIMIT=50] -->
     <string name="media_transfer_playing_this_device" product="tablet">Playing on this tablet</string>
+
+
+
 </resources>

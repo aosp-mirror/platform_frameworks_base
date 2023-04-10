@@ -31,6 +31,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
+import com.android.server.display.brightness.strategy.FollowerBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OverrideBrightnessStrategy;
 import com.android.server.display.brightness.strategy.ScreenOffBrightnessStrategy;
@@ -60,6 +61,8 @@ public final class DisplayBrightnessStrategySelectorTest {
     private BoostBrightnessStrategy mBoostBrightnessStrategy;
     @Mock
     private InvalidBrightnessStrategy mInvalidBrightnessStrategy;
+    @Mock
+    private FollowerBrightnessStrategy mFollowerBrightnessStrategy;
     @Mock
     private Context mContext;
     @Mock
@@ -100,6 +103,11 @@ public final class DisplayBrightnessStrategySelectorTest {
                     }
 
                     @Override
+                    FollowerBrightnessStrategy getFollowerBrightnessStrategy(int displayId) {
+                        return mFollowerBrightnessStrategy;
+                    }
+
+                    @Override
                     InvalidBrightnessStrategy getInvalidBrightnessStrategy() {
                         return mInvalidBrightnessStrategy;
                     }
@@ -133,6 +141,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.screenBrightnessOverride = 0.4f;
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
                 Display.STATE_ON), mOverrideBrightnessStrategy);
     }
@@ -142,6 +151,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.screenBrightnessOverride = Float.NaN;
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
         when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(0.3f);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
                 Display.STATE_ON), mTemporaryBrightnessStrategy);
@@ -152,6 +162,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.boostScreenBrightness = true;
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
         displayPowerRequest.screenBrightnessOverride = Float.NaN;
         when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(Float.NaN);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
@@ -163,8 +174,18 @@ public final class DisplayBrightnessStrategySelectorTest {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.screenBrightnessOverride = Float.NaN;
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
         when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(Float.NaN);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
                 Display.STATE_ON), mInvalidBrightnessStrategy);
+    }
+
+    @Test
+    public void selectStrategySelectsFollowerStrategyWhenValid() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(0.3f);
+        assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
+                Display.STATE_ON), mFollowerBrightnessStrategy);
     }
 }

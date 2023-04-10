@@ -31,6 +31,4 @@ oneway interface IAccessibilityManagerClient {
     void setRelevantEventTypes(int eventTypes);
 
     void setFocusAppearance(int strokeWidth, int color);
-
-    void setUiContrast(float contrast);
 }

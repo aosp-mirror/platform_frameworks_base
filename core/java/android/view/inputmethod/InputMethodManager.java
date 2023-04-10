@@ -99,6 +99,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.widget.Editor;
 import android.window.ImeOnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -1552,13 +1553,7 @@ public final class InputMethodManager {
         if (fallbackContext == null) {
             return false;
         }
-        if (Settings.Global.getInt(fallbackContext.getContentResolver(),
-                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
-            if (DEBUG) {
-                Log.d(TAG, "Stylus handwriting is not enabled in settings.");
-            }
-            return false;
-        }
+
         return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(userId);
     }
 
@@ -1653,6 +1648,7 @@ public final class InputMethodManager {
      *
      * @param userId user ID to query
      * @return {@link List} of {@link InputMethodInfo}.
+     * @see #getEnabledInputMethodSubtypeListAsUser(String, boolean, int)
      * @hide
      */
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
@@ -1678,6 +1674,27 @@ public final class InputMethodManager {
                 imi == null ? null : imi.getId(),
                 allowsImplicitlyEnabledSubtypes,
                 UserHandle.myUserId());
+    }
+
+    /**
+     * Returns a list of enabled input method subtypes for the specified input method info for the
+     * specified user.
+     *
+     * @param imeId IME ID to be queried about.
+     * @param allowsImplicitlyEnabledSubtypes {@code true} to include implicitly enabled subtypes.
+     * @param userId user ID to be queried about.
+     *               {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required if this is
+     *               different from the calling process user ID.
+     * @return {@link List} of {@link InputMethodSubtype}.
+     * @see #getEnabledInputMethodListAsUser(int)
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
+            @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
+        return IInputMethodManagerGlobalInvoker.getEnabledInputMethodSubtypeList(
+                Objects.requireNonNull(imeId), allowsImplicitlyEnabledSubtypes, userId);
     }
 
     /**
@@ -2045,10 +2062,11 @@ public final class InputMethodManager {
     private boolean showSoftInput(View view, @Nullable ImeTracker.Token statsToken, int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         if (statsToken == null) {
-            statsToken = ImeTracker.get().onRequestShow(null /* component */,
+            statsToken = ImeTracker.forLogging().onRequestShow(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT, reason);
         }
-
+        ImeTracker.forLatency().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
+                reason, ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this,
                 null /* icProto */);
         // Re-dispatch if there is a context mismatch.
@@ -2060,12 +2078,15 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view)) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onShowFailed(
+                        statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED,
+                        ActivityThread::currentApplication);
                 Log.w(TAG, "Ignoring showSoftInput() as view=" + view + " is not served.");
                 return false;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
             // TODO(b/229426865): call WindowInsetsController#show instead.
@@ -2095,20 +2116,20 @@ public final class InputMethodManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768499)
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         synchronized (mH) {
-            final ImeTracker.Token statsToken = ImeTracker.get().onRequestShow(null /* component */,
-                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
+            final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestShow(
+                    null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
                     SoftInputShowHideReason.SHOW_SOFT_INPUT);
 
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
                     + " removed soon. If you are using androidx.appcompat.widget.SearchView,"
                     + " please update to version 26.0 or newer version.");
             if (mCurRootView == null || mCurRootView.getView() == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                 return;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
             // TODO(b/229426865): call WindowInsetsController#show instead.
@@ -2186,20 +2207,24 @@ public final class InputMethodManager {
 
     private boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        final ImeTracker.Token statsToken = ImeTracker.get().onRequestHide(null /* component */,
-                Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
-
+        final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
+                null /* component */, Process.myUid(),
+                ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onHideFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
                 return false;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
                     flags, resultReceiver, reason);
@@ -2225,35 +2250,156 @@ public final class InputMethodManager {
      * @see #isStylusHandwritingAvailable()
      */
     public void startStylusHandwriting(@NonNull View view) {
+        startStylusHandwritingInternal(view, null /* delegatorPackageName */);
+    }
+
+    private boolean startStylusHandwritingInternal(
+            @NonNull View view, @Nullable String delegatorPackageName) {
+        Objects.requireNonNull(view);
+
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
-            fallbackImm.startStylusHandwriting(view);
+            fallbackImm.startStylusHandwritingInternal(view, delegatorPackageName);
         }
-        Objects.requireNonNull(view);
 
-        if (Settings.Global.getInt(view.getContext().getContentResolver(),
-                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
-            Log.d(TAG, "Ignoring startStylusHandwriting(view) as stylus handwriting is disabled");
-            return;
-        }
+        boolean useDelegation = !TextUtils.isEmpty(delegatorPackageName);
 
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view)) {
                 Log.w(TAG,
-                        "Ignoring startStylusHandwriting() as view=" + view + " is not served.");
-                return;
+                        "Ignoring startStylusHandwriting as view=" + view + " is not served.");
+                return false;
             }
             if (view.getViewRootImpl() != mCurRootView) {
-                Log.w(TAG, "Ignoring startStylusHandwriting: View's window does not have focus.");
-                return;
+                Log.w(TAG,
+                        "Ignoring startStylusHandwriting: View's window does not have focus.");
+                return false;
             }
-
-            IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
-            // TODO(b/210039666): do we need any extra work for supporting non-native
-            //   UI toolkits?
+            if (useDelegation) {
+                return IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegation(
+                        mClient, UserHandle.myUserId(), view.getContext().getOpPackageName(),
+                        delegatorPackageName);
+            } else {
+                IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
+            }
+            return false;
         }
+    }
+
+    /**
+     * Prepares delegation of starting stylus handwriting session to a different editor in same
+     * or different window than the view on which initial handwriting stroke was detected.
+     *
+     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
+     * its {@link InputConnection} is started. Calling this method starts buffering of stylus
+     * motion events until {@link #acceptStylusHandwritingDelegation(View)} is called, at which
+     * point the handwriting session can be started and the buffered stylus motion events will be
+     * delivered to the IME.
+     * e.g. Delegation can be used when initial handwriting stroke is
+     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
+     * {@link Editor} is on a different window.
+     *
+     * <p> Note: If an actual {@link Editor} capable of {@link InputConnection} is being scribbled
+     * upon using stylus, use {@link #startStylusHandwriting(View)} instead.</p>
+     *
+     * @param delegatorView the view that receives initial stylus stroke and delegates it to the
+     *  actual editor. Its window must {@link View#hasWindowFocus have focus}.
+     * @see #prepareStylusHandwritingDelegation(View, String)
+     * @see #acceptStylusHandwritingDelegation(View)
+     * @see #startStylusHandwriting(View)
+     */
+    public void prepareStylusHandwritingDelegation(@NonNull View delegatorView) {
+        prepareStylusHandwritingDelegation(
+                delegatorView, delegatorView.getContext().getOpPackageName());
+    }
+
+    /**
+     * Prepares delegation of starting stylus handwriting session to a different editor in same or a
+     * different window in a different package than the view on which initial handwriting stroke
+     * was detected.
+     *
+     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
+     * its {@link InputConnection} is started. Calling this method starts buffering of stylus
+     * motion events until {@link #acceptStylusHandwritingDelegation(View, String)} is called, at
+     * which point the handwriting session can be started and the buffered stylus motion events will
+     * be delivered to the IME.
+     * e.g. Delegation can be used when initial handwriting stroke is
+     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
+     * {@link Editor} is on a different window in the given package.
+     *
+     * <p>Note: If delegator and delegate are in same package use
+     * {@link #prepareStylusHandwritingDelegation(View)} instead.</p>
+     *
+     * @param delegatorView  the view that receives initial stylus stroke and delegates it to the
+     * actual editor. Its window must {@link View#hasWindowFocus have focus}.
+     * @param delegatePackageName package name that contains actual {@link Editor} which should
+     *  start stylus handwriting session by calling {@link #acceptStylusHandwritingDelegation}.
+     * @see #prepareStylusHandwritingDelegation(View)
+     * @see #acceptStylusHandwritingDelegation(View, String)
+     */
+    public void prepareStylusHandwritingDelegation(
+            @NonNull View delegatorView, @NonNull String delegatePackageName) {
+        Objects.requireNonNull(delegatorView);
+        Objects.requireNonNull(delegatePackageName);
+
+        // Re-dispatch if there is a context mismatch.
+        final InputMethodManager fallbackImm =
+                getFallbackInputMethodManagerIfNecessary(delegatorView);
+        if (fallbackImm != null) {
+            fallbackImm.prepareStylusHandwritingDelegation(delegatorView, delegatePackageName);
+        }
+
+        IInputMethodManagerGlobalInvoker.prepareStylusHandwritingDelegation(
+                mClient,
+                UserHandle.myUserId(),
+                delegatePackageName,
+                delegatorView.getContext().getOpPackageName());
+    }
+
+    /**
+     * Accepts and starts a stylus handwriting session on the delegate view, if handwriting
+     * initiation delegation was previously requested using
+     * {@link #prepareStylusHandwritingDelegation(View)} from the delegator.
+     *
+     * <p>Note: If delegator and delegate are in different application packages, use
+     * {@link #acceptStylusHandwritingDelegation(View, String)} instead.</p>
+     *
+     * @param delegateView delegate view capable of receiving input via {@link InputConnection}
+     *  on which {@link #startStylusHandwriting(View)} will be called.
+     * @return {@code true} if view belongs to same application package as used in
+     *  {@link #prepareStylusHandwritingDelegation(View)} and handwriting session can start.
+     * @see #acceptStylusHandwritingDelegation(View, String)
+     * @see #prepareStylusHandwritingDelegation(View)
+     */
+    public boolean acceptStylusHandwritingDelegation(@NonNull View delegateView) {
+        return startStylusHandwritingInternal(
+                delegateView, delegateView.getContext().getOpPackageName());
+    }
+
+    /**
+     * Accepts and starts a stylus handwriting session on the delegate view, if handwriting
+     * initiation delegation was previously requested using
+     * {@link #prepareStylusHandwritingDelegation(View, String)} from te delegator and the view
+     * belongs to a specified delegate package.
+     *
+     * <p>Note: If delegator and delegate are in same application package use
+     * {@link #acceptStylusHandwritingDelegation(View)} instead.</p>
+     *
+     * @param delegateView delegate view capable of receiving input via {@link InputConnection}
+     *  on which {@link #startStylusHandwriting(View)} will be called.
+     * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
+     * @return {@code true} if view belongs to allowed delegate package declared in
+     *  {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting session can start.
+     * @see #prepareStylusHandwritingDelegation(View, String)
+     * @see #acceptStylusHandwritingDelegation(View)
+     */
+    public boolean acceptStylusHandwritingDelegation(
+            @NonNull View delegateView, @NonNull String delegatorPackageName) {
+        Objects.requireNonNull(delegatorPackageName);
+
+        return startStylusHandwritingInternal(delegateView, delegatorPackageName);
     }
 
     /**
@@ -2835,18 +2981,22 @@ public final class InputMethodManager {
 
     @UnsupportedAppUsage
     void closeCurrentInput() {
-        final ImeTracker.Token statsToken = ImeTracker.get().onRequestHide(null /* component */,
-                Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+        final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
+                null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                 SoftInputShowHideReason.HIDE_SOFT_INPUT);
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT, ActivityThread::currentApplication);
 
         synchronized (mH) {
             if (mCurRootView == null || mCurRootView.getView() == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onHideFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
                 Log.w(TAG, "No current root view, ignoring closeCurrentInput()");
                 return;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             IInputMethodManagerGlobalInvoker.hideSoftInput(
                     mClient,
@@ -2905,11 +3055,13 @@ public final class InputMethodManager {
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
                 return false;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
+            ImeTracker.forLogging().onProgress(statsToken,
+                    ImeTracker.PHASE_CLIENT_REQUEST_IME_SHOW);
 
             showSoftInput(servedView, statsToken, 0 /* flags */, null /* resultReceiver */,
                     SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API);
@@ -2927,21 +3079,25 @@ public final class InputMethodManager {
      */
     public void notifyImeHidden(IBinder windowToken, @Nullable ImeTracker.Token statsToken) {
         if (statsToken == null) {
-            statsToken = ImeTracker.get().onRequestHide(null /* component */,
+            statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
         }
-
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API,
+                ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this,
                 null /* icProto */);
         synchronized (mH) {
             if (!isImeSessionAvailableLocked() || mCurRootView == null
                     || mCurRootView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onHideFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
                 return;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
                     0 /* flags */, null /* resultReceiver */,

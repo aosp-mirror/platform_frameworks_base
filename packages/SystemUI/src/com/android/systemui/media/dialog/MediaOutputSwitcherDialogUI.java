@@ -23,8 +23,6 @@ import android.util.Log;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.CommandQueue;
 
 import javax.inject.Inject;
@@ -37,26 +35,19 @@ public class MediaOutputSwitcherDialogUI implements CoreStartable, CommandQueue.
 
     private final CommandQueue mCommandQueue;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
-    private final FeatureFlags mFeatureFlags;
 
     @Inject
     public MediaOutputSwitcherDialogUI(
             Context context,
             CommandQueue commandQueue,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
-            FeatureFlags featureFlags) {
+            MediaOutputDialogFactory mediaOutputDialogFactory) {
         mCommandQueue = commandQueue;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
-        mFeatureFlags = featureFlags;
     }
 
     @Override
     public void start() {
-        if (mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_SHOW_API_ENABLED)) {
-            mCommandQueue.addCallback(this);
-        } else {
-            Log.w(TAG, "Show media output switcher is not enabled.");
-        }
+        mCommandQueue.addCallback(this);
     }
 
     @Override

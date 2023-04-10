@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -120,6 +121,20 @@ class Utils {
         }
     }
 
+    private static boolean isDarkTheme(@NonNull Context context) {
+        int nightModeFlags = context.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    // Get image color for the corresponding theme.
+    static int getImageColor(@NonNull Context context) {
+        if (isDarkTheme(context)) {
+            return android.R.color.system_accent1_200;
+        } else {
+            return android.R.color.system_accent1_600;
+        }
+    }
     /**
      * Getting ApplicationInfo from meta-data.
      */

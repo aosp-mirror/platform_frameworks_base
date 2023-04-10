@@ -59,12 +59,14 @@ class RemoteTransitionAdapter {
             // changes should be ordered top-to-bottom in z
             val mode = change.mode
 
+            var rootIdx = info.findRootIndex(change.endDisplayId)
+            if (rootIdx < 0) rootIdx = 0
             // Launcher animates leaf tasks directly, so always reparent all task leashes to root.
-            t.reparent(leash, info.rootLeash)
+            t.reparent(leash, info.getRoot(rootIdx).leash)
             t.setPosition(
                 leash,
-                (change.startAbsBounds.left - info.rootOffset.x).toFloat(),
-                (change.startAbsBounds.top - info.rootOffset.y).toFloat()
+                (change.startAbsBounds.left - info.getRoot(rootIdx).offset.x).toFloat(),
+                (change.startAbsBounds.top - info.getRoot(rootIdx).offset.y).toFloat()
             )
             t.show(leash)
             // Put all the OPEN/SHOW on top
@@ -114,8 +116,11 @@ class RemoteTransitionAdapter {
                     .setName(change.leash.toString() + "_transition-leash")
                     .setContainerLayer()
                     .setParent(
-                        if (change.parent == null) info.rootLeash
-                        else info.getChange(change.parent!!)!!.leash
+                        if (change.parent == null) {
+                            var rootIdx = info.findRootIndex(change.endDisplayId)
+                            if (rootIdx < 0) rootIdx = 0
+                            info.getRoot(rootIdx).leash
+                        } else info.getChange(change.parent!!)!!.leash
                     )
                     .build()
             // Copied Transitions setup code (which expects bottom-to-top order, so we swap here)
@@ -182,9 +187,9 @@ class RemoteTransitionAdapter {
          * Represents a TransitionInfo object as an array of old-style targets
          *
          * @param wallpapers If true, this will return wallpaper targets; otherwise it returns
-         * non-wallpaper targets.
+         *   non-wallpaper targets.
          * @param leashMap Temporary map of change leash -> launcher leash. Is an output, so should
-         * be populated by this function. If null, it is ignored.
+         *   be populated by this function. If null, it is ignored.
          */
         fun wrapTargets(
             info: TransitionInfo,
@@ -379,8 +384,15 @@ class RemoteTransitionAdapter {
         }
 
         @JvmStatic
-        fun adaptRemoteAnimation(adapter: RemoteAnimationAdapter): RemoteTransition {
-            return RemoteTransition(adaptRemoteRunner(adapter.runner), adapter.callingApplication)
+        fun adaptRemoteAnimation(
+            adapter: RemoteAnimationAdapter,
+            debugName: String
+        ): RemoteTransition {
+            return RemoteTransition(
+                adaptRemoteRunner(adapter.runner),
+                adapter.callingApplication,
+                debugName
+            )
         }
     }
 

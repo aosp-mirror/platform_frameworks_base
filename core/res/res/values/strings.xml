@@ -327,6 +327,7 @@
         <item>@string/wfcSpnFormat_wifi_calling_wo_hyphen</item>
         <item>@string/wfcSpnFormat_vowifi</item>
         <item>@string/wfcSpnFormat_spn_wifi_calling_vo_hyphen</item>
+        <item>@string/wfcSpnFormat_wifi_call</item>
     </string-array>
 
     <!-- Spn during Wi-Fi Calling: "<operator>" -->
@@ -353,6 +354,8 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen">WiFi Calling</string>
     <!-- Spn during Wi-Fi Calling: "VoWifi" -->
     <string name="wfcSpnFormat_vowifi">VoWifi</string>
+    <!-- Spn during Wi_Fi Calling: "WiFi Call" (without hyphen).  This string is shown in the call banner for calls which take place over a WiFi network. -->
+    <string name="wfcSpnFormat_wifi_call">WiFi Call</string>
 
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
@@ -556,6 +559,16 @@
     <!-- Title for the button that turns work profile on. To be used in a notification
         [CHAR LIMIT=NONE] -->
     <string name="personal_apps_suspended_turn_profile_on">Turn on</string>
+    <!-- Notification title. This notification lets the user know that they will be unable to
+     receive phone calls or texts until the work profile is turned on. [CHAR LIMIT=40] -->
+    <string name="work_profile_telephony_paused_title">Calls and messages are off</string>
+    <!-- Notification text. This notification lets the user know that they will be unable to
+     receive phone calls or texts until the work profile is turned on. [CHAR LIMIT=NONE] -->
+    <string name="work_profile_telephony_paused_text">You have paused work apps.
+        You won\'t receive phone calls or text messages.</string>
+    <!-- Label for notification button. This button lets the user turn the work profile on.
+         [CHAR LIMIT=15]  -->
+    <string name="work_profile_telephony_paused_turn_on_button">Unpause work apps</string>
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
@@ -965,6 +978,11 @@
     <!-- Description for the capability of an accessibility service to take screenshot. [CHAR LIMIT=NONE] -->
     <string name="capability_desc_canTakeScreenshot">Can take a screenshot of the display.</string>
 
+    <!-- Dream -->
+
+    <!-- The title to use when a dream is opened in preview mode. [CHAR LIMIT=NONE] -->
+    <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1328,6 +1346,16 @@
     <string name="permlab_bodySensors_background">Access body sensor data, like heart rate, while in the background</string>
     <!-- Description of the background body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors in the background. [CHAR LIMIT=NONE] -->
     <string name="permdesc_bodySensors_background" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in the background.</string>
+
+    <!-- Title of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access body sensor wrist temperature data. [CHAR LIMIT=NONE] -->
+    <string name="permlab_bodySensorsWristTemperature">Access body sensor wrist temperature data while the app is in use.</string>
+    <!-- Description of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bodySensorsWristTemperature" product="default">Allows the app to access body sensor wrist temperature data, while the app is in use.</string>
+
+    <!-- Title of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access body sensor wrist temperature data. [CHAR LIMIT=NONE] -->
+    <string name="permlab_bodySensors_wristTemperature_background">Access body sensor wrist temperature data while the app is in the background.</string>
+    <!-- Description of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default">Allows the app to access body sensor wrist temperature data, while the app is in the background.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">Read calendar events and details</string>
@@ -2162,6 +2190,11 @@
     <string name="permlab_highSamplingRateSensors">access sensor data at a high sampling rate</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_highSamplingRateSensors">Allows the app to sample sensor data at a rate greater than 200 Hz</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_updatePackagesWithoutUserAction">update app without user action</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_updatePackagesWithoutUserAction">Allows the holder to update the app it previously installed without user action</string>
 
     <!-- Policy administration -->
 
@@ -3386,18 +3419,12 @@
     <string name="android_start_title" product="device">Device is starting\u2026</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim. -->
-    <string name="android_upgrading_fstrim">Optimizing storage.</string>
 
     <!-- [CHAR LIMIT=40] Title of notification that is shown when finishing a system update. -->
     <string name="android_upgrading_notification_title" product="default">Finishing system update\u2026</string>
 
     <!-- [CHAR LIMIT=40] Toast that is shown when an app is still upgrading. -->
     <string name="app_upgrading_toast"><xliff:g id="application">%1$s</xliff:g> is upgrading\u2026</string>
-
-    <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized. -->
-    <string name="android_upgrading_apk">Optimizing app
-        <xliff:g id="number" example="123">%1$d</xliff:g> of
-        <xliff:g id="number" example="123">%2$d</xliff:g>.</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk pre boot broadcast -->
     <string name="android_preparing_apk">Preparing <xliff:g id="appname">%1$s</xliff:g>.</string>
@@ -3689,6 +3716,8 @@
     <string name="usb_tether_notification_title">USB tethering turned on</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MIDI mode.  This is the title -->
     <string name="usb_midi_notification_title">MIDI via USB turned on</string>
+    <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in UVC mode.  This is the title -->
+    <string name="usb_uvc_notification_title">Device connected as Webcam</string>
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
     <string name="usb_accessory_notification_title">USB accessory connected</string>
     <!-- See USB_PREFERENCES. This is the message. -->
@@ -3766,8 +3795,10 @@
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
     <string name="hardware">Show virtual keyboard</string>
 
-    <!-- Title of the notification to prompt the user to configure physical keyboard settings. -->
-    <string name="select_keyboard_layout_notification_title">Configure physical keyboard</string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_keyboard_layout_notification_title">Configure <xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g></string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings when multiple keyboards connected. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_multiple_keyboards_layout_notification_title">Configure physical keyboards</string>
     <!-- Message of the notification to prompt the user to configure physical keyboard settings
          where the user can associate language with physical keyboard layout. -->
     <string name="select_keyboard_layout_notification_message">Tap to select language and layout</string>
@@ -4703,7 +4734,7 @@
 
     <!-- Title of Color Inversion feature shown in the warning dialog about the accessibility
     shortcut. -->
-    <string name="color_inversion_feature_name">Color Inversion</string>
+    <string name="color_inversion_feature_name">Color inversion</string>
 
     <!-- Title of Color Correction feature, which is mostly used to help users who are colorblind,
      shown in the warning dialog about the accessibility shortcut. -->
@@ -4725,8 +4756,7 @@
     <string name="accessibility_shortcut_disabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned off.</string>
 
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
-    <string name="accessibility_shortcut_spoken_feedback">Press and hold both volume keys for three seconds to use
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g></string>
+    <string name="accessibility_shortcut_spoken_feedback">Release the volume keys. To turn on <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>, press and hold both volume keys again for 3 seconds.</string>
 
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
     <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>
@@ -5014,6 +5044,14 @@
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
 
+    <!-- Text on a toast shown after the system rotates the screen for camera app
+         compatibility. [CHAR LIMIT=NONE] -->
+    <string name="display_rotation_camera_compat_toast_after_rotation">Rotate for a better view</string>
+
+    <!-- Text on a toast shown when a camera view is started within the app that may not be able
+         to display the camera preview correctly while in split screen. [CHAR LIMIT=NONE] -->
+    <string name="display_rotation_camera_compat_toast_in_split_screen">Exit split screen for a better view</string>
+
     <!-- Label for button to confirm chosen date or time [CHAR LIMIT=30] -->
     <string name="done_label">Done</string>
     <!--
@@ -5048,6 +5086,13 @@
     <string name="managed_profile_label_badge">Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
     <string name="managed_profile_label_badge_2">2nd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
     <string name="managed_profile_label_badge_3">3rd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+
+    <!--
+        Used to wrap a label for content description for a Clone profile, e.g. "Clone Messenger"
+        instead of Messenger when the Messenger app is cloned.
+        [CHAR LIMIT=20]
+    -->
+    <string name="clone_profile_label_badge">Clone <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
 
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
@@ -5324,15 +5369,11 @@
     <string name="app_suspended_unsuspend_message">Unpause app</string>
 
     <!-- Title of a dialog. This text is confirming that the user wants to turn on access to their work apps, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=30] -->
-    <string name="work_mode_off_title">Turn on work apps?</string>
-    <!-- Text in a dialog. This text is confirming that the user wants to turn on access to their work apps and notifications, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_off_message">Get access to your work apps and notifications</string>
-    <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_turn_on">Turn on</string>
+    <string name="work_mode_off_title">Unpause work apps?</string>
+    <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
+    <string name="work_mode_turn_on">Unpause</string>
     <!-- Title for button to launch the personal safety app to make an emergency call    -->
     <string name="work_mode_emergency_call_button">Emergency</string>
-    <!-- Text shown in a dialog when the user tries to launch a disabled work profile app when work apps are paused-->
-    <string name="work_mode_dialer_off_message">Get access to your work apps and calls</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
@@ -6216,4 +6257,38 @@ ul.</string>
     <string name="mic_access_on_toast">Microphone is available</string>
     <!-- Toast message that is shown when the user mutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
     <string name="mic_access_off_toast">Microphone is blocked</string>
+
+    <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_name">Dual screen</string>
+    <!-- Title of concurrent display active notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_active_title">Dual screen is on</string>
+    <!-- Content of concurrent display active notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_active_content"><xliff:g id="app_name" example="Camera app">%1$s</xliff:g> is using both displays to show content</string>
+    <!-- Title of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_thermal_title">Device is too warm</string>
+    <!-- Content of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_thermal_content">Dual Screen is unavailable because your phone is getting too warm</string>
+    <!-- Title of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_title">Dual Screen is unavailable</string>
+    <!-- Content of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_content">Dual Screen is unavailable because Battery Saver is on. You can turn this off in Settings.</string>
+    <!-- Text of power saver notification settings button. [CHAR LIMIT=NONE] -->
+    <string name="device_state_notification_settings_button">Go to Settings</string>
+    <!-- Text of device state notification turn off button. [CHAR LIMIT=NONE] -->
+    <string name="device_state_notification_turn_off_button">Turn off</string>
+
+    <!-- Notification title when a keyboard has been configured [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_selected_title"><xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g> configured</string>
+    <!-- Notification message shown when one layout was configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_one_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when two layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_two_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when more than three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_more_than_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="English (US)">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>\u2026 Tap to change.</string>
+    <!-- Notification title when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_multiple_selected_title">Physical keyboards configured</string>
+    <!-- Notification message when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_multiple_selected_message">Tap to view keyboards</string>
 </resources>

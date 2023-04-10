@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.carrier.CarrierIdentifier;
+import android.telephony.SubscriptionInfo;
 import android.telephony.UiccAccessRule;
 import android.text.TextUtils;
 
@@ -451,6 +452,8 @@ public final class EuiccProfileInfo implements Parcelable {
                 + mPolicyRules
                 + ", accessRules="
                 + Arrays.toString(mAccessRules)
+                + ", iccid="
+                + SubscriptionInfo.getPrintableId(mIccid)
                 + ")";
     }
 }

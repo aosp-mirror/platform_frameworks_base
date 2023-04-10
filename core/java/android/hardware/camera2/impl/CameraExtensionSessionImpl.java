@@ -60,7 +60,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
-import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
@@ -118,7 +117,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private boolean mInternalRepeatingRequestEnabled = true;
 
     // Lock to synchronize cross-thread access to device public interface
-    final Object mInterfaceLock = new Object(); // access from this class and Session only!
+    final Object mInterfaceLock;
 
     private static int nativeGetSurfaceFormat(Surface surface) {
         return SurfaceUtils.getSurfaceFormat(surface);
@@ -129,7 +128,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
      */
     @RequiresPermission(android.Manifest.permission.CAMERA)
     public static CameraExtensionSessionImpl createCameraExtensionSession(
-            @NonNull CameraDevice cameraDevice,
+            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
             @NonNull Context ctx,
             @NonNull ExtensionSessionConfiguration config,
             int sessionId)
@@ -252,7 +251,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             @NonNull IPreviewExtenderImpl previewExtender,
             @NonNull List<Size> previewSizes,
             long extensionClientId,
-            @NonNull CameraDevice cameraDevice,
+            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
             @Nullable Surface repeatingRequestSurface,
             @Nullable Surface burstCaptureSurface,
             @Nullable Surface postviewSurface,
@@ -280,6 +279,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mSupportedRequestKeys = requestKeys;
         mSupportedResultKeys = resultKeys;
         mCaptureResultsSupported = !resultKeys.isEmpty();
+        mInterfaceLock = cameraDevice.mInterfaceLock;
     }
 
     private void initializeRepeatingRequestPipeline() throws RemoteException {
@@ -478,13 +478,21 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         ArrayList<CaptureStageImpl> sessionParamsList = new ArrayList<>();
         ArrayList<OutputConfiguration> outputList = new ArrayList<>();
         initializeRepeatingRequestPipeline();
-        outputList.add(new OutputConfiguration(mCameraRepeatingSurface));
+        OutputConfiguration previewOutput = new OutputConfiguration(mCameraRepeatingSurface);
+        // The extension processing logic needs to be able to match images to capture results via
+        // image and result timestamps.
+        previewOutput.setTimestampBase(OutputConfiguration.TIMESTAMP_BASE_SENSOR);
+        previewOutput.setReadoutTimestampEnabled(false);
+        outputList.add(previewOutput);
         CaptureStageImpl previewSessionParams = mPreviewExtender.onPresetSession();
         if (previewSessionParams != null) {
             sessionParamsList.add(previewSessionParams);
         }
         initializeBurstCapturePipeline();
-        outputList.add(new OutputConfiguration(mCameraBurstSurface));
+        OutputConfiguration captureOutput = new OutputConfiguration(mCameraBurstSurface);
+        captureOutput.setTimestampBase(OutputConfiguration.TIMESTAMP_BASE_SENSOR);
+        captureOutput.setReadoutTimestampEnabled(false);
+        outputList.add(captureOutput);
         CaptureStageImpl stillCaptureSessionParams = mImageExtender.onPresetSession();
         if (stillCaptureSessionParams != null) {
             sessionParamsList.add(stillCaptureSessionParams);
@@ -962,46 +970,56 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private class InitializeSessionHandler extends IInitializeSessionCallback.Stub {
         @Override
         public void onSuccess() {
-            boolean status = true;
-            ArrayList<CaptureStageImpl> initialRequestList =
-                    compileInitialRequestList();
-            if (!initialRequestList.isEmpty()) {
-                try {
-                    setInitialCaptureRequest(initialRequestList,
-                            new InitialRequestHandler(
-                                    mRepeatingRequestImageCallback));
-                } catch (CameraAccessException e) {
-                    Log.e(TAG,
-                            "Failed to initialize the initial capture "
-                                    + "request!");
-                    status = false;
-                }
-            } else {
-                try {
-                    setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new PreviewRequestHandler(null, null, null,
-                                    mRepeatingRequestImageCallback));
-                } catch (CameraAccessException | RemoteException e) {
-                    Log.e(TAG,
-                            "Failed to initialize internal repeating "
-                                    + "request!");
-                    status = false;
-                }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    boolean status = true;
+                    ArrayList<CaptureStageImpl> initialRequestList =
+                            compileInitialRequestList();
+                    if (!initialRequestList.isEmpty()) {
+                        try {
+                            setInitialCaptureRequest(initialRequestList,
+                                    new InitialRequestHandler(
+                                            mRepeatingRequestImageCallback));
+                        } catch (CameraAccessException e) {
+                            Log.e(TAG,
+                                    "Failed to initialize the initial capture "
+                                            + "request!");
+                            status = false;
+                        }
+                    } else {
+                        try {
+                            setRepeatingRequest(mPreviewExtender.getCaptureStage(),
+                                    new PreviewRequestHandler(null, null, null,
+                                            mRepeatingRequestImageCallback));
+                        } catch (CameraAccessException | RemoteException e) {
+                            Log.e(TAG,
+                                    "Failed to initialize internal repeating "
+                                            + "request!");
+                            status = false;
+                        }
 
-            }
+                    }
 
-            if (!status) {
-                notifyConfigurationFailure();
-            }
+                    if (!status) {
+                        notifyConfigurationFailure();
+                    }
+                }
+            });
         }
 
         @Override
         public void onFailure() {
-            mCaptureSession.close();
-            Log.e(TAG, "Failed to initialize proxy service session!"
-                    + " This can happen when trying to configure multiple "
-                    + "concurrent extension sessions!");
-            notifyConfigurationFailure();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCaptureSession.close();
+                    Log.e(TAG, "Failed to initialize proxy service session!"
+                            + " This can happen when trying to configure multiple "
+                            + "concurrent extension sessions!");
+                    notifyConfigurationFailure();
+                }
+            });
         }
     }
 

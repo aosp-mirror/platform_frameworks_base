@@ -53,6 +53,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.util.Compile;
 
 import java.io.PrintWriter;
 
@@ -71,6 +72,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     boolean DEBUG_CAMERA_LIFT = false;
     boolean DEBUG_WINDOW_STATE = false;
+    boolean DEBUG_WAKEUP_DELAY = Compile.IS_DEBUG;
     // additional instrumentation for testing purposes; intended to be left on during development
     boolean CHATTY = DEBUG;
     boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
@@ -122,7 +124,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         options.setLaunchDisplayId(displayId);
         options.setCallerDisplayId(displayId);
         options.setPendingIntentBackgroundActivityLaunchAllowed(true);
-        options.setInteractive(true);
         return options.toBundle();
     }
 
@@ -156,7 +157,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         if (animationAdapter != null) {
             if (ENABLE_SHELL_TRANSITIONS) {
                 options = ActivityOptions.makeRemoteTransition(
-                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter));
+                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter,
+                                "SysUILaunch"));
             } else {
                 options = ActivityOptions.makeRemoteAnimation(animationAdapter);
             }
@@ -217,8 +219,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     NotificationShadeWindowViewController getNotificationShadeWindowViewController();
 
     NotificationPanelViewController getNotificationPanelViewController();
-
-    ViewGroup getBouncerContainer();
 
     /** Get the Keyguard Message Area that displays auth messages. */
     AuthKeyguardMessageArea getKeyguardMessageArea();
@@ -374,8 +374,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
-
-    void animateKeyguardUnoccluding();
 
     void startLaunchTransitionTimeout();
 
@@ -540,6 +538,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     float getDisplayDensity();
 
     void extendDozePulse();
+
+    boolean shouldDelayWakeUpAnimation();
 
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;

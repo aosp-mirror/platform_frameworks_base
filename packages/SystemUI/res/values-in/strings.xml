@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Aktifkan USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Pelajari lebih lanjut"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock dinonaktifkan"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock dinonaktifkan"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"mengirim gambar"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Menyimpan screenshot..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Menyimpan screenshot ke profil kerja …"</string>
@@ -91,10 +91,11 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Batas bawah <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Batas kiri <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Batas kanan <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Disimpan di <xliff:g id="APP">%1$s</xliff:g> di profil kerja"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"File"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> mendeteksi screenshot ini."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dan aplikasi terbuka lainnya mendeteksi screenshot ini."</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Tambahkan ke catatan"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses perekaman layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
@@ -168,7 +169,6 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Jika Anda memasukkan PIN yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Jika Anda memasukkan sandi yang salah saat mencoba lagi, profil kerja dan datanya akan dihapus."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sentuh sensor sidik jari"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon sidik jari"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Tidak dapat mengenali wajah. Gunakan sidik jari."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -197,6 +197,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Bayangan pemberitahuan."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Setelan cepat."</string>
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Setelan cepat dan Menu notifikasi."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Layar kunci."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Layar kunci kantor"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Tutup"</string>
@@ -257,6 +258,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Kecerahan"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversi warna"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Koreksi warna"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Ukuran font"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Kelola pengguna"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Selesai"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Tutup"</string>
@@ -341,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Wajah dikenali. Tekan ikon buka kunci untuk membuka."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Kunci dibuka dengan wajah"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Wajah dikenali"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Pindah ke kiri"</item>
-    <item msgid="5558598599408514296">"Pindah ke bawah"</item>
-    <item msgid="4844142668312841831">"Pindah ke kanan"</item>
-    <item msgid="5640521437931460125">"Pindah ke atas"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Geser ke atas untuk mencoba lagi"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Buka kunci untuk menggunakan NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Perangkat ini milik organisasi Anda"</string>
@@ -462,6 +458,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"nonaktifkan"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Suara &amp; getaran"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Setelan"</string>
+    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
+    <skip />
+    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikasi disematkan"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Kembali dan Ringkasan untuk melepas sematan."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Kembali dan Beranda untuk melepas sematan."</string>
@@ -545,8 +545,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Otomatis"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Tidak ada suara atau getaran"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Tidak ada suara atau getaran dan ditampilkan lebih rendah di bagian percakapan"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Dapat berdering atau bergetar berdasarkan setelan ponsel"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Dapat berdering atau bergetar berdasarkan setelan ponsel. Percakapan dari balon <xliff:g id="APP_NAME">%1$s</xliff:g> secara default."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Dapat berdering atau bergetar berdasarkan setelan perangkat"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Dapat berdering atau bergetar berdasarkan setelan perangkat. Percakapan <xliff:g id="APP_NAME">%1$s</xliff:g> ditampilkan sebagai balon secara default."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Biarkan sistem menentukan apakah notifikasi ini akan berbunyi atau bergetar"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; Dipromosikan menjadi Default"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Didemosikan menjadi Senyap"</string>
@@ -618,14 +618,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifikasi"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Pintasan keyboard"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Ganti tata letak keyboard"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Hapus teks"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Pintasan"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Pintasan penelusuran"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Tidak ditemukan pintasan"</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistem"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Input"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Aplikasi yang terbuka"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aplikasi saat ini"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Akses menu notifikasi"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Ambil screenshot penuh"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Akses daftar sistem/pintasan aplikasi"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"Kembali: kembali ke status sebelumnya (tombol kembali)"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Akses layar utama"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ringkasan aplikasi yang terbuka"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Berpindah-pindah antara aplikasi terbaru (maju)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Berpindah-pindah antara aplikasi terbaru (mundur)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Akses daftar semua aplikasi dan penelusuran (yaitu Penelusuran/Peluncur)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Sembunyikan dan tampilkan (kembali) taskbar"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Akses setelan sistem"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Akses Asisten Google"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Kunci layar"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"Buka aplikasi Catatan untuk memo cepat"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasking sistem"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Masuk ke Layar terpisah dengan aplikasi saat ini ke RHS"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Masuk ke Layar terpisah dengan aplikasi saat ini ke LHS"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Beralih dari Layar terpisah ke layar penuh"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"Dalam Layar terpisah: ganti dari satu aplikasi ke aplikasi lainnya"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Beralih bahasa input (bahasa berikutnya)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Beralih bahasa input (bahasa sebelumnya)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Akses emoji"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Akses dikte"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikasi"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Bantuan"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Browser"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Browser (Chrome sebagai default)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontak"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Email (Gmail sebagai default)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Kalkulator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Jangan Ganggu"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Pintasan tombol volume"</string>
     <string name="battery" msgid="769686279459897127">"Baterai"</string>
@@ -788,6 +822,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"perekaman layar"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Tanpa judul"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Siaga"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Ukuran Font"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Buat lebih kecil"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Buat lebih besar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Jendela Pembesaran"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrol Jendela Pembesaran"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Perbesar"</string>
@@ -799,7 +836,7 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Tombol pembesaran"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Memperbesar tampilan layar penuh"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Perbesar sebagian layar"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Alihkan"</string>
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Buka setelan pembesaran"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Tarik pojok persegi untuk mengubah ukuran"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Izinkan scrolling diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Ubah ukuran"</string>
@@ -809,13 +846,14 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Tuas kiri"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Tuas kanan"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Tuas bawah"</string>
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Setelan pembesaran"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Ukuran kaca pembesar"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Sedang"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Kecil"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Besar"</string>
-    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Layar penuh"</string>
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"Selesai"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Edit"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Setelan jendela kaca pembesar"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Ketuk untuk membuka fitur aksesibilitas. Sesuaikan atau ganti tombol ini di Setelan.\n\n"<annotation id="link">"Lihat setelan"</annotation></string>
@@ -835,6 +873,9 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Pilih aplikasi untuk menambahkan kontrol"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrol ditambahkan.}other{# kontrol ditambahkan.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Dihapus"</string>
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Tambahkan <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> dapat memilih kontrol dan konten yang ditampilkan di sini."</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Hapus kontrol untuk <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Difavoritkan"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Difavoritkan, posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Batal difavoritkan"</string>
@@ -847,17 +888,24 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Semua kontrol dihapus"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Perubahan tidak disimpan"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Lihat aplikasi lainnya"</string>
+    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
+    <skip />
+    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
+    <skip />
+    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrol tidak dapat dimuat. Periksa aplikasi <xliff:g id="APP">%s</xliff:g> untuk memastikan setelan aplikasi tidak berubah."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kontrol yang kompatibel tidak tersedia"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Lainnya"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Tambahkan ke kontrol perangkat"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Tambahkan"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"Hapus"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Disarankan oleh <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Perangkat terkunci"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Tampilkan dan kontrol perangkat dari layar kunci?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Anda dapat menambahkan kontrol untuk perangkat eksternal ke layar kunci.\n\nAplikasi perangkat Anda mungkin mengizinkan Anda mengontrol beberapa perangkat tanpa membuka kunci ponsel atau tablet.\n\nAnda dapat melakukan perubahan kapan saja di Setelan."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kontrol perangkat dari layar kunci?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Anda dapat mengontrol beberapa perangkat eksternal tanpa membuka kunci ponsel atau tablet.\n\nAplikasi perangkat Anda menentukan perangkat yang dapat dikontrol dengan cara ini."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Anda dapat mengontrol beberapa perangkat tanpa membuka kunci ponsel atau tablet. Aplikasi perangkat Anda menentukan perangkat yang dapat dikontrol dengan cara ini."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Lain kali"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ya"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN berisi huruf atau simbol"</string>
@@ -885,15 +933,16 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Buka <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Putar <xliff:g id="SONG_NAME">%1$s</xliff:g> oleh <xliff:g id="ARTIST_NAME">%2$s</xliff:g> dari <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Putar <xliff:g id="SONG_NAME">%1$s</xliff:g> dari <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Untuk Anda"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Urungkan"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Dekatkan untuk memutar di <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Untuk memutar di sini, dekatkan ke <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Diputar di <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Terjadi error. Coba lagi."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Memuat"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Mentransmisikan media"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Mentransmisikan <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nonaktif, periksa aplikasi"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tidak ditemukan"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrol tidak tersedia"</string>
@@ -903,6 +952,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Error, coba lagi"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Tambahkan kontrol"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Edit kontrol"</string>
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Tambahkan aplikasi"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Hapus aplikasi"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Tambahkan output"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grup"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 perangkat dipilih"</string>
@@ -917,8 +968,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speaker &amp; Layar"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Perangkat yang Disarankan"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cara kerja siaran"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Siaran"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Orang di dekat Anda dengan perangkat Bluetooth yang kompatibel dapat mendengarkan media yang sedang Anda siarkan"</string>
@@ -930,6 +980,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Tidak dapat menyiarkan"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Tidak dapat menyimpan. Coba lagi."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Tidak dapat menyimpan."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gunakan minimal 4 karakter"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Gunakan kurang dari 16 karakter"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nomor build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nomor versi disalin ke papan klip."</string>
     <string name="basic_status" msgid="2315371112182658176">"Membuka percakapan"</string>
@@ -1023,13 +1075,14 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"mengedit"</string>
     <string name="add" msgid="81036585205287996">"Tambahkan"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kelola pengguna"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Notifikasi ini tidak mendukung fitur tarik ke Layar terpisah."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Notifikasi ini tidak mendukung fitur tarik ke layar terpisah"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi tidak tersedia"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mode prioritas"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarm disetel"</string>
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera nonaktif"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon nonaktif"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera dan mikrofon nonaktif"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant sedang mendengarkan"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifikasi}other{# notifikasi}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Pembuatan catatan"</string>
@@ -1045,6 +1098,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Izinkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Jangan izinkan"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Log perangkat merekam hal-hal yang terjadi di perangkat Anda. Aplikasi dapat menggunakan log ini untuk menemukan dan memperbaiki masalah.\n\nBeberapa log mungkin berisi info sensitif, jadi hanya izinkan aplikasi yang Anda percayai untuk mengakses semua log perangkat. \n\nJika Anda tidak mengizinkan aplikasi ini mengakses semua log perangkat, aplikasi masih dapat mengakses log-nya sendiri. Produsen perangkat masih dapat mengakses beberapa log atau info di perangkat Anda."</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Pelajari lebih lanjut"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Pelajari lebih lanjut di <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Buka <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Aplikasi disiapkan"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Minimal satu kartu telah ditambahkan ke Wallet"</string>
@@ -1053,15 +1108,26 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Tersedia minimal satu perangkat"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Sentuh lama pintasan"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Batal"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Balik sekarang"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Bentangkan ponsel untuk selfie yang lebih baik"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Gunakan layar depan untuk selfie yang lebih baik?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gunakan kamera belakang untuk foto dengan resolusi lebih tinggi dan lebih lebar."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Layar ini akan dinonaktifkan"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Beralih layar sekarang"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Bentangkan ponsel"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Beralih layar?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Untuk resolusi lebih tinggi, gunakan kamera belakang"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Untuk resolusi lebih tinggi, balik ponsel"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Perangkat foldable sedang dibentangkan"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Perangkat foldable sedang dibalik"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
-    <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Baterai tersisa <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Hubungkan stilus ke pengisi daya"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Baterai stilus lemah"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Kamera video"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Tidak dapat melakukan panggilan dari profil ini"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Kebijakan kantor mengizinkan Anda melakukan panggilan telepon hanya dari profil kerja"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Beralih ke profil kerja"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Tutup"</string>
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Setelan layar kunci"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi tidak tersedia"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera diblokir"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera dan mikrofon diblokir"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon diblokir"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Mode prioritas diaktifkan"</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"Asisten sedang memerhatikan"</string>
 </resources>

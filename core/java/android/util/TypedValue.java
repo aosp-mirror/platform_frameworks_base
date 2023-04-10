@@ -495,6 +495,48 @@ public class TypedValue {
     }
 
     /**
+     * Converts a pixel value to the given dimension, e.g. PX to DP.
+     *
+     * <p>This is just an alias of {@link #deriveDimension(int, float, DisplayMetrics)} with an
+     * easier-to-find name.
+     *
+     * @param unitToConvertTo The unit to convert to.
+     * @param pixelValue The raw pixels value to convert from.
+     * @param metrics Current display metrics to use in the conversion --
+     *                supplies display density and scaling information.
+     *
+     * @return A dimension value equivalent to the given number of pixels
+     * @throws IllegalArgumentException if unitToConvertTo is not valid.
+     */
+    public static float convertPixelsToDimension(
+            @ComplexDimensionUnit int unitToConvertTo,
+            float pixelValue,
+            @NonNull DisplayMetrics metrics) {
+        return deriveDimension(unitToConvertTo, pixelValue, metrics);
+    }
+
+    /**
+     * Converts a dimension value to raw pixels, e.g. DP to PX.
+     *
+     * <p>This is just an alias of {@link #applyDimension(int, float, DisplayMetrics)} with an
+     * easier-to-find name.
+     *
+     * @param unitToConvertFrom The unit to convert from.
+     * @param value The dimension value to apply the unit to.
+     * @param metrics Current display metrics to use in the conversion --
+     *                supplies display density and scaling information.
+     *
+     * @return The equivalent pixel value—i.e. the complex floating point value multiplied by the
+     * appropriate metrics depending on its unit—or zero if unit is not valid.
+     */
+    public static float convertDimensionToPixels(
+            @ComplexDimensionUnit int unitToConvertFrom,
+            float value,
+            @NonNull DisplayMetrics metrics) {
+        return applyDimension(unitToConvertFrom, value, metrics);
+    }
+
+    /**
      * Return the data for this value as a dimension.  Only use for values 
      * whose type is {@link #TYPE_DIMENSION}. 
      * 

@@ -16,7 +16,6 @@
 
 package com.android.internal.statusbar;
 
-import android.annotation.NonNull;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,15 +40,14 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final int mBehavior;
     public final int mRequestedVisibleTypes;
     public final String mPackageName;
-    public final int[] mTransientBarTypes;
+    public final int mTransientBarTypes;
     public final LetterboxDetails[] mLetterboxDetails;
 
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
             int appearance, AppearanceRegion[] appearanceRegions, int imeWindowVis,
             int imeBackDisposition, boolean showImeSwitcher, int disabledFlags2, IBinder imeToken,
             boolean navbarColorManagedByIme, int behavior, int requestedVisibleTypes,
-            String packageName, @NonNull int[] transientBarTypes,
-            LetterboxDetails[] letterboxDetails) {
+            String packageName, int transientBarTypes, LetterboxDetails[] letterboxDetails) {
         mIcons = new ArrayMap<>(icons);
         mDisabledFlags1 = disabledFlags1;
         mAppearance = appearance;
@@ -87,7 +85,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeInt(mBehavior);
         dest.writeInt(mRequestedVisibleTypes);
         dest.writeString(mPackageName);
-        dest.writeIntArray(mTransientBarTypes);
+        dest.writeInt(mTransientBarTypes);
         dest.writeParcelableArray(mLetterboxDetails, flags);
     }
 
@@ -113,7 +111,7 @@ public final class RegisterStatusBarResult implements Parcelable {
                     final int behavior = source.readInt();
                     final int requestedVisibleTypes = source.readInt();
                     final String packageName = source.readString();
-                    final int[] transientBarTypes = source.createIntArray();
+                    final int transientBarTypes = source.readInt();
                     final LetterboxDetails[] letterboxDetails =
                             source.readParcelableArray(null, LetterboxDetails.class);
                     return new RegisterStatusBarResult(icons, disabledFlags1, appearance,

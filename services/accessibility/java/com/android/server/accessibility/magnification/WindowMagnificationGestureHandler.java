@@ -71,7 +71,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     private static final boolean DEBUG_DETECTING = false | DEBUG_ALL;
 
     //Ensure the range has consistency with FullScreenMagnificationGestureHandler.
-    private static final float MIN_SCALE = 2.0f;
+    private static final float MIN_SCALE = 1.0f;
     private static final float MAX_SCALE = MagnificationScaleProvider.MAX_SCALE;
 
     private final WindowMagnificationManager mWindowMagnificationMgr;
@@ -222,6 +222,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         if (DEBUG_DETECTING) {
             Slog.i(mLogTag, "onTripleTapAndHold()");
         }
+        mViewportDraggingState.mEnabledBeforeDrag =
+                mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId);
         enableWindowMagnifier(up.getX(), up.getY(),
                 WindowMagnificationManager.WINDOW_POSITION_AT_TOP_LEFT);
         mTripleTapAndHoldStartedTime = SystemClock.uptimeMillis();
@@ -230,7 +232,9 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
     @VisibleForTesting
     void releaseTripleTapAndHold() {
-        mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
+        if (!mViewportDraggingState.mEnabledBeforeDrag) {
+            mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
+        }
         transitionTo(mDetectingState);
         if (mTripleTapAndHoldStartedTime != 0) {
             final long duration = SystemClock.uptimeMillis() - mTripleTapAndHoldStartedTime;
@@ -376,6 +380,9 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
      * or {@link MotionEvent#ACTION_CANCEL}.
      */
     final class ViewportDraggingState implements State {
+
+        /** Whether to disable zoom after dragging ends */
+        boolean mEnabledBeforeDrag;
 
         private float mLastX = Float.NaN;
         private float mLastY = Float.NaN;

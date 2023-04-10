@@ -395,7 +395,7 @@ public class AudioDeviceInventory {
                 case BluetoothProfile.LE_AUDIO:
                 case BluetoothProfile.LE_AUDIO_BROADCAST:
                     if (switchToUnavailable) {
-                        makeLeAudioDeviceUnavailable(address, btInfo.mAudioSystemDevice);
+                        makeLeAudioDeviceUnavailableNow(address, btInfo.mAudioSystemDevice);
                     } else if (switchToAvailable) {
                         makeLeAudioDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
                                 streamType, btInfo.mVolume == -1 ? -1 : btInfo.mVolume * 10,
@@ -507,6 +507,12 @@ public class AudioDeviceInventory {
         }
     }
 
+    /*package*/ void onMakeLeAudioDeviceUnavailableNow(String address, int device) {
+        synchronized (mDevicesLock) {
+            makeLeAudioDeviceUnavailableNow(address, device);
+        }
+    }
+
     /*package*/ void onReportNewRoutes() {
         int n = mRoutesObservers.beginBroadcast();
         if (n > 0) {
@@ -591,7 +597,13 @@ public class AudioDeviceInventory {
             if (wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED
                     && AudioSystem.DEVICE_OUT_ALL_USB_SET.contains(
                             wdcs.mAttributes.getInternalType())) {
-                mDeviceBroker.dispatchPreferredMixerAttributesChangedCausedByDeviceRemoved(info);
+                if (info != null) {
+                    mDeviceBroker.dispatchPreferredMixerAttributesChangedCausedByDeviceRemoved(
+                            info);
+                } else {
+                    Log.e(TAG, "Didn't find AudioDeviceInfo to notify preferred mixer "
+                            + "attributes change for type=" + wdcs.mAttributes.getType());
+                }
             }
             sendDeviceConnectionIntent(type, wdcs.mState,
                     wdcs.mAttributes.getAddress(), wdcs.mAttributes.getName());
@@ -1027,10 +1039,11 @@ public class AudioDeviceInventory {
             new MediaMetrics.Item(mMetricsId + "disconnectLeAudio")
                     .record();
             if (toRemove.size() > 0) {
-                final int delay = checkSendBecomingNoisyIntentInt(device, 0,
+                final int delay = checkSendBecomingNoisyIntentInt(device,
+                        AudioService.CONNECTION_STATE_DISCONNECTED,
                         AudioSystem.DEVICE_NONE);
                 toRemove.stream().forEach(deviceAddress ->
-                        makeLeAudioDeviceUnavailable(deviceAddress, device)
+                        makeLeAudioDeviceUnavailableLater(deviceAddress, device, delay)
                 );
             }
         }
@@ -1331,9 +1344,24 @@ public class AudioDeviceInventory {
              */
             mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/, eventSource);
 
-            AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(device, address, name),
+            final int res = AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                    device, address, name),
                     AudioSystem.DEVICE_STATE_AVAILABLE,
                     AudioSystem.AUDIO_FORMAT_DEFAULT);
+            if (res != AudioSystem.AUDIO_STATUS_OK) {
+                AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                        "APM failed to make available LE Audio device addr=" + address
+                                + " error=" + res).printLog(TAG));
+                // TODO: connection failed, stop here
+                // TODO: return;
+            } else {
+                AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                        "LE Audio device addr=" + address + " now available").printLog(TAG));
+            }
+
+            // Reset LEA suspend state each time a new sink is connected
+            mAudioSystem.setParameters("LeAudioSuspended=false");
+
             mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
                     new DeviceInfo(device, name, address, AudioSystem.AUDIO_FORMAT_DEFAULT));
             mDeviceBroker.postAccessoryPlugMediaUnmute(device);
@@ -1354,15 +1382,38 @@ public class AudioDeviceInventory {
     }
 
     @GuardedBy("mDevicesLock")
-    private void makeLeAudioDeviceUnavailable(String address, int device) {
+    private void makeLeAudioDeviceUnavailableNow(String address, int device) {
         if (device != AudioSystem.DEVICE_NONE) {
-            AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(device, address),
+            final int res = AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                    device, address),
                     AudioSystem.DEVICE_STATE_UNAVAILABLE,
                     AudioSystem.AUDIO_FORMAT_DEFAULT);
+
+            if (res != AudioSystem.AUDIO_STATUS_OK) {
+                AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                        "APM failed to make unavailable LE Audio device addr=" + address
+                                + " error=" + res).printLog(TAG));
+                // TODO:  failed to disconnect, stop here
+                // TODO: return;
+            } else {
+                AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                        "LE Audio device addr=" + address + " made unavailable").printLog(TAG));
+            }
             mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
         }
 
         setCurrentAudioRouteNameIfPossible(null, false /*fromA2dp*/);
+    }
+
+    @GuardedBy("mDevicesLock")
+    private void makeLeAudioDeviceUnavailableLater(String address, int device, int delayMs) {
+        // prevent any activity on the LEA output to avoid unwanted
+        // reconnection of the sink.
+        mAudioSystem.setParameters("LeAudioSuspended=true");
+        // the device will be made unavailable later, so consider it disconnected right away
+        mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
+        // send the delayed message to make the device unavailable later
+        mDeviceBroker.setLeAudioTimeout(address, device, delayMs);
     }
 
     @GuardedBy("mDevicesLock")

@@ -120,6 +120,14 @@ interface NativeInputManagerService {
 
     void setPointerAcceleration(float acceleration);
 
+    void setTouchpadPointerSpeed(int speed);
+
+    void setTouchpadNaturalScrollingEnabled(boolean enabled);
+
+    void setTouchpadTapToClickEnabled(boolean enabled);
+
+    void setTouchpadRightClickZoneEnabled(boolean enabled);
+
     void setShowTouches(boolean enabled);
 
     void setInteractive(boolean interactive);
@@ -215,6 +223,25 @@ interface NativeInputManagerService {
 
     /** Set whether stylus button reporting through motion events should be enabled. */
     void setStylusButtonMotionEventsEnabled(boolean enabled);
+
+    /**
+     * Get the current position of the mouse cursor.
+     *
+     * If the mouse cursor is not currently shown, the coordinate values will be NaN-s.
+     *
+     * NOTE: This will grab the PointerController's lock, so we must be careful about calling this
+     * from the InputReader or Display threads, which may result in a deadlock.
+     */
+    float[] getMouseCursorPosition();
+
+    /** Set whether showing a pointer icon for styluses is enabled. */
+    void setStylusPointerIconEnabled(boolean enabled);
+
+    /**
+     * Report sysfs node changes. This may result in recreation of the corresponding InputDevice.
+     * The recreated device may contain new associated peripheral devices like Light, Battery, etc.
+     */
+    void sysfsNodeChanged(String sysfsNodePath);
 
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
@@ -312,6 +339,18 @@ interface NativeInputManagerService {
 
         @Override
         public native void setPointerAcceleration(float acceleration);
+
+        @Override
+        public native void setTouchpadPointerSpeed(int speed);
+
+        @Override
+        public native void setTouchpadNaturalScrollingEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadTapToClickEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadRightClickZoneEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);
@@ -445,5 +484,14 @@ interface NativeInputManagerService {
 
         @Override
         public native void setStylusButtonMotionEventsEnabled(boolean enabled);
+
+        @Override
+        public native float[] getMouseCursorPosition();
+
+        @Override
+        public native void setStylusPointerIconEnabled(boolean enabled);
+
+        @Override
+        public native void sysfsNodeChanged(String sysfsNodePath);
     }
 }

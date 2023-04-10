@@ -201,7 +201,9 @@ internal constructor(
         animatingColorTransitionFactory(
             loadDefaultColor(R.attr.textColorSecondary),
             ::textSecondaryFromScheme
-        ) { textSecondary -> mediaViewHolder.artistText.setTextColor(textSecondary) }
+        ) { textSecondary ->
+            mediaViewHolder.artistText.setTextColor(textSecondary)
+        }
 
     val textTertiary =
         animatingColorTransitionFactory(
@@ -230,7 +232,14 @@ internal constructor(
 
     fun updateColorScheme(colorScheme: ColorScheme?): Boolean {
         var anyChanged = false
-        colorTransitions.forEach { anyChanged = it.updateColorScheme(colorScheme) || anyChanged }
+        colorTransitions.forEach {
+            val isChanged = it.updateColorScheme(colorScheme)
+
+            // Ignore changes to colorSeamless, since that is expected when toggling dark mode
+            if (it == colorSeamless) return@forEach
+
+            anyChanged = isChanged || anyChanged
+        }
         colorScheme?.let { mediaViewHolder.gutsViewHolder.colorScheme = colorScheme }
         return anyChanged
     }

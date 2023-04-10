@@ -45,12 +45,13 @@ public class TraceErrorLogger {
      * can be uniquely identified. We also add the same id to the dropbox entry of the error, so
      * that we can join the trace and the error server-side.
      *
-     * @param processName The process name to include in the error id.
+     * @param processName The name of the ANRing process.
+     * @param pid         The pid of the ANRing process.
      * @param errorId     The unique id with which to tag the trace.
      */
-    public void addErrorIdToTrace(String processName, UUID errorId) {
+    public void addProcessInfoAndErrorIdToTrace(String processName, int pid, UUID errorId) {
         Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                COUNTER_PREFIX + processName + "#" + errorId.toString(),
+                COUNTER_PREFIX + processName + " " + pid + "#" + errorId.toString(),
                 PLACEHOLDER_VALUE);
     }
 

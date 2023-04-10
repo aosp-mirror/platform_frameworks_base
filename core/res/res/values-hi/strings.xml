@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="3381766946944136678">"&lt;शीर्षक-रहित&gt;"</string>
+    <string name="untitled" msgid="3381766946944136678">"&lt;टाइटल-रहित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कोई फ़ोन नंबर नहीं)"</string>
     <string name="unknownName" msgid="7078697621109055330">"अज्ञात"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"वॉइसमेल"</string>
@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"वाई-फ़ाई"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"वाई-फ़ाई कॉलिंग"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"वाई-फ़ाई कॉल"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"बंद"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"वाई-फ़ाई के ज़रिए कॉल करें"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"मोबाइल नेटवर्क के ज़रिए कॉल"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"निजी ऐप्लिकेशन अनब्लॉक करने के लिए, अपनी वर्क प्रोफ़ाइल चालू करें"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"निजी ऐप्लिकेशन <xliff:g id="DATE">%1$s</xliff:g> को <xliff:g id="TIME">%2$s</xliff:g> पर ब्लॉक कर दिए जाएंगे. आपका आईटी एडमिन आपकी वर्क प्रोफ़ाइल को <xliff:g id="NUMBER">%3$d</xliff:g> दिन से ज़्यादा बंद रखने की अनुमति नहीं देता."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"चालू करें"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"कॉल और मैसेज की सुविधा बंद है"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"आपने वर्क ऐप्लिकेशन रोक दिए हैं. आपको फ़ोन कॉल या मैसेज नहीं मिलेंगे."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"वर्क ऐप्लिकेशन फिर से चालू करें"</string>
     <string name="me" msgid="6207584824693813140">"मैं"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"टैबलेट विकल्‍प"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV डिवाइस में फ़ोन से जुड़े विकल्प"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"डिवाइस के फ़िंगरप्रिंट सेंसर पर किए गए हाथ के जेस्चर कैप्चर किए जा सकते हैं."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रीनशॉट लें"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिसप्ले का स्क्रीनशॉट लिया जा सकता है."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> की झलक"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्टेटस बार को अक्षम करें या बदलें"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ऐप को, स्टेटस बार को बंद करने या सिस्‍टम आइकॉन को जोड़ने और निकालने की अनुमति देता है."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"स्टेटस बार को रहने दें"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"इससे ऐप्लिकेशन को इस्तेमाल करने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"बैकग्राउंड में चलने के दौरान, धड़कन की दर जैसे बॉडी सेंसर डेटा का ऐक्सेस दें"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"इससे ऐप्लिकेशन के बैकग्राउंड में चलने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ऐप्लिकेशन को यह अनुमति दें कि जब उसे इस्तेमाल किया जा रहा हो, तब वह आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाए जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"इससे ऐप्लिकेशन, आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाएगा जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है. इस डेटा का ऐक्सेस उस समय मिलेगा जब ऐप्लिकेशन का इस्तेमाल किया जा रहा हो."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ऐप्लिकेशन को यह अनुमति दें कि बैकग्राउंड में चलते समय, वह आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाए जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"इससे ऐप्लिकेशन, आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाएगा जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है. इस डेटा का ऐक्सेस उस समय मिलेगा जब ऐप्लिकेशन बैकग्राउंड में चल रहा होगा."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कैलेंडर इवेंट और विवरण पढ़ें"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यह ऐप्लिकेशन आपके टैबलेट पर संग्रहित सभी कैलेंडर इवेंट पढ़ सकता है और आपका कैलेंडर डेटा शेयर कर सकता है या सहेज सकता है."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यह ऐप्लिकेशन आपके टीवी पर सेव किए गए सभी कैलेंडर इवेंट को पढ़ सकता है. इसके अलावा यह आपके कैलेंडर का डेटा शेयर कर सकता है या सेव कर सकता है."</string>
@@ -791,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ऐप्लिकेशन को, किसी ऐप्लिकेशन की सुविधाओं की जानकारी देखने की अनुमति देता है."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"सेंसर डेटा को, नमूने लेने की तेज़ दर पर ऐक्सेस करें"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यह अनुमति मिलने पर ऐप्लिकेशन, 200 हर्ट्ज़ से ज़्यादा की दर पर सेंसर डेटा का नमूना ले पाएगा"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ऐप्लिकेशन अपने-आप अपडेट होने की अनुमति दें"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"इससे होल्डर उस ऐप्लिकेशन को अपने-आप अपडेट कर पाएगा जो उसने पहले इंस्टॉल किया था"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
@@ -1241,10 +1252,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android प्रारंभ हो रहा है…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"टैबलेट चालू हो रहा है…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"डिवाइस चालू हो रहा है…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"मेमोरी ऑप्‍टिमाइज़ हो रही है."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"सिस्टम अपडेट पूरा होने वाला है…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> अपग्रेड हो रहा है…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> में से <xliff:g id="NUMBER_0">%1$d</xliff:g> ऐप्स  अनुकूलित हो रहा है."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तैयार हो रहा है."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट खत्म हो रहा है."</string>
@@ -1356,6 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"यूएसबी के ज़रिए पीटीपी की सुविधा चालू की गई"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"यूएसबी टेदरिंग की सुविधा चालू की गई"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"यूएसबी के ज़रिए एमआईडीआई (मिडी) की सुविधा चालू की गई"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"डिवाइस को वेबकैम के तौर पर कनेक्ट किया गया"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"यूएसबी ऐक्सेसरी कनेक्ट हो गई है"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"ज़्यादा विकल्पों के लिए टैप करें."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"जोड़ा गया डिवाइस चार्ज हो रहा है. ज़्यादा विकल्पों के लिए टैप करें."</string>
@@ -1386,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"इनपुट का तरीका चुनें"</string>
     <string name="show_ime" msgid="6406112007347443383">"सामान्य कीबोर्ड के सक्रिय होने के दौरान इसे स्‍क्रीन पर बनाए रखें"</string>
     <string name="hardware" msgid="1800597768237606953">"वर्चुअल कीबोर्ड दिखाएं"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"सामान्य कीबोर्ड कॉन्फ़िगर करें"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> को कॉन्फ़िगर करें"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"फ़िज़िकल कीबोर्ड को कॉन्फ़िगर करें"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"भाषा और लेआउट चुनने के लिए टैप करें"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1691,7 +1702,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> को अपना डिवाइस पूरी तरह कंट्रोल करने की मंज़ूरी दें?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह कंट्रोल करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और कंट्रोल करें"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाली हर तरह के कॉन्टेंट को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन पर दिखा सकता है."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाले कॉन्टेंट को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन के ऊपर दिखा सकता है."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"देखें और कार्रवाई करें"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
@@ -1704,14 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"हो गया"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"शॉर्टकट बंद करें"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट का उपयोग करें"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"रंग बदलने की सुविधा"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"रंग बदलने की सुविधा"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"रंग में सुधार करने की सुविधा"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"वन-हैंडेड मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"स्क्रीन की रोशनी को सामान्य लेवल से और कम करने की सुविधा"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"सुनने में मदद करने वाले डिवाइस"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू कर दिया गया."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद कर दिया गया."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> इस्तेमाल करने के लिए आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"आवाज़ बटन को छोड़ें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> की सुविधा चालू करने के लिए, आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"सुलभता बटन पर टैप करके, इस्तेमाल करने के लिए सुविधा चुनें:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"सुलभता वाले हाथ के जेस्चर (हाव-भाव) के साथ इस्तेमाल करने के लिए सुविधा चुनें (दो उंगलियों से स्क्रीन पर सबसे नीचे से ऊपर की ओर स्वाइप करें):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"सुलभता वाले हाथ के जेस्चर (हाव-भाव) के साथ इस्तेमाल करने के लिए सुविधा चुनें (तीन उंगलियों से स्क्रीन पर सबसे नीचे से ऊपर की ओर स्वाइप करें):"</string>
@@ -1842,6 +1853,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"आप पूरे स्क्रीन पर देख रहे हैं"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ठीक है"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"बेहतर व्यू पाने के लिए, डिवाइस की स्क्रीन को घुमाएं"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"बेहतर व्यू पाने के लिए, स्प्लिट स्क्रीन मोड बंद करें"</string>
     <string name="done_label" msgid="7283767013231718521">"हो गया"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"घंटो का चक्राकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनटों का चक्राकार स्लाइडर"</string>
@@ -1853,6 +1866,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"दफ़्तर का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"दूसरा काम <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"तीसरा काम <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> का क्लोन"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"अनपिन करने से पहले पिन के लिए पूछें"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"अनपिन करने से पहले लॉक खोलने के पैटर्न के लिए पूछें"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"अनपिन करने से पहले पासवर्ड के लिए पूछें"</string>
@@ -1943,10 +1957,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करने हैं?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"अपने ऑफ़िस के काम से जुड़े ऐप्लिकेशन और सूचनाओं का ऐक्सेस पाएं"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"चालू करें"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आपातकालीन कॉल"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"अपने वर्क ऐप्लिकेशन और कॉल का ऐक्सेस पाएं"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> इस समय उपलब्ध नहीं है."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नहीं है"</string>
@@ -2309,4 +2321,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"इससे साथी ऐप्लिकेशन को बैकग्राउंड में फ़ोरग्राउंड सेवाएं चलाने की अनुमति मिलती है."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"माइक्रोफ़ोन इस्तेमाल किया जा सकता है"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"माइक्रोफ़ोन को ब्लॉक किया गया है"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ड्यूअल स्क्रीन"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ड्यूअल स्क्रीन की सुविधा चालू है"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, कॉन्टेंट दिखाने के लिए दोनों डिसप्ले का इस्तेमाल कर रहा है"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"आपका फ़ोन बहुत गर्म हो गया है"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ड्यूअल स्क्रीन की सुविधा अभी उपलब्ध नहीं है, क्योंकि आपका फ़ोन बहुत गर्म हो रहा है"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen का इस्तेमाल नहीं किया जा सकता"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"बैटरी सेवर की सुविधा चालू होने पर, Dual Screen का इस्तेमाल नहीं किया जा सकता. इस सुविधा को सेटिंग में जाकर बंद करें."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"सेटिंग पर जाएं"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"बंद करें"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉन्फ़िगर किया गया"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%s</xliff:g> पर सेट कर दिया गया है. बदलने के लिए टैप करें."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> पर सेट कर दिया गया है. बदलने के लिए टैप करें."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> पर सेट कर दिया गया है. बदलने के लिए टैप करें."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… पर सेट कर दिया गया है. इसे बदलने के लिए टैप करें."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"फ़िज़िकल कीबोर्ड कॉन्फ़िगर किए गए"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"कीबोर्ड देखने के लिए टैप करें"</string>
 </resources>

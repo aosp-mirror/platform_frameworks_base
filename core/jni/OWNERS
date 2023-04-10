@@ -5,6 +5,9 @@ per-file *Camera*,*camera* = shuzhenwang@google.com, yinchiayeh@google.com, zhij
 # Connectivity
 per-file android_net_* = codewiz@google.com, jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
 
+# Choreographer
+per-file android_view_DisplayEventReceiver* = file:platform/frameworks/native:/services/surfaceflinger/OWNERS
+
 # CPU
 per-file *Cpu* = file:/core/java/com/android/internal/os/CPU_OWNERS
 

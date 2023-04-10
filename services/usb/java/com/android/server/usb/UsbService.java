@@ -16,6 +16,8 @@
 
 package com.android.server.usb;
 
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
+import static android.hardware.usb.DisplayPortAltModeInfo.LINK_TRAINING_STATUS_UNKNOWN;
 import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
@@ -1169,14 +1171,17 @@ public class UsbService extends IUsbManager.Stub {
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
                 }
-            } else if ("set-displayport-status".equals(args[0]) && args.length == 5) {
+            } else if ("set-displayport-status".equals(args[0]) && args.length == 7) {
                 final String portId = args[1];
                 final int partnerSinkStatus = Integer.parseInt(args[2]);
                 final int cableStatus = Integer.parseInt(args[3]);
                 final int displayPortNumLanes = Integer.parseInt(args[4]);
+                final boolean hpd = Boolean.parseBoolean(args[5]);
+                final int linkTrainingStatus = Integer.parseInt(args[6]);
                 if (mPortManager != null) {
                     mPortManager.simulateDisplayPortAltModeInfo(portId,
-                            partnerSinkStatus, cableStatus, displayPortNumLanes, pw);
+                            partnerSinkStatus, cableStatus, displayPortNumLanes,
+                            hpd, linkTrainingStatus, pw);
                     pw.println();
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
@@ -1185,9 +1190,12 @@ public class UsbService extends IUsbManager.Stub {
                 final String portId = args[1];
                 if (mPortManager != null) {
                     mPortManager.simulateDisplayPortAltModeInfo(portId,
-                            DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
-                            DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
-                            0, pw);
+                            DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
+                            DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
+                            0,
+                            false,
+                            LINK_TRAINING_STATUS_UNKNOWN,
+                            pw);
                     pw.println();
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             "", 0);
@@ -1259,7 +1267,13 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("Example simulate DisplayPort Alt Mode Changes:");
                 pw.println("  dumpsys usb add-port \"matrix\" dual --displayport");
                 pw.println("  dumpsys usb set-displayport-status \"matrix\" <partner-sink>"
-                        + " <cable> <num-lanes>");
+                        + " <cable> <num-lanes> <hpd> <link-training-status>");
+                pw.println("The required fields are as followed:");
+                pw.println("    <partner-sink>: type DisplayPortAltModeStatus");
+                pw.println("    <cable>: type DisplayPortAltModeStatus");
+                pw.println("    <num-lanes>: type int, expected 0, 2, or 4");
+                pw.println("    <hpd>: type boolean, expected true or false");
+                pw.println("    <link-training-status>: type LinkTrainingStatus");
                 pw.println("  dumpsys usb reset-displayport-status \"matrix\"");
                 pw.println("reset-displayport-status can also be used in order to set");
                 pw.println("the DisplayPortInfo to default values.");

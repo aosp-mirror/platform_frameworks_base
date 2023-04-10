@@ -142,6 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Дзвінки через Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"Передавання голосу через Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Дзвінки через Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Вимкнено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Телефонувати через Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Телефонувати через мобільну мережу"</string>
@@ -209,6 +210,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Особисті додатки заблоковано, доки ви не ввімкнете робочий профіль"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Особисті додатки буде заблоковано <xliff:g id="DATE">%1$s</xliff:g> о <xliff:g id="TIME">%2$s</xliff:g>. Ваш ІТ-адміністратор не дозволяє, щоб робочий профіль був неактивний більше ніж <xliff:g id="NUMBER">%3$d</xliff:g> дн."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Увімкнути"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Дзвінки та повідомлення вимкнено"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Ви призупинили робочі додатки. Телефонні дзвінки й текстові повідомлення не надходитимуть."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Увімкнути робочі додатки"</string>
     <string name="me" msgid="6207584824693813140">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Парам. пристрою"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Опції Android TV"</string>
@@ -224,9 +228,9 @@
     <string name="reboot_to_update_title" msgid="2125818841916373708">"Оновлення системи Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Підготовка до оновлення…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Обробка пакета оновлення…"</string>
-    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезавантаження…"</string>
+    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезапуск…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Скидання налаштувань"</string>
-    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезавантаження…"</string>
+    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезапуск…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Ваш пристрій буде вимкнено."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Пристрій Android TV буде вимкнено."</string>
@@ -329,7 +333,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Отримувати вміст вікна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Перевіряти вміст вікна, з яким ви взаємодієте."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Увімкнути функцію дослідження дотиком"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Активувати голосові підказки для елементів, яких торкаються, і користуватися інтерфейсом за допомогою жестів."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Озвучувати елементи, яких торкаються, і здійснювати навігацію екраном за допомогою жестів."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Переглядати текст, який ви вводите"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Включає особисті дані, як-от номери кредитних карток і паролі."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Контролювати збільшення екрана"</string>
@@ -340,6 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може фіксувати жести на сканері відбитків пальців."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Робити знімки екрана"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може робити знімки екрана."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> (попередній перегляд)"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"вимикати чи змін. рядок стану"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволяє програмі вимикати рядок стану чи додавати та видаляти піктограми системи."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"відображатися як рядок стану"</string>
@@ -460,6 +465,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Під час використання додатка він матиме доступ до даних датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ до показників датчиків на тілі, наприклад пульсу, у фоновому режимі"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Коли додаток працюватиме у фоновому режимі, він матиме доступ до показників датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Отримувати доступ до даних датчика на тілі про температуру в зоні зап’ястя, коли додаток використовується."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Під час використання додатка він матиме доступ до даних датчика на тілі про температуру в зоні зап’ястя."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Отримувати доступ до даних датчика на тілі про температуру в зоні зап’ястя, коли додаток працює у фоновому режимі."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Коли додаток працюватиме у фоновому режимі, він матиме доступ до даних датчика на тілі про температуру в зоні зап’ястя."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Переглядати події календаря й додаткову інформацію"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Цей додаток може переглядати всі події календаря, збережені на вашому планшеті, а також надсилати та зберігати дані календаря."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Додаток може переглядати всі події календаря, збережені на вашому пристрої Android TV, а також надсилати та зберігати дані календаря."</string>
@@ -793,6 +802,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозволяє додатку почати перегляд інформації про функції іншого додатка."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"доступ до даних датчиків із високою частотою дикретизації"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Додаток зможе дискретизувати дані даних датчиків із частотою понад 200 Гц"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Відстежувати спроби розблокування екрана"</string>
@@ -1243,10 +1256,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Запуск ОС Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет запускається…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Пристрій запускається…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Оптимізація пам’яті."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Завершується оновлення системи…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> оновлюється…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Оптимізація програми <xliff:g id="NUMBER_0">%1$d</xliff:g> з <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Підготовка додатка <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск програм."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завершення завантаження."</string>
@@ -1358,6 +1369,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режим PTP через USB ввімкнено"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Режим USB-модема ввімкнено"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Режим MIDI через USB ввімкнено"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Пристрій підключено як веб-камеру"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Під’єднано USB-аксесуар"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Торкніться, щоб переглянути більше опцій."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Під’єднаний пристрій заряджається. Торкніться, щоб побачити більше опцій."</string>
@@ -1388,7 +1400,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Вибрати метод введення"</string>
     <string name="show_ime" msgid="6406112007347443383">"Утримуйте на екрані, коли активна фізична клавіатура"</string>
     <string name="hardware" msgid="1800597768237606953">"Показати віртуальну клавіатуру"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Налаштуйте фізичну клавіатуру"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Налаштуйте клавіатуру \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\""</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Налаштуйте фізичні клавіатури"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Торкніться, щоб вибрати мову та розкладку"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
@@ -1482,7 +1495,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ви використовуєте цей додаток у своєму робочому профілі"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Метод введення"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Синхр."</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Доступність"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
@@ -1690,8 +1703,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вмикати"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УВІМК."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ВИМК."</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу \"<xliff:g id="SERVICE">%1$s</xliff:g>\" повний доступ до вашого пристрою?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ потрібен додаткам, які підтримують функції доступності, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати контент поверх інших додатків."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
@@ -1706,14 +1719,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Використовувати ярлик"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія кольорів"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Інверсія кольорів"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Корекція кольору"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим керування однією рукою"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додаткове зменшення яскравості"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слухові апарати"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Щоб скористатися службою <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, утримуйте обидві клавіші гучності впродовж трьох секунд"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Відпустіть клавіші гучності. Щоб увімкнути сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, натисніть і втримуйте обидві клавіші гучності протягом 3 секунд."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Виберіть функцію для кнопки спеціальних можливостей:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Виберіть функцію для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Виберіть функцію для жесту спеціальних можливостей (проведення трьома пальцями знизу вгору):"</string>
@@ -1844,6 +1857,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Перегляд на весь екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Щоб вийти, проведіть пальцем зверху вниз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Оберніть для кращого огляду"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Для кращого огляду вийдіть із режиму розділення екрана"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Вибір годин на циферблаті"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Вибір хвилин на циферблаті"</string>
@@ -1855,6 +1870,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Робоча <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-а робота: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-я робота: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Копія додатка <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-код для відкріплення"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Запитувати ключ розблокування перед відкріпленням"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Запитувати пароль перед відкріпленням"</string>
@@ -1945,10 +1961,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Увімкнути робочі додатки?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Отримайте доступ до своїх робочих додатків і сповіщень"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Екстрений виклик"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Отримайте доступ до своїх робочих додатків і дзвінків"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -1997,7 +2011,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Новини та журнали"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карти й навігація"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Продуктивність"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Спеціальні можливості"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Доступність"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Пам’ять пристрою"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Налагодження USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"години"</string>
@@ -2311,4 +2325,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дозволяє супутньому додатку запускати активні сервіси у фоновому режимі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Мікрофон доступний"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Мікрофон заблоковано"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Подвійний екран"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Подвійний екран увімкнено"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує обидва екрани для показу контенту"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Пристрій сильно нагрівається"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Подвійний екран недоступний, оскільки телефон сильно нагрівається"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функція Dual Screen недоступна"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функція Dual Screen недоступна, оскільки ввімкнено режим енергозбереження. Її можна вимкнути в налаштуваннях."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Перейти до налаштувань"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Вимкнути"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Клавіатуру \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\" налаштовано"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Вибрано розкладку клавіатури \"<xliff:g id="LAYOUT_1">%s</xliff:g>\". Натисніть, щоб змінити."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Вибрано такі розкладки клавіатури: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Натисніть, щоб змінити."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Вибрано такі розкладки клавіатури: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Натисніть, щоб змінити."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Вибрано такі розкладки клавіатури: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Натисніть, щоб змінити."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Фізичні клавіатури налаштовано"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Натисніть, щоб переглянути клавіатури"</string>
 </resources>

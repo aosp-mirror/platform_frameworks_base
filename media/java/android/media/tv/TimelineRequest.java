@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -54,7 +55,6 @@ public final class TimelineRequest extends BroadcastInfoRequest implements Parce
         mSelector = null;
     }
 
-    /** @hide */
     public TimelineRequest(int requestId, @RequestOption int option, int intervalMillis,
             @NonNull String selector) {
         super(REQUEST_TYPE, requestId, option);
@@ -81,8 +81,8 @@ public final class TimelineRequest extends BroadcastInfoRequest implements Parce
      * {@code urn:dvb:css:timeline:pts} is a selector in DVB standard.
      *
      * @return the selector if it's set; {@code null} otherwise.
-     * @hide
      */
+    @Nullable
     public String getSelector() {
         return mSelector;
     }

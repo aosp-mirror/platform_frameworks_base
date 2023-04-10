@@ -216,7 +216,6 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
         args.argi1 = homeTaskVisible ? 1 : 0;
         args.argi2 = clearedTask ? 1 : 0;
         args.argi3 = wasVisible ? 1 : 0;
-        mMainHandler.removeMessages(ON_ACTIVITY_RESTART_ATTEMPT);
         mMainHandler.obtainMessage(ON_ACTIVITY_RESTART_ATTEMPT, args).sendToTarget();
     }
 

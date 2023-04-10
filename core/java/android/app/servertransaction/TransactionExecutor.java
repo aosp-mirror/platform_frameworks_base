@@ -32,6 +32,7 @@ import static android.app.servertransaction.TransactionExecutorHelper.transactio
 
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.os.IBinder;
 import android.util.IntArray;
 import android.util.Slog;
@@ -218,7 +219,7 @@ public class TransactionExecutor {
             switch (state) {
                 case ON_CREATE:
                     mTransactionHandler.handleLaunchActivity(r, mPendingActions,
-                            null /* customIntent */);
+                            Context.DEVICE_ID_INVALID, null /* customIntent */);
                     break;
                 case ON_START:
                     mTransactionHandler.handleStartActivity(r, mPendingActions,

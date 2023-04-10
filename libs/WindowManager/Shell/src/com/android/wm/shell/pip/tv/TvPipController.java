@@ -51,6 +51,7 @@ import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -118,6 +119,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     private final ShellController mShellController;
     private final TvPipBoundsState mTvPipBoundsState;
+    private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final TvPipBoundsAlgorithm mTvPipBoundsAlgorithm;
     private final TvPipBoundsController mTvPipBoundsController;
     private final PipAppOpsListener mAppOpsListener;
@@ -152,6 +154,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -171,6 +174,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 shellInit,
                 shellController,
                 tvPipBoundsState,
+                pipDisplayLayoutState,
                 tvPipBoundsAlgorithm,
                 tvPipBoundsController,
                 pipAppOpsListener,
@@ -192,6 +196,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -212,9 +217,13 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mShellController = shellController;
         mDisplayController = displayController;
 
+        DisplayLayout layout = new DisplayLayout(context, context.getDisplay());
+
         mTvPipBoundsState = tvPipBoundsState;
-        mTvPipBoundsState.setDisplayId(context.getDisplayId());
-        mTvPipBoundsState.setDisplayLayout(new DisplayLayout(context, context.getDisplay()));
+
+        mPipDisplayLayoutState = pipDisplayLayoutState;
+        mPipDisplayLayoutState.setDisplayLayout(layout);
+        mPipDisplayLayoutState.setDisplayId(context.getDisplayId());
 
         mTvPipBoundsAlgorithm = tvPipBoundsAlgorithm;
         mTvPipBoundsController = tvPipBoundsController;
@@ -384,7 +393,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     @Override
     public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
             Set<Rect> unrestricted) {
-        if (mTvPipBoundsState.getDisplayId() == displayId) {
+        if (mPipDisplayLayoutState.getDisplayId() == displayId) {
             boolean unrestrictedAreasChanged = !Objects.equals(unrestricted,
                     mTvPipBoundsState.getUnrestrictedKeepClearAreas());
             mTvPipBoundsState.setKeepClearAreas(restricted, unrestricted);
@@ -437,7 +446,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                     "%s: PiP has already been closed by custom close action", TAG);
             return;
         }
-        removeTask(mPinnedTaskId);
+        mPipTaskOrganizer.removePip();
         onPipDisappeared();
     }
 
@@ -664,17 +673,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
     }
 
-    private static void removeTask(int taskId) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: removeTask(), taskId=%d", TAG, taskId);
-        try {
-            ActivityTaskManager.getService().removeTask(taskId);
-        } catch (Exception e) {
-            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Atm.removeTask() failed, %s", TAG, e);
-        }
-    }
-
     private static String stateToName(@State int state) {
         switch (state) {
             case STATE_NO_PIP:
@@ -732,7 +730,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             if (mRegistered) return;
 
             mContext.registerReceiverForAllUsers(this, mIntentFilter, SYSTEMUI_PERMISSION,
-                    mMainHandler);
+                    mMainHandler, Context.RECEIVER_NOT_EXPORTED);
             mRegistered = true;
         }
 

@@ -199,8 +199,7 @@ public final class BroadcastRadioServiceImpl {
      */
     @Nullable
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
-            boolean withAudio, ITunerCallback callback, int targetSdkVersion)
-            throws RemoteException {
+            boolean withAudio, ITunerCallback callback) throws RemoteException {
         if (DEBUG) {
             Slogf.d(TAG, "Open AIDL radio session");
         }
@@ -223,7 +222,7 @@ public final class BroadcastRadioServiceImpl {
             }
         }
 
-        TunerSession tunerSession = radioModule.openSession(callback, targetSdkVersion);
+        TunerSession tunerSession = radioModule.openSession(callback);
         if (legacyConfig != null) {
             tunerSession.setConfiguration(legacyConfig);
         }

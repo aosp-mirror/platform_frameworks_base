@@ -1870,6 +1870,65 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyVibrate(1);
     }
 
+    @Test
+    public void testStartFlashNotificationEvent_receiveBeepyNotification() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyBeepUnlooped();
+        verifyNeverVibrate();
+        verify(mAccessibilityService).startFlashNotificationEvent(any(), anyInt(),
+                eq(r.getSbn().getPackageName()));
+        assertTrue(r.isInterruptive());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testStartFlashNotificationEvent_receiveBuzzyNotification() throws Exception {
+        NotificationRecord r = getBuzzyNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
+        verifyVibrate();
+        verify(mAccessibilityService).startFlashNotificationEvent(any(), anyInt(),
+                eq(r.getSbn().getPackageName()));
+        assertTrue(r.isInterruptive());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testStartFlashNotificationEvent_receiveBuzzyBeepyNotification() throws Exception {
+        NotificationRecord r = getBuzzyBeepyNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyBeepUnlooped();
+        verifyDelayedVibrate(r.getVibration());
+        verify(mAccessibilityService).startFlashNotificationEvent(any(), anyInt(),
+                eq(r.getSbn().getPackageName()));
+        assertTrue(r.isInterruptive());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testStartFlashNotificationEvent_receiveBuzzyBeepyNotification_ringerModeSilent()
+            throws Exception {
+        NotificationRecord r = getBuzzyBeepyNotification();
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
+        verifyNeverVibrate();
+        verify(mAccessibilityService).startFlashNotificationEvent(any(), anyInt(),
+                eq(r.getSbn().getPackageName()));
+        assertFalse(r.isInterruptive());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {
         private final int mRepeatIndex;
 

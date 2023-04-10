@@ -81,6 +81,8 @@ public interface PackageStateInternal extends PackageState {
 
     float getLoadingProgress();
 
+    long getLoadingCompletedTime();
+
     @NonNull
     PackageKeySetData getKeySetData();
 

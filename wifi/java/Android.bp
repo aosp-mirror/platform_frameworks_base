@@ -27,7 +27,10 @@ package {
 
 filegroup {
     name: "framework-wifi-non-updatable-sources-internal",
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.aidl",
+    ],
     path: "src",
     visibility: ["//visibility:private"],
 }

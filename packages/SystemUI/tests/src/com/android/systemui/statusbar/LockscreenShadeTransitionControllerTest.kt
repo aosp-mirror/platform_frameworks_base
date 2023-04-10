@@ -79,6 +79,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
     @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
     @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
+    @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     private val configurationController = FakeConfigurationController()
@@ -124,6 +125,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 },
                 qsTransitionControllerFactory = { qsTransitionController },
             )
+        transitionController.addCallback(transitionControllerCallback)
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
         transitionController.notificationPanelController = notificationPanelController
@@ -209,16 +211,6 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testTriggeringBouncerWhenPrivateNotificationsArentAllowed() {
-        whenever(lockScreenUserManager.userAllowsPrivateNotificationsInPublic(anyInt())).thenReturn(
-                false)
-        transitionController.goToLockedShade(null)
-        verify(statusbarStateController, never()).setState(anyInt())
-        verify(statusbarStateController).setLeaveOpenOnKeyguardHide(true)
-        verify(mCentralSurfaces).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
-    }
-
-    @Test
     fun testTriggeringBouncerNoNotificationsOnLockscreen() {
         whenever(lockScreenUserManager.shouldShowLockscreenNotifications()).thenReturn(false)
         transitionController.goToLockedShade(null)
@@ -231,7 +223,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeCreatesQSAnimation() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(notificationPanelController).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 
@@ -239,7 +231,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeDoesntCreateQSAnimation() {
         transitionController.goToLockedShade(null, needsQSAnimation = false)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(notificationPanelController).transitionToExpandedShade(anyLong())
         assertNull(transitionController.dragDownAnimator)
     }
 
@@ -247,7 +239,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeAlwaysCreatesQSAnimationInSplitShade() {
         enableSplitShade()
         transitionController.goToLockedShade(null, needsQSAnimation = true)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(notificationPanelController).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 
@@ -258,7 +250,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
-        verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
+        verify(transitionControllerCallback, never()).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
         verify(qsTransitionController, never()).dragDownAmount = anyFloat()
     }
@@ -269,7 +261,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(nsslController).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat(), anyFloat())
-        verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
+        verify(transitionControllerCallback).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
         verify(qsTransitionController).dragDownAmount = 10f
         verify(depthController).transitionToFullShadeProgress = anyFloat()

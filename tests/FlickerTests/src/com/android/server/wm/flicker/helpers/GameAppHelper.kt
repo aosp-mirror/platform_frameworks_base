@@ -17,13 +17,14 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 class GameAppHelper
 @JvmOverloads
@@ -59,7 +60,6 @@ constructor(
      *
      * @param wmHelper Helper used to get window region.
      * @param direction UiAutomator Direction enum to indicate the swipe direction.
-     *
      * @return true if the swipe operation is successful.
      */
     fun switchToPreviousAppByQuickSwitchGesture(
@@ -95,7 +95,6 @@ constructor(
      * @param packageName The targe application's package name.
      * @param identifier The resource id of the target object.
      * @param timeout The timeout duration in milliseconds.
-     *
      * @return true if the target object exists.
      */
     @JvmOverloads

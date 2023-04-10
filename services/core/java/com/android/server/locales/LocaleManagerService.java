@@ -129,11 +129,8 @@ public class LocaleManagerService extends SystemService {
 
         mBackupHelper = new LocaleManagerBackupHelper(this,
                 mPackageManager, broadcastHandlerThread);
-        AppUpdateTracker appUpdateTracker =
-                new AppUpdateTracker(mContext, this, mBackupHelper);
-
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
-                systemAppUpdateTracker, appUpdateTracker, this);
+                systemAppUpdateTracker, this);
         mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
                 UserHandle.ALL,
                 true);
@@ -185,8 +182,11 @@ public class LocaleManagerService extends SystemService {
         @Override
         public void setApplicationLocales(@NonNull String appPackageName, @UserIdInt int userId,
                 @NonNull LocaleList locales, boolean fromDelegate) throws RemoteException {
+            int caller = fromDelegate
+                    ? FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_DELEGATE
+                    : FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APPS;
             LocaleManagerService.this.setApplicationLocales(appPackageName, userId, locales,
-                    fromDelegate);
+                    fromDelegate, caller);
         }
 
         @Override
@@ -229,13 +229,14 @@ public class LocaleManagerService extends SystemService {
      * Sets the current UI locales for a specified app.
      */
     public void setApplicationLocales(@NonNull String appPackageName, @UserIdInt int userId,
-            @NonNull LocaleList locales, boolean fromDelegate)
+            @NonNull LocaleList locales, boolean fromDelegate, int caller)
             throws RemoteException, IllegalArgumentException {
         AppLocaleChangedAtomRecord atomRecordForMetrics = new
                 AppLocaleChangedAtomRecord(Binder.getCallingUid());
         try {
             requireNonNull(appPackageName);
             requireNonNull(locales);
+            atomRecordForMetrics.setCaller(caller);
             atomRecordForMetrics.setNewLocales(locales.toLanguageTags());
             //Allow apps with INTERACT_ACROSS_USERS permission to set locales for different user.
             userId = mActivityManagerInternal.handleIncomingUser(
@@ -250,7 +251,7 @@ public class LocaleManagerService extends SystemService {
             // set locales if the package name is owned by the app. Next, check if the caller has
             // the necessary permission and set locales.
             boolean isCallerOwner = isPackageOwnedByCaller(appPackageName, userId,
-                    atomRecordForMetrics);
+                    atomRecordForMetrics, null);
             if (!isCallerOwner) {
                 enforceChangeConfigurationPermission(atomRecordForMetrics);
             }
@@ -264,7 +265,7 @@ public class LocaleManagerService extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
         } finally {
-            logMetric(atomRecordForMetrics);
+            logAppLocalesMetric(atomRecordForMetrics);
         }
     }
 
@@ -276,8 +277,8 @@ public class LocaleManagerService extends SystemService {
                     + " and user " + userId);
         }
 
-        atomRecordForMetrics.setPrevLocales(getApplicationLocalesUnchecked(appPackageName, userId)
-                .toLanguageTags());
+        atomRecordForMetrics.setPrevLocales(
+                getApplicationLocalesUnchecked(appPackageName, userId).toLanguageTags());
         final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
                 mActivityTaskManagerInternal.createPackageConfigurationUpdater(appPackageName,
                         userId);
@@ -355,32 +356,30 @@ public class LocaleManagerService extends SystemService {
     }
 
     /**
-     * Same as {@link LocaleManagerService#isPackageOwnedByCaller(String, int,
-     * AppLocaleChangedAtomRecord)}, but for methods that do not log locale atom.
-     */
-    private boolean isPackageOwnedByCaller(String appPackageName, int userId) {
-        return isPackageOwnedByCaller(appPackageName, userId, /* atomRecordForMetrics= */null);
-    }
-
-    /**
      * Checks if the package is owned by the calling app or not for the given user id.
      *
      * @throws IllegalArgumentException if package not found for given userid
      */
     private boolean isPackageOwnedByCaller(String appPackageName, int userId,
-            @Nullable AppLocaleChangedAtomRecord atomRecordForMetrics) {
+            @Nullable AppLocaleChangedAtomRecord atomRecordForMetrics,
+            @Nullable AppSupportedLocalesChangedAtomRecord appSupportedLocalesChangedAtomRecord) {
         final int uid = getPackageUid(appPackageName, userId);
         if (uid < 0) {
             Slog.w(TAG, "Unknown package " + appPackageName + " for user " + userId);
             if (atomRecordForMetrics != null) {
                 atomRecordForMetrics.setStatus(FrameworkStatsLog
                         .APPLICATION_LOCALES_CHANGED__STATUS__FAILURE_INVALID_TARGET_PACKAGE);
+            } else if (appSupportedLocalesChangedAtomRecord != null) {
+                appSupportedLocalesChangedAtomRecord.setStatus(FrameworkStatsLog
+                        .APP_SUPPORTED_LOCALES_CHANGED__STATUS__FAILURE_INVALID_TARGET_PACKAGE);
             }
             throw new IllegalArgumentException("Unknown package: " + appPackageName
                     + " for user " + userId);
         }
         if (atomRecordForMetrics != null) {
             atomRecordForMetrics.setTargetUid(uid);
+        } else if (appSupportedLocalesChangedAtomRecord != null) {
+            appSupportedLocalesChangedAtomRecord.setTargetUid(uid);
         }
         //Once valid package found, ignore the userId part for validating package ownership
         //as apps with INTERACT_ACROSS_USERS permission could be changing locale for different user.
@@ -425,7 +424,7 @@ public class LocaleManagerService extends SystemService {
         // current input method, and that app is querying locales of the current foreground app. If
         // neither conditions matched, check if the caller has the necessary permission and fetch
         // locales.
-        if (!isPackageOwnedByCaller(appPackageName, userId)
+        if (!isPackageOwnedByCaller(appPackageName, userId, null, null)
                 && !isCallerInstaller(appPackageName, userId)
                 && !(isCallerFromCurrentInputMethod(userId)
                     && mActivityManagerInternal.isAppForeground(
@@ -550,13 +549,14 @@ public class LocaleManagerService extends SystemService {
         return systemLocales;
     }
 
-    private void logMetric(@NonNull AppLocaleChangedAtomRecord atomRecordForMetrics) {
+    private void logAppLocalesMetric(@NonNull AppLocaleChangedAtomRecord atomRecordForMetrics) {
         FrameworkStatsLog.write(FrameworkStatsLog.APPLICATION_LOCALES_CHANGED,
                 atomRecordForMetrics.mCallingUid,
                 atomRecordForMetrics.mTargetUid,
                 atomRecordForMetrics.mNewLocales,
                 atomRecordForMetrics.mPrevLocales,
-                atomRecordForMetrics.mStatus);
+                atomRecordForMetrics.mStatus,
+                atomRecordForMetrics.mCaller);
     }
 
     /**
@@ -569,49 +569,77 @@ public class LocaleManagerService extends SystemService {
             return;
         }
 
-        requireNonNull(appPackageName);
-
-        //Allow apps with INTERACT_ACROSS_USERS permission to set locales for different user.
-        userId = mActivityManagerInternal.handleIncomingUser(
-                Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
-                "setOverrideLocaleConfig", /* callerPackage= */ null);
-
-        // This function handles two types of set operations:
-        // 1.) A normal, an app overrides its own LocaleConfig.
-        // 2.) A privileged system application or service is granted the necessary permission to
-        // override a LocaleConfig of another package.
-        if (!isPackageOwnedByCaller(appPackageName, userId)) {
-            enforceSetAppSpecificLocaleConfigPermission();
-        }
-
-        final long token = Binder.clearCallingIdentity();
+        AppSupportedLocalesChangedAtomRecord atomRecord = new AppSupportedLocalesChangedAtomRecord(
+                Binder.getCallingUid());
         try {
-            setOverrideLocaleConfigUnchecked(appPackageName, userId, localeConfig);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+            requireNonNull(appPackageName);
 
-        //TODO: Add metrics to monitor the usage by applications
+            //Allow apps with INTERACT_ACROSS_USERS permission to set locales for different user.
+            userId = mActivityManagerInternal.handleIncomingUser(
+                    Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                    false /* allowAll */, ActivityManagerInternal.ALLOW_NON_FULL,
+                    "setOverrideLocaleConfig", /* callerPackage= */ null);
+
+            // This function handles two types of set operations:
+            // 1.) A normal, an app overrides its own LocaleConfig.
+            // 2.) A privileged system application or service is granted the necessary permission to
+            // override a LocaleConfig of another package.
+            if (!isPackageOwnedByCaller(appPackageName, userId, null, atomRecord)) {
+                enforceSetAppSpecificLocaleConfigPermission(atomRecord);
+            }
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setOverrideLocaleConfigUnchecked(appPackageName, userId, localeConfig, atomRecord);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        } finally {
+            logAppSupportedLocalesChangedMetric(atomRecord);
+        }
     }
+
     private void setOverrideLocaleConfigUnchecked(@NonNull String appPackageName,
-            @UserIdInt int userId, @Nullable LocaleConfig overridelocaleConfig) {
+            @UserIdInt int userId, @Nullable LocaleConfig overrideLocaleConfig,
+            @NonNull AppSupportedLocalesChangedAtomRecord atomRecord) {
         synchronized (mWriteLock) {
             if (DEBUG) {
                 Slog.d(TAG,
                         "set the override LocaleConfig for package " + appPackageName + " and user "
                                 + userId);
             }
+            LocaleConfig resLocaleConfig = null;
+            try {
+                resLocaleConfig = LocaleConfig.fromContextIgnoringOverride(
+                        mContext.createPackageContext(appPackageName, 0));
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Unknown package name " + appPackageName);
+                return;
+            }
             final File file = getXmlFileNameForUser(appPackageName, userId);
 
-            if (overridelocaleConfig == null) {
+            if (overrideLocaleConfig == null) {
                 if (file.exists()) {
                     Slog.d(TAG, "remove the override LocaleConfig");
                     file.delete();
                 }
+                removeUnsupportedAppLocales(appPackageName, userId, resLocaleConfig,
+                        FrameworkStatsLog
+                                .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_DYNAMIC_LOCALES_CHANGE
+                );
+                atomRecord.setOverrideRemoved(true);
+                atomRecord.setStatus(FrameworkStatsLog
+                        .APP_SUPPORTED_LOCALES_CHANGED__STATUS__SUCCESS);
                 return;
             } else {
-                LocaleList localeList = overridelocaleConfig.getSupportedLocales();
+                if (overrideLocaleConfig.isSameLocaleConfig(
+                        getOverrideLocaleConfig(appPackageName, userId))) {
+                    Slog.d(TAG, "the same override, ignore it");
+                    atomRecord.setSameAsPrevConfig(true);
+                    return;
+                }
+
+                LocaleList localeList = overrideLocaleConfig.getSupportedLocales();
                 // Normally the LocaleList object should not be null. However we reassign it as the
                 // empty list in case it happens.
                 if (localeList == null) {
@@ -621,6 +649,7 @@ public class LocaleManagerService extends SystemService {
                     Slog.d(TAG,
                             "setOverrideLocaleConfig, localeList: " + localeList.toLanguageTags());
                 }
+                atomRecord.setNumLocales(localeList.size());
 
                 // Store the override LocaleConfig to the file storage.
                 final AtomicFile atomicFile = new AtomicFile(file);
@@ -633,11 +662,22 @@ public class LocaleManagerService extends SystemService {
                     if (stream != null) {
                         atomicFile.failWrite(stream);
                     }
+                    atomRecord.setStatus(FrameworkStatsLog
+                            .APP_SUPPORTED_LOCALES_CHANGED__STATUS__FAILURE_WRITE_TO_STORAGE);
                     return;
                 }
                 atomicFile.finishWrite(stream);
                 // Clear per-app locales if they are not in the override LocaleConfig.
-                removeUnsupportedAppLocales(appPackageName, userId, overridelocaleConfig);
+                removeUnsupportedAppLocales(appPackageName, userId, overrideLocaleConfig,
+                        FrameworkStatsLog
+                                .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_DYNAMIC_LOCALES_CHANGE
+                );
+                if (overrideLocaleConfig.isSameLocaleConfig(resLocaleConfig)) {
+                    Slog.d(TAG, "setOverrideLocaleConfig, same as the app's LocaleConfig");
+                    atomRecord.setSameAsResConfig(true);
+                }
+                atomRecord.setStatus(FrameworkStatsLog
+                        .APP_SUPPORTED_LOCALES_CHANGED__STATUS__SUCCESS);
                 if (DEBUG) {
                     Slog.i(TAG, "Successfully written to " + atomicFile);
                 }
@@ -646,23 +686,32 @@ public class LocaleManagerService extends SystemService {
     }
 
     /**
-     * Checks if the per-app locales are in the new override LocaleConfig. Per-app locales
-     * missing from the new LocaleConfig will be removed.
+     * Checks if the per-app locales are in the LocaleConfig. Per-app locales missing from the
+     * LocaleConfig will be removed.
+     *
+     * <p><b>Note:</b> Check whether to remove the per-app locales when the app is upgraded or
+     * the LocaleConfig is overridden.
      */
-    private void removeUnsupportedAppLocales(String appPackageName, int userId,
-            LocaleConfig localeConfig) {
+    void removeUnsupportedAppLocales(String appPackageName, int userId,
+            LocaleConfig localeConfig, int caller) {
         LocaleList appLocales = getApplicationLocalesUnchecked(appPackageName, userId);
-        // Remove the app locale from the locale list if it doesn't exist in the override
-        // LocaleConfig.
+        // Remove the per-app locales from the locale list if they don't exist in the LocaleConfig.
         boolean resetAppLocales = false;
         List<Locale> newAppLocales = new ArrayList<Locale>();
-        for (int i = 0; i < appLocales.size(); i++) {
-            if (!localeConfig.containsLocale(appLocales.get(i))) {
-                Slog.i(TAG, "reset the app locales");
-                resetAppLocales = true;
-                continue;
+
+        if (localeConfig == null) {
+            //Reset the app locales to the system default
+            Slog.i(TAG, "There is no LocaleConfig, reset app locales");
+            resetAppLocales = true;
+        } else {
+            for (int i = 0; i < appLocales.size(); i++) {
+                if (!localeConfig.containsLocale(appLocales.get(i))) {
+                    Slog.i(TAG, "Missing from the LocaleConfig, reset app locales");
+                    resetAppLocales = true;
+                    continue;
+                }
+                newAppLocales.add(appLocales.get(i));
             }
-            newAppLocales.add(appLocales.get(i));
         }
 
         if (resetAppLocales) {
@@ -670,17 +719,25 @@ public class LocaleManagerService extends SystemService {
             Locale[] locales = new Locale[newAppLocales.size()];
             try {
                 setApplicationLocales(appPackageName, userId,
-                        new LocaleList(newAppLocales.toArray(locales)), false);
+                        new LocaleList(newAppLocales.toArray(locales)),
+                        mBackupHelper.areLocalesSetFromDelegate(userId, appPackageName), caller);
             } catch (RemoteException | IllegalArgumentException e) {
                 Slog.e(TAG, "Could not set locales for " + appPackageName, e);
             }
         }
     }
 
-    private void enforceSetAppSpecificLocaleConfigPermission() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_APP_SPECIFIC_LOCALECONFIG,
-                "setOverrideLocaleConfig");
+    private void enforceSetAppSpecificLocaleConfigPermission(
+            AppSupportedLocalesChangedAtomRecord atomRecord) {
+        try {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.SET_APP_SPECIFIC_LOCALECONFIG,
+                    "setOverrideLocaleConfig");
+        } catch (SecurityException e) {
+            atomRecord.setStatus(FrameworkStatsLog
+                    .APP_SUPPORTED_LOCALES_CHANGED__STATUS__FAILURE_PERMISSION_ABSENT);
+            throw e;
+        }
     }
 
     /**
@@ -793,7 +850,19 @@ public class LocaleManagerService extends SystemService {
     @NonNull
     private File getXmlFileNameForUser(@NonNull String appPackageName, @UserIdInt int userId) {
         // TODO(b/262752965): use per-package data directory
-        final File dir = new File(Environment.getDataSystemDeDirectory(userId), LOCALE_CONFIGS);
+        final File dir = new File(Environment.getDataSystemCeDirectory(userId), LOCALE_CONFIGS);
         return new File(dir, appPackageName + SUFFIX_FILE_NAME);
+    }
+
+    private void logAppSupportedLocalesChangedMetric(
+            @NonNull AppSupportedLocalesChangedAtomRecord atomRecord) {
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_SUPPORTED_LOCALES_CHANGED,
+                atomRecord.mCallingUid,
+                atomRecord.mTargetUid,
+                atomRecord.mNumLocales,
+                atomRecord.mOverrideRemoved,
+                atomRecord.mSameAsResConfig,
+                atomRecord.mSameAsPrevConfig,
+                atomRecord.mStatus);
     }
 }

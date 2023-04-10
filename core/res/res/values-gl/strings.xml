@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Chamadas por wifi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Chamada por wifi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Chama por wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Chama pola rede de telefonía móbil"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"As túas aplicacións persoais están bloqueadas ata que actives o teu perfil de traballo"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"As aplicacións persoais bloquearanse o <xliff:g id="DATE">%1$s</xliff:g> á seguinte hora: <xliff:g id="TIME">%2$s</xliff:g>. O administrador de TI non permite que o teu perfil de traballo estea desactivado máis de <xliff:g id="NUMBER">%3$d</xliff:g> días."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activar"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Desactiváronse as chamadas e as mensaxes"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Puxeches en pausa as aplicacións do traballo. Non recibirás chamadas nin mensaxes de texto."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Volver activar"</string>
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcións da tableta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcións de Android TV"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode rexistrar os xestos realizados no sensor de impresión dixital do dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Facer captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pode facer capturas de pantalla."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Vista previa, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar ou modificar a barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite á aplicación desactivar a barra de estado ou engadir e quitar as iconas do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"actuar como a barra de estado"</string>
@@ -393,7 +398,7 @@
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"usar datos en segundo plano"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Esta aplicación pode usar datos en segundo plano. Por este motivo, quizais aumente o uso de datos."</string>
     <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"Planificar accións para que se leven a cabo nun momento determinado"</string>
-    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Esta aplicación pode planificar o traballo para que se leve a cabo nun momento determinado no futuro. Isto tamén supón que a aplicación poderá executarse cando non esteas usando o dispositivo de forma activa."</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Esta aplicación pode planificar accións para que se leven a cabo nun momento determinado no futuro. Isto tamén supón que a aplicación poderá executarse cando non esteas usando o dispositivo de forma activa."</string>
     <string name="permlab_use_exact_alarm" msgid="348045139777131552">"Planificar alarmas ou recordatorios de eventos"</string>
     <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Esta aplicación pode planificar accións (por exemplo, alarmas ou recordatorios) para enviarche notificacións nun momento determinado no futuro."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"facer que a aplicación se execute sempre"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite que a aplicación acceda aos datos dos sensores corporais (por exemplo, a frecuencia cardíaca, a temperatura ou a porcentaxe de osíxeno en sangue) mentres se estea utilizando."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Acceso en segundo plano aos datos dos sensores corporais, como a frecuencia cardíaca"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite que a aplicación acceda aos datos dos sensores corporais (por exemplo, a frecuencia cardíaca, a temperatura ou a porcentaxe de osíxeno en sangue) mentres se estea executando en segundo plano."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Acceder aos datos de temperatura do sensor corporal do pulso mentres se está utilizando a aplicación."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite que a aplicación acceda aos datos de temperatura do sensor corporal do pulso mentres se está utilizando a aplicación."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Acceder aos datos de temperatura do sensor corporal do pulso mentres a aplicación está en segundo plano."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite que a aplicación acceda aos datos de temperatura do sensor corporal do pulso mentres a aplicación está en segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler os detalles e os eventos do calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta aplicación pode ler todos os eventos do calendario almacenados na túa tableta e compartir ou gardar os datos do calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta aplicación pode ler todos os eventos do calendario almacenados no dispositivo Android TV e compartir ou gardar os datos do calendario."</string>
@@ -791,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o propietario comece a ver a información das funcións dunha aplicación."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acceder aos datos dos sensores usando unha taxa de mostraxe alta"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que a aplicación recompile mostras dos datos dos sensores cunha taxa superior a 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecer as normas de contrasinal"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controla a lonxitude e os caracteres permitidos nos contrasinais e nos PIN de bloqueo da pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Controlar os intentos de desbloqueo da pantalla"</string>
@@ -1241,10 +1254,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Estase iniciando Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"A tableta estase iniciando…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"O dispositivo estase iniciando…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Optimizando almacenamento."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Finalizando actualización do sistema…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Actualizando <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicacións."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Está finalizando o arranque"</string>
@@ -1321,8 +1332,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"Permitir"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Rexeitar"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; quere enviar unha mensaxe a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na túa conta de teléfono móbil."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na túa conta de teléfono móbil."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na conta do teu operador móbil."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na conta do teu operador móbil."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Lembrar a miña opción"</string>
@@ -1356,6 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Activouse o modo PTP por USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Activouse a conexión compartida por USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Activouse o modo MIDI por USB"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"O dispositivo está conectado como unha cámara web"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Conectouse un accesorio USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Toca para ver máis opcións."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Cargando o dispositivo conectado. Toca para ver máis opcións."</string>
@@ -1386,7 +1398,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Escoller método de introdución de texto"</string>
     <string name="show_ime" msgid="6406112007347443383">"Móstrase na pantalla mentres o teclado físico estea activo"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configura o teclado físico"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura o teclado (<xliff:g id="DEVICE_NAME">%s</xliff:g>)"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura os teclados físicos"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toca para seleccionar o idioma e o deseño"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
@@ -1704,14 +1717,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Feito"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar atallo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atallo"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de cor"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversión da cor"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Corrección da cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo dunha soa man"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuación extra"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Dispositivos auditivos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume premidas. Activouse o servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Desactivouse <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premidas as teclas do volume durante tres segudos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Solta as teclas de volume. Para activar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, mantenas premidas de novo durante 3 segundos."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Escolle a función que queres utilizar cando toques o botón Accesibilidade:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Escolle a función que queres usar co xesto de accesibilidade (pasa dous dedos cara arriba desde a parte inferior da pantalla):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Escolle a función que queres usar co xesto de accesibilidade (pasa tres dedos cara arriba desde a parte inferior da pantalla):"</string>
@@ -1842,6 +1855,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vendo pantalla completa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para saír, pasa o dedo cara abaixo desde a parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Xira a pantalla para que se vexa mellor"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sae da pantalla dividida para que se vexa mellor"</string>
     <string name="done_label" msgid="7283767013231718521">"Feito"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control desprazable circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control desprazable circular dos minutos"</string>
@@ -1853,6 +1868,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clonar <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Pedir PIN antes de soltar a fixación"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pedir padrón de desbloqueo antes de soltar a fixación"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pedir contrasinal antes de soltar a fixación"</string>
@@ -1943,10 +1959,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Activar as apps do traballo?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Obtén acceso ás túas aplicacións e notificacións do traballo"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emerxencia"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Obtén acceso ás túas chamadas e aplicacións do traballo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"A aplicación non está dispoñible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> non está dispoñible neste momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non está dispoñible"</string>
@@ -2306,7 +2320,23 @@
     <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Enviar mensaxes complementarias"</string>
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Permite que unha aplicación complementaria envíe mensaxes complementarias a outros dispositivos."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Desde un segundo plano iniciar servizos en primeiro plano"</string>
-    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que nun segundo plano unha aplicación complementaria inicie servizos en primeiro plano."</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que unha aplicación complementaria, desde un segundo plano, inicie servizos en primeiro plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"O micrófono está dispoñible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"O micrófono está bloqueado"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"A pantalla dual está activada"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"A aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas as pantallas para mostrar contido"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"O dispositivo está demasiado quente"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"A pantalla dual non está dispoñible porque o teléfono está quentando demasiado"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen non está dispoñible"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen non está dispoñible porque a opción Aforro de batería está activado. Podes desactivar esta función en Configuración."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ir a Configuración"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactivar"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Configurouse o teclado (<xliff:g id="DEVICE_NAME">%s</xliff:g>)"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%s</xliff:g>. Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%1$s</xliff:g> e <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> e <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Configuráronse varios teclados físicos"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toca para ver os teclados"</string>
 </resources>

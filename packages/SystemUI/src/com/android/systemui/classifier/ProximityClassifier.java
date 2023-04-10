@@ -81,19 +81,19 @@ class ProximityClassifier extends FalsingClassifier {
         int action = motionEvent.getActionMasked();
 
         if (action == MotionEvent.ACTION_DOWN) {
-            mGestureStartTimeNs = motionEvent.getEventTimeNano();
+            mGestureStartTimeNs = motionEvent.getEventTimeNanos();
             if (mPrevNearTimeNs > 0) {
                 // We only care about if the proximity sensor is triggered while a move event is
                 // happening.
-                mPrevNearTimeNs = motionEvent.getEventTimeNano();
+                mPrevNearTimeNs = motionEvent.getEventTimeNanos();
             }
             logDebug("Gesture start time: " + mGestureStartTimeNs);
             mNearDurationNs = 0;
         }
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            update(mNear, motionEvent.getEventTimeNano());
-            long duration = motionEvent.getEventTimeNano() - mGestureStartTimeNs;
+            update(mNear, motionEvent.getEventTimeNanos());
+            long duration = motionEvent.getEventTimeNanos() - mGestureStartTimeNs;
 
             logDebug("Gesture duration, Proximity duration: " + duration + ", " + mNearDurationNs);
 

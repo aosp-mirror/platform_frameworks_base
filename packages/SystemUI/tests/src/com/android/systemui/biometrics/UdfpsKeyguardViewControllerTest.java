@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
@@ -32,24 +33,17 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewControllerBaseTest {
-    private @Captor ArgumentCaptor<PrimaryBouncerExpansionCallback>
-            mBouncerExpansionCallbackCaptor;
-    private PrimaryBouncerExpansionCallback mBouncerExpansionCallback;
-
     @Override
     public UdfpsKeyguardViewController createUdfpsKeyguardViewController() {
         return createUdfpsKeyguardViewController(/* useModernBouncer */ false,
@@ -62,11 +56,9 @@ public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewController
         captureStatusBarStateListeners();
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
-        captureBouncerExpansionCallback();
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()).thenReturn(true);
-        mBouncerExpansionCallback.onVisibilityChanged(true);
-
+        when(mView.getUnpausedAlpha()).thenReturn(0);
         assertTrue(mController.shouldPauseAuth());
     }
 
@@ -163,6 +155,22 @@ public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewController
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
         assertFalse(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void onBiometricAuthenticated_pauseAuth() {
+        // GIVEN view is attached and we're on the keyguard (see testShouldNotPauseAuthOnKeyguard)
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+
+        // WHEN biometric is authenticated
+        captureKeyguardStateControllerCallback();
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        mKeyguardStateControllerCallback.onUnlockedChanged();
+
+        // THEN pause auth
+        assertTrue(mController.shouldPauseAuth());
     }
 
     @Test
@@ -302,11 +310,6 @@ public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewController
 
         // THEN pause auth is updated to NOT pause
         verify(mView, atLeastOnce()).setPauseAuth(false);
-    }
-
-    private void captureBouncerExpansionCallback() {
-        verify(mBouncer).addBouncerExpansionCallback(mBouncerExpansionCallbackCaptor.capture());
-        mBouncerExpansionCallback = mBouncerExpansionCallbackCaptor.getValue();
     }
 
     @Test

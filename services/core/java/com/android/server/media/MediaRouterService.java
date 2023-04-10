@@ -16,6 +16,8 @@
 
 package com.android.server.media;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -69,6 +71,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -243,6 +246,30 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    // Binder call
+    @Override
+    public boolean showMediaOutputSwitcher(String packageName) {
+        if (!validatePackageName(Binder.getCallingUid(), packageName)) {
+            throw new SecurityException("packageName must match the calling identity");
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (mContext.getSystemService(ActivityManager.class).getPackageImportance(packageName)
+                    > IMPORTANCE_FOREGROUND) {
+                Slog.w(TAG, "showMediaOutputSwitcher only works when called from foreground");
+                return false;
+            }
+            synchronized (mLock) {
+                StatusBarManagerInternal statusBar =
+                        LocalServices.getService(StatusBarManagerInternal.class);
+                statusBar.showMediaOutputSwitcher(packageName);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
     }
 
     // Binder call

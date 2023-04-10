@@ -62,6 +62,15 @@ public class LogModule {
         return factory.create("NotifLog", maxSize, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
+    @Provides
+    @SysUISingleton
+    @NotificationLockscreenLog
+    public static LogBuffer provideNotificationLockScreenLogBuffer(
+            LogBufferFactory factory) {
+        return factory.create("NotifLockscreenLog", 50, false /* systrace */);
+    }
+
     /** Provides a logging buffer for logs related to heads up presentation of notifications. */
     @Provides
     @SysUISingleton
@@ -110,21 +119,20 @@ public class LogModule {
         return factory.create("ShadeLog", 500, false);
     }
 
-    /** Provides a logging buffer for Shade height messages. */
-    @Provides
-    @SysUISingleton
-    @ShadeHeightLog
-    public static LogBuffer provideShadeHeightLogBuffer(LogBufferFactory factory) {
-        return factory.create("ShadeHeightLog", 500 /* maxSize */);
-    }
-
-
     /** Provides a logging buffer for all logs related to managing notification sections. */
     @Provides
     @SysUISingleton
     @NotificationSectionLog
     public static LogBuffer provideNotificationSectionLogBuffer(LogBufferFactory factory) {
         return factory.create("NotifSectionLog", 1000 /* maxSize */, false /* systrace */);
+    }
+
+    /** Provides a logging buffer for all logs related to remote input controller. */
+    @Provides
+    @SysUISingleton
+    @NotificationRemoteInputLog
+    public static LogBuffer provideNotificationRemoteInputLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
@@ -141,6 +149,14 @@ public class LogModule {
     @QSLog
     public static LogBuffer provideQuickSettingsLogBuffer(LogBufferFactory factory) {
         return factory.create("QSLog", 700 /* maxSize */, false /* systrace */);
+    }
+
+    /** Provides a logging buffer for logs related to Quick Settings configuration. */
+    @Provides
+    @SysUISingleton
+    @QSConfigLog
+    public static LogBuffer provideQSConfigLogBuffer(LogBufferFactory factory) {
+        return factory.create("QSConfigLog", 100 /* maxSize */, true /* systrace */);
     }
 
     /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
@@ -191,37 +207,12 @@ public class LogModule {
                 false /* systrace */);
     }
 
-    /**
-     * Provides a logging buffer for logs related to swiping away the status bar while in immersive
-     * mode. See {@link com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureLogger}.
-     */
+    /** Provides a logging buffer for logs related to swipe up gestures. */
     @Provides
     @SysUISingleton
-    @SwipeStatusBarAwayLog
-    public static LogBuffer provideSwipeAwayGestureLogBuffer(LogBufferFactory factory) {
-        return factory.create("SwipeStatusBarAwayLog", 30);
-    }
-
-    /**
-     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the sender
-     * device. See {@link com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger}.
-     */
-    @Provides
-    @SysUISingleton
-    @MediaTttSenderLogBuffer
-    public static LogBuffer provideMediaTttSenderLogBuffer(LogBufferFactory factory) {
-        return factory.create("MediaTttSender", 20);
-    }
-
-    /**
-     * Provides a logging buffer for logs related to the media tap-to-transfer chip on the receiver
-     * device. See {@link com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger}.
-     */
-    @Provides
-    @SysUISingleton
-    @MediaTttReceiverLogBuffer
-    public static LogBuffer provideMediaTttReceiverLogBuffer(LogBufferFactory factory) {
-        return factory.create("MediaTttReceiver", 20);
+    @SwipeUpLog
+    public static LogBuffer provideSwipeUpLogBuffer(LogBufferFactory factory) {
+        return factory.create("SwipeUpLog", 30);
     }
 
     /**
@@ -288,16 +279,6 @@ public class LogModule {
     @MediaCarouselControllerLog
     public static LogBuffer provideMediaCarouselControllerBuffer(LogBufferFactory factory) {
         return factory.create("MediaCarouselCtlrLog", 20);
-    }
-
-    /**
-     * Provides a {@link LogBuffer} for use in the status bar connectivity pipeline
-     */
-    @Provides
-    @SysUISingleton
-    @StatusBarConnectivityLog
-    public static LogBuffer provideStatusBarConnectivityBuffer(LogBufferFactory factory) {
-        return factory.create("SbConnectivity", 64);
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
@@ -372,6 +353,37 @@ public class LogModule {
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 400);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.systemui.ScreenDecorations}.
+     */
+    @Provides
+    @SysUISingleton
+    @ScreenDecorationsLog
+    public static LogBuffer provideScreenDecorationsLog(LogBufferFactory factory) {
+        return factory.create("ScreenDecorationsLog", 200);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by
+     *  {@link com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepositoryImpl}.
+     */
+    @Provides
+    @SysUISingleton
+    @FaceAuthLog
+    public static LogBuffer provideFaceAuthLog(LogBufferFactory factory) {
+        return factory.create("DeviceEntryFaceAuthRepositoryLog", 300);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for Device State Auto-Rotation logs.
+     */
+    @Provides
+    @SysUISingleton
+    @DeviceStateAutoRotationLog
+    public static LogBuffer provideDeviceStateAutoRotationLogBuffer(LogBufferFactory factory) {
+        return factory.create("DeviceStateAutoRotationLog", 100);
     }
 
     /**

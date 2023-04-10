@@ -31,6 +31,7 @@ android_test {
         "services.backup",
         "services.companion",
         "services.core",
+        "services.credentials",
         "services.devicepolicy",
         "services.net",
         "services.people",
@@ -41,6 +42,7 @@ android_test {
         "androidx.test.ext.truth",
         "androidx.test.runner",
         "androidx.test.rules",
+        "androidx.test.ext.junit",
         "cts-wm-util",
         "platform-compat-test-rules",
         "mockito-target-minus-junit4",
@@ -60,9 +62,9 @@ android_test {
         "truth-prebuilt",
         "junit",
         "junit-params",
-        "platform-compat-test-rules",
         "ActivityContext",
         "coretests-aidl",
+        "securebox",
     ],
 
     libs: [
@@ -115,6 +117,7 @@ android_test {
         ":StubTestApp",
         ":SuspendTestApp",
         ":MediaButtonReceiverHolderTestHelperApp",
+        "data/broken_shortcut.xml",
     ],
 
     java_resources: [

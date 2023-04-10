@@ -428,9 +428,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @Override
-    public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
+    public void addStartingWindow(StartingWindowInfo info) {
         if (mStartingWindow != null) {
-            mStartingWindow.addStartingWindow(info, appToken);
+            mStartingWindow.addStartingWindow(info);
         }
     }
 
@@ -464,6 +464,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+        if (leash != null) {
+            leash.setUnreleasedWarningCallSite("ShellTaskOrganizer.onTaskAppeared");
+        }
         synchronized (mLock) {
             onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
         }

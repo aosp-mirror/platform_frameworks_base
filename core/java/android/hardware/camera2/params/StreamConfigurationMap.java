@@ -26,7 +26,6 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
-import android.util.Log;
 import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -1791,7 +1790,7 @@ public final class StreamConfigurationMap {
      *
      * <p>{@code ValidOutputFormatsForInput([in:%s(%d), out:%s(%d), ... %s(%d)],
      * ... [in:%s(%d), out:%s(%d), ... %s(%d)])}, where {@code [in:%s(%d), out:%s(%d), ... %s(%d)]}
-     * represents an input fomat and its valid output formats.</p>
+     * represents an input format and its valid output formats.</p>
      *
      * <p>{@code HighSpeedVideoConfigurations([w:%d, h:%d, min_fps:%d, max_fps:%d],
      * ... [w:%d, h:%d, min_fps:%d, max_fps:%d])}, where
@@ -2019,7 +2018,7 @@ public final class StreamConfigurationMap {
     /**
      * @hide
      */
-    public static final int HAL_DATASPACE_HEIF = 0x1003;
+    public static final int HAL_DATASPACE_HEIF = 0x1004;
     /**
      * @hide
      */

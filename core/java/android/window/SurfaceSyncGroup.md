@@ -2,7 +2,7 @@
 
 ### Overview
 
-A generic way for data to be gathered so multiple surfaces can be synced. This is intended to be used with Views, SurfaceView, and any other surface that wants to be involved in a sync. This allows different parts of the Android system to synchronize different windows and layers themselves.
+A generic way for data to be gathered so multiple surfaces can be synced. This is intended to be used with AttachedSurfaceControl, SurfaceView, SurfaceControlViewHost, and any other surface that wants to be involved in a sync. This allows different parts of the Android system to synchronize different windows and layers themselves.
 
 ### Code
 

@@ -18,6 +18,7 @@ package com.android.server.tare;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.tare.EconomyManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,7 +122,7 @@ public interface EconomyManagerInternal {
 
     /** Listener for various TARE state changes. */
     interface TareStateChangeListener {
-        void onTareEnabledStateChanged(boolean isTareEnabled);
+        void onTareEnabledModeChanged(@EconomyManager.EnabledMode int tareEnabledMode);
     }
 
     /**
@@ -135,11 +136,13 @@ public interface EconomyManagerInternal {
      */
     long getMaxDurationMs(int userId, @NonNull String pkgName, @NonNull ActionBill bill);
 
-    /** Returns true if TARE is enabled. */
-    boolean isEnabled();
+    /** Returns the current TARE enabled mode. */
+    @EconomyManager.EnabledMode
+    int getEnabledMode();
 
-    /** Returns true if TARE and the specified policy are enabled. */
-    boolean isEnabled(@EconomicPolicy.Policy int policyId);
+    /** Returns the current TARE enabled mode for the specified policy. */
+    @EconomyManager.EnabledMode
+    int getEnabledMode(@EconomicPolicy.Policy int policyId);
 
     /**
      * Register an {@link AffordabilityChangeListener} to track when an app's ability to afford the

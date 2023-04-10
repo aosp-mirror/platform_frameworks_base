@@ -30,8 +30,8 @@ import android.os.ICancellationSignal;
  *
  * @hide
  */
-interface ICredentialProviderService {
-    ICancellationSignal onBeginGetCredential(in BeginGetCredentialRequest request, in IBeginGetCredentialCallback callback);
-    ICancellationSignal onBeginCreateCredential(in BeginCreateCredentialRequest request, in IBeginCreateCredentialCallback callback);
-    ICancellationSignal onClearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback);
+oneway interface ICredentialProviderService {
+    void onBeginGetCredential(in BeginGetCredentialRequest request, in IBeginGetCredentialCallback callback);
+    void onBeginCreateCredential(in BeginCreateCredentialRequest request, in IBeginCreateCredentialCallback callback);
+    void onClearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback);
 }

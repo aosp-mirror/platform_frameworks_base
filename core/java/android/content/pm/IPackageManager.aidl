@@ -159,7 +159,8 @@ interface IPackageManager {
      */
     ParceledListSlice getInstalledPackages(long flags, in int userId);
 
-    String getAppMetadataPath(String packageName, int userId);
+    @nullable ParcelFileDescriptor getAppMetadataFd(String packageName,
+                int userId);
 
     /**
      * This implements getPackagesHoldingPermissions via a "last returned row"
@@ -246,7 +247,7 @@ interface IPackageManager {
     @UnsupportedAppUsage
     String getInstallerPackageName(in String packageName);
 
-    InstallSourceInfo getInstallSourceInfo(in String packageName);
+    InstallSourceInfo getInstallSourceInfo(in String packageName, int userId);
 
     void resetApplicationPreferences(int userId);
 
@@ -280,6 +281,9 @@ interface IPackageManager {
 
     void addCrossProfileIntentFilter(in IntentFilter intentFilter, String ownerPackage,
             int sourceUserId, int targetUserId, int flags);
+
+    boolean removeCrossProfileIntentFilter(in IntentFilter intentFilter, String ownerPackage,
+                int sourceUserId, int targetUserId, int flags);
 
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
@@ -349,12 +353,13 @@ interface IPackageManager {
      */
     @UnsupportedAppUsage
     void setComponentEnabledSetting(in ComponentName componentName,
-            in int newState, in int flags, int userId);
+            in int newState, in int flags, int userId, String callingPackage);
 
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSettings}.
      */
-    void setComponentEnabledSettings(in List<ComponentEnabledSetting> settings, int userId);
+    void setComponentEnabledSettings(in List<ComponentEnabledSetting> settings, int userId,
+            String callingPackage);
 
     /**
      * As per {@link android.content.pm.PackageManager#getComponentEnabledSetting}.
@@ -571,8 +576,6 @@ interface IPackageManager {
      */
     boolean performDexOptSecondary(String packageName,
             String targetCompilerFilter, boolean force);
-
-    void forceDexOpt(String packageName);
 
     int getMoveStatus(int moveId);
 

@@ -19,12 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.view.InsetsState.ITYPE_BOTTOM_MANDATORY_GESTURES;
-import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
-import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
@@ -51,6 +45,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
 import android.app.StatusBarManager;
+import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
@@ -158,7 +153,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @Test
     public void testControlsForDispatch_remoteInsetsControllerControlsBars_appHasNoControl() {
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
-        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(true);
+        mDisplayContent.getDisplayPolicy().setRemoteInsetsControllerControlsSystemBars(true);
         addStatusBar();
         addNavigationBar();
 
@@ -261,11 +256,15 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @Test
     public void testShowTransientBars_bothCanBeTransient_appGetsBothFakeControls() {
         final WindowState statusBar = addStatusBar();
+        final InsetsSourceProvider statusBarProvider = statusBar.getControllableInsetProvider();
+        final int statusBarId = statusBarProvider.getSource().getId();
         statusBar.setHasSurface(true);
-        statusBar.getControllableInsetProvider().setServerVisible(true);
+        statusBarProvider.setServerVisible(true);
         final WindowState navBar = addNavigationBar();
+        final InsetsSourceProvider navBarProvider = statusBar.getControllableInsetProvider();
+        final int navBarId = statusBarProvider.getSource().getId();
         navBar.setHasSurface(true);
-        navBar.getControllableInsetProvider().setServerVisible(true);
+        navBarProvider.setServerVisible(true);
         final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
         spyOn(policy);
         doNothing().when(policy).startAnimation(anyBoolean(), any());
@@ -276,12 +275,11 @@ public class InsetsPolicyTest extends WindowTestsBase {
         policy.updateBarControlTarget(mAppWindow);
         waitUntilWindowAnimatorIdle();
         assertFalse(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_STATUS_BAR).isVisible());
+                .isSourceOrDefaultVisible(statusBarId, statusBars()));
         assertFalse(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_NAVIGATION_BAR).isVisible());
+                .isSourceOrDefaultVisible(navBarId, navigationBars()));
 
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
-                true /* isGestureOnSystemBar */);
+        policy.showTransient(navigationBars() | statusBars(), true /* isGestureOnSystemBar */);
         waitUntilWindowAnimatorIdle();
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
@@ -293,9 +291,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
         }
 
         assertTrue(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_STATUS_BAR).isVisible());
+                .isSourceOrDefaultVisible(statusBarId, statusBars()));
         assertTrue(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_NAVIGATION_BAR).isVisible());
+                .isSourceOrDefaultVisible(navBarId, navigationBars()));
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -308,11 +306,11 @@ public class InsetsPolicyTest extends WindowTestsBase {
         spyOn(policy);
         doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(mAppWindow);
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
+        policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
         waitUntilWindowAnimatorIdle();
-        assertTrue(policy.isTransient(ITYPE_STATUS_BAR));
-        assertFalse(policy.isTransient(ITYPE_NAVIGATION_BAR));
+        assertTrue(policy.isTransient(statusBars()));
+        assertFalse(policy.isTransient(navigationBars()));
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
@@ -344,7 +342,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         spyOn(policy);
         doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(mAppWindow);
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
+        policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
         waitUntilWindowAnimatorIdle();
         InsetsSourceControl[] controls =
@@ -357,16 +355,16 @@ public class InsetsPolicyTest extends WindowTestsBase {
         }
 
         final InsetsState state = mAppWindow.getInsetsState();
-        state.setSourceVisible(ITYPE_STATUS_BAR, true);
-        state.setSourceVisible(ITYPE_NAVIGATION_BAR, true);
+        state.setSourceVisible(statusBarSource.getId(), true);
+        state.setSourceVisible(navBarSource.getId(), true);
 
         final InsetsState clientState = mAppWindow.getInsetsState();
         // The transient bar states for client should be invisible.
-        assertFalse(clientState.getSource(ITYPE_STATUS_BAR).isVisible());
-        assertFalse(clientState.getSource(ITYPE_NAVIGATION_BAR).isVisible());
+        assertFalse(clientState.isSourceOrDefaultVisible(statusBarSource.getId(), statusBars()));
+        assertFalse(clientState.isSourceOrDefaultVisible(navBarSource.getId(), navigationBars()));
         // The original state shouldn't be modified.
-        assertTrue(state.getSource(ITYPE_STATUS_BAR).isVisible());
-        assertTrue(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
+        assertTrue(state.isSourceOrDefaultVisible(statusBarSource.getId(), statusBars()));
+        assertTrue(state.isSourceOrDefaultVisible(navBarSource.getId(), navigationBars()));
 
         mAppWindow.setRequestedVisibleTypes(
                 navigationBars() | statusBars(), navigationBars() | statusBars());
@@ -393,34 +391,36 @@ public class InsetsPolicyTest extends WindowTestsBase {
         spyOn(policy);
         doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(app);
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
+        policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
         policy.updateBarControlTarget(app2);
-        assertFalse(policy.isTransient(ITYPE_STATUS_BAR));
-        assertFalse(policy.isTransient(ITYPE_NAVIGATION_BAR));
+        assertFalse(policy.isTransient(statusBars()));
+        assertFalse(policy.isTransient(navigationBars()));
     }
 
     private WindowState addNavigationBar() {
+        final Binder owner = new Binder();
         final WindowState win = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
         win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         win.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR),
-                new InsetsFrameProvider(ITYPE_BOTTOM_MANDATORY_GESTURES),
-                new InsetsFrameProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT)
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
         };
         mDisplayContent.getDisplayPolicy().addWindowLw(win, win.mAttrs);
         return win;
     }
 
     private WindowState addStatusBar() {
+        final Binder owner = new Binder();
         final WindowState win = createWindow(null, TYPE_STATUS_BAR, "statusBar");
         win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         win.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_STATUS_BAR),
-                new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
-                new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES)
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
         };
         mDisplayContent.getDisplayPolicy().addWindowLw(win, win.mAttrs);
         return win;

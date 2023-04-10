@@ -55,6 +55,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
@@ -126,7 +127,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mMockContext.getSystemService(eq(Vibrator.class))).thenReturn(mVibrator);
-        when(mMockContext.getResources()).thenReturn(getContext().getResources());
+        final Resources res = mContext.getResources();
+        when(mMockContext.getResources()).thenReturn(res);
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
         ApplicationInfo appInfo = new ApplicationInfo();
@@ -785,6 +787,24 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         record.setIsAppImportanceLocked(false);
         assertFalse(record.getIsAppImportanceLocked());
+    }
+
+    @Test
+    public void testSensitiveContent() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse(record.hasSensitiveContent());
+
+        Bundle signals = new Bundle();
+        signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, true);
+        record.addAdjustment(new Adjustment(mPkg, record.getKey(), signals, null, sbn.getUserId()));
+
+        record.applyAdjustments();
+
+        assertTrue(record.hasSensitiveContent());
     }
 
     @Test

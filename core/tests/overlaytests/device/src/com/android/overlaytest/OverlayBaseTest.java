@@ -37,10 +37,12 @@ import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.compatibility.common.util.AmUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.overlaytest.view.TestTextView;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -68,6 +70,13 @@ public abstract class OverlayBaseTest {
 
     protected OverlayBaseTest(int mode) {
         mMode = mode;
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+        // Wait for package_added broadcasts to be handled so that OverlayManagerService
+        // can update it's internal state with the new packages.
+        AmUtils.waitForBroadcastBarrier();
     }
 
     @Before

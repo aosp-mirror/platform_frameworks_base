@@ -116,7 +116,7 @@ import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
-import android.healthconnect.HealthServicesInitializer;
+import android.health.connect.HealthServicesInitializer;
 import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
@@ -156,7 +156,8 @@ import android.net.vcn.IVcnManagementService;
 import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
-import android.nfc.NfcManager;
+import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
+import android.nfc.NfcFrameworkInitializer;
 import android.ondevicepersonalization.OnDevicePersonalizationFrameworkInitializer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -483,13 +484,6 @@ public final class SystemServiceRegistry {
                 return new BatteryManager(ctx, stats, registrar);
             }});
 
-        registerService(Context.NFC_SERVICE, NfcManager.class,
-                new CachedServiceFetcher<NfcManager>() {
-            @Override
-            public NfcManager createService(ContextImpl ctx) {
-                return new NfcManager(ctx);
-            }});
-
         registerService(Context.DROPBOX_SERVICE, DropBoxManager.class,
                 new CachedServiceFetcher<DropBoxManager>() {
             @Override
@@ -510,11 +504,12 @@ public final class SystemServiceRegistry {
                 return new BinaryTransparencyManager(ctx, service);
             }});
 
+        // InputManager stores its own static instance for historical purposes.
         registerService(Context.INPUT_SERVICE, InputManager.class,
-                new StaticServiceFetcher<InputManager>() {
+                new ServiceFetcher<InputManager>() {
             @Override
-            public InputManager createService() {
-                return InputManager.getInstance();
+            public InputManager getService(ContextImpl ctx) {
+                return InputManager.getInstance(ctx.getOuterContext());
             }});
 
         registerService(Context.DISPLAY_SERVICE, DisplayManager.class,
@@ -882,6 +877,10 @@ public final class SystemServiceRegistry {
             @Override
             public VirtualDeviceManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
+                if (!ctx.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
+                    return null;
+                }
                 IVirtualDeviceManager service = IVirtualDeviceManager.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(Context.VIRTUAL_DEVICE_SERVICE));
                 return new VirtualDeviceManager(service, ctx.getOuterContext());
@@ -1571,6 +1570,13 @@ public final class SystemServiceRegistry {
                                                 Context.GRAMMATICAL_INFLECTION_SERVICE)));
                     }});
 
+        registerService(Context.SHARED_CONNECTIVITY_SERVICE, SharedConnectivityManager.class,
+                new CachedServiceFetcher<SharedConnectivityManager>() {
+                    @Override
+                    public SharedConnectivityManager createService(ContextImpl ctx) {
+                        return SharedConnectivityManager.create(ctx);
+                    }
+                });
 
         sInitializing = true;
         try {
@@ -1580,6 +1586,7 @@ public final class SystemServiceRegistry {
             JobSchedulerFrameworkInitializer.registerServiceWrappers();
             BlobStoreManagerFrameworkInitializer.initialize();
             BluetoothFrameworkInitializer.registerServiceWrappers();
+            NfcFrameworkInitializer.registerServiceWrappers();
             TelephonyFrameworkInitializer.registerServiceWrappers();
             AppSearchManagerFrameworkInitializer.initialize();
             HealthServicesInitializer.registerServiceWrappers();
@@ -1645,6 +1652,7 @@ public final class SystemServiceRegistry {
                 case Context.ETHERNET_SERVICE:
                 case Context.CONTEXTHUB_SERVICE:
                 case Context.VIRTUALIZATION_SERVICE:
+                case Context.VIRTUAL_DEVICE_SERVICE:
                     return null;
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);

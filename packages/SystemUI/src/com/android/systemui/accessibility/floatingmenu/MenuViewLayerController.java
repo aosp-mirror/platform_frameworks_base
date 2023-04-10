@@ -24,6 +24,8 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.systemui.util.settings.SecureSettings;
+
 /**
  * Controls the {@link MenuViewLayer} whether to be attached to the window via the interface
  * of {@link IAccessibilityFloatingMenu}.
@@ -34,9 +36,10 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
     private boolean mIsShowing;
 
     MenuViewLayerController(Context context, WindowManager windowManager,
-            AccessibilityManager accessibilityManager) {
+            AccessibilityManager accessibilityManager, SecureSettings secureSettings) {
         mWindowManager = windowManager;
-        mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager, this);
+        mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager, this,
+                secureSettings);
     }
 
     @Override

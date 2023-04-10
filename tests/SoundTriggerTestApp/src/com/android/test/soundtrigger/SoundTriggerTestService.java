@@ -92,7 +92,7 @@ public class SoundTriggerTestService extends Service {
         super.onCreate();
         IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_ACTION);
-        registerReceiver(mBroadcastReceiver, filter);
+        registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         // Make sure the data directory exists, and we're the owner of it.
         try {

@@ -95,6 +95,9 @@ public:
     virtual void setPictureCapturedCallback(
             const std::function<void(sk_sp<SkPicture>&&)>& callback) = 0;
 
+    virtual void setTargetSdrHdrRatio(float ratio) = 0;
+    virtual const SkM44& getPixelSnapMatrix() const = 0;
+
     virtual ~IRenderPipeline() {}
 };
 

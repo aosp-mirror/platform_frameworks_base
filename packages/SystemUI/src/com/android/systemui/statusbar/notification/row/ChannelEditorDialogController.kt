@@ -344,7 +344,7 @@ class ChannelEditorDialogController @Inject constructor(
             or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
 }
 
-class ChannelEditorDialog(context: Context) : Dialog(context) {
+class ChannelEditorDialog(context: Context, theme: Int) : Dialog(context, theme) {
     fun updateDoneButtonText(hasChanges: Boolean) {
         findViewById<TextView>(R.id.done_button)?.setText(
                 if (hasChanges)
@@ -361,7 +361,7 @@ class ChannelEditorDialog(context: Context) : Dialog(context) {
         }
 
         fun build(): ChannelEditorDialog {
-            return ChannelEditorDialog(context)
+            return ChannelEditorDialog(context, R.style.Theme_SystemUI_Dialog)
         }
     }
 }

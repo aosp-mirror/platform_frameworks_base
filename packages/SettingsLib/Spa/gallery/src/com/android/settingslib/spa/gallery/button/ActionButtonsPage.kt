@@ -24,8 +24,8 @@ import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.button.ActionButton
@@ -39,13 +39,24 @@ private const val TITLE = "Sample ActionButton"
 object ActionButtonPageProvider : SettingsPageProvider {
     override val name = "ActionButton"
 
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
-        ActionButtonPage()
+        RegularScaffold(title = TITLE) {
+            val actionButtons = listOf(
+                ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {},
+                ActionButton(text = "Uninstall", imageVector = Icons.Outlined.Delete) {},
+                ActionButton(text = "Force stop", imageVector = Icons.Outlined.WarningAmber) {},
+            )
+            ActionButtons(actionButtons)
+        }
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+        return SettingsEntryBuilder.createInject(owner = createSettingsPage())
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
@@ -55,22 +66,10 @@ object ActionButtonPageProvider : SettingsPageProvider {
     }
 }
 
-@Composable
-fun ActionButtonPage() {
-    RegularScaffold(title = TITLE) {
-        val actionButtons = listOf(
-            ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {},
-            ActionButton(text = "Uninstall", imageVector = Icons.Outlined.Delete) {},
-            ActionButton(text = "Force stop", imageVector = Icons.Outlined.WarningAmber) {},
-        )
-        ActionButtons(actionButtons)
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun ActionButtonPagePreview() {
     SettingsTheme {
-        ActionButtonPage()
+        ActionButtonPageProvider.Page(null)
     }
 }

@@ -41,6 +41,9 @@ class BackAnimationRunner {
     // Whether we are waiting to receive onAnimationStart
     private boolean mWaitingAnimation;
 
+    /** True when the back animation is cancelled */
+    private boolean mAnimationCancelled;
+
     BackAnimationRunner(@NonNull IOnBackInvokedCallback callback,
             @NonNull IRemoteAnimationRunner runner) {
         mCallback = callback;
@@ -72,7 +75,7 @@ class BackAnimationRunner {
                 };
         mWaitingAnimation = false;
         try {
-            mRunner.onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,
+            getRunner().onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,
                     nonApps, callback);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed call onAnimationStart", e);
@@ -81,9 +84,23 @@ class BackAnimationRunner {
 
     void startGesture() {
         mWaitingAnimation = true;
+        mAnimationCancelled = false;
     }
 
     boolean isWaitingAnimation() {
         return mWaitingAnimation;
+    }
+
+    void cancelAnimation() {
+        mWaitingAnimation = false;
+        mAnimationCancelled = true;
+    }
+
+    boolean isAnimationCancelled() {
+        return mAnimationCancelled;
+    }
+
+    void resetWaitingAnimation() {
+        mWaitingAnimation = false;
     }
 }

@@ -22,6 +22,9 @@ import android.graphics.Point
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -30,8 +33,9 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDoz
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessModel.Companion.isWakingOrStartingToWake
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.CommandQueue.Callbacks
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -41,7 +45,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -52,6 +58,8 @@ class KeyguardInteractor
 constructor(
     private val repository: KeyguardRepository,
     private val commandQueue: CommandQueue,
+    featureFlags: FeatureFlags,
+    bouncerRepository: KeyguardBouncerRepository,
 ) {
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
@@ -89,6 +97,9 @@ constructor(
         awaitClose { commandQueue.removeCallback(callback) }
     }
 
+    /** The device wake/sleep state */
+    val wakefulnessModel: Flow<WakefulnessModel> = repository.wakefulness
+
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
      * that doze mode is not running and DREAMING is ok to commence.
@@ -103,6 +114,12 @@ constructor(
                     isDreaming && isDozeOff(dozeTransitionModel.to)
                 }
             )
+            .sample(
+                wakefulnessModel,
+                { isAbleToDream, wakefulnessModel ->
+                    isAbleToDream && isWakingOrStartingToWake(wakefulnessModel)
+                }
+            )
             .flatMapLatest { isAbleToDream ->
                 flow {
                     delay(50)
@@ -113,21 +130,48 @@ constructor(
 
     /** Whether the keyguard is showing or not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+    /** Whether the keyguard is unlocked or not. */
+    val isKeyguardUnlocked: Flow<Boolean> = repository.isKeyguardUnlocked
     /** Whether the keyguard is occluded (covered by an activity). */
     val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
-    /** Whether the bouncer is showing or not. */
-    val isBouncerShowing: Flow<Boolean> = repository.isBouncerShowing
-    /** The device wake/sleep state */
-    val wakefulnessModel: Flow<WakefulnessModel> = repository.wakefulness
+    /** Whether the primary bouncer is showing or not. */
+    val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
+    /** Whether the alternate bouncer is showing or not. */
+    val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
+    /** Whether or not quick settings or quick quick settings are showing. */
+    val isQuickSettingsVisible: Flow<Boolean> = repository.isQuickSettingsVisible
     /**
      * Observable for [BiometricUnlockModel] when biometrics like face or any fingerprint (rear,
      * side, under display) is used to unlock the device.
      */
     val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
+
+    /** Keyguard is present and is not occluded. */
+    val isKeyguardVisible: Flow<Boolean> =
+        combine(isKeyguardShowing, isKeyguardOccluded) { showing, occluded -> showing && !occluded }
+
+    /** Whether camera is launched over keyguard. */
+    var isSecureCameraActive =
+        if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
+            combine(
+                    isKeyguardVisible,
+                    primaryBouncerShowing,
+                    onCameraLaunchDetected,
+                ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
+                    when {
+                        isKeyguardVisible -> false
+                        isPrimaryBouncerShowing -> false
+                        else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
+                    }
+                }
+                .onStart { emit(false) }
+        } else {
+            flowOf(false)
+        }
 
     /** The approximate location on the screen of the fingerprint sensor, if one is available. */
     val fingerprintSensorLocation: Flow<Point?> = repository.fingerprintSensorLocation
@@ -153,6 +197,11 @@ constructor(
                 CameraLaunchSourceModel.QUICK_AFFORDANCE
             else -> throw IllegalArgumentException("Invalid CameraLaunchSourceModel value: $value")
         }
+    }
+
+    /** Sets whether quick settings or quick-quick settings is visible. */
+    fun setQuickSettingsVisible(isVisible: Boolean) {
+        repository.setQuickSettingsVisible(isVisible)
     }
 
     companion object {

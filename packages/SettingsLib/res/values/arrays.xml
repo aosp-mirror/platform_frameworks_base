@@ -116,6 +116,36 @@
         <item>full</item>
     </string-array>
 
+    <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_filters_entries">
+        <item>Leave only ACL headers</item>
+        <item>Filter A2DP media packets</item>
+        <item>Filter RFCOMM channel</item>
+    </string-array>
+
+        <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_filters_values" translatable="false">
+        <item>headers</item>
+        <item>profiles.a2dp</item>
+        <item>profiles.rfcomm</item>
+    </string-array>
+
+        <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_profile_filter_entries">
+        <item>Disable</item>
+        <item>Fill with string of characters</item>
+        <item>Leave only header</item>
+        <item>Fully remove</item>
+    </string-array>
+
+        <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_profile_filter_values" translatable="false">
+        <item>disabled</item>
+        <item>magic</item>
+        <item>header</item>
+        <item>fullfilter</item>
+    </string-array>
+
     <!-- Titles for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_versions">
         <item>AVRCP 1.5 (Default)</item>
@@ -542,7 +572,7 @@
 
     <!-- BatteryMeterView parameters -->
     <array name="batterymeter_color_levels">
-        <item>15</item>
+        <item>20</item>
         <item>100</item>
     </array>
     <array name="batterymeter_color_values">
@@ -615,5 +645,17 @@
 
     <!-- Content descriptions for each of the images in the avatar_images array. -->
     <string-array name="avatar_image_descriptions"/>
+
+    <!-- NOTE: if you change this, you must also add the corresponding scale key and lookup table to
+     frameworks/base/core/java/android/content/res/FontScaleConverterFactory.java -->
+    <string-array name="entryvalues_font_size" translatable="false">
+        <item>0.85</item>
+        <item>1.0</item>
+        <item>1.15</item>
+        <item>1.30</item>
+        <item>1.50</item>
+        <item>1.80</item>
+        <item>2.0</item>
+    </string-array>
 
 </resources>

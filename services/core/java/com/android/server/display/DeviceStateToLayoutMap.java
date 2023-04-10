@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.DisplayAddress;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -114,29 +115,40 @@ class DeviceStateToLayoutMap {
                 Slog.i(TAG, "Display layout config not found: " + configFile);
                 return;
             }
+            int leadDisplayId = Display.DEFAULT_DISPLAY;
             for (com.android.server.display.config.layout.Layout l : layouts.getLayout()) {
                 final int state = l.getState().intValue();
                 final Layout layout = createLayout(state);
                 for (com.android.server.display.config.layout.Display d: l.getDisplay()) {
-                    Layout.Display display = layout.createDisplayLocked(
+                    assert layout != null;
+                    int position = getPosition(d.getPosition());
+                    layout.createDisplayLocked(
                             DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
                             d.isDefaultDisplay(),
                             d.isEnabled(),
-                            mIdProducer);
-
-                    if (FRONT_STRING.equals(d.getPosition())) {
-                        display.setPosition(POSITION_FRONT);
-                    } else if (REAR_STRING.equals(d.getPosition())) {
-                        display.setPosition(POSITION_REAR);
-                    } else {
-                        display.setPosition(POSITION_UNKNOWN);
-                    }
+                            d.getDisplayGroup(),
+                            mIdProducer,
+                            position,
+                            leadDisplayId,
+                            d.getBrightnessThrottlingMapId(),
+                            d.getRefreshRateZoneId(),
+                            d.getRefreshRateThermalThrottlingMapId());
                 }
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing display layout config file: "
                     + configFile, e);
         }
+    }
+
+    private int getPosition(@NonNull String position) {
+        int positionInt = POSITION_UNKNOWN;
+        if (FRONT_STRING.equals(position)) {
+            positionInt = POSITION_FRONT;
+        } else if (REAR_STRING.equals(position)) {
+            positionInt = POSITION_REAR;
+        }
+        return positionInt;
     }
 
     private Layout createLayout(int state) {

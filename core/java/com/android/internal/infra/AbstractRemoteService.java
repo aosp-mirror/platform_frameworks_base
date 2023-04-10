@@ -107,7 +107,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     private int mServiceExitSubReason;
 
     /** Requests that have been scheduled, but that are not finished yet */
-    private final ArrayList<BasePendingRequest<S, I>> mUnfinishedRequests = new ArrayList<>();
+    protected final ArrayList<BasePendingRequest<S, I>> mUnfinishedRequests = new ArrayList<>();
 
     /**
      * Callback called when the service dies.
@@ -671,6 +671,11 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                     return false;
                 }
                 mCancelled = true;
+            }
+
+            S service = mWeakService.get();
+            if (service != null) {
+                service.finishRequest(this);
             }
 
             onCancel();

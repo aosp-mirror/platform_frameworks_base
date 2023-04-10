@@ -448,12 +448,15 @@ public class RecentTasksTest extends WindowTestsBase {
         final String taskAffinity = "affinity";
         final int uid = 10123;
         final Task task1 = createTaskBuilder(".Task1").build();
-        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        final ComponentName componentName = getUniqueComponentName();
+        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
+                componentName);
         mRecentTasks.add(task1);
 
         // Add another task to recents, and make sure the previous task was removed.
         final Task task2 = createTaskBuilder(".Task2").build();
-        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
+                componentName);
         mRecentTasks.add(task2);
         assertEquals(1, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
                 true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
@@ -461,7 +464,7 @@ public class RecentTasksTest extends WindowTestsBase {
         // Add another single-instance task to recents, and make sure no task is removed.
         final Task task3 = createTaskBuilder(".Task3").build();
         task3.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid,
-                LAUNCH_SINGLE_INSTANCE);
+                LAUNCH_SINGLE_INSTANCE, componentName);
         mRecentTasks.add(task3);
         assertEquals(2, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
                 true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
@@ -921,6 +924,11 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testFreezeTaskListOrder_timeout() {
+        for (Task t : mTasks) {
+            // Make all the tasks non-empty
+            new ActivityBuilder(mAtm).setTask(t).build();
+        }
+
         // Add some tasks
         mRecentTasks.add(mTasks.get(0));
         mRecentTasks.add(mTasks.get(1));
@@ -1029,6 +1037,17 @@ public class RecentTasksTest extends WindowTestsBase {
                 fail("Expected com.android.pkg1 tasks to be removed");
             }
         }
+
+        // If the task has a non-stopped activity, the removal will wait for its onDestroy.
+        final Task task = tasks.get(0);
+        final ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).build();
+        top.lastVisibleTime = 123;
+        top.setState(ActivityRecord.State.RESUMED, "test");
+        mRecentTasks.removeTasksByPackageName(task.getBasePackageName(), TEST_USER_0_ID);
+        assertTrue(task.mKillProcessesOnDestroyed);
+        top.setState(ActivityRecord.State.DESTROYING, "test");
+        top.destroyed("test");
+        assertFalse(task.mKillProcessesOnDestroyed);
     }
 
     @Test

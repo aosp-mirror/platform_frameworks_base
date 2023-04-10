@@ -76,6 +76,7 @@ public class RootDisplayAreaOrganizer extends DisplayAreaOrganizer {
                             + " mDisplayAreasInfo.get():" + mDisplayAreasInfo.get(displayId));
         }
 
+        leash.setUnreleasedWarningCallSite("RootDisplayAreaOrganizer.onDisplayAreaAppeared");
         mDisplayAreasInfo.put(displayId, displayAreaInfo);
         mLeashes.put(displayId, leash);
     }

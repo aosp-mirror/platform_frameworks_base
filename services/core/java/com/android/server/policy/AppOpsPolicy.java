@@ -447,7 +447,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         // package, so we don't need to modify it.
         if (Process.isIsolated(uid) // simple check which fails-fast for the common case
                 && (code == AppOpsManager.OP_RECORD_AUDIO
-                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD)) {
+                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD
+                || code == AppOpsManager.OP_CAMERA)) {
             final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
                     mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
             if (hotwordDetectionServiceIdentity != null

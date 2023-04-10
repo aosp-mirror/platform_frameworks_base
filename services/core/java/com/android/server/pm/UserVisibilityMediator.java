@@ -22,6 +22,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND;
@@ -41,6 +42,7 @@ import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Display;
 
@@ -54,32 +56,54 @@ import com.android.server.pm.UserManagerInternal.UserVisibilityListener;
 import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Class responsible for deciding whether a user is visible (or visible for a given display).
  *
- * <p>Currently, it has 2 "modes" (set on constructor), which defines the class behavior (i.e, the
+ * <p>Currently, it has 3 "modes" (set on constructor), which defines the class behavior (i.e, the
  * logic that dictates the result of methods such as {@link #isUserVisible(int)} and
  * {@link #isUserVisible(int, int)}):
  *
  * <ul>
- *   <li>default: this is the most common mode (used by phones, tablets, foldables, automotives with
- *   just cluster and driver displayes, etc...), where the logic is based solely on the current
- *   foreground user (and its started profiles)
- *   <li>{@code MUMD}: mode for "(concurrent) Multiple Users on Multiple Displays", which is used on
- *   automotives with passenger display. In this mode, users started in background on the secondary
- *   display are stored in map.
+ *   <li>default (A.K.A {@code SUSD} - Single User on Single Display): this is the most common mode
+ *   (used by phones, tablets, foldables, cars with just cluster and driver displays, etc.),
+ *   where just the current foreground user and its profiles are visible; hence, most methods are
+ *   optimized to just check for the current user / profile. This mode is unit tested by
+ *   {@link com.android.server.pm.UserVisibilityMediatorSUSDTest} and CTS tested by
+ *   {@link android.multiuser.cts.UserVisibilityTest}.
+ *   <li>concurrent users (A.K.A. {@code MUMD} - Multiple Users on Multiple Displays): typically
+ *   used on automotive builds where the car has additional displays for passengers, it allows users
+ *   to be started in the background but visible on these displays; hence, it contains additional
+ *   maps to account for the visibility state. This mode is unit tested by
+ *   {@link com.android.server.pm.UserVisibilityMediatorMUMDTest} and CTS tested by
+ *   {@link android.multiuser.cts.UserVisibilityTest}.
+ *   <li>no driver (A.K.A. {@code MUPAND} - MUltiple PAssengers, No Driver): extension of the
+ *   previous mode and typically used on automotive builds where the car has additional displays for
+ *   passengers but uses a secondary Android system for the back passengers, so all "human" users
+ *   are started in the background (and the current foreground user is the system user), hence the
+ *   "no driver name". This mode is unit tested by
+ *   {@link com.android.server.pm.UserVisibilityMediatorMUPANDTest} and CTS tested by
+ *   {@link android.multiuser.cts.UserVisibilityVisibleBackgroundUsersOnDefaultDisplayTest}.
  * </ul>
+ *
+ * <p>When you make changes in this class, you should run at least the 3 unit tests and
+ * {@link android.multiuser.cts.UserVisibilityTest} (which actually applies for all modes); for
+ * example, by calling {@code atest UserVisibilityMediatorSUSDTest UserVisibilityMediatorMUMDTest
+ * UserVisibilityMediatorMUPANDTest UserVisibilityTest}. Ideally, you should run the other 2 CTS
+ * tests as well (you can emulate these modes using {@code adb} commands; their javadoc provides
+ * instructions on how to do so).
  *
  * <p>This class is thread safe.
  */
 public final class UserVisibilityMediator implements Dumpable {
 
-    private static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
-    private static final boolean VERBOSE = false; // DO NOT SUBMIT WITH TRUE
-
     private static final String TAG = UserVisibilityMediator.class.getSimpleName();
+
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean VERBOSE = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String PREFIX_SECONDARY_DISPLAY_MAPPING = "SECONDARY_DISPLAY_MAPPING_";
     public static final int SECONDARY_DISPLAY_MAPPING_NEEDED = 1;
@@ -97,14 +121,14 @@ public final class UserVisibilityMediator implements Dumpable {
     })
     public @interface SecondaryDisplayMappingStatus {}
 
-    // TODO(b/242195409): might need to change this if boot logic is refactored for HSUM devices
+    // TODO(b/266158156): might need to change this if boot logic is refactored for HSUM devices
     @VisibleForTesting
     static final int INITIAL_CURRENT_USER_ID = USER_SYSTEM;
 
     private final Object mLock = new Object();
 
     private final boolean mVisibleBackgroundUsersEnabled;
-    private final boolean mVisibleBackgroundUserOnDefaultDisplayAllowed;
+    private final boolean mVisibleBackgroundUserOnDefaultDisplayEnabled;
 
     @UserIdInt
     @GuardedBy("mLock")
@@ -131,10 +155,23 @@ public final class UserVisibilityMediator implements Dumpable {
     private final SparseIntArray mExtraDisplaysAssignedToUsers;
 
     /**
-     * Mapping from each started user to its profile group.
+     * Mapping of each user that started visible (key) to its profile group id (value).
+     *
+     * <p>It's used to determine not just if the user is visible, but also
+     * {@link #isProfile(int, int) if it's a profile}.
      */
     @GuardedBy("mLock")
-    private final SparseIntArray mStartedProfileGroupIds = new SparseIntArray();
+    private final SparseIntArray mStartedVisibleProfileGroupIds = new SparseIntArray();
+
+    /**
+     * List of profiles that have explicitly started invisible.
+     *
+     * <p>Only used for debugging purposes (and set when {@link #DBG} is {@code true}), hence we
+     * don't care about autoboxing.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private final List<Integer> mStartedInvisibleProfileUserIds;
 
     /**
      * Handler user to call listeners
@@ -147,16 +184,21 @@ public final class UserVisibilityMediator implements Dumpable {
 
     UserVisibilityMediator(Handler handler) {
         this(UserManager.isVisibleBackgroundUsersEnabled(),
-                // TODO(b/261538232): get visibleBackgroundUserOnDefaultDisplayAllowed from UM
-                /* visibleBackgroundUserOnDefaultDisplayAllowed= */ false, handler);
+                UserManager.isVisibleBackgroundUsersOnDefaultDisplayEnabled(), handler);
     }
 
     @VisibleForTesting
-    UserVisibilityMediator(boolean backgroundUsersOnDisplaysEnabled,
-            boolean visibleBackgroundUserOnDefaultDisplayAllowed, Handler handler) {
-        mVisibleBackgroundUsersEnabled = backgroundUsersOnDisplaysEnabled;
-        mVisibleBackgroundUserOnDefaultDisplayAllowed =
-                visibleBackgroundUserOnDefaultDisplayAllowed;
+    UserVisibilityMediator(boolean visibleBackgroundUsersOnDisplaysEnabled,
+            boolean visibleBackgroundUserOnDefaultDisplayEnabled, Handler handler) {
+        mVisibleBackgroundUsersEnabled = visibleBackgroundUsersOnDisplaysEnabled;
+        if (visibleBackgroundUserOnDefaultDisplayEnabled
+                && !visibleBackgroundUsersOnDisplaysEnabled) {
+            throw new IllegalArgumentException("Cannot have "
+                    + "visibleBackgroundUserOnDefaultDisplayEnabled without "
+                    + "visibleBackgroundUsersOnDisplaysEnabled");
+        }
+        mVisibleBackgroundUserOnDefaultDisplayEnabled =
+                visibleBackgroundUserOnDefaultDisplayEnabled;
         if (mVisibleBackgroundUsersEnabled) {
             mUsersAssignedToDisplayOnStart = new SparseIntArray();
             mExtraDisplaysAssignedToUsers = new SparseIntArray();
@@ -164,9 +206,14 @@ public final class UserVisibilityMediator implements Dumpable {
             mUsersAssignedToDisplayOnStart = null;
             mExtraDisplaysAssignedToUsers = null;
         }
+        mStartedInvisibleProfileUserIds = DBG ? new ArrayList<>(4) : null;
         mHandler = handler;
-        // TODO(b/242195409): might need to change this if boot logic is refactored for HSUM devices
-        mStartedProfileGroupIds.put(INITIAL_CURRENT_USER_ID, INITIAL_CURRENT_USER_ID);
+        // TODO(b/266158156): might need to change this if boot logic is refactored for HSUM devices
+        mStartedVisibleProfileGroupIds.put(INITIAL_CURRENT_USER_ID, INITIAL_CURRENT_USER_ID);
+
+        if (DBG) {
+            Slogf.i(TAG, "UserVisibilityMediator created with DBG on");
+        }
     }
 
     /**
@@ -177,6 +224,8 @@ public final class UserVisibilityMediator implements Dumpable {
             int displayId) {
         Preconditions.checkArgument(!isSpecialUserId(userId), "user id cannot be generic: %d",
                 userId);
+        validateUserStartMode(userStartMode);
+
         // This method needs to perform 4 actions:
         //
         // 1. Check if the user can be started given the provided arguments
@@ -207,7 +256,8 @@ public final class UserVisibilityMediator implements Dumpable {
                 Slogf.d(TAG, "result of getUserVisibilityOnStartLocked(%s)",
                         userAssignmentResultToString(result));
             }
-            if (result == USER_ASSIGNMENT_RESULT_FAILURE) {
+            if (result == USER_ASSIGNMENT_RESULT_FAILURE
+                    || result == USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE) {
                 return result;
             }
 
@@ -223,14 +273,29 @@ public final class UserVisibilityMediator implements Dumpable {
 
             visibleUsersBefore = getVisibleUsers();
 
-            // Set current user / profiles state
-            if (userStartMode == USER_START_MODE_FOREGROUND) {
-                mCurrentUserId = userId;
+            // Set current user / started users state
+            switch (userStartMode) {
+                case USER_START_MODE_FOREGROUND:
+                    mCurrentUserId = userId;
+                    // Fallthrough
+                case USER_START_MODE_BACKGROUND_VISIBLE:
+                    if (DBG) {
+                        Slogf.d(TAG, "adding visible user / profile group id mapping (%d -> %d)",
+                                userId, profileGroupId);
+                    }
+                    mStartedVisibleProfileGroupIds.put(userId, profileGroupId);
+                    break;
+                case USER_START_MODE_BACKGROUND:
+                    if (mStartedInvisibleProfileUserIds != null
+                            && isProfile(userId, profileGroupId)) {
+                        Slogf.d(TAG, "adding user %d to list of invisible profiles", userId);
+                        mStartedInvisibleProfileUserIds.add(userId);
+                    }
+                    break;
+                default:
+                    Slogf.wtf(TAG,  "invalid userStartMode passed to assignUserToDisplayOnStart: "
+                            + "%d", userStartMode);
             }
-            if (DBG) {
-                Slogf.d(TAG, "adding user / profile mapping (%d -> %d)", userId, profileGroupId);
-            }
-            mStartedProfileGroupIds.put(userId, profileGroupId);
 
             //  Set user / display state
             switch (mappingResult) {
@@ -278,53 +343,73 @@ public final class UserVisibilityMediator implements Dumpable {
         }
 
         boolean visibleBackground = userStartMode == USER_START_MODE_BACKGROUND_VISIBLE;
-        if (displayId == DEFAULT_DISPLAY && visibleBackground
-                && !mVisibleBackgroundUserOnDefaultDisplayAllowed
-                && !isProfile(userId, profileGroupId)) {
-            Slogf.wtf(TAG, "cannot start full user (%d) visible on default display", userId);
-            return USER_ASSIGNMENT_RESULT_FAILURE;
+        if (displayId == DEFAULT_DISPLAY && visibleBackground) {
+            if (mVisibleBackgroundUserOnDefaultDisplayEnabled && isCurrentUserLocked(userId)) {
+                // Shouldn't happen - UserController returns before calling this method
+                Slogf.wtf(TAG, "trying to start current user (%d) visible in background on default"
+                        + " display", userId);
+                return USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
+
+            }
+            if (!mVisibleBackgroundUserOnDefaultDisplayEnabled
+                    && !isProfile(userId, profileGroupId)) {
+                Slogf.wtf(TAG, "cannot start full user (%d) visible on default display", userId);
+                return USER_ASSIGNMENT_RESULT_FAILURE;
+            }
         }
 
         boolean foreground = userStartMode == USER_START_MODE_FOREGROUND;
         if (displayId != DEFAULT_DISPLAY) {
             if (foreground) {
-                Slogf.w(TAG, "getUserVisibilityOnStartLocked(%d, %d, %b, %d) failed: cannot start "
+                Slogf.w(TAG, "getUserVisibilityOnStartLocked(%d, %d, %s, %d) failed: cannot start "
                         + "foreground user on secondary display", userId, profileGroupId,
-                        foreground, displayId);
+                        userStartModeToString(userStartMode), displayId);
                 return USER_ASSIGNMENT_RESULT_FAILURE;
             }
             if (!mVisibleBackgroundUsersEnabled) {
-                Slogf.w(TAG, "getUserVisibilityOnStartLocked(%d, %d, %b, %d) failed: called on "
+                Slogf.w(TAG, "getUserVisibilityOnStartLocked(%d, %d, %s, %d) failed: called on "
                         + "device that doesn't support multiple users on multiple displays",
-                        userId, profileGroupId, foreground, displayId);
+                        userId, profileGroupId, userStartModeToString(userStartMode), displayId);
                 return USER_ASSIGNMENT_RESULT_FAILURE;
             }
         }
 
         if (isProfile(userId, profileGroupId)) {
             if (displayId != DEFAULT_DISPLAY) {
-                Slogf.w(TAG, "canStartUserLocked(%d, %d, %b, %d) failed: cannot start profile user "
-                        + "on secondary display", userId, profileGroupId, foreground,
-                        displayId);
+                Slogf.w(TAG, "canStartUserLocked(%d, %d, %s, %d) failed: cannot start profile user "
+                        + "on secondary display", userId, profileGroupId,
+                        userStartModeToString(userStartMode), displayId);
                 return USER_ASSIGNMENT_RESULT_FAILURE;
             }
-            if (foreground) {
-                Slogf.w(TAG, "startUser(%d, %d, %b, %d) failed: cannot start profile user in "
-                        + "foreground", userId, profileGroupId, foreground, displayId);
-                return USER_ASSIGNMENT_RESULT_FAILURE;
-            } else {
-                boolean isParentVisibleOnDisplay = isUserVisible(profileGroupId, displayId);
-                if (DBG) {
-                    Slogf.d(TAG, "parent visible on display: %b", isParentVisibleOnDisplay);
-                }
-                return isParentVisibleOnDisplay
-                        ? USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE
-                        : USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
+            switch (userStartMode) {
+                case USER_START_MODE_FOREGROUND:
+                    Slogf.w(TAG, "startUser(%d, %d, %s, %d) failed: cannot start profile user in "
+                            + "foreground", userId, profileGroupId,
+                            userStartModeToString(userStartMode), displayId);
+                    return USER_ASSIGNMENT_RESULT_FAILURE;
+                case USER_START_MODE_BACKGROUND_VISIBLE:
+                    boolean isParentVisibleOnDisplay = isUserVisible(profileGroupId, displayId);
+                    if (!isParentVisibleOnDisplay) {
+                        Slogf.w(TAG, "getUserVisibilityOnStartLocked(%d, %d, %s, %d) failed: cannot"
+                                + " start profile user visible when its parent is not visible in "
+                                + "that display", userId, profileGroupId,
+                                userStartModeToString(userStartMode), displayId);
+                        return USER_ASSIGNMENT_RESULT_FAILURE;
+                    }
+                    return USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
+                case USER_START_MODE_BACKGROUND:
+                    return USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
             }
+        } else if (mUsersAssignedToDisplayOnStart != null
+                && isUserAssignedToDisplayOnStartLocked(userId, displayId)) {
+            if (DBG) {
+                Slogf.d(TAG, "full user %d is already visible on display %d", userId, displayId);
+            }
+            return USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
         }
 
         return foreground || displayId != DEFAULT_DISPLAY
-                || (visibleBackground && mVisibleBackgroundUserOnDefaultDisplayAllowed)
+                || (visibleBackground && mVisibleBackgroundUserOnDefaultDisplayEnabled)
                         ? USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE
                         : USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
     }
@@ -335,11 +420,12 @@ public final class UserVisibilityMediator implements Dumpable {
             @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId) {
         if (displayId == DEFAULT_DISPLAY) {
             boolean mappingNeeded = false;
-            if (mVisibleBackgroundUserOnDefaultDisplayAllowed
+            if (mVisibleBackgroundUserOnDefaultDisplayEnabled
                     && userStartMode == USER_START_MODE_BACKGROUND_VISIBLE) {
                 int userStartedOnDefaultDisplay = getUserStartedOnDisplay(DEFAULT_DISPLAY);
-                if (userStartedOnDefaultDisplay != USER_NULL) {
-                    Slogf.w(TAG, "getUserVisibilityOnStartLocked(): cannot start user %d visible on"
+                if (userStartedOnDefaultDisplay != USER_NULL
+                        && userStartedOnDefaultDisplay != profileGroupId) {
+                    Slogf.w(TAG, "canAssignUserToDisplayLocked(): cannot start user %d visible on"
                             + " default display because user %d already did so", userId,
                             userStartedOnDefaultDisplay);
                     return SECONDARY_DISPLAY_MAPPING_FAILED;
@@ -360,7 +446,7 @@ public final class UserVisibilityMediator implements Dumpable {
                 // parent is the current user, as the current user is always assigned to the
                 // DEFAULT_DISPLAY).
                 if (DBG) {
-                    Slogf.d(TAG, "ignoring mapping for default display for user %d starting as %s",
+                    Slogf.d(TAG, "Ignoring mapping for default display for user %d starting as %s",
                             userId, userStartModeToString(userStartMode));
                 }
                 return SECONDARY_DISPLAY_MAPPING_NOT_NEEDED;
@@ -394,7 +480,15 @@ public final class UserVisibilityMediator implements Dumpable {
             return SECONDARY_DISPLAY_MAPPING_NOT_NEEDED;
         }
 
-        // Check if display is available
+        if (mUsersAssignedToDisplayOnStart == null) {
+            // Should never have reached this point
+            Slogf.wtf(TAG, "canAssignUserToDisplayLocked(%d, %d, %d, %d) is trying to check "
+                    + "mUsersAssignedToDisplayOnStart when it's not set",
+                    userId, profileGroupId, userStartMode, displayId);
+            return SECONDARY_DISPLAY_MAPPING_FAILED;
+        }
+
+        // Check if display is available and user is not assigned to any display
         for (int i = 0; i < mUsersAssignedToDisplayOnStart.size(); i++) {
             int assignedUserId = mUsersAssignedToDisplayOnStart.keyAt(i);
             int assignedDisplayId = mUsersAssignedToDisplayOnStart.valueAt(i);
@@ -445,7 +539,7 @@ public final class UserVisibilityMediator implements Dumpable {
                         userId, displayId);
                 return false;
             }
-            if (isStartedProfile(userId)) {
+            if (isStartedVisibleProfileLocked(userId)) {
                 Slogf.w(TAG, "assignUserToExtraDisplay(%d, %d): failed because user is a profile",
                         userId, displayId);
                 return false;
@@ -533,10 +627,14 @@ public final class UserVisibilityMediator implements Dumpable {
     @GuardedBy("mLock")
     private void unassignUserFromAllDisplaysOnStopLocked(@UserIdInt int userId) {
         if (DBG) {
-            Slogf.d(TAG, "Removing %d from mStartedProfileGroupIds (%s)", userId,
-                    mStartedProfileGroupIds);
+            Slogf.d(TAG, "Removing %d from mStartedVisibleProfileGroupIds (%s)", userId,
+                    mStartedVisibleProfileGroupIds);
         }
-        mStartedProfileGroupIds.delete(userId);
+        mStartedVisibleProfileGroupIds.delete(userId);
+        if (mStartedInvisibleProfileUserIds != null) {
+            Slogf.d(TAG, "Removing %d from list of invisible profiles", userId);
+            mStartedInvisibleProfileUserIds.remove(Integer.valueOf(userId));
+        }
 
         if (!mVisibleBackgroundUsersEnabled) {
             // Don't need to update mUsersAssignedToDisplayOnStart because methods (such as
@@ -566,7 +664,8 @@ public final class UserVisibilityMediator implements Dumpable {
      * See {@link UserManagerInternal#isUserVisible(int)}.
      */
     public boolean isUserVisible(@UserIdInt int userId) {
-        // First check current foreground user and their profiles (on main display)
+        // For optimization (as most devices don't support visible background users), check for
+        // current foreground user and their profiles first
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
             if (VERBOSE) {
                 Slogf.v(TAG, "isUserVisible(%d): true to current user or profile", userId);
@@ -575,21 +674,50 @@ public final class UserVisibilityMediator implements Dumpable {
         }
 
         if (!mVisibleBackgroundUsersEnabled) {
-            if (DBG) {
-                Slogf.d(TAG, "isUserVisible(%d): false for non-current user (or its profiles) when"
+            if (VERBOSE) {
+                Slogf.v(TAG, "isUserVisible(%d): false for non-current user (or its profiles) when"
                         + " device doesn't support visible background users", userId);
             }
             return false;
         }
 
-        boolean visible;
+
         synchronized (mLock) {
-            visible = mUsersAssignedToDisplayOnStart.indexOfKey(userId) >= 0;
+            int profileGroupId;
+            synchronized (mLock) {
+                profileGroupId = mStartedVisibleProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
+            }
+            if (isProfile(userId, profileGroupId)) {
+                return isUserAssignedToDisplayOnStartLocked(profileGroupId);
+            }
+            return isUserAssignedToDisplayOnStartLocked(userId);
         }
-        if (DBG) {
-            Slogf.d(TAG, "isUserVisible(%d): %b from mapping", userId, visible);
+    }
+
+    @GuardedBy("mLock")
+    private boolean isUserAssignedToDisplayOnStartLocked(@UserIdInt int userId) {
+        boolean visible = mUsersAssignedToDisplayOnStart.indexOfKey(userId) >= 0;
+        if (VERBOSE) {
+            Slogf.v(TAG, "isUserAssignedToDisplayOnStartLocked(%d): %b", userId, visible);
         }
         return visible;
+    }
+
+    @GuardedBy("mLock")
+    private boolean isUserAssignedToDisplayOnStartLocked(@UserIdInt int userId, int displayId) {
+        if (mUsersAssignedToDisplayOnStart == null) {
+            // Shouldn't have been called in this case
+            Slogf.wtf(TAG, "isUserAssignedToDisplayOnStartLocked(%d, %d): called when "
+                    + "mUsersAssignedToDisplayOnStart is null", userId, displayId);
+            return false;
+        }
+        boolean isIt = displayId != INVALID_DISPLAY
+                && mUsersAssignedToDisplayOnStart.get(userId, INVALID_DISPLAY) == displayId;
+        if (VERBOSE) {
+            Slogf.v(TAG, "isUserAssignedToDisplayOnStartLocked(%d, %d): %b", userId, displayId,
+                    isIt);
+        }
+        return isIt;
     }
 
     /**
@@ -600,7 +728,8 @@ public final class UserVisibilityMediator implements Dumpable {
             return false;
         }
 
-        // Current user is always visible on:
+        // For optimization (as most devices don't support visible background users), check for
+        // current user and profile first. Current user is always visible on:
         // - Default display
         // - Secondary displays when device doesn't support visible bg users
         //   - Or when explicitly added (which is checked below)
@@ -622,22 +751,34 @@ public final class UserVisibilityMediator implements Dumpable {
         }
 
         synchronized (mLock) {
-            if (mUsersAssignedToDisplayOnStart.get(userId, Display.INVALID_DISPLAY) == displayId) {
-                // User assigned to display on start
-                return true;
+            int profileGroupId;
+            synchronized (mLock) {
+                profileGroupId = mStartedVisibleProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
             }
-
-            // Check for extra display assignment
-            return mExtraDisplaysAssignedToUsers.get(displayId, USER_NULL) == userId;
+            if (isProfile(userId, profileGroupId)) {
+                return isFullUserVisibleOnBackgroundLocked(profileGroupId, displayId);
+            }
+            return isFullUserVisibleOnBackgroundLocked(userId, displayId);
         }
     }
 
+    // NOTE: it doesn't check if the userId is a full user, it's up to the caller to check that
+    @GuardedBy("mLock")
+    private boolean isFullUserVisibleOnBackgroundLocked(@UserIdInt int userId, int displayId) {
+        if (mUsersAssignedToDisplayOnStart.get(userId, Display.INVALID_DISPLAY) == displayId) {
+            // User assigned to display on start
+            return true;
+        }
+        // Check for extra display assignment
+        return mExtraDisplaysAssignedToUsers.get(displayId, USER_NULL) == userId;
+    }
+
     /**
-     * See {@link UserManagerInternal#getDisplayAssignedToUser(int)}.
+     * See {@link UserManagerInternal#getMainDisplayAssignedToUser(int)}.
      */
-    public int getDisplayAssignedToUser(@UserIdInt int userId) {
+    public int getMainDisplayAssignedToUser(@UserIdInt int userId) {
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
-            if (mVisibleBackgroundUserOnDefaultDisplayAllowed) {
+            if (mVisibleBackgroundUserOnDefaultDisplayEnabled) {
                 // When device supports visible bg users on default display, the default display is
                 // assigned to the current user, unless a user is started visible on it
                 int userStartedOnDefaultDisplay;
@@ -646,8 +787,8 @@ public final class UserVisibilityMediator implements Dumpable {
                 }
                 if (userStartedOnDefaultDisplay != USER_NULL) {
                     if (DBG) {
-                        Slogf.d(TAG, "getDisplayAssignedToUser(%d): returning INVALID_DISPLAY for "
-                                + "current user user %d was started on DEFAULT_DISPLAY",
+                        Slogf.d(TAG, "getMainDisplayAssignedToUser(%d): returning INVALID_DISPLAY "
+                                        + "for current user user %d was started on DEFAULT_DISPLAY",
                                 userId, userStartedOnDefaultDisplay);
                     }
                     return INVALID_DISPLAY;
@@ -662,6 +803,49 @@ public final class UserVisibilityMediator implements Dumpable {
 
         synchronized (mLock) {
             return mUsersAssignedToDisplayOnStart.get(userId, INVALID_DISPLAY);
+        }
+    }
+
+    /** See {@link UserManagerInternal#getDisplaysAssignedToUser(int)}. */
+    @Nullable
+    public int[] getDisplaysAssignedToUser(@UserIdInt int userId) {
+        int mainDisplayId = getMainDisplayAssignedToUser(userId);
+        if (mainDisplayId == INVALID_DISPLAY) {
+            // The user will not have any extra displays if they have no main display.
+            // Return null if no display is assigned to the user.
+            if (DBG) {
+                Slogf.d(TAG, "getDisplaysAssignedToUser(): returning null"
+                        + " because there is no display assigned to user %d", userId);
+            }
+            return null;
+        }
+
+        synchronized (mLock) {
+            if (mExtraDisplaysAssignedToUsers == null
+                    || mExtraDisplaysAssignedToUsers.size() == 0) {
+                return new int[]{mainDisplayId};
+            }
+
+            int count = 0;
+            int[] displayIds = new int[mExtraDisplaysAssignedToUsers.size() + 1];
+            displayIds[count++] = mainDisplayId;
+            for (int i = 0; i < mExtraDisplaysAssignedToUsers.size(); ++i) {
+                if (mExtraDisplaysAssignedToUsers.valueAt(i) == userId) {
+                    displayIds[count++] = mExtraDisplaysAssignedToUsers.keyAt(i);
+                }
+            }
+            // Return the array if the array length happens to be correct.
+            if (displayIds.length == count) {
+                return displayIds;
+            }
+
+            // Copy the results to a new array with the exact length. The size of displayIds[] is
+            // initialized to `1 + mExtraDisplaysAssignedToUsers.size()`, which is usually larger
+            // than the actual length, because mExtraDisplaysAssignedToUsers contains displayIds for
+            // other users. Therefore, we need to copy to a new array with the correct length.
+            int[] results = new int[count];
+            System.arraycopy(displayIds, 0, results, 0, count);
+            return results;
         }
     }
 
@@ -686,7 +870,7 @@ public final class UserVisibilityMediator implements Dumpable {
     private @UserIdInt int getUserAssignedToDisplay(@UserIdInt int displayId,
             boolean returnCurrentUserByDefault) {
         if (returnCurrentUserByDefault
-                && ((displayId == DEFAULT_DISPLAY && !mVisibleBackgroundUserOnDefaultDisplayAllowed
+                && ((displayId == DEFAULT_DISPLAY && !mVisibleBackgroundUserOnDefaultDisplayEnabled
                 || !mVisibleBackgroundUsersEnabled))) {
             return getCurrentUserId();
         }
@@ -697,7 +881,7 @@ public final class UserVisibilityMediator implements Dumpable {
                     continue;
                 }
                 int userId = mUsersAssignedToDisplayOnStart.keyAt(i);
-                if (!isStartedProfile(userId)) {
+                if (!isStartedVisibleProfileLocked(userId)) {
                     return userId;
                 } else if (DBG) {
                     Slogf.d(TAG, "getUserAssignedToDisplay(%d): skipping user %d because it's "
@@ -730,8 +914,8 @@ public final class UserVisibilityMediator implements Dumpable {
         // number of users is too small, the gain is probably not worth the increase on complexity.
         IntArray visibleUsers = new IntArray();
         synchronized (mLock) {
-            for (int i = 0; i < mStartedProfileGroupIds.size(); i++) {
-                int userId = mStartedProfileGroupIds.keyAt(i);
+            for (int i = 0; i < mStartedVisibleProfileGroupIds.size(); i++) {
+                int userId = mStartedVisibleProfileGroupIds.keyAt(i);
                 if (isUserVisible(userId)) {
                     visibleUsers.add(userId);
                 }
@@ -764,7 +948,7 @@ public final class UserVisibilityMediator implements Dumpable {
         }
     }
 
-    // TODO(b/242195409): remove this method if not needed anymore
+    // TODO(b/266158156): remove this method if not needed anymore
     /**
      * Nofify all listeners that the system user visibility changed.
      */
@@ -826,6 +1010,9 @@ public final class UserVisibilityMediator implements Dumpable {
         ipw.println("UserVisibilityMediator");
         ipw.increaseIndent();
 
+        ipw.print("DBG: ");
+        ipw.println(DBG);
+
         synchronized (mLock) {
             ipw.print("Current user id: ");
             ipw.println(mCurrentUserId);
@@ -833,14 +1020,18 @@ public final class UserVisibilityMediator implements Dumpable {
             ipw.print("Visible users: ");
             ipw.println(getVisibleUsers());
 
-            dumpSparseIntArray(ipw, mStartedProfileGroupIds, "started user / profile group",
-                    "u", "pg");
+            dumpSparseIntArray(ipw, mStartedVisibleProfileGroupIds,
+                    "started visible user / profile group", "u", "pg");
+            if (mStartedInvisibleProfileUserIds != null) {
+                ipw.print("Profiles started invisible: ");
+                ipw.println(mStartedInvisibleProfileUserIds);
+            }
 
             ipw.print("Supports visible background users on displays: ");
             ipw.println(mVisibleBackgroundUsersEnabled);
 
-            ipw.print("Allows visible background users on default display: ");
-            ipw.println(mVisibleBackgroundUserOnDefaultDisplayAllowed);
+            ipw.print("Supports visible background users on default display: ");
+            ipw.println(mVisibleBackgroundUserOnDefaultDisplayEnabled);
 
             dumpSparseIntArray(ipw, mUsersAssignedToDisplayOnStart, "user / display", "u", "d");
             dumpSparseIntArray(ipw, mExtraDisplaysAssignedToUsers, "extra display / user",
@@ -924,6 +1115,15 @@ public final class UserVisibilityMediator implements Dumpable {
         }
     }
 
+    @GuardedBy("mLock")
+    private boolean isCurrentUserLocked(@UserIdInt int userId) {
+        // Special case as NO_PROFILE_GROUP_ID == USER_NULL
+        if (userId == USER_NULL || mCurrentUserId == USER_NULL) {
+            return false;
+        }
+        return mCurrentUserId == userId;
+    }
+
     private boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
         synchronized (mLock) {
             // Special case as NO_PROFILE_GROUP_ID == USER_NULL
@@ -933,22 +1133,25 @@ public final class UserVisibilityMediator implements Dumpable {
             if (mCurrentUserId == userId) {
                 return true;
             }
-            return mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID) == mCurrentUserId;
+            return mStartedVisibleProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID)
+                    == mCurrentUserId;
         }
     }
 
-    private boolean isStartedProfile(@UserIdInt int userId) {
-        int profileGroupId;
-        synchronized (mLock) {
-            profileGroupId = mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
-        }
+    @GuardedBy("mLock")
+    private boolean isStartedVisibleProfileLocked(@UserIdInt int userId) {
+        int profileGroupId = mStartedVisibleProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
         return isProfile(userId, profileGroupId);
     }
 
-    private @UserIdInt int getStartedProfileGroupId(@UserIdInt int userId) {
-        synchronized (mLock) {
-            return mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
+    private void validateUserStartMode(@UserStartMode int userStartMode) {
+        switch (userStartMode) {
+            case USER_START_MODE_FOREGROUND:
+            case USER_START_MODE_BACKGROUND:
+            case USER_START_MODE_BACKGROUND_VISIBLE:
+                return;
         }
+        throw new IllegalArgumentException("Invalid user start mode: " + userStartMode);
     }
 
     private static String secondaryDisplayMappingStatusToString(

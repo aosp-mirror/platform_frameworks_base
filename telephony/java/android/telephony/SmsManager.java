@@ -2547,8 +2547,6 @@ public final class SmsManager {
 
     /**
      * User is not associated with the subscription.
-     * TODO(b/263279115): Make this error code public.
-     * @hide
      */
     public static final int RESULT_USER_NOT_ALLOWED = 33;
 

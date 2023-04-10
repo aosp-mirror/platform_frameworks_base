@@ -21,7 +21,6 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE;
 import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
-import static com.android.systemui.classifier.Classifier.LOCK_ICON;
 import static com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR;
 import static com.android.systemui.classifier.Classifier.SHADE_DRAG;
 
@@ -93,8 +92,7 @@ class ZigZagClassifier extends FalsingClassifier {
             double historyBelief, double historyConfidence) {
         if (interactionType == BRIGHTNESS_SLIDER
                 || interactionType == MEDIA_SEEKBAR
-                || interactionType == SHADE_DRAG
-                || interactionType == LOCK_ICON) {
+                || interactionType == SHADE_DRAG) {
             return Result.passed(0);
         }
 

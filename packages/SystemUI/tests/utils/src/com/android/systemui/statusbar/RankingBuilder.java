@@ -60,6 +60,7 @@ public class RankingBuilder {
     private int mRankingAdjustment = 0;
     private boolean mIsBubble = false;
     private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
+    private boolean mSensitiveContent = false;
 
     public RankingBuilder() {
     }
@@ -90,6 +91,7 @@ public class RankingBuilder {
         mRankingAdjustment = ranking.getRankingAdjustment();
         mIsBubble = ranking.isBubble();
         mProposedImportance = ranking.getProposedImportance();
+        mSensitiveContent = ranking.hasSensitiveContent();
     }
 
     public Ranking build() {
@@ -119,7 +121,8 @@ public class RankingBuilder {
                 mShortcutInfo,
                 mRankingAdjustment,
                 mIsBubble,
-                mProposedImportance);
+                mProposedImportance,
+                mSensitiveContent);
         return ranking;
     }
 
@@ -221,6 +224,11 @@ public class RankingBuilder {
 
     public RankingBuilder setProposedImportance(@Importance int importance) {
         mProposedImportance = importance;
+        return this;
+    }
+
+    public RankingBuilder setSensitiveContent(boolean sensitiveContent) {
+        mSensitiveContent = sensitiveContent;
         return this;
     }
 

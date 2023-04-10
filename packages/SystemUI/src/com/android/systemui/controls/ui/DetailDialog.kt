@@ -36,7 +36,7 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.wm.shell.TaskView
+import com.android.wm.shell.taskview.TaskView
 
 /**
  * A dialog that provides an {@link TaskView}, allowing the application to provide
@@ -44,13 +44,13 @@ import com.android.wm.shell.TaskView
  * The activity being launched is specified by {@link android.service.controls.Control#getAppIntent}.
  */
 class DetailDialog(
-    val activityContext: Context,
-    val broadcastSender: BroadcastSender,
-    val taskView: TaskView,
-    val pendingIntent: PendingIntent,
-    val cvh: ControlViewHolder,
-    val keyguardStateController: KeyguardStateController,
-    val activityStarter: ActivityStarter
+        val activityContext: Context,
+        val broadcastSender: BroadcastSender,
+        val taskView: TaskView,
+        val pendingIntent: PendingIntent,
+        val cvh: ControlViewHolder,
+        val keyguardStateController: KeyguardStateController,
+        val activityStarter: ActivityStarter
 ) : Dialog(
     activityContext,
     R.style.Theme_SystemUI_Dialog_Control_DetailPanel

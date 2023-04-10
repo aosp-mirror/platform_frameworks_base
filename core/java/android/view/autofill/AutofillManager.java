@@ -16,9 +16,11 @@
 
 package android.view.autofill;
 
+import static android.Manifest.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS;
 import static android.service.autofill.FillRequest.FLAG_IME_SHOWING;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
@@ -33,6 +35,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -299,6 +302,14 @@ public final class AutofillManager {
      */
     public static final String EXTRA_AUGMENTED_AUTOFILL_CLIENT =
             "android.view.autofill.extra.AUGMENTED_AUTOFILL_CLIENT";
+
+    /**
+     * Autofill Hint to indicate that it can match any field.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String ANY_HINT = "any";
 
     private static final String SESSION_ID_TAG = "android:sessionId";
     private static final String STATE_TAG = "android:state";
@@ -665,22 +676,51 @@ public final class AutofillManager {
     // Indicate whether trigger fill request on unimportant views is enabled
     private boolean mIsTriggerFillRequestOnUnimportantViewEnabled = false;
 
+    // Indicate whether to apply heuristic check on important views before trigger fill request
+    private boolean mIsTriggerFillRequestOnFilteredImportantViewsEnabled;
+
+    // Indicate whether to enable autofill for all view types
+    private boolean mShouldEnableAutofillOnAllViewTypes;
+
     // A set containing all non-autofillable ime actions passed by flag
     private Set<String> mNonAutofillableImeActionIdSet = new ArraySet<>();
 
     // If a package is fully denied, then all views that marked as not
     // important for autofill will not trigger fill request
-    private boolean mIsPackageFullyDeniedForAutofillForUnimportantView = false;
+    private boolean mIsPackageFullyDeniedForAutofill = false;
 
     // If a package is partially denied, autofill manager will check whether
     // current activity is in deny set to decide whether to trigger fill request
-    private boolean mIsPackagePartiallyDeniedForAutofillForUnimportantView = false;
+    private boolean mIsPackagePartiallyDeniedForAutofill = false;
 
     // A deny set read from device config
-    private Set<String> mDeniedActivitiySet = new ArraySet<>();
+    private Set<String> mDeniedActivitySet = new ArraySet<>();
+
+    // If a package is fully allowed, all views in package will skip the heuristic check
+    private boolean mIsPackageFullyAllowedForAutofill = false;
+
+    // If a package is partially denied, autofill manager will check whether
+    // current activity is in allowed activity set. If it's allowed activity, then autofill manager
+    // will skip the heuristic check
+    private boolean mIsPackagePartiallyAllowedForAutofill = false;
+
+    // An allowed activity set read from device config
+    private Set<String> mAllowedActivitySet = new ArraySet<>();
+
+    // Whether to enable multi-line check when checking whether view is autofillable
+    private boolean mShouldEnableMultilineFilter;
+
+    // Indicate whether should include all view with autofill type not none in assist structure
+    private boolean mShouldIncludeAllViewsWithAutofillTypeNotNoneInAssistStructure;
+
+    // Indicate whether should include all view in assist structure
+    private boolean mShouldIncludeAllChildrenViewInAssistStructure;
 
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
+
+    // Cached autofill feature flag
+    private boolean mShouldIgnoreCredentialViews = false;
 
     private final String[] mFillDialogEnabledHints;
 
@@ -829,6 +869,7 @@ public final class AutofillManager {
 
         mIsFillDialogEnabled = AutofillFeatureFlags.isFillDialogEnabled();
         mFillDialogEnabledHints = AutofillFeatureFlags.getFillDialogEnabledHints();
+        mShouldIgnoreCredentialViews = AutofillFeatureFlags.shouldIgnoreCredentialViews();
         if (sDebug) {
             Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled
                     + ", hints=" + Arrays.toString(mFillDialogEnabledHints));
@@ -842,96 +883,188 @@ public final class AutofillManager {
         mIsTriggerFillRequestOnUnimportantViewEnabled =
             AutofillFeatureFlags.isTriggerFillRequestOnUnimportantViewEnabled();
 
+        mIsTriggerFillRequestOnFilteredImportantViewsEnabled =
+            AutofillFeatureFlags.isTriggerFillRequestOnFilteredImportantViewsEnabled();
+
+        mShouldEnableAutofillOnAllViewTypes =
+            AutofillFeatureFlags.shouldEnableAutofillOnAllViewTypes();
+
         mNonAutofillableImeActionIdSet =
             AutofillFeatureFlags.getNonAutofillableImeActionIdSetFromFlag();
 
+        mShouldEnableMultilineFilter =
+            AutofillFeatureFlags.shouldEnableMultilineFilter();
+
         final String denyListString = AutofillFeatureFlags.getDenylistStringFromFlag();
+        final String allowlistString = AutofillFeatureFlags.getAllowlistStringFromFlag();
 
         final String packageName = mContext.getPackageName();
 
-        mIsPackageFullyDeniedForAutofillForUnimportantView =
-            isPackageFullyDeniedForAutofillForUnimportantView(denyListString, packageName);
+        mIsPackageFullyDeniedForAutofill =
+            isPackageFullyAllowedOrDeniedForAutofill(denyListString, packageName);
 
-        mIsPackagePartiallyDeniedForAutofillForUnimportantView =
-            isPackagePartiallyDeniedForAutofillForUnimportantView(denyListString, packageName);
+        mIsPackageFullyAllowedForAutofill =
+            isPackageFullyAllowedOrDeniedForAutofill(allowlistString, packageName);
 
-        if (mIsPackagePartiallyDeniedForAutofillForUnimportantView) {
-            setDeniedActivitySetWithDenyList(denyListString, packageName);
+        if (!mIsPackageFullyDeniedForAutofill) {
+            mIsPackagePartiallyDeniedForAutofill =
+                isPackagePartiallyDeniedOrAllowedForAutofill(denyListString, packageName);
         }
-    }
 
-    private boolean isPackageFullyDeniedForAutofillForUnimportantView(
-            @NonNull String denyListString, @NonNull String packageName) {
-        // If "PackageName:;" is in the string, then it means the package name is in denylist
-        // and there are no activities specified under it. That means the package is fully
-        // denied for autofill
-        return denyListString.indexOf(packageName + ":;") != -1;
-    }
+        if (!mIsPackageFullyAllowedForAutofill) {
+            mIsPackagePartiallyAllowedForAutofill =
+                isPackagePartiallyDeniedOrAllowedForAutofill(allowlistString, packageName);
+        }
 
-    private boolean isPackagePartiallyDeniedForAutofillForUnimportantView(
-            @NonNull String denyListString, @NonNull String packageName) {
-        // This check happens after checking package is not fully denied. If "PackageName:" instead
-        // is in denylist, then it means there are specific activities to be denied. So the package
-        // is partially denied for autofill
-        return denyListString.indexOf(packageName + ":") != -1;
+        if (mIsPackagePartiallyDeniedForAutofill) {
+            mDeniedActivitySet = getDeniedOrAllowedActivitySetFromString(
+                    denyListString, packageName);
+        }
+
+        if (mIsPackagePartiallyAllowedForAutofill) {
+            mAllowedActivitySet = getDeniedOrAllowedActivitySetFromString(
+                    allowlistString, packageName);
+        }
+
+        mShouldIncludeAllViewsWithAutofillTypeNotNoneInAssistStructure
+            = AutofillFeatureFlags.shouldIncludeAllViewsAutofillTypeNotNoneInAssistStructrue();
+
+        mShouldIncludeAllChildrenViewInAssistStructure
+            = AutofillFeatureFlags.shouldIncludeAllChildrenViewInAssistStructure();
     }
 
     /**
-     * Get the denied activitiy names under specified package from denylist and set it in field
-     * mDeniedActivitiySet
+     * Whether to apply heuristic check on important views before triggering fill request
      *
-     * If using parameter as the example below, the denied activity set would be set to
-     * Set{Activity1,Activity2}.
-     *
-     * @param denyListString Denylist that is got from device config. For example,
-     *        "Package1:Activity1,Activity2;Package2:;"
-     * @param packageName Specify to extract activities under which package.For example,
-     *        "Package1:;"
+     * @hide
      */
-    private void setDeniedActivitySetWithDenyList(
-            @NonNull String denyListString, @NonNull String packageName) {
+    public boolean isTriggerFillRequestOnFilteredImportantViewsEnabled() {
+        return mIsTriggerFillRequestOnFilteredImportantViewsEnabled;
+    }
+
+    /**
+     * Whether to trigger fill request on not important views that passes heuristic check
+     *
+     * @hide
+     */
+    public boolean isTriggerFillRequestOnUnimportantViewEnabled() {
+        return mIsTriggerFillRequestOnUnimportantViewEnabled;
+    }
+
+    /**
+     * Whether view passes the imeAction check
+     *
+     */
+    private boolean isPassingImeActionCheck(EditText editText) {
+        final int actionId = editText.getImeOptions();
+        if (mNonAutofillableImeActionIdSet.contains(String.valueOf(actionId))) {
+            Log.d(TAG, "view not autofillable - not passing ime action check");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether the view passed in is not multiline text
+     *
+     * @param editText the view that passed to this check
+     * @return true if the view input is not multiline, false otherwise
+     */
+    private boolean isPassingMultilineCheck(EditText editText) {
+        // check if min line is set to be greater than 1
+        if (editText.getMinLines() > 1) {
+            Log.d(TAG, "view not autofillable - has multiline input type");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isPackageFullyAllowedOrDeniedForAutofill(
+            @NonNull String listString, @NonNull String packageName) {
+        // If "PackageName:;" is in the string, then it the package is fully denied or allowed for
+        // autofill, depending on which string is passed to this function
+        return listString.indexOf(packageName + ":;") != -1;
+    }
+
+    private boolean isPackagePartiallyDeniedOrAllowedForAutofill(
+            @NonNull String listString, @NonNull String packageName) {
+        // If "PackageName:" is in string when "PackageName:;" is not, then it means there are
+        // specific activities to be allowed or denied. So the package is partially allowed or
+        // denied for autofill.
+        return listString.indexOf(packageName + ":") != -1;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldIncludeAllChildrenViewsWithAutofillTypeNotNoneInAssistStructure()  {
+        return mShouldIncludeAllViewsWithAutofillTypeNotNoneInAssistStructure;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldIncludeAllChildrenViewInAssistStructure() {
+        return mShouldIncludeAllChildrenViewInAssistStructure;
+    }
+
+    /**
+     * Get the denied or allowed activitiy names under specified package from the list string and
+     * set it in fields accordingly
+     *
+     * For example, if the package name is Package1, and the string is
+     * "Package1:Activity1,Activity2;", then the extracted activity set would be
+     * {Activity1, Activity2}
+     *
+     * @param listString Denylist that is got from device config. For example,
+     *        "Package1:Activity1,Activity2;Package2:;"
+     * @param packageName Specify which package to extract.For example, "Package1"
+     *
+     * @return the extracted activity set, For example, {Activity1, Activity2}
+     */
+    private Set<String> getDeniedOrAllowedActivitySetFromString(
+            @NonNull String listString, @NonNull String packageName) {
         // 1. Get the index of where the Package name starts
-        final int packageInStringIndex = denyListString.indexOf(packageName + ":");
+        final int packageInStringIndex = listString.indexOf(packageName + ":");
 
         // 2. Get the ";" index after this index of package
-        final int firstNextSemicolonIndex = denyListString.indexOf(";", packageInStringIndex);
+        final int firstNextSemicolonIndex = listString.indexOf(";", packageInStringIndex);
 
         // 3. Get the activity names substring between the indexes
         final int activityStringStartIndex = packageInStringIndex + packageName.length() + 1;
-        if (activityStringStartIndex < firstNextSemicolonIndex) {
-            Log.e(TAG, "Failed to get denied activity names from denylist because it's wrongly "
+
+        if (activityStringStartIndex >= firstNextSemicolonIndex) {
+            Log.e(TAG, "Failed to get denied activity names from list because it's wrongly "
                     + "formatted");
+            return new ArraySet<>();
         }
         final String activitySubstring =
-                denyListString.substring(activityStringStartIndex, firstNextSemicolonIndex);
+                listString.substring(activityStringStartIndex, firstNextSemicolonIndex);
 
         // 4. Split the activity name substring
         final String[] activityStringArray = activitySubstring.split(",");
 
-        // 5. Set the denied activity set
-        mDeniedActivitiySet = new ArraySet<>(Arrays.asList(activityStringArray));
-
-        return;
+        // 5. return the extracted activities in a set
+        return new ArraySet<>(Arrays.asList(activityStringArray));
     }
 
     /**
-     * Check whether autofill is denied for current activity or package. Used when a view is marked
-     * as not important for autofill, if current activity or package is denied, then the view won't
-     * trigger fill request.
+     * Check whether autofill is denied for current activity or package. If current activity or
+     * package is denied, then the view won't trigger fill request.
      *
      * @hide
      */
-    public final boolean isActivityDeniedForAutofillForUnimportantView() {
-        if (mIsPackageFullyDeniedForAutofillForUnimportantView) {
+    public boolean isActivityDeniedForAutofill() {
+        if (mIsPackageFullyDeniedForAutofill) {
             return true;
         }
-        if (mIsPackagePartiallyDeniedForAutofillForUnimportantView) {
+        if (mIsPackagePartiallyDeniedForAutofill) {
             final AutofillClient client = getClient();
             if (client == null) {
                 return false;
             }
             final ComponentName clientActivity = client.autofillClientGetComponentName();
-            if (mDeniedActivitiySet.contains(clientActivity.flattenToShortString())) {
+            if (mDeniedActivitySet.contains(clientActivity.flattenToShortString())) {
                 return true;
             }
         }
@@ -939,31 +1072,79 @@ public final class AutofillManager {
     }
 
     /**
-     * Check whether view matches autofill-able heuristics
+     * Check whether current activity is allowlisted for autofill.
+     *
+     * If it is, the view in current activity will bypass heuristic check when checking whether it's
+     * autofillable
      *
      * @hide
      */
-    public final boolean isMatchingAutofillableHeuristics(@NonNull View view) {
-        if (!mIsTriggerFillRequestOnUnimportantViewEnabled) {
-            return false;
+    public boolean isActivityAllowedForAutofill() {
+        if (mIsPackageFullyAllowedForAutofill) {
+            return true;
         }
-        if (view instanceof EditText) {
-            final int actionId = ((EditText) view).getImeOptions();
-            if (mNonAutofillableImeActionIdSet.contains(String.valueOf(actionId))) {
+        if (mIsPackagePartiallyAllowedForAutofill) {
+            final AutofillClient client = getClient();
+            if (client == null) {
                 return false;
             }
-            return true;
-        }
-        if (view instanceof CheckBox
-                || view instanceof Spinner
-                || view instanceof DatePicker
-                || view instanceof TimePicker
-                || view instanceof RadioGroup) {
-            return true;
+            final ComponentName clientActivity = client.autofillClientGetComponentName();
+            if (mAllowedActivitySet.contains(clientActivity.flattenToShortString())) {
+                return true;
+            }
         }
         return false;
     }
 
+    /**
+     * Check heuristics and other rules to determine if view is autofillable
+     *
+     * Note: this function should be only called only when autofill for all apps is turned on. The
+     * calling method needs to check the corresponding flag to make sure that before calling into
+     * this function.
+     *
+     * @hide
+     */
+    public boolean isAutofillable(View view) {
+        // Duplicate the autofill type check here because ViewGroup will call this function to
+        // decide whether to include view in assist structure.
+        // Also keep the autofill type check inside View#IsAutofillable() to serve as an early out
+        // or if other functions need to call it.
+        if (view.getAutofillType() == View.AUTOFILL_TYPE_NONE) return false;
+
+        if (isActivityDeniedForAutofill()) {
+            Log.d(TAG, "view is not autofillable - activity denied for autofill");
+            return false;
+        }
+
+        if (isActivityAllowedForAutofill()) {
+            Log.d(TAG, "view is autofillable - activity allowed for autofill");
+            return true;
+        }
+
+        if (view instanceof EditText) {
+            if (mShouldEnableMultilineFilter && !isPassingMultilineCheck((EditText) view)) {
+                return false;
+            }
+            return isPassingImeActionCheck((EditText) view);
+        }
+
+        // Skip view type check if view is important for autofill or
+        // shouldEnableAutofillOnAllViewTypes flag is turned on
+        if (view.isImportantForAutofill() || mShouldEnableAutofillOnAllViewTypes) {
+            return true;
+        }
+
+        if (view instanceof CheckBox
+            || view instanceof Spinner
+            || view instanceof DatePicker
+            || view instanceof TimePicker
+            || view instanceof RadioGroup) {
+            return true;
+        }
+        Log.d(TAG, "view is not autofillable - not important and filtered by view type check");
+        return false;
+    }
 
     /**
      * @hide
@@ -1312,6 +1493,22 @@ public final class AutofillManager {
             return;
         }
 
+        // Start session with PCC flag to get assist structure and send field classification request
+        // to PCC classification service.
+        if (AutofillFeatureFlags.isAutofillPccClassificationEnabled()) {
+            synchronized (mLock) {
+                final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+                if (clientAdded){
+                    startSessionLocked(/* id= */ AutofillId.NO_AUTOFILL_ID,
+                        /* bounds= */ null, /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
+                } else {
+                    if (sVerbose) {
+                        Log.v(TAG, "not starting session: no service client");
+                    }
+                }
+            }
+        }
+
         if (mIsFillDialogEnabled
                 || ArrayUtils.containsAny(autofillHints, mFillDialogEnabledHints)) {
             if (sDebug) {
@@ -1567,7 +1764,7 @@ public final class AutofillManager {
                     mForAugmentedAutofillOnly = false;
                 }
 
-                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0) {
+                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0 && view != null) {
                     flags |= FLAG_RESET_FILL_DIALOG_STATE;
                 }
 
@@ -2055,6 +2252,11 @@ public final class AutofillManager {
     }
 
     /** @hide */
+    public boolean shouldIgnoreCredentialViews() {
+        return mShouldIgnoreCredentialViews;
+    }
+
+    /** @hide */
     public void onAuthenticationResult(int authenticationId, Intent data, View focusView) {
         if (!hasAutofillFeature()) {
             return;
@@ -2143,9 +2345,18 @@ public final class AutofillManager {
      *
      * @param executor specifies the thread upon which the callbacks will be invoked.
      * @param callback which handles autofill request to provide client's suggestions.
+     *
+     * @hide
      */
+    @TestApi
+    @RequiresPermission(PROVIDE_OWN_AUTOFILL_SUGGESTIONS)
     public void setAutofillRequestCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull AutofillRequestCallback callback) {
+        if (mContext.checkSelfPermission(PROVIDE_OWN_AUTOFILL_SUGGESTIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires PROVIDE_OWN_AUTOFILL_SUGGESTIONS permission!");
+        }
+
         synchronized (mLock) {
             mRequestCallbackExecutor = executor;
             mAutofillRequestCallback = callback;
@@ -2154,7 +2365,10 @@ public final class AutofillManager {
 
     /**
      * clears the client's suggestions callback for autofill.
+     *
+     * @hide
      */
+    @TestApi
     public void clearAutofillRequestCallback() {
         synchronized (mLock) {
             mRequestCallbackExecutor = null;
@@ -2861,8 +3075,10 @@ public final class AutofillManager {
                         mFillableIds = new ArraySet<>(fillableIds.length);
                     }
                     for (AutofillId id : fillableIds) {
-                        id.resetSessionId();
-                        mFillableIds.add(id);
+                        if (id != null) {
+                            id.resetSessionId();
+                            mFillableIds.add(id);
+                        }
                     }
                 }
 
@@ -2887,8 +3103,10 @@ public final class AutofillManager {
                 }
                 if (trackedIds != null) {
                     for (AutofillId id : trackedIds) {
-                        id.resetSessionId();
-                        allFillableIds.add(id);
+                        if (id != null) {
+                            id.resetSessionId();
+                            allFillableIds.add(id);
+                        }
                     }
                 }
 

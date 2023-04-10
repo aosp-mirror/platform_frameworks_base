@@ -167,10 +167,10 @@ public class UserRestrictionsUtils {
     );
 
     /**
-     * User restrictions that cannot be set by profile owners of secondary users. When set by DO
-     * they will be applied to all users.
+     * User restrictions that can only be set by profile owners on the main user, or by device
+     * owners. When set by DO they will be applied to all users.
      */
-    private static final Set<String> PRIMARY_USER_ONLY_RESTRICTIONS = Sets.newArraySet(
+    private static final Set<String> MAIN_USER_ONLY_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_BLUETOOTH,
             UserManager.DISALLOW_USB_FILE_TRANSFER,
             UserManager.DISALLOW_CONFIG_TETHERING,
@@ -454,14 +454,14 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * @return true if a restriction is settable by profile owner.  Note it takes a user ID because
-     * some restrictions can be changed by PO only when it's running on the system user.
+     * @return true if a restriction is settable by profile owner.  Note it takes a boolean to say
+     * if the relevant user is the {@link UserManager#isMainUser() MainUser}, because some
+     * restrictions can be changed by PO only when it's running on the main user.
      */
-    public static boolean canProfileOwnerChange(String restriction, int userId) {
+    public static boolean canProfileOwnerChange(String restriction, boolean isMainUser) {
         return !IMMUTABLE_BY_OWNERS.contains(restriction)
                 && !DEVICE_OWNER_ONLY_RESTRICTIONS.contains(restriction)
-                && !(userId != UserHandle.USER_SYSTEM
-                    && PRIMARY_USER_ONLY_RESTRICTIONS.contains(restriction));
+                && !(!isMainUser && MAIN_USER_ONLY_RESTRICTIONS.contains(restriction));
     }
 
     /**
@@ -494,7 +494,7 @@ public class UserRestrictionsUtils {
     public static boolean isGlobal(@UserManagerInternal.OwnerType int restrictionOwnerType,
             String key) {
         return ((restrictionOwnerType == UserManagerInternal.OWNER_TYPE_DEVICE_OWNER) && (
-                PRIMARY_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
+                MAIN_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
                 || ((restrictionOwnerType
                 == UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE)
                 && PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(key))

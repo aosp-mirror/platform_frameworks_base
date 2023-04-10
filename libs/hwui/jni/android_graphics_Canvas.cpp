@@ -21,7 +21,6 @@
 #else
 #define __ANDROID_API_P__ 28
 #endif
-#include <Mesh.h>
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
@@ -446,10 +445,10 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
 
 static void drawMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong meshHandle, jint modeHandle,
                      jlong paintHandle) {
-    const SkMesh mesh = reinterpret_cast<MeshWrapper*>(meshHandle)->mesh;
+    const Mesh* mesh = reinterpret_cast<Mesh*>(meshHandle);
     SkBlendMode blendMode = static_cast<SkBlendMode>(modeHandle);
-    SkPaint* paint = reinterpret_cast<Paint*>(paintHandle);
-    get_canvas(canvasHandle)->drawMesh(mesh, SkBlender::Mode(blendMode), *paint);
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    get_canvas(canvasHandle)->drawMesh(*mesh, SkBlender::Mode(blendMode), *paint);
 }
 
 static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,

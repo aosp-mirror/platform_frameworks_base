@@ -17,6 +17,7 @@ package com.android.systemui.theme;
 
 import static com.android.systemui.theme.ThemeOverlayApplier.ANDROID_PACKAGE;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ACCENT_COLOR;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_DYNAMIC_COLOR;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_FONT;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_ANDROID;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_LAUNCHER;
@@ -113,6 +114,8 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         };
         when(mOverlayManager.getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM))
                 .thenReturn(Lists.newArrayList(
+                        createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_DYNAMIC_COLOR,
+                                ANDROID_PACKAGE, OVERLAY_CATEGORY_DYNAMIC_COLOR, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_ACCENT_COLOR,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_ACCENT_COLOR, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_SYSTEM_PALETTE,
@@ -123,6 +126,8 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_SHAPE, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_ICON_ANDROID,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_ICON_ANDROID, false),
+                        createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_DYNAMIC_COLOR,
+                                ANDROID_PACKAGE, OVERLAY_CATEGORY_DYNAMIC_COLOR, true),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ACCENT_COLOR,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_ACCENT_COLOR, true),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_SYSTEM_PALETTE,

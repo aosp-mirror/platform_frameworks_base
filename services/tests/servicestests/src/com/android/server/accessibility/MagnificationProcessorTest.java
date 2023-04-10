@@ -24,6 +24,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -70,7 +71,6 @@ public class MagnificationProcessorTest {
     WindowMagnificationManagerStub mWindowMagnificationManagerStub;
 
     @Before
-
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mFullScreenMagnificationControllerStub = new FullScreenMagnificationControllerStub(
@@ -433,27 +433,60 @@ public class MagnificationProcessorTest {
                 eq(newConfig), anyBoolean(), anyInt());
     }
 
+    @Test
+    public void setMagnificationConfigWithActivatedFalse_fullScreenEnabled_resetMagnification() {
+        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_FULLSCREEN);
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setActivated(false).build();
+        mMagnificationProcessor.setMagnificationConfig(TEST_DISPLAY, config, false, SERVICE_ID);
+
+        verify(mMockFullScreenMagnificationController).reset(eq(TEST_DISPLAY), anyBoolean());
+    }
+
+    @Test
+    public void setMagnificationConfigWithActivatedFalse_windowEnabled_disableMagnification() {
+        setMagnificationActivated(TEST_DISPLAY, MAGNIFICATION_MODE_WINDOW);
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setActivated(false).build();
+        mMagnificationProcessor.setMagnificationConfig(TEST_DISPLAY, config, false, SERVICE_ID);
+
+        verify(mMockWindowMagnificationManager)
+                .disableWindowMagnification(eq(TEST_DISPLAY), anyBoolean());
+    }
+
+    @Test
+    public void setMagnificationConfigWithActivatedFalse_expectedReturnedValue() {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setActivated(false).build();
+        assertFalse(mMagnificationProcessor.setMagnificationConfig(
+                        TEST_DISPLAY, config, false, SERVICE_ID));
+    }
+
     private void setMagnificationActivated(int displayId, int configMode) {
         setMagnificationActivated(displayId,
-                new MagnificationConfig.Builder().setMode(configMode).build());
+                new MagnificationConfig.Builder()
+                        .setMode(configMode)
+                        .setScale(TEST_SCALE).build());
     }
 
     private void setMagnificationActivated(int displayId, MagnificationConfig config) {
+        if (!config.isActivated()) {
+            fail("setMagnificationActivated method should be called with config activated true");
+        }
+
         when(mMockMagnificationController.isActivated(displayId, config.getMode())).thenReturn(
                 true);
         mMagnificationProcessor.setMagnificationConfig(displayId, config, false, SERVICE_ID);
         if (config.getMode() == MAGNIFICATION_MODE_FULLSCREEN) {
-            when(mMockMagnificationController.isActivated(displayId,
-                    MAGNIFICATION_MODE_WINDOW)).thenReturn(false);
             mFullScreenMagnificationControllerStub.resetAndStubMethods();
             mMockFullScreenMagnificationController.setScaleAndCenter(displayId, config.getScale(),
                     config.getCenterX(), config.getCenterY(), false, SERVICE_ID);
+            mWindowMagnificationManagerStub.deactivateIfNeed();
         } else if (config.getMode() == MAGNIFICATION_MODE_WINDOW) {
-            when(mMockMagnificationController.isActivated(displayId,
-                    MAGNIFICATION_MODE_FULLSCREEN)).thenReturn(false);
             mWindowMagnificationManagerStub.resetAndStubMethods();
             mMockWindowMagnificationManager.enableWindowMagnification(displayId, config.getScale(),
                     config.getCenterX(), config.getCenterY());
+            mFullScreenMagnificationControllerStub.deactivateIfNeed();
         }
     }
 
@@ -469,6 +502,7 @@ public class MagnificationProcessorTest {
         private float mScale = 1.0f;
         private float mCenterX = 0;
         private float mCenterY = 0;
+        private boolean mIsActivated = false;
         private boolean mIsRegistered = false;
 
         FullScreenMagnificationControllerStub(
@@ -485,7 +519,11 @@ public class MagnificationProcessorTest {
                     TEST_DISPLAY);
             doAnswer(invocation -> mIsRegistered).when(mScreenMagnificationController).isRegistered(
                     TEST_DISPLAY);
+            doAnswer(invocation -> mIsActivated).when(mScreenMagnificationController).isActivated(
+                    TEST_DISPLAY);
+
             Answer enableMagnificationStubAnswer = invocation -> {
+                mIsActivated = true;
                 mScale = invocation.getArgument(1);
                 mCenterX = invocation.getArgument(2);
                 mCenterY = invocation.getArgument(3);
@@ -494,6 +532,13 @@ public class MagnificationProcessorTest {
             doAnswer(enableMagnificationStubAnswer).when(
                     mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), anyFloat(),
                     anyFloat(), anyFloat(), anyBoolean(), eq(SERVICE_ID));
+
+            Answer disableMagnificationStubAnswer = invocation -> {
+                deactivateIfNeed();
+                return true;
+            };
+            doAnswer(disableMagnificationStubAnswer).when(
+                    mScreenMagnificationController).reset(eq(TEST_DISPLAY), anyBoolean());
 
             Answer registerStubAnswer = invocation -> {
                 mIsRegistered = true;
@@ -508,13 +553,18 @@ public class MagnificationProcessorTest {
             };
             doAnswer(unregisterStubAnswer).when(
                     mScreenMagnificationController).unregister(eq(TEST_DISPLAY));
-            doAnswer(unregisterStubAnswer).when(
-                    mScreenMagnificationController).reset(eq(TEST_DISPLAY), anyBoolean());
         }
 
         public void resetAndStubMethods() {
             Mockito.reset(mScreenMagnificationController);
             stubMethods();
+        }
+
+        public void deactivateIfNeed() {
+            mScale = 1.0f;
+            mCenterX = 0;
+            mCenterY = 0;
+            mIsActivated = false;
         }
     }
 
@@ -523,6 +573,7 @@ public class MagnificationProcessorTest {
         private float mScale = 1.0f;
         private float mCenterX = 0;
         private float mCenterY = 0;
+        private boolean mIsEnabled = false;
 
         WindowMagnificationManagerStub(
                 WindowMagnificationManager windowMagnificationManager) {
@@ -536,7 +587,11 @@ public class MagnificationProcessorTest {
                     TEST_DISPLAY);
             doAnswer(invocation -> mCenterY).when(mWindowMagnificationManager).getCenterY(
                     TEST_DISPLAY);
+            doAnswer(invocation -> mIsEnabled).when(mWindowMagnificationManager)
+                    .isWindowMagnifierEnabled(TEST_DISPLAY);
+
             Answer enableWindowMagnificationStubAnswer = invocation -> {
+                mIsEnabled = true;
                 mScale = invocation.getArgument(1);
                 mCenterX = invocation.getArgument(2);
                 mCenterY = invocation.getArgument(3);
@@ -548,11 +603,29 @@ public class MagnificationProcessorTest {
             doAnswer(enableWindowMagnificationStubAnswer).when(
                     mWindowMagnificationManager).enableWindowMagnification(eq(TEST_DISPLAY),
                     anyFloat(), anyFloat(), anyFloat(), any(), anyInt());
+
+            Answer disableWindowMagnificationStubAnswer = invocation -> {
+                deactivateIfNeed();
+                return true;
+            };
+            doAnswer(disableWindowMagnificationStubAnswer).when(
+                    mWindowMagnificationManager).disableWindowMagnification(eq(TEST_DISPLAY),
+                    anyBoolean());
+            doAnswer(disableWindowMagnificationStubAnswer).when(
+                    mWindowMagnificationManager).disableWindowMagnification(eq(TEST_DISPLAY),
+                    anyBoolean(), any());
         }
 
         public void resetAndStubMethods() {
             Mockito.reset(mWindowMagnificationManager);
             stubMethods();
+        }
+
+        public void deactivateIfNeed() {
+            mScale = 1.0f;
+            mCenterX = Float.NaN;
+            mCenterY = Float.NaN;
+            mIsEnabled = false;
         }
     }
 }

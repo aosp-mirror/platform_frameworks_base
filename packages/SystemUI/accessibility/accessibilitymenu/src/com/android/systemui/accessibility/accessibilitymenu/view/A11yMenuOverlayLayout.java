@@ -16,12 +16,19 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static java.lang.Math.max;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,11 +38,15 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
-import android.widget.Toast;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.R;
+import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
 
 import java.util.ArrayList;
@@ -64,16 +75,40 @@ public class A11yMenuOverlayLayout {
         A11yMenuShortcut.ShortcutId.ID_SCREENSHOT_VALUE.ordinal()
     };
 
+    /** Predefined default shortcuts when large button setting is on. */
+    private static final int[] LARGE_SHORTCUT_LIST_DEFAULT = {
+            A11yMenuShortcut.ShortcutId.ID_ASSISTANT_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_A11YSETTING_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_POWER_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_RECENT_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_VOLUME_UP_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_LOCKSCREEN_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_QUICKSETTING_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_NOTIFICATION_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_SCREENSHOT_VALUE.ordinal()
+    };
+
+
+
     private final AccessibilityMenuService mService;
     private final WindowManager mWindowManager;
+    private final DisplayManager mDisplayManager;
     private ViewGroup mLayout;
     private WindowManager.LayoutParams mLayoutParameter;
     private A11yMenuViewPager mA11yMenuViewPager;
+    private Handler mHandler;
+    private AccessibilityManager mAccessibilityManager;
 
     public A11yMenuOverlayLayout(AccessibilityMenuService service) {
         mService = service;
         mWindowManager = mService.getSystemService(WindowManager.class);
+        mDisplayManager = mService.getSystemService(DisplayManager.class);
         configureLayout();
+        mHandler = new Handler(Looper.getMainLooper());
+        mAccessibilityManager = mService.getSystemService(AccessibilityManager.class);
     }
 
     /** Creates Accessibility menu layout and configure layout parameters. */
@@ -100,7 +135,12 @@ public class A11yMenuOverlayLayout {
             initLayoutParams();
         }
 
-        mLayout = new FrameLayout(mService);
+        final Display display = mService.getSystemService(
+                DisplayManager.class).getDisplay(DEFAULT_DISPLAY);
+
+        mLayout = new FrameLayout(
+                mService.createDisplayContext(display).createWindowContext(
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, null));
         updateLayoutPosition();
         inflateLayoutAndSetOnTouchListener(mLayout);
         mA11yMenuViewPager = new A11yMenuViewPager(mService);
@@ -142,7 +182,10 @@ public class A11yMenuOverlayLayout {
      */
     private List<A11yMenuShortcut> createShortcutList() {
         List<A11yMenuShortcut> shortcutList = new ArrayList<>();
-        for (int shortcutId : SHORTCUT_LIST_DEFAULT) {
+
+        for (int shortcutId :
+                (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)
+                        ? LARGE_SHORTCUT_LIST_DEFAULT : SHORTCUT_LIST_DEFAULT)) {
             shortcutList.add(new A11yMenuShortcut(shortcutId));
         }
         return shortcutList;
@@ -150,14 +193,16 @@ public class A11yMenuOverlayLayout {
 
     /** Updates a11y menu layout position by configuring layout params. */
     private void updateLayoutPosition() {
-        Display display = mLayout.getDisplay();
-        final int orientation = mService.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        final Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        final Configuration configuration = mService.getResources().getConfiguration();
+        final int orientation = configuration.orientation;
+        if (display != null && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            final boolean ltr = configuration.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
             switch (display.getRotation()) {
-                case Surface.ROTATION_90:
+                case Surface.ROTATION_0:
                 case Surface.ROTATION_180:
                     mLayoutParameter.gravity =
-                            Gravity.END | Gravity.BOTTOM
+                            (ltr ? Gravity.END : Gravity.START) | Gravity.BOTTOM
                                     | Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
                     mLayoutParameter.width = WindowManager.LayoutParams.WRAP_CONTENT;
                     mLayoutParameter.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -165,10 +210,10 @@ public class A11yMenuOverlayLayout {
                     mLayoutParameter.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
                     mLayout.setBackgroundResource(R.drawable.shadow_90deg);
                     break;
-                case Surface.ROTATION_0:
+                case Surface.ROTATION_90:
                 case Surface.ROTATION_270:
                     mLayoutParameter.gravity =
-                            Gravity.START | Gravity.BOTTOM
+                            (ltr ? Gravity.START : Gravity.END) | Gravity.BOTTOM
                                     | Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
                     mLayoutParameter.width = WindowManager.LayoutParams.WRAP_CONTENT;
                     mLayoutParameter.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -261,9 +306,30 @@ public class A11yMenuOverlayLayout {
         mLayout.setVisibility((mLayout.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
     }
 
-    /** Shows hint text on Toast. */
-    public void showToast(String text) {
-        final View viewPos = mLayout.findViewById(R.id.coordinatorLayout);
-        Toast.makeText(viewPos.getContext(), text, Toast.LENGTH_SHORT).show();
+    /** Shows hint text on a minimal Snackbar-like text view. */
+    public void showSnackbar(String text) {
+        final int animationDurationMs = 300;
+        final int timeoutDurationMs = mAccessibilityManager.getRecommendedTimeoutMillis(2000,
+                AccessibilityManager.FLAG_CONTENT_TEXT);
+
+        final TextView snackbar = mLayout.findViewById(R.id.snackbar);
+        snackbar.setText(text);
+
+        // Remove any existing fade-out animation before starting any new animations.
+        mHandler.removeCallbacksAndMessages(null);
+
+        if (snackbar.getVisibility() != View.VISIBLE) {
+            snackbar.setAlpha(0f);
+            snackbar.setVisibility(View.VISIBLE);
+            snackbar.animate().alpha(1f).setDuration(animationDurationMs).setListener(null);
+        }
+        mHandler.postDelayed(() -> snackbar.animate().alpha(0f).setDuration(
+                animationDurationMs).setListener(
+                new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(@NonNull Animator animation) {
+                            snackbar.setVisibility(View.GONE);
+                        }
+                    }), timeoutDurationMs);
     }
 }

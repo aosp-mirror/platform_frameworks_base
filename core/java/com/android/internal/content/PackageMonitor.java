@@ -39,26 +39,11 @@ import java.util.Objects;
  */
 public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     static final String TAG = "PackageMonitor";
-    static final IntentFilter sPackageFilt = new IntentFilter();
-    static final IntentFilter sNonDataFilt = new IntentFilter();
-    static final IntentFilter sExternalFilt = new IntentFilter();
 
-    static {
-        sPackageFilt.addAction(Intent.ACTION_PACKAGE_ADDED);
-        sPackageFilt.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        sPackageFilt.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        sPackageFilt.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
-        sPackageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        sPackageFilt.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
-        sPackageFilt.addDataScheme("package");
-        sNonDataFilt.addAction(Intent.ACTION_UID_REMOVED);
-        sNonDataFilt.addAction(Intent.ACTION_USER_STOPPED);
-        sNonDataFilt.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
-        sNonDataFilt.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
-        sExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-        sExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-    }
-    
+    final IntentFilter mPackageFilt;
+    final IntentFilter mNonDataFilt;
+    final IntentFilter mExternalFilt;
+
     final HashSet<String> mUpdatingPackages = new HashSet<String>();
     
     Context mRegisteredContext;
@@ -75,6 +60,35 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
     @UnsupportedAppUsage
     public PackageMonitor() {
+        final boolean isCore = UserHandle.isCore(android.os.Process.myUid());
+
+        mPackageFilt = new IntentFilter();
+        mPackageFilt.addAction(Intent.ACTION_PACKAGE_ADDED);
+        mPackageFilt.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        mPackageFilt.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        mPackageFilt.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
+        mPackageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        mPackageFilt.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        mPackageFilt.addDataScheme("package");
+        if (isCore) {
+            mPackageFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        }
+
+        mNonDataFilt = new IntentFilter();
+        mNonDataFilt.addAction(Intent.ACTION_UID_REMOVED);
+        mNonDataFilt.addAction(Intent.ACTION_USER_STOPPED);
+        mNonDataFilt.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+        mNonDataFilt.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        if (isCore) {
+            mNonDataFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        }
+
+        mExternalFilt = new IntentFilter();
+        mExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+        mExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+        if (isCore) {
+            mExternalFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        }
     }
 
     @UnsupportedAppUsage
@@ -97,17 +111,17 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         mRegisteredContext = context;
         mRegisteredHandler = Objects.requireNonNull(handler);
         if (user != null) {
-            context.registerReceiverAsUser(this, user, sPackageFilt, null, mRegisteredHandler);
-            context.registerReceiverAsUser(this, user, sNonDataFilt, null, mRegisteredHandler);
+            context.registerReceiverAsUser(this, user, mPackageFilt, null, mRegisteredHandler);
+            context.registerReceiverAsUser(this, user, mNonDataFilt, null, mRegisteredHandler);
             if (externalStorage) {
-                context.registerReceiverAsUser(this, user, sExternalFilt, null,
+                context.registerReceiverAsUser(this, user, mExternalFilt, null,
                         mRegisteredHandler);
             }
         } else {
-            context.registerReceiver(this, sPackageFilt, null, mRegisteredHandler);
-            context.registerReceiver(this, sNonDataFilt, null, mRegisteredHandler);
+            context.registerReceiver(this, mPackageFilt, null, mRegisteredHandler);
+            context.registerReceiver(this, mNonDataFilt, null, mRegisteredHandler);
             if (externalStorage) {
-                context.registerReceiver(this, sExternalFilt, null, mRegisteredHandler);
+                context.registerReceiver(this, mExternalFilt, null, mRegisteredHandler);
             }
         }
     }

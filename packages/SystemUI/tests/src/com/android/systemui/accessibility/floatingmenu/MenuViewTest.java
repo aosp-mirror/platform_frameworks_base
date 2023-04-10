@@ -20,6 +20,7 @@ import static android.app.UiModeManager.MODE_NIGHT_YES;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -35,6 +36,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -68,7 +70,8 @@ public class MenuViewTest extends SysuiTestCase {
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mNightMode = mUiModeManager.getNightMode();
         mUiModeManager.setNightMode(MODE_NIGHT_YES);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                mock(SecureSettings.class));
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         mStubMenuViewAppearance = new MenuViewAppearance(mContext, stubWindowManager);
         mMenuView = spy(new MenuView(mContext, stubMenuViewModel, mStubMenuViewAppearance));

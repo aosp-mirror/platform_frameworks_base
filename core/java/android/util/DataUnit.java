@@ -36,9 +36,11 @@ public enum DataUnit {
     KILOBYTES { @Override public long toBytes(long v) { return v * 1_000; } },
     MEGABYTES { @Override public long toBytes(long v) { return v * 1_000_000; } },
     GIGABYTES { @Override public long toBytes(long v) { return v * 1_000_000_000; } },
+    TERABYTES { @Override public long toBytes(long v) { return v * 1_000_000_000_000L; } },
     KIBIBYTES { @Override public long toBytes(long v) { return v * 1_024; } },
     MEBIBYTES { @Override public long toBytes(long v) { return v * 1_048_576; } },
-    GIBIBYTES { @Override public long toBytes(long v) { return v * 1_073_741_824; } };
+    GIBIBYTES { @Override public long toBytes(long v) { return v * 1_073_741_824; } },
+    TEBIBYTES { @Override public long toBytes(long v) { return v * 1_099_511_627_776L; } };
 
     public long toBytes(long v) {
         throw new AbstractMethodError();

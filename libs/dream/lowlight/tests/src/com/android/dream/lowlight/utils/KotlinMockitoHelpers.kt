@@ -1,0 +1,125 @@
+package src.com.android.dream.lowlight.utils
+
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatcher
+import org.mockito.Mockito
+import org.mockito.Mockito.`when`
+import org.mockito.stubbing.OngoingStubbing
+import org.mockito.stubbing.Stubber
+
+/**
+ * Returns Mockito.eq() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> eq(obj: T): T = Mockito.eq<T>(obj)
+
+/**
+ * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
+inline fun <reified T> any(): T = any(T::class.java)
+
+/**
+ * Returns Mockito.argThat() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> argThat(matcher: ArgumentMatcher<T>): T = Mockito.argThat(matcher)
+
+/**
+ * Kotlin type-inferred version of Mockito.nullable()
+ */
+inline fun <reified T> nullable(): T? = Mockito.nullable(T::class.java)
+
+/**
+ * Returns ArgumentCaptor.capture() as nullable type to avoid java.lang.IllegalStateException
+ * when null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+
+/**
+ * Helper function for creating an argumentCaptor in kotlin.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+inline fun <reified T : Any> argumentCaptor(): ArgumentCaptor<T> =
+    ArgumentCaptor.forClass(T::class.java)
+
+/**
+ * Helper function for creating new mocks, without the need to pass in a [Class] instance.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ *
+ * @param apply builder function to simplify stub configuration by improving type inference.
+ */
+inline fun <reified T : Any> mock(apply: T.() -> Unit = {}): T = Mockito.mock(T::class.java)
+    .apply(apply)
+
+/**
+ * Helper function for stubbing methods without the need to use backticks.
+ *
+ * @see Mockito.when
+ */
+fun <T> whenever(methodCall: T): OngoingStubbing<T> = `when`(methodCall)
+fun <T> Stubber.whenever(mock: T): T = `when`(mock)
+
+/**
+ * A kotlin implemented wrapper of [ArgumentCaptor] which prevents the following exception when
+ * kotlin tests are mocking kotlin objects and the methods take non-null parameters:
+ *
+ *     java.lang.NullPointerException: capture() must not be null
+ */
+class KotlinArgumentCaptor<T> constructor(clazz: Class<T>) {
+    private val wrapped: ArgumentCaptor<T> = ArgumentCaptor.forClass(clazz)
+    fun capture(): T = wrapped.capture()
+    val value: T
+        get() = wrapped.value
+    val allValues: List<T>
+        get() = wrapped.allValues
+}
+
+/**
+ * Helper function for creating an argumentCaptor in kotlin.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+inline fun <reified T : Any> kotlinArgumentCaptor(): KotlinArgumentCaptor<T> =
+    KotlinArgumentCaptor(T::class.java)
+
+/**
+ * Helper function for creating and using a single-use ArgumentCaptor in kotlin.
+ *
+ *    val captor = argumentCaptor<Foo>()
+ *    verify(...).someMethod(captor.capture())
+ *    val captured = captor.value
+ *
+ * becomes:
+ *
+ *    val captured = withArgCaptor<Foo> { verify(...).someMethod(capture()) }
+ *
+ * NOTE: this uses the KotlinArgumentCaptor to avoid the NullPointerException.
+ */
+inline fun <reified T : Any> withArgCaptor(block: KotlinArgumentCaptor<T>.() -> Unit): T =
+    kotlinArgumentCaptor<T>().apply { block() }.value
+
+/**
+ * Variant of [withArgCaptor] for capturing multiple arguments.
+ *
+ *    val captor = argumentCaptor<Foo>()
+ *    verify(...).someMethod(captor.capture())
+ *    val captured: List<Foo> = captor.allValues
+ *
+ * becomes:
+ *
+ *    val capturedList = captureMany<Foo> { verify(...).someMethod(capture()) }
+ */
+inline fun <reified T : Any> captureMany(block: KotlinArgumentCaptor<T>.() -> Unit): List<T> =
+    kotlinArgumentCaptor<T>().apply{ block() }.allValues

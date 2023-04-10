@@ -88,7 +88,7 @@ public class HdmiControlServiceTest {
     private MockPlaybackDevice mPlaybackDeviceSpy;
     private FakeNativeWrapper mNativeWrapper;
     private HdmiEarcController mHdmiEarcController;
-    private FakeEArcNativeWrapper mEArcNativeWrapper;
+    private FakeEarcNativeWrapper mEarcNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
@@ -128,9 +128,9 @@ public class HdmiControlServiceTest {
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlServiceSpy, mNativeWrapper, mHdmiControlServiceSpy.getAtomWriter());
         mHdmiControlServiceSpy.setCecController(mHdmiCecController);
-        mEArcNativeWrapper = new FakeEArcNativeWrapper();
+        mEarcNativeWrapper = new FakeEarcNativeWrapper();
         mHdmiEarcController = HdmiEarcController.createWithNativeWrapper(
-                mHdmiControlServiceSpy, mEArcNativeWrapper);
+                mHdmiControlServiceSpy, mEarcNativeWrapper);
         mHdmiControlServiceSpy.setEarcController(mHdmiEarcController);
         mHdmiControlServiceSpy.setHdmiMhlController(HdmiMhlControllerStub.create(
                 mHdmiControlServiceSpy));
@@ -139,13 +139,33 @@ public class HdmiControlServiceTest {
         mLocalDevices.add(mPlaybackDeviceSpy);
         mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, 0x2100)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
         mHdmiPortInfo[1] =
-                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false, false);
+                new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, 0x2200)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
         mHdmiPortInfo[2] =
-                new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, true, true);
+                new HdmiPortInfo.Builder(3, HdmiPortInfo.PORT_INPUT, 0x2000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(true)
+                        .setEarcSupported(true)
+                        .build();
         mHdmiPortInfo[3] =
-                new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false, false);
+                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, 0x3000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlServiceSpy.initService();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);

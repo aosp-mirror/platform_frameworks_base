@@ -34,8 +34,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
@@ -84,7 +87,9 @@ import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.leak.ReferenceTestUtils;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.utils.os.FakeHandler;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -122,15 +127,18 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     IRemoteMagnificationAnimationCallback mAnimationCallback;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private Handler mHandler;
     private TestableWindowManager mWindowManager;
-    private SysUiState mSysUiState = new SysUiState();
+    private SysUiState mSysUiState;
     private Resources mResources;
     private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
     private final ValueAnimator mValueAnimator = ValueAnimator.ofFloat(0, 1.0f).setDuration(0);
+    private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     private IWindowSession mWindowSessionSpy;
 
@@ -156,7 +164,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             return null;
         }).when(mSfVsyncFrameProvider).postFrameCallback(
                 any(FrameCallback.class));
+        mSysUiState = new SysUiState(mDisplayTracker);
         mSysUiState.addCallback(Mockito.mock(SysUiState.SysUiStateCallback.class));
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), anyInt())).then(
+                returnsSecondArg());
+        when(mSecureSettings.getFloatForUser(anyString(), anyFloat(), anyInt())).then(
+                returnsSecondArg());
 
         mResources = getContext().getOrCreateTestableResources().getResources();
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
@@ -171,7 +184,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                         mTransaction,
                         mWindowMagnifierCallback,
                         mSysUiState,
-                        () -> mWindowSessionSpy);
+                        () -> mWindowSessionSpy,
+                        mSecureSettings);
 
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
@@ -604,18 +618,18 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     public void performA11yActions_visible_expectedResults() {
         final int displayId = mContext.getDisplayId();
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(2.5f, Float.NaN,
+            mWindowMagnificationController.enableWindowMagnificationInternal(1.5f, Float.NaN,
                     Float.NaN);
         });
 
         final View mirrorView = mWindowManager.getAttachedView();
         assertTrue(
                 mirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_out, null));
-        // Minimum scale is 2.0.
-        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(2.0f));
+        // Minimum scale is 1.0.
+        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(1.0f));
 
         assertTrue(mirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_in, null));
-        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(3.5f));
+        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(2.5f));
 
         // TODO: Verify the final state when the mirror surface is visible.
         assertTrue(mirrorView.performAccessibilityAction(R.id.accessibility_action_move_up, null));
@@ -626,6 +640,10 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertTrue(
                 mirrorView.performAccessibilityAction(R.id.accessibility_action_move_left, null));
         verify(mWindowMagnifierCallback, times(4)).onMove(eq(displayId));
+
+        assertTrue(mirrorView.performAccessibilityAction(
+                AccessibilityAction.ACTION_CLICK.getId(), null));
+        verify(mWindowMagnifierCallback).onClickSettingsButton(eq(displayId));
     }
 
     @Test

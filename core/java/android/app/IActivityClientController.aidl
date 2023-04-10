@@ -120,7 +120,11 @@ interface IActivityClientController {
     oneway void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
     oneway void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
     oneway void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
+    oneway void setAllowCrossUidActivitySwitchFromBelow(in IBinder token, boolean allowed);
     oneway void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
+    oneway void overrideActivityTransition(IBinder token, boolean open, int enterAnim, int exitAnim,
+            int backgroundColor);
+    oneway void clearOverrideActivityTransition(IBinder token, boolean open);
     /**
      * Overrides the animation of activity pending transition. This call is not one-way because
      * the method is usually used after startActivity or Activity#finish. If this is non-blocking,
@@ -177,4 +181,14 @@ interface IActivityClientController {
      * that started the task.
      */
     void enableTaskLocaleOverride(in IBinder token);
+
+    /**
+     * Return {@code true} if the activity was explicitly requested to be launched in the
+     * TaskFragment.
+     *
+     * @param activityToken The token of the Activity.
+     * @param taskFragmentToken The token of the TaskFragment.
+     */
+    boolean isRequestedToLaunchInTaskFragment(in IBinder activityToken,
+            in IBinder taskFragmentToken);
 }

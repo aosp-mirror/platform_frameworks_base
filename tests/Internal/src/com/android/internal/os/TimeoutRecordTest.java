@@ -16,14 +16,14 @@
 
 package com.android.internal.os;
 
-import android.content.ComponentName;
-import android.content.Intent;
-import android.platform.test.annotations.Presubmit;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import android.content.ComponentName;
+import android.content.Intent;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
@@ -40,7 +40,7 @@ public class TimeoutRecordTest {
     @Test
     public void forBroadcastReceiver_returnsCorrectTimeoutRecord() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setComponent(ComponentName.createRelative("com.example.app", "ExampleClass"));
+        intent.setComponent(new ComponentName("com.example.app", "com.example.app.ExampleClass"));
 
         TimeoutRecord record = TimeoutRecord.forBroadcastReceiver(intent);
 
@@ -48,14 +48,28 @@ public class TimeoutRecordTest {
         assertEquals(record.mKind, TimeoutRecord.TimeoutKind.BROADCAST_RECEIVER);
         assertEquals(record.mReason,
                 "Broadcast of Intent { act=android.intent.action.MAIN cmp=com.example"
-                        + ".app/ExampleClass }");
+                        + ".app/.ExampleClass }");
+        assertTrue(record.mEndTakenBeforeLocks);
+    }
+
+    @Test
+    public void forBroadcastReceiver_withPackageAndClass_returnsCorrectTimeoutRecord() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        TimeoutRecord record = TimeoutRecord.forBroadcastReceiver(intent,
+                "com.example.app", "com.example.app.ExampleClass");
+
+        assertNotNull(record);
+        assertEquals(record.mKind, TimeoutRecord.TimeoutKind.BROADCAST_RECEIVER);
+        assertEquals(record.mReason,
+                "Broadcast of Intent { act=android.intent.action.MAIN cmp=com.example"
+                        + ".app/.ExampleClass }");
         assertTrue(record.mEndTakenBeforeLocks);
     }
 
     @Test
     public void forBroadcastReceiver_withTimeoutDurationMs_returnsCorrectTimeoutRecord() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setComponent(ComponentName.createRelative("com.example.app", "ExampleClass"));
+        intent.setComponent(new ComponentName("com.example.app", "com.example.app.ExampleClass"));
 
         TimeoutRecord record = TimeoutRecord.forBroadcastReceiver(intent, 1000L);
 
@@ -63,7 +77,7 @@ public class TimeoutRecordTest {
         assertEquals(record.mKind, TimeoutRecord.TimeoutKind.BROADCAST_RECEIVER);
         assertEquals(record.mReason,
                 "Broadcast of Intent { act=android.intent.action.MAIN cmp=com.example"
-                        + ".app/ExampleClass }, waited 1000ms");
+                        + ".app/.ExampleClass }, waited 1000ms");
         assertTrue(record.mEndTakenBeforeLocks);
     }
 

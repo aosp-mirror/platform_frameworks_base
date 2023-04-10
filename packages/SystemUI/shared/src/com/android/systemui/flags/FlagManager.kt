@@ -39,7 +39,7 @@ class FlagManager constructor(
         const val ACTION_GET_FLAGS = "com.android.systemui.action.GET_FLAGS"
         const val FLAGS_PERMISSION = "com.android.systemui.permission.FLAGS"
         const val ACTION_SYSUI_STARTED = "com.android.systemui.STARTED"
-        const val EXTRA_ID = "id"
+        const val EXTRA_NAME = "name"
         const val EXTRA_VALUE = "value"
         const val EXTRA_FLAGS = "flags"
         private const val SETTINGS_PREFIX = "systemui/flags"
@@ -56,7 +56,7 @@ class FlagManager constructor(
      * that the restart be suppressed
      */
     var onSettingsChangedAction: Consumer<Boolean>? = null
-    var clearCacheAction: Consumer<Int>? = null
+    var clearCacheAction: Consumer<String>? = null
     private val listeners: MutableSet<PerFlagListener> = mutableSetOf()
     private val settingsObserver: ContentObserver = SettingsObserver()
 
@@ -96,35 +96,42 @@ class FlagManager constructor(
      * Returns the stored value or null if not set.
      * This API is used by TheFlippinApp.
      */
-    fun isEnabled(id: Int): Boolean? = readFlagValue(id, BooleanFlagSerializer)
+    fun isEnabled(name: String): Boolean? = readFlagValue(name, BooleanFlagSerializer)
 
     /**
      * Sets the value of a boolean flag.
      * This API is used by TheFlippinApp.
      */
-    fun setFlagValue(id: Int, enabled: Boolean) {
-        val intent = createIntent(id)
+    fun setFlagValue(name: String, enabled: Boolean) {
+        val intent = createIntent(name)
         intent.putExtra(EXTRA_VALUE, enabled)
 
         context.sendBroadcast(intent)
     }
 
-    fun eraseFlag(id: Int) {
-        val intent = createIntent(id)
+    fun eraseFlag(name: String) {
+        val intent = createIntent(name)
 
         context.sendBroadcast(intent)
     }
 
     /** Returns the stored value or null if not set.  */
+    // TODO(b/265188950): Remove method this once ids are fully deprecated.
     fun <T> readFlagValue(id: Int, serializer: FlagSerializer<T>): T? {
-        val data = settings.getString(idToSettingsKey(id))
+        val data = settings.getStringFromSecure(idToSettingsKey(id))
+        return serializer.fromSettingsData(data)
+    }
+
+    /** Returns the stored value or null if not set.  */
+    fun <T> readFlagValue(name: String, serializer: FlagSerializer<T>): T? {
+        val data = settings.getString(nameToSettingsKey(name))
         return serializer.fromSettingsData(data)
     }
 
     override fun addListener(flag: Flag<*>, listener: FlagListenable.Listener) {
         synchronized(listeners) {
             val registerNeeded = listeners.isEmpty()
-            listeners.add(PerFlagListener(flag.id, listener))
+            listeners.add(PerFlagListener(flag.name, listener))
             if (registerNeeded) {
                 settings.registerContentObserver(SETTINGS_PREFIX, true, settingsObserver)
             }
@@ -143,16 +150,21 @@ class FlagManager constructor(
         }
     }
 
-    private fun createIntent(id: Int): Intent {
+    private fun createIntent(name: String): Intent {
         val intent = Intent(ACTION_SET_FLAG)
         intent.setPackage(RECEIVING_PACKAGE)
-        intent.putExtra(EXTRA_ID, id)
+        intent.putExtra(EXTRA_NAME, name)
 
         return intent
     }
 
+    // TODO(b/265188950): Remove method this once ids are fully deprecated.
     fun idToSettingsKey(id: Int): String {
         return "$SETTINGS_PREFIX/$id"
+    }
+
+    fun nameToSettingsKey(name: String): String {
+        return "$SETTINGS_PREFIX/$name"
     }
 
     inner class SettingsObserver : ContentObserver(handler) {
@@ -161,20 +173,15 @@ class FlagManager constructor(
                 return
             }
             val parts = uri.pathSegments
-            val idStr = parts[parts.size - 1]
-            val id = try {
-                idStr.toInt()
-            } catch (e: NumberFormatException) {
-                return
-            }
-            clearCacheAction?.accept(id)
-            dispatchListenersAndMaybeRestart(id, onSettingsChangedAction)
+            val name = parts[parts.size - 1]
+            clearCacheAction?.accept(name)
+            dispatchListenersAndMaybeRestart(name, onSettingsChangedAction)
         }
     }
 
-    fun dispatchListenersAndMaybeRestart(id: Int, restartAction: Consumer<Boolean>?) {
+    fun dispatchListenersAndMaybeRestart(name: String, restartAction: Consumer<Boolean>?) {
         val filteredListeners: List<FlagListenable.Listener> = synchronized(listeners) {
-            listeners.mapNotNull { if (it.id == id) it.listener else null }
+            listeners.mapNotNull { if (it.name == name) it.listener else null }
         }
         // If there are no listeners, there's nothing to dispatch to, and nothing to suppress it.
         if (filteredListeners.isEmpty()) {
@@ -185,7 +192,7 @@ class FlagManager constructor(
         val suppressRestartList: List<Boolean> = filteredListeners.map { listener ->
             var didRequestNoRestart = false
             val event = object : FlagListenable.FlagEvent {
-                override val flagId = id
+                override val flagName = name
                 override fun requestNoRestart() {
                     didRequestNoRestart = true
                 }
@@ -198,7 +205,7 @@ class FlagManager constructor(
         restartAction?.accept(suppressRestart)
     }
 
-    private data class PerFlagListener(val id: Int, val listener: FlagListenable.Listener)
+    private data class PerFlagListener(val name: String, val listener: FlagListenable.Listener)
 }
 
 class NoFlagResultsException : Exception(

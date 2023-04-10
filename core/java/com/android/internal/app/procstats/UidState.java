@@ -150,6 +150,7 @@ public final class UidState {
     public void resetSafely(long now) {
         mDurations.resetTable();
         mStartTime = now;
+        mProcesses.removeIf(p -> !p.isInUse());
     }
 
     /**

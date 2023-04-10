@@ -16,12 +16,12 @@
     },
     {
       "name": "service.incremental_test"
+    },
+    {
+      "name": "CtsInstalledLoadingProgressHostTests"
     }
   ],
   "presubmit-large": [
-    {
-      "name": "CtsInstalledLoadingProgressHostTests"
-    },
     {
       "name": "CtsContentTestCases",
       "options": [
@@ -35,6 +35,11 @@
           "include-filter": "android.content.pm.cts.ChecksumsTest"
         }
       ]
+    }
+  ],
+  "kernel-presubmit": [
+    {
+      "name": "CtsIncrementalInstallHostTestCases"
     }
   ]
 }

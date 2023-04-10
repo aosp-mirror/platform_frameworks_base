@@ -16,14 +16,18 @@
 
 package com.android.internal.app;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_WORK;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
 import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -45,8 +49,13 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -73,6 +82,10 @@ public class IntentForwarderActivity extends Activity  {
 
     public static String FORWARD_INTENT_TO_MANAGED_PROFILE
             = "com.android.internal.app.ForwardIntentToManagedProfile";
+
+    @TestApi
+    public static final String EXTRA_SKIP_USER_CONFIRMATION =
+            "com.android.internal.app.EXTRA_SKIP_USER_CONFIRMATION";
 
     private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEMES
             = new HashSet<>(Arrays.asList("sms", "smsto", "mms", "mmsto"));
@@ -151,15 +164,72 @@ public class IntentForwarderActivity extends Activity  {
                     if (isResolverActivityResolveInfo(targetResolveInfo)) {
                         launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
                                 callingUserId, targetUserId);
-                        return targetResolveInfo;
+                    // When switching to the personal profile, automatically start the activity
+                    } else if (className.equals(FORWARD_INTENT_TO_PARENT)) {
+                        startActivityAsCaller(newIntent, targetUserId);
                     }
-                    startActivityAsCaller(newIntent, targetUserId);
                     return targetResolveInfo;
                 }, mExecutorService)
                 .thenAcceptAsync(result -> {
-                    maybeShowDisclosure(intentReceived, result, userMessage);
-                    finish();
+                    // When switching to the personal profile, inform user after starting activity
+                    if (className.equals(FORWARD_INTENT_TO_PARENT)) {
+                        maybeShowDisclosure(intentReceived, result, userMessage);
+                        finish();
+                    // When switching to the work profile, ask the user for consent before launching
+                    } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+                        maybeShowUserConsentMiniResolver(result, newIntent, targetUserId);
+                    }
                 }, getApplicationContext().getMainExecutor());
+    }
+
+    private void maybeShowUserConsentMiniResolver(
+            ResolveInfo target, Intent launchIntent, int targetUserId) {
+        if (target == null || isIntentForwarderResolveInfo(target) || !isDeviceProvisioned()) {
+            finish();
+            return;
+        }
+
+        if (launchIntent.getBooleanExtra(EXTRA_SKIP_USER_CONFIRMATION, /* defaultValue= */ false)
+                && getCallingPackage() != null
+                && PERMISSION_GRANTED == getPackageManager().checkPermission(
+                        INTERACT_ACROSS_USERS, getCallingPackage())) {
+            startActivityAsCaller(launchIntent, targetUserId);
+            finish();
+            return;
+        }
+
+        int layoutId = R.layout.miniresolver;
+        setContentView(layoutId);
+
+        findViewById(R.id.title_container).setElevation(0);
+
+        ImageView icon = findViewById(R.id.icon);
+        PackageManager packageManagerForTargetUser =
+                createContextAsUser(UserHandle.of(targetUserId), /* flags= */ 0)
+                        .getPackageManager();
+        icon.setImageDrawable(target.loadIcon(packageManagerForTargetUser));
+
+        View buttonContainer = findViewById(R.id.button_bar_container);
+        buttonContainer.setPadding(0, 0, 0, buttonContainer.getPaddingBottom());
+
+        ((TextView) findViewById(R.id.open_cross_profile)).setText(
+                getOpenInWorkMessage(target.loadLabel(packageManagerForTargetUser)));
+
+        // The mini-resolver's negative button is reused in this flow to cancel the intent
+        ((Button) findViewById(R.id.use_same_profile_browser)).setText(R.string.cancel);
+        findViewById(R.id.use_same_profile_browser).setOnClickListener(v -> finish());
+
+        findViewById(R.id.button_open).setOnClickListener(v -> {
+            startActivityAsCaller(launchIntent, targetUserId);
+            finish();
+        });
+    }
+
+    private String getOpenInWorkMessage(CharSequence targetLabel) {
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_OPEN_IN_WORK,
+                () -> getString(R.string.miniresolver_open_in_work, targetLabel),
+                targetLabel);
     }
 
     private String getForwardToPersonalMessage() {

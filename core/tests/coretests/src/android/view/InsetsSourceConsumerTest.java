@@ -18,9 +18,8 @@ package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_USER;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSourceConsumer.ShowResult.SHOW_IMMEDIATELY;
-import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.statusBars;
 
@@ -69,6 +68,9 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class InsetsSourceConsumerTest {
 
+    private static final int ID_STATUS_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, statusBars());
+
     private InsetsSourceConsumer mConsumer;
 
     private SurfaceSession mSession = new SurfaceSession();
@@ -97,11 +99,11 @@ public class InsetsSourceConsumerTest {
                 // activity isn't running, lets ignore BadTokenException.
             }
             mState = new InsetsState();
-            mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR, statusBars()));
+            mSpyInsetsSource = Mockito.spy(new InsetsSource(ID_STATUS_BAR, statusBars()));
             mState.addSource(mSpyInsetsSource);
 
             mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot));
-            mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, statusBars(), mState,
+            mConsumer = new InsetsSourceConsumer(ID_STATUS_BAR, statusBars(), mState,
                     () -> mMockTransaction, mController) {
                 @Override
                 public void removeSurface() {
@@ -113,7 +115,7 @@ public class InsetsSourceConsumerTest {
         instrumentation.waitForIdleSync();
 
         mConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, statusBars(), mLeash,
+                new InsetsSourceControl(ID_STATUS_BAR, statusBars(), mLeash,
                         true /* initialVisible */, new Point(), Insets.NONE),
                 new int[1], new int[1]);
     }
@@ -147,25 +149,25 @@ public class InsetsSourceConsumerTest {
         InsetsController controller = new InsetsController(new ViewRootInsetsControllerHost(
                 mViewRoot));
         InsetsSourceConsumer consumer = new InsetsSourceConsumer(
-                ITYPE_IME, ime(), state, null, controller);
+                ID_IME, ime(), state, null, controller);
 
-        InsetsSource source = new InsetsSource(ITYPE_IME, ime());
+        InsetsSource source = new InsetsSource(ID_IME, ime());
         source.setFrame(0, 1, 2, 3);
         consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_NONE);
 
         // While we're animating, updates are delayed
         source.setFrame(4, 5, 6, 7);
         consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_USER);
-        assertEquals(new Rect(0, 1, 2, 3), state.peekSource(ITYPE_IME).getFrame());
+        assertEquals(new Rect(0, 1, 2, 3), state.peekSource(ID_IME).getFrame());
 
         // Finish the animation, now the pending frame should be applied
         assertTrue(consumer.onAnimationStateChanged(false /* running */));
-        assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
+        assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ID_IME).getFrame());
 
         // Animating again, updates are delayed
         source.setFrame(8, 9, 10, 11);
         consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_USER);
-        assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
+        assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ID_IME).getFrame());
 
         // Updating with the current frame triggers a different code path, verify this clears
         // the pending 8, 9, 10, 11 frame:
@@ -173,7 +175,7 @@ public class InsetsSourceConsumerTest {
         consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_USER);
 
         assertFalse(consumer.onAnimationStateChanged(false /* running */));
-        assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
+        assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ID_IME).getFrame());
     }
 
     @Test
@@ -185,7 +187,7 @@ public class InsetsSourceConsumerTest {
             verifyZeroInteractions(mMockTransaction);
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, statusBars(), mLeash,
+                    new InsetsSourceControl(ID_STATUS_BAR, statusBars(), mLeash,
                             true /* initialVisible */, new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertEquals(statusBars(), hideTypes[0]);
@@ -203,7 +205,7 @@ public class InsetsSourceConsumerTest {
             mRemoveSurfaceCalled = false;
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, statusBars(), mLeash,
+                    new InsetsSourceControl(ID_STATUS_BAR, statusBars(), mLeash,
                             false /* initialVisible */, new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertTrue(mRemoveSurfaceCalled);
@@ -219,7 +221,7 @@ public class InsetsSourceConsumerTest {
             ViewRootInsetsControllerHost host = new ViewRootInsetsControllerHost(mViewRoot);
             InsetsController insetsController = new InsetsController(host, (controller, source) -> {
                 if (source.getType() == ime()) {
-                    return new InsetsSourceConsumer(ITYPE_IME, ime(), state,
+                    return new InsetsSourceConsumer(ID_IME, ime(), state,
                             () -> mMockTransaction, controller) {
                         @Override
                         public int requestShow(boolean fromController,
@@ -231,11 +233,11 @@ public class InsetsSourceConsumerTest {
                 return new InsetsSourceConsumer(source.getId(), source.getType(),
                         controller.getState(), Transaction::new, controller);
             }, host.getHandler());
-            InsetsSource imeSource = new InsetsSource(ITYPE_IME, ime());
+            InsetsSource imeSource = new InsetsSource(ID_IME, ime());
             InsetsSourceConsumer imeConsumer = insetsController.getSourceConsumer(imeSource);
 
             // Initial IME insets source control with its leash.
-            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, ime(), mLeash,
+            imeConsumer.setControl(new InsetsSourceControl(ID_IME, ime(), mLeash,
                     false /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
             reset(mMockTransaction);
 
@@ -244,7 +246,7 @@ public class InsetsSourceConsumerTest {
             insetsController.controlWindowInsetsAnimation(ime(), 0L,
                     null /* interpolator */, null /* cancellationSignal */, null /* listener */);
             assertEquals(ANIMATION_TYPE_USER, insetsController.getAnimationType(ime()));
-            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, ime(), mLeash,
+            imeConsumer.setControl(new InsetsSourceControl(ID_IME, ime(), mLeash,
                     true /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
             verify(mMockTransaction, never()).show(mLeash);
         });

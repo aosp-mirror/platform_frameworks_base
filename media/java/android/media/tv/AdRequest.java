@@ -79,7 +79,6 @@ public final class AdRequest implements Parcelable {
                 mediaFileType, metadata);
     }
 
-    /** @hide */
     public AdRequest(int id, @RequestType int requestType, @Nullable Uri uri, long startTime,
             long stopTime, long echoInterval, @NonNull Bundle metadata) {
         this(id, requestType, null, uri, startTime, stopTime, echoInterval, null, metadata);
@@ -153,7 +152,6 @@ public final class AdRequest implements Parcelable {
      *
      * @return The URI of the AD media. Can be {@code null} for {@link #REQUEST_TYPE_STOP} or a file
      *         descriptor is used.
-     * @hide
      */
     @Nullable
     public Uri getUri() {

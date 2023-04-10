@@ -15,6 +15,7 @@
  */
 package com.android.server.am;
 
+import static android.Manifest.permission.GET_ANY_PROVIDER_TYPE;
 import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfile;
 import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
@@ -23,10 +24,10 @@ import static android.os.Process.PROC_SPACE_TERM;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION;
-import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_CHECK_URI_PERMISSION;
-import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_ERROR;
 import static com.android.internal.util.FrameworkStatsLog.GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_FRAMEWORK_PERMISSION;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
@@ -50,13 +51,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
-import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -87,7 +88,6 @@ import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.UserManagerService;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 
@@ -186,7 +186,7 @@ public class ContentProviderHelper {
 
             checkTime(startTime, "getContentProviderImpl: getProviderByName");
 
-            UserManagerService userManagerService = UserManagerService.getInstance();
+            UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
 
             /*
              For clone user profile and allowed authority, skipping finding provider and redirecting
@@ -196,8 +196,10 @@ public class ContentProviderHelper {
              used and redirect to owner user's MediaProvider.
              */
             //todo(b/236121588) MediaProvider should not be installed in clone profile.
-            if (!isAuthorityRedirectedForCloneProfile(name)
-                    || !userManagerService.isMediaSharedWithParent(userId)) {
+            final UserProperties userProps = umInternal.getUserProperties(userId);
+            final boolean isMediaSharedWithParent =
+                    userProps != null && userProps.isMediaSharedWithParent();
+            if (!isAuthorityRedirectedForCloneProfile(name) || !isMediaSharedWithParent) {
                 // First check if this content provider has been published...
                 cpr = mProviderMap.getProviderByName(name, userId);
             }
@@ -215,9 +217,7 @@ public class ContentProviderHelper {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
                     } else if (isAuthorityRedirectedForCloneProfile(name)) {
-                        if (userManagerService.isMediaSharedWithParent(userId)) {
-                            UserManagerInternal umInternal = LocalServices.getService(
-                                    UserManagerInternal.class);
+                        if (isMediaSharedWithParent) {
                             userId = umInternal.getProfileParentId(userId);
                             checkCrossUser = false;
                         }
@@ -262,7 +262,9 @@ public class ContentProviderHelper {
                     FrameworkStatsLog.write(
                             PROVIDER_ACQUISITION_EVENT_REPORTED,
                             r.uid, callingUid,
-                            PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
+                            PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
+                            PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                            cpi.packageName, callingPackage);
                     return holder;
                 }
 
@@ -332,7 +334,9 @@ public class ContentProviderHelper {
                         FrameworkStatsLog.write(
                                 PROVIDER_ACQUISITION_EVENT_REPORTED,
                                 cpr.proc.uid, callingUid,
-                                PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
+                                PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
+                                PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                                cpi.packageName, callingPackage);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -508,8 +512,14 @@ public class ContentProviderHelper {
                             FrameworkStatsLog.write(
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
-                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                                    cpi.packageName, callingPackage);
                         } else {
+                            final int packageState =
+                                    ((cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
+                                    ? PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                                    : PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
                                     cpi.processName, cpr.appInfo, false, 0,
@@ -528,7 +538,8 @@ public class ContentProviderHelper {
                             FrameworkStatsLog.write(
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
-                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD);
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
+                                    packageState, cpi.packageName, callingPackage);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);
@@ -961,87 +972,12 @@ public class ContentProviderHelper {
     }
 
     /**
-     * Allows apps to retrieve the MIME type of a URI.
-     * If an app is in the same user as the ContentProvider, or if it is allowed to interact across
-     * users, then it does not need permission to access the ContentProvider.
-     * Either, it needs cross-user uri grants.
-     *
-     * CTS tests for this functionality can be run with "runtest cts-appsecurity".
-     *
-     * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert/
-     *     src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
-     *
-     * @deprecated -- use getProviderMimeTypeAsync.
+     * Filters calls to getType based on permission. If the caller has required permission,
+     * then it returns the contentProvider#getType.
+     * Else, it returns the contentProvider#getTypeAnonymous, which does not
+     * reveal any internal information which should be protected by any permission.
      */
-    @Deprecated
-    String getProviderMimeType(Uri uri, int userId) {
-        mService.enforceNotIsolatedCaller("getProviderMimeType");
-        final String name = uri.getAuthority();
-        final int callingUid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
-        final int safeUserId = mService.mUserController.unsafeConvertIncomingUser(userId);
-        final long ident = canClearIdentity(callingPid, callingUid, safeUserId)
-                ? Binder.clearCallingIdentity() : 0;
-        final ContentProviderHolder holder;
-        try {
-            holder = getContentProviderExternalUnchecked(name, null /* token */, callingUid,
-                    "*getmimetype*", safeUserId);
-        } finally {
-            if (ident != 0) {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-        try {
-            if (isHolderVisibleToCaller(holder, callingUid, safeUserId)) {
-                final IBinder providerConnection = holder.connection;
-                final ComponentName providerName = holder.info.getComponentName();
-                // Note: creating a new Runnable instead of using a lambda here since lambdas in
-                // java provide no guarantee that there will be a new instance returned every call.
-                // Hence, it's possible that a cached copy is returned and the ANR is executed on
-                // the incorrect provider.
-                final Runnable providerNotResponding = new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.w(TAG, "Provider " + providerName + " didn't return from getType().");
-                        appNotRespondingViaProvider(providerConnection);
-                    }
-                };
-                mService.mHandler.postDelayed(providerNotResponding, 1000);
-                try {
-                    final String type = holder.provider.getType(uri);
-                    if (type != null) {
-                        backgroundLogging(callingUid, callingPid, userId, uri, holder, type);
-                    }
-                    return type;
-                } finally {
-                    mService.mHandler.removeCallbacks(providerNotResponding);
-                    // We need to clear the identity to call removeContentProviderExternalUnchecked
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        removeContentProviderExternalUnchecked(name, null /* token */, safeUserId);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                }
-            }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Content provider dead retrieving " + uri, e);
-            return null;
-        } catch (Exception e) {
-            Log.w(TAG, "Exception while determining type of " + uri, e);
-            return null;
-        }
-
-        return null;
-    }
-
-    /**
-     * Allows apps to retrieve the MIME type of a URI.
-     * If an app is in the same user as the ContentProvider, or if it is allowed to interact across
-     * users, then it does not need permission to access the ContentProvider.
-     * Either way, it needs cross-user uri grants.
-     */
-    void getProviderMimeTypeAsync(Uri uri, int userId, RemoteCallback resultCallback) {
+    void getMimeTypeFilterAsync(Uri uri, int userId, RemoteCallback resultCallback) {
         mService.enforceNotIsolatedCaller("getProviderMimeTypeAsync");
         final String name = uri.getAuthority();
         final int callingUid = Binder.getCallingUid();
@@ -1061,19 +997,34 @@ public class ContentProviderHelper {
 
         try {
             if (isHolderVisibleToCaller(holder, callingUid, safeUserId)) {
-                holder.provider.getTypeAsync(uri, new RemoteCallback(result -> {
-                    final long identity = Binder.clearCallingIdentity();
-                    try {
-                        removeContentProviderExternalUnchecked(name, null, safeUserId);
-                    } finally {
-                        Binder.restoreCallingIdentity(identity);
-                    }
-                    resultCallback.sendResult(result);
-                    final String type = result.getPairValue();
-                    if (type != null) {
-                        backgroundLogging(callingUid, callingPid, userId, uri, holder, type);
-                    }
-                }));
+                if (checkGetAnyTypePermission(callingUid, callingPid)) {
+                    final AttributionSource attributionSource =
+                            new AttributionSource.Builder(callingUid).build();
+                    holder.provider.getTypeAsync(attributionSource,
+                            uri, new RemoteCallback(result -> {
+                                final long identity = Binder.clearCallingIdentity();
+                                try {
+                                    removeContentProviderExternalUnchecked(name, null, safeUserId);
+                                } finally {
+                                    Binder.restoreCallingIdentity(identity);
+                                }
+                                resultCallback.sendResult(result);
+                            }));
+                } else {
+                    holder.provider.getTypeAnonymousAsync(uri, new RemoteCallback(result -> {
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            removeContentProviderExternalUnchecked(name, null, safeUserId);
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                        resultCallback.sendResult(result);
+                        final String type = result.getPairValue();
+                        if (type != null) {
+                            logGetTypeData(callingUid, uri, type);
+                        }
+                    }));
+                }
             } else {
                 resultCallback.sendResult(Bundle.EMPTY);
             }
@@ -1083,61 +1034,19 @@ public class ContentProviderHelper {
         }
     }
 
-    private void backgroundLogging(int callingUid, int callingPid, int userId, Uri uri,
-            ContentProviderHolder holder, String type) {
-        // Push the logging code in a different handlerThread.
-        try {
-            mService.mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    logGetTypeData(callingUid, callingPid, userId,
-                            uri, holder, type);
-                }
-            });
-        } catch (Exception e) {
-            // To ensure logging does not break the getType calls.
+    private boolean checkGetAnyTypePermission(int callingUid, int callingPid) {
+        if (mService.checkPermission(GET_ANY_PROVIDER_TYPE, callingPid, callingUid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
         }
+        return false;
     }
 
     // Utility function to log the getTypeData calls
-    private void logGetTypeData(int callingUid, int callingPid, int userId, Uri uri,
-            ContentProviderHolder holder, String type) {
-        try {
-            boolean checkUser = true;
-            final String authority = uri.getAuthority();
-            if (isAuthorityRedirectedForCloneProfile(authority)) {
-                UserManagerInternal umInternal =
-                        LocalServices.getService(UserManagerInternal.class);
-                UserInfo userInfo = umInternal.getUserInfo(userId);
-
-                if (userInfo != null && userInfo.isCloneProfile()) {
-                    userId = umInternal.getProfileParentId(userId);
-                    checkUser = false;
-                }
-            }
-            final ProviderInfo cpi = holder.info;
-            final AttributionSource attributionSource =
-                    new AttributionSource.Builder(callingUid).build();
-            final String permissionCheck =
-                    checkContentProviderPermission(cpi, callingPid, callingUid,
-                            userId, checkUser, null);
-            if (permissionCheck != null) {
-                FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
-                        GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_FRAMEWORK_PERMISSION,
-                        callingUid, authority, type);
-            } else if (cpi.forceUriPermissions
-                    && holder.provider.checkUriPermission(attributionSource,
-                            uri, callingUid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            != PermissionChecker.PERMISSION_GRANTED) {
-                FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
-                        GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_CHECK_URI_PERMISSION,
-                        callingUid, authority, type);
-            }
-        } catch (Exception e) {
-            FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
-                    GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_ERROR, callingUid,
-                    uri.getAuthority(), type);
-        }
+    private void logGetTypeData(int callingUid, Uri uri, String type) {
+        FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
+                GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_FRAMEWORK_PERMISSION,
+                callingUid, uri.getAuthority(), type);
     }
 
     private boolean canClearIdentity(int callingPid, int callingUid, int userId) {

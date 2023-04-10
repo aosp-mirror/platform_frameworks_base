@@ -45,7 +45,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSEditEvent;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
 import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
@@ -91,7 +91,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private ItemDecoration mDecoration;
     private final MarginTileDecoration mMarginDecoration;
     private final int mMinNumTiles;
-    private final QSTileHost mHost;
+    private final QSHost mHost;
     private int mEditIndex;
     private int mTileDividerIndex;
     private int mFocusIndex;
@@ -117,7 +117,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     @Inject
     public TileAdapter(
             @QSThemedContext Context context,
-            QSTileHost qsHost,
+            QSHost qsHost,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mHost = qsHost;
@@ -176,7 +176,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mMarginDecoration.setHalfMargin(halfMargin);
     }
 
-    public void saveSpecs(QSTileHost host) {
+    public void saveSpecs(QSHost host) {
         List<String> newSpecs = new ArrayList<>();
         clearAccessibilityState();
         for (int i = 1; i < mTiles.size() && mTiles.get(i) != null; i++) {

@@ -561,9 +561,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         for (StatusBarWindowCallback cb : activeCallbacks) {
             cb.onStateChanged(mCurrentState.keyguardShowing,
                     mCurrentState.keyguardOccluded,
+                    mCurrentState.keyguardGoingAway,
                     mCurrentState.bouncerShowing,
                     mCurrentState.dozing,
-                    mCurrentState.panelExpanded);
+                    mCurrentState.panelExpanded,
+                    mCurrentState.dreaming);
         }
     }
 
@@ -778,6 +780,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
+    public void setDreaming(boolean dreaming) {
+        mCurrentState.dreaming = dreaming;
+        apply(mCurrentState);
+    }
+
+    @Override
     public void setForcePluginOpen(boolean forceOpen, Object token) {
         if (forceOpen) {
             mCurrentState.forceOpenTokens.add(token);
@@ -903,6 +911,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         @Override
         public void onDozingChanged(boolean isDozing) {
             setDozing(isDozing);
+        }
+
+        @Override
+        public void onDreamingChanged(boolean isDreaming) {
+            setDreaming(isDreaming);
         }
     };
 }

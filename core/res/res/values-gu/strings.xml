@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"વાઇ-ફાઇ"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"વાઇ-ફાઇ કૉલિંગ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"વાઇ ફાઇ કૉલ"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"બંધ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"વાઇ-ફાઇ પરથી કૉલ કરો"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"મોબાઇલ નેટવર્ક પરથી કૉલ કરો"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"જ્યાં સુધી તમે કાર્યાલયની પ્રોફાઇલ ચાલુ ન કરો ત્યાં સુધી તમારી વ્યક્તિગત ઍપ બ્લૉક કરેલી રહે છે"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"વ્યક્તિગત ઍપને <xliff:g id="DATE">%1$s</xliff:g>ના રોજ <xliff:g id="TIME">%2$s</xliff:g> વાગ્યે બ્લૉક કરવામાં આવશે. તમારા IT વ્યવસ્થાપક તમારી ઑફિસની પ્રોફાઇલને <xliff:g id="NUMBER">%3$d</xliff:g> દિવસ કરતાં વધુ સમય માટે બંધ રાખવાની મંજૂરી આપતા નથી."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ચાલુ કરો"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"કૉલ અને મેસેજ બંધ છે"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"તમે ઑફિસ માટેની ઍપ થોભાવી છે. તમે ફોન કૉલ કે ટેક્સ્ટ મેસેજ મેળવશો નહીં."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ઑફિસ માટેની ઍપ ફરી ચાલુ કરો"</string>
     <string name="me" msgid="6207584824693813140">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ટેબ્લેટ વિકલ્પો"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TVના વિકલ્પો"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ડિવાઇસના ફિંગરપ્રિન્ટ સેન્સર પર કરવામાં આવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"સ્ક્રીનશૉટ લો"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ડિસ્પ્લેનો સ્ક્રીનશૉટ લઈ શકે છે."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"પ્રીવ્યૂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"સ્ટેટસ બારમાં બતાવો"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ઍપ ઉપયોગમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે હૃદયના ધબકારા જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરો"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"કૅલેન્ડર ઇવેન્ટ્સ અને વિગતો વાંચો"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત બધા કૅલેન્ડર ઇવેન્ટને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
@@ -791,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ધારકને ઍપ માટેની સુવિધાઓની માહિતી જોવાનું શરૂ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ઉચ્ચ સેમ્પ્લિંગ રેટ પર સેન્સરનો ડેટા ઍક્સેસ કરો"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ઍપને 200 Hzથી વધુના દરે સેન્સરના ડેટાના નમૂનાની મંજૂરી આપે છે"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"વપરાશકર્તા દ્વારા કરવામાં આવતી ક્રિયા વિના ઍપને અપડેટ કરો"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"હોલ્ડરને વપરાશકર્તા દ્વારા કરવામાં આવતી ક્રિયા વિના, અગાઉ ઇન્સ્ટૉલ કરેલી ઍપને અપડેટ કરવાની મંજૂરી આપે છે"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોનું નિયમન કરો"</string>
@@ -1241,10 +1252,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android પ્રારંભ થઈ રહ્યું છે…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ટૅબ્લેટ શરૂ થઈ રહ્યું છે…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ઉપકરણ શરૂ થઈ રહ્યું છે…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"સંગ્રહ ઓપ્ટિમાઇઝ કરી રહ્યું છે."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"સિસ્ટમ અપડેટ સમાપ્ત કરી રહ્યાં છીએ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> અપગ્રેડ થઈ રહી છે…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> માંથી <xliff:g id="NUMBER_0">%1$d</xliff:g> ઍપ્લિકેશન ઓપ્ટિમાઇઝ કરી રહ્યું છે."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> તૈયાર કરી રહ્યું છે."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ઍપ્લિકેશનો શરૂ કરી રહ્યાં છે."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"બૂટ સમાપ્ત કરી રહ્યાં છે."</string>
@@ -1350,12 +1359,13 @@
     <string name="no_permissions" msgid="5729199278862516390">"કોઈ પરવાનગીઓ જરૂરી નથી"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"આનાથી તમારા પૈસા ખર્ચ થઈ શકે છે"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ઓકે"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"આ ડિવાઇસને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"આ ડિવાઇસને USB મારફતે ચાર્જ કરી રહ્યાં છીએ."</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"કનેક્ટેડ ઉપકરણને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ફાઇલ ટ્રાન્સફર ચાલુ છે"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB મારફતે PTP ચાલુ કર્યું"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USBથી ઇન્ટરનેટ શેર કરવાની સુવિધા ચાલુ કરી"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB મારફતે MIDI ચાલુ કર્યું"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ડિવાઇસને વેબકૅમ તરીકે કનેક્ટ કર્યું"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ઍક્સેસરી કનેક્ટ કરેલ છે"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"વધુ વિકલ્પો માટે ટૅપ કરો."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"કનેક્ટ કરેલ ઉપકરણ ચાર્જ થઈ રહ્યું છે. વધુ વિકલ્પો માટે ટૅપ કરો."</string>
@@ -1386,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"ઇનપુટ પદ્ધતિ પસંદ કરો"</string>
     <string name="show_ime" msgid="6406112007347443383">"જ્યારે ભૌતિક કીબોર્ડ સક્રિય હોય ત્યારે તેને સ્ક્રીન પર રાખો"</string>
     <string name="hardware" msgid="1800597768237606953">"વર્ચ્યુઅલ કીબોર્ડ બતાવો"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ભૌતિક કીબોર્ડ ગોઠવો"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>ની ગોઠવણી કરો"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ભૌતિક કીબોર્ડની ગોઠવણી કરો"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ભાષા અને લેઆઉટ પસંદ કરવા માટે ટૅપ કરો"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1704,14 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"થઈ ગયું"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"શૉર્ટકટ બંધ કરો"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"શૉર્ટકટનો ઉપયોગ કરો"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"વિપરીત રંગમાં બદલવું"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"વિપરીત રંગમાં બદલવું"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"રંગ સુધારણા"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"એક-હાથે વાપરો મોડ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"એક્સ્ટ્રા ડિમ"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"સાંભળવામાં સહાય કરતા ડિવાઇસ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"વૉલ્યૂમ કી દબાવી રાખો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>નો ઉપયોગ કરવા માટે બન્ને વૉલ્યૂમ કીને ત્રણ સેકન્ડ સુધી દબાવી રાખો"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"વૉલ્યૂમ કી છોડી દો. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ને ચાલુ કરવા માટે, 3 સેકન્ડ માટે બન્ને વૉલ્યૂમ કીને ફરીથી દબાવી રાખો."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"જ્યારે તમે ઍક્સેસિબિલિટી બટન પર ટૅપ કરો, ત્યારે ઉપયોગ કરવાની સુવિધા પસંદ કરો:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ઍક્સેસિબિલિટી સંકેત સાથે ઉપયોગ કરવાની સુવિધા પસંદ કરો (બે આંગળીઓ વડે સ્ક્રીનના નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરવા માટે):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ઍક્સેસિબિલિટી સંકેત સાથે ઉપયોગ કરવાની સુવિધા પસંદ કરો (ત્રણ આંગળીઓ વડે સ્ક્રીનના નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરવા માટે):"</string>
@@ -1842,6 +1853,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"સમજાઈ ગયું"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"બહેતર વ્યૂ માટે ફેરવો"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"બહેતર વ્યૂ માટે, વિભાજિત સ્ક્રીનમાંથી બહાર નીકળો"</string>
     <string name="done_label" msgid="7283767013231718521">"થઈ ગયું"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"કલાકનું વર્તુળાકાર સ્લાઇડર"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"મિનિટનું વર્તુળાકાર સ્લાઇડર"</string>
@@ -1853,6 +1866,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ઑફિસ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g>ની ક્લોન"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"અનપિન કરતા પહેલાં પિન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"અનપિન કરતા પહેલાં અનલૉક પૅટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
@@ -1943,10 +1957,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"શું ઑફિસ માટેની ઍપ ચાલુ કરીએ?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"તમારી ઑફિસ માટેની ઍપ અને નોટિફિકેશનનો ઍક્સેસ મેળવો"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ચાલુ કરો"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ઇમર્જન્સી"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"તમારી ઑફિસ માટેની ઍપ અને કૉલનો ઍક્સેસ મેળવો"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ઍપ ઉપલબ્ધ નથી"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> હાલમાં ઉપલબ્ધ નથી."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ઉપલબ્ધ નથી"</string>
@@ -2309,4 +2321,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"સાથી ઍપને બૅકગ્રાઉન્ડમાંથી ફૉરગ્રાઉન્ડ સેવાઓ શરૂ કરવાની મંજૂરી આપે છે."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"માઇક્રોફોન ઉપલબ્ધ છે"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"માઇક્રોફોનને બ્લૉક કરવામાં આવ્યો છે"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ડ્યૂઅલ સ્ક્રીન"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ડ્યૂઅલ સ્ક્રીન ચાલુ છે"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"કન્ટેન્ટ બતાવવા માટે <xliff:g id="APP_NAME">%1$s</xliff:g> બન્ને ડિસ્પ્લેનો ઉપયોગ કરી રહી છે"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ડિવાઇસ ખૂબ જ ગરમ છે"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ડ્યૂઅલ સ્ક્રીન અનુપલબ્ધ છે કારણ કે તમારો ફોન ખૂબ જ ગરમ થઈ રહ્યો છે"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ડ્યૂઅલ સ્ક્રીન અનુપલબ્ધ છે"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"બૅટરી સેવર ચાલુ હોવાને કારણે ડ્યૂઅલ સ્ક્રીન અનુપલબ્ધ છે. તમે સેટિંગમાં જઈને આને બંધ કરી શકો છો."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"સેટિંગ પર જાઓ"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"બંધ કરો"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>ની ગોઠવણી કરવામાં આવી છે"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"કીબોર્ડનું લેઆઉટ <xliff:g id="LAYOUT_1">%s</xliff:g> પર સેટ કરવામાં આવ્યું છે. બદલવા માટે ટૅપ કરો."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"કીબોર્ડનું લેઆઉટ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> પર સેટ કરવામાં આવ્યું છે. બદલવા માટે ટૅપ કરો."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"કીબોર્ડનું લેઆઉટ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> પર સેટ કરવામાં આવ્યું છે. બદલવા માટે ટૅપ કરો."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"કીબોર્ડનું લેઆઉટ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> પર સેટ કરવામાં આવ્યું છે… બદલવા માટે ટૅપ કરો."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ભૌતિક કીબોર્ડની ગોઠવણી કરવામાં આવી છે"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"કીબોર્ડ જોવા માટે ટૅપ કરો"</string>
 </resources>

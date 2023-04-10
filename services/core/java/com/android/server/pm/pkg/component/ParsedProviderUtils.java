@@ -136,7 +136,7 @@ public class ParsedProviderUtils {
             sa.recycle();
         }
 
-        if (pkg.isCantSaveState()) {
+        if (pkg.isSaveStateDisallowed()) {
             // A heavy-weight application can not have providers in its main process
             if (Objects.equals(provider.getProcessName(), packageName)) {
                 return input.error("Heavy-weight applications can not have providers"

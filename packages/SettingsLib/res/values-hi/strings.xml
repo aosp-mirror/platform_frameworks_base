@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमाएं, मार्जिन वगैरह दिखाएं."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"लेआउट की दिशा दाएं से बाएं करें"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सभी भाषाओं के लिए स्क्रीन लेआउट की दिशा दाएं से बाएं रखें"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"पारदर्शी बैकग्राउंड वाला नेविगेशन बार"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"नेविगेशन बार के बैकग्राउंड के रंग को डिफ़ॉल्ट रूप से पारदर्शी के तौर पर सेट करें"</string>
     <string name="window_blurs" msgid="6831008984828425106">"विंडो को धुंधला करने की सुविधा चालू करें"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA को हर हाल में चालू करें"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ऐप में 4x MSAA को चालू करें"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"यह फ़ोन"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"यह टैबलेट"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यह फ़ोन"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"इस डिवाइस पर मीडिया नहीं चलाया जा सकता"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"प्रीमियम खाते में स्विच करने के लिए, अपना खाता अपग्रेड करें"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"डाउनलोड किए गए वीडियो यहां नहीं चलाए जा सकते"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"विज्ञापन खत्म होने के बाद फिर से कोशिश करें"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"मीडिया को यहां चलाने के लिए, डिवाइस को अनलॉक करें"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"डिवाइस को मीडिया चलाने की अनुमति नहीं दी गई है"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"इस मीडिया को यहां नहीं चलाया जा सकता"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्ट करने में समस्या हो रही है. डिवाइस को बंद करके चालू करें"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर वाला ऑडियो डिवाइस"</string>
     <string name="help_label" msgid="3528360748637781274">"सहायता और सुझाव"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"प्रिडिक्टिव बैक ऐनिमेशन"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"प्रिडिक्टिव बैक के लिए सिस्टम ऐनिमेशन चालू करें."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"यह सेटिंग, सिस्टम के ऐनिमेशन को प्रिडिक्टिव जेस्चर ऐनिमेशन के लिए चालू कर देती है. मेनिफ़ेस्ट फ़ाइल में enableOnBackInvokedCallback की सेटिंग को हर ऐप्लिकेशन के हिसाब से \'सही\' पर सेट होना चाहिए."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"बाईं ओर ले जाएं"</item>
+    <item msgid="5425394847942513942">"नीचे ले जाएं"</item>
+    <item msgid="7728484337962740316">"दाईं ओर ले जाएं"</item>
+    <item msgid="324200556467459329">"ऊपर की ओर ले जाएं"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

@@ -161,7 +161,7 @@ class DebugProvider : ContentProvider() {
                 .add(ColumnEnum.PAGE_ROUTE.id, page.buildRoute())
                 .add(ColumnEnum.PAGE_INTENT_URI.id, intent.toUri(URI_INTENT_SCHEME))
                 .add(ColumnEnum.PAGE_ENTRY_COUNT.id, pageWithEntry.entries.size)
-                .add(ColumnEnum.HAS_RUNTIME_PARAM.id, if (page.hasRuntimeParam()) 1 else 0)
+                .add(ColumnEnum.PAGE_BROWSABLE.id, if (page.isBrowsable()) 1 else 0)
         }
         return cursor
     }
@@ -173,12 +173,12 @@ class DebugProvider : ContentProvider() {
             val intent = entry.createIntent(SESSION_SEARCH) ?: Intent()
             cursor.newRow()
                 .add(ColumnEnum.ENTRY_ID.id, entry.id)
-                .add(ColumnEnum.ENTRY_NAME.id, entry.displayName)
+                .add(ColumnEnum.ENTRY_LABEL.id, entry.label)
                 .add(ColumnEnum.ENTRY_ROUTE.id, entry.containerPage().buildRoute())
                 .add(ColumnEnum.ENTRY_INTENT_URI.id, intent.toUri(URI_INTENT_SCHEME))
                 .add(
                     ColumnEnum.ENTRY_HIERARCHY_PATH.id,
-                    entryRepository.getEntryPathWithDisplayName(entry.id)
+                    entryRepository.getEntryPathWithLabel(entry.id)
                 )
         }
         return cursor

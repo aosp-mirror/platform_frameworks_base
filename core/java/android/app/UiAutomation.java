@@ -17,6 +17,7 @@
 package android.app;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityService.Callbacks;
 import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -45,6 +46,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -58,6 +60,7 @@ import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
+import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -109,6 +112,7 @@ public final class UiAutomation {
     private static final String LOG_TAG = UiAutomation.class.getSimpleName();
 
     private static final boolean DEBUG = false;
+    private static final boolean VERBOSE = false;
 
     private static final int CONNECTION_ID_UNDEFINED = -1;
 
@@ -319,11 +323,18 @@ public final class UiAutomation {
      * @hide
      */
     public void connectWithTimeout(int flags, long timeoutMillis) throws TimeoutException {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "connectWithTimeout: user=" + Process.myUserHandle().getIdentifier()
+                    + ", flags=" + DebugUtils.flagsToString(UiAutomation.class, "FLAG_", flags)
+                    + ", timeout=" + timeoutMillis + "ms");
+        }
         synchronized (mLock) {
             throwIfConnectedLocked();
             if (mConnectionState == ConnectionState.CONNECTING) {
+                if (DEBUG) Log.d(LOG_TAG, "already connecting");
                 return;
             }
+            if (DEBUG) Log.d(LOG_TAG, "setting state to CONNECTING");
             mConnectionState = ConnectionState.CONNECTING;
             mRemoteCallbackThread = new HandlerThread("UiAutomation");
             mRemoteCallbackThread.start();
@@ -339,6 +350,7 @@ public final class UiAutomation {
             // If UiAutomation is not allowed to use the accessibility subsystem, the
             // connection state should keep disconnected and not to start the client connection.
             if (!useAccessibility()) {
+                if (DEBUG) Log.d(LOG_TAG, "setting state to DISCONNECTED");
                 mConnectionState = ConnectionState.DISCONNECTED;
                 return;
             }
@@ -355,6 +367,7 @@ public final class UiAutomation {
                 final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                 final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
                 if (remainingTimeMillis <= 0) {
+                    if (DEBUG) Log.d(LOG_TAG, "setting state to FAILED");
                     mConnectionState = ConnectionState.FAILED;
                     throw new TimeoutException("Timeout while connecting " + this);
                 }
@@ -462,6 +475,48 @@ public final class UiAutomation {
     public void destroy() {
         disconnect();
         mIsDestroyed = true;
+    }
+
+    /**
+     * Clears the accessibility cache.
+     *
+     * @return {@code true} if the cache was cleared
+     * @see AccessibilityService#clearCache()
+     */
+    public boolean clearCache() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        final AccessibilityCache cache = AccessibilityInteractionClient.getCache(connectionId);
+        if (cache == null) {
+            return false;
+        }
+        cache.clear();
+        return true;
+    }
+
+    /**
+     * Checks if {@code node} is in the accessibility cache.
+     *
+     * @param node the node to check.
+     * @return {@code true} if {@code node} is in the cache.
+     * @hide
+     * @see AccessibilityService#isNodeInCache(AccessibilityNodeInfo)
+     */
+    @TestApi
+    public boolean isNodeInCache(@NonNull AccessibilityNodeInfo node) {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        final AccessibilityCache cache = AccessibilityInteractionClient.getCache(connectionId);
+        if (cache == null) {
+            return false;
+        }
+        return cache.isNodeInCache(node);
     }
 
     /**
@@ -1323,7 +1378,8 @@ public final class UiAutomation {
             UserHandle userHandle) {
         try {
             if (DEBUG) {
-                Log.i(LOG_TAG, "Granting runtime permission");
+                Log.i(LOG_TAG, "Granting runtime permission (" + permission + ") to package "
+                        + packageName + " on user " + userHandle);
             }
             // Calling out without a lock held.
             mUiAutomationConnection.grantRuntimePermission(packageName,
@@ -1447,10 +1503,7 @@ public final class UiAutomation {
      *
      * @param command The command to execute.
      * @return File descriptors (out, in, err) to the standard output/input/error streams.
-     *
-     * @hide
      */
-    @TestApi
     @SuppressLint("ArrayReturn") // For consistency with other APIs
     public @NonNull ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String command) {
         return executeShellCommandInternal(command, true /* includeStderr */);
@@ -1551,7 +1604,7 @@ public final class UiAutomation {
     private class IAccessibilityServiceClientImpl extends IAccessibilityServiceClientWrapper {
 
         public IAccessibilityServiceClientImpl(Looper looper, int generationId) {
-            super(null, looper, new Callbacks() {
+            super(/* context= */ null, looper, new Callbacks() {
                 private final int mGenerationId = generationId;
 
                 /**
@@ -1565,10 +1618,21 @@ public final class UiAutomation {
 
                 @Override
                 public void init(int connectionId, IBinder windowToken) {
+                    if (DEBUG) {
+                        Log.d(LOG_TAG, "init(): connectionId=" + connectionId + ", windowToken="
+                                + windowToken + ", user=" + Process.myUserHandle()
+                                + ", mGenerationId=" + mGenerationId
+                                + ", UiAutomation.mGenerationId="
+                                + UiAutomation.this.mGenerationId);
+                    }
                     synchronized (mLock) {
                         if (isGenerationChangedLocked()) {
+                            if (DEBUG) {
+                                Log.d(LOG_TAG, "init(): returning because generation id changed");
+                            }
                             return;
                         }
+                        if (DEBUG) Log.d(LOG_TAG, "setting state to CONNECTED");
                         mConnectionState = ConnectionState.CONNECTED;
                         mConnectionId = connectionId;
                         mLock.notifyAll();
@@ -1621,12 +1685,25 @@ public final class UiAutomation {
 
                 @Override
                 public void onAccessibilityEvent(AccessibilityEvent event) {
+                    if (VERBOSE) {
+                        Log.v(LOG_TAG, "onAccessibilityEvent(" + Process.myUserHandle() + "): "
+                                + event);
+                    }
+
                     final OnAccessibilityEventListener listener;
                     synchronized (mLock) {
                         if (isGenerationChangedLocked()) {
+                            if (VERBOSE) {
+                                Log.v(LOG_TAG, "onAccessibilityEvent(): returning because "
+                                        + "generation id changed (from "
+                                        + UiAutomation.this.mGenerationId + " to "
+                                        + mGenerationId + ")");
+                            }
                             return;
                         }
-                        mLastEventTimeMillis = event.getEventTime();
+                        // It is not guaranteed that the accessibility framework sends events by the
+                        // order of event timestamp.
+                        mLastEventTimeMillis = Math.max(mLastEventTimeMillis, event.getEventTime());
                         if (mWaitingForEventDelivery) {
                             mEventQueue.add(AccessibilityEvent.obtain(event));
                         }

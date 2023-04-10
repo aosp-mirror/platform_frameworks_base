@@ -27,6 +27,22 @@
             value="pm uninstall com.android.cts.install.lib.testapp.A" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="install-arg" value="-t" />
+        <option name="test-file-name" value="PackageManagerServiceServerTests.apk" />
+    </target_preparer>
+
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+        <!-- The build system produces both 32 and 64 bit variants with bitness suffix. Let
+             FilePusher find the filename with bitness and push to a remote name without bitness.
+        -->
+        <option name="append-bitness" value="true" />
+        <option name="cleanup" value="true" />
+        <option name="push" value="block_device_writer->/data/local/tmp/block_device_writer" />
+        <option name="push" value="fsverity_multilib->/data/local/tmp/fsverity_multilib" />
+    </target_preparer>
+
     <test class="com.android.tradefed.testtype.HostTest">
         <option name="jar" value="PackageManagerServiceHostTests.jar" />
     </test>

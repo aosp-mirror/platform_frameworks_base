@@ -37,6 +37,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.pipeline.RESUME_MEDIA_TIMEOUT
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
@@ -63,7 +64,8 @@ constructor(
     private val tunerService: TunerService,
     private val mediaBrowserFactory: ResumeMediaBrowserFactory,
     dumpManager: DumpManager,
-    private val systemClock: SystemClock
+    private val systemClock: SystemClock,
+    private val mediaFlags: MediaFlags,
 ) : MediaDataManager.Listener, Dumpable {
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
@@ -231,8 +233,14 @@ constructor(
                 mediaBrowser = null
             }
             // If we don't have a resume action, check if we haven't already
-            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession()) {
+            val isEligibleForResume =
+                data.isLocalSession() ||
+                    (mediaFlags.isRemoteResumeAllowed() &&
+                        data.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE)
+            if (data.resumeAction == null && !data.hasCheckedForResume && isEligibleForResume) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
+                // Set null action to prevent additional attempts to connect
+                mediaDataManager.setResumeAction(key, null)
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager
                 val serviceIntent = Intent(MediaBrowserService.SERVICE_INTERFACE)
@@ -243,9 +251,6 @@ constructor(
                     backgroundExecutor.execute {
                         tryUpdateResumptionList(key, inf!!.get(0).componentInfo.componentName)
                     }
-                } else {
-                    // No service found
-                    mediaDataManager.setResumeAction(key, null)
                 }
             }
         }
@@ -257,8 +262,6 @@ constructor(
      */
     private fun tryUpdateResumptionList(key: String, componentName: ComponentName) {
         Log.d(TAG, "Testing if we can connect to $componentName")
-        // Set null action to prevent additional attempts to connect
-        mediaDataManager.setResumeAction(key, null)
         mediaBrowser =
             mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
@@ -291,6 +294,7 @@ constructor(
     /**
      * Add the component to the saved list of media browser services, checking for duplicates and
      * removing older components that exceed the maximum limit
+     *
      * @param componentName
      */
     private fun updateResumptionList(componentName: ComponentName) {

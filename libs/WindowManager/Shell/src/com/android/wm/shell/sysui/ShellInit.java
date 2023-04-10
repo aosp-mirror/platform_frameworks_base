@@ -21,6 +21,7 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_INIT;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.Pair;
+import android.view.SurfaceControl;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -75,6 +76,7 @@ public class ShellInit {
     @VisibleForTesting
     public void init() {
         ProtoLog.v(WM_SHELL_INIT, "Initializing Shell Components: %d", mInitCallbacks.size());
+        SurfaceControl.setDebugUsageAfterRelease(true);
         // Init in order of registration
         for (int i = 0; i < mInitCallbacks.size(); i++) {
             final Pair<String, Runnable> info = mInitCallbacks.get(i);

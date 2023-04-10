@@ -19,6 +19,8 @@ package android.hardware.biometrics;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 
 /**
  * The internal class for storing the component info for a subsystem of the biometric sensor,
@@ -90,12 +92,19 @@ public class ComponentInfoInternal implements Parcelable {
         dest.writeString(softwareVersion);
     }
 
-    @Override
-    public String toString() {
-        return "ComponentId: " + componentId
-                + ", HardwareVersion: " + hardwareVersion
-                + ", FirmwareVersion: " + firmwareVersion
-                + ", SerialNumber " + serialNumber
-                + ", SoftwareVersion: " + softwareVersion;
+    /**
+     * Print the component info into the given stream.
+     *
+     * @param pw The stream to dump the info into.
+     * @hide
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println(TextUtils.formatSimple("componentId: %s", componentId));
+        pw.increaseIndent();
+        pw.println(TextUtils.formatSimple("hardwareVersion: %s", hardwareVersion));
+        pw.println(TextUtils.formatSimple("firmwareVersion: %s", firmwareVersion));
+        pw.println(TextUtils.formatSimple("serialNumber: %s", serialNumber));
+        pw.println(TextUtils.formatSimple("softwareVersion: %s", softwareVersion));
+        pw.decreaseIndent();
     }
 }

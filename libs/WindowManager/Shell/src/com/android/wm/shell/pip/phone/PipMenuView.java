@@ -282,7 +282,8 @@ public class PipMenuView extends FrameLayout {
 
     public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
         final boolean isSplitScreen = mSplitScreenControllerOptional.isPresent()
-                && mSplitScreenControllerOptional.get().isTaskInSplitScreen(taskInfo.taskId);
+                && mSplitScreenControllerOptional.get().isTaskInSplitScreenForeground(
+                taskInfo.taskId);
         mFocusedTaskAllowSplitScreen = isSplitScreen
                 || (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 && taskInfo.supportsMultiWindow

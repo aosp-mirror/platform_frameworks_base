@@ -41,7 +41,7 @@ public class DozeBrightnessStrategyTest {
     }
 
     @Test
-    public void updateBrightnessWorksAsExpectedWhenScreenDozeStateIsRequested() {
+    public void testUpdateBrightnessWhenScreenDozeStateIsRequested() {
         DisplayPowerRequest displayPowerRequest = new DisplayPowerRequest();
         float dozeScreenBrightness = 0.2f;
         displayPowerRequest.dozeScreenBrightness = dozeScreenBrightness;
@@ -52,6 +52,7 @@ public class DozeBrightnessStrategyTest {
                         .setBrightness(dozeScreenBrightness)
                         .setBrightnessReason(brightnessReason)
                         .setSdrBrightness(dozeScreenBrightness)
+                        .setDisplayBrightnessStrategyName(mDozeBrightnessModeStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mDozeBrightnessModeStrategy.updateBrightness(displayPowerRequest);

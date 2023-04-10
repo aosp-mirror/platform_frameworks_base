@@ -57,7 +57,6 @@ import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -186,6 +185,7 @@ public final class PendingIntent implements Parcelable {
                     FLAG_IMMUTABLE,
                     FLAG_MUTABLE,
                     FLAG_MUTABLE_UNAUDITED,
+                    FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT,
 
                     Intent.FILL_IN_ACTION,
                     Intent.FILL_IN_DATA,
@@ -278,6 +278,21 @@ public final class PendingIntent implements Parcelable {
     @Deprecated
     @TestApi
     public static final int FLAG_MUTABLE_UNAUDITED = FLAG_MUTABLE;
+
+    /**
+     * Flag indicating that the created PendingIntent with {@link #FLAG_MUTABLE}
+     * is allowed to have an unsafe implicit Intent within. <p>Starting with
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, for apps that
+     * target SDK {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * higher, creation of a PendingIntent with {@link #FLAG_MUTABLE} and an
+     * implicit Intent within will throw an {@link IllegalArgumentException}
+     * for security reasons. To bypass this check, use
+     * {@link #FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT} when creating a PendingIntent.
+     * However, it is strongly recommended to not to use this flag and make the
+     * Intent explicit or the PendingIntent immutable, thereby making the Intent
+     * safe.
+     */
+    public static final int FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT = 1<<24;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
@@ -413,39 +428,31 @@ public final class PendingIntent implements Parcelable {
                 throw new IllegalArgumentException(msg);
         }
 
-        // Whenever creation or retrieval of a mutable implicit PendingIntent occurs:
-        // - For apps with target SDK >= U, Log.wtfStack() that it is blocked for security reasons.
-        //   This will be changed to a throw of an exception on the server side once we finish
-        //   migrating to safer PendingIntents b/262253127.
-        // - Otherwise, warn that it will be blocked from target SDK U.
-        if (isNewMutableImplicitPendingIntent(flags, intent)) {
-            if (Compatibility.isChangeEnabled(BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT)) {
-                String msg = packageName + ": Targeting U+ (version "
-                        + Build.VERSION_CODES.UPSIDE_DOWN_CAKE + " and above) disallows"
-                        + " creating or retrieving a PendingIntent with FLAG_MUTABLE,"
-                        + " an implicit Intent within and without FLAG_NO_CREATE for"
-                        + " security reasons. To retrieve an already existing"
-                        + " PendingIntent, use FLAG_NO_CREATE, however, to create a"
-                        + " new PendingIntent with an implicit Intent use"
-                        + " FLAG_IMMUTABLE.";
-                Slog.wtfStack(TAG, msg);
-            } else {
-                String msg = "New mutable implicit PendingIntent: pkg=" + packageName
-                        + ", action=" + intent.getAction()
-                        + ", featureId=" + context.getAttributionTag()
-                        + ". This will be blocked once the app targets U+"
-                        + " for security reasons.";
-                Log.w(TAG, new RuntimeException(msg));
-            }
+        // For apps with target SDK < U, warn that creation or retrieval of a mutable
+        // implicit PendingIntent will be blocked from target SDK U onwards for security
+        // reasons. The block itself happens on the server side, but this warning has to
+        // stay here to preserve the client side stack trace for app developers.
+        if (isNewMutableDisallowedImplicitPendingIntent(flags, intent)
+                && !Compatibility.isChangeEnabled(BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT)) {
+            String msg = "New mutable implicit PendingIntent: pkg=" + packageName
+                    + ", action=" + intent.getAction()
+                    + ", featureId=" + context.getAttributionTag()
+                    + ". This will be blocked once the app targets U+"
+                    + " for security reasons.";
+            Log.w(TAG, new StackTrace(msg));
         }
     }
 
     /** @hide */
-    public static boolean isNewMutableImplicitPendingIntent(int flags, @NonNull Intent intent) {
+    public static boolean isNewMutableDisallowedImplicitPendingIntent(int flags,
+            @NonNull Intent intent) {
         boolean isFlagNoCreateSet = (flags & PendingIntent.FLAG_NO_CREATE) != 0;
         boolean isFlagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
         boolean isImplicit = (intent.getComponent() == null) && (intent.getPackage() == null);
-        return !isFlagNoCreateSet && isFlagMutableSet && isImplicit;
+        boolean isFlagAllowUnsafeImplicitIntentSet =
+                (flags & PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT) != 0;
+        return !isFlagNoCreateSet && isFlagMutableSet && isImplicit
+                && !isFlagAllowUnsafeImplicitIntentSet;
     }
 
     /**
@@ -834,7 +841,8 @@ public final class PendingIntent implements Parcelable {
     /**
      * Perform the operation associated with this PendingIntent.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -848,7 +856,8 @@ public final class PendingIntent implements Parcelable {
      *
      * @param code Result code to supply back to the PendingIntent's target.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -868,7 +877,8 @@ public final class PendingIntent implements Parcelable {
      * original Intent. If flag {@link #FLAG_IMMUTABLE} was set when this
      * pending intent was created, this argument will be ignored.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -886,9 +896,12 @@ public final class PendingIntent implements Parcelable {
      * sending behavior.  May be built from an {@link ActivityOptions} to apply to an
      * activity start.
      *
-     * @hide
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String)
+     *
+     * @throws CanceledException Throws CanceledException if the PendingIntent
+     * is no longer allowing more intents to be sent through it.
      */
-    public void send(Bundle options) throws CanceledException {
+    public void send(@Nullable Bundle options) throws CanceledException {
         send(null, 0, null, null, null, null, options);
     }
 
@@ -903,7 +916,8 @@ public final class PendingIntent implements Parcelable {
      * should happen.  If null, the callback will happen from the thread
      * pool of the process.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -937,11 +951,8 @@ public final class PendingIntent implements Parcelable {
      * should happen.  If null, the callback will happen from the thread
      * pool of the process.
      *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler, String)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -980,11 +991,8 @@ public final class PendingIntent implements Parcelable {
      * {@link Context#sendBroadcast(Intent, String) Context.sendOrderedBroadcast(Intent, String)}.
      * If null, no permission is required.
      *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -1026,12 +1034,6 @@ public final class PendingIntent implements Parcelable {
      * If null, no permission is required.
      * @param options Additional options the caller would like to provide to modify the sending
      * behavior.  May be built from an {@link ActivityOptions} to apply to an activity start.
-     *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.

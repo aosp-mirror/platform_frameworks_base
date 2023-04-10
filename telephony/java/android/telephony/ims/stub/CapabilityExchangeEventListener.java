@@ -115,6 +115,10 @@ public interface CapabilityExchangeEventListener {
     @Deprecated
     default void onPublishUpdated(int reasonCode, @NonNull String reasonPhrase,
             int reasonHeaderCause, @NonNull String reasonHeaderText) throws ImsException {
+        onPublishUpdated(new SipDetails.Builder(SipDetails.METHOD_PUBLISH)
+                .setSipResponseCode(reasonCode, reasonPhrase)
+                .setSipResponseReasonHeader(reasonHeaderCause, reasonHeaderText)
+                .build());
     }
 
     /**

@@ -16,14 +16,13 @@
 
 package com.android.systemui.reardisplay;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 import android.hardware.devicestate.DeviceStateManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
@@ -36,8 +35,6 @@ import com.android.systemui.util.time.FakeSystemClock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-
-import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -63,9 +60,11 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
 
         controller.showRearDisplayDialog(CLOSED_BASE_STATE);
         assertTrue(controller.mRearDisplayEducationDialog.isShowing());
-        View deviceOpenedWarningTextView = controller.mRearDisplayEducationDialog.findViewById(
-                R.id.rear_display_warning_text_view);
-        assertNull(deviceOpenedWarningTextView);
+        TextView deviceClosedTitleTextView = controller.mRearDisplayEducationDialog.findViewById(
+                R.id.rear_display_title_text_view);
+        assertEquals(deviceClosedTitleTextView.getText().toString(),
+                getContext().getResources().getString(
+                        R.string.rear_display_folded_bottom_sheet_title));
     }
 
     @Test
@@ -79,9 +78,11 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
         controller.showRearDisplayDialog(OPEN_BASE_STATE);
 
         assertTrue(controller.mRearDisplayEducationDialog.isShowing());
-        View deviceOpenedWarningTextView = controller.mRearDisplayEducationDialog.findViewById(
-                R.id.rear_display_warning_text_view);
-        assertNotNull(deviceOpenedWarningTextView);
+        TextView deviceClosedTitleTextView = controller.mRearDisplayEducationDialog.findViewById(
+                R.id.rear_display_title_text_view);
+        assertEquals(deviceClosedTitleTextView.getText().toString(),
+                getContext().getResources().getString(
+                        R.string.rear_display_unfolded_bottom_sheet_title));
     }
 
     /**

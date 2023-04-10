@@ -48,6 +48,8 @@ import javax.inject.Inject;
 /** Quick settings tile: Color correction **/
 public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
 
+    public static final String TILE_SPEC = "color_correction";
+
     private final Icon mIcon = ResourceIcon.get(drawable.ic_qs_color_correction);
     private final SettingObserver mSetting;
 

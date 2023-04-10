@@ -42,10 +42,15 @@ enum class KeyguardState {
      */
     AOD,
     /*
-     * The security screen prompt UI, containing PIN, Password, Pattern, and all FPS
-     * (Fingerprint Sensor) variations, for the user to verify their credentials
+     * The security screen prompt containing UI to prompt the user to use a biometric credential
+     * (ie: fingerprint). When supported, this may show before showing the primary bouncer.
      */
-    BOUNCER,
+    ALTERNATE_BOUNCER,
+    /*
+     * The security screen prompt UI, containing PIN, Password, Pattern for the user to verify their
+     * credentials.
+     */
+    PRIMARY_BOUNCER,
     /*
      * Device is actively displaying keyguard UI and is not in low-power mode. Device may be
      * unlocked if SWIPE security method is used, or if face lockscreen bypass is false.

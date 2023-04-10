@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
+import static android.view.Surface.ROTATION_0;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -26,8 +27,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -36,6 +42,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -44,14 +51,17 @@ import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntr
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 class TestDisplayContent extends DisplayContent {
 
     public static final int DEFAULT_LOGICAL_DISPLAY_DENSITY = 300;
 
     /** Please use the {@link Builder} to create, visible for use in test builder overrides only. */
-    TestDisplayContent(RootWindowContainer rootWindowContainer, Display display) {
-        super(display, rootWindowContainer);
+    TestDisplayContent(RootWindowContainer rootWindowContainer, Display display,
+            @NonNull DeviceStateController deviceStateController) {
+        super(display, rootWindowContainer, deviceStateController);
         // Normally this comes from display-properties as exposed by WM. Without that, just
         // hard-code to FULLSCREEN for tests.
         setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -78,6 +88,12 @@ class TestDisplayContent extends DisplayContent {
         final InputMonitor inputMonitor = getInputMonitor();
         spyOn(inputMonitor);
         doNothing().when(inputMonitor).resumeDispatchingLw(any());
+
+        // For devices that set the sysprop ro.bootanim.set_orientation_<display_id>
+        // See DisplayRotation#readDefaultDisplayRotation for context.
+        // Without that, meaning of height and width in context of the tests can be swapped if
+        // the default rotation is 90 or 270.
+        displayRotation.setRotation(ROTATION_0);
     }
 
     public static class Builder {
@@ -90,6 +106,8 @@ class TestDisplayContent extends DisplayContent {
         private int mStatusBarHeight = 0;
         private SettingsEntry mOverrideSettings;
         private DisplayMetrics mDisplayMetrics;
+        @NonNull
+        private DeviceStateController mDeviceStateController = mock(DeviceStateController.class);
         @Mock
         Context mMockContext;
         @Mock
@@ -185,14 +203,30 @@ class TestDisplayContent extends DisplayContent {
             MockitoAnnotations.initMocks(this);
             doReturn(mMockContext).when(mService.mContext).createConfigurationContext(any());
             doReturn(mResources).when(mMockContext).getResources();
-            doReturn(valueDp * mDisplayMetrics.density)
-                    .when(mResources)
-                    .getDimension(
-                        com.android.internal.R.dimen.default_minimal_size_resizable_task);
+            doAnswer(
+                    new Answer() {
+                        @Override
+                        public Object answer(InvocationOnMock i) {
+                            Object[] args = i.getArguments();
+                            TypedValue v = (TypedValue) args[1];
+                            v.type = TypedValue.TYPE_DIMENSION;
+                            v.data = TypedValue.createComplexDimension(valueDp,
+                                    TypedValue.COMPLEX_UNIT_DIP);
+                            return null;
+                        }
+                    }
+            ).when(mResources).getValue(
+                    eq(com.android.internal.R.dimen.default_minimal_size_resizable_task),
+                    any(TypedValue.class), eq(true));
+            return this;
+        }
+        Builder setDeviceStateController(@NonNull DeviceStateController deviceStateController) {
+            mDeviceStateController = deviceStateController;
             return this;
         }
         TestDisplayContent createInternal(Display display) {
-            return new TestDisplayContent(mService.mRootWindowContainer, display);
+            return new TestDisplayContent(mService.mRootWindowContainer, display,
+                    mDeviceStateController);
         }
         TestDisplayContent build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);

@@ -28,6 +28,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.random.Random.Default.nextFloat
 
 @Presubmit
 @RunWith(AndroidJUnit4::class)
@@ -43,14 +44,56 @@ class FontScaleConverterFactoryTest {
         assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
     }
 
-    @SmallTest
-    fun missingLookupTableReturnsNull() {
-        assertThat(FontScaleConverterFactory.forScale(3F)).isNull()
+    @LargeTest
+    @Test
+    fun missingLookupTablePastEnd_returnsLinear() {
+        val table = FontScaleConverterFactory.forScale(3F)!!
+        generateSequenceOfFractions(-10000f..10000f, step = 0.01f)
+            .map {
+                assertThat(table.convertSpToDp(it)).isWithin(CONVERSION_TOLERANCE).of(it * 3f)
+            }
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(3f)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(24f)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(30f)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(15f)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        assertThat(table.convertSpToDp(50F)).isWithin(CONVERSION_TOLERANCE).of(150f)
+        assertThat(table.convertSpToDp(100F)).isWithin(CONVERSION_TOLERANCE).of(300f)
     }
 
     @SmallTest
-    fun missingLookupTable105ReturnsNull() {
-        assertThat(FontScaleConverterFactory.forScale(1.05F)).isNull()
+    fun missingLookupTable110_returnsInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.1F)!!
+
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1.1f)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(8f * 1.1f)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(11f)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f * 1.1f)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        assertThat(table.convertSpToDp(50F)).isLessThan(50f * 1.1f)
+        assertThat(table.convertSpToDp(100F)).isLessThan(100f * 1.1f)
+    }
+
+    @Test
+    fun missingLookupTable199_returnsInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.9999F)!!
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(2f)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(16f)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(20f)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(10f)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+    }
+
+    @Test
+    fun missingLookupTable160_returnsInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.6F)!!
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1f * 1.6F)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(8f * 1.6F)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(10f * 1.6F)
+        assertThat(table.convertSpToDp(20F)).isLessThan(20f * 1.6F)
+        assertThat(table.convertSpToDp(100F)).isLessThan(100f * 1.6F)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f * 1.6F)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
     }
 
     @SmallTest
@@ -82,21 +125,23 @@ class FontScaleConverterFactoryTest {
     @LargeTest
     @Test
     fun allFeasibleScalesAndConversionsDoNotCrash() {
-        generateSequenceOfFractions(-10f..10f, step = 0.01f)
+        generateSequenceOfFractions(-10f..10f, step = 0.1f)
+            .fuzzFractions()
             .mapNotNull{ FontScaleConverterFactory.forScale(it) }
             .flatMap{ table ->
-                generateSequenceOfFractions(-2000f..2000f, step = 0.01f)
+                generateSequenceOfFractions(-2000f..2000f, step = 0.1f)
+                    .fuzzFractions()
                     .map{ Pair(table, it) }
             }
             .forEach { (table, sp) ->
                 try {
-                    assertWithMessage(
-                        "convertSpToDp(%s) on table: %s",
-                        sp.toString(),
-                        table.toString()
-                    )
-                        .that(table.convertSpToDp(sp))
-                        .isFinite()
+                    // Truth is slow because it creates a bunch of
+                    // objects. Don't use it unless we need to.
+                    if (!table.convertSpToDp(sp).isFinite()) {
+                        assertWithMessage("convertSpToDp(%s) on table: %s", sp, table)
+                            .that(table.convertSpToDp(sp))
+                            .isFinite()
+                    }
                 } catch (e: Exception) {
                     throw AssertionError("Exception during convertSpToDp($sp) on table: $table", e)
                 }
@@ -130,6 +175,30 @@ class FontScaleConverterFactoryTest {
         assertThat(fractions).doesNotContain(-.35f)
     }
 
+    @Test
+    fun testFuzzFractions() {
+        val numFuzzedFractions = 6
+        val fractions = generateSequenceOfFractions(-1000f..1000f, step = 0.1f)
+            .fuzzFractions()
+            .toList()
+        fractions.forEach {
+            assertThat(it).isAtLeast(-1000f)
+            assertThat(it).isLessThan(1001f)
+        }
+
+        val numGeneratedFractions = 1000 * 2 * 10 + 1 // Don't forget the 0 in the middle!
+        assertThat(fractions).hasSize(numGeneratedFractions * numFuzzedFractions)
+
+        assertThat(fractions).contains(100f)
+        assertThat(fractions).contains(500.1f)
+        assertThat(fractions).contains(500.2f)
+        assertThat(fractions).contains(0.2f)
+        assertThat(fractions).contains(0f)
+        assertThat(fractions).contains(-10f)
+        assertThat(fractions).contains(-10f)
+        assertThat(fractions).contains(-10.3f)
+    }
+
     companion object {
         private const val CONVERSION_TOLERANCE = 0.05f
     }
@@ -145,4 +214,10 @@ fun generateSequenceOfFractions(
     return generateSequence(start) { it + 1 }
         .takeWhile { it <= endInclusive }
         .map{ it.toFloat() / multiplier }
+}
+
+private fun Sequence<Float>.fuzzFractions(): Sequence<Float> {
+    return flatMap { i ->
+        listOf(i, i + 0.01f, i + 0.054f, i + 0.099f, i + nextFloat(), i + nextFloat())
+    }
 }

@@ -53,8 +53,9 @@ struct MemoryPolicy {
     // Whether or not to only purge scratch resources when triggering UI Hidden or background
     // collection
     bool purgeScratchOnly = true;
-    // Whether or not to trigger releasing GPU context when all contexts are stopped
-    bool releaseContextOnStoppedOnly = true;
+    // EXPERIMENTAL: Whether or not to trigger releasing GPU context when all contexts are stopped
+    // WARNING: Enabling this option can lead to instability, see b/266626090
+    bool releaseContextOnStoppedOnly = false;
 };
 
 const MemoryPolicy& loadMemoryPolicy();

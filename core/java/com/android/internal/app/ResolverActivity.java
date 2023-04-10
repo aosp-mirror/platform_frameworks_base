@@ -19,6 +19,10 @@ package com.android.internal.app;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_PERSONAL;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_USE_PERSONAL_BROWSER;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_USE_WORK_BROWSER;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_WORK;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CROSS_PROFILE_BLOCKED_TITLE;
@@ -33,6 +37,8 @@ import static android.stats.devicepolicy.nano.DevicePolicyEnums.RESOLVER_EMPTY_S
 import static android.stats.devicepolicy.nano.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
+
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
@@ -44,6 +50,7 @@ import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -737,6 +744,11 @@ public class ResolverActivity extends Activity implements
     }
 
     protected UserHandle fetchPersonalProfileUserHandle() {
+        // ActivityManager.getCurrentUser() refers to the current Foreground user. When clone/work
+        // profile is active, we always make the personal tab from the foreground user.
+        // Outside profiles, current foreground user is potentially the same as the sharesheet
+        // process's user (UserHandle.myUserId()), so we continue to create personal tab with the
+        // current foreground user.
         mPersonalProfileUserHandle = UserHandle.of(ActivityManager.getCurrentUser());
         return mPersonalProfileUserHandle;
     }
@@ -766,10 +778,11 @@ public class ResolverActivity extends Activity implements
     }
 
     private UserHandle fetchTabOwnerUserHandleForLaunch() {
-        if (isLaunchedAsCloneProfile()) {
-            return getPersonalProfileUserHandle();
-        }
-        return mLaunchedFromUserHandle;
+        // If we are in work profile's process, return WorkProfile user as owner, otherwise we
+        // always return PersonalProfile user as owner
+        return UserHandle.of(UserHandle.myUserId()).equals(getWorkProfileUserHandle())
+                ? getWorkProfileUserHandle()
+                : getPersonalProfileUserHandle();
     }
 
     private boolean hasWorkProfile() {
@@ -780,7 +793,7 @@ public class ResolverActivity extends Activity implements
         return getCloneProfileUserHandle() != null;
     }
 
-    private boolean isLaunchedAsCloneProfile() {
+    protected final boolean isLaunchedAsCloneProfile() {
         return hasCloneProfile()
                 && (UserHandle.myUserId() == getCloneProfileUserHandle().getIdentifier());
     }
@@ -1517,9 +1530,7 @@ public class ResolverActivity extends Activity implements
         safelyStartActivityAsUser(cti, user, null);
     }
 
-    // TODO: Make method public final.
-    @VisibleForTesting
-    protected void safelyStartActivityAsUser(
+    protected final void safelyStartActivityAsUser(
             TargetInfo cti, UserHandle user, @Nullable Bundle options) {
         // We're dispatching intents that might be coming from legacy apps, so
         // don't kill ourselves.
@@ -1609,9 +1620,12 @@ public class ResolverActivity extends Activity implements
         Intent startIntent = getIntent();
         boolean isAudioCaptureDevice =
                 startIntent.getBooleanExtra(EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
+        UserHandle initialIntentsUserSpace = isLaunchedAsCloneProfile()
+                && userHandle.equals(getPersonalProfileUserHandle())
+                ? getCloneProfileUserHandle() : userHandle;
         return new ResolverListAdapter(context, payloadIntents, initialIntents, rList,
                 filterLastUsed, createListController(userHandle), this,
-                isAudioCaptureDevice);
+                isAudioCaptureDevice, initialIntentsUserSpace);
     }
 
     @VisibleForTesting
@@ -1704,14 +1718,29 @@ public class ResolverActivity extends Activity implements
             }
         }.execute();
 
-        ((TextView) findViewById(R.id.open_cross_profile)).setText(
-                getResources().getString(
-                        inWorkProfile ? R.string.miniresolver_open_in_personal
-                                : R.string.miniresolver_open_in_work,
-                        otherProfileResolveInfo.getDisplayLabel()));
-        ((Button) findViewById(R.id.use_same_profile_browser)).setText(
-                inWorkProfile ? R.string.miniresolver_use_work_browser
-                        : R.string.miniresolver_use_personal_browser);
+        CharSequence targetDisplayLabel = otherProfileResolveInfo.getDisplayLabel();
+
+        DevicePolicyResourcesManager devicePolicyResourcesManager = getSystemService(
+                DevicePolicyManager.class).getResources();
+
+        if (inWorkProfile) {
+            ((TextView) findViewById(R.id.open_cross_profile)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_WORK,
+                            () -> getString(R.string.miniresolver_open_in_work, targetDisplayLabel),
+                            targetDisplayLabel));
+            ((Button) findViewById(R.id.use_same_profile_browser)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_USE_WORK_BROWSER,
+                            () -> getString(R.string.miniresolver_use_work_browser)));
+        } else {
+            ((TextView) findViewById(R.id.open_cross_profile)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_PERSONAL,
+                            () -> getString(R.string.miniresolver_open_in_personal,
+                                    targetDisplayLabel),
+                            targetDisplayLabel));
+            ((Button) findViewById(R.id.use_same_profile_browser)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_USE_PERSONAL_BROWSER,
+                            () -> getString(R.string.miniresolver_use_personal_browser)));
+        }
 
         findViewById(R.id.use_same_profile_browser).setOnClickListener(
                 v -> {
@@ -2536,19 +2565,17 @@ public class ResolverActivity extends Activity implements
     }
 
     /**
-     * This function is temporary in nature, and its usages will be replaced with just
-     * resolveInfo.userHandle, once it is available, once sharesheet is stable.
-     */
-    public static UserHandle getResolveInfoUserHandle(ResolveInfo resolveInfo,
-            UserHandle predictedHandle) {
-        return resolveInfo.userHandle;
-    }
-
-    /**
      * Returns the {@link List} of {@link UserHandle} to pass on to the
      * {@link ResolverRankerServiceResolverComparator} as per the provided {@code userHandle}.
      */
-    protected final List<UserHandle> getResolverRankerServiceUserHandleList(UserHandle userHandle) {
+    @VisibleForTesting(visibility = PROTECTED)
+    public final List<UserHandle> getResolverRankerServiceUserHandleList(UserHandle userHandle) {
+        return getResolverRankerServiceUserHandleListInternal(userHandle);
+    }
+
+    @VisibleForTesting
+    protected List<UserHandle> getResolverRankerServiceUserHandleListInternal(UserHandle
+            userHandle) {
         List<UserHandle> userList = new ArrayList<>();
         userList.add(userHandle);
         // Add clonedProfileUserHandle to the list only if we are:
@@ -2559,5 +2586,17 @@ public class ResolverActivity extends Activity implements
             userList.add(getCloneProfileUserHandle());
         }
         return userList;
+    }
+
+    /**
+     * This function is temporary in nature, and its usages will be replaced with just
+     * resolveInfo.userHandle, once it is available, once sharesheet is stable.
+     */
+    public static UserHandle getResolveInfoUserHandle(ResolveInfo resolveInfo,
+            UserHandle predictedHandle) {
+        if (resolveInfo.userHandle == null) {
+            Log.e(TAG, "ResolveInfo with null UserHandle found: " + resolveInfo);
+        }
+        return resolveInfo.userHandle;
     }
 }

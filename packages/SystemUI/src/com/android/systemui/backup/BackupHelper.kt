@@ -31,6 +31,7 @@ import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
 import com.android.systemui.keyguard.domain.backup.KeyguardQuickAffordanceBackupHelper
 import com.android.systemui.people.widget.PeopleBackupHelper
+import com.android.systemui.settings.UserFileManagerImpl
 
 /**
  * Helper for backing up elements in SystemUI
@@ -58,17 +59,8 @@ open class BackupHelper : BackupAgentHelper() {
 
     override fun onCreate(userHandle: UserHandle, operationType: Int) {
         super.onCreate()
-        // The map in mapOf is guaranteed to be order preserving
-        val controlsMap = mapOf(CONTROLS to getPPControlsFile(this))
-        NoOverwriteFileBackupHelper(controlsDataLock, this, controlsMap).also {
-            addHelper(NO_OVERWRITE_FILES_BACKUP_KEY, it)
-        }
 
-        // Conversations widgets backup only works for system user, because widgets' information is
-        // stored in system user's SharedPreferences files and we can't open those from other users.
-        if (!userHandle.isSystem) {
-            return
-        }
+        addControlsHelper(userHandle.identifier)
 
         val keys = PeopleBackupHelper.getFilesToBackup()
         addHelper(
@@ -93,6 +85,18 @@ open class BackupHelper : BackupAgentHelper() {
                 flags = Intent.FLAG_RECEIVER_REGISTERED_ONLY
             }
         sendBroadcastAsUser(intent, UserHandle.SYSTEM, PERMISSION_SELF)
+    }
+
+    private fun addControlsHelper(userId: Int) {
+        val file = UserFileManagerImpl.createFile(
+            userId = userId,
+            fileName = CONTROLS,
+        )
+        // The map in mapOf is guaranteed to be order preserving
+        val controlsMap = mapOf(file.getPath() to getPPControlsFile(this, userId))
+        NoOverwriteFileBackupHelper(controlsDataLock, this, controlsMap).also {
+            addHelper(NO_OVERWRITE_FILES_BACKUP_KEY, it)
+        }
     }
 
     /**
@@ -136,17 +140,21 @@ open class BackupHelper : BackupAgentHelper() {
     }
 }
 
-private fun getPPControlsFile(context: Context): () -> Unit {
+private fun getPPControlsFile(context: Context, userId: Int): () -> Unit {
     return {
-        val filesDir = context.filesDir
-        val file = Environment.buildPath(filesDir, BackupHelper.CONTROLS)
+        val file = UserFileManagerImpl.createFile(
+            userId = userId,
+            fileName = BackupHelper.CONTROLS,
+        )
         if (file.exists()) {
-            val dest =
-                Environment.buildPath(filesDir, AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME)
+            val dest = UserFileManagerImpl.createFile(
+                userId = userId,
+                fileName = AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME,
+            )
             file.copyTo(dest)
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
             jobScheduler?.schedule(
-                AuxiliaryPersistenceWrapper.DeletionJobService.getJobForContext(context)
+                AuxiliaryPersistenceWrapper.DeletionJobService.getJobForContext(context, userId)
             )
         }
     }

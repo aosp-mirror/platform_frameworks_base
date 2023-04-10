@@ -33,6 +33,7 @@ public class PromptInfo implements Parcelable {
     @NonNull private CharSequence mTitle;
     private boolean mUseDefaultTitle;
     @Nullable private CharSequence mSubtitle;
+    private boolean mUseDefaultSubtitle;
     @Nullable private CharSequence mDescription;
     @Nullable private CharSequence mDeviceCredentialTitle;
     @Nullable private CharSequence mDeviceCredentialSubtitle;
@@ -56,6 +57,7 @@ public class PromptInfo implements Parcelable {
         mTitle = in.readCharSequence();
         mUseDefaultTitle = in.readBoolean();
         mSubtitle = in.readCharSequence();
+        mUseDefaultSubtitle = in.readBoolean();
         mDescription = in.readCharSequence();
         mDeviceCredentialTitle = in.readCharSequence();
         mDeviceCredentialSubtitle = in.readCharSequence();
@@ -94,6 +96,7 @@ public class PromptInfo implements Parcelable {
         dest.writeCharSequence(mTitle);
         dest.writeBoolean(mUseDefaultTitle);
         dest.writeCharSequence(mSubtitle);
+        dest.writeBoolean(mUseDefaultSubtitle);
         dest.writeCharSequence(mDescription);
         dest.writeCharSequence(mDeviceCredentialTitle);
         dest.writeCharSequence(mDeviceCredentialSubtitle);
@@ -128,6 +131,8 @@ public class PromptInfo implements Parcelable {
             return true;
         } else if (mUseDefaultTitle) {
             return true;
+        } else if (mUseDefaultSubtitle) {
+            return true;
         } else if (mDeviceCredentialTitle != null) {
             return true;
         } else if (mDeviceCredentialSubtitle != null) {
@@ -152,6 +157,10 @@ public class PromptInfo implements Parcelable {
 
     public void setSubtitle(CharSequence subtitle) {
         mSubtitle = subtitle;
+    }
+
+    public void setUseDefaultSubtitle(boolean useDefaultSubtitle) {
+        mUseDefaultSubtitle = useDefaultSubtitle;
     }
 
     public void setDescription(CharSequence description) {
@@ -225,6 +234,10 @@ public class PromptInfo implements Parcelable {
 
     public CharSequence getSubtitle() {
         return mSubtitle;
+    }
+
+    public boolean isUseDefaultSubtitle() {
+        return mUseDefaultSubtitle;
     }
 
     public CharSequence getDescription() {

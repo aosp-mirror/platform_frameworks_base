@@ -26,10 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"App instalado."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Quer instalar esse app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Quer atualizar esse app?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Atualizar este app com <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAs atualizações dele normalmente são feitas com <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Ao atualizar usando uma origem diferente, as próximas atualizações poderão ser feitas com qualquer origem no seu smartphone. A funcionalidade do app pode mudar."</string>
     <string name="install_failed" msgid="5777824004474125469">"O app não foi instalado."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"A instalação do pacote foi bloqueada."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Como o pacote tem um conflito com um pacote já existente, o app não foi instalado."</string>
@@ -45,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Apps desconhecidos não podem ser instalados por este usuário"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Este usuário não tem permissão para instalar apps"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Atualizar mesmo assim"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gerenciar apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Sem espaço"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Não foi possível instalar <xliff:g id="APP_NAME">%1$s</xliff:g>. Libere um pouco de espaço e tente novamente."</string>
@@ -57,7 +55,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Desinstalar app"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar atualização"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> é parte do seguinte app:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Quer desinstalar este app?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Você quer desinstalar este app?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Quer desinstalar este app para "<b>"todos"</b>" os usuários? O aplicativo e os dados dele serão removidos para "<b>"todos"</b>" os usuários do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Quer desinstalar este app para o usuário <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Você quer desinstalar esse app do seu perfil de trabalho?"</string>
@@ -72,6 +70,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Desinstalando <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Desinstalação concluída."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> desinstalado"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"O clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> foi excluído"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Falha na desinstalação."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Falha na desinstalação de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Excluindo o clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>

@@ -25,30 +25,41 @@ import android.os.Parcelable;
 
 import com.android.internal.util.AnnotationValidations;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * A request to unregister a {@link ComponentName} that contains an actively provisioned
  * {@link Credential} represented by a {@link CredentialDescription}. *
  *
- * @hide
  */
 public final class UnregisterCredentialDescriptionRequest implements Parcelable {
 
     @NonNull
-    private final CredentialDescription mCredentialDescription;
+    private final List<CredentialDescription> mCredentialDescriptions;
 
-    public UnregisterCredentialDescriptionRequest(@NonNull CredentialDescription
-            credentialDescription) {
-        mCredentialDescription = requireNonNull(credentialDescription);
+    public UnregisterCredentialDescriptionRequest(
+            @NonNull CredentialDescription credentialDescription) {
+        mCredentialDescriptions = Arrays.asList(requireNonNull(credentialDescription));
+    }
+
+    public UnregisterCredentialDescriptionRequest(
+            @NonNull Set<CredentialDescription> credentialDescriptions) {
+        mCredentialDescriptions = new ArrayList<>(requireNonNull(credentialDescriptions));
     }
 
     private UnregisterCredentialDescriptionRequest(@NonNull Parcel in) {
-        CredentialDescription credentialDescription =
-                CredentialDescription.CREATOR.createFromParcel(in);
+        List<CredentialDescription> credentialDescriptions = new ArrayList<>();
+        in.readTypedList(credentialDescriptions, CredentialDescription.CREATOR);
 
-        mCredentialDescription = credentialDescription;
+        mCredentialDescriptions = new ArrayList<>();
         AnnotationValidations.validate(android.annotation.NonNull.class, null,
-                credentialDescription);
+                credentialDescriptions);
+        mCredentialDescriptions.addAll(credentialDescriptions);
     }
 
     public static final @NonNull Parcelable.Creator<UnregisterCredentialDescriptionRequest>
@@ -71,11 +82,11 @@ public final class UnregisterCredentialDescriptionRequest implements Parcelable 
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mCredentialDescription.writeToParcel(dest, flags);
+        dest.writeTypedList(mCredentialDescriptions, flags);
     }
 
     @NonNull
-    public CredentialDescription getCredentialDescription() {
-        return mCredentialDescription;
+    public Set<CredentialDescription> getCredentialDescriptions() {
+        return new HashSet<>(mCredentialDescriptions);
     }
 }

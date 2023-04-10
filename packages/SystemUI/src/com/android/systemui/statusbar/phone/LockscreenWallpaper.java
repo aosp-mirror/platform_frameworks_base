@@ -122,6 +122,10 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     public LoaderResult loadBitmap(int currentUserId, UserHandle selectedUser) {
         // May be called on any thread - only use thread safe operations.
 
+        if (mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
+            return LoaderResult.success(null);
+        }
+
         if (!mWallpaperManager.isWallpaperSupported()) {
             // When wallpaper is not supported, show the system wallpaper
             return LoaderResult.success(null);

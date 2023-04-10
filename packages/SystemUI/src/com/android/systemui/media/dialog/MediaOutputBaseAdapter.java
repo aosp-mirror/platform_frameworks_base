@@ -23,8 +23,7 @@ import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
 import android.app.WallpaperColors;
 import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.Drawable;
@@ -45,6 +44,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settingslib.Utils;
@@ -65,6 +65,8 @@ public abstract class MediaOutputBaseAdapter extends
     static final int CUSTOMIZED_ITEM_DYNAMIC_GROUP = 3;
 
     protected final MediaOutputController mController;
+
+    private static final int UNMUTE_DEFAULT_VOLUME = 2;
 
     Context mContext;
     View mHolderView;
@@ -142,11 +144,13 @@ public abstract class MediaOutputBaseAdapter extends
         final TextView mVolumeValueText;
         final ImageView mTitleIcon;
         final ProgressBar mProgressBar;
-        final MediaOutputSeekbar mSeekBar;
         final LinearLayout mTwoLineLayout;
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
         final ViewGroup mEndTouchArea;
+        final ImageView mEndClickIcon;
+        @VisibleForTesting
+        MediaOutputSeekbar mSeekBar;
         private String mDeviceId;
         private ValueAnimator mCornerAnimator;
         private ValueAnimator mVolumeAnimator;
@@ -166,11 +170,13 @@ public abstract class MediaOutputBaseAdapter extends
             mCheckBox = view.requireViewById(R.id.check_box);
             mEndTouchArea = view.requireViewById(R.id.end_action_area);
             if (mController.isAdvancedLayoutSupported()) {
+                mEndClickIcon = view.requireViewById(R.id.media_output_item_end_click_icon);
                 mVolumeValueText = view.requireViewById(R.id.volume_value);
                 mIconAreaLayout = view.requireViewById(R.id.icon_area);
             } else {
                 mVolumeValueText = null;
                 mIconAreaLayout = null;
+                mEndClickIcon = null;
             }
             initAnimator();
         }
@@ -188,12 +194,10 @@ public abstract class MediaOutputBaseAdapter extends
             mSubTitleText.setTextColor(mController.getColorItemContent());
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
             if (mController.isAdvancedLayoutSupported()) {
-                mIconAreaLayout.setOnClickListener(null);
                 mVolumeValueText.setTextColor(mController.getColorItemContent());
             }
-            mSeekBar.getProgressDrawable().setColorFilter(
-                    new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
-                            PorterDuff.Mode.SRC_IN));
+            mSeekBar.setProgressTintList(
+                    ColorStateList.valueOf(mController.getColorSeekbarProgress()));
         }
 
         abstract void onBind(int customizedItem);
@@ -216,32 +220,17 @@ public abstract class MediaOutputBaseAdapter extends
                                 .mutate();
                 mItemLayout.setBackground(backgroundDrawable);
                 if (showSeekBar) {
-                    final ClipDrawable clipDrawable =
-                            (ClipDrawable) ((LayerDrawable) mSeekBar.getProgressDrawable())
-                                    .findDrawableByLayerId(android.R.id.progress);
-                    final GradientDrawable progressDrawable =
-                            (GradientDrawable) clipDrawable.getDrawable();
-                    if (mController.isAdvancedLayoutSupported()) {
-                        progressDrawable.setCornerRadii(
-                                new float[]{0, 0, mController.getActiveRadius(),
-                                        mController.getActiveRadius(),
-                                        mController.getActiveRadius(),
-                                        mController.getActiveRadius(), 0, 0});
-                    } else {
-                        progressDrawable.setCornerRadius(mController.getActiveRadius());
-                    }
+                    updateSeekbarProgressBackground();
                 }
             }
-            mItemLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
-                    isActive ? mController.getColorConnectedItemBackground()
-                            : mController.getColorItemBackground(),
-                    PorterDuff.Mode.SRC_IN));
+            mItemLayout.setBackgroundTintList(
+                    ColorStateList.valueOf(isActive ? mController.getColorConnectedItemBackground()
+                            : mController.getColorItemBackground()));
             if (mController.isAdvancedLayoutSupported()) {
-                mIconAreaLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
-                        showSeekBar ? mController.getColorSeekbarProgress()
+                mIconAreaLayout.setBackgroundTintList(
+                        ColorStateList.valueOf(showSeekBar ? mController.getColorSeekbarProgress()
                                 : showProgressBar ? mController.getColorConnectedItemBackground()
-                                        : mController.getColorItemBackground(),
-                        PorterDuff.Mode.SRC_IN));
+                                        : mController.getColorItemBackground()));
             }
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
@@ -259,29 +248,54 @@ public abstract class MediaOutputBaseAdapter extends
                 params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
                         : mController.getItemMarginEndDefault();
             }
-            mTitleIcon.setColorFilter(mController.getColorItemContent());
+            mTitleIcon.setBackgroundTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
         }
 
         void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
-                boolean showProgressBar, boolean showSubtitle, boolean showStatus) {
+                boolean showProgressBar, boolean showSubtitle, boolean showStatus,
+                boolean isFakeActive) {
             setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle,
-                    showStatus);
+                    showStatus, false, isFakeActive);
         }
 
-        private void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
+        void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
                 boolean showSeekBar, boolean showProgressBar, boolean showSubtitle,
-                boolean showStatus) {
+                boolean showStatus , boolean showEndTouchArea, boolean isFakeActive) {
             mTitleText.setVisibility(View.GONE);
             mTwoLineLayout.setVisibility(View.VISIBLE);
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
-            final Drawable backgroundDrawable = mContext.getDrawable(
-                            R.drawable.media_output_item_background)
-                    .mutate();
-            backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
-                    mController.getColorItemBackground(),
-                    PorterDuff.Mode.SRC_IN));
+            final Drawable backgroundDrawable;
+            if (mController.isAdvancedLayoutSupported() && mController.isSubStatusSupported()) {
+                backgroundDrawable = mContext.getDrawable(
+                        showSeekBar || isFakeActive ? R.drawable.media_output_item_background_active
+                                : R.drawable.media_output_item_background).mutate();
+                backgroundDrawable.setTint(
+                        showSeekBar || isFakeActive ? mController.getColorConnectedItemBackground()
+                                : mController.getColorItemBackground());
+                mIconAreaLayout.setBackgroundTintList(
+                        ColorStateList.valueOf(showProgressBar || isFakeActive
+                                ? mController.getColorConnectedItemBackground()
+                                : showSeekBar ? mController.getColorSeekbarProgress()
+                                        : mController.getColorItemBackground()));
+                if (showSeekBar) {
+                    updateSeekbarProgressBackground();
+                }
+                //update end click area by isActive
+                mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
+                mEndClickIcon.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
+                ViewGroup.MarginLayoutParams params =
+                        (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
+                params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
+                        : mController.getItemMarginEndDefault();
+            } else {
+                backgroundDrawable = mContext.getDrawable(
+                                R.drawable.media_output_item_background)
+                        .mutate();
+                backgroundDrawable.setTint(mController.getColorItemBackground());
+            }
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
@@ -293,11 +307,28 @@ public abstract class MediaOutputBaseAdapter extends
                     Typeface.NORMAL));
         }
 
+        void updateSeekbarProgressBackground() {
+            final ClipDrawable clipDrawable =
+                    (ClipDrawable) ((LayerDrawable) mSeekBar.getProgressDrawable())
+                            .findDrawableByLayerId(android.R.id.progress);
+            final GradientDrawable progressDrawable =
+                    (GradientDrawable) clipDrawable.getDrawable();
+            if (mController.isAdvancedLayoutSupported()) {
+                progressDrawable.setCornerRadii(
+                        new float[]{0, 0, mController.getActiveRadius(),
+                                mController.getActiveRadius(),
+                                mController.getActiveRadius(),
+                                mController.getActiveRadius(), 0, 0});
+            } else {
+                progressDrawable.setCornerRadius(mController.getActiveRadius());
+            }
+        }
+
         void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
             if (!mController.isVolumeControlEnabled(device)) {
                 disableSeekBar();
             } else {
-                enableSeekBar();
+                enableSeekBar(device);
             }
             mSeekBar.setMaxVolume(device.getMaxVolume());
             final int currentVolume = device.getCurrentVolume();
@@ -332,13 +363,6 @@ public abstract class MediaOutputBaseAdapter extends
             }
             if (mIsInitVolumeFirstTime) {
                 mIsInitVolumeFirstTime = false;
-            }
-            if (mController.isAdvancedLayoutSupported()) {
-                updateIconAreaClickListener((v) -> {
-                    mSeekBar.resetVolume();
-                    mController.adjustVolume(device, 0);
-                    updateMutedVolumeIcon();
-                });
             }
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -390,6 +414,7 @@ public abstract class MediaOutputBaseAdapter extends
                         mTitleIcon.setVisibility(View.VISIBLE);
                         mVolumeValueText.setVisibility(View.GONE);
                     }
+                    mController.logInteractionAdjustVolume(device);
                     mIsDragging = false;
                 }
             });
@@ -412,18 +437,14 @@ public abstract class MediaOutputBaseAdapter extends
 
         void updateTitleIcon(@DrawableRes int id, int color) {
             mTitleIcon.setImageDrawable(mContext.getDrawable(id));
-            mTitleIcon.setColorFilter(color);
+            mTitleIcon.setImageTintList(ColorStateList.valueOf(color));
             if (mController.isAdvancedLayoutSupported()) {
-                mIconAreaLayout.getBackground().setColorFilter(
-                        new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
-                                PorterDuff.Mode.SRC_IN));
+                mIconAreaLayout.setBackgroundTintList(
+                        ColorStateList.valueOf(mController.getColorSeekbarProgress()));
             }
         }
 
         void updateIconAreaClickListener(View.OnClickListener listener) {
-            if (mController.isAdvancedLayoutSupported()) {
-                mIconAreaLayout.setOnClickListener(listener);
-            }
             mTitleIcon.setOnClickListener(listener);
         }
 
@@ -432,9 +453,7 @@ public abstract class MediaOutputBaseAdapter extends
             final Drawable backgroundDrawable = mContext.getDrawable(
                                     R.drawable.media_output_item_background_active)
                             .mutate();
-            backgroundDrawable.setColorFilter(
-                    new PorterDuffColorFilter(mController.getColorConnectedItemBackground(),
-                            PorterDuff.Mode.SRC_IN));
+            backgroundDrawable.setTint(mController.getColorConnectedItemBackground());
             mItemLayout.setBackground(backgroundDrawable);
         }
 
@@ -509,21 +528,37 @@ public abstract class MediaOutputBaseAdapter extends
         Drawable getSpeakerDrawable() {
             final Drawable drawable = mContext.getDrawable(R.drawable.ic_speaker_group_black_24dp)
                     .mutate();
-            drawable.setColorFilter(
-                    new PorterDuffColorFilter(Utils.getColorStateListDefaultColor(mContext,
-                            R.color.media_dialog_item_main_content),
-                            PorterDuff.Mode.SRC_IN));
+            drawable.setTint(Utils.getColorStateListDefaultColor(mContext,
+                    R.color.media_dialog_item_main_content));
             return drawable;
         }
 
         protected void disableSeekBar() {
             mSeekBar.setEnabled(false);
             mSeekBar.setOnTouchListener((v, event) -> true);
+            if (mController.isAdvancedLayoutSupported()) {
+                updateIconAreaClickListener(null);
+            }
         }
 
-        private void enableSeekBar() {
+        private void enableSeekBar(MediaDevice device) {
             mSeekBar.setEnabled(true);
             mSeekBar.setOnTouchListener((v, event) -> false);
+            updateIconAreaClickListener((v) -> {
+                if (device.getCurrentVolume() == 0) {
+                    mController.adjustVolume(device, UNMUTE_DEFAULT_VOLUME);
+                    updateUnmutedVolumeIcon();
+                    mTitleIcon.setOnTouchListener(((iconV, event) -> false));
+                } else {
+                    mSeekBar.resetVolume();
+                    mController.adjustVolume(device, 0);
+                    updateMutedVolumeIcon();
+                    mTitleIcon.setOnTouchListener(((iconV, event) -> {
+                        mSeekBar.dispatchTouchEvent(event);
+                        return false;
+                    }));
+                }
+            });
         }
 
         protected void setUpDeviceIcon(MediaDevice device) {
@@ -534,7 +569,9 @@ public abstract class MediaOutputBaseAdapter extends
                         return;
                     }
                     mTitleIcon.setImageIcon(icon);
-                    mTitleIcon.setColorFilter(mController.getColorItemContent());
+                    icon.setTint(mController.getColorItemContent());
+                    mTitleIcon.setImageTintList(
+                            ColorStateList.valueOf(mController.getColorItemContent()));
                 });
             });
         }

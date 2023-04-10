@@ -63,6 +63,8 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+import static com.android.internal.util.FrameworkStatsLog.APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+import static com.android.internal.util.FrameworkStatsLog.APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT;
 import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_REVERT_TREATMENT;
 import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_APPLY_TREATMENT;
@@ -396,6 +398,7 @@ class ActivityMetricsLogger {
         /** Returns {@code true} if the incoming activity can belong to this transition. */
         boolean canCoalesce(ActivityRecord r) {
             return mLastLaunchedActivity.mDisplayContent == r.mDisplayContent
+                    && mLastLaunchedActivity.getTask().getBounds().equals(r.getTask().getBounds())
                     && mLastLaunchedActivity.getWindowingMode() == r.getWindowingMode();
         }
 
@@ -644,7 +647,7 @@ class ActivityMetricsLogger {
     void notifyActivityLaunched(@NonNull LaunchingState launchingState, int resultCode,
             boolean newActivityCreated, @Nullable ActivityRecord launchedActivity,
             @Nullable ActivityOptions options) {
-        if (launchedActivity == null) {
+        if (launchedActivity == null || launchedActivity.getTask() == null) {
             // The launch is aborted, e.g. intent not resolved, class not found.
             abort(launchingState, "nothing launched");
             return;
@@ -1092,6 +1095,10 @@ class ActivityMetricsLogger {
             isIncremental = true;
             isLoading = isIncrementalLoading(info.packageName, info.userId);
         }
+        final boolean stopped = (info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        final int packageState = stopped
+                ? APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                : APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
         FrameworkStatsLog.write(
                 FrameworkStatsLog.APP_START_OCCURRED,
                 info.applicationInfo.uid,
@@ -1117,7 +1124,8 @@ class ActivityMetricsLogger {
                 info.launchedActivityName.hashCode(),
                 TimeUnit.NANOSECONDS.toMillis(info.timestampNs),
                 processState,
-                processOomAdj);
+                processOomAdj,
+                packageState);
 
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
@@ -1147,6 +1155,8 @@ class ActivityMetricsLogger {
         sb.setLength(0);
         sb.append("Displayed ");
         sb.append(info.launchedActivityShortComponentName);
+        sb.append(" for user ");
+        sb.append(info.userId);
         sb.append(": ");
         TimeUtils.formatDuration(info.windowsDrawnDelayMs, sb);
         Log.i(TAG, sb.toString());

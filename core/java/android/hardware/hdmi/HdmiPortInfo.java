@@ -15,14 +15,20 @@
  */
 package android.hardware.hdmi;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.IntRange;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
- * A class to encapsulate HDMI port information. Contains the capability of the ports such as
+ * Encapsulates HDMI port information. Contains the capability of the ports such as
  * HDMI-CEC, MHL, ARC(Audio Return Channel), eARC and physical address assigned to each port.
  *
  * @hide
@@ -35,6 +41,18 @@ public final class HdmiPortInfo implements Parcelable {
     /** HDMI port type: Output */
     public static final int PORT_OUTPUT = 1;
 
+    /**
+     * @hide
+     *
+     * @see HdmiPortInfo#getType()
+     */
+    @IntDef(prefix = { "PORT_" }, value = {
+            PORT_INPUT,
+            PORT_OUTPUT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PortType {}
+
     private final int mId;
     private final int mType;
     private final int mAddress;
@@ -46,43 +64,48 @@ public final class HdmiPortInfo implements Parcelable {
     /**
      * Constructor.
      *
-     * @param id identifier assigned to each port. 1 for HDMI port 1
+     * @param id identifier assigned to each port. 1 for HDMI OUT port 1
      * @param type HDMI port input/output type
      * @param address physical address of the port
      * @param cec {@code true} if HDMI-CEC is supported on the port
      * @param mhl {@code true} if MHL is supported on the port
      * @param arc {@code true} if audio return channel is supported on the port
-     */
-    public HdmiPortInfo(int id, int type, int address, boolean cec, boolean mhl, boolean arc) {
-        this(id, type, address, cec, mhl, arc, false);
-    }
-
-    /**
-     * Constructor.
      *
-     * @param id identifier assigned to each port. 1 for HDMI port 1
-     * @param type HDMI port input/output type
-     * @param address physical address of the port
-     * @param cec {@code true} if HDMI-CEC is supported on the port
-     * @param mhl {@code true} if MHL is supported on the port
-     * @param arc {@code true} if audio return channel is supported on the port
-     * @param earc {@code true} if eARC is supported on the port
+     * @deprecated use {@link Builder()} instead
      */
-    public HdmiPortInfo(int id, int type, int address,
-            boolean cec, boolean mhl, boolean arc, boolean earc) {
+    @Deprecated
+    public HdmiPortInfo(int id, @PortType int type,
+            @IntRange(from = 0) int address, boolean cec, boolean mhl, boolean arc) {
         mId = id;
         mType = type;
         mAddress = address;
         mCecSupported = cec;
         mArcSupported = arc;
-        mEarcSupported = earc;
+        mEarcSupported = false;
         mMhlSupported = mhl;
     }
 
     /**
-     * Returns the port id.
+     * Converts an instance to a builder
      *
-     * @return port id
+     * @hide
+     */
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
+    private HdmiPortInfo(Builder builder) {
+        this.mId = builder.mId;
+        this.mType = builder.mType;
+        this.mAddress = builder.mAddress;
+        this.mCecSupported = builder.mCecSupported;
+        this.mArcSupported = builder.mArcSupported;
+        this.mEarcSupported = builder.mEarcSupported;
+        this.mMhlSupported = builder.mMhlSupported;
+    }
+
+    /**
+     * Returns the port id.
      */
     public int getId() {
         return mId;
@@ -90,26 +113,22 @@ public final class HdmiPortInfo implements Parcelable {
 
     /**
      * Returns the port type.
-     *
-     * @return port type
      */
+    @PortType
     public int getType() {
         return mType;
     }
 
     /**
      * Returns the port address.
-     *
-     * @return port address
      */
+    @IntRange(from = 0)
     public int getAddress() {
         return mAddress;
     }
 
     /**
      * Returns {@code true} if the port supports HDMI-CEC signaling.
-     *
-     * @return {@code true} if the port supports HDMI-CEC signaling.
      */
     public boolean isCecSupported() {
         return mCecSupported;
@@ -117,8 +136,6 @@ public final class HdmiPortInfo implements Parcelable {
 
     /**
      * Returns {@code true} if the port supports MHL signaling.
-     *
-     * @return {@code true} if the port supports MHL signaling.
      */
     public boolean isMhlSupported() {
         return mMhlSupported;
@@ -126,8 +143,6 @@ public final class HdmiPortInfo implements Parcelable {
 
     /**
      * Returns {@code true} if the port supports audio return channel.
-     *
-     * @return {@code true} if the port supports audio return channel
      */
     public boolean isArcSupported() {
         return mArcSupported;
@@ -135,8 +150,6 @@ public final class HdmiPortInfo implements Parcelable {
 
     /**
      * Returns {@code true} if the port supports eARC.
-     *
-     * @return {@code true} if the port supports eARC.
      */
     public boolean isEarcSupported() {
         return mEarcSupported;
@@ -166,7 +179,12 @@ public final class HdmiPortInfo implements Parcelable {
                     boolean arc = (source.readInt() == 1);
                     boolean mhl = (source.readInt() == 1);
                     boolean earc = (source.readInt() == 1);
-                    return new HdmiPortInfo(id, type, address, cec, mhl, arc, earc);
+                    return new Builder(id, type, address)
+                            .setCecSupported(cec)
+                            .setArcSupported(arc)
+                            .setEarcSupported(earc)
+                            .setMhlSupported(mhl)
+                            .build();
                 }
 
                 @Override
@@ -224,5 +242,96 @@ public final class HdmiPortInfo implements Parcelable {
     public int hashCode() {
         return java.util.Objects.hash(
                 mId, mType, mAddress, mCecSupported, mArcSupported, mMhlSupported, mEarcSupported);
+    }
+
+    /**
+     * Builder for {@link HdmiPortInfo} instances.
+     */
+    public static final class Builder {
+        // Required parameters
+        private int mId;
+        private int mType;
+        private int mAddress;
+
+        // Optional parameters that are set to false by default.
+        private boolean mCecSupported;
+        private boolean mArcSupported;
+        private boolean mEarcSupported;
+        private boolean mMhlSupported;
+
+        /**
+         * Constructor
+         *
+         * @param id      identifier assigned to each port. 1 for HDMI OUT port 1
+         * @param type    HDMI port input/output type
+         * @param address physical address of the port
+         * @throws IllegalArgumentException if the parameters are invalid
+         */
+        public Builder(int id, @PortType int type, @IntRange(from = 0) int address) {
+            if (type != PORT_INPUT && type != PORT_OUTPUT) {
+                throw new IllegalArgumentException(
+                        "type should be " + PORT_INPUT + " or " + PORT_OUTPUT + ".");
+            }
+            if (address < 0) {
+                throw new IllegalArgumentException("address should be positive.");
+            }
+            mId = id;
+            mType = type;
+            mAddress = address;
+        }
+
+        private Builder(@NonNull HdmiPortInfo hdmiPortInfo) {
+            mId = hdmiPortInfo.mId;
+            mType = hdmiPortInfo.mType;
+            mAddress = hdmiPortInfo.mAddress;
+            mCecSupported = hdmiPortInfo.mCecSupported;
+            mArcSupported = hdmiPortInfo.mArcSupported;
+            mEarcSupported = hdmiPortInfo.mEarcSupported;
+            mMhlSupported = hdmiPortInfo.mMhlSupported;
+        }
+
+        /**
+         * Create a new {@link HdmiPortInfo} object.
+         */
+        @NonNull
+        public HdmiPortInfo build() {
+            return new HdmiPortInfo(this);
+        }
+
+        /**
+         * Sets the value for whether the port supports HDMI-CEC signaling.
+         */
+        @NonNull
+        public Builder setCecSupported(boolean supported) {
+            mCecSupported = supported;
+            return this;
+        }
+
+        /**
+         * Sets the value for whether the port supports audio return channel.
+         */
+        @NonNull
+        public Builder setArcSupported(boolean supported) {
+            mArcSupported = supported;
+            return this;
+        }
+
+        /**
+         * Sets the value for whether the port supports eARC.
+         */
+        @NonNull
+        public Builder setEarcSupported(boolean supported) {
+            mEarcSupported = supported;
+            return this;
+        }
+
+        /**
+         * Sets the value for whether the port supports MHL signaling.
+         */
+        @NonNull
+        public Builder setMhlSupported(boolean supported) {
+            mMhlSupported = supported;
+            return this;
+        }
     }
 }

@@ -65,8 +65,12 @@ public class JobSchedulerImpl extends JobScheduler {
     @NonNull
     @Override
     public JobScheduler forNamespace(@NonNull String namespace) {
+        namespace = sanitizeNamespace(namespace);
         if (namespace == null) {
-            throw new IllegalArgumentException("namespace cannot be null");
+            throw new NullPointerException("namespace cannot be null");
+        }
+        if (namespace.isEmpty()) {
+            throw new IllegalArgumentException("namespace cannot be empty");
         }
         return new JobSchedulerImpl(this, namespace);
     }
@@ -169,18 +173,18 @@ public class JobSchedulerImpl extends JobScheduler {
     }
 
     @Override
-    public boolean canRunLongJobs() {
+    public boolean canRunUserInitiatedJobs() {
         try {
-            return mBinder.canRunLongJobs(mContext.getOpPackageName());
+            return mBinder.canRunUserInitiatedJobs(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return false;
         }
     }
 
     @Override
-    public boolean hasRunLongJobsPermission(String packageName, int userId) {
+    public boolean hasRunUserInitiatedJobsPermission(String packageName, int userId) {
         try {
-            return mBinder.hasRunLongJobsPermission(packageName, userId);
+            return mBinder.hasRunUserInitiatedJobsPermission(packageName, userId);
         } catch (RemoteException e) {
             return false;
         }
@@ -230,9 +234,10 @@ public class JobSchedulerImpl extends JobScheduler {
             android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @Override
-    public void stopUserVisibleJobsForUser(@NonNull String packageName, int userId) {
+    public void notePendingUserRequestedAppStop(@NonNull String packageName, int userId,
+            @Nullable String debugReason) {
         try {
-            mBinder.stopUserVisibleJobsForUser(packageName, userId);
+            mBinder.notePendingUserRequestedAppStop(packageName, userId, debugReason);
         } catch (RemoteException e) {
         }
     }

@@ -22,6 +22,9 @@
         <option name="cleanup-apks" value="true" />
         <option name="test-file-name" value="HdmiCecTests.apk" />
     </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer">
+        <option name="force-root" value="true" />
+    </target_preparer>
 
     <option name="test-suite-tag" value="apct"/>
     <option name="test-tag" value="HdmiTests"/>
@@ -30,5 +33,6 @@
         <option name="package" value="android.hardware.hdmi" />
         <option name="hidden-api-checks" value="false"/>
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner"/>
+        <option name="test-filter-dir" value="/data/data/android.hardware.hdmi" />
     </test>
 </configuration>

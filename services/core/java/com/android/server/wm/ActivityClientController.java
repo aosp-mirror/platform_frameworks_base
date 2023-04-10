@@ -251,11 +251,6 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // {@link #restartActivityProcessIfVisible}.
                     restartingName = r.app.mName;
                     restartingUid = r.app.mUid;
-                    // Make EnsureActivitiesVisibleHelper#makeVisibleAndRestartIfNeeded not skip
-                    // restarting non-top activity.
-                    if (r != r.getTask().topRunningActivity()) {
-                        r.setVisibleRequested(false);
-                    }
                 }
                 r.activityStopped(icicle, persistentState, description);
             }
@@ -749,6 +744,8 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
+                    EventLogTags.writeWmSetRequestedOrientation(requestedOrientation,
+                            r.shortComponentName);
                     r.setRequestedOrientation(requestedOrientation);
                 }
             }
@@ -762,7 +759,8 @@ class ActivityClientController extends IActivityClientController.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             return r != null
-                    ? r.getRequestedOrientation() : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+                    ? r.getOverrideOrientation()
+                    : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
     }
 
@@ -778,14 +776,14 @@ class ActivityClientController extends IActivityClientController.Stub {
                 // the running transition finish.
                 final Transition transition = r != null
                         && r.mTransitionController.inPlayingTransition(r)
+                        && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_BACK) : null;
-                if (transition != null) {
-                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
-                            null /* remoteTransition */, null /* displayChange */);
-                }
                 final boolean changed = r != null && r.setOccludesParent(true);
                 if (transition != null) {
                     if (changed) {
+                        r.mTransitionController.requestStartTransition(transition,
+                                null /*startTask */, null /* remoteTransition */,
+                                null /* displayChange */);
                         r.mTransitionController.setReady(r.getDisplayContent());
                     } else {
                         transition.abort();
@@ -817,14 +815,14 @@ class ActivityClientController extends IActivityClientController.Stub {
                 // visibility while playing transition, there won't able to commit visibility until
                 // the running transition finish.
                 final Transition transition = r.mTransitionController.inPlayingTransition(r)
+                        && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
-                if (transition != null) {
-                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
-                            null /* remoteTransition */, null /* displayChange */);
-                }
                 final boolean changed = r.setOccludesParent(false);
                 if (transition != null) {
                     if (changed) {
+                        r.mTransitionController.requestStartTransition(transition,
+                                null /*startTask */, null /* remoteTransition */,
+                                null /* displayChange */);
                         r.mTransitionController.setReady(r.getDisplayContent());
                     } else {
                         transition.abort();
@@ -1360,6 +1358,20 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    public void setAllowCrossUidActivitySwitchFromBelow(IBinder token, boolean allowed) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r != null) {
+                    r.setAllowCrossUidActivitySwitchFromBelow(allowed);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     @Override
     public void reportActivityFullyDrawn(IBinder token, boolean restoredFromBundle) {
         final long origId = Binder.clearCallingIdentity();
@@ -1374,6 +1386,31 @@ class ActivityClientController extends IActivityClientController.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public void overrideActivityTransition(IBinder token, boolean open, int enterAnim, int exitAnim,
+            int backgroundColor) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            if (r != null) {
+                r.overrideCustomTransition(open, enterAnim, exitAnim, backgroundColor);
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
+    public void clearOverrideActivityTransition(IBinder token, boolean open) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            if (r != null) {
+                r.clearCustomTransition(open);
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     @Override
@@ -1668,6 +1705,22 @@ class ActivityClientController extends IActivityClientController.Stub {
             if (r != null) {
                 r.getTask().mAlignActivityLocaleWithTask = true;
             }
+        }
+    }
+
+    /**
+     * Returns {@code true} if the activity was explicitly requested to be launched in its
+     * current TaskFragment.
+     *
+     * @see ActivityRecord#mRequestedLaunchingTaskFragmentToken
+     */
+    public boolean isRequestedToLaunchInTaskFragment(IBinder activityToken,
+            IBinder taskFragmentToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
+            if (r == null) return false;
+
+            return r.mRequestedLaunchingTaskFragmentToken == taskFragmentToken;
         }
     }
 }

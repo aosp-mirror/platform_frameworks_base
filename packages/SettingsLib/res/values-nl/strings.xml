@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Toon clipgrenzen, marges en meer"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"V.r.n.l.-indelingsrichting afdwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Stel de schermindelingsrichting geforceerd in op v.r.n.l. voor alle talen"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Doorzichtige navigatiebalk"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Maak de achtergrondkleur van de navigatiebalk standaard doorzichtig"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Vervagen op vensterniveau toestaan"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA forceren"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Zet 4x MSAA aan in OpenGL ES 2.0-apps"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Deze telefoon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Deze tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Deze telefoon"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan niet afspelen op dit apparaat"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Upgrade het account om te schakelen"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan hier geen downloads afspelen"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Probeer het na de advertentie nog een keer"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activeer het apparaat om hier af te spelen"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Apparaat niet goedgekeurd voor afspelen"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Kan deze media hier niet afspelen"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Probleem bij verbinding maken. Zet het apparaat uit en weer aan."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedraad audioapparaat"</string>
     <string name="help_label" msgid="3528360748637781274">"Hulp en feedback"</string>
@@ -563,7 +572,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkt profiel"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Nieuwe gebruiker toevoegen?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers te maken. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon diens eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon hun eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_grant_admin_title" msgid="5565796912475193314">"Deze gebruiker beheerdersrechten geven?"</string>
     <string name="user_grant_admin_message" msgid="7925257971286380976">"Als beheerder kan deze persoon andere gebruikers beheren, apparaatinstellingen aanpassen en het apparaat terugzetten op de fabrieksinstellingen."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Gebruiker nu instellen?"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Voorspellende animaties voor gebaren voor terug"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Systeemanimaties aanzetten voor voorspellende animaties voor gebaren voor terug."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Met deze instelling zet je systeemanimaties aan voor voorspellende gebaaranimaties. Je moet enableOnBackInvokedCallback per app instellen op True in het manifestbestand."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Naar links verplaatsen"</item>
+    <item msgid="5425394847942513942">"Omlaag verplaatsen"</item>
+    <item msgid="7728484337962740316">"Naar rechts verplaatsen"</item>
+    <item msgid="324200556467459329">"Omhoog verplaatsen"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

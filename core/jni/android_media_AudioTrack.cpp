@@ -19,18 +19,18 @@
 
 #include "android_media_AudioTrack.h"
 
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
-#include "core_jni_helpers.h"
-
-#include <utils/Log.h>
+#include <android-base/macros.h>
+#include <android_os_Parcel.h>
+#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
 #include <media/AudioParameter.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <utils/Log.h>
 
-#include <android-base/macros.h>
-#include <binder/MemoryHeapBase.h>
-#include <binder/MemoryBase.h>
+#include <cinttypes>
 
 #include "android_media_AudioAttributes.h"
 #include "android_media_AudioErrors.h"
@@ -41,8 +41,7 @@
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
 #include "android_media_VolumeShaper.h"
-
-#include <cinttypes>
+#include "core_jni_helpers.h"
 
 // ----------------------------------------------------------------------------
 
@@ -245,9 +244,10 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                                            jobject jaa, jintArray jSampleRate,
                                            jint channelPositionMask, jint channelIndexMask,
                                            jint audioFormat, jint buffSizeInBytes, jint memoryMode,
-                                           jintArray jSession, jlong nativeAudioTrack,
-                                           jboolean offload, jint encapsulationMode,
-                                           jobject tunerConfiguration, jstring opPackageName) {
+                                           jintArray jSession, jobject jAttributionSource,
+                                           jlong nativeAudioTrack, jboolean offload,
+                                           jint encapsulationMode, jobject tunerConfiguration,
+                                           jstring opPackageName) {
     ALOGV("sampleRates=%p, channel mask=%x, index mask=%x, audioFormat(Java)=%d, buffSize=%d,"
           " nativeAudioTrack=0x%" PRIX64 ", offload=%d encapsulationMode=%d tuner=%p",
           jSampleRate, channelPositionMask, channelIndexMask, audioFormat, buffSizeInBytes,
@@ -323,10 +323,9 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
 
         // create the native AudioTrack object
         ScopedUtfChars opPackageNameStr(env, opPackageName);
-        // TODO b/182469354: make consistent with AudioRecord
-        AttributionSourceState attributionSource;
-        attributionSource.packageName = std::string(opPackageNameStr.c_str());
-        attributionSource.token = sp<BBinder>::make();
+
+        android::content::AttributionSourceState attributionSource;
+        attributionSource.readFromParcel(parcelForJavaObject(env, jAttributionSource));
         lpTrack = sp<AudioTrack>::make(attributionSource);
 
         // read the AudioAttributes values
@@ -382,7 +381,7 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                                   offload ? AudioTrack::TRANSFER_SYNC_NOTIF_CALLBACK
                                           : AudioTrack::TRANSFER_SYNC,
                                   (offload || encapsulationMode) ? &offloadInfo : NULL,
-                                  AttributionSourceState(), // default uid, pid values
+                                  attributionSource, // Passed from Java
                                   paa.get());
             break;
 
@@ -401,14 +400,14 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                                   format, // word length, PCM
                                   nativeChannelMask, frameCount, AUDIO_OUTPUT_FLAG_NONE,
                                   lpJniStorage,
-                                  0, // notificationFrames == 0 since not using EVENT_MORE_DATA
-                                     // to feed the AudioTrack
-                                  iMem,                   // shared mem
-                                  true,                   // thread can call Java
-                                  sessionId,              // audio session ID
+                                  0,    // notificationFrames == 0 since not using EVENT_MORE_DATA
+                                        // to feed the AudioTrack
+                                  iMem, // shared mem
+                                  true, // thread can call Java
+                                  sessionId, // audio session ID
                                   AudioTrack::TRANSFER_SHARED,
-                                  nullptr ,               // default offloadInfo
-                                  AttributionSourceState(), // default uid, pid values
+                                  nullptr,           // default offloadInfo
+                                  attributionSource, // Passed from Java
                                   paa.get());
             break;
         }
@@ -1456,7 +1455,8 @@ static const JNINativeMethod gMethods[] = {
         {"native_pause", "()V", (void *)android_media_AudioTrack_pause},
         {"native_flush", "()V", (void *)android_media_AudioTrack_flush},
         {"native_setup",
-         "(Ljava/lang/Object;Ljava/lang/Object;[IIIIII[IJZILjava/lang/Object;Ljava/lang/String;)I",
+         "(Ljava/lang/Object;Ljava/lang/Object;[IIIIII[ILandroid/os/Parcel;"
+         "JZILjava/lang/Object;Ljava/lang/String;)I",
          (void *)android_media_AudioTrack_setup},
         {"native_finalize", "()V", (void *)android_media_AudioTrack_finalize},
         {"native_release", "()V", (void *)android_media_AudioTrack_release},

@@ -18,9 +18,11 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +36,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 import com.android.server.PermissionThread;
 
 /**
@@ -50,6 +53,7 @@ public class OneTimePermissionUserManager {
 
     private final @NonNull Context mContext;
     private final @NonNull IActivityManager mIActivityManager;
+    private final @NonNull ActivityManagerInternal mActivityManagerInternal;
     private final @NonNull AlarmManager mAlarmManager;
     private final @NonNull PermissionControllerManager mPermissionControllerManager;
 
@@ -80,6 +84,7 @@ public class OneTimePermissionUserManager {
     OneTimePermissionUserManager(@NonNull Context context) {
         mContext = context;
         mIActivityManager = ActivityManager.getService();
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mPermissionControllerManager = new PermissionControllerManager(
                 mContext, PermissionThread.getHandler());
@@ -164,7 +169,7 @@ public class OneTimePermissionUserManager {
 
         private final Object mInnerLock = new Object();
         private final Object mToken = new Object();
-        private final IUidObserver.Stub mObserver = new IUidObserver.Stub() {
+        private final IUidObserver mObserver = new UidObserver() {
             @Override
             public void onUidGone(int uid, boolean disabled) {
                 if (uid == mUid) {
@@ -183,15 +188,6 @@ public class OneTimePermissionUserManager {
                         PackageInactivityListener.this.updateUidState(STATE_ACTIVE);
                     }
                 }
-            }
-
-            public void onUidActive(int uid) {
-            }
-            public void onUidIdle(int uid, boolean disabled) {
-            }
-            public void onUidProcAdjChanged(int uid) {
-            }
-            public void onUidCachedChanged(int uid, boolean cached) {
             }
         };
 
@@ -243,12 +239,7 @@ public class OneTimePermissionUserManager {
         }
 
         private int getCurrentState() {
-            try {
-                return getStateFromProcState(mIActivityManager.getUidProcessState(mUid, null));
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Couldn't check uid proc state", e);
-            }
-            return STATE_GONE;
+            return getStateFromProcState(mActivityManagerInternal.getUidProcessState(mUid));
         }
 
         private int getStateFromProcState(int procState) {

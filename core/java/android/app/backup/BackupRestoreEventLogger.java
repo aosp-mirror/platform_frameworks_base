@@ -19,11 +19,11 @@ package android.app.backup;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
-import android.app.backup.BackupAnnotations.OperationType;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -47,7 +47,7 @@ import java.util.Map;
  * @hide
  */
 @SystemApi
-public class BackupRestoreEventLogger {
+public final class BackupRestoreEventLogger {
     private static final String TAG = "BackupRestoreEventLogger";
 
     /**
@@ -61,6 +61,8 @@ public class BackupRestoreEventLogger {
     /**
      * Denotes that the annotated element identifies a data type as required by the logging methods
      * of {@code BackupRestoreEventLogger}
+     *
+     * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     public @interface BackupRestoreDataType {}
@@ -68,6 +70,8 @@ public class BackupRestoreEventLogger {
     /**
      * Denotes that the annotated element identifies an error type as required by the logging
      * methods of {@code BackupRestoreEventLogger}
+     *
+     * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     public @interface BackupRestoreError {}
@@ -144,7 +148,7 @@ public class BackupRestoreEventLogger {
      * @param dataType the type of data being backed up.
      * @param metaData the metadata associated with the data type.
      */
-    public void logBackupMetaData(@NonNull @BackupRestoreDataType String dataType,
+    public void logBackupMetadata(@NonNull @BackupRestoreDataType String dataType,
             @NonNull String metaData) {
         logMetaData(OperationType.BACKUP, dataType, metaData);
     }
@@ -227,6 +231,16 @@ public class BackupRestoreEventLogger {
     @OperationType
     public int getOperationType() {
         return mOperationType;
+    }
+
+    /**
+     * Clears data logged. This method should only be used by B&R code in Android Framework.
+     *
+     * @hide
+     */
+    public void clearData() {
+        mResults.clear();
+
     }
 
     private void logSuccess(@OperationType int operationType,

@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"การโทรผ่าน Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"การโทรผ่าน Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ปิด"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"โทรผ่าน Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"โทรผ่านเครือข่ายมือถือ"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"แอปส่วนตัวจะถูกบล็อกไว้จนกว่าคุณจะเปิดโปรไฟล์งาน"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"แอปส่วนตัวจะถูกบล็อกในวันที่ <xliff:g id="DATE">%1$s</xliff:g> เวลา <xliff:g id="TIME">%2$s</xliff:g> ผู้ดูแลระบบไอทีไม่อนุญาตให้หยุดใช้โปรไฟล์งานเกิน <xliff:g id="NUMBER">%3$d</xliff:g> วัน"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"เปิด"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"การโทรและข้อความปิดอยู่"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"คุณหยุดแอปงานไว้ชั่วคราว และจะไม่ได้รับสายโทรเข้ารวมถึง SMS"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"เลิกหยุดแอปงาน"</string>
     <string name="me" msgid="6207584824693813140">"ฉัน"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ตัวเลือกของแท็บเล็ต"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ตัวเลือกของ Android TV"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"สามารถจับท่าทางสัมผัสที่เกิดขึ้นบนเซ็นเซอร์ลายนิ้วมือของอุปกรณ์"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ถ่ายภาพหน้าจอ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ถ่ายภาพหน้าจอได้"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"ตัวอย่าง <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ปิดการใช้งานหรือแก้ไขแถบสถานะ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"อนุญาตให้แอปพลิเคชันปิดใช้งานแถบสถานะหรือเพิ่มและนำไอคอนระบบออก"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"เป็นแถบสถานะ"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะใช้งานแอป"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"เข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ ขณะแอปทำงานในเบื้องหลัง"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะที่แอปทำงานในเบื้องหลัง"</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"เข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะใช้งานแอป"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"อนุญาตให้แอปเข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะใช้งานแอป"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"เข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะที่แอปทำงานในเบื้องหลัง"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"อนุญาตให้แอปเข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะที่แอปทำงานในเบื้องหลัง"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในแท็บเล็ต รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"แอปนี้อ่านกิจกรรมทั้งหมดในปฏิทินที่จัดเก็บไว้ในอุปกรณ์ Android TV ได้ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ด้วย"</string>
@@ -791,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"อนุญาตให้เจ้าของเริ่มดูข้อมูลฟีเจอร์สำหรับแอป"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"เข้าถึงข้อมูลเซ็นเซอร์ที่อัตราการสุ่มตัวอย่างสูง"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"อนุญาตให้แอปสุ่มตัวอย่างข้อมูลเซ็นเซอร์ที่อัตราสูงกว่า 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1241,10 +1254,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android กำลังเริ่มต้น…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"แท็บเล็ตกำลังเริ่มต้น…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"อุปกรณ์กำลังเริ่มต้น…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"กำลังเพิ่มประสิทธิภาพพื้นที่จัดเก็บข้อมูล"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"กำลังอัปเดตระบบ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"กำลังอัปเกรด <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"กำลังเพิ่มประสิทธิภาพแอปพลิเคชัน <xliff:g id="NUMBER_0">%1$d</xliff:g> จาก <xliff:g id="NUMBER_1">%2$d</xliff:g> รายการ"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"กำลังเตรียม <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"กำลังเริ่มต้นแอปพลิเคชัน"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"เสร็จสิ้นการบูต"</string>
@@ -1356,6 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"เปิดโหมด PTP ผ่าน USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"เปิดการเชื่อมต่ออินเทอร์เน็ตผ่าน USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"เปิดโหมด MIDI ผ่าน USB"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"เชื่อมต่ออุปกรณ์เป็นเว็บแคมแล้ว"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"เชื่อมต่ออุปกรณ์เสริม USB แล้ว"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"กำลังชาร์จอุปกรณ์ที่เชื่อมต่อ แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
@@ -1386,7 +1398,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"เลือกวิธีการป้อนข้อมูล"</string>
     <string name="show_ime" msgid="6406112007347443383">"เปิดทิ้งไว้บนหน้าจอในระหว่างใช้งานแป้นพิมพ์จริง"</string>
     <string name="hardware" msgid="1800597768237606953">"แสดงแป้นพิมพ์เสมือน"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"กำหนดค่าแป้นพิมพ์จริง"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"กำหนดค่า <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"กำหนดค่าแป้นพิมพ์จริง"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
@@ -1704,14 +1717,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"เสร็จ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ปิดทางลัด"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ใช้ทางลัด"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"การกลับสี"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"การกลับสี"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"การแก้สี"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"โหมดมือเดียว"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"หรี่แสงเพิ่มเติม"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"เครื่องช่วยฟัง"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ปล่อยปุ่มปรับระดับเสียง หากต้องการเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ให้กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้อีกครั้งเป็นเวลา 3 วินาที"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่มการช่วยเหลือพิเศษดังต่อไปนี้"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"เลือกฟีเจอร์ที่จะใช้กับท่าทางสัมผัสการช่วยเหลือพิเศษ (ใช้ 2 นิ้วเลื่อนขึ้นจากด้านล่างของหน้าจอ) ดังต่อไปนี้"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"เลือกฟีเจอร์ที่จะใช้กับท่าทางสัมผัสการช่วยเหลือพิเศษ (ใช้ 3 นิ้วเลื่อนขึ้นจากด้านล่างของหน้าจอ) ดังต่อไปนี้"</string>
@@ -1842,6 +1855,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"กำลังดูแบบเต็มหน้าจอ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"หากต้องการออก ให้เลื่อนลงจากด้านบน"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"รับทราบ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"หมุนเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ออกจากโหมดแยกหน้าจอเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
     <string name="done_label" msgid="7283767013231718521">"เสร็จสิ้น"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ตัวเลื่อนหมุนระบุชั่วโมง"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ตัวเลื่อนหมุนระบุนาที"</string>
@@ -1853,6 +1868,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 3"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"โคลน <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ขอรูปแบบการปลดล็อกก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกปักหมุด"</string>
@@ -1943,10 +1959,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"เปิดแอปงานใช่ไหม"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"รับสิทธิ์เข้าถึงแอปงานและการแจ้งเตือนต่างๆ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"เปิด"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ฉุกเฉิน"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"รับสิทธิ์เข้าถึงแอปงานและการโทร"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"แอปไม่พร้อมใช้งาน"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่พร้อมใช้งานในขณะนี้"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่พร้อมใช้งาน"</string>
@@ -2309,4 +2323,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"อนุญาตจากเบื้องหลังให้แอปที่ใช้ร่วมกันเริ่มการทำงานของบริการที่ทำงานอยู่เบื้องหน้า"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ไมโครโฟนพร้อมใช้งาน"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ไมโครโฟนถูกบล็อก"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"หน้าจอคู่"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"หน้าจอคู่เปิดอยู่"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังใช้จอแสดงผลทั้งสองจอเพื่อแสดงเนื้อหา"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"อุปกรณ์ร้อนเกินไป"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"หน้าจอคู่ไม่พร้อมให้ใช้งานเนื่องจากโทรศัพท์ของคุณร้อนเกินไป"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ใช้งานไม่ได้"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ใช้งานไม่ได้เนื่องจากเปิดโหมดประหยัดแบตเตอรี่อยู่ คุณปิดโหมดนี้ได้ในการตั้งค่า"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ไปที่การตั้งค่า"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ปิด"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"กำหนดค่า <xliff:g id="DEVICE_NAME">%s</xliff:g> แล้ว"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%s</xliff:g> แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"กำหนดค่าแป้นพิมพ์จริงแล้ว"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"แตะเพื่อดูแป้นพิมพ์"</string>
 </resources>

@@ -48,10 +48,10 @@ import android.companion.ICompanionDeviceManager;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionManager;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -65,6 +65,7 @@ import android.util.Pair;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.server.LocalServices;
@@ -94,8 +95,6 @@ import java.util.List;
 public class RoleObserverTest extends UiServiceTestCase {
     private TestableNotificationManagerService mService;
     private NotificationManagerService.RoleObserver mRoleObserver;
-
-    private TestableContext mContext = spy(getContext());
 
     @Mock
     private PreferencesHelper mPreferencesHelper;
@@ -169,7 +168,8 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(ActivityManagerInternal.class),
                     mock(MultiRateLimiter.class), mock(PermissionHelper.class),
                     mock(UsageStatsManagerInternal.class), mock (TelecomManager.class),
-                    mock(NotificationChannelLogger.class));
+                    mock(NotificationChannelLogger.class), new TestableFlagResolver(),
+                    mock(PermissionManager.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

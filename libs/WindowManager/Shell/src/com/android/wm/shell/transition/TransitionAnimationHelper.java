@@ -43,7 +43,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
-import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
@@ -55,24 +54,10 @@ import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.util.TransitionUtil;
 
 /** The helper class that provides methods for adding styles to transition animations. */
 public class TransitionAnimationHelper {
-
-    /**
-     * Restrict ability of activities overriding transition animation in a way such that
-     * an activity can do it only when the transition happens within a same task.
-     *
-     * @see android.app.Activity#overridePendingTransition(int, int)
-     */
-    private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
-            "persist.wm.disable_custom_task_animation";
-
-    /**
-     * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
-     */
-    static final boolean sDisableCustomTaskAnimationProperty =
-            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     /** Loads the animation that is defined through attribute id for the given transition. */
     @Nullable
@@ -82,11 +67,10 @@ public class TransitionAnimationHelper {
         final int type = info.getType();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
-        final boolean enter = Transitions.isOpeningType(changeMode);
+        final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
-        final boolean canCustomContainer = !isTask || !sDisableCustomTaskAnimationProperty;
         final boolean isDream =
                 isTask && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_DREAM;
         int animAttr = 0;
@@ -158,10 +142,17 @@ public class TransitionAnimationHelper {
 
         Animation a = null;
         if (animAttr != 0) {
-            if (overrideType == ANIM_FROM_STYLE && canCustomContainer) {
-                a = transitionAnimation
-                        .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
-                                animAttr, translucent);
+            if (overrideType == ANIM_FROM_STYLE && !isTask) {
+                final TransitionInfo.AnimationOptions.CustomActivityTransition customTransition =
+                        getCustomActivityTransition(animAttr, options);
+                if (customTransition != null) {
+                    a = loadCustomActivityTransition(
+                            customTransition, options, enter, transitionAnimation);
+                } else {
+                    a = transitionAnimation
+                            .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
+                                    animAttr, translucent);
+                }
             } else {
                 a = transitionAnimation.loadDefaultAnimationAttr(animAttr, translucent);
             }
@@ -171,6 +162,37 @@ public class TransitionAnimationHelper {
                 "loadAnimation: anim=%s animAttr=0x%x type=%s isEntrance=%b", a, animAttr,
                 transitTypeToString(type),
                 enter);
+        return a;
+    }
+
+    static TransitionInfo.AnimationOptions.CustomActivityTransition getCustomActivityTransition(
+            int animAttr, TransitionInfo.AnimationOptions options) {
+        boolean isOpen = false;
+        switch (animAttr) {
+            case R.styleable.WindowAnimation_activityOpenEnterAnimation:
+            case R.styleable.WindowAnimation_activityOpenExitAnimation:
+                isOpen = true;
+                break;
+            case R.styleable.WindowAnimation_activityCloseEnterAnimation:
+            case R.styleable.WindowAnimation_activityCloseExitAnimation:
+                break;
+            default:
+                return null;
+        }
+
+        return options.getCustomActivityTransition(isOpen);
+    }
+
+    static Animation loadCustomActivityTransition(
+            @NonNull TransitionInfo.AnimationOptions.CustomActivityTransition transitionAnim,
+            TransitionInfo.AnimationOptions options, boolean enter,
+            TransitionAnimation transitionAnimation) {
+        final Animation a = transitionAnimation.loadAppTransitionAnimation(options.getPackageName(),
+                enter ? transitionAnim.getCustomEnterResId()
+                        : transitionAnim.getCustomExitResId());
+        if (a != null && transitionAnim.getCustomBackgroundColor() != 0) {
+            a.setBackdropColor(transitionAnim.getCustomBackgroundColor());
+        }
         return a;
     }
 

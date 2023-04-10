@@ -156,11 +156,18 @@ public abstract class JobService extends Service {
      * a future idle maintenance window.
      * </p>
      *
+     * <p class="note">
+     * Any {@link JobInfo.Builder#setUserInitiated(boolean) user-initiated job}
+     * cannot be rescheduled when the user has asked to stop the app
+     * via a system provided affordance (such as the Task Manager).
+     * In such situations, the value of {@code wantsReschedule} is always treated as {@code false}.
+     *
      * @param params The parameters identifying this job, as supplied to
      *               the job in the {@link #onStartJob(JobParameters)} callback.
      * @param wantsReschedule {@code true} if this job should be rescheduled according
      *     to the back-off criteria specified when it was first scheduled; {@code false}
-     *     otherwise.
+     *     otherwise. When {@code false} is returned for a periodic job,
+     *     the job will be rescheduled according to its periodic policy.
      */
     public final void jobFinished(JobParameters params, boolean wantsReschedule) {
         mEngine.jobFinished(params, wantsReschedule);
@@ -211,7 +218,7 @@ public abstract class JobService extends Service {
      * {@link android.app.job.JobInfo.Builder#setRequiredNetworkType(int)}, yet while your
      * job was executing the user toggled WiFi. Another example is if you had specified
      * {@link android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)}, and the phone left
-     * its idle maintenance window. There are many other reasons a job can be stopped early besides
+     * its idle state. There are many other reasons a job can be stopped early besides
      * constraints no longer being satisfied. {@link JobParameters#getStopReason()} will return the
      * reason this method was called. You are solely responsible for the behavior of your
      * application upon receipt of this message; your app will likely start to misbehave if you
@@ -219,6 +226,12 @@ public abstract class JobService extends Service {
      * <p>
      * Once this method returns (or times out), the system releases the wakelock that it is holding
      * on behalf of the job.</p>
+     *
+     * <p class="note">
+     * Any {@link JobInfo.Builder#setUserInitiated(boolean) user-initiated job}
+     * cannot be rescheduled when stopped by the user via a system provided affordance (such as
+     * the Task Manager). In such situations, the returned value from this method call is always
+     * treated as {@code false}.
      *
      * <p class="caution"><strong>Note:</strong> When a job is stopped and rescheduled via this
      * method call, the deadline constraint is excluded from the rescheduled job's constraint set.
@@ -229,7 +242,8 @@ public abstract class JobService extends Service {
      *               included.
      * @return {@code true} to indicate to the JobManager whether you'd like to reschedule
      * this job based on the retry criteria provided at job creation-time; or {@code false}
-     * to end the job entirely.  Regardless of the value returned, your job must stop executing.
+     * to end the job entirely (or, for a periodic job, to reschedule it according to its
+     * requested periodic criteria). Regardless of the value returned, your job must stop executing.
      */
     public abstract boolean onStopJob(JobParameters params);
 
@@ -412,11 +426,14 @@ public abstract class JobService extends Service {
      * 10 seconds after {@link #onStartJob(JobParameters)} is called,
      * the system will trigger an ANR and stop this job.
      *
+     * The notification must provide an accurate description of the work that the job is doing
+     * and, if possible, the state of the work.
+     *
      * <p>
      * Note that certain types of jobs
-     * (e.g. {@link JobInfo.Builder#setDataTransfer data transfer jobs}) may require the
-     * notification to have certain characteristics and their documentation will state
-     * any such requirements.
+     * (e.g. {@link JobInfo.Builder#setEstimatedNetworkBytes(long, long) data transfer jobs})
+     * may require the notification to have certain characteristics
+     * and their documentation will state any such requirements.
      *
      * <p>
      * JobScheduler will not remember this notification after the job has finished running,

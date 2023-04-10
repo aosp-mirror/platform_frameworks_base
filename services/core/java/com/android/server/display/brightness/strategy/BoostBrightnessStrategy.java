@@ -35,11 +35,12 @@ public class BoostBrightnessStrategy implements DisplayBrightnessStrategy {
     @Override
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
-        // Todo(brup): Introduce a validator class and add validations before setting the brightness
+        // Todo(b/241308599): Introduce a validator class and add validations before setting
+        // the brightness
         DisplayBrightnessState displayBrightnessState =
                 BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_BOOST,
                         PowerManager.BRIGHTNESS_MAX,
-                        PowerManager.BRIGHTNESS_MAX);
+                        PowerManager.BRIGHTNESS_MAX, getName());
         return displayBrightnessState;
     }
 

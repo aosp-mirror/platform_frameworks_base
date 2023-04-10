@@ -22,6 +22,7 @@ import static com.android.server.locales.LocaleManagerService.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.LocaleConfig;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -43,6 +44,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -298,6 +300,16 @@ class LocaleManagerBackupHelper {
 
     /**
      * <p><b>Note:</b> This is invoked by service's common monitor
+     * {@link LocaleManagerServicePackageMonitor#onPackageUpdateFinished} when a package is upgraded
+     * on device.
+     */
+    void onPackageUpdateFinished(String packageName, int uid) {
+        int userId = UserHandle.getUserId(uid);
+        cleanApplicationLocalesIfNeeded(packageName, userId);
+    }
+
+    /**
+     * <p><b>Note:</b> This is invoked by service's common monitor
      * {@link LocaleManagerServicePackageMonitor#onPackageDataCleared} when a package's data
      * is cleared.
      */
@@ -366,7 +378,8 @@ class LocaleManagerBackupHelper {
         // Restore the locale immediately
         try {
             mLocaleManagerService.setApplicationLocales(pkgName, userId,
-                    LocaleList.forLanguageTags(localesInfo.mLocales), localesInfo.mSetFromDelegate);
+                    LocaleList.forLanguageTags(localesInfo.mLocales), localesInfo.mSetFromDelegate,
+                    FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
             if (DEBUG) {
                 Slog.d(TAG, "Restored locales=" + localesInfo.mLocales + " fromDelegate="
                         + localesInfo.mSetFromDelegate + " for package=" + pkgName);
@@ -606,6 +619,56 @@ class LocaleManagerBackupHelper {
         // commit and log the result.
         if (!editor.commit()) {
             Slog.e(TAG, "failed to commit locale setter info");
+        }
+    }
+
+    boolean areLocalesSetFromDelegate(@UserIdInt int userId, String packageName) {
+        if (mDelegateAppLocalePackages == null) {
+            Slog.w(TAG, "Failed to persist data into the shared preference!");
+            return false;
+        }
+
+        String user = Integer.toString(userId);
+        Set<String> packageNames = new ArraySet<>(
+                mDelegateAppLocalePackages.getStringSet(user, new ArraySet<>()));
+
+        return packageNames.contains(packageName);
+    }
+
+    /**
+     * When the user has set per-app locales for a specific application from a delegate selector,
+     * and then the LocaleConfig of that application is removed in the upgraded version, the per-app
+     * locales need to be removed or reset to system default locales to avoid the user being unable
+     * to change system locales setting.
+     */
+    private void cleanApplicationLocalesIfNeeded(String packageName, int userId) {
+        if (mDelegateAppLocalePackages == null) {
+            Slog.w(TAG, "Failed to persist data into the shared preference!");
+            return;
+        }
+
+        String user = Integer.toString(userId);
+        Set<String> packageNames = new ArraySet<>(
+                mDelegateAppLocalePackages.getStringSet(user, new ArraySet<>()));
+        try {
+            LocaleList appLocales = mLocaleManagerService.getApplicationLocales(packageName,
+                    userId);
+            if (appLocales.isEmpty() || !packageNames.contains(packageName)) {
+                return;
+            }
+        } catch (RemoteException | IllegalArgumentException e) {
+            Slog.e(TAG, "Exception when getting locales for " + packageName, e);
+            return;
+        }
+
+        try {
+            LocaleConfig localeConfig = new LocaleConfig(
+                    mContext.createPackageContextAsUser(packageName, 0, UserHandle.of(userId)));
+            mLocaleManagerService.removeUnsupportedAppLocales(packageName, userId, localeConfig,
+                    FrameworkStatsLog
+                            .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APP_UPDATE_LOCALES_CHANGE);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Can not found the package name : " + packageName + " / " + e);
         }
     }
 }

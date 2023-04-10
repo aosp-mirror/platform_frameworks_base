@@ -19,7 +19,6 @@
 #include <GrContextOptions.h>
 #include <SkExecutor.h>
 #include <SkGraphics.h>
-#include <SkMathPriv.h>
 #include <math.h>
 #include <utils/Trace.h>
 
@@ -47,13 +46,23 @@ CacheManager::CacheManager(RenderThread& thread)
     setupCacheLimits();
 }
 
+static inline int countLeadingZeros(uint32_t mask) {
+    // __builtin_clz(0) is undefined, so we have to detect that case.
+    return mask ? __builtin_clz(mask) : 32;
+}
+
+// Return the smallest power-of-2 >= n.
+static inline uint32_t nextPowerOfTwo(uint32_t n) {
+    return n ? (1 << (32 - countLeadingZeros(n - 1))) : 1;
+}
+
 void CacheManager::setupCacheLimits() {
     mMaxResourceBytes = mMaxSurfaceArea * mMemoryPolicy.surfaceSizeMultiplier;
     mBackgroundResourceBytes = mMaxResourceBytes * mMemoryPolicy.backgroundRetentionPercent;
     // This sets the maximum size for a single texture atlas in the GPU font cache. If
     // necessary, the cache can allocate additional textures that are counted against the
     // total cache limits provided to Skia.
-    mMaxGpuFontAtlasBytes = GrNextSizePow2(mMaxSurfaceArea);
+    mMaxGpuFontAtlasBytes = nextPowerOfTwo(mMaxSurfaceArea);
     // This sets the maximum size of the CPU font cache to be at least the same size as the
     // total number of GPU font caches (i.e. 4 separate GPU atlases).
     mMaxCpuFontCacheBytes = std::max(mMaxGpuFontAtlasBytes * 4, SkGraphics::GetFontCacheLimit());

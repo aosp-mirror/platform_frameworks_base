@@ -474,9 +474,8 @@ public class GraphicsEnvironment {
      *        target functionality.  The ANGLE broadcast receiver code will apply a "deferlist" at
      *        the first boot of a newly-flashed device.  However, there is a gap in time between
      *        when applications can start and when the deferlist is applied.  For now, assume that
-     *        if ANGLE is the system driver and Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS is
-     *        empty, that the deferlist has not yet been applied.  In this case, select the Legacy
-     *        driver.
+     *        if ANGLE is the system driver and Settings.Global.ANGLE_DEFERLIST is empty, that the
+     *        deferlist has not yet been applied.  In this case, select the Legacy driver.
      *    otherwise ...
      * 3) Use ANGLE if isAngleEnabledByGameMode() returns true; otherwise ...
      * 4) The global switch (i.e. use the system driver, whether ANGLE or legacy;
@@ -516,14 +515,17 @@ public class GraphicsEnvironment {
                 contentResolver, bundle, Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS);
         final List<String> optInValues = getGlobalSettingsString(
                 contentResolver, bundle, Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES);
+        final List<String> angleDeferlist = getGlobalSettingsString(
+                contentResolver, bundle, Settings.Global.ANGLE_DEFERLIST);
         Log.v(TAG, "Currently set values for:");
         Log.v(TAG, "    angle_gl_driver_selection_pkgs =" + optInPackages);
         Log.v(TAG, "  angle_gl_driver_selection_values =" + optInValues);
 
         // If ANGLE is the system driver AND the deferlist has not yet been applied, select the
         // Legacy driver
-        if (mAngleIsSystemDriver && optInPackages.size() <= 1) {
-            Log.v(TAG, "Ignoring angle_gl_driver_selection_* until deferlist has been applied");
+        if (mAngleIsSystemDriver && angleDeferlist.size() == 0) {
+            Log.v(TAG, "ANGLE deferlist (" + Settings.Global.ANGLE_DEFERLIST + ") has not been "
+                           + "applied, defaulting to legacy driver");
             return ANGLE_GL_DRIVER_TO_USE_LEGACY;
         }
 

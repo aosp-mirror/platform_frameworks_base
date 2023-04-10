@@ -16,7 +16,7 @@
 package com.android.systemui.flags
 
 interface Restarter {
-    fun restartSystemUI()
+    fun restartSystemUI(reason: String)
 
-    fun restartAndroid()
+    fun restartAndroid(reason: String)
 }

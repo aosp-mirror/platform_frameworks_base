@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
@@ -223,6 +224,11 @@ public class SnapshotDrawerUtils {
                         PixelFormat.RGBA_8888,
                         GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
                                 | GraphicBuffer.USAGE_SW_WRITE_RARELY);
+                if (background == null) {
+                    Log.e(TAG, "Unable to draw snapshot: failed to allocate graphic buffer for "
+                            + mTitle);
+                    return;
+                }
                 // TODO: Support this on HardwareBuffer
                 final Canvas c = background.lockCanvas();
                 drawBackgroundAndBars(c, frame);
@@ -329,6 +335,21 @@ public class SnapshotDrawerUtils {
     }
 
     /**
+     * Get or create a TaskDescription from a RunningTaskInfo.
+     */
+    public static ActivityManager.TaskDescription getOrCreateTaskDescription(
+            ActivityManager.RunningTaskInfo runningTaskInfo) {
+        final ActivityManager.TaskDescription taskDescription;
+        if (runningTaskInfo.taskDescription != null) {
+            taskDescription = runningTaskInfo.taskDescription;
+        } else {
+            taskDescription = new ActivityManager.TaskDescription();
+            taskDescription.setBackgroundColor(WHITE);
+        }
+        return taskDescription;
+    }
+
+    /**
      * Help method to draw the snapshot on a surface.
      */
     public static void drawSnapshotOnSurface(StartingWindowInfo info, WindowManager.LayoutParams lp,
@@ -344,13 +365,8 @@ public class SnapshotDrawerUtils {
 
         final WindowManager.LayoutParams attrs = info.topOpaqueWindowLayoutParams;
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
-        final ActivityManager.TaskDescription taskDescription;
-        if (runningTaskInfo.taskDescription != null) {
-            taskDescription = runningTaskInfo.taskDescription;
-        } else {
-            taskDescription = new ActivityManager.TaskDescription();
-            taskDescription.setBackgroundColor(WHITE);
-        }
+        final ActivityManager.TaskDescription taskDescription =
+                getOrCreateTaskDescription(runningTaskInfo);
         drawSurface.initiateSystemBarPainter(lp.flags, lp.privateFlags,
                 attrs.insetsFlags.appearance, taskDescription, info.requestedVisibleTypes);
         final Rect systemBarInsets = getSystemBarInsets(windowBounds, topWindowInsetsState);
@@ -400,6 +416,7 @@ public class SnapshotDrawerUtils {
         layoutParams.setFitInsetsIgnoringVisibility(attrs.isFitInsetsIgnoringVisibility());
 
         layoutParams.setTitle(title);
+        layoutParams.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
         return layoutParams;
     }
 

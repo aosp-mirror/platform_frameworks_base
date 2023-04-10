@@ -43,7 +43,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
     private final List<GnssAutomaticGainControl> mGnssAgcs;
     private final boolean mIsFullTracking;
 
-    private static final int HAS_FULL_TRACKING = 1;
+    private static final int HAS_IS_FULL_TRACKING = 1;
 
     /**
      * Used for receiving GNSS satellite measurements from the GNSS engine.
@@ -174,7 +174,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
      * False indicates that the GNSS chipset may optimize power via duty cycling, constellations and
      * frequency limits, etc.
      *
-     * <p>The value is only available if {@link #hasFullTracking()} is {@code true}.
+     * <p>The value is only available if {@link #hasIsFullTracking()} is {@code true}.
      */
     public boolean isFullTracking() {
         return mIsFullTracking;
@@ -183,8 +183,8 @@ public final class GnssMeasurementsEvent implements Parcelable {
     /**
      * Return {@code true} if {@link #isFullTracking()} is available, {@code false} otherwise.
      */
-    public boolean hasFullTracking() {
-        return (mFlag & HAS_FULL_TRACKING) == HAS_FULL_TRACKING;
+    public boolean hasIsFullTracking() {
+        return (mFlag & HAS_IS_FULL_TRACKING) == HAS_IS_FULL_TRACKING;
     }
 
     public static final @android.annotation.NonNull Creator<GnssMeasurementsEvent> CREATOR =
@@ -227,7 +227,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
         builder.append(mClock);
         builder.append(' ').append(mMeasurements.toString());
         builder.append(' ').append(mGnssAgcs.toString());
-        if (hasFullTracking()) {
+        if (hasIsFullTracking()) {
             builder.append(" isFullTracking=").append(mIsFullTracking);
         }
         builder.append("]");
@@ -334,8 +334,8 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * and frequency limits, etc.
          */
         @NonNull
-        public Builder setFullTracking(boolean isFullTracking) {
-            mFlag |= HAS_FULL_TRACKING;
+        public Builder setIsFullTracking(boolean isFullTracking) {
+            mFlag |= HAS_IS_FULL_TRACKING;
             mIsFullTracking = isFullTracking;
             return this;
         }
@@ -344,8 +344,8 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * Clears the full tracking mode indicator.
          */
         @NonNull
-        public Builder clearFullTracking() {
-            mFlag &= ~HAS_FULL_TRACKING;
+        public Builder clearIsFullTracking() {
+            mFlag &= ~HAS_IS_FULL_TRACKING;
             return this;
         }
 

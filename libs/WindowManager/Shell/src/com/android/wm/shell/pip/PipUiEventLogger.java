@@ -78,6 +78,12 @@ public class PipUiEventLogger {
         @UiEvent(doc = "Activity enters picture-in-picture mode")
         PICTURE_IN_PICTURE_ENTER(603),
 
+        @UiEvent(doc = "Activity enters picture-in-picture mode with auto-enter-pip API")
+        PICTURE_IN_PICTURE_AUTO_ENTER(1313),
+
+        @UiEvent(doc = "Activity enters picture-in-picture mode from content-pip API")
+        PICTURE_IN_PICTURE_ENTER_CONTENT_PIP(1314),
+
         @UiEvent(doc = "Expands from picture-in-picture to fullscreen")
         PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN(604),
 

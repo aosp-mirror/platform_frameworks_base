@@ -17,6 +17,7 @@
 package android.net.vcn;
 
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static org.junit.Assert.assertEquals;
@@ -158,6 +159,37 @@ public class VcnConfigTest {
 
         assertEquals(config, configEqual);
         assertNotEquals(config, configNotEqual);
+    }
+
+    private VcnConfig buildConfigRestrictTransportTest(boolean isTestMode) throws Exception {
+        VcnConfig.Builder builder =
+                new VcnConfig.Builder(mContext)
+                        .setRestrictedUnderlyingNetworkTransports(Set.of(TRANSPORT_TEST));
+        if (isTestMode) {
+            builder.setIsTestModeProfile();
+        }
+
+        for (VcnGatewayConnectionConfig gatewayConnectionConfig : GATEWAY_CONNECTION_CONFIGS) {
+            builder.addGatewayConnectionConfig(gatewayConnectionConfig);
+        }
+
+        return builder.build();
+    }
+
+    @Test
+    public void testRestrictTransportTestInTestModeProfile() throws Exception {
+        final VcnConfig config = buildConfigRestrictTransportTest(true /*  isTestMode */);
+        assertEquals(Set.of(TRANSPORT_TEST), config.getRestrictedUnderlyingNetworkTransports());
+    }
+
+    @Test
+    public void testRestrictTransportTestInNonTestModeProfile() throws Exception {
+        try {
+            buildConfigRestrictTransportTest(false /*  isTestMode */);
+            fail("Expected exception because the config is not a test mode profile");
+        } catch (Exception expected) {
+
+        }
     }
 
     @Test

@@ -16,8 +16,6 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
-import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED;
-
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -109,8 +107,6 @@ public class FingerprintEnrollClientTest {
     private Probe mLuxProbe;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
-    @Captor
-    private ArgumentCaptor<PointerContext> mPointerContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
 
@@ -246,7 +242,7 @@ public class FingerprintEnrollClientTest {
                 mOperationContextCaptor.capture(), mContextInjector.capture());
         mContextInjector.getValue().accept(
                 mOperationContextCaptor.getValue().toAidlContext());
-        verify(mHal).onContextChanged(eq(opContext));
+        verify(mHal).onContextChanged(same(opContext));
 
         client.stopHalOperation();
         verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
@@ -271,16 +267,6 @@ public class FingerprintEnrollClientTest {
     @Test
     public void showHideOverlay_result() throws RemoteException {
         showHideOverlay(c -> c.onEnrollResult(new Fingerprint("", 1, 1), 0));
-    }
-
-    @Test
-    public void testPowerPressForwardsAcquireMessage() throws RemoteException {
-        final FingerprintEnrollClient client = createClient();
-        client.start(mCallback);
-        client.onPowerPressed();
-
-        verify(mClientMonitorCallbackConverter).onAcquired(anyInt(),
-                eq(FINGERPRINT_ACQUIRED_POWER_PRESSED), anyInt());
     }
 
     private void showHideOverlay(Consumer<FingerprintEnrollClient> block)

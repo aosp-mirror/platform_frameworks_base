@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
@@ -245,7 +244,7 @@ public class AppDataHelper {
                 }
             }
 
-            if (!useArtService()) { // ART Service handles this on demand instead.
+            if (!DexOptHelper.useArtService()) { // ART Service handles this on demand instead.
                 // Prepare the application profiles only for upgrades and
                 // first boot (so that we don't repeat the same operation at
                 // each boot).
@@ -485,18 +484,22 @@ public class AppDataHelper {
             String packageName, int userId) throws PackageManagerException {
         final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
         if (packageState == null) {
-            throw new PackageManagerException("Package " + packageName + " is unknown");
+            throw PackageManagerException.ofInternalError("Package " + packageName + " is unknown",
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_PACKAGE_UNKNOWN);
         } else if (!TextUtils.equals(volumeUuid, packageState.getVolumeUuid())) {
-            throw new PackageManagerException(
+            throw PackageManagerException.ofInternalError(
                     "Package " + packageName + " found on unknown volume " + volumeUuid
-                            + "; expected volume " + packageState.getVolumeUuid());
+                            + "; expected volume " + packageState.getVolumeUuid(),
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_VOLUME_UNKNOWN);
         } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
-            throw new PackageManagerException(
-                    "Package " + packageName + " not installed for user " + userId);
+            throw PackageManagerException.ofInternalError(
+                    "Package " + packageName + " not installed for user " + userId,
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_NOT_INSTALLED_FOR_USER);
         } else if (packageState.getPkg() != null
                 && !shouldHaveAppStorage(packageState.getPkg())) {
-            throw new PackageManagerException(
-                    "Package " + packageName + " shouldn't have storage");
+            throw PackageManagerException.ofInternalError(
+                    "Package " + packageName + " shouldn't have storage",
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_SHOULD_NOT_HAVE_STORAGE);
         }
     }
 
@@ -587,7 +590,7 @@ public class AppDataHelper {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        if (useArtService()) {
+        if (DexOptHelper.useArtService()) {
             destroyAppProfilesWithArtService(pkg);
         } else {
             try {
@@ -633,7 +636,7 @@ public class AppDataHelper {
     }
 
     private void destroyAppProfilesLeafLIF(AndroidPackage pkg) {
-        if (useArtService()) {
+        if (DexOptHelper.useArtService()) {
             destroyAppProfilesWithArtService(pkg);
         } else {
             try {
@@ -647,6 +650,15 @@ public class AppDataHelper {
     }
 
     private void destroyAppProfilesWithArtService(AndroidPackage pkg) {
+        if (!DexOptHelper.artManagerLocalIsInitialized()) {
+            // This function may get called while PackageManagerService is constructed (via e.g.
+            // InitAppsHelper.initSystemApps), and ART Service hasn't yet been started then (it
+            // requires a registered PackageManagerLocal instance). We can skip clearing any stale
+            // app profiles in this case, because ART Service and the runtime will ignore stale or
+            // otherwise invalid ref and cur profiles.
+            return;
+        }
+
         try (PackageManagerLocal.FilteredSnapshot snapshot =
                         getPackageManagerLocal().withFilteredSnapshot()) {
             try {

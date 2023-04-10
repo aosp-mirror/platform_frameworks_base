@@ -23,11 +23,11 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
-import com.android.internal.view.IImeTracker;
 
 /**
  * Public interface to the global input method manager, used by all client
@@ -147,6 +147,16 @@ interface IInputMethodManager {
 
     /** Start Stylus handwriting session **/
     void startStylusHandwriting(in IInputMethodClient client);
+
+    /** Prepares delegation of starting stylus handwriting session to a different editor **/
+    void prepareStylusHandwritingDelegation(in IInputMethodClient client,
+                in int userId,
+                in String delegatePackageName,
+                in String delegatorPackageName);
+
+    /** Accepts and starts a stylus handwriting session for the delegate view **/
+    boolean acceptStylusHandwritingDelegation(in IInputMethodClient client,
+                in int userId, in String delegatePackageName, in String delegatorPackageName);
 
     /** Returns {@code true} if currently selected IME supports Stylus handwriting. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "

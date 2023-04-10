@@ -46,6 +46,8 @@ oneway interface ITvInteractiveAppSession {
     void sendStreamVolume(float volume);
     void sendTrackInfoList(in List<TvTrackInfo> tracks);
     void sendCurrentTvInputId(in String inputId);
+    void sendTimeShiftMode(int mode);
+    void sendAvailableSpeeds(in float[] speeds);
     void sendSigningResult(in String signingId, in byte[] result);
     void sendTvRecordingInfo(in TvRecordingInfo recordingInfo);
     void sendTvRecordingInfoList(in List<TvRecordingInfo> recordingInfoList);
@@ -54,6 +56,11 @@ oneway interface ITvInteractiveAppSession {
     void notifyTimeShiftStatusChanged(in String inputId, int status);
     void notifyTimeShiftStartPositionChanged(in String inputId, long timeMs);
     void notifyTimeShiftCurrentPositionChanged(in String inputId, long timeMs);
+    void notifyRecordingConnectionFailed(in String recordingId, in String inputId);
+    void notifyRecordingDisconnected(in String recordingId, in String inputId);
+    void notifyRecordingTuned(in String recordingId, in Uri channelUri);
+    void notifyRecordingError(in String recordingId, int err);
+    void notifyRecordingScheduled(in String recordingId, in String requestId);
     void release();
     void notifyTuned(in Uri channelUri);
     void notifyTrackSelected(int type, in String trackId);
@@ -63,9 +70,9 @@ oneway interface ITvInteractiveAppSession {
     void notifyContentAllowed();
     void notifyContentBlocked(in String rating);
     void notifySignalStrength(int strength);
-    void notifyRecordingStarted(in String recordingId);
+    void notifyRecordingStarted(in String recordingId, in String requestId);
     void notifyRecordingStopped(in String recordingId);
-    void notifyTvMessage(in String type, in Bundle data);
+    void notifyTvMessage(int type, in Bundle data);
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);

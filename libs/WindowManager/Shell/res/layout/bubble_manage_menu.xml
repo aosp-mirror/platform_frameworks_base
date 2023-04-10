@@ -63,11 +63,11 @@
             android:tint="@color/bubbles_icon_tint"/>
 
         <TextView
+            android:id="@+id/bubble_manage_menu_dont_bubble_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault"
-            android:text="@string/bubbles_dont_bubble_conversation" />
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault" />
 
     </LinearLayout>
 

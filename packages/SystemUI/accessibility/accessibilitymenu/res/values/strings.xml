@@ -10,13 +10,9 @@
   <!-- String defining the label for the assistant button -->
   <string name="assistant_label">Assistant</string>
   <!-- String defining utterance for the assistant button for screen readers -->
-  <string name="assistant_utterance">Google Assistant</string>
+  <string name="assistant_utterance">Assistant</string>
   <!-- String defining the label for the accessibility settings button -->
   <string name="a11y_settings_label">Accessibility Settings</string>
-  <!-- String defining the label for the volume button -->
-  <string name="volume_label">Volume</string>
-  <!-- String defining utterance for the volume button for screen readers -->
-  <string name="volume_utterance">Volume controls</string>
   <!-- String defining the label for the power button -->
   <string name="power_label">Power</string>
   <!-- String defining utterance for the power button for screen readers -->
@@ -49,7 +45,6 @@
   <!-- Short summary of app that appears as subtext on the service preference in Settings -->
   <string name="accessibility_menu_summary">Control device via large menu</string>
 
-  <!-- TODO(b/113371047): string need to be reviewed -->
   <!-- String defining the settings name -->
   <string name="accessibility_menu_settings_name">Accessibility Menu Settings</string>
 
@@ -57,8 +52,6 @@
   <string name="accessibility_menu_large_buttons_title">Large buttons</string>
   <!-- String defining the summary of Large button setting -->
   <string name="accessibility_menu_large_buttons_summary">Increase size of Accessibility Menu Buttons</string>
-  <!-- String defining the title of the preference to show help and feedback menu [CHAR LIMIT=40] -->
-  <string name="pref_help_and_feedback_title">Help &#38; feedback</string>
   <!-- String defining the title of the preference to show help menu [CHAR LIMIT=40] -->
   <string name="pref_help_title">Help</string>
 
@@ -66,8 +59,5 @@
   <string name="brightness_percentage_label">Brightness <xliff:g id="percentage">%1$s</xliff:g> %%</string>
   <!-- The percentage of the music volume, and double "%" is required to represent the symbol "%" -->
   <string name="music_volume_percentage_label">Music volume <xliff:g id="percentage">%1$s</xliff:g> %%</string>
-
-  <!-- The label of a settings item that displays legal information about the licenses used in this app. [CHAR LIMIT=NONE] -->
-  <string name="pref_item_licenses">Open Source Licenses</string>
 
 </resources>

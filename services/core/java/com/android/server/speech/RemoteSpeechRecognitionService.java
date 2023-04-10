@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.speech.IModelDownloadListener;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionSupportCallback;
@@ -72,8 +73,7 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
                 new Intent(RecognitionService.SERVICE_INTERFACE).setComponent(serviceName),
                 Context.BIND_AUTO_CREATE
                         | Context.BIND_FOREGROUND_SERVICE
-                        | Context.BIND_INCLUDE_CAPABILITIES
-                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS,
+                        | Context.BIND_INCLUDE_CAPABILITIES,
                 userId,
                 IRecognitionService.Stub::asInterface);
 
@@ -234,7 +234,9 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
 
     void checkRecognitionSupport(
             Intent recognizerIntent,
+            AttributionSource attributionSource,
             IRecognitionSupportCallback callback) {
+
         if (!mConnected) {
             try {
                 callback.onError(SpeechRecognizer.ERROR_SERVER_DISCONNECTED);
@@ -244,15 +246,24 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             }
             return;
         }
-        run(service -> service.checkRecognitionSupport(recognizerIntent, callback));
+        run(service ->
+                service.checkRecognitionSupport(recognizerIntent, attributionSource, callback));
     }
 
-    void triggerModelDownload(Intent recognizerIntent) {
+    void triggerModelDownload(
+            Intent recognizerIntent,
+            AttributionSource attributionSource,
+            IModelDownloadListener listener) {
         if (!mConnected) {
-            Slog.e(TAG, "#downloadModel failed due to connection.");
+            try {
+                listener.onError(SpeechRecognizer.ERROR_SERVER_DISCONNECTED);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "#downloadModel failed due to connection.", e);
+                e.printStackTrace();
+            }
             return;
         }
-        run(service -> service.triggerModelDownload(recognizerIntent));
+        run(service -> service.triggerModelDownload(recognizerIntent, attributionSource, listener));
     }
 
     void shutdown(IBinder clientToken) {
@@ -417,6 +428,11 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             }
             mOnSessionSuccess.run();
             mRemoteListener.onEndOfSegmentedSession();
+        }
+
+        @Override
+        public void onLanguageDetection(Bundle results) throws RemoteException {
+            mRemoteListener.onLanguageDetection(results);
         }
 
         @Override

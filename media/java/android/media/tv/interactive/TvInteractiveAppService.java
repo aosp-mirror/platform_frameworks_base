@@ -38,6 +38,7 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
+import android.media.tv.TvContract;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
@@ -145,30 +146,29 @@ public abstract class TvInteractiveAppService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "PLAYBACK_COMMAND_STOP_MODE_", value = {
-            PLAYBACK_COMMAND_STOP_MODE_BLANK,
-            PLAYBACK_COMMAND_STOP_MODE_FREEZE
+    @IntDef(prefix = "COMMAND_PARAMETER_VALUE_STOP_MODE_", value = {
+            COMMAND_PARAMETER_VALUE_STOP_MODE_BLANK,
+            COMMAND_PARAMETER_VALUE_STOP_MODE_FREEZE
     })
     public @interface PlaybackCommandStopMode {}
 
     /**
      * Playback command stop mode: show a blank screen.
-     * @hide
+     * @see #PLAYBACK_COMMAND_TYPE_STOP
      */
-    public static final int PLAYBACK_COMMAND_STOP_MODE_BLANK = 1;
+    public static final int COMMAND_PARAMETER_VALUE_STOP_MODE_BLANK = 1;
 
     /**
      * Playback command stop mode: freeze the video.
-     * @hide
+     * @see #PLAYBACK_COMMAND_TYPE_STOP
      */
-    public static final int PLAYBACK_COMMAND_STOP_MODE_FREEZE = 2;
+    public static final int COMMAND_PARAMETER_VALUE_STOP_MODE_FREEZE = 2;
 
     /**
      * Playback command parameter: stop mode.
      * <p>Type: int
      *
      * @see #PLAYBACK_COMMAND_TYPE_STOP
-     * @hide
      */
     public static final String COMMAND_PARAMETER_KEY_STOP_MODE = "command_stop_mode";
 
@@ -224,6 +224,7 @@ public abstract class TvInteractiveAppService extends Service {
             TIME_SHIFT_COMMAND_TYPE_RESUME,
             TIME_SHIFT_COMMAND_TYPE_SEEK_TO,
             TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS,
+            TIME_SHIFT_COMMAND_TYPE_SET_MODE,
     })
     public @interface TimeShiftCommandType {}
 
@@ -231,44 +232,42 @@ public abstract class TvInteractiveAppService extends Service {
      * Time shift command type: play.
      *
      * @see TvView#timeShiftPlay(String, Uri)
-     * @hide
      */
     public static final String TIME_SHIFT_COMMAND_TYPE_PLAY = "play";
     /**
      * Time shift command type: pause.
      *
      * @see TvView#timeShiftPause()
-     * @hide
      */
     public static final String TIME_SHIFT_COMMAND_TYPE_PAUSE = "pause";
     /**
      * Time shift command type: resume.
      *
      * @see TvView#timeShiftResume()
-     * @hide
      */
     public static final String TIME_SHIFT_COMMAND_TYPE_RESUME = "resume";
     /**
      * Time shift command type: seek to.
      *
      * @see TvView#timeShiftSeekTo(long)
-     * @hide
      */
     public static final String TIME_SHIFT_COMMAND_TYPE_SEEK_TO = "seek_to";
     /**
      * Time shift command type: set playback params.
      *
      * @see TvView#timeShiftSetPlaybackParams(PlaybackParams)
-     * @hide
      */
     public static final String TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS = "set_playback_params";
+    /**
+     * Time shift command type: set time shift mode.
+     */
+    public static final String TIME_SHIFT_COMMAND_TYPE_SET_MODE = "set_mode";
 
     /**
      * Time shift command parameter: program URI.
      * <p>Type: android.net.Uri
      *
      * @see #TIME_SHIFT_COMMAND_TYPE_PLAY
-     * @hide
      */
     public static final String COMMAND_PARAMETER_KEY_PROGRAM_URI = "command_program_uri";
     /**
@@ -276,7 +275,6 @@ public abstract class TvInteractiveAppService extends Service {
      * <p>Type: long
      *
      * @see #TIME_SHIFT_COMMAND_TYPE_SEEK_TO
-     * @hide
      */
     public static final String COMMAND_PARAMETER_KEY_TIME_POSITION = "command_time_position";
     /**
@@ -284,9 +282,18 @@ public abstract class TvInteractiveAppService extends Service {
      * <p>Type: android.media.PlaybackParams
      *
      * @see #TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS
-     * @hide
      */
     public static final String COMMAND_PARAMETER_KEY_PLAYBACK_PARAMS = "command_playback_params";
+    /**
+     * Time shift command parameter: playback params.
+     * <p>Type: Integer. One of {@link TvInputManager#TIME_SHIFT_MODE_OFF},
+     * {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+     * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+     * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+     *
+     * @see #TIME_SHIFT_COMMAND_TYPE_SET_MODE
+     */
+    public static final String COMMAND_PARAMETER_KEY_TIME_SHIFT_MODE = "command_time_shift_mode";
 
     private final Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInteractiveAppServiceCallback> mCallbacks =
@@ -532,7 +539,8 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Receives current video bounds.
-         * @hide
+         *
+         * @param bounds the rectangle area for rendering the current video.
          */
         public void onCurrentVideoBounds(@NonNull Rect bounds) {
         }
@@ -570,41 +578,143 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Receives requested recording info.
+         * Receives current time shift mode.
          *
-         * @param recordingInfo The requested recording info. Null if recording not found.
-         * @hide
+         * @param mode The current time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         */
+        public void onTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
+        }
+
+        /**
+         * Receives available playback speeds.
+         *
+         * @param speeds An ordered array of playback speeds, expressed as values relative to the
+         *               normal playback speed (1.0), at which the current content can be played as
+         *               a time-shifted broadcast. This is an empty array if the supported playback
+         *               speeds are unknown or the video/broadcast is not in time shift mode. If
+         *               currently in time shift mode, this array will normally include at least
+         *               the values 1.0 (normal speed) and 0.0 (paused).
+         */
+        public void onAvailableSpeeds(@NonNull float[] speeds) {
+        }
+
+        /**
+         * Receives the requested {@link android.media.tv.TvRecordingInfo}.
+         *
+         * @see #requestTvRecordingInfo(String)
+         * @param recordingInfo The requested recording info. {@code null} if no recording found.
          */
         public void onTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
         }
 
         /**
-         * Receives requested recording info.
+         * Receives requested recording info list.
          *
-         * @param recordingInfoList The requested recording info list. Null if recording not found.
-         * @hide
+         * @see #requestTvRecordingInfoList(int)
+         * @param recordingInfoList The list of recording info requested. Returns an empty list if
+         *                          no matching recording info found.
          */
-        public void onTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
-        }
+        public void onTvRecordingInfoList(@NonNull List<TvRecordingInfo> recordingInfoList) {}
 
         /**
-         * Receives started recording's ID.
+         * This is called when a recording has been started.
+         *
+         * <p>When a scheduled recording is started, this is also called, and the request ID in this
+         * case is {@code null}.
          *
          * @param recordingId The ID of the recording started. The TV app should provide and
          *                    maintain this ID to identify the recording in the future.
+         * @param requestId The ID of the request when
+         *                  {@link #requestStartRecording(String, Uri)} is called.
+         *                  {@code null} if the recording is not triggered by a
+         *                  {@link #requestStartRecording(String, Uri)} request.
+         *                  This ID should be created by the {@link TvInteractiveAppService} and
+         *                  can be any string.
          * @see #onRecordingStopped(String)
          */
-        public void onRecordingStarted(@NonNull String recordingId) {
+        public void onRecordingStarted(@NonNull String recordingId, @Nullable String requestId) {
         }
 
         /**
-         * Receives stopped recording's ID.
+         * This is called when the recording has been stopped.
          *
          * @param recordingId The ID of the recording stopped. This ID is created and maintained by
          *                    the TV app when the recording was started.
-         * @see #onRecordingStarted(String)
+         * @see #onRecordingStarted(String, String)
          */
         public void onRecordingStopped(@NonNull String recordingId) {
+        }
+
+        /**
+         * This is called when an error occurred while establishing a connection to the recording
+         * session for the corresponding TV input.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String, String)}
+         * @param inputId The ID of the TV input bound to the current TvRecordingClient.
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onConnectionFailed(String)
+         */
+        public void onRecordingConnectionFailed(
+                @NonNull String recordingId, @NonNull String inputId) {
+        }
+
+        /**
+         * This is called when the connection to the current recording session is lost.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String, String)}
+         * @param inputId The ID of the TV input bound to the current TvRecordingClient.
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onDisconnected(String)
+         */
+        public void onRecordingDisconnected(@NonNull String recordingId, @NonNull String inputId) {
+        }
+
+        /**
+         * This is called when the recording session has been tuned to the given channel and is
+         * ready to start recording.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String, String)}
+         * @param channelUri The URI of the tuned channel.
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onTuned(Uri)
+         */
+        public void onRecordingTuned(@NonNull String recordingId, @NonNull Uri channelUri) {
+        }
+
+        /**
+         * This is called when an issue has occurred. It may be called at any time after the current
+         * recording session is created until it is released.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String, String)}
+         * @param err The error code. Should be one of the following.
+         * <ul>
+         * <li>{@link TvInputManager#RECORDING_ERROR_UNKNOWN}
+         * <li>{@link TvInputManager#RECORDING_ERROR_INSUFFICIENT_SPACE}
+         * <li>{@link TvInputManager#RECORDING_ERROR_RESOURCE_BUSY}
+         * </ul>
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onError(int)
+         */
+        public void onRecordingError(
+                @NonNull String recordingId, @TvInputManager.RecordingError int err) {
+        }
+
+        /**
+         * This is called when the recording has been scheduled.
+         *
+         * @param recordingId The ID assigned to this recording by the app. It can be used to send
+         *                    recording related requests such as
+         *                    {@link #requestStopRecording(String)}.
+         * @param requestId The ID of the request when
+         *                  {@link #requestScheduleRecording}  is called.
+         *                  {@code null} if the recording is not triggered by a request.
+         *                  This ID should be created by the {@link TvInteractiveAppService} and
+         *                  can be any string.
+         */
+        public void onRecordingScheduled(@NonNull String recordingId, @Nullable String requestId) {
         }
 
         /**
@@ -635,8 +745,8 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Called when the time shift {@link android.media.PlaybackParams} is set or changed.
          *
+         * @param params The new {@link PlaybackParams} that was set or changed.
          * @see TvView#timeShiftSetPlaybackParams(PlaybackParams)
-         * @hide
          */
         public void onTimeShiftPlaybackParams(@NonNull PlaybackParams params) {
         }
@@ -646,17 +756,25 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @see TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)
          * @see android.media.tv.TvInputService.Session#notifyTimeShiftStatusChanged(int)
-         * @hide
+         * @param inputId The ID of the input for which the time shift status has changed.
+         * @param status The status of which the input has changed to. Should be one of the
+         *               following.
+         *               <ul>
+         *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNKNOWN}
+         *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED}
+         *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
+         *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+         *               </ul>
          */
         public void onTimeShiftStatusChanged(
-                @NonNull String inputId, @TvInputManager.TimeShiftStatus int status) {
-        }
+                @NonNull String inputId, @TvInputManager.TimeShiftStatus int status) {}
 
         /**
          * Called when time shift start position is changed.
          *
          * @see TvView.TimeShiftPositionCallback#onTimeShiftStartPositionChanged(String, long)
-         * @hide
+         * @param inputId The ID of the input for which the time shift start position has changed.
+         * @param timeMs The start position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftStartPositionChanged(@NonNull String inputId, long timeMs) {
         }
@@ -665,7 +783,8 @@ public abstract class TvInteractiveAppService extends Service {
          * Called when time shift current position is changed.
          *
          * @see TvView.TimeShiftPositionCallback#onTimeShiftCurrentPositionChanged(String, long)
-         * @hide
+         * @param inputId The ID of the input for which the time shift current position has changed.
+         * @param timeMs The current position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftCurrentPositionChanged(@NonNull String inputId, long timeMs) {
         }
@@ -789,17 +908,27 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when an advertisement buffer is consumed.
-         * @hide
+         *
+         * @param buffer The {@link AdBuffer} that was consumed.
          */
-        public void onAdBufferConsumed(AdBuffer buffer) {
-
+        public void onAdBufferConsumed(@NonNull AdBuffer buffer) {
         }
 
         /**
-         * Called when a tv message is received
-         * @hide
+         * Called when a TV message is received
+         *
+         * @param type The type of message received, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
          */
-        public void onTvMessage(@NonNull String type, @NonNull Bundle data) {
+        public void onTvMessage(@TvInputManager.TvMessageType int type,
+                @NonNull Bundle data) {
         }
 
         @Override
@@ -975,7 +1104,6 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @param cmdType type of the specific command
          * @param parameters parameters of the specific command
-         * @hide
          */
         @CallSuper
         public void sendTimeShiftCommandRequest(
@@ -1024,7 +1152,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the bounds of the current video.
-         * @hide
          */
         @CallSuper
         public void requestCurrentVideoBounds() {
@@ -1164,6 +1291,52 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests time shift mode.
+         */
+        @CallSuper
+        public void requestTimeShiftMode() {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestTimeShiftMode");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestTimeShiftMode();
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestTimeShiftMode", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Requests available speeds for time shift.
+         */
+        @CallSuper
+        public void requestAvailableSpeeds() {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestAvailableSpeeds");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestAvailableSpeeds();
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestAvailableSpeeds", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Requests starting of recording
          *
          * <p> This is used to request the active {@link android.media.tv.TvRecordingClient} to
@@ -1173,18 +1346,26 @@ public abstract class TvInteractiveAppService extends Service {
          * program, whereas null {@code programUri} does not impose such a requirement and the
          * recording can span across multiple TV programs.
          *
-         * @param programUri The URI for the TV program to record.
+         * @param requestId The ID of this request which is used to match the corresponding
+         *                  response. The request ID in
+         *                  {@link #onRecordingStarted(String, String)} for this request is the
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string.
+         *                  Should this API be called with the same requestId twice, both 
+         *                  requests should be handled regardless by the TV application.
+         * @param programUri The URI for the TV program to record, built by
+         *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
          * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
         @CallSuper
-        public void requestStartRecording(@Nullable Uri programUri) {
+        public void requestStartRecording(@NonNull String requestId, @Nullable Uri programUri) {
             executeOrPostRunnableOnMainThread(() -> {
                 try {
                     if (DEBUG) {
                         Log.d(TAG, "requestStartRecording");
                     }
                     if (mSessionCallback != null) {
-                        mSessionCallback.onRequestStartRecording(programUri);
+                        mSessionCallback.onRequestStartRecording(requestId, programUri);
                     }
                 } catch (RemoteException e) {
                     Log.w(TAG, "error in requestStartRecording", e);
@@ -1199,7 +1380,7 @@ public abstract class TvInteractiveAppService extends Service {
          * call {@link android.media.tv.TvRecordingClient#stopRecording()}.
          *
          * @param recordingId The ID of the recording to stop. This is provided by the TV app in
-         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String)}
+         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String, String)}
          * @see android.media.tv.TvRecordingClient#stopRecording()
          */
         @CallSuper
@@ -1219,13 +1400,92 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Sets the recording info for the specified recording
+         * Requests scheduling of a recording.
          *
-         * @hide
+         * @param requestId The ID of this request which is used to match the corresponding
+         *                  response. The request ID in
+         *                  {@link #onRecordingScheduled(String, String)} for this request is the
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string.
+         *                  Should this API be called with the same requestId twice, both requests
+         *                  should be handled regardless by the TV application.
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param programUri The URI of the TV program to be recorded.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
         @CallSuper
-        public void setTvRecordingInfo(@NonNull String recordingId,
-                @NonNull TvRecordingInfo recordingInfo) {
+        public void requestScheduleRecording(@NonNull String requestId, @NonNull String inputId,
+                @NonNull Uri channelUri, @NonNull Uri programUri, @NonNull Bundle params) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestScheduleRecording");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestScheduleRecording(
+                                requestId, inputId, channelUri, programUri, params);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestScheduleRecording", e);
+                }
+            });
+        }
+
+        /**
+         * Requests scheduling of a recording.
+         *
+         * @param requestId The ID of this request which is used to match the corresponding
+         *                  response. The request ID in
+         *                  {@link #onRecordingScheduled(String, String)} for this request is the
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string. Should this API
+         *                  be called with the same requestId twice, both requests should be handled
+         *                  regardless by the TV application.
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param startTime The start time of the recording in milliseconds since epoch.
+         * @param duration The duration of the recording in milliseconds.
+         * @param repeatDays The repeated days. 0 if not repeated.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
+         */
+        @CallSuper
+        public void requestScheduleRecording(@NonNull String requestId, @NonNull String inputId,
+                @NonNull Uri channelUri, long startTime, long duration, int repeatDays,
+                @NonNull Bundle params) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestScheduleRecording");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestScheduleRecording2(requestId, inputId, channelUri,
+                                startTime, duration, repeatDays, params);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestScheduleRecording", e);
+                }
+            });
+        }
+
+        /**
+         * Sets the recording info for the specified recording
+         *
+         * @param recordingId The ID of the recording to set the info for. This is provided by the
+         *     TV app in {@link TvInteractiveAppView#notifyRecordingStarted(String, String)}
+         * @param recordingInfo The {@link TvRecordingInfo} to set to the recording.
+         */
+        @CallSuper
+        public void setTvRecordingInfo(
+                @NonNull String recordingId, @NonNull TvRecordingInfo recordingInfo) {
             executeOrPostRunnableOnMainThread(() -> {
                 try {
                     if (DEBUG) {
@@ -1242,8 +1502,9 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Gets the recording info for the specified recording
-         *
-         * @hide
+         * @param recordingId The ID of the recording to set the info for. This is provided by the
+         *                    TV app in
+         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String, String)}
          */
         @CallSuper
         public void requestTvRecordingInfo(@NonNull String recordingId) {
@@ -1262,13 +1523,12 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Gets the recording info list for the specified recording type
+         * Gets a list of {@link TvRecordingInfo} for the specified recording type.
          *
-         * @hide
+         * @param type The type of recording to retrieve.
          */
         @CallSuper
-        public void requestTvRecordingInfoList(@NonNull @TvRecordingInfo.TvRecordingListType
-                int type) {
+        public void requestTvRecordingInfoList(@TvRecordingInfo.TvRecordingListType int type) {
             executeOrPostRunnableOnMainThread(() -> {
                 try {
                     if (DEBUG) {
@@ -1397,6 +1657,14 @@ public abstract class TvInteractiveAppService extends Service {
             onCurrentTvInputId(inputId);
         }
 
+        void sendTimeShiftMode(int mode) {
+            onTimeShiftMode(mode);
+        }
+
+        void sendAvailableSpeeds(@NonNull float[] speeds) {
+            onAvailableSpeeds(speeds);
+        }
+
         void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
             onTvRecordingInfo(recordingInfo);
         }
@@ -1505,7 +1773,7 @@ public abstract class TvInteractiveAppService extends Service {
             onAdResponse(response);
         }
 
-        void notifyTvMessage(String type, Bundle data) {
+        void notifyTvMessage(int type, Bundle data) {
             if (DEBUG) {
                 Log.d(TAG, "notifyTvMessage (type=" + type + ", data= " + data + ")");
             }
@@ -1524,10 +1792,10 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Calls {@link #onRecordingStarted(String)}.
+         * Calls {@link #onRecordingStarted(String, String)}.
          */
-        void notifyRecordingStarted(String recordingId) {
-            onRecordingStarted(recordingId);
+        void notifyRecordingStarted(String recordingId, String requestId) {
+            onRecordingStarted(recordingId, requestId);
         }
 
         /**
@@ -1535,6 +1803,41 @@ public abstract class TvInteractiveAppService extends Service {
          */
         void notifyRecordingStopped(String recordingId) {
             onRecordingStopped(recordingId);
+        }
+
+        /**
+         * Calls {@link #onRecordingConnectionFailed(String, String)}.
+         */
+        void notifyRecordingConnectionFailed(String recordingId, String inputId) {
+            onRecordingConnectionFailed(recordingId, inputId);
+        }
+
+        /**
+         * Calls {@link #onRecordingDisconnected(String, String)}.
+         */
+        void notifyRecordingDisconnected(String recordingId, String inputId) {
+            onRecordingDisconnected(recordingId, inputId);
+        }
+
+        /**
+         * Calls {@link #onRecordingTuned(String, Uri)}.
+         */
+        void notifyRecordingTuned(String recordingId, Uri channelUri) {
+            onRecordingTuned(recordingId, channelUri);
+        }
+
+        /**
+         * Calls {@link #onRecordingError(String, int)}.
+         */
+        void notifyRecordingError(String recordingId, int err) {
+            onRecordingError(recordingId, err);
+        }
+
+        /**
+         * Calls {@link #onRecordingScheduled(String, String)}.
+         */
+        void notifyRecordingScheduled(String recordingId, String requestId) {
+            onRecordingScheduled(recordingId, requestId);
         }
 
         /**
@@ -1655,10 +1958,11 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Notifies when the advertisement buffer is filled and ready to be read.
-         * @hide
+         *
+         * @param buffer The {@link AdBuffer} to be received
          */
         @CallSuper
-        public void notifyAdBuffer(AdBuffer buffer) {
+        public void notifyAdBufferReady(@NonNull AdBuffer buffer) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1666,10 +1970,10 @@ public abstract class TvInteractiveAppService extends Service {
                     try {
                         if (DEBUG) {
                             Log.d(TAG,
-                                    "notifyAdBuffer(buffer=" + buffer + ")");
+                                    "notifyAdBufferReady(buffer=" + buffer + ")");
                         }
                         if (mSessionCallback != null) {
-                            mSessionCallback.onAdBuffer(buffer);
+                            mSessionCallback.onAdBufferReady(buffer);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyAdBuffer", e);

@@ -478,6 +478,7 @@ public class JobStoreTest {
                 0 /* sourceUserId */, 0, "someNamespace", "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
+                0 /* cumulativeExecutionTime */,
                 persistedExecutionTimesUTC, 0 /* innerFlag */, 0 /* dynamicConstraints */);
 
         mTaskStoreUnderTest.add(js);
@@ -512,6 +513,21 @@ public class JobStoreTest {
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Bias not correctly persisted.", 42, loaded.getBias());
+    }
+
+    @Test
+    public void testCumulativeExecutionTimePersisted() throws Exception {
+        JobInfo ji = new Builder(53, mComponent).setPersisted(true).build();
+        final JobStatus js = JobStatus.createFromJobInfo(ji, SOME_UID, null, -1, null, null);
+        js.incrementCumulativeExecutionTime(1234567890);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Cumulative execution time not correctly persisted.",
+                1234567890, loaded.getCumulativeExecutionTimeMs());
     }
 
     @Test
@@ -728,6 +744,66 @@ public class JobStoreTest {
     }
 
     @Test
+    public void testPersistedPreferredBatteryNotLowConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setPrefersBatteryNotLow(true)
+                .setPersisted(true);
+        JobStatus taskStatus =
+                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Battery-not-low constraint not persisted correctly.",
+                taskStatus.getJob().isPreferBatteryNotLow(),
+                loaded.getJob().isPreferBatteryNotLow());
+    }
+
+    @Test
+    public void testPersistedPreferredChargingConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setPrefersCharging(true)
+                .setPersisted(true);
+        JobStatus taskStatus =
+                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Charging constraint not persisted correctly.",
+                taskStatus.getJob().isPreferCharging(),
+                loaded.getJob().isPreferCharging());
+    }
+
+    @Test
+    public void testPersistedPreferredDeviceIdleConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setPrefersDeviceIdle(true)
+                .setPersisted(true);
+        JobStatus taskStatus =
+                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Idle constraint not persisted correctly.",
+                taskStatus.getJob().isPreferDeviceIdle(),
+                loaded.getJob().isPreferDeviceIdle());
+    }
+
+    @Test
     public void testJobWorkItems() throws Exception {
         JobWorkItem item1 = new JobWorkItem.Builder().build();
         item1.bumpDeliveryCount();
@@ -792,6 +868,9 @@ public class JobStoreTest {
                 expected.getEarliestRunTime(), actual.getEarliestRunTime());
         compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
                 expected.getLatestRunTimeElapsed(), actual.getLatestRunTimeElapsed());
+
+        assertEquals(expected.getCumulativeExecutionTimeMs(),
+                actual.getCumulativeExecutionTimeMs());
 
         assertEquals(expected.hasWorkLocked(), actual.hasWorkLocked());
         if (expected.hasWorkLocked()) {

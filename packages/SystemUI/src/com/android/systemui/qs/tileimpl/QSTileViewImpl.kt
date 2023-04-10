@@ -310,9 +310,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun onStateChanged(state: QSTile.State) {
-        post {
-            handleStateChanged(state)
-        }
+        // We cannot use the handler here because sometimes, the views are not attached (if they
+        // are in a page that the ViewPager hasn't attached). Instead, we use a runnable where
+        // all its instances are `equal` to each other, so they can be used to remove them from the
+        // queue.
+        // This means that at any given time there's at most one enqueued runnable to change state.
+        // However, as we only ever care about the last state posted, this is fine.
+        val runnable = StateChangeRunnable(state.copy())
+        removeCallbacks(runnable)
+        post(runnable)
     }
 
     override fun getDetailY(): Int {
@@ -440,12 +446,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
         // State handling and description
         val stateDescription = StringBuilder()
-        val stateText = getStateText(state)
+        val arrayResId = SubtitleArrayMapping.getSubtitleId(state.spec)
+        val stateText = state.getStateText(arrayResId, resources)
+        state.secondaryLabel = state.getSecondaryLabel(stateText)
         if (!TextUtils.isEmpty(stateText)) {
             stateDescription.append(stateText)
-            if (TextUtils.isEmpty(state.secondaryLabel)) {
-                state.secondaryLabel = stateText
-            }
         }
         if (state.disabledByPolicy && state.state != Tile.STATE_UNAVAILABLE) {
             stateDescription.append(", ")
@@ -491,7 +496,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
 
         // Colors
-        if (state.state != lastState || state.disabledByPolicy || lastDisabledByPolicy) {
+        if (state.state != lastState || state.disabledByPolicy != lastDisabledByPolicy) {
             singleAnimator.cancel()
             mQsLogger?.logTileBackgroundColorUpdateIfInternetTile(
                     state.spec,
@@ -591,16 +596,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
         return resources.getStringArray(arrayResId)[Tile.STATE_UNAVAILABLE]
     }
 
-    private fun getStateText(state: QSTile.State): String {
-        return if (state.state == Tile.STATE_UNAVAILABLE || state is BooleanState) {
-            val arrayResId = SubtitleArrayMapping.getSubtitleId(state.spec)
-            val array = resources.getStringArray(arrayResId)
-            array[state.state]
-        } else {
-            ""
-        }
-    }
-
     /*
      * The view should not be animated if it's not on screen and no part of it is visible.
      */
@@ -661,44 +656,22 @@ open class QSTileViewImpl @JvmOverloads constructor(
             secondaryLabel.currentTextColor,
             chevronView.imageTintList?.defaultColor ?: 0
     )
-}
 
-@VisibleForTesting
-internal object SubtitleArrayMapping {
-    private val subtitleIdsMap = mapOf<String?, Int>(
-        "internet" to R.array.tile_states_internet,
-        "wifi" to R.array.tile_states_wifi,
-        "cell" to R.array.tile_states_cell,
-        "battery" to R.array.tile_states_battery,
-        "dnd" to R.array.tile_states_dnd,
-        "flashlight" to R.array.tile_states_flashlight,
-        "rotation" to R.array.tile_states_rotation,
-        "bt" to R.array.tile_states_bt,
-        "airplane" to R.array.tile_states_airplane,
-        "location" to R.array.tile_states_location,
-        "hotspot" to R.array.tile_states_hotspot,
-        "inversion" to R.array.tile_states_inversion,
-        "saver" to R.array.tile_states_saver,
-        "dark" to R.array.tile_states_dark,
-        "work" to R.array.tile_states_work,
-        "cast" to R.array.tile_states_cast,
-        "night" to R.array.tile_states_night,
-        "screenrecord" to R.array.tile_states_screenrecord,
-        "reverse" to R.array.tile_states_reverse,
-        "reduce_brightness" to R.array.tile_states_reduce_brightness,
-        "cameratoggle" to R.array.tile_states_cameratoggle,
-        "mictoggle" to R.array.tile_states_mictoggle,
-        "controls" to R.array.tile_states_controls,
-        "wallet" to R.array.tile_states_wallet,
-        "qr_code_scanner" to R.array.tile_states_qr_code_scanner,
-        "alarm" to R.array.tile_states_alarm,
-        "onehanded" to R.array.tile_states_onehanded,
-        "color_correction" to R.array.tile_states_color_correction,
-        "dream" to R.array.tile_states_dream
-    )
+    inner class StateChangeRunnable(private val state: QSTile.State) : Runnable {
+        override fun run() {
+            handleStateChanged(state)
+        }
 
-    fun getSubtitleId(spec: String?): Int {
-        return subtitleIdsMap.getOrDefault(spec, R.array.tile_states_default)
+        // We want all instances of this runnable to be equal to each other, so they can be used to
+        // remove previous instances from the Handler/RunQueue of this view
+        override fun equals(other: Any?): Boolean {
+            return other is StateChangeRunnable
+        }
+
+        // This makes sure that all instances have the same hashcode (because they are `equal`)
+        override fun hashCode(): Int {
+            return StateChangeRunnable::class.hashCode()
+        }
     }
 }
 

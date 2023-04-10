@@ -149,7 +149,8 @@ int32_t AMotionEvent_getPointerId(const AInputEvent* motion_event, size_t pointe
 }
 
 int32_t AMotionEvent_getToolType(const AInputEvent* motion_event, size_t pointer_index) {
-    return static_cast<const MotionEvent*>(motion_event)->getToolType(pointer_index);
+    const MotionEvent& motion = static_cast<const MotionEvent&>(*motion_event);
+    return static_cast<int32_t>(motion.getToolType(pointer_index));
 }
 
 float AMotionEvent_getRawX(const AInputEvent* motion_event, size_t pointer_index) {

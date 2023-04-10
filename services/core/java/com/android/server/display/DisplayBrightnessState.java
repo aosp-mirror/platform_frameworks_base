@@ -28,11 +28,13 @@ public final class DisplayBrightnessState {
     private final float mBrightness;
     private final float mSdrBrightness;
     private final BrightnessReason mBrightnessReason;
+    private final String mDisplayBrightnessStrategyName;
 
     private DisplayBrightnessState(Builder builder) {
         this.mBrightness = builder.getBrightness();
         this.mSdrBrightness = builder.getSdrBrightness();
         this.mBrightnessReason = builder.getBrightnessReason();
+        this.mDisplayBrightnessStrategyName = builder.getDisplayBrightnessStrategyName();
     }
 
     /**
@@ -54,6 +56,14 @@ public final class DisplayBrightnessState {
      */
     public BrightnessReason getBrightnessReason() {
         return mBrightnessReason;
+    }
+
+    /**
+     * Gets the {@link com.android.server.display.brightness.strategy.DisplayBrightnessStrategy}
+     * name
+     */
+    public String getDisplayBrightnessStrategyName() {
+        return mDisplayBrightnessStrategyName;
     }
 
     @Override
@@ -93,6 +103,10 @@ public final class DisplayBrightnessState {
         if (!mBrightnessReason.equals(displayBrightnessState.getBrightnessReason())) {
             return false;
         }
+        if (!mDisplayBrightnessStrategyName.equals(
+                displayBrightnessState.getDisplayBrightnessStrategyName())) {
+            return false;
+        }
         return true;
     }
 
@@ -108,6 +122,7 @@ public final class DisplayBrightnessState {
         private float mBrightness;
         private float mSdrBrightness;
         private BrightnessReason mBrightnessReason = new BrightnessReason();
+        private String mDisplayBrightnessStrategyName;
 
         /**
          * Gets the brightness
@@ -160,6 +175,27 @@ public final class DisplayBrightnessState {
          */
         public Builder setBrightnessReason(BrightnessReason brightnessReason) {
             this.mBrightnessReason = brightnessReason;
+            return this;
+        }
+
+        /**
+         * Gets the {@link com.android.server.display.brightness.strategy.DisplayBrightnessStrategy}
+         * name
+         */
+        public String getDisplayBrightnessStrategyName() {
+            return mDisplayBrightnessStrategyName;
+        }
+
+        /**
+         * Sets the
+         * {@link com.android.server.display.brightness.strategy.DisplayBrightnessStrategy}'s name
+         *
+         * @param displayBrightnessStrategyName The name of the
+         * {@link com.android.server.display.brightness.strategy.DisplayBrightnessStrategy} being
+         *                                      used.
+         */
+        public Builder setDisplayBrightnessStrategyName(String displayBrightnessStrategyName) {
+            this.mDisplayBrightnessStrategyName = displayBrightnessStrategyName;
             return this;
         }
 

@@ -18,16 +18,16 @@ package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.ScenarioBuilder
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.ScenarioBuilder
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -45,6 +45,7 @@ import org.junit.runners.Parameterized
  *      90 -> 0 degrees
  *      90 -> 0 degrees (with starved UI thread)
  * ```
+ *
  * Actions:
  * ```
  *     Launch an app in fullscreen and supporting seamless rotation (via intent)
@@ -53,22 +54,29 @@ import org.junit.runners.Parameterized
  *     Change device orientation
  *     Stop tracing
  * ```
+ *
  * To run this test: `atest FlickerTests:SeamlessAppRotationTest`
  *
  * To run only the presubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
  * ```
+ *
  * To run only the postsubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
  * ```
+ *
  * To run only the flaky assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -108,12 +116,14 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
     fun appWindowFullScreen() {
         flicker.assertWm {
             this.invoke("isFullScreen") {
-                val appWindow = it.windowState(testApp.`package`)
-                val flags = appWindow.windowState?.attributes?.flags ?: 0
+                val appWindow =
+                    it.windowState(testApp.`package`)
+                        ?: error("App window for package ${testApp.`package`} not found")
+                val flags = appWindow.windowState.attributes.flags
                 appWindow
-                    .verify("isFullScreen")
+                    .check { "isFullScreen" }
                     .that(flags.and(WindowManager.LayoutParams.FLAG_FULLSCREEN))
-                    .isGreaterThan(0)
+                    .isGreater(0)
             }
         }
     }
@@ -124,16 +134,18 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
     fun appWindowSeamlessRotation() {
         flicker.assertWm {
             this.invoke("isRotationSeamless") {
-                val appWindow = it.windowState(testApp.`package`)
-                val rotationAnimation = appWindow.windowState?.attributes?.rotationAnimation ?: 0
+                val appWindow =
+                    it.windowState(testApp.`package`)
+                        ?: error("App window for package ${testApp.`package`} not found")
+                val rotationAnimation = appWindow.windowState.attributes.rotationAnimation
                 appWindow
-                    .verify("isRotationSeamless")
+                    .check { "isRotationSeamless" }
                     .that(
                         rotationAnimation.and(
                             WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
                         )
                     )
-                    .isGreaterThan(0)
+                    .isGreater(0)
             }
         }
     }

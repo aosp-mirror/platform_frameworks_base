@@ -49,8 +49,8 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
     @VisibleForTesting var noiseConfig: TurbulenceNoiseAnimationConfig? = null
     @VisibleForTesting var currentAnimator: ValueAnimator? = null
 
-    override fun onDraw(canvas: Canvas?) {
-        if (canvas == null || !canvas.isHardwareAccelerated) {
+    override fun onDraw(canvas: Canvas) {
+        if (!canvas.isHardwareAccelerated) {
             // Drawing with the turbulence noise shader requires hardware acceleration, so skip
             // if it's unsupported.
             return

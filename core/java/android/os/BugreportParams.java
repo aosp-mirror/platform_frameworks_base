@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Parameters that specify what kind of bugreport should be taken.
@@ -125,7 +126,8 @@ public final class BugreportParams {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "BUGREPORT_FLAG_" }, value = {
-            BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA
+            BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA,
+            BUGREPORT_FLAG_DEFER_CONSENT
     })
     public @interface BugreportFlag {}
 
@@ -135,4 +137,14 @@ public final class BugreportParams {
      */
     public static final int BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA =
             IDumpstate.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA;
+
+    /**
+     * Flag for deferring user consent.
+     *
+     * <p>This flag should be used in cases where it may not be possible for the user to respond
+     * to a consent dialog immediately, such as when the user is driving. The generated bugreport
+     * may be retrieved at a later time using {@link BugreportManager#retrieveBugreport(
+     * String, ParcelFileDescriptor, Executor, BugreportManager.BugreportCallback)}.
+     */
+    public static final int BUGREPORT_FLAG_DEFER_CONSENT = IDumpstate.BUGREPORT_FLAG_DEFER_CONSENT;
 }

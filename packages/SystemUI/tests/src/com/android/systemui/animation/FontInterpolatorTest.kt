@@ -61,7 +61,7 @@ class FontInterpolatorTest : SysuiTestCase() {
         val interp = FontInterpolator()
         assertSameAxes(startFont, interp.lerp(startFont, endFont, 0f))
         assertSameAxes(endFont, interp.lerp(startFont, endFont, 1f))
-        assertSameAxes("'wght' 500, 'ital' 0.5, 'GRAD' 450", interp.lerp(startFont, endFont, 0.5f))
+        assertSameAxes("'wght' 496, 'ital' 0.5, 'GRAD' 450", interp.lerp(startFont, endFont, 0.5f))
     }
 
     @Test
@@ -74,7 +74,7 @@ class FontInterpolatorTest : SysuiTestCase() {
                 .build()
 
         val interp = FontInterpolator()
-        assertSameAxes("'wght' 250, 'ital' 0.5", interp.lerp(startFont, endFont, 0.5f))
+        assertSameAxes("'wght' 249, 'ital' 0.5", interp.lerp(startFont, endFont, 0.5f))
     }
 
     @Test

@@ -17,30 +17,28 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 
 import libcore.util.NativeAllocationRegistry;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Calculate motion predictions.
  *
- * Feed motion events to this class in order to generate the predicted events. The prediction
- * functionality may not be available on all devices. Check if a specific source is supported on a
- * given input device using #isPredictionAvailable.
+ * Feed motion events to this class in order to generate predicted future events. The prediction
+ * functionality may not be available on all devices: check if a specific source is supported on a
+ * given input device using {@link #isPredictionAvailable}.
  *
- * Send all of the events that were received from the system here in order to generate complete,
- * accurate predictions. When processing the returned predictions, make sure to consider all of the
- * {@link MotionEvent#getHistoricalAxisValue historical samples}.
+ * Send all of the events that were received from the system to {@link #record} to generate
+ * complete, accurate predictions from {@link #predict}. When processing the returned predictions,
+ * make sure to consider all of the {@link MotionEvent#getHistoricalAxisValue historical samples}.
  */
-// Acts as a pass-through to the native MotionPredictor object.
-// Do not store any state in this Java layer, or add any business logic here. All of the
-// implementation details should go into the native MotionPredictor.
-// The context / resource access must be here rather than in native layer due to the lack of the
-// corresponding native API surface.
 public final class MotionPredictor {
+
+    // This is a pass-through to the native MotionPredictor object (mPtr). Do not store any state or
+    // add any business logic here -- all of the implementation details should go into the native
+    // MotionPredictor (except for accessing the context/resources, which have no corresponding
+    // native API).
 
     private static class RegistryHolder {
         public static final NativeAllocationRegistry REGISTRY =
@@ -51,15 +49,17 @@ public final class MotionPredictor {
 
     // Pointer to the native object.
     private final long mPtr;
-    private final Context mContext;
+    // Device-specific override to enable/disable motion prediction.
+    private final boolean mIsPredictionEnabled;
 
     /**
      * Create a new MotionPredictor for the provided {@link Context}.
      * @param context The context for the predictions
      */
     public MotionPredictor(@NonNull Context context) {
-        mContext = context;
-        final int offsetNanos = mContext.getResources().getInteger(
+        mIsPredictionEnabled = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableMotionPrediction);
+        final int offsetNanos = context.getResources().getInteger(
                 com.android.internal.R.integer.config_motionPredictionOffsetNanos);
         mPtr = nativeInitialize(offsetNanos);
         RegistryHolder.REGISTRY.registerNativeAllocation(this, mPtr);
@@ -67,54 +67,58 @@ public final class MotionPredictor {
 
     /**
      * Record a movement so that in the future, a prediction for the current gesture can be
-     * generated. Ensure to add all motions from the gesture of interest to generate the correct
-     * prediction.
+     * generated. Only gestures from one input device at a time should be provided to an instance of
+     * MotionPredictor.
+     *
      * @param event The received event
+     *
+     * @throws IllegalArgumentException if an inconsistent MotionEvent stream is sent.
      */
     public void record(@NonNull MotionEvent event) {
+        if (!mIsPredictionEnabled) {
+            return;
+        }
         nativeRecord(mPtr, event);
     }
 
     /**
-     * Get predicted events for all gestures that have been provided to the 'record' function.
-     * If events from multiple devices were sent to 'record', this will produce a separate
-     * {@link MotionEvent} for each device id. The returned list may be empty if no predictions for
-     * any of the added events are available.
+     * Get a predicted event for the gesture that has been provided to {@link #record}.
      * Predictions may not reach the requested timestamp if the confidence in the prediction results
      * is low.
      *
      * @param predictionTimeNanos The time that the prediction should target, in the
      * {@link android.os.SystemClock#uptimeMillis} time base, but in nanoseconds.
      *
-     * @return the list of predicted motion events, for each device id. Ensure to check the
-     * historical data in addition to the latest ({@link MotionEvent#getX getX()},
-     * {@link MotionEvent#getY getY()}) coordinates for smoothest prediction curves. Empty list is
-     * returned if predictions are not supported, or not possible for the current set of gestures.
+     * @return The predicted motion event, or `null` if predictions are not supported, or not
+     * possible for the current gesture. Be sure to check the historical data in addition to the
+     * latest ({@link MotionEvent#getX getX()}, {@link MotionEvent#getY getY()}) coordinates for
+     * smooth prediction curves.
      */
-    @NonNull
-    public List<MotionEvent> predict(long predictionTimeNanos) {
-        return Arrays.asList(nativePredict(mPtr, predictionTimeNanos));
+    @Nullable
+    public MotionEvent predict(long predictionTimeNanos) {
+        if (!mIsPredictionEnabled) {
+            return null;
+        }
+        return nativePredict(mPtr, predictionTimeNanos);
     }
 
     /**
-     * Check whether this device supports motion predictions for the given source type.
+     * Check whether a device supports motion predictions for a given source type.
      *
-     * @param deviceId The input device id
-     * @param source The source of input events
+     * @param deviceId The input device id.
+     * @param source The source of input events.
      * @return True if the current device supports predictions, false otherwise.
+     *
+     * @see MotionEvent#getDeviceId
+     * @see MotionEvent#getSource
      */
     public boolean isPredictionAvailable(int deviceId, int source) {
-        // Device-specific override
-        if (!mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableMotionPrediction)) {
-            return false;
-        }
-        return nativeIsPredictionAvailable(mPtr, deviceId, source);
+        return mIsPredictionEnabled && nativeIsPredictionAvailable(mPtr, deviceId, source);
     }
 
     private static native long nativeInitialize(int offsetNanos);
     private static native void nativeRecord(long nativePtr, MotionEvent event);
-    private static native MotionEvent[] nativePredict(long nativePtr, long predictionTimeNanos);
+    private static native MotionEvent nativePredict(long nativePtr, long predictionTimeNanos);
     private static native boolean nativeIsPredictionAvailable(long nativePtr, int deviceId,
             int source);
     private static native long nativeGetNativeMotionPredictorFinalizer();

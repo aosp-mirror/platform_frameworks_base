@@ -44,5 +44,14 @@ class ExponentialBackOff {
     void reset() {
         mCurrentIntervalMillis = mInitIntervalMillis / MULTIPLIER;
     }
+
+    @Override
+    public String toString() {
+        return "ExponentialBackOff{"
+                + "mInitIntervalMillis=" + mInitIntervalMillis
+                + ", mMaxIntervalMillis=" + mMaxIntervalMillis
+                + ", mCurrentIntervalMillis=" + mCurrentIntervalMillis
+                + '}';
+    }
 }
 

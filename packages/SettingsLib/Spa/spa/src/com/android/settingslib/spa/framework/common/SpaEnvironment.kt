@@ -71,11 +71,15 @@ abstract class SpaEnvironment(context: Context) {
 
     val sliceDataRepository = lazy { SettingsSliceDataRepository(entryRepository.value) }
 
-    // In Robolectric test, applicationContext is not available. Use context as fallback.
+    // The application context. Use local context as fallback when applicationContext is not
+    // available (e.g. in Robolectric test).
     val appContext: Context = context.applicationContext ?: context
 
+    // Set your SpaLogger implementation, for any SPA events logging.
     open val logger: SpaLogger = object : SpaLogger {}
 
+    // Specify class name of browse activity and slice broadcast receiver, which is used to
+    // generate the necessary intents.
     open val browseActivityClass: Class<out Activity>? = null
     open val sliceBroadcastReceiverClass: Class<out BroadcastReceiver>? = null
 
@@ -84,4 +88,13 @@ abstract class SpaEnvironment(context: Context) {
     open val sliceProviderAuthorities: String? = null
 
     // TODO: add other environment setup here.
+    companion object {
+        /**
+         * Whether debug mode is on or off.
+         *
+         * If set to true, this will also enable all the pages under development (allows browsing
+         * and searching).
+         */
+        const val IS_DEBUG = false
+    }
 }

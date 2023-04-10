@@ -22,6 +22,14 @@
     android:background="@android:color/holo_orange_light">
 
     <Button
+        android:id="@+id/launch_secondary_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_centerHorizontal="true"
+        android:onClick="launchSecondaryActivity"
+        android:text="Launch Secondary Activity" />
+
+    <Button
         android:id="@+id/launch_placeholder_split_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"

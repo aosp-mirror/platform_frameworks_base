@@ -28,7 +28,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
-import android.util.Log
 import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
@@ -318,13 +317,16 @@ constructor(
 
     /**
      * Returns the amount of translationY of the media container, during the current guided
-     * transformation, if running. If there is no guided transformation running, it will return 0.
+     * transformation, if running. If there is no guided transformation running, it will return -1.
      */
     fun getGuidedTransformationTranslationY(): Int {
         if (!isCurrentlyInGuidedTransformation()) {
             return -1
         }
-        val startHost = getHost(previousLocation) ?: return 0
+        val startHost = getHost(previousLocation)
+        if (startHost == null || !startHost.visible) {
+            return 0
+        }
         return targetBounds.top - startHost.currentBounds.top
     }
 
@@ -418,8 +420,8 @@ constructor(
      * Calculate the alpha of the view when given a cross-fade progress.
      *
      * @param crossFadeProgress The current cross fade progress. 0.5f means it's just switching
-     * between the start and the end location and the content is fully faded, while 0.75f means that
-     * we're halfway faded in again in the target state.
+     *   between the start and the end location and the content is fully faded, while 0.75f means
+     *   that we're halfway faded in again in the target state.
      */
     private fun calculateAlphaFromCrossFade(crossFadeProgress: Float): Float {
         if (crossFadeProgress <= 0.5f) {
@@ -629,6 +631,7 @@ constructor(
      *
      * @param forceNoAnimation optional parameter telling the system not to animate
      * @param forceStateUpdate optional parameter telling the system to update transition state
+     *
      * ```
      *                         even if location did not change
      * ```
@@ -639,7 +642,9 @@ constructor(
     ) =
         traceSection("MediaHierarchyManager#updateDesiredLocation") {
             val desiredLocation = calculateLocation()
-            if (desiredLocation != this.desiredLocation || forceStateUpdate) {
+            if (
+                desiredLocation != this.desiredLocation || forceStateUpdate && !blockLocationChanges
+            ) {
                 if (this.desiredLocation >= 0 && desiredLocation != this.desiredLocation) {
                     // Only update previous location when it actually changes
                     previousLocation = this.desiredLocation
@@ -944,7 +949,7 @@ constructor(
 
     /**
      * @return the current transformation progress if we're in a guided transformation and -1
-     * otherwise
+     *   otherwise
      */
     private fun getTransformationProgress(): Float {
         if (skipQqsOnExpansion) {
@@ -1055,17 +1060,6 @@ constructor(
                     // This will either do a full layout pass and remeasure, or it will bypass
                     // that and directly set the mediaFrame's bounds within the premeasured host.
                     targetHost.addView(mediaFrame)
-
-                    if (mediaFrame.childCount > 0) {
-                        val child = mediaFrame.getChildAt(0)
-                        if (mediaFrame.height < child.height) {
-                            Log.wtf(
-                                TAG,
-                                "mediaFrame height is too small for child: " +
-                                    "${mediaFrame.height} vs ${child.height}"
-                            )
-                        }
-                    }
                 }
                 if (isCrossFadeAnimatorRunning) {
                     // When cross-fading with an animation, we only notify the media carousel of the

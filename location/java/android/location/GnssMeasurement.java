@@ -497,24 +497,29 @@ public final class GnssMeasurement implements Parcelable {
      *   <thead>
      *     <tr>
      *       <td />
-     *       <td colspan="3"><strong>GPS/QZSS</strong></td>
+     *       <td colspan="4"><strong>GPS/QZSS</strong></td>
      *       <td><strong>GLNS</strong></td>
-     *       <td colspan="2"><strong>BDS</strong></td>
+     *       <td colspan="4"><strong>BDS</strong></td>
      *       <td colspan="3"><strong>GAL</strong></td>
      *       <td><strong>SBAS</strong></td>
+     *       <td><strong>IRNSS</strong></td>
      *     </tr>
      *     <tr>
      *       <td><strong>State Flag</strong></td>
      *       <td><strong>L1 C/A</strong></td>
+     *       <td><strong>L1 C(P)</strong></td>
      *       <td><strong>L5I</strong></td>
      *       <td><strong>L5Q</strong></td>
      *       <td><strong>L1OF</strong></td>
      *       <td><strong>B1I (D1)</strong></td>
-     *       <td><strong>B1I &nbsp;(D2)</strong></td>
+     *       <td><strong>B1I (D2)</strong></td>
+     *       <td><strong>B1C (P)</strong></td>
+     *       <td><strong>B2AQ </strong></td>
      *       <td><strong>E1B</strong></td>
      *       <td><strong>E1C</strong></td>
      *       <td><strong>E5AQ</strong></td>
      *       <td><strong>L1 C/A</strong></td>
+     *       <td><strong>L5C</strong></td>
      *     </tr>
      *   </thead>
      *   <tbody>
@@ -532,19 +537,27 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>0</td>
      *       <td>0</td>
      *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
+     *       <td>0</td>
      *     </tr>
      *     <tr>
      *       <td>
      *         <strong>STATE_CODE_LOCK</strong>
      *       </td>
      *       <td>1 ms</td>
+     *       <td>10 ms</td>
      *       <td>1 ms</td>
      *       <td>1 ms</td>
      *       <td>1 ms</td>
      *       <td>1 ms</td>
+     *       <td>1 ms</td>
+     *       <td>10 ms</td>
      *       <td>1 ms</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>1 ms</td>
      *       <td>1 ms</td>
      *       <td>1 ms</td>
      *     </tr>
@@ -552,67 +565,95 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>
      *         <strong>STATE_SYMBOL_SYNC</strong>
      *       </td>
-     *       <td>20 ms (optional)</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>10 ms</td>
-     *       <td>1 ms (optional)</td>
+     *       <td>-</td>
      *       <td>10 ms</td>
-     *       <td>20 ms (optional)</td>
+     *       <td>-</td>
      *       <td>2 ms</td>
-     *       <td>4 ms (optional)</td>
-     *       <td>4 ms (optional)</td>
-     *       <td>1 ms (optional)</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>2 ms</td>
+     *       <td>-</td>
      *     </tr>
      *     <tr>
      *       <td>
      *         <strong>STATE_BIT_SYNC</strong>
      *       </td>
      *       <td>20 ms</td>
+     *       <td>-</td>
      *       <td>20 ms</td>
-     *       <td>1 ms (optional)</td>
+     *       <td>-</td>
      *       <td>20 ms</td>
      *       <td>20 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>8 ms</td>
      *       <td>-</td>
-     *       <td>1 ms (optional)</td>
+     *       <td>-</td>
      *       <td>4 ms</td>
+     *       <td>20 ms</td>
      *     </tr>
      *     <tr>
      *       <td>
      *         <strong>STATE_SUBFRAME_SYNC</strong>
      *       </td>
-     *       <td>6s</td>
-     *       <td>6s</td>
-     *       <td>-</td>
-     *       <td>2 s</td>
      *       <td>6 s</td>
      *       <td>-</td>
+     *       <td>6 s</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>6 s</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>100 ms</td>
      *       <td>-</td>
+     *       <td>-</td>
+     *       <td>100 ms</td>
+     *       <td>-</td>
+     *       <td>6 s</td>
      *     </tr>
      *     <tr>
      *       <td>
      *         <strong>STATE_TOW_DECODED</strong>
      *       </td>
-     *       <td colspan="2">1 week</td>
+     *       <td>1 week</td>
      *       <td>-</td>
-     *       <td>1 day</td>
-     *       <td colspan="2">1 week</td>
-     *       <td colspan="2">1 week</td>
+     *       <td>1 week</td>
      *       <td>-</td>
+     *       <td>-</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>-</td>
+     *       <td>1 week</td>
      *       <td>1 week</td>
      *     </tr>
      *     <tr>
      *       <td>
      *         <strong>STATE_TOW_KNOWN</strong>
      *       </td>
-     *       <td colspan="3">1 week</td>
-     *       <td>1 day</td>
-     *       <td colspan="2">1 week</td>
-     *       <td colspan="3">1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>-</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
+     *       <td>1 week</td>
      *       <td>1 week</td>
      *     </tr>
      *     <tr>
@@ -622,7 +663,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
      *       <td>2 s</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
@@ -637,7 +682,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
      *       <td>1 day</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
@@ -652,7 +701,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
      *       <td>1 day</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
@@ -669,7 +722,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
      *       <td>2 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
@@ -684,7 +741,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
      *       <td>600 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
@@ -700,8 +761,12 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>4 ms</td>
      *       <td>4 ms</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *     </tr>
@@ -716,7 +781,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>100 ms</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *     </tr>
@@ -725,14 +794,18 @@ public final class GnssMeasurement implements Parcelable {
      *         <strong>STATE_2ND_CODE_LOCK</strong>
      *       </td>
      *       <td>-</td>
-     *       <td>10 ms (optional)</td>
+     *       <td>18000 ms</td>
+     *       <td>10 ms</td>
      *       <td>20 ms</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
-     *       <td>-</td>
-     *       <td>100 ms (optional)</td>
+     *       <td>18000 ms</td>
      *       <td>100 ms</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>100 ms</td>
+     *       <td>-</td>
      *       <td>-</td>
      *     </tr>
      *     <tr>
@@ -745,7 +818,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>2 s</td>
+     *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
@@ -763,7 +840,11 @@ public final class GnssMeasurement implements Parcelable {
      *       <td>-</td>
      *       <td>-</td>
      *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
+     *       <td>-</td>
      *       <td>1 s</td>
+     *       <td>-</td>
      *     </tr>
      *   </tbody>
      * </table>

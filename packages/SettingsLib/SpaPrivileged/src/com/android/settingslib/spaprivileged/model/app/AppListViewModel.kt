@@ -26,6 +26,7 @@ import com.android.settingslib.spa.framework.util.StateFlowBridge
 import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spa.framework.util.waitFirst
 import com.android.settingslib.spa.widget.ui.SpinnerOption
+import com.android.settingslib.spaprivileged.template.app.AppListConfig
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,8 +35,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -78,32 +79,77 @@ internal open class AppListViewModelImpl<T : AppRecord>(
     private val labelMap = ConcurrentHashMap<String, String>()
     private val scope = viewModelScope + Dispatchers.IO
 
-    private val userIdFlow = appListConfig.flow.map { it.userId }
+    private val userSubGraphsFlow = appListConfig.flow.map { config ->
+        config.userIds.map { userId -> UserSubGraph(userId, config.showInstantApps) }
+    }.shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
 
-    private val appsStateFlow = MutableStateFlow<List<ApplicationInfo>?>(null)
+    private inner class UserSubGraph(
+        private val userId: Int,
+        private val showInstantApps: Boolean,
+    ) {
+        private val userIdFlow = flowOf(userId)
 
-    private val recordListFlow = listModel.flow
-        .flatMapLatest { it.transform(userIdFlow, appsStateFlow.filterNotNull()) }
-        .shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
+        private val appsStateFlow = MutableStateFlow<List<ApplicationInfo>?>(null)
 
-    private val systemFilteredFlow =
-        appListRepository.showSystemPredicate(userIdFlow, showSystem.flow)
-            .combine(recordListFlow) { showAppPredicate, recordList ->
-                recordList.filter { showAppPredicate(it.app) }
+        val recordListFlow = listModel.flow
+            .flatMapLatest { it.transform(userIdFlow, appsStateFlow.filterNotNull()) }
+            .shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
+
+        private val systemFilteredFlow =
+            appListRepository.showSystemPredicate(userIdFlow, showSystem.flow)
+                .combine(recordListFlow) { showAppPredicate, recordList ->
+                    recordList.filter { showAppPredicate(it.app) }
+                }
+                .shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
+
+        val listModelFilteredFlow = optionFlow.filterNotNull().flatMapLatest { option ->
+            listModel.flow.flatMapLatest { listModel ->
+                listModel.filter(this.userIdFlow, option, this.systemFilteredFlow)
             }
+        }.shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
+
+        fun reloadApps() {
+            scope.launch {
+                appsStateFlow.value = appListRepository.loadApps(userId, showInstantApps)
+            }
+        }
+    }
+
+    private val combinedRecordListFlow = userSubGraphsFlow.flatMapLatest { userSubGraphList ->
+        combine(userSubGraphList.map { it.recordListFlow }) { it.toList().flatten() }
+    }.shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
 
     override val spinnerOptionsFlow =
-        recordListFlow.combine(listModel.flow) { recordList, listModel ->
+        combinedRecordListFlow.combine(listModel.flow) { recordList, listModel ->
             listModel.getSpinnerOptions(recordList)
-        }
+        }.shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
 
-    override val appListDataFlow = optionFlow.filterNotNull().flatMapLatest(::filterAndSort)
-        .combine(searchQuery.flow) { appListData, searchQuery ->
+    private val appEntryListFlow = userSubGraphsFlow.flatMapLatest { userSubGraphList ->
+        combine(userSubGraphList.map { it.listModelFilteredFlow }) { it.toList().flatten() }
+    }.asyncMapItem { record ->
+        val label = getLabel(record.app)
+        AppEntry(
+            record = record,
+            label = label,
+            labelCollationKey = collator.getCollationKey(label),
+        )
+    }
+
+    override val appListDataFlow =
+        combine(
+            appEntryListFlow,
+            listModel.flow,
+            optionFlow.filterNotNull(),
+        ) { appEntries, listModel, option ->
+            AppListData(
+                appEntries = appEntries.sortedWith(listModel.getComparator(option)),
+                option = option,
+            )
+        }.combine(searchQuery.flow) { appListData, searchQuery ->
             appListData.filter {
                 it.label.contains(other = searchQuery, ignoreCase = true)
             }
-        }
-        .shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
+        }.shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
 
     init {
         scheduleOnFirstLoaded()
@@ -111,30 +157,16 @@ internal open class AppListViewModelImpl<T : AppRecord>(
 
     fun reloadApps() {
         scope.launch {
-            appsStateFlow.value = appListRepository.loadApps(appListConfig.flow.first())
+            userSubGraphsFlow.collect { userSubGraphList ->
+                for (userSubGraph in userSubGraphList) {
+                    userSubGraph.reloadApps()
+                }
+            }
         }
     }
 
-    private fun filterAndSort(option: Int) = listModel.flow.flatMapLatest { listModel ->
-        listModel.filter(userIdFlow, option, systemFilteredFlow)
-            .asyncMapItem { record ->
-                val label = getLabel(record.app)
-                AppEntry(
-                    record = record,
-                    label = label,
-                    labelCollationKey = collator.getCollationKey(label),
-                )
-            }
-            .map { appEntries ->
-                AppListData(
-                    appEntries = appEntries.sortedWith(listModel.getComparator(option)),
-                    option = option,
-                )
-            }
-    }
-
     private fun scheduleOnFirstLoaded() {
-        recordListFlow
+        combinedRecordListFlow
             .waitFirst(appListDataFlow)
             .combine(listModel.flow) { recordList, listModel ->
                 if (listModel.onFirstLoaded(recordList)) {

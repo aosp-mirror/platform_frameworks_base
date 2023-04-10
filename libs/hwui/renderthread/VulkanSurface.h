@@ -46,6 +46,11 @@ public:
     }
     const SkMatrix& getCurrentPreTransform() { return mWindowInfo.preTransform; }
 
+    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
+    const SkM44& getPixelSnapMatrix() const { return mWindowInfo.pixelSnapMatrix; }
+
+    bool isBeyond8Bit() const;
+
 private:
     /*
      * All structs/methods in this private section are specifically for use by the VulkanManager
@@ -94,6 +99,7 @@ private:
         uint32_t bufferFormat;
         android_dataspace dataspace;
         sk_sp<SkColorSpace> colorspace;
+        ColorMode colorMode;
         int transform;
         size_t bufferCount;
         uint64_t windowUsageFlags;
@@ -102,6 +108,7 @@ private:
         SkISize actualSize;
         // transform to be applied to the SkSurface to map the coordinates to the provided transform
         SkMatrix preTransform;
+        SkM44 pixelSnapMatrix;
     };
 
     VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, GrDirectContext* grContext);

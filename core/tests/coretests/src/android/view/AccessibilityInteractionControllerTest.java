@@ -16,8 +16,8 @@
 
 package android.view;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
@@ -98,24 +98,42 @@ public class AccessibilityInteractionControllerTest {
     @Test
     public void clearAccessibilityFocus_shouldClearFocus() throws Exception {
         performAccessibilityFocus("com.android.frameworks.coretests:id/appNameBtn");
-        assertTrue("Button should have a11y focus",
-                mButton.isAccessibilityFocused());
+        assertWithMessage("Button should have a11y focus").that(
+                mButton.isAccessibilityFocused()).isTrue();
         mAccessibilityInteractionController.clearAccessibilityFocusClientThread();
         sInstrumentation.waitForIdleSync();
-        assertFalse("Button should not have a11y focus",
-                mButton.isAccessibilityFocused());
+        assertWithMessage("Button should not have a11y focus").that(
+                mButton.isAccessibilityFocused()).isFalse();
     }
 
     @Test
     public void clearAccessibilityFocus_uiThread_shouldClearFocus() throws Exception {
         performAccessibilityFocus("com.android.frameworks.coretests:id/appNameBtn");
-        assertTrue("Button should have a11y focus",
-                mButton.isAccessibilityFocused());
-        sInstrumentation.runOnMainSync(() -> {
-            mAccessibilityInteractionController.clearAccessibilityFocusClientThread();
-        });
-        assertFalse("Button should not have a11y focus",
-                mButton.isAccessibilityFocused());
+        assertWithMessage("Button should have a11y focus").that(
+                mButton.isAccessibilityFocused()).isTrue();
+        sInstrumentation.runOnMainSync(() ->
+                mAccessibilityInteractionController.clearAccessibilityFocusClientThread());
+        assertWithMessage("Button should not have a11y focus").that(
+                mButton.isAccessibilityFocused()).isFalse();
+    }
+
+    @Test
+    public void clearAccessibilityFocus_sensitiveRootView_shouldClearFocus()
+            throws Exception {
+        final View rootView = mButton.getRootView();
+        assertThat(rootView).isNotNull();
+        try {
+            rootView.setAccessibilityDataSensitive(View.ACCESSIBILITY_DATA_SENSITIVE_YES);
+            performAccessibilityFocus("com.android.frameworks.coretests:id/appNameBtn");
+            assertWithMessage("Button should have a11y focus").that(
+                    mButton.isAccessibilityFocused()).isTrue();
+            sInstrumentation.runOnMainSync(() ->
+                    mAccessibilityInteractionController.clearAccessibilityFocusClientThread());
+            assertWithMessage("Button should not have a11y focus").that(
+                    mButton.isAccessibilityFocused()).isFalse();
+        } finally {
+            rootView.setAccessibilityDataSensitive(View.ACCESSIBILITY_DATA_SENSITIVE_AUTO);
+        }
     }
 
     private void launchActivity() {

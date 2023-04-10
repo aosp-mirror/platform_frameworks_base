@@ -31,6 +31,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_OEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRODUCT;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_STOPPED_SYSTEM_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM_EXT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
@@ -198,6 +199,7 @@ final class ScanPackageUtils {
         if (createNewPackage) {
             final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
             final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
+            final boolean isStoppedSystemApp = (scanFlags & SCAN_AS_STOPPED_SYSTEM_APP) != 0;
 
             // Flags contain system values stored in the server variant of AndroidPackage,
             // and so the server-side PackageInfoUtils is still called, even without a
@@ -212,7 +214,7 @@ final class ScanPackageUtils {
                     AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
                     parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
-                    true /*allowInstall*/, instantApp, virtualPreload,
+                    true /*allowInstall*/, instantApp, virtualPreload, isStoppedSystemApp,
                     UserManagerService.getInstance(), usesSdkLibraries,
                     parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
@@ -545,7 +547,7 @@ final class ScanPackageUtils {
      */
     public static void assertCodePolicy(AndroidPackage pkg)
             throws PackageManagerException {
-        final boolean shouldHaveCode = pkg.isHasCode();
+        final boolean shouldHaveCode = pkg.isDeclaredHavingCode();
         if (shouldHaveCode && !apkHasCode(pkg.getBaseApkPath())) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Package " + pkg.getBaseApkPath() + " code is missing");
@@ -567,87 +569,101 @@ final class ScanPackageUtils {
             @PackageManagerService.ScanFlags int scanFlags) throws PackageManagerException {
         // Static shared libraries should have at least O target SDK
         if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.O) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs must target O SDK or higher");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs must target O SDK or higher",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_LOW_SDK);
         }
 
         // Package declaring static a shared lib cannot be instant apps
         if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot be instant apps");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot be instant apps",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_INSTANT);
         }
 
         // Package declaring static a shared lib cannot be renamed since the package
         // name is synthetic and apps can't code around package manager internals.
         if (!ArrayUtils.isEmpty(pkg.getOriginalPackages())) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot be renamed");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot be renamed",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_RENAMED);
         }
 
         // Package declaring static a shared lib cannot declare dynamic libs
         if (!ArrayUtils.isEmpty(pkg.getLibraryNames())) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot declare dynamic libs");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot declare dynamic libs",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_DYNAMIC);
         }
 
         // Package declaring static a shared lib cannot declare shared users
         if (pkg.getSharedUserId() != null) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot declare shared users");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot declare shared users",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_SHARED_USER);
         }
 
         // Static shared libs cannot declare activities
         if (!pkg.getActivities().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare activities");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare activities",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_ACTIVITY);
         }
 
         // Static shared libs cannot declare services
         if (!pkg.getServices().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare services");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare services",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_SERVICE);
         }
 
         // Static shared libs cannot declare providers
         if (!pkg.getProviders().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare content providers");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare content providers",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_CONTENT_PROVIDER);
         }
 
         // Static shared libs cannot declare receivers
         if (!pkg.getReceivers().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare broadcast receivers");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare broadcast receivers",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_BROADCAST_RECEIVER);
         }
 
         // Static shared libs cannot declare permission groups
         if (!pkg.getPermissionGroups().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare permission groups");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare permission groups",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_PERMISSION_GROUP);
         }
 
         // Static shared libs cannot declare attributions
         if (!pkg.getAttributions().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare features");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare features",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_FEATURE);
         }
 
         // Static shared libs cannot declare permissions
         if (!pkg.getPermissions().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare permissions");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare permissions",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_PERMISSION);
         }
 
         // Static shared libs cannot declare protected broadcasts
         if (!pkg.getProtectedBroadcasts().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare protected broadcasts");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare protected broadcasts",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_PROTECTED_BROADCAST);
         }
 
         // Static shared libs cannot be overlay targets
         if (pkg.getOverlayTarget() != null) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot be overlay targets");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot be overlay targets",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_OVERLAY_TARGETS);
         }
     }
 

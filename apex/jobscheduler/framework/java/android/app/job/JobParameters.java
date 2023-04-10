@@ -19,6 +19,7 @@ package android.app.job;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.usage.UsageStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -102,6 +103,7 @@ public class JobParameters implements Parcelable {
      * The user stopped the job via some UI (eg. Task Manager).
      * @hide
      */
+    @TestApi
     public static final int INTERNAL_STOP_REASON_USER_UI_STOP =
             JobProtoEnums.INTERNAL_STOP_REASON_USER_UI_STOP; // 11.
     /**
@@ -424,7 +426,7 @@ public class JobParameters implements Parcelable {
      * {@code true}. This will return {@code false} if the job wasn't requested to run as a
      * user-initiated job, or if it was requested to run as a user-initiated job but the app didn't
      * meet any of the requirements at the time of execution, such as having the
-     * {@link android.Manifest.permission#RUN_LONG_JOBS} permission.
+     * {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS} permission.
      *
      * @see JobInfo.Builder#setUserInitiated(boolean)
      */
@@ -478,6 +480,10 @@ public class JobParameters implements Parcelable {
      * Note that the system may relax the constraints you originally requested,
      * such as allowing a {@link JobInfo#NETWORK_TYPE_UNMETERED} job to run over
      * a metered network when there is a surplus of metered data available.
+     *
+     * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * this will return {@code null} if the app does not hold the permissions specified in
+     * {@link JobInfo.Builder#setRequiredNetwork(NetworkRequest)}.
      *
      * @return the network that should be used to perform any network requests
      *         for this job, or {@code null} if this job didn't set any required

@@ -73,6 +73,8 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @VisibleForTesting
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     int getDrawableResId() {
         int resId;
         switch (mRouteInfo.getType()) {

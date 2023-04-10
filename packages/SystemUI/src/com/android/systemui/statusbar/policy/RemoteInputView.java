@@ -78,6 +78,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.InterpolatorsAndroidX;
@@ -221,7 +222,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         final int stroke = colorized ? mContext.getResources().getDimensionPixelSize(
                 R.dimen.remote_input_view_text_stroke) : 0;
         if (colorized) {
-            final boolean dark = Notification.Builder.isColorDark(backgroundColor);
+            final boolean dark = ContrastColorUtil.isColorDark(backgroundColor);
             final int foregroundColor = dark ? Color.WHITE : Color.BLACK;
             final int inverseColor = dark ? Color.BLACK : Color.WHITE;
             editBgColor = backgroundColor;
@@ -303,7 +304,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     mEntry.mRemoteEditImeVisible = editTextRootWindowInsets != null
                             && editTextRootWindowInsets.isVisible(WindowInsets.Type.ime());
                     if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
-                        mController.removeRemoteInput(mEntry, mToken);
+                        // Pass null to ensure all inputs are cleared for this entry b/227115380
+                        mController.removeRemoteInput(mEntry, null);
                     }
                 }
             }

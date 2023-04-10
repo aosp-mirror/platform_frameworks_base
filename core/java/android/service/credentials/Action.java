@@ -17,7 +17,6 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.os.Parcel;
@@ -31,14 +30,8 @@ import java.util.Objects;
  *
  * <p>If user selects this action entry, the corresponding {@link PendingIntent} set on the
  * {@code slice} as a {@link androidx.slice.core.SliceAction} will get invoked.
- *
- * <p>Any class that derives this class must only add extra field values to the {@code slice}
- * object passed into the constructor. Any other field will not be parceled through. If the
- * derived class has custom parceling implementation, this class will not be able to unpack
- * the parcel without having access to that implementation.
  */
-@SuppressLint("ParcelNotFinal")
-public class Action implements Parcelable {
+public final class Action implements Parcelable {
     /** Slice object containing display content to be displayed with this action on the UI. */
     @NonNull
     private final Slice mSlice;

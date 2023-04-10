@@ -25,6 +25,8 @@ import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.CancellationSignalBeamer;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
@@ -59,6 +61,7 @@ final class IRemoteInputConnectionInvoker {
     @NonNull
     private final IRemoteInputConnection mConnection;
     private final int mSessionId;
+    private CancellationSignalBeamer.Sender mBeamer;
 
     private IRemoteInputConnectionInvoker(@NonNull IRemoteInputConnection inputConnection,
             int sessionId) {
@@ -66,73 +69,74 @@ final class IRemoteInputConnectionInvoker {
         mSessionId = sessionId;
     }
 
-    /**
-     * Subclass of {@link ResultReceiver} used by
-     * {@link #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)} for providing
-     * callback.
-     */
-    private static final class IntResultReceiver extends ResultReceiver {
-        @NonNull
-        private IntConsumer mConsumer;
-        @NonNull
+    private abstract static class OnceResultReceiver<C> extends ResultReceiver {
+        @Nullable
+        private C mConsumer;
+        @Nullable
         private Executor mExecutor;
 
-        IntResultReceiver(@NonNull Executor executor, @NonNull IntConsumer consumer) {
+        protected OnceResultReceiver(@NonNull Executor executor, @NonNull C consumer) {
             super(null);
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(consumer);
             mExecutor = executor;
             mConsumer = consumer;
         }
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (mExecutor != null && mConsumer != null) {
-                mExecutor.execute(() -> mConsumer.accept(resultCode));
-                // provide callback only once.
-                clear();
+        protected final void onReceiveResult(int resultCode, Bundle resultData) {
+            final Executor executor;
+            final C consumer;
+            synchronized (this) {
+                executor = mExecutor;
+                consumer = mConsumer;
+                mExecutor = null;
+                mConsumer = null;
+            }
+            if (executor != null && consumer != null) {
+                dispatch(executor, consumer, resultCode, resultData);
             }
         }
 
-        private void clear() {
-            mExecutor = null;
-            mConsumer = null;
+        protected abstract void dispatch(@NonNull Executor executor, @NonNull C consumer, int code,
+                Bundle data);
+    }
+
+    /**
+     * Subclass of {@link ResultReceiver} used by
+     * {@link #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)} for providing
+     * callback.
+     */
+    private static final class IntResultReceiver extends OnceResultReceiver<IntConsumer> {
+        IntResultReceiver(@NonNull Executor executor, @NonNull IntConsumer consumer) {
+            super(executor, consumer);
         }
-    };
+
+        @Override
+        protected void dispatch(@NonNull Executor executor, @NonNull IntConsumer consumer, int code,
+                Bundle data) {
+            executor.execute(() -> consumer.accept(code));
+        }
+    }
 
     /**
      * Subclass of {@link ResultReceiver} used by
      * {@link #requestTextBoundsInfo(RectF, Executor, Consumer)} for providing
      * callback.
      */
-    private static final class TextBoundsInfoResultReceiver extends ResultReceiver {
-        @Nullable
-        private Consumer<TextBoundsInfoResult> mConsumer;
-        @Nullable
-        private Executor mExecutor;
-
+    private static final class TextBoundsInfoResultReceiver extends
+            OnceResultReceiver<Consumer<TextBoundsInfoResult>> {
         TextBoundsInfoResultReceiver(@NonNull Executor executor,
                 @NonNull Consumer<TextBoundsInfoResult> consumer) {
-            super(null);
-            mExecutor = executor;
-            mConsumer = consumer;
+            super(executor, consumer);
         }
 
         @Override
-        protected void onReceiveResult(@TextBoundsInfoResult.ResultCode int resultCode,
-                @Nullable Bundle resultData) {
-            synchronized (this) {
-                if (mExecutor != null && mConsumer != null) {
-                    final TextBoundsInfoResult textBoundsInfoResult = new TextBoundsInfoResult(
-                            resultCode, TextBoundsInfo.createFromBundle(resultData));
-                    mExecutor.execute(() -> mConsumer.accept(textBoundsInfoResult));
-                    // provide callback only once.
-                    clear();
-                }
-            }
-        }
-
-        private void clear() {
-            mExecutor = null;
-            mConsumer = null;
+        protected void dispatch(@NonNull Executor executor,
+                @NonNull Consumer<TextBoundsInfoResult> consumer, int code, Bundle data) {
+            final TextBoundsInfoResult textBoundsInfoResult = new TextBoundsInfoResult(
+                    code, TextBoundsInfo.createFromBundle(data));
+            executor.execute(() -> consumer.accept(textBoundsInfoResult));
         }
     }
 
@@ -680,7 +684,7 @@ final class IRemoteInputConnectionInvoker {
      * InputConnectionCommandHeader, ParcelableHandwritingGesture, ResultReceiver)}.
      */
     @AnyThread
-    public void performHandwritingGesture(@NonNull ParcelableHandwritingGesture gesture,
+    public void performHandwritingGesture(@NonNull HandwritingGesture gesture,
             @Nullable @CallbackExecutor Executor executor, @Nullable IntConsumer consumer) {
         ResultReceiver resultReceiver = null;
         if (consumer != null) {
@@ -688,7 +692,11 @@ final class IRemoteInputConnectionInvoker {
             resultReceiver = new IntResultReceiver(executor, consumer);
         }
         try {
-            mConnection.performHandwritingGesture(createHeader(), gesture, resultReceiver);
+            try (var ignored = getCancellationSignalBeamer().beamScopeIfNeeded(gesture)) {
+                mConnection.performHandwritingGesture(createHeader(),
+                        ParcelableHandwritingGesture.of(gesture),
+                        resultReceiver);
+            }
         } catch (RemoteException e) {
             if (consumer != null && executor != null) {
                 executor.execute(() -> consumer.accept(
@@ -699,23 +707,57 @@ final class IRemoteInputConnectionInvoker {
 
     /**
      * Invokes one of {@link IRemoteInputConnection#previewHandwritingGesture(
-     * InputConnectionCommandHeader, ParcelableHandwritingGesture, CancellationSignal)}
+     * InputConnectionCommandHeader, HandwritingGesture, IBinder)}
      */
     @AnyThread
     public boolean previewHandwritingGesture(
-            @NonNull ParcelableHandwritingGesture gesture,
+            @NonNull HandwritingGesture gesture,
             @Nullable CancellationSignal cancellationSignal) {
-        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            return false; // cancelled.
-        }
-
-        // TODO(b/254727073): Implement CancellationSignal
         try {
-            mConnection.previewHandwritingGesture(createHeader(), gesture, null);
+            try (var csToken = beam(cancellationSignal)) {
+                mConnection.previewHandwritingGesture(createHeader(),
+                        ParcelableHandwritingGesture.of(gesture),
+                        csToken);
+            }
             return true;
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    @Nullable
+    CancellationSignalBeamer.Sender.CloseableToken beam(CancellationSignal cs) {
+        if (cs == null) {
+            return null;
+        }
+        return getCancellationSignalBeamer().beam(cs);
+    }
+
+    private CancellationSignalBeamer.Sender getCancellationSignalBeamer() {
+        if (mBeamer != null) {
+            return mBeamer;
+        }
+        mBeamer = new CancellationSignalBeamer.Sender() {
+            @Override
+            public void onCancel(IBinder token) {
+                try {
+                    mConnection.cancelCancellationSignal(token);
+                } catch (RemoteException e) {
+                    // Remote process likely died, ignore.
+                }
+            }
+
+            @Override
+            public void onForget(IBinder token) {
+                try {
+                    mConnection.forgetCancellationSignal(token);
+                } catch (RemoteException e) {
+                    // Remote process likely died, ignore.
+                }
+            }
+        };
+
+        return mBeamer;
     }
 
     /**

@@ -29,6 +29,7 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.timezonedetector.Dumpable;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -87,7 +88,7 @@ public interface TimeDetectorStrategy extends Dumpable {
     boolean confirmTime(@NonNull UnixEpochTime confirmationTime);
 
     /** Processes the suggested time from telephony sources. */
-    void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
+    void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion suggestion);
 
     /**
      * Processes the suggested manually entered time. Returns {@code false} if the suggestion was
@@ -98,11 +99,23 @@ public interface TimeDetectorStrategy extends Dumpable {
      * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
      *   policy restrictions that should apply to actual users can be ignored
      */
-    boolean suggestManualTime(@UserIdInt int userId, @NonNull ManualTimeSuggestion timeSuggestion,
+    boolean suggestManualTime(@UserIdInt int userId, @NonNull ManualTimeSuggestion suggestion,
             boolean bypassUserPolicyChecks);
 
-    /** Processes the suggested time from network sources. */
-    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);
+    /**
+     * Processes the suggested network time. The suggestion may not be used to set the device's time
+     * depending on device configuration and user settings, but can replace previous network
+     * suggestions received. See also
+     * {@link #addNetworkTimeUpdateListener(StateChangeListener)} and
+     * {@link #getLatestNetworkSuggestion()}.
+     */
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion suggestion);
+
+    /**
+     * Adds a listener that will be notified when a new network time is available. See {@link
+     * #getLatestNetworkSuggestion()}.
+     */
+    void addNetworkTimeUpdateListener(@NonNull StateChangeListener networkSuggestionUpdateListener);
 
     /**
      * Returns the latest (accepted) network time suggestion. Returns {@code null} if there isn't
@@ -119,10 +132,10 @@ public interface TimeDetectorStrategy extends Dumpable {
     void clearLatestNetworkSuggestion();
 
     /** Processes the suggested time from gnss sources. */
-    void suggestGnssTime(@NonNull GnssTimeSuggestion timeSuggestion);
+    void suggestGnssTime(@NonNull GnssTimeSuggestion suggestion);
 
     /** Processes the suggested time from external sources. */
-    void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion);
+    void suggestExternalTime(@NonNull ExternalTimeSuggestion suggestion);
 
     // Utility methods below are to be moved to a better home when one becomes more obvious.
 

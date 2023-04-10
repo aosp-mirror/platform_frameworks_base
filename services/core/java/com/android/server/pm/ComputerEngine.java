@@ -65,6 +65,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -570,6 +571,7 @@ public class ComputerEngine implements Computer {
                 if (!blockInstantResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.activityInfo = ai;
+                    ri.userHandle = UserHandle.of(userId);
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
@@ -1856,8 +1858,7 @@ public class ComputerEngine implements Computer {
         // Figure out which lib versions the caller can see
         LongSparseLongArray versionsCallerCanSee = null;
         final int callingAppId = UserHandle.getAppId(callingUid);
-        if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.SHELL_UID
-                && callingAppId != Process.ROOT_UID) {
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingAppId)) {
             versionsCallerCanSee = new LongSparseLongArray();
             String libName = versionedLib.valueAt(0).getName();
             String[] uidPackages = getPackagesForUidInternal(callingUid, callingUid);
@@ -2034,8 +2035,7 @@ public class ComputerEngine implements Computer {
         if ((flags & PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES) != 0) {
             // System/shell/root get to see all static libs
             final int appId = UserHandle.getAppId(uid);
-            if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
-                    || appId == Process.ROOT_UID) {
+            if (PackageManagerServiceUtils.isSystemOrRootOrShell(appId)) {
                 return false;
             }
             // Installer gets to see all static libs.
@@ -2091,8 +2091,7 @@ public class ComputerEngine implements Computer {
         if ((flags & PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES) != 0) {
             // System/shell/root get to see all SDK libs.
             final int appId = UserHandle.getAppId(uid);
-            if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
-                    || appId == Process.ROOT_UID) {
+            if (PackageManagerServiceUtils.isSystemOrRootOrShell(appId)) {
                 return false;
             }
             // Installer gets to see all SDK libs.
@@ -2152,7 +2151,7 @@ public class ComputerEngine implements Computer {
         if (!requirePermissionWhenSameUser && userId == callingUserId) {
             return true;
         }
-        if (callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID) {
+        if (PackageManagerServiceUtils.isSystemOrRoot(callingUid)) {
             return true;
         }
         if (requireFullPermission) {
@@ -2191,6 +2190,11 @@ public class ComputerEngine implements Computer {
         }
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.getUid();
+    }
+
+    private boolean isCallerFromManagedUserOrProfile(@UserIdInt int userId) {
+        final var dpmi = mInjector.getLocalService(DevicePolicyManagerInternal.class);
+        return dpmi != null && dpmi.isUserOrganizationManaged(userId);
     }
 
     public final boolean isComponentVisibleToInstantApp(@Nullable ComponentName component) {
@@ -3813,8 +3817,7 @@ public class ComputerEngine implements Computer {
     public boolean canRequestPackageInstalls(@NonNull String packageName, int callingUid,
             int userId, boolean throwIfPermNotDeclared) {
         int uid = getPackageUidInternal(packageName, 0, userId, callingUid);
-        if (callingUid != uid && callingUid != Process.ROOT_UID
-                && callingUid != Process.SYSTEM_UID) {
+        if (callingUid != uid && !PackageManagerServiceUtils.isSystemOrRoot(callingUid)) {
             throw new SecurityException(
                     "Caller uid " + callingUid + " does not own package " + packageName);
         }
@@ -4980,9 +4983,11 @@ public class ComputerEngine implements Computer {
 
     @Override
     @Nullable
-    public InstallSourceInfo getInstallSourceInfo(@NonNull String packageName) {
+    public InstallSourceInfo getInstallSourceInfo(@NonNull String packageName,
+            @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(callingUid);
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "getInstallSourceInfo");
 
         String installerPackageName;
         String initiatingPackageName;
@@ -5006,8 +5011,15 @@ public class ComputerEngine implements Computer {
         updateOwnerPackageName = installSource.mUpdateOwnerPackageName;
         if (updateOwnerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(updateOwnerPackageName);
+            final boolean isCallerSystemOrUpdateOwner = callingUid == Process.SYSTEM_UID
+                            || isCallerSameApp(updateOwnerPackageName, callingUid);
+            // Except for package visibility filtering, we also hide update owner if the installer
+            // is in the managed user or profile. As we don't enforce the update ownership for the
+            // managed user and profile, knowing there's an update owner is meaningless in that
+            // user unless the installer is the owner.
             if (ps == null
-                    || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
+                    || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)
+                    || (!isCallerSystemOrUpdateOwner && isCallerFromManagedUserOrProfile(userId))) {
                 updateOwnerPackageName = null;
             }
         }
@@ -5120,9 +5132,10 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
-            @UserIdInt int userId) {
+            @NonNull UserHandle userHandle) {
         try {
             String packageName = componentInfo.packageName;
+            int userId = userHandle.getIdentifier();
             int appEnabledSetting =
                     mSettings.getApplicationEnabledSetting(packageName, userId);
             if (appEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
@@ -5145,9 +5158,10 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean isApplicationEffectivelyEnabled(@NonNull String packageName,
-            @UserIdInt int userId) {
+            @NonNull UserHandle userHandle) {
         try {
-            int appEnabledSetting = mSettings.getApplicationEnabledSetting(packageName, userId);
+            int appEnabledSetting = mSettings.getApplicationEnabledSetting(packageName,
+                    userHandle.getIdentifier());
             if (appEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
                 final AndroidPackage pkg = getPackage(packageName);
                 if (pkg == null) {
@@ -5540,8 +5554,8 @@ public class ComputerEngine implements Computer {
         enforceCrossUserPermission(callingUid, userId, true /*requireFullPermission*/,
                 true /*checkShell*/, "getHarmfulAppInfo");
 
-        if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID &&
-                checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid) != PERMISSION_GRANTED) {
+        if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
+                && checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid) != PERMISSION_GRANTED) {
             throw new SecurityException("Caller must have the "
                     + SET_HARMFUL_APP_WARNINGS + " permission.");
         }

@@ -25,13 +25,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.RemoteException
-import android.os.UserHandle
 import android.util.Log
 import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -55,6 +55,7 @@ class CameraGestureHelper @Inject constructor(
     private val cameraIntents: CameraIntentsWrapper,
     private val contentResolver: ContentResolver,
     @Main private val uiExecutor: Executor,
+    private val userTracker: UserTracker
 ) {
     /**
      * Whether the camera application can be launched for the camera launch gesture.
@@ -111,7 +112,7 @@ class CameraGestureHelper @Inject constructor(
                         Intent.FLAG_ACTIVITY_NEW_TASK,
                         null,
                         activityOptions.toBundle(),
-                        UserHandle.CURRENT.identifier,
+                        userTracker.userId,
                     )
                 } catch (e: RemoteException) {
                     Log.w(

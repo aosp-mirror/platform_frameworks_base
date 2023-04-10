@@ -2425,8 +2425,9 @@ public abstract class BatteryStats {
     public abstract int getHistoryTagPoolUid(int index);
 
     /**
-     * Returns a BatteryStatsHistoryIterator. Battery history will remain immutable until the
-     * {@link BatteryStatsHistoryIterator#close()} method is invoked.
+     * Returns a BatteryStatsHistoryIterator. Battery history will continue being writable,
+     * but the iterator will continue iterating over the snapshot taken at the time this method
+     * is called.
      */
     public abstract BatteryStatsHistoryIterator iterateBatteryStatsHistory();
 
@@ -4355,13 +4356,6 @@ public abstract class BatteryStats {
         }
     }
 
-    /**
-     * Temporary for settings.
-     */
-    public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid) {
-        dumpCheckinLocked(context, pw, which, reqUid, checkWifiOnly(context));
-    }
-
     private static final String[] CHECKIN_POWER_COMPONENT_LABELS =
             new String[BatteryConsumer.POWER_COMPONENT_COUNT];
     static {
@@ -5118,14 +5112,6 @@ public abstract class BatteryStats {
 
     private void printmAh(StringBuilder sb, double power) {
         sb.append(formatCharge(power));
-    }
-
-    /**
-     * Temporary for settings.
-     */
-    public final void dumpLocked(Context context, PrintWriter pw, String prefix, int which,
-            int reqUid) {
-        dumpLocked(context, pw, prefix, which, reqUid, checkWifiOnly(context));
     }
 
     @SuppressWarnings("unused")
@@ -7483,7 +7469,11 @@ public abstract class BatteryStats {
     public static final int DUMP_VERBOSE = 1<<5;
     public static final int DUMP_DEVICE_WIFI_ONLY = 1<<6;
 
-    private void dumpHistoryLocked(PrintWriter pw, int flags, long histStart, boolean checkin) {
+    private void dumpHistory(PrintWriter pw, int flags, long histStart, boolean checkin) {
+        synchronized (this) {
+            dumpHistoryTagPoolLocked(pw, checkin);
+        }
+
         final HistoryPrinter hprinter = new HistoryPrinter();
         long lastTime = -1;
         long baseTime = -1;
@@ -7575,6 +7565,43 @@ public abstract class BatteryStats {
         }
     }
 
+    private void dumpHistoryTagPoolLocked(PrintWriter pw, boolean checkin) {
+        if (checkin) {
+            for (int i = 0; i < getHistoryStringPoolSize(); i++) {
+                pw.print(BATTERY_STATS_CHECKIN_VERSION);
+                pw.print(',');
+                pw.print(HISTORY_STRING_POOL);
+                pw.print(',');
+                pw.print(i);
+                pw.print(",");
+                pw.print(getHistoryTagPoolUid(i));
+                pw.print(",\"");
+                String str = getHistoryTagPoolString(i);
+                if (str != null) {
+                    str = str.replace("\\", "\\\\");
+                    str = str.replace("\"", "\\\"");
+                    pw.print(str);
+                }
+                pw.print("\"");
+                pw.println();
+            }
+        } else {
+            final long historyTotalSize = getHistoryTotalSize();
+            final long historyUsedSize = getHistoryUsedSize();
+            pw.print("Battery History (");
+            pw.print((100 * historyUsedSize) / historyTotalSize);
+            pw.print("% used, ");
+            printSizeValue(pw, historyUsedSize);
+            pw.print(" used of ");
+            printSizeValue(pw, historyTotalSize);
+            pw.print(", ");
+            pw.print(getHistoryStringPoolSize());
+            pw.print(" strings using ");
+            printSizeValue(pw, getHistoryStringPoolBytes());
+            pw.println("):");
+        }
+    }
+
     private void dumpDailyLevelStepSummary(PrintWriter pw, String prefix, String label,
             LevelStepTracker steps, StringBuilder tmpSb, int[] tmpOutInt) {
         if (steps == null) {
@@ -7628,27 +7655,16 @@ public abstract class BatteryStats {
      * @param pw a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
-        prepareForDumpLocked();
+    public void dump(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
+        synchronized (this) {
+            prepareForDumpLocked();
+        }
 
         final boolean filtering = (flags
                 & (DUMP_HISTORY_ONLY|DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) != 0;
 
         if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
-            final long historyTotalSize = getHistoryTotalSize();
-            final long historyUsedSize = getHistoryUsedSize();
-            pw.print("Battery History (");
-            pw.print((100 * historyUsedSize) / historyTotalSize);
-            pw.print("% used, ");
-            printSizeValue(pw, historyUsedSize);
-            pw.print(" used of ");
-            printSizeValue(pw, historyTotalSize);
-            pw.print(", ");
-            pw.print(getHistoryStringPoolSize());
-            pw.print(" strings using ");
-            printSizeValue(pw, getHistoryStringPoolBytes());
-            pw.println("):");
-            dumpHistoryLocked(pw, flags, histStart, false);
+            dumpHistory(pw, flags, histStart, false);
             pw.println();
         }
 
@@ -7656,6 +7672,13 @@ public abstract class BatteryStats {
             return;
         }
 
+        synchronized (this) {
+            dumpLocked(context, pw, flags, reqUid, filtering);
+        }
+    }
+
+    private void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid,
+            boolean filtering) {
         if (!filtering) {
             SparseArray<? extends Uid> uidStats = getUidStats();
             final int NU = uidStats.size();
@@ -7797,40 +7820,31 @@ public abstract class BatteryStats {
 
     // This is called from BatteryStatsService.
     @SuppressWarnings("unused")
-    public void dumpCheckinLocked(Context context, PrintWriter pw,
+    public void dumpCheckin(Context context, PrintWriter pw,
             List<ApplicationInfo> apps, int flags, long histStart) {
-        prepareForDumpLocked();
+        synchronized (this) {
+            prepareForDumpLocked();
 
-        dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
-                CHECKIN_VERSION, getParcelVersion(), getStartPlatformVersion(),
-                getEndPlatformVersion());
+            dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
+                    CHECKIN_VERSION, getParcelVersion(), getStartPlatformVersion(),
+                    getEndPlatformVersion());
+        }
 
         if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
-            for (int i = 0; i < getHistoryStringPoolSize(); i++) {
-                pw.print(BATTERY_STATS_CHECKIN_VERSION);
-                pw.print(',');
-                pw.print(HISTORY_STRING_POOL);
-                pw.print(',');
-                pw.print(i);
-                pw.print(",");
-                pw.print(getHistoryTagPoolUid(i));
-                pw.print(",\"");
-                String str = getHistoryTagPoolString(i);
-                if (str != null) {
-                    str = str.replace("\\", "\\\\");
-                    str = str.replace("\"", "\\\"");
-                    pw.print(str);
-                }
-                pw.print("\"");
-                pw.println();
-                dumpHistoryLocked(pw, flags, histStart, true);
-            }
+            dumpHistory(pw, flags, histStart, true);
         }
 
         if ((flags & DUMP_HISTORY_ONLY) != 0) {
             return;
         }
 
+        synchronized (this) {
+            dumpCheckinLocked(context, pw, apps, flags);
+        }
+    }
+
+    private void dumpCheckinLocked(Context context, PrintWriter pw, List<ApplicationInfo> apps,
+            int flags) {
         if (apps != null) {
             SparseArray<Pair<ArrayList<String>, MutableBoolean>> uids = new SparseArray<>();
             for (int i=0; i<apps.size(); i++) {

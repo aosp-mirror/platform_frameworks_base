@@ -266,7 +266,7 @@ public interface ActivityInterceptorCallback {
              * @param resolvedType the resolved type.
              */
             @NonNull
-            public Builder setResolvedType(@NonNull String resolvedType) {
+            public Builder setResolvedType(@Nullable String resolvedType) {
                 mResolvedType = resolvedType;
                 return this;
             }
@@ -276,7 +276,7 @@ public interface ActivityInterceptorCallback {
              * @param callingPackage the calling package.
              */
             @NonNull
-            public Builder setCallingPackage(@NonNull String callingPackage) {
+            public Builder setCallingPackage(@Nullable String callingPackage) {
                 mCallingPackage = callingPackage;
                 return this;
             }
@@ -286,7 +286,7 @@ public interface ActivityInterceptorCallback {
              * @param callingFeatureId the calling feature id.
              */
             @NonNull
-            public Builder setCallingFeatureId(@NonNull String callingFeatureId) {
+            public Builder setCallingFeatureId(@Nullable String callingFeatureId) {
                 mCallingFeatureId = callingFeatureId;
                 return this;
             }
@@ -296,7 +296,7 @@ public interface ActivityInterceptorCallback {
              * @param checkedOptions the {@link ActivityOptions}.
              */
             @NonNull
-            public Builder setCheckedOptions(@NonNull ActivityOptions checkedOptions) {
+            public Builder setCheckedOptions(@Nullable ActivityOptions checkedOptions) {
                 mCheckedOptions = checkedOptions;
                 return this;
             }
@@ -306,7 +306,7 @@ public interface ActivityInterceptorCallback {
              * @param clearOptionsAnimationRunnable the calling package.
              */
             @NonNull
-            public Builder setClearOptionsAnimationRunnable(@NonNull
+            public Builder setClearOptionsAnimationRunnable(@Nullable
                     Runnable clearOptionsAnimationRunnable) {
                 mClearOptionsAnimation = clearOptionsAnimationRunnable;
                 return this;

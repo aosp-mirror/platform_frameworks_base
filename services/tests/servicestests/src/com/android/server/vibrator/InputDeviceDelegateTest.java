@@ -34,6 +34,7 @@ import android.content.ContextWrapper;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.Process;
@@ -82,8 +83,8 @@ public class InputDeviceDelegateTest {
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
-        mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
+        mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
 
         when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
         doAnswer(invocation -> mIInputDevicesChangedListener = invocation.getArgument(0))
@@ -263,7 +264,8 @@ public class InputDeviceDelegateTest {
     public void vibrateIfAvailable_withNoInputDevice_returnsFalse() {
         assertFalse(mInputDeviceDelegate.isAvailable());
         assertFalse(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
+                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                SYNCED_EFFECT));
     }
 
     @Test
@@ -277,7 +279,8 @@ public class InputDeviceDelegateTest {
         mInputDeviceDelegate.updateInputDeviceVibrators(/* vibrateInputDevices= */ true);
 
         assertTrue(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
+                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                SYNCED_EFFECT));
         verify(mIInputManagerMock).vibrateCombined(eq(1), same(SYNCED_EFFECT), any());
         verify(mIInputManagerMock).vibrateCombined(eq(2), same(SYNCED_EFFECT), any());
     }
@@ -312,7 +315,7 @@ public class InputDeviceDelegateTest {
             deviceIdsAndGenerations[i + 1] = 2; // update by increasing it's generation to 2.
         }
         // Force initialization of mIInputDevicesChangedListener, if it still haven't
-        InputManager.getInstance().getInputDeviceIds();
+        InputManagerGlobal.getInstance().getInputDeviceIds();
         mIInputDevicesChangedListener.onInputDevicesChanged(deviceIdsAndGenerations);
         // Makes sure all callbacks from InputDeviceDelegate are executed.
         mTestLooper.dispatchAll();

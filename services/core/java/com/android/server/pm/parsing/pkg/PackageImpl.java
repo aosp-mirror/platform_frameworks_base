@@ -793,7 +793,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
                     null,
                     getBaseApkPath(),
                     getBaseRevisionCode(),
-                    isHasCode() ? ApplicationInfo.FLAG_HAS_CODE : 0,
+                    isDeclaredHavingCode() ? ApplicationInfo.FLAG_HAS_CODE : 0,
                     getClassLoaderName()
             ));
 
@@ -879,7 +879,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getBannerRes() {
+    public int getBannerResourceId() {
         return banner;
     }
 
@@ -934,12 +934,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getDataExtractionRulesRes() {
+    public int getDataExtractionRulesResourceId() {
         return dataExtractionRules;
     }
 
     @Override
-    public int getDescriptionRes() {
+    public int getDescriptionResourceId() {
         return descriptionRes;
     }
 
@@ -950,7 +950,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getFullBackupContentRes() {
+    public int getFullBackupContentResourceId() {
         return fullBackupContent;
     }
 
@@ -961,7 +961,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getIconRes() {
+    public int getIconResourceId() {
         return iconRes;
     }
 
@@ -995,7 +995,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getLabelRes() {
+    public int getLabelResourceId() {
         return labelRes;
     }
 
@@ -1011,12 +1011,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getLocaleConfigRes() {
+    public int getLocaleConfigResourceId() {
         return mLocaleConfigRes;
     }
 
     @Override
-    public int getLogoRes() {
+    public int getLogoResourceId() {
         return logo;
     }
 
@@ -1077,7 +1077,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getNetworkSecurityConfigRes() {
+    public int getNetworkSecurityConfigResourceId() {
         return networkSecurityConfigRes;
     }
 
@@ -1259,7 +1259,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getRoundIconRes() {
+    public int getRoundIconResourceId() {
         return roundIconRes;
     }
 
@@ -1287,7 +1287,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getSharedUserLabelRes() {
+    public int getSharedUserLabelResourceId() {
         return sharedUserLabel;
     }
 
@@ -1366,7 +1366,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public int getThemeRes() {
+    public int getThemeResourceId() {
         return theme;
     }
 
@@ -1531,17 +1531,17 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isAllowBackup() {
+    public boolean isBackupAllowed() {
         return getBoolean(Booleans.ALLOW_BACKUP);
     }
 
     @Override
-    public boolean isAllowClearUserData() {
+    public boolean isClearUserDataAllowed() {
         return getBoolean(Booleans.ALLOW_CLEAR_USER_DATA);
     }
 
     @Override
-    public boolean isAllowClearUserDataOnFailedRestore() {
+    public boolean isClearUserDataOnFailedRestoreAllowed() {
         return getBoolean(Booleans.ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE);
     }
 
@@ -1551,7 +1551,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isAllowTaskReparenting() {
+    public boolean isTaskReparentingAllowed() {
         return getBoolean(Booleans.ALLOW_TASK_REPARENTING);
     }
 
@@ -1574,7 +1574,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isCantSaveState() {
+    public boolean isSaveStateDisallowed() {
         return getBoolean(Booleans.CANT_SAVE_STATE);
     }
 
@@ -1609,7 +1609,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isExtractNativeLibs() {
+    public boolean isExtractNativeLibrariesRequested() {
         return getBoolean(Booleans.EXTRACT_NATIVE_LIBS);
     }
 
@@ -1629,7 +1629,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isHasCode() {
+    public boolean isDeclaredHavingCode() {
         return getBoolean(Booleans.HAS_CODE);
     }
 
@@ -1639,7 +1639,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isHasFragileUserData() {
+    public boolean isUserDataFragile() {
         return getBoolean(Booleans.HAS_FRAGILE_USER_DATA);
     }
 
@@ -1649,7 +1649,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isKillAfterRestore() {
+    public boolean isKillAfterRestoreAllowed() {
         return getBoolean(Booleans.KILL_AFTER_RESTORE);
     }
 
@@ -1746,7 +1746,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         return getBoolean(Booleans.STATIC_SHARED_LIBRARY);
     }
 
-    public boolean isSupportsExtraLargeScreens() {
+    public boolean isExtraLargeScreensSupported() {
         if (supportsExtraLargeScreens == null) {
             return targetSdkVersion >= Build.VERSION_CODES.GINGERBREAD;
         }
@@ -1754,7 +1754,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         return supportsExtraLargeScreens;
     }
 
-    public boolean isSupportsLargeScreens() {
+    public boolean isLargeScreensSupported() {
         if (supportsLargeScreens == null) {
             return targetSdkVersion >= Build.VERSION_CODES.DONUT;
         }
@@ -1762,16 +1762,16 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         return supportsLargeScreens;
     }
 
-    public boolean isSupportsNormalScreens() {
+    public boolean isNormalScreensSupported() {
         return supportsNormalScreens == null || supportsNormalScreens;
     }
 
     @Override
-    public boolean isSupportsRtl() {
+    public boolean isRtlSupported() {
         return getBoolean(Booleans.SUPPORTS_RTL);
     }
 
-    public boolean isSupportsSmallScreens() {
+    public boolean isSmallScreensSupported() {
         if (supportsSmallScreens == null) {
             return targetSdkVersion >= Build.VERSION_CODES.DONUT;
         }
@@ -1785,7 +1785,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isUse32BitAbi() {
+    public boolean is32BitAbiPreferred() {
         return getBoolean(Booleans.USE_32_BIT_ABI);
     }
 
@@ -1795,12 +1795,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public boolean isUsesCleartextTraffic() {
+    public boolean isCleartextTrafficAllowed() {
         return getBoolean(Booleans.USES_CLEARTEXT_TRAFFIC);
     }
 
     @Override
-    public boolean isUsesNonSdkApi() {
+    public boolean isNonSdkApiRequested() {
         return getBoolean(Booleans.USES_NON_SDK_API);
     }
 
@@ -1831,17 +1831,17 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setAllowBackup(boolean value) {
+    public PackageImpl setBackupAllowed(boolean value) {
         return setBoolean(Booleans.ALLOW_BACKUP, value);
     }
 
     @Override
-    public PackageImpl setAllowClearUserData(boolean value) {
+    public PackageImpl setClearUserDataAllowed(boolean value) {
         return setBoolean(Booleans.ALLOW_CLEAR_USER_DATA, value);
     }
 
     @Override
-    public PackageImpl setAllowClearUserDataOnFailedRestore(boolean value) {
+    public PackageImpl setClearUserDataOnFailedRestoreAllowed(boolean value) {
         return setBoolean(Booleans.ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE, value);
     }
 
@@ -1851,7 +1851,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setAllowTaskReparenting(boolean value) {
+    public PackageImpl setTaskReparentingAllowed(boolean value) {
         return setBoolean(Booleans.ALLOW_TASK_REPARENTING, value);
     }
 
@@ -1895,7 +1895,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setBannerRes(int value) {
+    public PackageImpl setBannerResourceId(int value) {
         banner = value;
         return this;
     }
@@ -1912,7 +1912,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setCantSaveState(boolean value) {
+    public PackageImpl setSaveStateDisallowed(boolean value) {
         return setBoolean(Booleans.CANT_SAVE_STATE, value);
     }
 
@@ -1958,7 +1958,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setDataExtractionRulesRes(int value) {
+    public PackageImpl setDataExtractionRulesResourceId(int value) {
         dataExtractionRules = value;
         return this;
     }
@@ -1969,7 +1969,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setDescriptionRes(int value) {
+    public PackageImpl setDescriptionResourceId(int value) {
         descriptionRes = value;
         return this;
     }
@@ -1985,7 +1985,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setExtractNativeLibs(boolean value) {
+    public PackageImpl setExtractNativeLibrariesRequested(boolean value) {
         return setBoolean(Booleans.EXTRACT_NATIVE_LIBS, value);
     }
 
@@ -1995,7 +1995,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setFullBackupContentRes(int value) {
+    public PackageImpl setFullBackupContentResourceId(int value) {
         fullBackupContent = value;
         return this;
     }
@@ -2017,7 +2017,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setHasCode(boolean value) {
+    public PackageImpl setDeclaredHavingCode(boolean value) {
         return setBoolean(Booleans.HAS_CODE, value);
     }
 
@@ -2027,12 +2027,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setHasFragileUserData(boolean value) {
+    public PackageImpl setUserDataFragile(boolean value) {
         return setBoolean(Booleans.HAS_FRAGILE_USER_DATA, value);
     }
 
     @Override
-    public PackageImpl setIconRes(int value) {
+    public PackageImpl setIconResourceId(int value) {
         iconRes = value;
         return this;
     }
@@ -2049,7 +2049,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setKillAfterRestore(boolean value) {
+    public PackageImpl setKillAfterRestoreAllowed(boolean value) {
         return setBoolean(Booleans.KILL_AFTER_RESTORE, value);
     }
 
@@ -2060,7 +2060,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setLabelRes(int value) {
+    public PackageImpl setLabelResourceId(int value) {
         labelRes = value;
         return this;
     }
@@ -2082,13 +2082,13 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setLocaleConfigRes(int value) {
+    public PackageImpl setLocaleConfigResourceId(int value) {
         mLocaleConfigRes = value;
         return this;
     }
 
     @Override
-    public PackageImpl setLogoRes(int value) {
+    public PackageImpl setLogoResourceId(int value) {
         logo = value;
         return this;
     }
@@ -2154,7 +2154,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setNetworkSecurityConfigRes(int value) {
+    public PackageImpl setNetworkSecurityConfigResourceId(int value) {
         networkSecurityConfigRes = value;
         return this;
     }
@@ -2318,7 +2318,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setRoundIconRes(int value) {
+    public PackageImpl setRoundIconResourceId(int value) {
         roundIconRes = value;
         return this;
     }
@@ -2347,7 +2347,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setSharedUserLabelRes(int value) {
+    public PackageImpl setSharedUserLabelResourceId(int value) {
         sharedUserLabel = value;
         return this;
     }
@@ -2384,7 +2384,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setSupportsExtraLargeScreens(int supportsExtraLargeScreens) {
+    public PackageImpl setExtraLargeScreensSupported(int supportsExtraLargeScreens) {
         if (supportsExtraLargeScreens == 1) {
             return this;
         }
@@ -2394,7 +2394,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setSupportsLargeScreens(int supportsLargeScreens) {
+    public PackageImpl setLargeScreensSupported(int supportsLargeScreens) {
         if (supportsLargeScreens == 1) {
             return this;
         }
@@ -2404,7 +2404,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setSupportsNormalScreens(int supportsNormalScreens) {
+    public PackageImpl setNormalScreensSupported(int supportsNormalScreens) {
         if (supportsNormalScreens == 1) {
             return this;
         }
@@ -2414,12 +2414,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setSupportsRtl(boolean value) {
+    public PackageImpl setRtlSupported(boolean value) {
         return setBoolean(Booleans.SUPPORTS_RTL, value);
     }
 
     @Override
-    public PackageImpl setSupportsSmallScreens(int supportsSmallScreens) {
+    public PackageImpl setSmallScreensSupported(int supportsSmallScreens) {
         if (supportsSmallScreens == 1) {
             return this;
         }
@@ -2452,7 +2452,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setThemeRes(int value) {
+    public PackageImpl setThemeResourceId(int value) {
         theme = value;
         return this;
     }
@@ -2470,7 +2470,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setUse32BitAbi(boolean value) {
+    public PackageImpl set32BitAbiPreferred(boolean value) {
         return setBoolean(Booleans.USE_32_BIT_ABI, value);
     }
 
@@ -2480,12 +2480,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
-    public PackageImpl setUsesCleartextTraffic(boolean value) {
+    public PackageImpl setCleartextTrafficAllowed(boolean value) {
         return setBoolean(Booleans.USES_CLEARTEXT_TRAFFIC, value);
     }
 
     @Override
-    public PackageImpl setUsesNonSdkApi(boolean value) {
+    public PackageImpl setNonSdkApiRequested(boolean value) {
         return setBoolean(Booleans.USES_NON_SDK_API, value);
     }
 

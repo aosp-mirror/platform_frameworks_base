@@ -23,6 +23,7 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.POWER_SAVER;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
@@ -65,6 +66,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
@@ -139,6 +141,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         BatteryStatsImpl.EnergyStatsRetriever,
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
+    static final String TRACE_TRACK_WAKEUP_REASON = "wakeup_reason";
     static final boolean DBG = false;
     private static final boolean BATTERY_USAGE_STORE_ENABLED = true;
 
@@ -370,6 +373,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
         mStats.setPowerProfileLocked(mPowerProfile);
+
+        final boolean resetOnUnplugHighBatteryLevel = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_batteryStatsResetOnUnplugHighBatteryLevel);
+        final boolean resetOnUnplugAfterSignificantCharge = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_batteryStatsResetOnUnplugAfterSignificantCharge);
+        mStats.setBatteryStatsConfig(
+                new BatteryStatsImpl.BatteryStatsConfig.Builder()
+                        .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
+                        .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
+                        .build());
         mStats.startTrackingSystemServerCpuTime();
 
         if (BATTERY_USAGE_STORE_ENABLED) {
@@ -390,6 +403,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void systemServicesReady() {
         mStats.systemServicesReady(mContext);
+        mCpuWakeupStats.systemServicesReady();
         mWorker.systemServicesReady();
         final INetworkManagementService nms = INetworkManagementService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
@@ -456,6 +470,31 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             BatteryStatsService.this.noteJobsDeferred(uid, numDeferred, sinceLast);
         }
 
+        private int transportToSubsystem(NetworkCapabilities nc) {
+            if (nc.hasTransport(TRANSPORT_WIFI)) {
+                return CPU_WAKEUP_SUBSYSTEM_WIFI;
+            }
+            return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
+        }
+
+        @Override
+        public void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid) {
+            if (uid < 0) {
+                Slog.e(TAG, "Invalid uid for waking network packet: " + uid);
+                return;
+            }
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+            final NetworkCapabilities nc = cm.getNetworkCapabilities(network);
+            final int subsystem = transportToSubsystem(nc);
+
+            if (subsystem == CPU_WAKEUP_SUBSYSTEM_UNKNOWN) {
+                Slog.wtf(TAG, "Could not map transport for network: " + network
+                        + " while attributing wakeup by packet sent to uid: " + uid);
+                return;
+            }
+            noteCpuWakingActivity(subsystem, elapsedMillis, uid);
+        }
+
         @Override
         public void noteBinderCallStats(int workSourceUid, long incrementatCallCount,
                 Collection<BinderCallsStats.CallStat> callStats) {
@@ -477,6 +516,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public void noteCpuWakingActivity(int subsystem, long elapsedMillis, int... uids) {
             Objects.requireNonNull(uids);
             mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids);
+        }
+
+        @Override
+        public void noteWakingSoundTrigger(long elapsedMillis, int uid) {
+            // TODO(b/267717665): Pipe to noteCpuWakingActivity once SoundTrigger starts using this.
+            Slog.w(TAG, "Sound trigger event dispatched to uid " + uid);
         }
     }
 
@@ -609,6 +654,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             mHandler.post(() -> {
+                mCpuWakeupStats.onUidRemoved(uid);
                 synchronized (mStats) {
                     mStats.removeUidStatsLocked(uid, elapsedRealtime);
                 }
@@ -719,6 +765,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
+                mCpuWakeupStats.noteUidProcessState(uid, state);
                 synchronized (mStats) {
                     mStats.noteUidProcessStateLocked(uid, state, elapsedRealtime, uptime);
                 }
@@ -800,7 +847,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
-                    final long sessionEnd = mStats.getStartClockTime();
+                    final long sessionEnd;
+                    synchronized (mStats) {
+                        sessionEnd = mStats.getStartClockTime();
+                    }
                     final BatteryUsageStatsQuery queryBeforeReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)
@@ -2436,6 +2486,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 while ((reason = waitWakeup()) != null) {
                     final long nowElapsed = SystemClock.elapsedRealtime();
                     final long nowUptime = SystemClock.uptimeMillis();
+
+                    Trace.instantForTrack(Trace.TRACE_TAG_POWER, TRACE_TRACK_WAKEUP_REASON,
+                            nowElapsed + " " + reason);
+
                     // Wait for the completion of pending works if there is any
                     awaitCompletion();
                     mCpuWakeupStats.noteWakeupTimeAndReason(nowElapsed, nowUptime, reason);
@@ -2673,7 +2727,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("--reset-all".equals(arg)) {
                     awaitCompletion();
                     synchronized (mStats) {
-                        mStats.resetAllStatsCmdLocked();
+                        mStats.resetAllStatsAndHistoryLocked(
+                                BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
                         mBatteryUsageStatsStore.removeAllSnapshots();
                         pw.println("Battery stats and history reset.");
                         noOutput = true;
@@ -2681,7 +2736,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("--reset".equals(arg)) {
                     awaitCompletion();
                     synchronized (mStats) {
-                        mStats.resetAllStatsCmdLocked();
+                        mStats.resetAllStatsAndHistoryLocked(
+                                BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
                         pw.println("Battery stats reset.");
                         noOutput = true;
                     }
@@ -2875,7 +2931,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 checkinStats.setPowerProfileLocked(mPowerProfile);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
-                                checkinStats.dumpCheckinLocked(mContext, pw, apps, flags,
+                                checkinStats.dumpCheckin(mContext, pw, apps, flags,
                                         historyStart);
                                 mStats.mCheckinFile.delete();
                                 return;
@@ -2887,29 +2943,25 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     }
                 }
             }
-            if (DBG) Slog.d(TAG, "begin dumpCheckinLocked from UID " + Binder.getCallingUid());
+            if (DBG) Slog.d(TAG, "begin dumpCheckin from UID " + Binder.getCallingUid());
             awaitCompletion();
-            synchronized (mStats) {
-                mStats.dumpCheckinLocked(mContext, pw, apps, flags, historyStart);
-                if (writeData) {
-                    mStats.writeAsyncLocked();
-                }
+            mStats.dumpCheckin(mContext, pw, apps, flags, historyStart);
+            if (writeData) {
+                mStats.writeAsyncLocked();
             }
-            if (DBG) Slog.d(TAG, "end dumpCheckinLocked");
+            if (DBG) Slog.d(TAG, "end dumpCheckin");
         } else {
-            if (DBG) Slog.d(TAG, "begin dumpLocked from UID " + Binder.getCallingUid());
+            if (DBG) Slog.d(TAG, "begin dump from UID " + Binder.getCallingUid());
             awaitCompletion();
 
-            synchronized (mStats) {
-                mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
-                if (writeData) {
-                    mStats.writeAsyncLocked();
-                }
+            mStats.dump(mContext, pw, flags, reqUid, historyStart);
+            if (writeData) {
+                mStats.writeAsyncLocked();
             }
             pw.println();
             mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "), SystemClock.elapsedRealtime());
 
-            if (DBG) Slog.d(TAG, "end dumpLocked");
+            if (DBG) Slog.d(TAG, "end dump");
         }
     }
 

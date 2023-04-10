@@ -636,6 +636,16 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as open by the
+         device fold controller. Default is empty. -->
+    <integer-array name="config_openDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
     <!-- The device states (supplied by DeviceStateManager) that should be treated as folded by the
          display fold controller. Default is empty. -->
     <integer-array name="config_foldedDeviceStates">
@@ -656,9 +666,33 @@
         -->
     </integer-array>
 
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as a rear display
+     state. Default is empty. -->
+    <integer-array name="config_rearDisplayDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
     <!-- Indicates whether the window manager reacts to half-fold device states by overriding
      rotation. -->
     <bool name="config_windowManagerHalfFoldAutoRotateOverride">false</bool>
+
+    <!-- Indicates whether the window manager pauses autorotation when folding or unfolding
+     a foldable device based on hinge angle sensor events and physical display switch events. -->
+    <bool name="config_windowManagerPauseRotationWhenUnfolding">false</bool>
+
+    <!-- Amount of time during which autorotation will be disabled since last hinge angle event -->
+    <integer name="config_pauseRotationWhenUnfolding_maxHingeAngle">0</integer>
+
+    <!-- Maximum hinge angle event to be considered to disable autorotation when folding or
+     unfolding -->
+    <integer name="config_pauseRotationWhenUnfolding_hingeEventTimeout">0</integer>
+
+    <!-- Amount of time during which autorotation will be disabled since last display switch -->
+    <integer name="config_pauseRotationWhenUnfolding_displaySwitchTimeout">0</integer>
 
     <!-- When a device enters any of these states, it should be woken up. States are defined in
          device_state_configuration.xml. -->
@@ -691,20 +725,22 @@
          mode. -->
     <integer name="config_unfoldTransitionHalfFoldedTimeout">1000</integer>
 
+    <!-- Timeout for receiving the keyguard drawn event from System UI.  -->
+    <integer name="config_keyguardDrawnTimeout">1000</integer>
+
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
          set to false, DisplayManager will make additional effort to ensure no more than 1 internal
          display is powered on at the same time. -->
     <bool name="config_supportsConcurrentInternalDisplays">true</bool>
 
-    <!-- Map of DeviceState to rotation lock setting. Each entry must be in the format
-         "key:value", for example: "0:1".
-          The keys are device states, and the values are one of
-          Settings.Secure.DeviceStateRotationLockSetting.
-          Any device state that doesn't have a default set here will be treated as
-          DEVICE_STATE_ROTATION_LOCK_IGNORED meaning it will not have its own rotation lock setting.
-          If this map is missing, the feature is disabled and only one global rotation lock setting
-           will apply, regardless of device state. -->
+    <!-- Map of device posture to rotation lock setting. Each entry must be in the format
+         "key:value", or "key:value:fallback_key" for example: "0:1" or "2:0:1". The keys are one of
+         Settings.Secure.DeviceStateRotationLockKey, and the values are one of
+         Settings.Secure.DeviceStateRotationLockSetting.
+         The fallback is a key to a device posture that can be specified when the value is
+         Settings.Secure.DEVICE_STATE_ROTATION_LOCK_IGNORED.
+     -->
     <string-array name="config_perDeviceStateRotationLockDefaults" />
 
     <!-- Dock behavior -->
@@ -732,6 +768,11 @@
          apart and the docks cannot report their true orientation on their own,
          we rely on gravity to determine the effective orientation. -->
     <bool name="config_deskDockEnablesAccelerometer">true</bool>
+
+    <!-- Control whether nosensor and locked orientation requests are respected from the app when
+         config_deskDockEnablesAccelerometer is set to false.
+         TODO(b/274763533): Consider making true by default and removing this. -->
+    <bool name="config_deskRespectsNoSensorAndLockedWithoutAccelerometer">false</bool>
 
     <!-- Car dock behavior -->
 
@@ -948,6 +989,22 @@
     <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
     <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
+    <!-- Duration, in milliseconds, of the display white balance animated transitions. -->
+    <integer name="config_displayWhiteBalanceTransitionTime">3000</integer>
+
+    <!-- Device states where the sensor based rotation values should be reversed around the Z axis
+         for the default display.
+         TODO(b/265312193): Remove this workaround when this bug is fixed.-->
+    <integer-array name="config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis">
+    </integer-array>
+
+    <!-- Boolean indicating whether secondary built-in displays should have their orientation
+         match the active default display. This config assumes that the secondary display only
+         requires swapping ROTATION_90 and ROTATION_270.
+         TODO(b/265991392): This should eventually be configured and parsed in
+          display_settings.xml -->
+    <bool name="config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay">true</bool>
+
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
         <!-- Example:
@@ -1122,13 +1179,24 @@
     <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the stem primary button.
-        Stem primary button is only used on watch form factor. If a device is not
-        a watch, setting this config is no-op.
-           0 - Nothing
-           1 - Go to launch all apps
+         Stem primary button is only used on watch form factor. If a device is not
+         a watch, setting this config is no-op.
+            0 - Nothing
+            1 - Go to launch all apps
     -->
     <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
 
+
+    <!-- Control the behavior of the search key.
+            0 - Launch default search activity
+            1 - Launch target activity defined by config_searchKeyTargetActivity
+    -->
+    <integer name="config_searchKeyBehavior">0</integer>
+
+    <!-- Component name for the default target activity to be launched when user
+         presses the global search key. [DO NOT TRANSLATE]
+    -->
+    <string name="config_searchKeyTargetActivity" translatable="false"></string>
 
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
@@ -1268,13 +1336,20 @@
     <!-- Default LED off time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOff">2000</integer>
 
+    <!-- LED behavior when battery is low.
+         Color for solid is taken from config_notificationsBatteryLowARGB
+          0 - default, solid when charging, flashing when not charging
+          1 - always solid when battery is low
+          2 - always flashing when battery is low -->
+    <integer name="config_notificationsBatteryLowBehavior">0</integer>
+
     <!-- Default value for led color when battery is low on charge -->
     <integer name="config_notificationsBatteryLowARGB">0xFFFF0000</integer>
 
     <!-- Default value for led color when battery is medium charged -->
     <integer name="config_notificationsBatteryMediumARGB">0xFFFFFF00</integer>
 
-    <!-- Default value for led color when battery is fully charged -->
+    <!-- Default value for led color when battery is fully or nearly fully charged -->
     <integer name="config_notificationsBatteryFullARGB">0xFF00FF00</integer>
 
     <!-- Default value for LED on time when the battery is low on charge in miliseconds -->
@@ -1288,6 +1363,9 @@
 
     <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
     <integer name="config_notificationsBatteryLedOff">2875</integer>
+
+    <!-- Battery level percent that is treated as nearly full. -->
+    <integer name="config_notificationsBatteryNearlyFullLevel">90</integer>
 
     <!-- If true, only colorized CallStyle notifications will apply custom colors -->
     <bool name="config_callNotificationActionColorsRequireColorized">true</bool>
@@ -2019,7 +2097,7 @@
     <integer name="config_audio_ring_vol_default">5</integer>
 
     <!-- Enable sound dose computation and warnings -->
-    <bool name="config_audio_csd_enabled_default">false</bool>
+    <bool name="config_audio_csd_enabled_default">true</bool>
 
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
@@ -2148,6 +2226,13 @@
     <bool name="config_enableDefaultNotes">false</bool>
     <!-- Whether the default notes role for work profile should be enabled. -->
     <bool name="config_enableDefaultNotesForWorkProfile">false</bool>
+    <!-- The name of the package that will hold the system financed device controller role. -->
+    <string name="config_systemFinancedDeviceController" translatable="false">com.android.devicelockcontroller</string>
+    <!-- The name of the package that will hold the call streaming role. -->
+    <string name="config_systemCallStreaming" translatable="false"></string>
+
+    <!-- The component name of the wear service class that will be started by the system server. -->
+    <string name="config_wearServiceComponent" translatable="false"></string>
 
     <!-- The name of the package that will handle updating the device management role. -->
     <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
@@ -2351,22 +2436,13 @@
          display, this value should be true. -->
     <bool name="config_perDisplayFocusEnabled">false</bool>
 
-    <!-- Whether the system enables motion prediction. Only enable this after confirming that the
-         model works well on your device. To enable system-based prediction, set this value to true.
-          -->
-    <bool name="config_enableMotionPrediction">true</bool>
+    <!-- Whether to use the system motion prediction model. Only set this value to true after
+         confirming that the model works well on your device. -->
+    <bool name="config_enableMotionPrediction">false</bool>
 
     <!-- Additional offset to use for motion prediction, in nanoseconds. A positive number indicates
-         that the prediction will take place further in the future. For example, suppose a
-         MotionEvent arrives with timestamp t=1, and the current expected presentation time is t=2.
-         Typically, the prediction will target the presentation time, t=2. If you'd like to make
-         prediction more aggressive, you could set the offset to a positive number.
-         Setting the offset to 1 here would mean that the prediction will be done for time t=3.
-         A negative number may also be provided, to make the prediction less aggressive. In general,
-         the offset here should represent some built-in hardware delays that may not be accounted
-         for by the "expected present time". See also:
-         https://developer.android.com/reference/android/view/
-                  Choreographer.FrameTimeline#getExpectedPresentationTimeNanos() -->
+         that the prediction will take place further in the future and, in general, should represent
+         some built-in hardware delays that prediction should try to recover. -->
     <integer name="config_motionPredictionOffsetNanos">0</integer>
 
     <!-- Whether a software navigation bar should be shown. NOTE: in the future this may be
@@ -2646,6 +2722,14 @@
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
 
+    <!-- Minimum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMinRotaryEncoderFlingVelocity">-1dp</dimen>
+
+    <!-- Maximum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMaxRotaryEncoderFlingVelocity">-1dp</dimen>
+
     <!-- Amount of time in ms the user needs to press the relevant key to bring up the
          global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
@@ -2707,6 +2791,12 @@
          Should be false for most devices, except automotive vehicle with passenger displays. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
+    <!-- Whether the device allows users to start in background visible on the default display.
+         Should be false for most devices, except passenger-only automotive build (i.e., when
+         Android runs in a separate system in the back seat to manage the passenger displays).
+         When set to true, config_multiuserVisibleBackgroundUsers must also be true. -->
+    <bool name="config_multiuserVisibleBackgroundUsersOnDefaultDisplay">false</bool>
+
     <!-- Whether to automatically switch to the designated Dock User (the user chosen for
          displaying dreams, etc.) after a timeout when the device is docked.  -->
     <bool name="config_enableTimeoutToDockUserWhenDocked">false</bool>
@@ -2730,8 +2820,14 @@
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
 
     <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
-     it can't be deleted or downgraded to non-admin status. -->
-    <bool name="config_isMainUserPermanentAdmin">false</bool>
+     it can't be deleted or downgraded to non-admin status.
+     This is generally only relevant on headless system user mode devices; on other devices, the
+     main user is the system user which is always a permanent admin anyway. -->
+    <bool name="config_isMainUserPermanentAdmin">true</bool>
+
+    <!-- Whether switch to headless system user is allowed. If allowed,
+    headless system user can run in the foreground even though it is not a full user. -->
+    <bool name="config_canSwitchToHeadlessSystemUser">false</bool>
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
@@ -2812,6 +2908,9 @@
     <!-- When true, local displays that do not contain any of their own content will automatically
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
+
+    <!-- When true, udfps vote is ignored. This feature is disabled by default. -->
+    <bool name="config_ignoreUdfpsVote">false</bool>
 
     <!-- Controls if local secondary displays should be private or not. Value specified in the array
          represents physical port address of each display and display in this list will be marked
@@ -2945,6 +3044,20 @@
     <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
 
+    <!-- Package name of the system service that implements the shared connectivity service -->
+    <string translatable="false" name="config_sharedConnectivityServicePackage"></string>
+
+    <!-- Intent action used when binding to the shared connectivity service -->
+    <string translatable="false" name="config_sharedConnectivityServiceIntentAction"></string>
+
+    <!-- The system and settings UI can support all the features of instant tether. If set to false,
+     instant tether will run in notifications mode -->
+    <bool name="config_hotspotNetworksEnabledForService">false</bool>
+
+    <!-- The system and settings UI can support all the features of known networks. If set to false,
+         known networks will run in notifications mode -->
+    <bool name="config_knownNetworksEnabledForService">false</bool>
+
     <!-- Component name of the activity that shows the usb containment status. -->
     <string name="config_usbContaminantActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbContaminantActivity</string>
@@ -3004,6 +3117,10 @@
     <!-- Name of the dialog that is used to get or save an app credential -->
     <string name="config_credentialManagerDialogComponent" translatable="false"
             >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
+
+    <!-- Name of the broadcast receiver that is used to receive provider change events -->
+    <string name="config_credentialManagerReceiverComponent" translatable="false"
+            >com.android.credentialmanager/com.android.credentialmanager.CredentialProviderReceiver</string>
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
@@ -3158,6 +3275,9 @@
     <!-- Feature flag to store TaskSnapshot in 16 bit pixel format to save memory. -->
     <bool name="config_use16BitTaskSnapshotPixelFormat">false</bool>
 
+    <!-- The amount to scale fullscreen activity snapshot for predict-back animation. -->
+    <item name="config_resActivitySnapshotScale" format="float" type="dimen">0.6</item>
+
     <!-- Determines whether recent tasks are provided to the user. Default device has recents
          property. If this is false, then the following recents config flags are ignored. -->
     <bool name="config_hasRecents">true</bool>
@@ -3191,6 +3311,12 @@
          activity transition.  We just want to start the dream. -->
     <string name="config_somnambulatorComponent" translatable="false"
             >com.android.systemui/com.android.systemui.Somnambulator</string>
+
+    <!-- The component name of the screenshot App Clips service that communicates with SystemUI to
+         evaluate certain aspects of App Clips flow such as whether a calling activity can launch
+         capture content for note activity. -->
+    <string name="config_screenshotAppClipsServiceComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.appclips.AppClipsService</string>
 
     <!-- The component name of a special dock app that merely launches a dream.
          We don't want to launch this app when docked because it causes an unnecessary
@@ -3232,6 +3358,11 @@
 
     <!-- The duration in which a recent task is considered in session and should be visible. -->
     <integer name="config_activeTaskDurationHours">6</integer>
+
+    <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
+         When set true, there will create windowless starting surface for the preview target, so it
+         won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
+    <bool name="config_predictShowStartingSurface">true</bool>
 
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
@@ -3812,6 +3943,10 @@
          This should only be set when the device has gestural navigation enabled by default. -->
     <bool name="config_showGesturalNavigationHints">false</bool>
 
+    <!-- Controls whether the navigation bar background color provided by the app is transparent by
+         default. This should be controlled in developer options. -->
+    <bool name="config_navBarDefaultTransparent">false</bool>
+
     <!-- Controls the free snap mode for the docked stack divider. In this mode, the divider can be
          snapped to any position between the first target and the last target. -->
     <bool name="config_dockedStackDividerFreeSnapMode">false</bool>
@@ -3894,7 +4029,7 @@
     <!-- Whether the device supports non-resizable activity in multi windowing modes.
          -1: The device doesn't support non-resizable in multi windowing modes.
           0: The device supports non-resizable in multi windowing modes only if this is a large
-             screen (smallest width >= {@link config_largeScreenSmallestScreenWidthDp}).
+             screen (smallest width >= {@link WindowManager#LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP}).
           1: The device always supports non-resizable in multi windowing modes.
     -->
     <integer name="config_supportsNonResizableMultiWindow">0</integer>
@@ -3904,9 +4039,9 @@
          -1: The device ignores the activity min width/height when determining if it can be shown in
              multi windowing modes.
           0: If this is a small screen (smallest width <
-             {@link config_largeScreenSmallestScreenWidthDp}), the device compares the activity min
-             width/height with the min multi windowing modes dimensions the device supports to
-             determine if the activity can be shown in multi windowing modes
+             {@link WindowManager#LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP}), the device compares the
+             activity min width/height with the min multi windowing modes dimensions the device
+             supports to determine if the activity can be shown in multi windowing modes
           1: The device always compare the activity min width/height with the min multi windowing
              modes dimensions {@link config_minPercentageMultiWindowSupportWidth} the device
              supports to determine if the activity can be shown in multi windowing modes.
@@ -3928,11 +4063,6 @@
          The value should be between [0 - 1].
     -->
     <item name="config_minPercentageMultiWindowSupportWidth" format="float" type="dimen">0.5</item>
-
-    <!-- If the display smallest screen width is greater or equal to this value, we will treat it
-         as a large screen device, which will have some multi window features enabled by default.
-    -->
-    <integer name="config_largeScreenSmallestScreenWidthDp">600</integer>
 
     <!-- True if the device is using legacy split. -->
     <bool name="config_useLegacySplit">false</bool>
@@ -4063,16 +4193,6 @@
     -->
     <string-array translatable="false" name="config_convert_to_emergency_number_map" />
 
-    <!-- An array of packages for which notifications cannot be blocked.
-         Should only be used for core device functionality that must not be
-         rendered inoperative for safety reasons, like the phone dialer and
-         SMS handler. -->
-    <string-array translatable="false" name="config_nonBlockableNotificationPackages">
-        <item>com.android.dialer</item>
-        <item>com.android.messaging</item>
-        <item>com.android.cellbroadcastreceiver.module</item>
-    </string-array>
-
     <!-- An array of packages that can make sound on the ringer stream in priority-only DND
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
@@ -4129,11 +4249,18 @@
     <bool name="config_quickSettingsSupported">true</bool>
 
     <!-- The component name, flattened to a string, for the default autofill service
-         to  enabled for an user. This service must be trusted, as it can be activated
+         to  enabled for a user. This service must be trusted, as it can be activated
          without explicit consent of the user. If no autofill service with the
           specified name exists on the device, autofill will be disabled by default.
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the default field classification service
+         to  enabled for a user. This service must be trusted, as it can be activated
+         without explicit consent of the user. If no field classification service with the
+         specified name exists on the device, field classification will be disabled by default.
+    -->
+    <string name="config_defaultFieldClassificationService" translatable="false"></string>
 
     <!-- The package name for the OEM custom system textclassifier service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -4323,6 +4450,19 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the system's credential manager
+      provider service. This service allows credential retrieval and storage od credentials.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, there will be no user configurable
+     provider to service credential manager requests. However, credential manager system
+     services that do not require user consent, will still work.
+
+     See android.credentials.CredentialManager
+    -->
+    <string-array name="config_defaultCredentialProviderService" translatable="false">
+    </string-array>
 
     <!-- The package name for the system's smartspace service.
      This service returns smartspace results.
@@ -4600,6 +4740,12 @@
 
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
+
+    <!-- Package name for the default Health Connect app.
+         OEMs can set this with their own health app package name to define a default app with high
+         priority for the app to store the health data. If set the app always has priority of 1
+         unless it is changed by the user. -->
+    <string name="config_defaultHealthConnectApp" translatable="false"></string>
 
     <!-- This is the default launcher package with an activity to use on secondary displays that
          support system decorations.
@@ -4967,6 +5113,26 @@
       -->
     </integer-array>
 
+    <!-- The properties for handling UDFPS touch detection
+    <string-array name="config_udfps_touch_detection_options">
+        <item>[detector_type],[sensor_shape],[target_size],[min_ellipse_overlap_percentage]</item>
+    </string-array>
+
+        [detector_type]: 0 for bounding box detector, 1 for ellipse detector
+        [sensor_shape]: 0 for square, 1 for circle
+        [target_size]: percentage (defined as a float of 0-1) of sensor that is considered the target, expands outward from center
+        [min_ellipse_overlap_percentage]: minimum percentage (float from 0-1) needed to be considered a valid overlap
+        [step_size]: size of each step when iterating over sensor pixel grid
+    -->
+    <string-array name="config_udfps_touch_detection_options">
+        <item>0,0,1.0,0,1</item>
+        <item>1,1,1.0,0,1</item>
+        <item>1,1,1.0,.4,1</item>
+    </string-array>
+
+    <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
+    <integer name="config_selected_udfps_touch_detection">2</integer>
+
     <!-- An array of arrays of side fingerprint sensor properties relative to each display.
          Note: this value is temporary and is expected to be queried directly
          from the HAL in the future. -->
@@ -5071,6 +5237,11 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
+
+    <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
+    <string-array name="config_forceSlowJpegModeList" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
 
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
@@ -5360,6 +5531,10 @@
     <!-- Whether vertical reachability repositioning is allowed for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsVerticalReachabilityEnabled">false</bool>
 
+    <!-- Whether book mode automatic horizontal reachability positioning is allowed for letterboxed
+        fullscreen apps -->
+    <bool name="config_letterboxIsAutomaticReachabilityInBookModeEnabled">false</bool>
+
     <!-- Default horizontal position of the letterboxed app window when reachability is
         enabled and an app is fullscreen in landscape device orientation. When reachability is
         enabled, the position can change between left, center and right. This config defines the
@@ -5435,9 +5610,19 @@
         split screen. -->
     <bool name="config_isWindowManagerCameraCompatTreatmentEnabled">false</bool>
 
+    <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
+        is enabled and activity is connected to the camera in fullscreen. -->
+    <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
+
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
+
+    <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
+         handled. If true, the configuration change will be sent but activities will not be
+         relaunched upon docking. Apps with desk resources will behave like normal, since they may
+         expect the relaunch upon the desk uiMode change. -->
+    <bool name="config_skipActivityRelaunchWhenDocking">false</bool>
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
@@ -5808,7 +5993,6 @@
            - config_roundedCornerDrawableArray (config in SystemUI resource)
            - config_roundedCornerTopDrawableArray (config in SystemUI resource)
            - config_roundedCornerBottomDrawableArray (config in SystemUI resource)
-           - config_displayUsiVersionArray
 
          Leave this array empty for single display device and the system will load the default main
          built-in related configs.
@@ -5882,6 +6066,12 @@
 
     <!-- Wear OS: the name of the main activity of the device's sysui. -->
     <string name="config_wearSysUiMainActivity" translatable="false"/>
+
+    <!-- Wear OS: the name of the package containing the Media Controls Activity. -->
+    <string name="config_wearMediaControlsPackage" translatable="false"/>
+
+    <!-- Wear OS: the name of the package containing the Media Sessions APK. -->
+    <string name="config_wearMediaSessionsPackage" translatable="false"/>
 
     <bool name="config_secondaryBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
 
@@ -5963,7 +6153,7 @@
     <bool name="config_settingsHelpLinksEnabled">false</bool>
 
     <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
-    <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
+    <bool name="config_enableQrCodeScannerOnLockScreen">true</bool>
 
     <!-- Default component for QR code scanner -->
     <string name="config_defaultQrCodeComponent"></string>
@@ -6127,9 +6317,17 @@
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
 
-    <!-- Whether the lock screen is allowed to run its own live wallpaper,
-         different from the home screen wallpaper. -->
-    <bool name="config_independentLockscreenLiveWallpaper">false</bool>
+    <!-- Device state that corresponds to concurrent display mode where the default display
+         is the internal display. Public API for the feature is provided through Jetpack
+         WindowManager.
+         TODO(b/236022708) Move concurrent display state to device state config file
+    -->
+    <integer name="config_deviceStateConcurrentRearDisplay">-1</integer>
+
+    <!-- Physical display address that corresponds to the rear display in rear display mode
+         and concurrent display mode. Used to get information about the display before
+         entering the corresponding modes -->
+    <string name="config_rearDisplayPhysicalAddress" translatable="false"></string>
 
     <!-- List of certificate to be used for font fs-verity integrity verification -->
     <string-array translatable="false" name="config_fontManagerServiceCerts">
@@ -6166,26 +6364,38 @@
         <item>@string/config_mainDisplayShape</item>
         <item>@string/config_secondaryDisplayShape</item>
     </string-array>
+
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for staging HealthConnect's remote data. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_healthConnectRestoreKnownSigners">
+    </string-array>
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner Health
         Connect Migration permissions. The digest should be computed over the DER encoding of the
         trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
 
-    <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
-         (@see https://universalstylus.org/).
+    <!-- Package name of Health Connect data migrator application.  -->
+    <string name="config_healthConnectMigratorPackageName"></string>
 
-         The i-th value in this array corresponds to the supported USI version of the i-th display
-         listed in config_displayUniqueIdArray. On a single-display device, the
-         config_displayUniqueIdArray may be empty, in which case the only value in this array should
-         be the USI version for the main built-in display.
+    <!-- Whether system apps should be scanned in the stopped state during initial boot.
+        Packages can be added by OEMs in an allowlist, to prevent them from being scanned as
+        "stopped" during initial boot of a device, or after an OTA update. Stopped state of
+        an app is not changed during subsequent reboots.  -->
+    <bool name="config_stopSystemPackagesByDefault">false</bool>
 
-         If the display does not support USI, the version value should be an empty string. If the
-         display supports USI, the version must be in the following format:
-           "<major-version>.<minor-version>"
+    <!-- Whether to show weather on the lock screen by default. -->
+    <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 
-         For example, "", "1.0", and "2.0" are valid values. -->
-    <string-array name="config_displayUsiVersionArray" translatable="false">
-        <item>""</item>
-    </string-array>
+    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
+    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
+    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
+    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
+
+    <!-- Whether we should persist the brightness value in nits for the default display even if
+         the underlying display device changes. -->
+    <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
+    <!-- Whether to request the approval before commit sessions. -->
+    <bool name="config_isPreApprovalRequestAvailable">true</bool>
 </resources>

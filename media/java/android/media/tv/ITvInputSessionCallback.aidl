@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.media.AudioPresentation;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.AitInfo;
@@ -34,6 +35,8 @@ oneway interface ITvInputSessionCallback {
     void onSessionCreated(ITvInputSession session, in IBinder hardwareSessionToken);
     void onSessionEvent(in String name, in Bundle args);
     void onChannelRetuned(in Uri channelUri);
+    void onAudioPresentationsChanged(in List<AudioPresentation> tvAudioPresentations);
+    void onAudioPresentationSelected(int presentationId, int programId);
     void onTracksChanged(in List<TvTrackInfo> tracks);
     void onTrackSelected(int type, in String trackId);
     void onVideoAvailable();
@@ -46,6 +49,9 @@ oneway interface ITvInputSessionCallback {
     void onTimeShiftCurrentPositionChanged(long timeMs);
     void onAitInfoUpdated(in AitInfo aitInfo);
     void onSignalStrength(int strength);
+    void onCueingMessageAvailability(boolean available);
+    void onTimeShiftMode(int mode);
+    void onAvailableSpeeds(in float[] speeds);
 
     // For the recording session
     void onTuned(in Uri channelUri);
@@ -60,5 +66,5 @@ oneway interface ITvInputSessionCallback {
     void onAdBufferConsumed(in AdBuffer buffer);
 
     // For messages sent from the TV input
-    void onTvMessage(in String type, in Bundle data);
+    void onTvMessage(int type, in Bundle data);
 }

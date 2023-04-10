@@ -16,8 +16,8 @@
 
 package com.android.systemui.recents;
 
+import static android.content.Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
@@ -26,14 +26,19 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_AWAKE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DREAMING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION;
 
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
@@ -45,6 +50,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -81,6 +87,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -88,6 +95,7 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -98,18 +106,20 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.sysui.ShellInterface;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -118,7 +128,8 @@ import dagger.Lazy;
 public class OverviewProxyService implements CallbackController<OverviewProxyListener>,
         NavigationModeController.ModeChangedListener, Dumpable {
 
-    private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
+    @VisibleForTesting
+    static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
 
     public static final String TAG_OPS = "OverviewProxyService";
     private static final long BACKOFF_MILLIS = 1000;
@@ -135,7 +146,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
     private final NotificationShadeWindowController mStatusBarWinController;
-    private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
+    private final Runnable mConnectionRunnable = () ->
+            internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
     private final ComponentName mRecentsComponentName;
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
@@ -143,7 +155,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final CommandQueue mCommandQueue;
     private final UserTracker mUserTracker;
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
+    private final Optional<UnfoldTransitionProgressForwarder> mUnfoldTransitionProgressForwarder;
     private final UiEventLogger mUiEventLogger;
+    private final DisplayTracker mDisplayTracker;
 
     private Region mActiveNavBarRegion;
     private SurfaceControl mNavigationBarSurface;
@@ -225,11 +239,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         @Override
         public void onImeSwitcherPressed() {
-            // TODO(b/204901476) We're intentionally using DEFAULT_DISPLAY for now since
+            // TODO(b/204901476) We're intentionally using the default display for now since
             // Launcher/Taskbar isn't display aware.
             mContext.getSystemService(InputMethodManager.class)
                     .showInputMethodPickerFromSystem(true /* showAuxiliarySubtypes */,
-                            DEFAULT_DISPLAY);
+                            mDisplayTracker.getDefaultDisplayId());
             mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
         }
 
@@ -259,7 +273,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     InputDevice.SOURCE_KEYBOARD);
 
             ev.setDisplayId(mContext.getDisplay().getDisplayId());
-            return InputManager.getInstance()
+            return InputManagerGlobal.getInstance()
                     .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         }
 
@@ -308,7 +322,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
                         intent.addFlags(
                                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
                     });
         }
 
@@ -326,7 +340,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void expandNotificationPanel() {
             verifyCallerAndClearCallingIdentity("expandNotificationPanel",
-                    () -> mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
+                    () -> mCommandQueue.handleSystemKey(new KeyEvent(KeyEvent.ACTION_DOWN,
+                            KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN)));
         }
 
         @Override
@@ -378,6 +393,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            StringBuilder extraComponentList = new StringBuilder(" components: ");
+            if (intent.hasExtra(EXTRA_CHANGED_COMPONENT_NAME_LIST)) {
+                String[] comps = intent.getStringArrayExtra(EXTRA_CHANGED_COMPONENT_NAME_LIST);
+                if (comps != null) {
+                    for (String c : comps) {
+                        extraComponentList.append(c).append(", ");
+                    }
+                }
+            }
+            Log.d(TAG_OPS, "launcherStateChanged intent: " + intent + extraComponentList);
             updateEnabledState();
 
             // Reconnect immediately, instead of waiting for resume to arrive.
@@ -388,9 +413,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ServiceConnection mOverviewServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if (SysUiState.DEBUG) {
-                Log.d(TAG_OPS, "Overview proxy service connected");
-            }
+            Log.d(TAG_OPS, "Overview proxy service connected");
             mConnectionBackoffAttempts = 0;
             mHandler.removeCallbacks(mDeferredConnectionCallback);
             try {
@@ -399,7 +422,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 // Failed to link to death (process may have died between binding and connecting),
                 // just unbind the service for now and retry again
                 Log.e(TAG_OPS, "Lost connection to launcher service", e);
-                disconnectFromLauncherService();
+                disconnectFromLauncherService("Lost connection to launcher service");
                 retryConnectionWithBackoff();
                 return;
             }
@@ -413,6 +436,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             params.putBoolean(KEY_EXTRA_SUPPORTS_WINDOW_CORNERS, mSupportsRoundedCornersOnWindows);
             params.putBinder(KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
                     mSysuiUnlockAnimationController.asBinder());
+            mUnfoldTransitionProgressForwarder.ifPresent(
+                    unfoldProgressForwarder -> params.putBinder(
+                            KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER,
+                            unfoldProgressForwarder.asBinder()));
             // Add all the interfaces exposed by the shell
             mShellInterface.createExternalInterfaces(params);
 
@@ -431,6 +458,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             notifySystemUiStateFlags(mSysUiState.getFlags());
 
             notifyConnectionChanged();
+            if (mLatchForOnUserChanging != null) {
+                mLatchForOnUserChanging.countDown();
+                mLatchForOnUserChanging = null;
+            }
         }
 
         @Override
@@ -485,12 +516,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
+    private CountDownLatch mLatchForOnUserChanging;
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
                 @Override
-                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                public void onUserChanging(int newUser, @NonNull Context userContext,
+                        CountDownLatch latch) {
                     mConnectionBackoffAttempts = 0;
-                    internalConnectToCurrentUser();
+                    mLatchForOnUserChanging = latch;
+                    internalConnectToCurrentUser("User changed");
                 }
             };
 
@@ -506,10 +540,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             UserTracker userTracker,
             ScreenLifecycle screenLifecycle,
+            WakefulnessLifecycle wakefulnessLifecycle,
             UiEventLogger uiEventLogger,
+            DisplayTracker displayTracker,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder
+    ) {
         // b/241601880: This component shouldn't be running for a non-primary user
         if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             Log.e(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
@@ -534,6 +572,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
         mUiEventLogger = uiEventLogger;
+        mDisplayTracker = displayTracker;
+        mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
+        mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
@@ -577,12 +618,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         // Listen for user setup
         mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
-        screenLifecycle.addObserver(mLifecycleObserver);
-
+        screenLifecycle.addObserver(mScreenLifecycleObserver);
+        wakefulnessLifecycle.addObserver(mWakefulnessLifecycleObserver);
         // Connect to the service
         updateEnabledState();
         startConnectionToCurrentUser();
-        mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
 
         // Listen for assistant changes
         assistUtils.registerVoiceInteractionSessionListener(mVoiceInteractionSessionListener);
@@ -617,7 +657,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
         final NotificationPanelViewController panelController =
-                mCentralSurfacesOptionalLazy.get().get().getNotificationPanelViewController();
+                mCentralSurfacesOptionalLazy.get()
+                        .map(CentralSurfaces::getNotificationPanelViewController)
+                        .orElse(null);
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
                     + " navBarView=" + navBarView + " panelController=" + panelController);
@@ -652,13 +694,17 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
-            boolean bouncerShowing, boolean isDozing, boolean panelExpanded) {
+            boolean keyguardGoingAway, boolean bouncerShowing, boolean isDozing,
+            boolean panelExpanded, boolean isDreaming) {
         mSysUiState.setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
                         keyguardShowing && !keyguardOccluded)
                 .setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
                         keyguardShowing && keyguardOccluded)
+                .setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY,
+                        keyguardGoingAway)
                 .setFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing)
                 .setFlag(SYSUI_STATE_DEVICE_DOZING, isDozing)
+                .setFlag(SYSUI_STATE_DEVICE_DREAMING, isDreaming)
                 .commitUpdate(mContext.getDisplayId());
     }
 
@@ -693,15 +739,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public void startConnectionToCurrentUser() {
+        Log.v(TAG_OPS, "startConnectionToCurrentUser: connection is restarted");
         if (mHandler.getLooper() != Looper.myLooper()) {
             mHandler.post(mConnectionRunnable);
         } else {
-            internalConnectToCurrentUser();
+            internalConnectToCurrentUser("startConnectionToCurrentUser");
         }
     }
 
-    private void internalConnectToCurrentUser() {
-        disconnectFromLauncherService();
+    private void internalConnectToCurrentUser(String reason) {
+        disconnectFromLauncherService(reason);
 
         // If user has not setup yet or already connected, do not try to connect
         if (!isEnabled()) {
@@ -709,10 +756,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             return;
         }
         mHandler.removeCallbacks(mConnectionRunnable);
-        Intent launcherServiceIntent = new Intent(ACTION_QUICKSTEP)
-                .setPackage(mRecentsComponentName.getPackageName());
         try {
-            mBound = mContext.bindServiceAsUser(launcherServiceIntent,
+            mBound = mContext.bindServiceAsUser(mQuickStepIntent,
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     UserHandle.of(mUserTracker.getUserId()));
@@ -765,7 +810,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         return mOverviewProxy;
     }
 
-    private void disconnectFromLauncherService() {
+    private void disconnectFromLauncherService(String disconnectReason) {
+        Log.d(TAG_OPS, "disconnectFromLauncherService bound?: " + mBound +
+                " currentProxy: " + mOverviewProxy + " disconnectReason: " + disconnectReason,
+                new Throwable());
         if (mBound) {
             // Always unbind the service (ie. if called through onNullBinding or onBindingDied)
             mContext.unbindService(mOverviewServiceConnection);
@@ -839,55 +887,94 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    private final ScreenLifecycle.Observer mLifecycleObserver = new ScreenLifecycle.Observer() {
-        /**
-         * Notifies the Launcher that screen turned on and ready to use
-         */
-        @Override
-        public void onScreenTurnedOn() {
-            try {
-                if (mOverviewProxy != null) {
-                    mOverviewProxy.onScreenTurnedOn();
-                } else {
-                    Log.e(TAG_OPS, "Failed to get overview proxy for screen turned on event.");
+    private final ScreenLifecycle.Observer mScreenLifecycleObserver =
+            new ScreenLifecycle.Observer() {
+                /**
+                 * Notifies the Launcher that screen turned on and ready to use
+                 */
+                @Override
+                public void onScreenTurnedOn() {
+                    try {
+                        if (mOverviewProxy != null) {
+                            mOverviewProxy.onScreenTurnedOn();
+                        } else {
+                            Log.e(TAG_OPS,
+                                    "Failed to get overview proxy for screen turned on event.");
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG_OPS, "Failed to call onScreenTurnedOn()", e);
+                    }
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG_OPS, "Failed to call onScreenTurnedOn()", e);
-            }
-        }
 
-        /**
-         * Notifies the Launcher that screen is starting to turn on.
-         */
-        @Override
-        public void onScreenTurningOff() {
-            try {
-                if (mOverviewProxy != null) {
-                    mOverviewProxy.onScreenTurningOff();
-                } else {
-                    Log.e(TAG_OPS, "Failed to get overview proxy for screen turning off event.");
+                /**
+                 * Notifies the Launcher that screen is starting to turn on.
+                 */
+                @Override
+                public void onScreenTurningOff() {
+                    try {
+                        if (mOverviewProxy != null) {
+                            mOverviewProxy.onScreenTurningOff();
+                        } else {
+                            Log.e(TAG_OPS,
+                                    "Failed to get overview proxy for screen turning off event.");
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG_OPS, "Failed to call onScreenTurningOff()", e);
+                    }
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG_OPS, "Failed to call onScreenTurningOff()", e);
-            }
-        }
 
-        /**
-         * Notifies the Launcher that screen is starting to turn on.
-         */
-        @Override
-        public void onScreenTurningOn() {
-            try {
-                if (mOverviewProxy != null) {
-                    mOverviewProxy.onScreenTurningOn();
-                } else {
-                    Log.e(TAG_OPS, "Failed to get overview proxy for screen turning on event.");
+                /**
+                 * Notifies the Launcher that screen is starting to turn on.
+                 */
+                @Override
+                public void onScreenTurningOn() {
+                    try {
+                        if (mOverviewProxy != null) {
+                            mOverviewProxy.onScreenTurningOn();
+                        } else {
+                            Log.e(TAG_OPS,
+                                    "Failed to get overview proxy for screen turning on event.");
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG_OPS, "Failed to call onScreenTurningOn()", e);
+                    }
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG_OPS, "Failed to call onScreenTurningOn()", e);
-            }
-        }
-    };
+            };
+
+    private final WakefulnessLifecycle.Observer mWakefulnessLifecycleObserver =
+            new WakefulnessLifecycle.Observer() {
+                @Override
+                public void onStartedWakingUp() {
+                    mSysUiState
+                            .setFlag(SYSUI_STATE_AWAKE, true)
+                            .setFlag(SYSUI_STATE_WAKEFULNESS_TRANSITION, true)
+                            .commitUpdate(mContext.getDisplayId());
+                }
+
+                @Override
+                public void onFinishedWakingUp() {
+                    mSysUiState
+                            .setFlag(SYSUI_STATE_AWAKE, true)
+                            .setFlag(SYSUI_STATE_WAKEFULNESS_TRANSITION, false)
+                            .commitUpdate(mContext.getDisplayId());
+                }
+
+                @Override
+                public void onStartedGoingToSleep() {
+                    mSysUiState
+                            .setFlag(SYSUI_STATE_AWAKE, false)
+                            .setFlag(SYSUI_STATE_WAKEFULNESS_TRANSITION, true)
+                            .commitUpdate(mContext.getDisplayId());
+                }
+
+                @Override
+                public void onFinishedGoingToSleep() {
+                    mSysUiState
+                            .setFlag(SYSUI_STATE_AWAKE, false)
+                            .setFlag(SYSUI_STATE_WAKEFULNESS_TRANSITION, false)
+                            .commitUpdate(mContext.getDisplayId());
+                }
+            };
 
     void notifyToggleRecentApps() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
@@ -987,5 +1074,22 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
+    }
+
+    /**
+     * Shuts down this service at the end of a testcase.
+     * <p>
+     * The in-production service is never shuts down, and it was not designed with testing in mind.
+     * This unregisters the mechanisms by which the service will be revived after a testcase.
+     * <p>
+     * NOTE: This is a stop-gap introduced when first added some tests to this class. It should
+     * probably be replaced by proper lifecycle management on this class.
+     */
+    @VisibleForTesting()
+    void shutdownForTest() {
+        mContext.unregisterReceiver(mLauncherStateChangedReceiver);
+        mIsEnabled = false;
+        mHandler.removeCallbacks(mConnectionRunnable);
+        disconnectFromLauncherService("Shutdown for test");
     }
 }

@@ -9,7 +9,6 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.plugins.FalsingManager
@@ -41,7 +40,7 @@ class QSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var qsPanel: QSPanel
     @Mock private lateinit var tunerService: TunerService
-    @Mock private lateinit var qsTileHost: QSTileHost
+    @Mock private lateinit var qsHost: QSHost
     @Mock private lateinit var qsCustomizerController: QSCustomizerController
     @Mock private lateinit var qsTileRevealControllerFactory: QSTileRevealController.Factory
     @Mock private lateinit var dumpManager: DumpManager
@@ -57,7 +56,6 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var otherTile: QSTile
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
-    @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var configuration: Configuration
     @Mock private lateinit var pagedTileLayout: PagedTileLayout
 
@@ -70,7 +68,7 @@ class QSPanelControllerTest : SysuiTestCase() {
 
         whenever(brightnessSliderFactory.create(any(), any())).thenReturn(brightnessSlider)
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
-        testableResources.addOverride(R.bool.config_use_split_notification_shade, false)
+        setShouldUseSplitShade(false)
         whenever(qsPanel.resources).thenReturn(testableResources.resources)
         whenever(qsPanel.getOrCreateTileLayout()).thenReturn(pagedTileLayout)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
@@ -81,7 +79,7 @@ class QSPanelControllerTest : SysuiTestCase() {
         controller = QSPanelController(
             qsPanel,
             tunerService,
-            qsTileHost,
+            qsHost,
             qsCustomizerController,
             /* usingMediaPlayer= */ true,
             mediaHost,
@@ -93,8 +91,7 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            statusBarKeyguardViewManager,
-            featureFlags
+            statusBarKeyguardViewManager
         )
     }
 
@@ -112,7 +109,7 @@ class QSPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun testSetListeningDoesntRefreshListeningTiles() {
-        whenever(qsTileHost.getTiles()).thenReturn(listOf(tile, otherTile))
+        whenever(qsHost.getTiles()).thenReturn(listOf(tile, otherTile))
         controller.setTiles()
         whenever(tile.isListening()).thenReturn(false)
         whenever(otherTile.isListening()).thenReturn(true)
@@ -133,12 +130,31 @@ class QSPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun configurationChange_onlySplitShadeConfigChanges_tileAreRedistributed() {
-        testableResources.addOverride(R.bool.config_use_split_notification_shade, false)
+        setShouldUseSplitShade(false)
         controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
         verify(pagedTileLayout, never()).forceTilesRedistribution(any())
 
-        testableResources.addOverride(R.bool.config_use_split_notification_shade, true)
+        setShouldUseSplitShade(true)
         controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
         verify(pagedTileLayout).forceTilesRedistribution("Split shade state changed")
+    }
+
+    @Test
+    fun configurationChange_onlySplitShadeConfigChanges_qsPanelCanBeCollapsed() {
+        setShouldUseSplitShade(false)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(qsPanel, never()).setCanCollapse(anyBoolean())
+
+        setShouldUseSplitShade(true)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(qsPanel).setCanCollapse(false)
+
+        setShouldUseSplitShade(false)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(qsPanel).setCanCollapse(true)
+    }
+
+    private fun setShouldUseSplitShade(shouldUse: Boolean) {
+        testableResources.addOverride(R.bool.config_use_split_notification_shade, shouldUse)
     }
 }

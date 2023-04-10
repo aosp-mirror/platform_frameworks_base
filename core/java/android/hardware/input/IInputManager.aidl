@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.graphics.Rect;
+import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
@@ -233,4 +234,6 @@ interface IInputManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)")
     void unregisterKeyboardBacklightListener(IKeyboardBacklightListener listener);
+
+    HostUsiVersion getHostUsiVersionFromDisplayConfig(int displayId);
 }

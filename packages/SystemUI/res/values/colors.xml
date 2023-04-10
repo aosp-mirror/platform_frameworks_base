@@ -118,6 +118,7 @@
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
+    <color name="ksh_key_item_new_background">@color/transparent</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>
 
@@ -136,15 +137,6 @@
     <!-- SFPS colors -->
     <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>
 
-    <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#699FF3</color>
-    <color name="udfps_moving_target_fill">#C2D7F7</color>
-    <!-- 50% of udfps_moving_target_fill-->
-    <color name="udfps_moving_target_fill_error">#80C2D7F7</color>
-    <color name="udfps_enroll_progress">#699FF3</color>
-    <color name="udfps_enroll_progress_help">#70699FF3</color>
-    <color name="udfps_enroll_progress_help_with_talkback">#FFEE675C</color>
-
     <!-- Floating overlay actions -->
     <color name="overlay_button_ripple">#1f000000</color>
     <color name="overlay_background_protection_start">#40000000</color> <!-- 25% black -->
@@ -161,6 +153,7 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#EA4335</color>
+    <color name="GM2_red_600">#B3261E</color>
     <color name="GM2_red_700">#C5221F</color>
 
     <color name="GM2_blue_300">#8AB4F8</color>
@@ -168,10 +161,10 @@
     <color name="GM2_yellow_200">#FDE293</color>
 
     <!-- Window magnification colors -->
-    <color name="magnification_border_color">#FF9900</color>
-    <color name="magnification_border_color_change">#0000FF</color>
-    <color name="magnification_switch_button_color">#7F000000</color>
-    <color name="magnification_drag_handle_color">#B3000000</color>
+    <color name="magnification_border_color">#F29900</color>
+    <color name="magnification_drag_corner_background">#E5FFFFFF</color>
+    <color name="magnification_drag_handle_stroke">#000000</color>
+    <color name="magnification_drag_handle_background_change">#111111</color>
     <color name="accessibility_magnifier_bg">#FCFCFC</color>
     <color name="accessibility_magnifier_bg_stroke">#E0E0E0</color>
     <color name="accessibility_magnifier_icon_color">#252525</color>
@@ -212,6 +205,12 @@
     <color name="control_thumbnail_tint">#33000000</color>
     <color name="control_thumbnail_shadow_color">@*android:color/black</color>
     <color name="controls_task_view_bg">#CC191C1D</color>
+    <color name="control_popup_dim">#8A000000</color>
+
+    <!-- Keyboard backlight indicator-->
+    <color name="backlight_indicator_step_filled">#F6E388</color>
+    <color name="backlight_indicator_step_empty">#494740</color>
+    <color name="backlight_indicator_background">#32302A</color>
 
     <!-- Docked misalignment message -->
     <color name="misalignment_text_color">#F28B82</color>
@@ -231,6 +230,9 @@
     <color name="wallet_card_border">#33FFFFFF</color>
 
     <color name="people_tile_background">@color/material_dynamic_secondary95</color>
+
+    <!-- Chipbar -->
+    <color name="chipbar_text_and_icon_color">@android:color/system_accent2_900</color>
 
     <!-- Internet Dialog -->
     <!-- Material next state on color-->

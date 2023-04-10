@@ -29,16 +29,16 @@
       ]
     },
     {
-      "name": "CtsPermission2TestCases",
+      "name": "CtsPermissionPolicyTestCases",
       "options": [
         {
-          "include-filter": "android.permission2.cts.RestrictedPermissionsTest"
+          "include-filter": "android.permissionpolicy.cts.RestrictedPermissionsTest"
         },
         {
-          "include-filter": "android.permission2.cts.RestrictedStoragePermissionSharedUidTest"
+          "include-filter": "android.permissionpolicy.cts.RestrictedStoragePermissionSharedUidTest"
         },
         {
-          "include-filter": "android.permission2.cts.RestrictedStoragePermissionTest"
+          "include-filter": "android.permissionpolicy.cts.RestrictedStoragePermissionTest"
         }
       ]
     },

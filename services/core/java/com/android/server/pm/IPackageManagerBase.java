@@ -303,12 +303,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final void forceDexOpt(String packageName) {
-        mDexOptHelper.forceDexOpt(snapshot(), packageName);
-    }
-
-    @Override
-    @Deprecated
     public final ActivityInfo getActivityInfo(ComponentName component,
             @PackageManager.ComponentInfoFlagsBits long flags, int userId) {
         return snapshot().getActivityInfo(component, flags, userId);
@@ -469,8 +463,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Override
     @Nullable
     @Deprecated
-    public final InstallSourceInfo getInstallSourceInfo(@NonNull String packageName) {
-        return snapshot().getInstallSourceInfo(packageName);
+    public final InstallSourceInfo getInstallSourceInfo(@NonNull String packageName,
+            @UserIdInt int userId) {
+        return snapshot().getInstallSourceInfo(packageName, userId);
     }
 
     @Override

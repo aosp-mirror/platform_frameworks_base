@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarV
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -74,8 +75,12 @@ object WifiViewBinder {
         val iconTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
         val decorTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
 
+        var isCollecting: Boolean = false
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                isCollecting = true
+
                 launch {
                     visibilityState.collect { visibilityState ->
                         groupView.isVisible = visibilityState == STATE_ICON
@@ -127,6 +132,12 @@ object WifiViewBinder {
                         airplaneSpacer.isVisible = visible
                     }
                 }
+
+                try {
+                    awaitCancellation()
+                } finally {
+                    isCollecting = false
+                }
             }
         }
 
@@ -151,6 +162,10 @@ object WifiViewBinder {
                     return
                 }
                 decorTint.value = newTint
+            }
+
+            override fun isCollecting(): Boolean {
+                return isCollecting
             }
         }
     }

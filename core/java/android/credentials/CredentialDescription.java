@@ -25,14 +25,17 @@ import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents the type and contained data fields of a {@link Credential}.
- * @hide
  */
 public final class CredentialDescription implements Parcelable {
+
+    private static final int MAX_ALLOWED_ENTRIES_PER_DESCRIPTION = 16;
 
     /**
      * The credential type.
@@ -41,13 +44,13 @@ public final class CredentialDescription implements Parcelable {
     private final String mType;
 
     /**
-     * The flattened JSON string that will be matched with requests.
+     * Keys of elements to match with Credential requests.
      */
     @NonNull
-    private final String mFlattenedRequestString;
+    private final Set<String> mSupportedElementKeys;
 
     /**
-     * The entry to be used in the UI.
+     * The credential entries to be used in the UI.
      */
     @NonNull
     private final List<CredentialEntry> mCredentialEntries;
@@ -56,34 +59,50 @@ public final class CredentialDescription implements Parcelable {
      * Constructs a {@link CredentialDescription}.
      *
      * @param type the type of the credential returned.
-     * @param flattenedRequestString flattened JSON string that will be matched with requests.
-     * @param credentialEntries a list of {@link  CredentialEntry}s that have been returned
-     *                          to the developer upon credential creation.
+     * @param supportedElementKeys Keys of elements to match with Credential requests.
+     * @param credentialEntries a list of {@link CredentialEntry}s that are to be shown on the
+     *                          account selector if a credential matches with this description.
+     *                          Each entry contains information to be displayed within an
+     *                          entry on the UI, as well as a {@link android.app.PendingIntent}
+     *                          that will be invoked if the user selects this entry.
      *
      * @throws IllegalArgumentException If type is empty.
      */
     public CredentialDescription(@NonNull String type,
-            @NonNull String flattenedRequestString,
+            @NonNull Set<String> supportedElementKeys,
             @NonNull List<CredentialEntry> credentialEntries) {
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
-        mFlattenedRequestString = Preconditions.checkStringNotEmpty(flattenedRequestString);
+        mSupportedElementKeys = Objects.requireNonNull(supportedElementKeys);
         mCredentialEntries = Objects.requireNonNull(credentialEntries);
+        Preconditions.checkArgument(credentialEntries.size()
+                        <= MAX_ALLOWED_ENTRIES_PER_DESCRIPTION,
+                "The number of Credential Entries exceed 16.");
+        Preconditions.checkArgument(compareEntryTypes(type, credentialEntries) == 0,
+                "Credential Entry type(s) do not match the request type.");
     }
 
     private CredentialDescription(@NonNull Parcel in) {
         String type = in.readString8();
-        String flattenedRequestString = in.readString();
+        List<String> descriptions = in.createStringArrayList();
         List<CredentialEntry> entries = new ArrayList<>();
         in.readTypedList(entries, CredentialEntry.CREATOR);
 
         mType = type;
         AnnotationValidations.validate(android.annotation.NonNull.class, null, mType);
-        mFlattenedRequestString = flattenedRequestString;
+        mSupportedElementKeys = new HashSet<>(descriptions);
         AnnotationValidations.validate(android.annotation.NonNull.class, null,
-                mFlattenedRequestString);
+                mSupportedElementKeys);
         mCredentialEntries = entries;
         AnnotationValidations.validate(android.annotation.NonNull.class, null,
                 mCredentialEntries);
+    }
+
+    private static int compareEntryTypes(@NonNull String type,
+            @NonNull List<CredentialEntry> credentialEntries) {
+        return credentialEntries.stream()
+                .filter(credentialEntry ->
+                        !credentialEntry.getType().equals(type)).toList().size();
+
     }
 
     public static final @NonNull Parcelable.Creator<CredentialDescription> CREATOR =
@@ -106,34 +125,57 @@ public final class CredentialDescription implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(mType);
-        dest.writeString(mFlattenedRequestString);
+        dest.writeString8(mType);
+        dest.writeStringList(mSupportedElementKeys.stream().toList());
         dest.writeTypedList(mCredentialEntries, flags);
     }
 
+    /**
+     * Returns the type of the Credential described.
+     */
     @NonNull
     public String getType() {
         return mType;
     }
 
+    /**
+     * Returns the flattened JSON string that will be matched with requests.
+     */
     @NonNull
-    public String getFlattenedRequestString() {
-        return mFlattenedRequestString;
+    public Set<String> getSupportedElementKeys() {
+        return new HashSet<>(mSupportedElementKeys);
     }
 
+    /**
+     * Returns the credential entries to be used in the UI.
+     */
     @NonNull
     public List<CredentialEntry> getCredentialEntries() {
         return mCredentialEntries;
     }
 
+    /**
+     * {@link CredentialDescription#mType} and
+     * {@link CredentialDescription#mSupportedElementKeys} are enough for hashing. Constructor
+     * enforces {@link CredentialEntry} to have the same type and
+     * {@link android.app.slice.Slice} contained by the entry can not be hashed.
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mFlattenedRequestString);
+        return Objects.hash(mType, mSupportedElementKeys);
     }
 
+    /**
+     * {@link CredentialDescription#mType} and
+     * {@link CredentialDescription#mSupportedElementKeys} are enough for equality check.
+     */
     @Override
     public boolean equals(Object obj) {
-        return Objects.equals(mType, ((CredentialDescription) obj).getType())
-                && Objects.equals(mFlattenedRequestString, ((CredentialDescription) obj).getType());
+        if (!(obj instanceof CredentialDescription)) {
+            return false;
+        }
+        CredentialDescription other = (CredentialDescription) obj;
+        return mType.equals(other.mType)
+                && mSupportedElementKeys.equals(other.mSupportedElementKeys);
     }
 }

@@ -49,7 +49,6 @@ class UdfpsShellTest : SysuiTestCase() {
     private lateinit var udfpsShell: UdfpsShell
 
     @Mock lateinit var commandRegistry: CommandRegistry
-    @Mock lateinit var udfpsOverlay: UdfpsOverlay
     @Mock lateinit var udfpsOverlayController: UdfpsOverlayController
 
     @Captor private lateinit var motionEvent: ArgumentCaptor<MotionEvent>
@@ -60,7 +59,7 @@ class UdfpsShellTest : SysuiTestCase() {
     fun setup() {
         whenEver(udfpsOverlayController.sensorBounds).thenReturn(sensorBounds)
 
-        udfpsShell = UdfpsShell(commandRegistry, udfpsOverlay)
+        udfpsShell = UdfpsShell(commandRegistry)
         udfpsShell.udfpsOverlayController = udfpsOverlayController
     }
 

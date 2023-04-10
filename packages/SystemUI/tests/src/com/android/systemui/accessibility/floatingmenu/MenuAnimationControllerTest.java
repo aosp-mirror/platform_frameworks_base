@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -77,7 +78,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                mock(SecureSettings.class));
 
         mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance));
         mViewPropertyAnimator = spy(mMenuView.animate());

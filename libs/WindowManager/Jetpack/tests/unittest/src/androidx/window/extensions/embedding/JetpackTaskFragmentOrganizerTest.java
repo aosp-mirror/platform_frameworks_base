@@ -124,7 +124,7 @@ public class JetpackTaskFragmentOrganizerTest {
     private TaskFragmentInfo createMockInfo(TaskFragmentContainer container) {
         return new TaskFragmentInfo(container.getTaskFragmentToken(),
                 mock(WindowContainerToken.class), new Configuration(), 0 /* runningActivityCount */,
-                false /* isVisible */, new ArrayList<>(), new Point(),
+                false /* isVisible */, new ArrayList<>(), new ArrayList<>(), new Point(),
                 false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */,
                 false /* isClearedForReorderActivityToFront */, new Point());
     }

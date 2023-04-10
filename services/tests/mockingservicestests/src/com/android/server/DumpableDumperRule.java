@@ -15,6 +15,7 @@
  */
 package com.android.server;
 
+import android.annotation.Nullable;
 import android.util.Dumpable;
 import android.util.Log;
 
@@ -40,6 +41,8 @@ public final class DumpableDumperRule implements TestRule {
 
     private final List<Dumpable> mDumpables = new ArrayList<>();
 
+    private @Nullable String mTestName;
+
     /**
      * Adds a {@link Dumpable} to be logged if the test case fails.
      */
@@ -47,15 +50,24 @@ public final class DumpableDumperRule implements TestRule {
         mDumpables.add(dumpable);
     }
 
+    /**
+     * Gets the name of the test being executed.
+     */
+    public @Nullable String getTestName() {
+        return mTestName;
+    }
+
     @Override
     public Statement apply(Statement base, Description description) {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                mTestName = description.getDisplayName();
                 try {
                     base.evaluate();
                 } catch (Throwable t) {
-                    dumpOnFailure(description.getMethodName());
+                    dumpOnFailure(mTestName);
+                    mTestName = null;
                     throw t;
                 }
             }

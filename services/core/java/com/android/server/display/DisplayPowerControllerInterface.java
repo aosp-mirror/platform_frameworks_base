@@ -31,10 +31,19 @@ import java.io.PrintWriter;
 public interface DisplayPowerControllerInterface {
 
     /**
-     * Notified when the display is changed. We use this to apply any changes that might be needed
-     * when displays get swapped on foldable devices.
+     * Notified when the display is changed.
+     *
+     * We use this to apply any changes that might be needed when displays get swapped on foldable
+     * devices, when layouts change, etc.
+     *
+     * Must be called while holding the SyncRoot lock.
+     *
+     * @param hbmInfo The high brightness mode metadata, like
+     *                remaining time and hbm events, for the corresponding
+     *                physical display, to make sure we stay within the safety margins.
+     * @param leadDisplayId The display who is considered our "leader" for things like brightness.
      */
-    void onDisplayChanged();
+    void onDisplayChanged(HighBrightnessModeMetadata hbmInfo, int leadDisplayId);
 
     /**
      * Unregisters all listeners and interrupts all running threads; halting future work.
@@ -157,4 +166,49 @@ public interface DisplayPowerControllerInterface {
      * @param newUserId The new userId
      */
     void onSwitchUser(int newUserId);
+
+    /**
+     * Get the ID of the display associated with this DPC.
+     * @return The display ID
+     */
+    int getDisplayId();
+
+    /**
+     * Get the ID of the display that is the leader of this DPC.
+     *
+     * Note that this is different than the display associated with the DPC. The leader is another
+     * display which we follow for things like brightness.
+     *
+     * Must be called while holding the SyncRoot lock.
+     */
+    int getLeadDisplayId();
+
+    /**
+     * Set the brightness to follow if this is an additional display in a set of concurrent
+     * displays.
+     * @param leadDisplayBrightness The brightness of the lead display in the set of concurrent
+     *                              displays
+     * @param nits The brightness value in nits if the device supports nits. Set to a negative
+     *             number otherwise.
+     * @param ambientLux The lux value that will be passed to {@link HighBrightnessModeController}
+     */
+    void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux);
+
+    /**
+     * Add an additional display that will copy the brightness value from this display. This is used
+     * when the device is in concurrent displays mode.
+     * @param follower The DPC that should copy the brightness value from this DPC
+     */
+    void addDisplayBrightnessFollower(DisplayPowerControllerInterface follower);
+
+    /**
+     * Removes the given display from the list of brightness followers.
+     * @param follower The DPC to remove from the followers list
+     */
+    void removeDisplayBrightnessFollower(DisplayPowerControllerInterface follower);
+
+    /**
+     * Indicate that boot has been completed and the screen is ready to update.
+     */
+    void onBootCompleted();
 }

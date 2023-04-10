@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_IME;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
 import static com.android.server.wm.InsetsSourceProviderProto.CLIENT_VISIBLE;
@@ -41,7 +39,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.SurfaceControl;
@@ -61,7 +58,7 @@ import java.util.function.Consumer;
  * Controller for a specific inset source on the server. It's called provider as it provides the
  * {@link InsetsSource} to the client that uses it in {@link android.view.InsetsSourceConsumer}.
  */
-abstract class InsetsSourceProvider {
+class InsetsSourceProvider {
 
     protected final DisplayContent mDisplayContent;
     protected final @NonNull InsetsSource mSource;
@@ -164,7 +161,7 @@ abstract class InsetsSourceProvider {
             // TODO: Ideally, we should wait for the animation to finish so previous window can
             // animate-out as new one animates-in.
             mWindowContainer.cancelAnimation();
-            mWindowContainer.getProvidedInsetsSources().remove(mSource.getId());
+            mWindowContainer.getInsetsSourceProviders().remove(mSource.getId());
             mSeamlessRotating = false;
         }
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "InsetsSource setWin %s for type %s",
@@ -180,7 +177,7 @@ abstract class InsetsSourceProvider {
             mSource.setInsetsRoundedCornerFrame(false);
             mSourceFrame.setEmpty();
         } else {
-            mWindowContainer.getProvidedInsetsSources().put(mSource.getId(), mSource);
+            mWindowContainer.getInsetsSourceProviders().put(mSource.getId(), this);
             if (mControllable) {
                 mWindowContainer.setControllableInsetProvider(this);
                 if (mPendingControlTarget != null) {
@@ -189,13 +186,6 @@ abstract class InsetsSourceProvider {
                 }
             }
         }
-    }
-
-    /**
-     * @return Whether there is a window container which backs this source.
-     */
-    boolean hasWindowContainer() {
-        return mWindowContainer != null;
     }
 
     /**
@@ -228,8 +218,6 @@ abstract class InsetsSourceProvider {
         if (mFrameProvider != null) {
             mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
                     mWindowContainer, mSourceFrame);
-        } else {
-            mSourceFrame.inset(win.mGivenContentInsets);
         }
         updateSourceFrameForServerVisibility();
 
@@ -363,9 +351,9 @@ abstract class InsetsSourceProvider {
     }
 
     /**
-     * @see InsetsStateController#onControlFakeTargetChanged(int, InsetsControlTarget)
+     * @see InsetsStateController#onControlTargetChanged
      */
-    void updateControlForFakeTarget(@Nullable InsetsControlTarget fakeTarget) {
+    void updateFakeControlTarget(@Nullable InsetsControlTarget fakeTarget) {
         if (fakeTarget == mFakeControlTarget) {
             return;
         }
@@ -521,31 +509,11 @@ abstract class InsetsSourceProvider {
     }
 
     protected void updateVisibility() {
-        mSource.setVisible(mServerVisible && (isMirroredSource() || mClientVisible));
+        mSource.setVisible(mServerVisible && mClientVisible);
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource updateVisibility for %s, serverVisible: %s clientVisible: %s",
                 WindowInsets.Type.toString(mSource.getType()),
                 mServerVisible, mClientVisible);
-    }
-
-    private boolean isMirroredSource() {
-        if (mWindowContainer == null) {
-            return false;
-        }
-        if (mWindowContainer.asWindowState() == null) {
-            return false;
-        }
-        final InsetsFrameProvider[] providers =
-                ((WindowState) mWindowContainer).mAttrs.providedInsets;
-        if (providers == null) {
-            return false;
-        }
-        for (int i = 0; i < providers.length; i++) {
-            if (providers[i].type == ITYPE_IME) {
-                return true;
-            }
-        }
-        return false;
     }
 
     InsetsSourceControl getControl(InsetsControlTarget target) {
@@ -568,6 +536,10 @@ abstract class InsetsSourceProvider {
 
     InsetsControlTarget getControlTarget() {
         return mControlTarget;
+    }
+
+    InsetsControlTarget getFakeControlTarget() {
+        return mFakeControlTarget;
     }
 
     boolean isClientVisible() {
@@ -609,15 +581,15 @@ abstract class InsetsSourceProvider {
         }
         if (mControlTarget != null) {
             pw.print(prefix + "mControlTarget=");
-            pw.println(mControlTarget.getWindow());
+            pw.println(mControlTarget);
         }
         if (mPendingControlTarget != null) {
             pw.print(prefix + "mPendingControlTarget=");
-            pw.println(mPendingControlTarget.getWindow());
+            pw.println(mPendingControlTarget);
         }
         if (mFakeControlTarget != null) {
             pw.print(prefix + "mFakeControlTarget=");
-            pw.println(mFakeControlTarget.getWindow());
+            pw.println(mFakeControlTarget);
         }
     }
 

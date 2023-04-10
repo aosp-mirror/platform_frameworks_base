@@ -38,7 +38,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -51,8 +50,8 @@ public class BatteryStatsUserLifecycleTests {
 
     private static final long POLL_INTERVAL_MS = 500;
     private static final long USER_REMOVE_TIMEOUT_MS = 5_000;
-    private static final long STOP_USER_TIMEOUT_MS = 10_000;
-    private static final long USER_UIDS_REMOVE_TIMEOUT_MS = 15_000;
+    private static final long STOP_USER_TIMEOUT_MS = 20_000;
+    private static final long USER_UIDS_REMOVE_TIMEOUT_MS = 20_000;
     private static final long BATTERYSTATS_POLLING_TIMEOUT_MS = 5_000;
 
     private static final String CPU_DATA_TAG = "cpu";
@@ -79,26 +78,29 @@ public class BatteryStatsUserLifecycleTests {
         batteryOnScreenOff();
     }
 
-    @Ignore("b/244349060")
     @Test
     public void testNoCpuDataForRemovedUser() throws Exception {
         mIam.startUserInBackground(mTestUserId);
         waitUntilTrue("No uids for started user " + mTestUserId,
                 () -> getNumberOfUidsInBatteryStats() > 0, BATTERYSTATS_POLLING_TIMEOUT_MS);
 
+        final boolean[] userStopped = new boolean[1];
         CountDownLatch stopUserLatch = new CountDownLatch(1);
         mIam.stopUser(mTestUserId, true, new IStopUserCallback.Stub() {
             @Override
             public void userStopped(int userId) throws RemoteException {
+                userStopped[0] = true;
                 stopUserLatch.countDown();
             }
 
             @Override
             public void userStopAborted(int userId) throws RemoteException {
+                stopUserLatch.countDown();
             }
         });
-        assertTrue("User " + mTestUserId + " could not be stopped",
+        assertTrue("User " + mTestUserId + " could not be stopped in " + STOP_USER_TIMEOUT_MS,
                 stopUserLatch.await(STOP_USER_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertTrue("User " + mTestUserId + " could not be stopped", userStopped[0]);
 
         mUm.removeUser(mTestUserId);
         waitUntilTrue("Unable to remove user " + mTestUserId, () -> {

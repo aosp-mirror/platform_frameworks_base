@@ -26,8 +26,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_VALUE;
-import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -136,6 +134,8 @@ class AccessibilityUserState {
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+    // Whether the always on magnification feature is enabled.
+    private boolean mAlwaysOnMagnificationEnabled = false;
 
     /** The stroke width of the focus rectangle in pixels */
     private int mFocusStrokeWidth;
@@ -145,8 +145,6 @@ class AccessibilityUserState {
     private final int mFocusStrokeWidthDefaultValue;
     // The default value of the focus color.
     private final int mFocusColorDefaultValue;
-    /** The color contrast in [-1, 1] */
-    private float mUiContrast = CONTRAST_DEFAULT_VALUE;
 
     private Context mContext;
 
@@ -221,7 +219,7 @@ class AccessibilityUserState {
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
         mMagnificationFollowTypingEnabled = true;
-        mUiContrast = CONTRAST_NOT_SET;
+        mAlwaysOnMagnificationEnabled = false;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -531,6 +529,8 @@ class AccessibilityUserState {
                 .append(String.valueOf(mIsAudioDescriptionByDefaultRequested));
         pw.append(", magnificationFollowTypingEnabled=")
                 .append(String.valueOf(mMagnificationFollowTypingEnabled));
+        pw.append(", alwaysOnMagnificationEnabled=")
+                .append(String.valueOf(mAlwaysOnMagnificationEnabled));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");
@@ -709,6 +709,14 @@ class AccessibilityUserState {
 
     public boolean isMagnificationFollowTypingEnabled() {
         return mMagnificationFollowTypingEnabled;
+    }
+
+    public void setAlwaysOnMagnificationEnabled(boolean enabled) {
+        mAlwaysOnMagnificationEnabled = enabled;
+    }
+
+    public boolean isAlwaysOnMagnificationEnabled() {
+        return mAlwaysOnMagnificationEnabled;
     }
 
     /**
@@ -988,7 +996,6 @@ class AccessibilityUserState {
         return mFocusColor;
     }
 
-
     /**
      * Sets the stroke width and color of the focus rectangle.
      *
@@ -1013,21 +1020,5 @@ class AccessibilityUserState {
             return mServiceDetectsGestures.get(displayId);
         }
         return false;
-    }
-
-    /**
-     * Get the color contrast
-     * @return color contrast in [-1, 1]
-     */
-    public float getUiContrastLocked() {
-        return mUiContrast;
-    }
-
-    /**
-     * Set the color contrast
-     * @param contrast the new color contrast in [-1, 1]
-     */
-    public void setUiContrastLocked(float contrast) {
-        mUiContrast = contrast;
     }
 }

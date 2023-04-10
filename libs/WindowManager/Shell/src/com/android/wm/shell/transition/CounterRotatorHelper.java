@@ -28,6 +28,7 @@ import android.window.WindowContainerToken;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.util.CounterRotator;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class CounterRotatorHelper {
         for (int i = numChanges - 1; i >= 0; --i) {
             final TransitionInfo.Change change = changes.get(i);
             final WindowContainerToken parent = change.getParent();
-            if (!Transitions.isClosingType(change.getMode())
+            if (!TransitionUtil.isClosingType(change.getMode())
                     || !TransitionInfo.isIndependent(change, info) || parent == null) {
                 continue;
             }

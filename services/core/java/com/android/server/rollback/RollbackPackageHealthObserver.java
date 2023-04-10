@@ -36,12 +36,14 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
+import com.android.server.SystemConfig;
 import com.android.server.pm.ApexManager;
 
 import java.io.BufferedReader;
@@ -358,6 +360,13 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private void rollbackPackage(RollbackInfo rollback, VersionedPackage failedPackage,
             @FailureReasons int rollbackReason) {
         assertInWorkerThread();
+
+        if (isAutomaticRollbackDenied(SystemConfig.getInstance(), failedPackage)) {
+            Slog.d(TAG, "Automatic rollback not allowed for package "
+                    + failedPackage.getPackageName());
+            return;
+        }
+
         final RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         int reasonToLog = WatchdogRollbackLogger.mapFailureReasonToMetric(rollbackReason);
         final String failedPackageToLog;
@@ -417,6 +426,17 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         rollbackManager.commitRollback(rollback.getRollbackId(),
                 Collections.singletonList(failedPackage), rollbackReceiver.getIntentSender());
+    }
+
+    /**
+     * Returns true if this package is not eligible for automatic rollback.
+     */
+    @VisibleForTesting
+    @AnyThread
+    public static boolean isAutomaticRollbackDenied(SystemConfig systemConfig,
+            VersionedPackage versionedPackage) {
+        return systemConfig.getAutomaticRollbackDenylistedPackages()
+            .contains(versionedPackage.getPackageName());
     }
 
     /**

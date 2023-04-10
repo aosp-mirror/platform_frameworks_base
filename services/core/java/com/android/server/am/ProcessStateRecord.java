@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
-import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
@@ -1177,11 +1176,6 @@ final class ProcessStateRecord {
         for (int i = 0; i < mCachedCompatChanges.length; i++) {
             mCachedCompatChanges[i] = VALUE_INVALID;
         }
-    }
-
-    @GuardedBy("mService")
-    boolean isAllowedStartFgs() {
-        return mCurProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
     }
 
     @GuardedBy("mService")

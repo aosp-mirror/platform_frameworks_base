@@ -52,6 +52,10 @@ android_test {
         "android.test.runner",
     ],
 
+    data: [
+        ":SimpleTestIme",
+    ],
+
     certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],

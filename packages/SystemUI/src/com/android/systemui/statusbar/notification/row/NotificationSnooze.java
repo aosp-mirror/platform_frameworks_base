@@ -290,6 +290,9 @@ public class NotificationSnooze extends LinearLayout
         int drawableId = show ? com.android.internal.R.drawable.ic_collapse_notification
                 : com.android.internal.R.drawable.ic_expand_notification;
         mExpandButton.setImageResource(drawableId);
+        mExpandButton.setContentDescription(mContext.getString(show
+                ? com.android.internal.R.string.expand_button_content_description_expanded
+                : com.android.internal.R.string.expand_button_content_description_collapsed));
         if (mExpanded != show) {
             mExpanded = show;
             animateSnoozeOptions(show);
@@ -373,6 +376,7 @@ public class NotificationSnooze extends LinearLayout
         } else if (id == R.id.notification_snooze) {
             // Toggle snooze options
             showSnoozeOptions(!mExpanded);
+            mSnoozeView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
             mMetricsLogger.write(!mExpanded ? OPTIONS_OPEN_LOG : OPTIONS_CLOSE_LOG);
         } else {
             // Undo snooze was selected
@@ -401,6 +405,7 @@ public class NotificationSnooze extends LinearLayout
     public View getContentView() {
         // Reset the view before use
         setSelected(mDefaultOption, false);
+        showSnoozeOptions(false);
         return this;
     }
 

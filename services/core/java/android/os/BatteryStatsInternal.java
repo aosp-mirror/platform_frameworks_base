@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.net.Network;
 
 import com.android.internal.os.BinderCallsStats;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
@@ -37,11 +38,13 @@ public abstract class BatteryStatsInternal {
 
     public static final int CPU_WAKEUP_SUBSYSTEM_UNKNOWN = -1;
     public static final int CPU_WAKEUP_SUBSYSTEM_ALARM = 1;
+    public static final int CPU_WAKEUP_SUBSYSTEM_WIFI = 2;
 
     /** @hide */
     @IntDef(prefix = {"CPU_WAKEUP_SUBSYSTEM_"}, value = {
             CPU_WAKEUP_SUBSYSTEM_UNKNOWN,
             CPU_WAKEUP_SUBSYSTEM_ALARM,
+            CPU_WAKEUP_SUBSYSTEM_WIFI,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface CpuWakeupSubsystem {
@@ -82,6 +85,15 @@ public abstract class BatteryStatsInternal {
     public abstract void noteJobsDeferred(int uid, int numDeferred, long sinceLast);
 
     /**
+     * Informs battery stats of a data packet that woke up the CPU.
+     *
+     * @param network The network over which the packet arrived.
+     * @param elapsedMillis The time of the packet's arrival in elapsed timebase.
+     * @param uid The uid that received the packet.
+     */
+    public abstract void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid);
+
+    /**
      * Informs battery stats of binder stats for the given work source UID.
      */
     public abstract void noteBinderCallStats(int workSourceUid, long incrementalBinderCallCount,
@@ -94,8 +106,18 @@ public abstract class BatteryStatsInternal {
 
     /**
      * Reports any activity that could potentially have caused the CPU to wake up.
-     * Accepts a timestamp to allow the reporter to report it before or after the event.
+     * Accepts a timestamp to allow free ordering between the event and its reporting.
+     * @param subsystem The subsystem this activity should be attributed to.
+     * @param elapsedMillis The time when this activity happened in the elapsed timebase.
+     * @param uids The uid (or uids) that should be blamed for this activity.
      */
     public abstract void noteCpuWakingActivity(@CpuWakeupSubsystem int subsystem,
             long elapsedMillis, @NonNull int... uids);
+
+    /**
+     * Reports a sound trigger recognition event that may have woken up the CPU.
+     * @param elapsedMillis The time when the event happened in the elapsed timebase.
+     * @param uid The uid that requested this trigger.
+     */
+    public abstract void noteWakingSoundTrigger(long elapsedMillis, int uid);
 }

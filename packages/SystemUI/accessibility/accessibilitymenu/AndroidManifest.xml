@@ -16,11 +16,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.android.systemui.accessibility.accessibilitymenu">
-    <application>
+
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
+
+    <application android:supportsRtl="true">
         <service
             android:name="com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService"
             android:exported="false"
-            android:label="Accessibility Menu (System)"
+            android:label="@string/accessibility_menu_service_name"
+            android:icon="@drawable/ic_logo_app"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>
@@ -29,5 +33,30 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibilitymenu_service"/>
         </service>
+
+        <!-- Accessibility Menu Settings -->
+        <activity
+            android:name="com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity"
+            android:exported="true"
+            android:label="@string/accessibility_menu_settings_name"
+            android:launchMode="singleTop"
+            android:theme="@style/AccessibilityMenuSettings">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.accessibilityservice.SERVICE_SETTINGS"/>
+            </intent-filter>
+        </activity>
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VOICE_COMMAND" />
+        </intent>
+    </queries>
 </manifest>

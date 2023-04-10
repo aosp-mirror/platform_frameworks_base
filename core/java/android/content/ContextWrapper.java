@@ -20,9 +20,11 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
+import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.compat.CompatChanges;
@@ -518,9 +520,9 @@ public class ContextWrapper extends Context {
     @Override
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
-            @Nullable String[] excludedPackages) {
+            @Nullable String[] excludedPackages, @Nullable BroadcastOptions options) {
         mBase.sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions,
-                excludedPackages);
+                excludedPackages, options);
     }
 
     /** @hide */
@@ -537,10 +539,8 @@ public class ContextWrapper extends Context {
         mBase.sendBroadcastAsUserMultiplePermissions(intent, user, receiverPermissions);
     }
 
-    /** @hide */
-    @SystemApi
     @Override
-    public void sendBroadcast(Intent intent, @Nullable String receiverPermission,
+    public void sendBroadcast(@NonNull Intent intent, @Nullable String receiverPermission,
             @Nullable Bundle options) {
         mBase.sendBroadcast(intent, receiverPermission, options);
     }
@@ -557,6 +557,14 @@ public class ContextWrapper extends Context {
         mBase.sendOrderedBroadcast(intent, receiverPermission);
     }
 
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @Override
+    public void sendOrderedBroadcast(@NonNull Intent intent,
+            @Nullable String receiverPermission,
+            @Nullable Bundle options) {
+        mBase.sendOrderedBroadcast(intent, receiverPermission, options);
+    }
+
     @Override
     public void sendOrderedBroadcast(
             Intent intent, @Nullable String receiverPermission,
@@ -567,11 +575,9 @@ public class ContextWrapper extends Context {
                 initialData, initialExtras);
     }
 
-    /** @hide */
-    @SystemApi
     @Override
     public void sendOrderedBroadcast(
-            Intent intent, @Nullable String receiverPermission, @Nullable Bundle options,
+            @NonNull Intent intent, @Nullable String receiverPermission, @Nullable Bundle options,
             @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
             int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
@@ -856,8 +862,20 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public boolean bindService(@NonNull Intent service, @NonNull ServiceConnection conn,
+            @NonNull BindServiceFlags flags) {
+        return mBase.bindService(service, conn, flags);
+    }
+
+    @Override
     public boolean bindService(Intent service, int flags, Executor executor,
             ServiceConnection conn) {
+        return mBase.bindService(service, flags, executor, conn);
+    }
+
+    @Override
+    public boolean bindService(@NonNull Intent service, @NonNull BindServiceFlags flags,
+            @NonNull Executor executor, @NonNull ServiceConnection conn) {
         return mBase.bindService(service, flags, executor, conn);
     }
 
@@ -876,8 +894,22 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+            @NonNull BindServiceFlags flags, UserHandle user) {
+        return mBase.bindServiceAsUser(service, conn, flags, user);
+    }
+
+    /** @hide */
+    @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
+        return mBase.bindServiceAsUser(service, conn, flags, handler, user);
+    }
+
+    /** @hide */
+    @Override
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+            @NonNull BindServiceFlags flags, Handler handler, UserHandle user) {
         return mBase.bindServiceAsUser(service, conn, flags, handler, user);
     }
 
@@ -1178,6 +1210,14 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
+    public int getAssociatedDisplayId() {
+        return mBase.getAssociatedDisplayId();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void updateDisplay(int displayId) {
         mBase.updateDisplay(displayId);
     }
@@ -1193,11 +1233,6 @@ public class ContextWrapper extends Context {
     @Override
     public int getDeviceId() {
         return mBase.getDeviceId();
-    }
-
-    @Override
-    public boolean isDeviceContext() {
-        return mBase.isDeviceContext();
     }
 
     @Override
@@ -1270,7 +1305,7 @@ public class ContextWrapper extends Context {
      */
     @Override
     public @Nullable IServiceConnection getServiceDispatcher(ServiceConnection conn,
-            Handler handler, int flags) {
+            Handler handler, long flags) {
         return mBase.getServiceDispatcher(conn, handler, flags);
     }
 
@@ -1448,5 +1483,16 @@ public class ContextWrapper extends Context {
         }
         // Do nothing if the callback hasn't been registered to Application Context by
         // super.unregisterComponentCallbacks() for Application that is targeting prior to T.
+    }
+
+    /**
+     * Closes temporary system dialogs. Some examples of temporary system dialogs are the
+     * notification window-shade and the recent tasks dialog.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
+    public void closeSystemDialogs() {
+        mBase.closeSystemDialogs();
     }
 }

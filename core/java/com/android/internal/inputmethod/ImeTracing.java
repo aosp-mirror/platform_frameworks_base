@@ -62,11 +62,7 @@ public abstract class ImeTracing {
             if (isSystemProcess()) {
                 sInstance = new ImeTracingServerImpl();
             } else {
-                try {
-                    sInstance = new ImeTracingClientImpl();
-                } catch (RuntimeException e) {
-                    Log.e(TAG, "Exception while creating ImeTracingClientImpl instance", e);
-                }
+                sInstance = new ImeTracingClientImpl();
             }
         }
         return sInstance;

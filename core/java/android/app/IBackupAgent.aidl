@@ -206,4 +206,9 @@ oneway interface IBackupAgent {
      */
     void getLoggerResults(
             in AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> resultsFuture);
+
+    /**
+     * Clears the logs accumulated by the BackupAgent during a backup or restore operation.
+     */
+    void clearBackupRestoreEventLogger();
 }

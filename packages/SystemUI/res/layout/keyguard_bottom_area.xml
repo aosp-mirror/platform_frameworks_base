@@ -59,26 +59,30 @@
 
     </LinearLayout>
 
-    <com.android.systemui.common.ui.view.LaunchableImageView
+    <com.android.systemui.animation.view.LaunchableImageView
         android:id="@+id/start_button"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"
         android:layout_width="@dimen/keyguard_affordance_fixed_width"
         android:layout_gravity="bottom|start"
-        android:scaleType="center"
+        android:scaleType="fitCenter"
+        android:padding="@dimen/keyguard_affordance_fixed_padding"
         android:tint="?android:attr/textColorPrimary"
         android:background="@drawable/keyguard_bottom_affordance_bg"
+        android:foreground="@drawable/keyguard_bottom_affordance_selected_border"
         android:layout_marginStart="@dimen/keyguard_affordance_horizontal_offset"
         android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
         android:visibility="gone" />
 
-    <com.android.systemui.common.ui.view.LaunchableImageView
+    <com.android.systemui.animation.view.LaunchableImageView
         android:id="@+id/end_button"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"
         android:layout_width="@dimen/keyguard_affordance_fixed_width"
         android:layout_gravity="bottom|end"
-        android:scaleType="center"
+        android:scaleType="fitCenter"
+        android:padding="@dimen/keyguard_affordance_fixed_padding"
         android:tint="?android:attr/textColorPrimary"
         android:background="@drawable/keyguard_bottom_affordance_bg"
+        android:foreground="@drawable/keyguard_bottom_affordance_selected_border"
         android:layout_marginEnd="@dimen/keyguard_affordance_horizontal_offset"
         android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
         android:visibility="gone" />

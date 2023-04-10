@@ -85,23 +85,6 @@ class DisposableBroadcastReceiverAsUserTest {
         assertThat(onReceiveIsCalled).isTrue()
     }
 
-    @Test
-    fun broadcastReceiver_onStartIsCalled() {
-        var onStartIsCalled = false
-        composeTestRule.setContent {
-            CompositionLocalProvider(LocalContext provides context) {
-                DisposableBroadcastReceiverAsUser(
-                    intentFilter = IntentFilter(),
-                    userHandle = USER_HANDLE,
-                    onStart = { onStartIsCalled = true },
-                    onReceive = {},
-                )
-            }
-        }
-
-        assertThat(onStartIsCalled).isTrue()
-    }
-
     private companion object {
         val USER_HANDLE: UserHandle = UserHandle.of(0)
     }

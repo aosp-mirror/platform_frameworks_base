@@ -96,11 +96,11 @@ public class LaunchActivityItem extends ClientTransactionItem {
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
         ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
-                mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor, mState, mPersistentState,
+                mOverrideConfig, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
                 client, mAssistToken, mShareableActivityToken, mLaunchedFromBubble,
                 mTaskFragmentToken);
-        client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
+        client.handleLaunchActivity(r, pendingActions, mDeviceId, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 

@@ -61,6 +61,9 @@ import java.util.function.Consumer;
  * </service>}
  * </pre>
  *
+ * <p>The use of "Wearable" here is not the same as the Android Wear platform and should be treated
+ * separately. </p>
+ *
  * @hide
  */
 @SystemApi

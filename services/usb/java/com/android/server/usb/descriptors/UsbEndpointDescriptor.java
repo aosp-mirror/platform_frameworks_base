@@ -118,7 +118,7 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
         mClassSpecificEndpointDescriptor = descriptor;
     }
 
-    UsbDescriptor getClassSpecificEndpointDescriptor() {
+    public UsbDescriptor getClassSpecificEndpointDescriptor() {
         return mClassSpecificEndpointDescriptor;
     }
 

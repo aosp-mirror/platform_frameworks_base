@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.app.StatusBarManager
+import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import com.android.systemui.ActivityIntentHelper
@@ -29,10 +30,13 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class VideoCameraQuickAffordanceConfig
@@ -42,6 +46,8 @@ constructor(
     private val cameraIntents: CameraIntentsWrapper,
     private val activityIntentHelper: ActivityIntentHelper,
     private val userTracker: UserTracker,
+    private val devicePolicyManager: DevicePolicyManager,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : KeyguardQuickAffordanceConfig {
 
     private val intent: Intent by lazy {
@@ -63,8 +69,8 @@ constructor(
         get() = R.drawable.ic_videocam
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState>
-        get() =
-            flowOf(
+        get() = flow {
+            emit(
                 if (isLaunchable()) {
                     KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                         icon =
@@ -77,6 +83,7 @@ constructor(
                     KeyguardQuickAffordanceConfig.LockScreenState.Hidden
                 }
             )
+        }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
         return if (isLaunchable()) {
@@ -95,11 +102,14 @@ constructor(
         )
     }
 
-    private fun isLaunchable(): Boolean {
+    private suspend fun isLaunchable(): Boolean {
         return activityIntentHelper.getTargetActivityInfo(
             intent,
             userTracker.userId,
             true,
-        ) != null
+        ) != null &&
+            withContext(backgroundDispatcher) {
+                !devicePolicyManager.getCameraDisabled(null, userTracker.userId)
+            }
     }
 }

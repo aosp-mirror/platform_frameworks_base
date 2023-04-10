@@ -17,11 +17,13 @@ import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
+import com.android.internal.annotations.Keep
 import com.android.systemui.plugins.annotations.ProvidesInterface
 import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
+import org.json.JSONObject
 
 /** Identifies a clock design */
 typealias ClockId = String
@@ -41,7 +43,13 @@ interface ClockProvider {
     fun getClocks(): List<ClockMetadata>
 
     /** Initializes and returns the target clock design */
-    fun createClock(id: ClockId): ClockController
+    @Deprecated("Use overload with ClockSettings")
+    fun createClock(id: ClockId): ClockController {
+        return createClock(ClockSettings(id, null))
+    }
+
+    /** Initializes and returns the target clock design */
+    fun createClock(settings: ClockSettings): ClockController
 
     /** A static thumbnail for rendering in some examples */
     fun getClockThumbnail(id: ClockId): Drawable?
@@ -55,6 +63,9 @@ interface ClockController {
     /** A large version of the clock, appropriate when a bigger viewport is available */
     val largeClock: ClockFaceController
 
+    /** Determines the way the hosting app should behave when rendering either clock face */
+    val config: ClockConfig
+
     /** Events that clocks may need to respond to */
     val events: ClockEvents
 
@@ -62,11 +73,16 @@ interface ClockController {
     val animations: ClockAnimations
 
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
-    fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
+    fun initialize(
+        resources: Resources,
+        dozeFraction: Float,
+        foldFraction: Float,
+    ) {
         events.onColorPaletteChanged(resources)
         animations.doze(dozeFraction)
         animations.fold(foldFraction)
-        events.onTimeTick()
+        smallClock.events.onTimeTick()
+        largeClock.events.onTimeTick()
     }
 
     /** Optional method for dumping debug information */
@@ -78,6 +94,9 @@ interface ClockFaceController {
     /** View that renders the clock face */
     val view: View
 
+    /** Determines the way the hosting app should behave when rendering this clock face */
+    val config: ClockFaceConfig
+
     /** Events specific to this clock face */
     val events: ClockFaceEvents
 
@@ -87,9 +106,6 @@ interface ClockFaceController {
 
 /** Events that should call when various rendering parameters change */
 interface ClockEvents {
-    /** Call every time tick */
-    fun onTimeTick() {}
-
     /** Call whenever timezone changes */
     fun onTimeZoneChanged(timeZone: TimeZone) {}
 
@@ -101,6 +117,12 @@ interface ClockEvents {
 
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(resources: Resources) {}
+
+    /** Call if the seed color has changed and should be updated */
+    fun onSeedColorChanged(seedColor: Int?) {}
+
+    /** Call whenever the weather data should update */
+    fun onWeatherDataChanged(data: WeatherData) {}
 }
 
 /** Methods which trigger various clock animations */
@@ -121,18 +143,23 @@ interface ClockAnimations {
     fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {}
 
     /**
-     * Whether this clock has a custom position update animation. If true, the keyguard will call
-     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
-     * animation will be used (e.g. a simple translation).
+     * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,
+     * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
      */
-    val hasCustomPositionUpdatedAnimation
-        get() = false
+    fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {}
 }
 
 /** Events that have specific data about the related face */
 interface ClockFaceEvents {
-    /** Region Darkness specific to the clock face */
-    fun onRegionDarknessChanged(isDark: Boolean) {}
+    /** Call every time tick */
+    fun onTimeTick() {}
+
+    /**
+     * Region Darkness specific to the clock face.
+     * - isRegionDark = dark theme -> clock should be light
+     * - !isRegionDark = light theme -> clock should be dark
+     */
+    fun onRegionDarknessChanged(isRegionDark: Boolean) {}
 
     /**
      * Call whenever font settings change. Pass in a target font size in pixels. The specific clock
@@ -150,8 +177,82 @@ interface ClockFaceEvents {
     fun onTargetRegionChanged(targetRegion: Rect?) {}
 }
 
+/** Tick rates for clocks */
+enum class ClockTickRate(val value: Int) {
+    PER_MINUTE(2), // Update the clock once per minute.
+    PER_SECOND(1), // Update the clock once per second.
+    PER_FRAME(0), // Update the clock every second.
+}
+
 /** Some data about a clock design */
 data class ClockMetadata(
     val clockId: ClockId,
     val name: String,
 )
+
+/** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
+data class ClockConfig(
+    /**
+     * Whether this clock has a custom position update animation. If true, the keyguard will call
+     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
+     * animation will be used (e.g. a simple translation).
+     */
+    val hasCustomPositionUpdatedAnimation: Boolean = false,
+
+    /** True if the clock will react to tone changes in the seed color. */
+    val isReactiveToTone: Boolean = true,
+)
+
+/** Render configuration options for a clock face. Modifies the way SystemUI behaves. */
+data class ClockFaceConfig(
+    /** Expected interval between calls to onTimeTick. Can always reduce to PER_MINUTE in AOD. */
+    val tickRate: ClockTickRate = ClockTickRate.PER_MINUTE,
+
+    /** Call to check whether the clock consumes weather data */
+    val hasCustomWeatherDataDisplay: Boolean = false,
+)
+
+/** Structure for keeping clock-specific settings */
+@Keep
+data class ClockSettings(
+    val clockId: ClockId? = null,
+    val seedColor: Int? = null,
+) {
+    // Exclude metadata from equality checks
+    var metadata: JSONObject = JSONObject()
+
+    companion object {
+        private val KEY_CLOCK_ID = "clockId"
+        private val KEY_SEED_COLOR = "seedColor"
+        private val KEY_METADATA = "metadata"
+
+        fun serialize(setting: ClockSettings?): String {
+            if (setting == null) {
+                return ""
+            }
+
+            return JSONObject()
+                .put(KEY_CLOCK_ID, setting.clockId)
+                .put(KEY_SEED_COLOR, setting.seedColor)
+                .put(KEY_METADATA, setting.metadata)
+                .toString()
+        }
+
+        fun deserialize(jsonStr: String?): ClockSettings? {
+            if (jsonStr.isNullOrEmpty()) {
+                return null
+            }
+
+            val json = JSONObject(jsonStr)
+            val result =
+                ClockSettings(
+                    if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null,
+                    if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null
+                )
+            if (!json.isNull(KEY_METADATA)) {
+                result.metadata = json.getJSONObject(KEY_METADATA)
+            }
+            return result
+        }
+    }
+}

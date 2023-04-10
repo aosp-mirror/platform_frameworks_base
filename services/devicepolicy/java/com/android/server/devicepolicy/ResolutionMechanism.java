@@ -17,10 +17,12 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.Nullable;
+import android.app.admin.PolicyValue;
 
 import java.util.LinkedHashMap;
 
 abstract class ResolutionMechanism<V> {
     @Nullable
-    abstract V resolve(LinkedHashMap<EnforcingAdmin, V> adminPolicies);
+    abstract PolicyValue<V> resolve(LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminPolicies);
+    abstract android.app.admin.ResolutionMechanism<V> getParcelableResolutionMechanism();
 }

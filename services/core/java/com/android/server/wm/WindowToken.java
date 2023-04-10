@@ -315,17 +315,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return mChildren.isEmpty();
     }
 
-    WindowState getReplacingWindow() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = mChildren.get(i);
-            final WindowState replacing = win.getReplacingWindow();
-            if (replacing != null) {
-                return replacing;
-            }
-        }
-        return null;
-    }
-
     /** Return true if this token has a window that wants the wallpaper displayed behind it. */
     boolean windowsCanBeWallpaperTarget() {
         for (int j = mChildren.size() - 1; j >= 0; j--) {

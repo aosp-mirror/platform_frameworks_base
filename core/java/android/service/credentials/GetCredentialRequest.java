@@ -17,43 +17,54 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.credentials.GetCredentialOption;
+import android.credentials.CredentialOption;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.AnnotationValidations;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 /**
  * Request for getting user's credential from a given credential provider.
  *
- * <p>Provider will receive this request once the user selects a given {@link CredentialEntry}
- * on the selector, that was sourced from provider's result to
- * {@link CredentialProviderService#onBeginGetCredential}.
+ * <p>A credential provider will receive this request once the user selects a
+ * given {@link CredentialEntry}, or {@link RemoteEntry} on the selector, that was sourced
+ * from provider's initial response to {@link CredentialProviderService#onBeginGetCredential}.
  */
 public final class GetCredentialRequest implements Parcelable {
     /** Calling package of the app requesting for credentials. */
-    private final @NonNull CallingAppInfo mCallingAppInfo;
+    @NonNull
+    private final CallingAppInfo mCallingAppInfo;
 
     /**
-     * Holds parameters to be used for retrieving a specific type of credential.
+     * Holds a list of options (parameters) to be used for retrieving a specific type of credential.
      */
-    private final @NonNull GetCredentialOption mGetCredentialOption;
+    @NonNull
+    private final List<CredentialOption> mCredentialOptions;
 
     public GetCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
-            @NonNull GetCredentialOption getCredentialOption) {
-        this.mCallingAppInfo = callingAppInfo;
-        this.mGetCredentialOption = getCredentialOption;
+            @NonNull List<CredentialOption> credentialOptions) {
+        this.mCallingAppInfo = Objects.requireNonNull(callingAppInfo,
+                "callingAppInfo must not be null");
+        this.mCredentialOptions = Objects.requireNonNull(credentialOptions,
+                "credentialOptions must not be null");
     }
 
     private GetCredentialRequest(@NonNull Parcel in) {
         mCallingAppInfo = in.readTypedObject(CallingAppInfo.CREATOR);
         AnnotationValidations.validate(NonNull.class, null, mCallingAppInfo);
-        mGetCredentialOption = in.readTypedObject(GetCredentialOption.CREATOR);
-        AnnotationValidations.validate(NonNull.class, null, mGetCredentialOption);
+
+        List<CredentialOption> credentialOptions = new ArrayList<>();
+        in.readTypedList(credentialOptions, CredentialOption.CREATOR);
+        mCredentialOptions = credentialOptions;
+        AnnotationValidations.validate(NonNull.class, null, mCredentialOptions);
     }
 
-    public static final @NonNull Creator<GetCredentialRequest> CREATOR =
-            new Creator<GetCredentialRequest>() {
+    @NonNull public static final  Creator<GetCredentialRequest> CREATOR =
+            new Creator<>() {
                 @Override
                 public GetCredentialRequest createFromParcel(Parcel in) {
                     return new GetCredentialRequest(in);
@@ -73,20 +84,38 @@ public final class GetCredentialRequest implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mCallingAppInfo, flags);
-        dest.writeTypedObject(mGetCredentialOption, flags);
+        dest.writeTypedList(mCredentialOptions, flags);
     }
 
     /**
      * Returns info pertaining to the app requesting credentials.
      */
-    public @NonNull CallingAppInfo getCallingAppInfo() {
+    @NonNull
+    public CallingAppInfo getCallingAppInfo() {
         return mCallingAppInfo;
     }
 
     /**
-     * Returns the parameters needed to return a given type of credential.
+     * Returns a list of options containing parameters needed to return a given type of credential.
+     * This is part of the request that the credential provider receives after the user has
+     * selected an entry on a selector UI.
+     *
+     * When the user selects a {@link CredentialEntry} and the credential provider receives a
+     * {@link GetCredentialRequest}, this list is expected to contain a single
+     * {@link CredentialOption} only. A {@link CredentialEntry} is always created for a given
+     * {@link BeginGetCredentialOption}, and hence when the user selects it, the provider
+     * receives a corresponding {@link CredentialOption} that contains all the required parameters
+     * to actually retrieve the credential.
+     *
+     * When the user selects a {@link RemoteEntry} and the credential provider receives a
+     * {@link GetCredentialRequest}, this list may contain greater than a single
+     * {@link CredentialOption}, representing the number of options specified by the developer
+     * in the original {@link android.credentials.GetCredentialRequest}. This is because a
+     * {@link RemoteEntry} indicates that the entire request will be processed on a different
+     * device and is not tied to a particular option.
      */
-    public @NonNull GetCredentialOption getGetCredentialOption() {
-        return mGetCredentialOption;
+    @NonNull
+    public List<CredentialOption> getCredentialOptions() {
+        return mCredentialOptions;
     }
 }

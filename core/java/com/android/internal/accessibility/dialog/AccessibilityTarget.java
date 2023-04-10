@@ -25,6 +25,7 @@ import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueF
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -37,8 +38,11 @@ import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * Abstract base class for creating various target related to accessibility service,
- * accessibility activity, and allowlisting feature.
+ * Abstract base class for creating various target related to accessibility service, accessibility
+ * activity, and allowlisting features.
+ *
+ * <p> Disables accessibility features that are not permitted in adding a restricted padlock icon
+ * and showing admin support message dialog.
  */
 public abstract class AccessibilityTarget implements TargetOperations, OnTargetSelectedListener,
         OnTargetCheckedChangeListener {
@@ -49,19 +53,24 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     private int mFragmentType;
     private boolean mShortcutEnabled;
     private String mId;
+    private int mUid;
+    private ComponentName mComponentName;
     private CharSequence mLabel;
     private Drawable mIcon;
     private String mKey;
+    private CharSequence mStateDescription;
 
     @VisibleForTesting
     public AccessibilityTarget(Context context, @ShortcutType int shortcutType,
             @AccessibilityFragmentType int fragmentType, boolean isShortcutSwitched, String id,
-            CharSequence label, Drawable icon, String key) {
+            int uid, CharSequence label, Drawable icon, String key) {
         mContext = context;
         mShortcutType = shortcutType;
         mFragmentType = fragmentType;
         mShortcutEnabled = isShortcutSwitched;
         mId = id;
+        mUid = uid;
+        mComponentName = ComponentName.unflattenFromString(id);
         mLabel = label;
         mIcon = icon;
         mKey = key;
@@ -70,9 +79,14 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     @Override
     public void updateActionItem(@NonNull ViewHolder holder,
             @ShortcutConstants.ShortcutMenuMode int shortcutMenuMode) {
+        // Resetting the enable state of the item to avoid the previous wrong state of RecyclerView.
+        holder.mCheckBoxView.setEnabled(true);
+        holder.mIconView.setEnabled(true);
+        holder.mLabelView.setEnabled(true);
+        holder.mStatusView.setEnabled(true);
+
         final boolean isEditMenuMode =
                 shortcutMenuMode == ShortcutConstants.ShortcutMenuMode.EDIT;
-
         holder.mCheckBoxView.setChecked(isEditMenuMode && isShortcutEnabled());
         holder.mCheckBoxView.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
         holder.mIconView.setImageDrawable(getIcon());
@@ -106,6 +120,10 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
         }
     }
 
+    public void setStateDescription(CharSequence stateDescription) {
+        mStateDescription = stateDescription;
+    }
+
     /**
      * Gets the state description of this feature target.
      *
@@ -113,7 +131,7 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
      */
     @Nullable
     public CharSequence getStateDescription() {
-        return null;
+        return mStateDescription;
     }
 
     public void setShortcutEnabled(boolean enabled) {
@@ -138,6 +156,14 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
 
     public String getId() {
         return mId;
+    }
+
+    public int getUid() {
+        return mUid;
+    }
+
+    public ComponentName getComponentName() {
+        return mComponentName;
     }
 
     public CharSequence getLabel() {

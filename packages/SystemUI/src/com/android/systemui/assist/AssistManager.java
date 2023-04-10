@@ -1,7 +1,5 @@
 package com.android.systemui.assist;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED;
 
@@ -35,8 +33,11 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
 
@@ -119,6 +120,9 @@ public class AssistManager {
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
     protected final AssistLogger mAssistLogger;
+    private final UserTracker mUserTracker;
+    private final DisplayTracker mDisplayTracker;
+    private final SecureSettings mSecureSettings;
 
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final CommandQueue mCommandQueue;
@@ -135,7 +139,10 @@ public class AssistManager {
             Lazy<SysUiState> sysUiState,
             DefaultUiController defaultUiController,
             AssistLogger assistLogger,
-            @Main Handler uiHandler) {
+            @Main Handler uiHandler,
+            UserTracker userTracker,
+            DisplayTracker displayTracker,
+            SecureSettings secureSettings) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
@@ -143,6 +150,9 @@ public class AssistManager {
         mAssistDisclosure = new AssistDisclosure(context, uiHandler);
         mPhoneStateMonitor = phoneStateMonitor;
         mAssistLogger = assistLogger;
+        mUserTracker = userTracker;
+        mDisplayTracker = displayTracker;
+        mSecureSettings = secureSettings;
 
         registerVoiceInteractionSessionListener();
 
@@ -206,7 +216,7 @@ public class AssistManager {
                                     .setFlag(
                                             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
                                             hints.getBoolean(CONSTRAINED_KEY, false))
-                                    .commitUpdate(DEFAULT_DISPLAY);
+                                    .commitUpdate(mDisplayTracker.getDefaultDisplayId());
                         }
                     }
                 });
@@ -273,7 +283,7 @@ public class AssistManager {
                 CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                 false /* force */);
 
-        boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+        boolean structureEnabled = mSecureSettings.getIntForUser(
                 Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
 
         final SearchManager searchManager =
@@ -300,7 +310,7 @@ public class AssistManager {
                 @Override
                 public void run() {
                     mContext.startActivityAsUser(intent, opts.toBundle(),
-                            new UserHandle(UserHandle.USER_CURRENT));
+                            mUserTracker.getUserHandle());
                 }
             });
         } catch (ActivityNotFoundException e) {

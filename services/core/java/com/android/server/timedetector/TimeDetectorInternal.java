@@ -17,9 +17,12 @@
 package com.android.server.timedetector;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeConfiguration;
 import android.app.timedetector.ManualTimeSuggestion;
+
+import com.android.server.timezonedetector.StateChangeListener;
 
 /**
  * The internal (in-process) system server API for the time detector service.
@@ -56,11 +59,34 @@ public interface TimeDetectorInternal {
      * valid but does not change the time because it matches the current device time is considered
      * accepted.
      */
-    boolean setManualTimeForDpm(@NonNull ManualTimeSuggestion manualTimeSuggestion);
+    boolean setManualTimeForDpm(@NonNull ManualTimeSuggestion suggestion);
 
-    /** Used to pass new network time suggestions to the time detector. */
-    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal);
+    /**
+     * Suggests a network time to the time detector. The suggestion may not be used by the time
+     * detector to set the device's time depending on device configuration and user settings, but
+     * can replace previous network suggestions received. See also
+     * {@link #addNetworkTimeUpdateListener(StateChangeListener)} and
+     * {@link #getLatestNetworkSuggestion()}.
+     */
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion suggestion);
 
-    /** Used to pass new GNSS time suggestions to the time detector. */
-    void suggestGnssTime(@NonNull GnssTimeSuggestion timeSignal);
+    /**
+     * Adds a listener that will be notified when a new network time is available. See {@link
+     * #getLatestNetworkSuggestion()}.
+     */
+    void addNetworkTimeUpdateListener(
+            @NonNull StateChangeListener networkSuggestionUpdateListener);
+
+    /**
+     * Returns the latest / best network time received by the time detector.
+     */
+    @Nullable
+    NetworkTimeSuggestion getLatestNetworkSuggestion();
+
+    /**
+     * Suggests a GNSS-derived time to the time detector. The suggestion may not be used by the time
+     * detector to set the device's time depending on device configuration and user settings, but
+     * can replace previous GNSS suggestions received.
+     */
+    void suggestGnssTime(@NonNull GnssTimeSuggestion suggestion);
 }

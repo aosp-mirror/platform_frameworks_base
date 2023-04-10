@@ -22,7 +22,6 @@ import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
@@ -71,6 +70,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
+import com.android.systemui.util.ListenerSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +163,8 @@ public final class NotificationEntry extends ListEntry {
     private boolean hasSentReply;
 
     private boolean mSensitive = true;
-    private List<OnSensitivityChangedListener> mOnSensitivityChangedListeners = new ArrayList<>();
+    private ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
+            new ListenerSet<>();
 
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
@@ -179,6 +180,44 @@ public final class NotificationEntry extends ListEntry {
      * Flag to determine if the entry is blockable by DnD filters
      */
     private boolean mBlockable;
+
+    /**
+     * The {@link SystemClock#elapsedRealtime()} when this notification entry was created.
+     */
+    public long mCreationElapsedRealTime;
+
+    /**
+     * Whether this notification has ever been a non-sticky HUN.
+     */
+    private boolean mIsDemoted = false;
+
+    /**
+     * True if both
+     *  1) app provided full screen intent but does not have the permission to send it
+     *  2) this notification has never been demoted before
+     */
+    public boolean isStickyAndNotDemoted() {
+
+        final boolean fsiRequestedButDenied =  (getSbn().getNotification().flags
+                & Notification.FLAG_FSI_REQUESTED_BUT_DENIED) != 0;
+
+        if (!fsiRequestedButDenied && !mIsDemoted) {
+            demoteStickyHun();
+        }
+        return fsiRequestedButDenied && !mIsDemoted;
+    }
+
+    @VisibleForTesting
+    public boolean isDemoted() {
+        return mIsDemoted;
+    }
+
+    /**
+     * Make sticky HUN not sticky.
+     */
+    public void demoteStickyHun() {
+        mIsDemoted = true;
+    }
 
     /**
      * @param sbn the StatusBarNotification from system server
@@ -197,8 +236,13 @@ public final class NotificationEntry extends ListEntry {
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
+        mCreationElapsedRealTime = SystemClock.elapsedRealtime();
     }
 
+    @VisibleForTesting
+    public void setCreationElapsedRealTime(long time) {
+        mCreationElapsedRealTime = time;
+    }
     @Override
     public NotificationEntry getRepresentativeEntry() {
         return this;
@@ -274,6 +318,15 @@ public final class NotificationEntry extends ListEntry {
 
     void setDismissState(@NonNull DismissState dismissState) {
         mDismissState = requireNonNull(dismissState);
+    }
+
+    /**
+     * True if the notification has been canceled by system server. Usually, such notifications are
+     * immediately removed from the collection, but can sometimes stick around due to lifetime
+     * extenders.
+     */
+    public boolean isCanceled() {
+        return mCancellationReason != REASON_NOT_CANCELED;
     }
 
     @Nullable public NotifFilter getExcludingFilter() {
@@ -576,14 +629,6 @@ public final class NotificationEntry extends ListEntry {
         return row.isMediaRow();
     }
 
-    /**
-     * We are a top level child if our parent is the list of notifications duh
-     * @return {@code true} if we're a top level notification
-     */
-    public boolean isTopLevelChild() {
-        return row != null && row.isTopLevelChild();
-    }
-
     public void resetUserExpansion() {
         if (row != null) row.resetUserExpansion();
     }
@@ -731,12 +776,28 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /**
+     * Determines whether the NotificationEntry is dismissable based on the Notification flags and
+     * the given state. It doesn't recurse children or depend on the view attach state.
+     *
+     * @param isLocked if the device is locked or unlocked
+     * @return true if this NotificationEntry is dismissable.
+     */
+    public boolean isDismissableForState(boolean isLocked) {
+        if (mSbn.isNonDismissable()) {
+            // don't dismiss exempted Notifications
+            return false;
+        }
+        // don't dismiss ongoing Notifications when the device is locked
+        return !mSbn.isOngoing() || !isLocked;
+    }
+
+    /**
      * @return Can the underlying notification be individually dismissed?
      * @see #canViewBeDismissed()
      */
     // TODO: This logic doesn't belong on NotificationEntry. It should be moved to a controller
     // that can be added as a dependency to any class that needs to answer this question.
-    public boolean isDismissable() {
+    public boolean legacyIsDismissableRecursive() {
         if  (mSbn.isOngoing()) {
             return false;
         }
@@ -763,8 +824,7 @@ public final class NotificationEntry extends ListEntry {
             return false;
         }
 
-        if ((mSbn.getNotification().flags
-                & FLAG_FOREGROUND_SERVICE) != 0) {
+        if (mSbn.getNotification().isFgsOrUij()) {
             return true;
         }
         if (mSbn.getNotification().isMediaNotification()) {
@@ -881,8 +941,9 @@ public final class NotificationEntry extends ListEntry {
         getRow().setSensitive(sensitive, deviceSensitive);
         if (sensitive != mSensitive) {
             mSensitive = sensitive;
-            for (int i = 0; i < mOnSensitivityChangedListeners.size(); i++) {
-                mOnSensitivityChangedListeners.get(i).onSensitivityChanged(this);
+            for (NotificationEntry.OnSensitivityChangedListener listener :
+                    mOnSensitivityChangedListeners) {
+                listener.onSensitivityChanged(this);
             }
         }
     }
@@ -893,7 +954,7 @@ public final class NotificationEntry extends ListEntry {
 
     /** Add a listener to be notified when the entry's sensitivity changes. */
     public void addOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
-        mOnSensitivityChangedListeners.add(listener);
+        mOnSensitivityChangedListeners.addIfAbsent(listener);
     }
 
     /** Remove a listener that was registered above. */

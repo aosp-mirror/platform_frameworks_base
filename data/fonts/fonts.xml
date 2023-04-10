@@ -251,13 +251,16 @@
     <alias name="courier new" to="serif-monospace" />
 
     <family name="casual">
-        <font weight="400" style="normal">ComingSoon.ttf</font>
+        <font weight="400" style="normal" postScriptName="ComingSoon-Regular">ComingSoon.ttf</font>
     </family>
 
     <family name="cursive">
-        <font weight="400" style="normal" postScriptName="DancingScript">DancingScript-Regular.ttf
-        </font>
-        <font weight="700" style="normal">DancingScript-Bold.ttf</font>
+      <font weight="400" style="normal">DancingScript-Regular.ttf
+        <axis tag="wght" stylevalue="400" />
+      </font>
+      <font weight="700" style="normal">DancingScript-Regular.ttf
+        <axis tag="wght" stylevalue="700" />
+      </font>
     </family>
 
     <family name="sans-serif-smallcaps">

@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.WorkerThread;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -255,7 +254,6 @@ public class FlashlightControllerImpl implements FlashlightController {
                 setTorchMode(enabled);
                 mSecureSettings.putInt(Settings.Secure.FLASHLIGHT_AVAILABLE, 1);
                 mSecureSettings.putInt(Secure.FLASHLIGHT_ENABLED, enabled ? 1 : 0);
-                mBroadcastSender.sendBroadcast(new Intent(ACTION_FLASHLIGHT_CHANGED));
             }
         }
 

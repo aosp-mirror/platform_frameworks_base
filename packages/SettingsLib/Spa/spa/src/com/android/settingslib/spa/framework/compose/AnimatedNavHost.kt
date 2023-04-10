@@ -201,11 +201,7 @@ public fun AnimatedNavHost(
         transition.AnimatedContent(
             modifier,
             transitionSpec = {
-                val zIndex = if (composeNavigator.isPop.value) {
-                    visibleEntries.indexOf(initialState).toFloat()
-                } else {
-                    visibleEntries.indexOf(targetState).toFloat()
-                }
+                val zIndex = composeNavigator.backStack.value.size.toFloat()
                 // If the initialState of the AnimatedContent is not in visibleEntries, we are in
                 // a case where visible has cleared the old state for some reason, so instead of
                 // attempting to animate away from the initialState, we skip the animation.

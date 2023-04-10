@@ -16,12 +16,15 @@
 
 package com.android.systemui.media.controls.ui
 
+import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionViewState
@@ -32,6 +35,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.floatThat
 import org.mockito.Mock
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -55,6 +59,7 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var mediaTitleWidgetState: WidgetState
     @Mock private lateinit var mediaSubTitleWidgetState: WidgetState
     @Mock private lateinit var mediaContainerWidgetState: WidgetState
+    @Mock private lateinit var mediaFlags: MediaFlags
 
     val delta = 0.1F
 
@@ -64,7 +69,57 @@ class MediaViewControllerTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         mediaViewController =
-            MediaViewController(context, configurationController, mediaHostStatesManager, logger)
+            MediaViewController(
+                context,
+                configurationController,
+                mediaHostStatesManager,
+                logger,
+                mediaFlags,
+            )
+    }
+
+    @Test
+    fun testOrientationChanged_heightOfPlayerIsUpdated() {
+        val newConfig = Configuration()
+
+        mediaViewController.attach(player, MediaViewController.TYPE.PLAYER)
+        // Change the height to see the effect of orientation change.
+        MediaViewController.backgroundIds.forEach { id ->
+            mediaViewController.expandedLayout.getConstraint(id).layout.mHeight = 10
+        }
+        newConfig.orientation = ORIENTATION_LANDSCAPE
+        configurationController.onConfigurationChanged(newConfig)
+
+        MediaViewController.backgroundIds.forEach { id ->
+            assertTrue(
+                mediaViewController.expandedLayout.getConstraint(id).layout.mHeight ==
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.qs_media_session_height_expanded
+                    )
+            )
+        }
+    }
+
+    @Test
+    fun testOrientationChanged_heightOfRecCardIsUpdated() {
+        val newConfig = Configuration()
+
+        mediaViewController.attach(recommendation, MediaViewController.TYPE.RECOMMENDATION)
+        // Change the height to see the effect of orientation change.
+        mediaViewController.expandedLayout
+            .getConstraint(MediaViewController.recSizingViewId)
+            .layout
+            .mHeight = 10
+        newConfig.orientation = ORIENTATION_LANDSCAPE
+        configurationController.onConfigurationChanged(newConfig)
+
+        assertTrue(
+            mediaViewController.expandedLayout
+                .getConstraint(MediaViewController.recSizingViewId)
+                .layout
+                .mHeight ==
+                context.resources.getDimensionPixelSize(R.dimen.qs_media_session_height_expanded)
+        )
     }
 
     @Test
@@ -131,14 +186,12 @@ class MediaViewControllerTest : SysuiTestCase() {
         whenever(controlWidgetState.y).thenReturn(150F)
         whenever(controlWidgetState.height).thenReturn(20)
         // in current beizer, when the progress reach 0.38, the result will be 0.5
-        mediaViewController.squishViewState(mockViewState, 119F / 200F)
-        verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
-        mediaViewController.squishViewState(mockViewState, 150F / 200F)
-        verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
         mediaViewController.squishViewState(mockViewState, 181.4F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
+        verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
         mediaViewController.squishViewState(mockViewState, 200F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
+        verify(detailWidgetState, times(2)).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
     }
 
     @Test

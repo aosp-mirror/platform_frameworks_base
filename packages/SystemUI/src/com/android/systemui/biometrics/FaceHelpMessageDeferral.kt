@@ -49,8 +49,8 @@ constructor(
 
 /**
  * @property messagesToDefer messages that shouldn't show immediately when received, but may be
- * shown later if the message is the most frequent acquiredInfo processed and meets [threshold]
- * percentage of all passed acquired frames.
+ *   shown later if the message is the most frequent acquiredInfo processed and meets [threshold]
+ *   percentage of all passed acquired frames.
  */
 open class BiometricMessageDeferral(
     private val messagesToDefer: Set<Int>,
@@ -127,8 +127,9 @@ open class BiometricMessageDeferral(
     /**
      * Get the most frequent deferred message that meets the [threshold] percentage of processed
      * frames.
+     *
      * @return null if no acquiredInfo have been deferred OR deferred messages didn't meet the
-     * [threshold] percentage.
+     *   [threshold] percentage.
      */
     fun getDeferredMessage(): CharSequence? {
         mostFrequentAcquiredInfoToDefer?.let {

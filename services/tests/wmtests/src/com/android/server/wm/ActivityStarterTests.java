@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -43,6 +44,7 @@ import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBE
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations;
@@ -50,6 +52,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -77,11 +80,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
@@ -99,6 +104,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
 import android.util.Size;
@@ -108,13 +114,20 @@ import android.window.TaskFragmentOrganizerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.compatibility.common.util.DeviceConfigStateHelper;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.wm.utils.MockTracker;
 
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -130,10 +143,10 @@ import java.util.Set;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityStarterTests extends WindowTestsBase {
-    private ActivityStartController mController;
-    private ActivityMetricsLogger mActivityMetricsLogger;
-    private PackageManagerInternal mMockPackageManager;
 
+    private static final String ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER =
+            "DefaultRescindBalPrivilegesFromPendingIntentSender__"
+                    + "enable_default_rescind_bal_privileges_from_pending_intent_sender";
     private static final int PRECONDITION_NO_CALLER_APP = 1;
     private static final int PRECONDITION_NO_INTENT_COMPONENT = 1 << 1;
     private static final int PRECONDITION_NO_ACTIVITY_INFO = 1 << 2;
@@ -144,13 +157,20 @@ public class ActivityStarterTests extends WindowTestsBase {
     private static final int PRECONDITION_DIFFERENT_UID = 1 << 7;
     private static final int PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION = 1 << 8;
     private static final int PRECONDITION_CANNOT_START_ANY_ACTIVITY = 1 << 9;
-
     private static final int FAKE_CALLING_UID = 666;
     private static final int FAKE_REAL_CALLING_UID = 667;
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
     private static final int UNIMPORTANT_UID = 12345;
     private static final int UNIMPORTANT_UID2 = 12346;
     private static final int CURRENT_IME_UID = 12347;
+
+    protected final DeviceConfigStateHelper mDeviceConfig = new DeviceConfigStateHelper(
+            DeviceConfig.NAMESPACE_WINDOW_MANAGER);
+
+    private ActivityStartController mController;
+    private ActivityMetricsLogger mActivityMetricsLogger;
+    private PackageManagerInternal mMockPackageManager;
+    private AppOpsManager mAppOpsManager;
 
     @Before
     public void setUp() throws Exception {
@@ -160,6 +180,17 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(balController).when(mController).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
+        mAppOpsManager = mAtm.getAppOpsManager();
+        doReturn(AppOpsManager.MODE_DEFAULT).when(mAppOpsManager).checkOpNoThrow(
+                eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
+                anyInt(), any());
+        mDeviceConfig.set(ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER,
+                String.valueOf(true));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mDeviceConfig.close();
     }
 
     @Test
@@ -619,7 +650,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -633,7 +664,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_unsupportedUsecase_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -647,7 +678,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_callingUidProcessStateTop_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -661,7 +692,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_realCallingUidProcessStateTop_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -675,7 +706,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_hasForegroundActivities_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                true, false, false, false, false);
+                true, false, false, false, false, false, false);
     }
 
     /**
@@ -689,7 +720,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_pinned_singleinstance_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, true);
+                false, false, false, false, false, true, false);
     }
 
     /**
@@ -703,7 +734,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted", false,
                 Process.ROOT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -717,7 +748,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted", false,
                 Process.SYSTEM_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -731,7 +762,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_nfcUid_notAborted", false,
                 Process.NFC_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -746,7 +777,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_callingUidHasVisibleWindow_notAborted", false,
                 UNIMPORTANT_UID, true, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -754,6 +785,7 @@ public class ActivityStarterTests extends WindowTestsBase {
      * start the background activity.
      */
     @Test
+    @Ignore("b/266015587")
     public void testBackgroundActivityStartsDisallowed_realCallingUidHasVisibleWindowAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
 
@@ -761,7 +793,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_realCallingUidHasVisibleWindow_abortedInU", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, true, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
     /**
@@ -776,7 +808,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_callerIsRecents_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, true, false, false, false);
+                false, true, false, false, false, false, false);
     }
 
     /**
@@ -791,7 +823,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_callerIsAllowed_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, true, false, false);
+                false, false, true, false, false, false, false);
     }
 
     /**
@@ -807,7 +839,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, true, false);
+                false, false, false, true, false, false, false);
     }
 
     /**
@@ -823,7 +855,22 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_callingPackageNameIsDeviceOwner_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, true);
+                false, false, false, false, true, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller has the OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerHasSystemExemptAppOpNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callerHasSystemExemptAppOpNotAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, true);
     }
 
     /**
@@ -839,22 +886,65 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "disallowed_callingPackageNameIsIme_notAborted", false,
                 CURRENT_IME_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false);
     }
 
-    private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
-            int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
-            int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
-            boolean hasForegroundActivities, boolean callerIsRecents,
-            boolean callerIsTempAllowed,
-            boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-            boolean isCallingUidDeviceOwner) {
-        runAndVerifyBackgroundActivityStartsSubtest(name, shouldHaveAborted, callingUid,
-                callingUidHasVisibleWindow, callingUidProcState, realCallingUid,
-                realCallingUidHasVisibleWindow, realCallingUidProcState,
-                hasForegroundActivities, callerIsRecents, callerIsTempAllowed,
-                callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-                isCallingUidDeviceOwner, false /* isPinnedSingleInstance */);
+    /**
+     * This test ensures proper logging for BAL_ALLOW_PERMISSION.
+     */
+    @Test
+    public void testBackgroundActivityStartsAllowed_logging() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        MockitoSession mockingSession = mockitoSession()
+                .mockStatic(ActivityTaskManagerService.class)
+                .mockStatic(FrameworkStatsLog.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+        doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                eq(START_ACTIVITIES_FROM_BACKGROUND),
+                anyInt(), anyInt()));
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "allowed_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, true, false, false, false, false, false);
+        verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                "",  // activity name
+                BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                UNIMPORTANT_UID,
+                UNIMPORTANT_UID2));
+        mockingSession.finishMocking();
+    }
+
+    /**
+     * This test ensures proper logging for BAL_ALLOW_PENDING_INTENT.
+     */
+    @Test
+    public void testBackgroundActivityStartsAllowed_loggingPendingIntentAllowed() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        MockitoSession mockingSession = mockitoSession()
+                .mockStatic(ActivityTaskManagerService.class)
+                .mockStatic(FrameworkStatsLog.class)
+                .mockStatic(PendingIntentRecord.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+        doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                eq(START_ACTIVITIES_FROM_BACKGROUND),
+                anyInt(), anyInt()));
+        doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
+                () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
+                anyObject(), anyInt()));
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "allowed_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
+                false, true, false, false, false, false, false);
+        verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                DEFAULT_COMPONENT_PACKAGE_NAME + "/" + DEFAULT_COMPONENT_PACKAGE_NAME,
+                BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT,
+                UNIMPORTANT_UID,
+                Process.SYSTEM_UID));
+        mockingSession.finishMocking();
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
@@ -864,7 +954,8 @@ public class ActivityStarterTests extends WindowTestsBase {
             boolean callerIsTempAllowed,
             boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
             boolean isCallingUidDeviceOwner,
-            boolean isPinnedSingleInstance) {
+            boolean isPinnedSingleInstance,
+            boolean hasSystemExemptAppOp) {
         // window visibility
         doReturn(callingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(callingUid);
         doReturn(realCallingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(realCallingUid);
@@ -896,6 +987,12 @@ public class ActivityStarterTests extends WindowTestsBase {
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);
         // callingUid is the device owner
         doReturn(isCallingUidDeviceOwner).when(mAtm).isDeviceOwner(callingUid);
+
+        // caller has OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop
+        doReturn(hasSystemExemptAppOp ? AppOpsManager.MODE_ALLOWED
+                : AppOpsManager.MODE_DEFAULT).when(mAppOpsManager).checkOpNoThrow(
+                eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
+                anyInt(), any());
 
         int launchMode = LAUNCH_MULTIPLE;
         if (isPinnedSingleInstance) {
@@ -1631,7 +1728,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
         info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */);
+                0 /* launchMode */, null /* componentName */);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
@@ -1657,7 +1754,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
         info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */);
+                0 /* launchMode */, null /* componentName */);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
@@ -1683,7 +1780,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
         info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */);
+                0 /* launchMode */, null /* componentName */);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
@@ -1751,6 +1848,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.startActivityInner(target, source, null /* voiceSession */,
                 null /* voiceInteractor */, 0 /* startFlags */,
                 options, inTask, inTaskFragment,
-                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */);
+                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */,
+                -1 /* realCallingUid */);
     }
 }

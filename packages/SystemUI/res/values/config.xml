@@ -64,6 +64,10 @@
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
+    <!-- If the dp width of the available space is <= this value, potentially adjust the number
+         of media recommendation items-->
+    <integer name="default_qs_media_rec_width_dp">380</integer>
+
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
 
     <!-- The default tiles to display in QuickSettings -->
@@ -81,7 +85,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -99,6 +103,7 @@
         <item>accessibility_display_daltonizer_enabled:color_correction</item>
         <item>accessibility_display_inversion_enabled:inversion</item>
         <item>one_handed_mode_enabled:onehanded</item>
+        <item>accessibility_font_scaling_has_been_changed:font_scaling</item>
     </string-array>
 
     <!-- Use collapsed layout for media player in landscape QQS -->
@@ -119,6 +124,9 @@
 
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
+
+    <!-- Display time for a sticky heads up notification, in milliseconds. -->
+    <integer name="sticky_heads_up_notification_time">60000</integer>
 
     <!-- Whether to hide the notification header when the HUN is expanded. -->
     <bool name="heads_up_notification_hides_header">false</bool>
@@ -445,6 +453,13 @@
          screenshot has been saved to work profile. If blank, a default icon will be shown. -->
     <string name="config_sceenshotWorkProfileFilesApp" translatable="false"></string>
 
+    <!-- The component name of the screenshot editing activity that provides the App Clips flow.
+         The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
+         and finally letting user send the screenshot to the calling notes app. This activity
+         should not send the screenshot to the calling activity without user consent. -->
+    <string name="config_screenshotAppClipsActivityComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.appclips.AppClipsActivity</string>
+
     <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
      This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_remoteCopyPackage" translatable="false"></string>
@@ -453,7 +468,7 @@
     <integer name="watch_heap_limit">256000</integer>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
-    <string-array name="config_pluginWhitelist" translatable="false">
+    <string-array name="config_pluginAllowlist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
 
@@ -490,8 +505,8 @@
      space -->
     <bool name="config_showBatteryEstimateQSBH">false</bool>
 
-    <!-- Whether to show a severe low battery dialog. -->
-    <bool name="config_severe_battery_dialog">false</bool>
+    <!-- Whether to show extra battery saver confirmation dialog. -->
+    <bool name="config_extra_battery_saver_confirmation">false</bool>
 
     <!-- A path representing a shield. Will sometimes be displayed with the battery icon when
          needed. This path is a 10px wide and 13px tall. -->
@@ -586,11 +601,6 @@
         58.0001 29.2229,56.9551 26.8945,55.195
     </string>
 
-    <!-- The radius of the enrollment progress bar, in dp -->
-    <integer name="config_udfpsEnrollProgressBar" translatable="false">
-        280
-    </integer>
-
     <!-- The time (in ms) needed to trigger the lock icon view's long-press affordance -->
     <integer name="config_lockIconLongPress" translatable="false">200</integer>
 
@@ -657,7 +667,7 @@
         <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
     </integer-array>
 
-    <!-- Which device wake-ups will trigger face auth. These values correspond with
+    <!-- Which device wake-ups will trigger passive auth. These values correspond with
          PowerManager#WakeReason. -->
     <integer-array name="config_face_auth_wake_up_triggers">
         <item>1</item> <!-- WAKE_REASON_POWER_BUTTON -->
@@ -666,6 +676,7 @@
         <item>7</item> <!-- WAKE_REASON_WAKE_MOTION -->
         <item>9</item> <!-- WAKE_REASON_LID -->
         <item>10</item> <!-- WAKE_REASON_DISPLAY_GROUP_ADDED -->
+        <item>12</item> <!-- WAKE_REASON_UNFOLD_DEVICE -->
         <item>15</item> <!-- WAKE_REASON_TAP -->
         <item>16</item> <!-- WAKE_REASON_LIFT -->
         <item>17</item> <!-- WAKE_REASON_BIOMETRIC -->
@@ -776,7 +787,7 @@
     <!-- Duration in milliseconds of the dream in complications fade-in animation. -->
     <integer name="config_dreamOverlayInComplicationsDurationMs">250</integer>
     <!-- Duration in milliseconds of the y-translation animation when entering a dream -->
-    <integer name="config_dreamOverlayInTranslationYDurationMs">917</integer>
+    <integer name="config_dreamOverlayInTranslationYDurationMs">1167</integer>
 
     <!-- Delay in milliseconds before switching to the dock user and dreaming if a secondary user is
     active when the device is locked and docked. 0 indicates disabled. Default is 1 minute. -->
@@ -827,4 +838,55 @@
         <item>bottom_end:wallet</item>
     </string-array>
 
+    <!-- Package name for the app that implements the wallpaper picker. -->
+    <string name="config_wallpaperPickerPackage" translatable="false">
+        com.android.wallpaper
+    </string>
+
+    <!-- Whether the floating rotation button should be on the left/right in the device's natural
+         orientation -->
+    <bool name="floating_rotation_button_position_left">true</bool>
+
+    <!-- Configuration to set Learn more in device logs as URL link -->
+    <bool name="log_access_confirmation_learn_more_as_link">true</bool>
+
+    <!-- [START] MULTI SHADE -->
+    <!-- Whether the device should use dual shade. If false, the device uses single shade. -->
+    <bool name="dual_shade_enabled">true</bool>
+    <!--
+    When in dual shade, where should the horizontal split be on the screen to help determine whether
+    the user is pulling down the left shade or the right shade. Must be between 0.0 and 1.0,
+    inclusive. In other words: how much of the left-hand side of the screen, when pulled down on,
+    would reveal the left-hand side shade.
+
+    More concretely:
+    A value of 0.67 means that the left two-thirds of the screen are dedicated to the left-hand side
+    shade and the remaining one-third of the screen on the right is dedicated to the right-hand side
+    shade.
+    -->
+    <dimen name="dual_shade_split_fraction">0.67</dimen>
+    <!-- Width of the left-hand side shade. -->
+    <dimen name="left_shade_width">436dp</dimen>
+    <!-- Width of the right-hand side shade. -->
+    <dimen name="right_shade_width">436dp</dimen>
+    <!--
+    Opaque version of the scrim that shows up behind dual shades. The alpha channel is driven
+    programmatically.
+    -->
+    <color name="opaque_scrim">#D9D9D9</color>
+    <!-- Maximum opacity when the scrim that shows up behind the dual shades is fully visible. -->
+    <dimen name="dual_shade_scrim_alpha">0.1</dimen>
+    <!--
+    The amount that the user must swipe down when the shade is fully collapsed to automatically
+    expand once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully collapsed once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_expand_threshold">0.5</dimen>
+    <!--
+    The amount that the user must swipe up when the shade is fully expanded to automatically
+    collapse once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully expanded once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_collapse_threshold">0.5</dimen>
+    <!-- [END] MULTI SHADE -->
 </resources>

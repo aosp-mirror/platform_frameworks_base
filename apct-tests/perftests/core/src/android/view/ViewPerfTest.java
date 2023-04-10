@@ -17,6 +17,7 @@
 package android.view;
 
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import android.content.Context;
 import android.perftests.utils.PerfTestActivity;
@@ -72,6 +73,15 @@ public class ViewPerfTest {
 
     @Test
     public void testPerformHapticFeedback() throws Throwable {
+        // performHapticFeedback is now asynchronous, so should be very fast. This benchmark
+        // is primarily a regression test for the re-introduction of blocking calls in the path.
+
+        // Can't run back-to-back performHapticFeedback, as it will just enqueue on the oneway
+        // thread and fill up that buffer. Instead, we invoke at a speed of a fairly high frame
+        // rate - and this is still too fast to fully vibrate in reality, but should be able to
+        // clear queues.
+        int waitPerCallMillis = 5;
+
         final BenchmarkState state = mBenchmarkRule.getState();
         mActivityRule.runOnUiThread(() -> {
             state.pauseTiming();
@@ -85,9 +95,17 @@ public class ViewPerfTest {
             int flags = HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                     | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING;
 
-            while (state.keepRunning()) {
-                assertTrue("Call to performHapticFeedback was ignored",
-                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_PRESS, flags));
+            try {
+                while (state.keepRunning()) {
+                    assertTrue("Call to performHapticFeedback was ignored",
+                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_PRESS,
+                                    flags));
+                    state.pauseTiming();
+                    Thread.sleep(waitPerCallMillis);
+                    state.resumeTiming();
+                }
+            } catch (InterruptedException e) {
+                fail("Unexpectedly interrupted");
             }
         });
     }

@@ -24,10 +24,9 @@ import com.android.settingslib.spa.widget.scaffold.MoreOptionsAction
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
 import com.android.settingslib.spa.widget.scaffold.SearchScaffold
 import com.android.settingslib.spaprivileged.R
-import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
-import com.android.settingslib.spaprivileged.template.common.WorkProfilePager
+import com.android.settingslib.spaprivileged.template.common.UserProfilePager
 
 /**
  * The full screen template for an App List page.
@@ -55,10 +54,10 @@ fun <T : AppRecord> AppListPage(
             }
         },
     ) { bottomPadding, searchQuery ->
-        WorkProfilePager(primaryUserOnly) { userInfo ->
+        UserProfilePager(primaryUserOnly) { userGroup ->
             val appListInput = AppListInput(
                 config = AppListConfig(
-                    userId = userInfo.id,
+                    userIds = userGroup.userInfos.map { it.id },
                     showInstantApps = showInstantApps,
                 ),
                 listModel = listModel,

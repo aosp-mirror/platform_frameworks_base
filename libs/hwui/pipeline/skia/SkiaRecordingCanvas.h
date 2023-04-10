@@ -78,10 +78,10 @@ public:
                             uirenderer::CanvasPropertyPaint* paint) override;
     virtual void drawRipple(const RippleDrawableParams& params) override;
 
-    virtual void drawLottie(LottieDrawable* lottieDrawable) override;
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
     virtual void enableZ(bool enableZ) override;
+    virtual void drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Paint& paint) override;
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
 
@@ -102,6 +102,8 @@ private:
      *  @param height used to calculate recording bounds.
      */
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
+
+    void handleMutableImages(Bitmap& bitmap, DrawImagePayload& payload);
 
     using INHERITED = SkiaCanvas;
 };

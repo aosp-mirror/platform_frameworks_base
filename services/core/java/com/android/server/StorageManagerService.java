@@ -73,6 +73,9 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
+import android.media.MediaCodecList;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -954,10 +957,27 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private boolean isHevcDecoderSupported() {
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        MediaCodecInfo[] codecInfos = codecList.getCodecInfos();
+        for (MediaCodecInfo codecInfo : codecInfos) {
+            if (codecInfo.isEncoder()) {
+                continue;
+            }
+            String[] supportedTypes = codecInfo.getSupportedTypes();
+            for (String type : supportedTypes) {
+                if (type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void configureTranscoding() {
         // See MediaProvider TranscodeHelper#getBooleanProperty for more information
         boolean transcodeEnabled = false;
-        boolean defaultValue = true;
+        boolean defaultValue = isHevcDecoderSupported() ? true : false;
 
         if (SystemProperties.getBoolean("persist.sys.fuse.transcode_user_control", false)) {
             transcodeEnabled = SystemProperties.getBoolean("persist.sys.fuse.transcode_enabled",
@@ -2753,6 +2773,8 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
+            int avgWriteAmount = 0;
+            int targetDirtyRatio = mTargetDirtyRatio;
             int latestWrite = mVold.getWriteAmount();
             if (latestWrite == -1) {
                 Slog.w(TAG, "Failed to get storage write record");
@@ -2765,10 +2787,11 @@ class StorageManagerService extends IStorageManager.Stub
             // (first boot after OTA), We skip the smart idle maintenance
             if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
                 if (!refreshLifetimeConstraint() || !checkChargeStatus()) {
-                    return;
+                    Slog.i(TAG, "Turn off gc_urgent based on checking lifetime and charge status");
+                    targetDirtyRatio = 100;
+                } else {
+                    avgWriteAmount = getAverageWriteAmount();
                 }
-
-                int avgWriteAmount = getAverageWriteAmount();
 
                 Slog.i(TAG, "Set smart idle maintenance: " + "latest write amount: " +
                             latestWrite + ", average write amount: " + avgWriteAmount +
@@ -2777,10 +2800,10 @@ class StorageManagerService extends IStorageManager.Stub
                             ", segment reclaim weight: " + mSegmentReclaimWeight +
                             ", period(min): " + sSmartIdleMaintPeriod +
                             ", min gc sleep time(ms): " + mMinGCSleepTime +
-                            ", target dirty ratio: " + mTargetDirtyRatio);
+                            ", target dirty ratio: " + targetDirtyRatio);
                 mVold.setGCUrgentPace(avgWriteAmount, mMinSegmentsThreshold, mDirtyReclaimRate,
                                       mSegmentReclaimWeight, sSmartIdleMaintPeriod,
-                                      mMinGCSleepTime, mTargetDirtyRatio);
+                                      mMinGCSleepTime, targetDirtyRatio);
             } else {
                 Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
             }
@@ -3380,8 +3403,9 @@ class StorageManagerService extends IStorageManager.Stub
                     appInfo.manageSpaceActivityName);
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
 
-            final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setIgnorePendingIntentCreatorForegroundState(true);
+            final ActivityOptions options = ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
 
             PendingIntent activity = PendingIntent.getActivity(targetAppContext, requestCode,
                     intent,
@@ -3747,8 +3771,12 @@ class StorageManagerService extends IStorageManager.Stub
                     // Return both read only and write only volumes. When includeSharedProfile is
                     // true, all the volumes of userIdSharingMedia should be returned when queried
                     // from the user it shares media with
+                    // Public Volumes will be also be returned if visible to the
+                    // userIdSharingMedia with.
                     match = vol.isVisibleForUser(userId)
                             || (!vol.isVisible() && includeInvisible && vol.getPath() != null)
+                            || (vol.getType() == VolumeInfo.TYPE_PUBLIC
+                                    && vol.isVisibleForUser(userIdSharingMedia))
                             || (includeSharedProfile && vol.isVisibleForUser(userIdSharingMedia));
                 }
                 if (!match) continue;

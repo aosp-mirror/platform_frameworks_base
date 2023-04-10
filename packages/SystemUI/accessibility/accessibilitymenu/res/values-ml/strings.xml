@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"ഉപയോഗസഹായി മെനു"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"നിങ്ങളുടെ ഉപകരണം നിയന്ത്രിക്കുന്നതിന്, ഉപയോഗസഹായി മെനു വലിയൊരു ഓൺ-സ്ക്രീൻ മെനു നൽകുന്നു. ഉപകരണം ലോക്ക് ചെയ്യാനും ശബ്‌ദവും തെളിച്ചവും നിയന്ത്രിക്കാനും സ്‌ക്രീൻ ഷോട്ടുകൾ എടുക്കാനും മറ്റും നിങ്ങൾക്ക് കഴിയും."</string>
+    <string name="assistant_label" msgid="6796392082252272356">"അസിസ്റ്റന്റ്"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"പ്രവേശനക്ഷമത ക്രമീകരണം"</string>
+    <string name="power_label" msgid="7699720321491287839">"പവർ"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"പവർ ഓപ്ഷനുകൾ"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"സമീപകാല ആപ്പുകൾ"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"ലോക്ക് സ്‌ക്രീൻ"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"ദ്രുത ക്രമീകരണം"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"അറിയിപ്പുകൾ"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"സ്‌ക്രീൻഷോട്ട്"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"ശബ്‌ദം കൂട്ടുക"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"ശബ്‌ദം കുറയ്ക്കുക"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"തെളിച്ചം കൂട്ടുക"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"തെളിച്ചം കുറയ്‌ക്കുക"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"മുമ്പത്തെ സ്‌ക്രീനിലേക്ക് പോവുക"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"അടുത്ത സ്‌ക്രീനിലേക്ക് പോവുക"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"നിങ്ങളുടെ ഉപകരണം നിയന്ത്രിക്കുന്നതിന്, ഉപയോഗസഹായി മെനു വലിയൊരു ഓൺ-സ്ക്രീൻ മെനു നൽകുന്നു. ഉപകരണം ലോക്ക് ചെയ്യാനും ശബ്‌ദവും തെളിച്ചവും നിയന്ത്രിക്കാനും സ്‌ക്രീൻ ഷോട്ടുകൾ എടുക്കാനും മറ്റും നിങ്ങൾക്ക് കഴിയും."</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"വലിയ മെനുവിലൂടെ ഉപകരണം നിയന്ത്രിക്കുക"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"ഉപയോഗസഹായി മെനു ക്രമീകരണം"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"വലിയ ബട്ടണുകൾ"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"ഉപയോഗസഹായി മെനു ബട്ടണുകളുടെ വലുപ്പം കൂട്ടുക"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"സഹായം"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"തെളിച്ചം, <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"സംഗീത ശബ്‌ദം, <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+</resources>

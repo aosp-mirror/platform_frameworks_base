@@ -64,7 +64,6 @@ import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackg
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
-import static com.android.wm.shell.transition.TransitionAnimationHelper.sDisableCustomTaskAnimationProperty;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -113,6 +112,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -301,8 +301,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             return true;
         }
 
-        // check if no-animation and skip animation if so.
-        if (Transitions.isAllNoAnimation(info)) {
+        // Early check if the transition doesn't warrant an animation.
+        if (Transitions.isAllNoAnimation(info) || Transitions.isAllOrderOnly(info)) {
             startTransaction.apply();
             finishTransaction.apply();
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
@@ -383,9 +383,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     continue;
                 }
                 // No default animation for this, so just update bounds/position.
+                final int rootIdx = TransitionUtil.rootIndexFor(change, info);
                 startTransaction.setPosition(change.getLeash(),
-                        change.getEndAbsBounds().left - info.getRootOffset().x,
-                        change.getEndAbsBounds().top - info.getRootOffset().y);
+                        change.getEndAbsBounds().left - info.getRoot(rootIdx).getOffset().x,
+                        change.getEndAbsBounds().top - info.getRoot(rootIdx).getOffset().y);
                 // Seamless display transition doesn't need to animate.
                 if (isSeamlessDisplayChange) continue;
                 if (isTask || (change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)
@@ -446,7 +447,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         backgroundColorForTransition);
 
                 if (!isTask && a.hasExtension()) {
-                    if (!Transitions.isOpeningType(change.getMode())) {
+                    if (!TransitionUtil.isOpeningType(change.getMode())) {
                         // Can screenshot now (before startTransaction is applied)
                         edgeExtendWindow(change, a, startTransaction, finishTransaction);
                     } else {
@@ -457,7 +458,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     }
                 }
 
-                final Rect clipRect = Transitions.isClosingType(change.getMode())
+                final Rect clipRect = TransitionUtil.isClosingType(change.getMode())
                         ? new Rect(mRotator.getEndBoundsInStartRotation(change))
                         : new Rect(change.getEndAbsBounds());
                 clipRect.offsetTo(0, 0);
@@ -474,8 +475,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         if (backgroundColorForTransition != 0) {
-            addBackgroundToTransition(info.getRootLeash(), backgroundColorForTransition,
-                    startTransaction, finishTransaction);
+            for (int i = 0; i < info.getRootCount(); ++i) {
+                addBackgroundToTransition(info.getRoot(i).getLeash(), backgroundColorForTransition,
+                        startTransaction, finishTransaction);
+            }
         }
 
         if (postStartTransactionCallbacks.size() > 0) {
@@ -520,8 +523,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private void startRotationAnimation(SurfaceControl.Transaction startTransaction,
             TransitionInfo.Change change, TransitionInfo info, int animHint,
             ArrayList<Animator> animations, Runnable onAnimFinish) {
+        final int rootIdx = TransitionUtil.rootIndexFor(change, info);
         final ScreenRotationAnimation anim = new ScreenRotationAnimation(mContext, mSurfaceSession,
-                mTransactionPool, startTransaction, change, info.getRootLeash(), animHint);
+                mTransactionPool, startTransaction, change, info.getRoot(rootIdx).getLeash(),
+                animHint);
         // The rotation animation may consist of 3 animations: fade-out screenshot, fade-in real
         // content, and background color. The item of "animGroup" will be removed if the sub
         // animation is finished. Then if the list becomes empty, the rotation animation is done.
@@ -563,13 +568,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int flags = info.getFlags();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
-        final boolean isOpeningType = Transitions.isOpeningType(type);
-        final boolean enter = Transitions.isOpeningType(changeMode);
+        final boolean isOpeningType = TransitionUtil.isOpeningType(type);
+        final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
-        final boolean canCustomContainer = !isTask || !sDisableCustomTaskAnimationProperty;
-        final Rect endBounds = Transitions.isClosingType(changeMode)
+        final Rect endBounds = TransitionUtil.isClosingType(changeMode)
                 ? mRotator.getEndBoundsInStartRotation(change)
                 : change.getEndAbsBounds();
 
@@ -591,7 +595,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         } else if (type == TRANSIT_RELAUNCH) {
             a = mTransitionAnimation.createRelaunchAnimation(endBounds, mInsets, endBounds);
         } else if (overrideType == ANIM_CUSTOM
-                && (canCustomContainer || options.getOverrideTaskTransition())) {
+                && (!isTask || options.getOverrideTaskTransition())) {
             a = mTransitionAnimation.loadAnimationRes(options.getPackageName(), enter
                     ? options.getEnterResId() : options.getExitResId());
         } else if (overrideType == ANIM_OPEN_CROSS_PROFILE_APPS && enter) {
@@ -691,8 +695,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private void attachThumbnail(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, TransitionInfo.Change change,
             TransitionInfo.AnimationOptions options, float cornerRadius) {
-        final boolean isOpen = Transitions.isOpeningType(change.getMode());
-        final boolean isClose = Transitions.isClosingType(change.getMode());
+        final boolean isOpen = TransitionUtil.isOpeningType(change.getMode());
+        final boolean isClose = TransitionUtil.isClosingType(change.getMode());
         if (isOpen) {
             if (options.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
                 attachCrossProfileThumbnailAnimation(animations, finishCallback, change,
@@ -774,16 +778,16 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if ((change.getFlags() & FLAG_SHOW_WALLPAPER) != 0) {
-                if (Transitions.isOpeningType(change.getMode())) {
+                if (TransitionUtil.isOpeningType(change.getMode())) {
                     hasOpenWallpaper = true;
-                } else if (Transitions.isClosingType(change.getMode())) {
+                } else if (TransitionUtil.isClosingType(change.getMode())) {
                     hasCloseWallpaper = true;
                 }
             }
         }
 
         if (hasOpenWallpaper && hasCloseWallpaper) {
-            return Transitions.isOpeningType(info.getType())
+            return TransitionUtil.isOpeningType(info.getType())
                     ? WALLPAPER_TRANSITION_INTRA_OPEN : WALLPAPER_TRANSITION_INTRA_CLOSE;
         } else if (hasOpenWallpaper) {
             return WALLPAPER_TRANSITION_OPEN;

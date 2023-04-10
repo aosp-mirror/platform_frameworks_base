@@ -49,6 +49,7 @@ import android.window.TransitionInfo;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.wm.shell.util.TransitionUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -120,7 +121,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
         change.setTaskInfo(createTaskInfo(1 /* taskId */, ACTIVITY_TYPE_HOME));
         change.setEndAbsBounds(endBounds);
         change.setEndRelOffset(0, 0);
-        RemoteAnimationTarget wrapped = RemoteAnimationTargetCompat.newTarget(
+        RemoteAnimationTarget wrapped = TransitionUtil.newTarget(
                 change, 0 /* order */, tinfo, mock(SurfaceControl.Transaction.class), null);
         assertEquals(ACTIVITY_TYPE_HOME, wrapped.windowConfiguration.getActivityType());
         assertEquals(new Rect(0, 0, 100, 140), wrapped.localBounds);
@@ -133,7 +134,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
 
         TransitionInfoBuilder(@WindowManager.TransitionType int type) {
             mInfo = new TransitionInfo(type, 0 /* flags */);
-            mInfo.setRootLeash(createMockSurface(true /* valid */), 0, 0);
+            mInfo.addRootLeash(0, createMockSurface(true /* valid */), 0, 0);
         }
 
         TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
@@ -143,6 +144,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
             change.setMode(mode);
             change.setFlags(flags);
             change.setTaskInfo(taskInfo);
+            change.setDisplayId(0, 0);
             mInfo.addChange(change);
             return this;
         }

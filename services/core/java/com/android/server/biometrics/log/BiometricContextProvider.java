@@ -23,14 +23,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.OperationContext;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
-import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
 import android.view.WindowManager;
@@ -65,7 +64,6 @@ public final class BiometricContextProvider implements BiometricContext {
                 try {
                     sInstance = new BiometricContextProvider(context,
                             (WindowManager) context.getSystemService(Context.WINDOW_SERVICE),
-                            new AmbientDisplayConfiguration(context),
                             IStatusBarService.Stub.asInterface(ServiceManager.getServiceOrThrow(
                                     Context.STATUS_BAR_SERVICE)), null /* handler */,
                             new AuthSessionCoordinator());
@@ -83,16 +81,13 @@ public final class BiometricContextProvider implements BiometricContext {
 
     @Nullable
     private final Map<Integer, BiometricContextSessionInfo> mSession = new ConcurrentHashMap<>();
-
-    private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final AuthSessionCoordinator mAuthSessionCoordinator;
     private final WindowManager mWindowManager;
     @Nullable private final Handler mHandler;
-    private boolean mIsAod = false;
-    private boolean mIsAwake = false;
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mFoldState = IBiometricContextListener.FoldState.UNKNOWN;
 
+    private int mDisplayState = AuthenticateOptions.DISPLAY_STATE_UNKNOWN;
     @VisibleForTesting
     final BroadcastReceiver mDockStateReceiver = new BroadcastReceiver() {
         @Override
@@ -106,11 +101,9 @@ public final class BiometricContextProvider implements BiometricContext {
     @VisibleForTesting
     public BiometricContextProvider(@NonNull Context context,
             @NonNull WindowManager windowManager,
-            @NonNull AmbientDisplayConfiguration ambientDisplayConfiguration,
             @NonNull IStatusBarService service, @Nullable Handler handler,
             @NonNull AuthSessionCoordinator authSessionCoordinator) {
         mWindowManager = windowManager;
-        mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mAuthSessionCoordinator = authSessionCoordinator;
         mHandler = handler;
 
@@ -122,24 +115,17 @@ public final class BiometricContextProvider implements BiometricContext {
         try {
             service.setBiometicContextListener(new IBiometricContextListener.Stub() {
                 @Override
-                public void onDozeChanged(boolean isDozing, boolean isAwake) {
-                    isDozing = isDozing && isAodEnabled();
-                    final boolean changed = (mIsAod != isDozing) || (mIsAwake != isAwake);
-                    if (changed) {
-                        mIsAod = isDozing;
-                        mIsAwake = isAwake;
-                        notifyChanged();
-                    }
-                }
-
-                @Override
                 public void onFoldChanged(int foldState) {
                     mFoldState = foldState;
                     // no need to notify, not sent to HAL
                 }
 
-                private boolean isAodEnabled() {
-                    return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+                @Override
+                public void onDisplayStateChanged(int displayState) {
+                    if (displayState != mDisplayState) {
+                        mDisplayState = displayState;
+                        notifyChanged();
+                    }
                 }
             });
             service.registerSessionListener(SESSION_TYPES, new ISessionListener.Stub() {
@@ -187,12 +173,18 @@ public final class BiometricContextProvider implements BiometricContext {
 
     @Override
     public boolean isAod() {
-        return mIsAod;
+        return mDisplayState == AuthenticateOptions.DISPLAY_STATE_AOD;
     }
 
     @Override
     public boolean isAwake() {
-        return mIsAwake;
+        switch (mDisplayState) {
+            case AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN:
+            case AuthenticateOptions.DISPLAY_STATE_SCREENSAVER:
+            case AuthenticateOptions.DISPLAY_STATE_UNKNOWN:
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -213,6 +205,11 @@ public final class BiometricContextProvider implements BiometricContext {
     @Override
     public int getCurrentRotation() {
         return mWindowManager.getDefaultDisplay().getRotation();
+    }
+
+    @Override
+    public int getDisplayState() {
+        return mDisplayState;
     }
 
     @Override
@@ -249,7 +246,7 @@ public final class BiometricContextProvider implements BiometricContext {
     public String toString() {
         return "[keyguard session: " + getKeyguardEntrySessionInfo() + ", "
                 + "bp session: " + getBiometricPromptSessionInfo() + ", "
-                + "isAod: " + isAod() + ", "
+                + "displayState: " + getDisplayState() + ", "
                 + "isAwake: " + isAwake() +  ", "
                 + "isDisplayOn: " + isDisplayOn() +  ", "
                 + "dock: " + getDockedState() + ", "

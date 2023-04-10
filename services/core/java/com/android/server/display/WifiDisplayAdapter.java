@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.app.BroadcastOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -421,6 +422,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     // Runs on the handler.
     private void handleSendStatusChangeBroadcast() {
         final Intent intent;
+        final BroadcastOptions options;
         synchronized (getSyncRoot()) {
             if (!mPendingStatusChangeBroadcast) {
                 return;
@@ -431,10 +433,13 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             intent.putExtra(DisplayManager.EXTRA_WIFI_DISPLAY_STATUS,
                     getWifiDisplayStatusLocked());
+
+            options = BroadcastOptions.makeBasic();
+            options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
         }
 
         // Send protected broadcast about wifi display status to registered receivers.
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL, null, options.toBundle());
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

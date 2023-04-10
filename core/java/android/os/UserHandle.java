@@ -123,6 +123,9 @@ public final class UserHandle implements Parcelable {
     @TestApi
     public static final int MIN_SECONDARY_USER_ID = 10;
 
+    /** @hide */
+    public static final int MAX_SECONDARY_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
+
     /**
      * (Arbitrary) user handle cache size.
      * {@link #CACHED_USER_HANDLES} caches user handles in the range of

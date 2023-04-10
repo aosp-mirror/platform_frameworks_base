@@ -1028,8 +1028,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             intent.setComponent(provider.getInfoLocked(mContext).configure);
             intent.setFlags(secureFlags);
 
-            final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setIgnorePendingIntentCreatorForegroundState(true);
+            final ActivityOptions options =
+                    ActivityOptions.makeBasic().setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
 
             // All right, create the sender.
             final long identity = Binder.clearCallingIdentity();
@@ -1141,7 +1142,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             } else {
                 // For any widget other then the first one, we just send update intent
                 // as we normally would.
-                sendUpdateIntentLocked(provider, new int[]{appWidgetId});
+                sendUpdateIntentLocked(provider, new int[]{appWidgetId}, true);
             }
 
             // Schedule the future updates.
@@ -1211,7 +1212,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     @Override
     public boolean bindRemoteViewsService(String callingPackage, int appWidgetId, Intent intent,
             IApplicationThread caller, IBinder activtiyToken, IServiceConnection connection,
-            int flags) {
+            long flags) {
         final int userId = UserHandle.getCallingUserId();
         if (DEBUG) {
             Slog.i(TAG, "bindRemoteViewsService() " + userId);
@@ -2378,7 +2379,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (!canSendCombinedBroadcast) {
             // If this function is called by mistake, send two separate broadcasts instead
             sendEnableIntentLocked(p);
-            sendUpdateIntentLocked(p, appWidgetIds);
+            sendUpdateIntentLocked(p, appWidgetIds, true);
             return;
         }
 
@@ -2398,12 +2399,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         sendBroadcastAsUser(intent, p.id.getProfile(), true);
     }
 
-    private void sendUpdateIntentLocked(Provider provider, int[] appWidgetIds) {
+    private void sendUpdateIntentLocked(Provider provider, int[] appWidgetIds,
+            boolean interactive) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         intent.setComponent(provider.id.componentName);
-        // Periodic background widget update heartbeats are not an interactive use case
-        sendBroadcastAsUser(intent, provider.id.getProfile(), false);
+        sendBroadcastAsUser(intent, provider.id.getProfile(), interactive);
     }
 
     private void sendDeletedIntentLocked(Widget widget) {
@@ -3588,7 +3589,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 scheduleNotifyProviderChangedLocked(widget);
                             }
                             // Now that we've told the host, push out an update.
-                            sendUpdateIntentLocked(provider, appWidgetIds);
+                            sendUpdateIntentLocked(provider, appWidgetIds, false);
                         }
                     }
                     providersUpdated = true;

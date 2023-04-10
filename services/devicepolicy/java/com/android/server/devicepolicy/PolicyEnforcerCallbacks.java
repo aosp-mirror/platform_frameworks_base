@@ -20,6 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.IntentFilterPolicyKey;
+import android.app.admin.LockTaskPolicy;
+import android.app.admin.PackagePermissionPolicyKey;
+import android.app.admin.PackagePolicyKey;
+import android.app.admin.PolicyKey;
+import android.app.admin.UserRestrictionPolicyKey;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -35,6 +41,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
 
 import java.util.Collections;
@@ -64,11 +71,11 @@ final class PolicyEnforcerCallbacks {
             @Nullable Integer grantState, @NonNull Context context, int userId,
             @NonNull PolicyKey policyKey) {
         return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
-            if (!(policyKey instanceof PermissionGrantStatePolicyKey)) {
+            if (!(policyKey instanceof PackagePermissionPolicyKey)) {
                 throw new IllegalArgumentException("policyKey is not of type "
-                        + "PermissionGrantStatePolicyKey");
+                        + "PermissionGrantStatePolicyKey, passed in policyKey is: " + policyKey);
             }
-            PermissionGrantStatePolicyKey parsedKey = (PermissionGrantStatePolicyKey) policyKey;
+            PackagePermissionPolicyKey parsedKey = (PackagePermissionPolicyKey) policyKey;
             Objects.requireNonNull(parsedKey.getPermissionName());
             Objects.requireNonNull(parsedKey.getPackageName());
             Objects.requireNonNull(context);
@@ -156,13 +163,13 @@ final class PolicyEnforcerCallbacks {
             @NonNull PolicyKey policyKey) {
         Binder.withCleanCallingIdentity(() -> {
             try {
-                if (!(policyKey instanceof PersistentPreferredActivityPolicyKey)) {
+                if (!(policyKey instanceof IntentFilterPolicyKey)) {
                     throw new IllegalArgumentException("policyKey is not of type "
-                            + "PersistentPreferredActivityPolicyKey");
+                            + "IntentFilterPolicyKey, passed in policyKey is: " + policyKey);
                 }
-                PersistentPreferredActivityPolicyKey parsedKey =
-                        (PersistentPreferredActivityPolicyKey) policyKey;
-                IntentFilter filter = Objects.requireNonNull(parsedKey.getFilter());
+                IntentFilterPolicyKey parsedKey =
+                        (IntentFilterPolicyKey) policyKey;
+                IntentFilter filter = Objects.requireNonNull(parsedKey.getIntentFilter());
 
                 IPackageManager packageManager = AppGlobals.getPackageManager();
                 if (preferredActivity != null) {
@@ -184,17 +191,50 @@ final class PolicyEnforcerCallbacks {
             @Nullable Boolean uninstallBlocked, @NonNull Context context, int userId,
             @NonNull PolicyKey policyKey) {
         return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
-            if (!(policyKey instanceof PackageSpecificPolicyKey)) {
+            if (!(policyKey instanceof PackagePolicyKey)) {
                 throw new IllegalArgumentException("policyKey is not of type "
-                        + "PackageSpecificPolicyKey");
+                        + "PackagePolicyKey, passed in policyKey is: " + policyKey);
             }
-            PackageSpecificPolicyKey parsedKey = (PackageSpecificPolicyKey) policyKey;
+            PackagePolicyKey parsedKey = (PackagePolicyKey) policyKey;
             String packageName = Objects.requireNonNull(parsedKey.getPackageName());
             DevicePolicyManagerService.setUninstallBlockedUnchecked(
                     packageName,
                     uninstallBlocked != null && uninstallBlocked,
                     userId);
             return true;
+        }));
+    }
+
+    static boolean setUserRestriction(
+            @Nullable Boolean enabled, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
+            if (!(policyKey instanceof UserRestrictionPolicyKey)) {
+                throw new IllegalArgumentException("policyKey is not of type "
+                        + "UserRestrictionPolicyKey, passed in policyKey is: " + policyKey);
+            }
+            UserRestrictionPolicyKey parsedKey =
+                    (UserRestrictionPolicyKey) policyKey;
+            UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
+            userManager.setUserRestriction(
+                    userId, parsedKey.getRestriction(), enabled != null && enabled);
+            return true;
+        }));
+    }
+
+    static boolean setApplicationHidden(
+            @Nullable Boolean hide, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
+            if (!(policyKey instanceof PackagePolicyKey)) {
+                throw new IllegalArgumentException("policyKey is not of type "
+                        + "PackagePolicyKey, passed in policyKey is: " + policyKey);
+            }
+            PackagePolicyKey parsedKey = (PackagePolicyKey) policyKey;
+            String packageName = Objects.requireNonNull(parsedKey.getPackageName());
+            IPackageManager packageManager = AppGlobals.getPackageManager();
+            return packageManager.setApplicationHiddenSettingAsUser(
+                    packageName, hide != null && hide, userId);
         }));
     }
 }

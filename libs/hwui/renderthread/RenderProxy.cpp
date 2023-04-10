@@ -45,8 +45,12 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
     pid_t uiThreadId = pthread_gettid_np(pthread_self());
     pid_t renderThreadId = getRenderThreadTid();
     mContext = mRenderThread.queue().runSync([=, this]() -> CanvasContext* {
-        return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory,
-                                     uiThreadId, renderThreadId);
+        CanvasContext* context = CanvasContext::create(mRenderThread, translucent, rootRenderNode,
+                                                       contextFactory, uiThreadId, renderThreadId);
+        if (context != nullptr) {
+            mRenderThread.queue().post([=] { context->startHintSession(); });
+        }
+        return context;
     });
     mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
 }
@@ -143,8 +147,20 @@ void RenderProxy::setOpaque(bool opaque) {
     mRenderThread.queue().post([=]() { mContext->setOpaque(opaque); });
 }
 
-void RenderProxy::setColorMode(ColorMode mode) {
-    mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
+float RenderProxy::setColorMode(ColorMode mode) {
+    // We only need to figure out what the renderer supports for HDR, otherwise this can stay
+    // an async call since we already know the return value
+    if (mode == ColorMode::Hdr || mode == ColorMode::Hdr10) {
+        return mRenderThread.queue().runSync(
+                [=]() -> float { return mContext->setColorMode(mode); });
+    } else {
+        mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
+        return 1.f;
+    }
+}
+
+void RenderProxy::setRenderSdrHdrRatio(float ratio) {
+    mDrawFrameTask.setRenderSdrHdrRatio(ratio);
 }
 
 int64_t* RenderProxy::frameInfo() {
@@ -252,6 +268,10 @@ void RenderProxy::notifyFramePending() {
 
 void RenderProxy::notifyCallbackPending() {
     mRenderThread.queue().post([this]() { mContext->sendLoadResetHint(); });
+}
+
+void RenderProxy::notifyExpensiveFrame() {
+    mRenderThread.queue().post([this]() { mContext->sendLoadIncreaseHint(); });
 }
 
 void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {

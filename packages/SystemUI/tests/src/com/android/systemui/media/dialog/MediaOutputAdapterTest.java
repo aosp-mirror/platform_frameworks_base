@@ -16,7 +16,12 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.media.RouteListingPreference.Item.DISABLE_REASON_SUBSCRIPTION_REQUIRED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
+import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
+
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,6 +36,7 @@ import android.graphics.drawable.Icon;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
@@ -45,6 +51,8 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +67,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     private static final String TEST_DEVICE_ID_1 = "test_device_id_1";
     private static final String TEST_DEVICE_ID_2 = "test_device_id_2";
     private static final String TEST_SESSION_NAME = "test_session_name";
+    private static final String TEST_CUSTOM_SUBTEXT = "custom subtext";
 
     private static final int TEST_MAX_VOLUME = 20;
     private static final int TEST_CURRENT_VOLUME = 10;
@@ -72,6 +81,8 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     private IconCompat mIconCompat = mock(IconCompat.class);
     private View mDialogLaunchView = mock(View.class);
 
+    @Captor
+    private ArgumentCaptor<SeekBar.OnSeekBarChangeListener> mOnSeekBarChangeListenerCaptor;
     private MediaOutputAdapter mMediaOutputAdapter;
     private MediaOutputAdapter.MediaDeviceViewHolder mViewHolder;
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -352,6 +363,24 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBindViewHolder_dragSeekbar_setsVolume() {
+        mOnSeekBarChangeListenerCaptor = ArgumentCaptor.forClass(
+                SeekBar.OnSeekBarChangeListener.class);
+        MediaOutputSeekbar mSpySeekbar = spy(mViewHolder.mSeekBar);
+        mViewHolder.mSeekBar = mSpySeekbar;
+        when(mMediaDevice1.getMaxVolume()).thenReturn(TEST_MAX_VOLUME);
+        when(mMediaDevice1.getCurrentVolume()).thenReturn(TEST_MAX_VOLUME);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        verify(mViewHolder.mSeekBar).setOnSeekBarChangeListener(
+                mOnSeekBarChangeListenerCaptor.capture());
+
+        mOnSeekBarChangeListenerCaptor.getValue().onStopTrackingTouch(mViewHolder.mSeekBar);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mMediaOutputController).logInteractionAdjustVolume(mMediaDevice1);
+    }
+
+    @Test
     public void onBindViewHolder_bindSelectableDevice_verifyView() {
         List<MediaDevice> selectableDevices = new ArrayList<>();
         selectableDevices.add(mMediaDevice2);
@@ -408,12 +437,46 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void subStatusSupported_onBindViewHolder_bindFailedStateDevice_verifyView() {
+    public void subStatusSupported_onBindViewHolder_bindHostDeviceWithOngoingSession_verifyView() {
+        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
+        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+        when(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).thenReturn(true);
+        when(mMediaDevice1.isHostForOngoingSession()).thenReturn(true);
+        when(mMediaDevice1.hasSubtext()).thenReturn(true);
+        when(mMediaDevice1.getSubtext()).thenReturn(SUBTEXT_CUSTOM);
+        when(mMediaDevice1.getSubtextString()).thenReturn(TEST_CUSTOM_SUBTEXT);
+        when(mMediaDevice1.hasOngoingSession()).thenReturn(true);
+        when(mMediaDevice1.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_GO_TO_APP);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getText().toString()).isEqualTo(TEST_CUSTOM_SUBTEXT);
+        assertThat(mViewHolder.mTwoLineTitleText.getText().toString()).isEqualTo(
+                TEST_DEVICE_NAME_1);
+        assertThat(mViewHolder.mContainerLayout.hasOnClickListeners()).isFalse();
+    }
+
+    @Test
+    public void subStatusSupported_onBindViewHolder_bindDeviceRequirePremium_verifyView() {
         String deviceStatus = (String) mContext.getText(
                 R.string.media_output_status_require_premium);
         when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
-        when(mMediaDevice2.hasDisabledReason()).thenReturn(true);
-        when(mMediaDevice2.getDisableReason()).thenReturn(DISABLE_REASON_SUBSCRIPTION_REQUIRED);
+        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+        when(mMediaDevice2.hasSubtext()).thenReturn(true);
+        when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_SUBSCRIPTION_REQUIRED);
+        when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);
+        when(mMediaDevice2.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_GO_TO_APP);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
 
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
@@ -421,9 +484,64 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSubTitleText.getText()).isEqualTo(deviceStatus);
         assertThat(mViewHolder.mTwoLineTitleText.getText()).isEqualTo(TEST_DEVICE_NAME_2);
+        assertThat(mViewHolder.mContainerLayout.hasOnClickListeners()).isTrue();
+    }
+
+    @Test
+    public void subStatusSupported_onBindViewHolder_bindDeviceWithAdPlaying_verifyView() {
+        String deviceStatus = (String) mContext.getText(
+                R.string.media_output_status_try_after_ad);
+        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
+        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+        when(mMediaDevice2.hasSubtext()).thenReturn(true);
+        when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_AD_ROUTING_DISALLOWED);
+        when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);
+        when(mMediaDevice2.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_NONE);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getText().toString()).isEqualTo(deviceStatus);
+        assertThat(mViewHolder.mTwoLineTitleText.getText().toString()).isEqualTo(
+                TEST_DEVICE_NAME_2);
+        assertThat(mViewHolder.mContainerLayout.hasOnClickListeners()).isFalse();
+    }
+
+    @Test
+    public void subStatusSupported_onBindViewHolder_bindDeviceWithOngoingSession_verifyView() {
+        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
+        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+        when(mMediaDevice1.hasSubtext()).thenReturn(true);
+        when(mMediaDevice1.getSubtext()).thenReturn(SUBTEXT_CUSTOM);
+        when(mMediaDevice1.getSubtextString()).thenReturn(TEST_CUSTOM_SUBTEXT);
+        when(mMediaDevice1.hasOngoingSession()).thenReturn(true);
+        when(mMediaDevice1.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_GO_TO_APP);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getText().toString()).isEqualTo(TEST_CUSTOM_SUBTEXT);
+        assertThat(mViewHolder.mTwoLineTitleText.getText().toString()).isEqualTo(
+                TEST_DEVICE_NAME_1);
+        assertThat(mViewHolder.mContainerLayout.hasOnClickListeners()).isTrue();
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.keyguard.logging
 
+import android.hardware.biometrics.BiometricSourceType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.BiometricLog
 import com.android.systemui.plugins.log.LogBuffer
@@ -155,6 +156,36 @@ class BiometricUnlockLogger @Inject constructor(@BiometricLog private val logBuf
                     " strongAuthFlags=$int2 nonStrongBiometricAllowed=$bool1" +
                     " deviceInteractive=$bool2 isKeyguardShowing=$bool3 bypass=$bool4"
             }
+        )
+    }
+
+    fun deferringAuthenticationDueToSleep(
+        userId: Int,
+        biometricSourceType: BiometricSourceType,
+        alreadyPendingAuth: Boolean
+    ) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                str1 = biometricSourceType.name
+                bool2 = alreadyPendingAuth
+            },
+            {
+                "onBiometricAuthenticated, deferring auth: userId: $int1, " +
+                    "biometricSourceType: $str1, " +
+                    "goingToSleep: true, " +
+                    "mPendingAuthentication != null: $bool2"
+            }
+        )
+    }
+
+    fun finishedGoingToSleepWithPendingAuth() {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            "onFinishedGoingToSleep with pendingAuthenticated != null"
         )
     }
 }

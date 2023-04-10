@@ -90,7 +90,7 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
     fun testEdgeElementsAlignedWithEdgeOrGuide_qs() {
         with(qsConstraint) {
             assertThat(getConstraint(R.id.clock).layout.startToStart).isEqualTo(PARENT_ID)
-            assertThat(getConstraint(R.id.clock).layout.horizontalBias).isEqualTo(0f)
+            assertThat(getConstraint(R.id.clock).layout.horizontalBias).isEqualTo(0.5f)
 
             assertThat(getConstraint(R.id.date).layout.startToStart).isEqualTo(PARENT_ID)
             assertThat(getConstraint(R.id.date).layout.horizontalBias).isEqualTo(0.5f)
@@ -342,7 +342,6 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
                 R.id.clock to "clock",
                 R.id.date to "date",
                 R.id.privacy_container to "privacy",
-                R.id.carrier_group to "carriers",
         )
         views.forEach { (id, name) ->
             assertWithMessage("$name has 0 height in qqs")
@@ -361,7 +360,6 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
         val views = mapOf(
                 R.id.clock to "clock",
                 R.id.privacy_container to "privacy",
-                R.id.carrier_group to "carriers",
         )
         views.forEach { (id, name) ->
             expect.withMessage("$name changes height")

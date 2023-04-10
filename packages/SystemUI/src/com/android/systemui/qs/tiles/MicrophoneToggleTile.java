@@ -45,6 +45,8 @@ import javax.inject.Inject;
 
 public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
 
+    public static final String TILE_SPEC = "mictoggle";
+
     @Inject
     protected MicrophoneToggleTile(QSHost host,
             @Background Looper backgroundLooper,

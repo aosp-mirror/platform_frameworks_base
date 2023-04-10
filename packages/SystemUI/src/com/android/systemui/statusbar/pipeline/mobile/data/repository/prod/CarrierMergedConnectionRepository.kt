@@ -16,19 +16,20 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.TelephonyManager
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
-import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -37,7 +38,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -54,10 +54,18 @@ import kotlinx.coroutines.flow.stateIn
 class CarrierMergedConnectionRepository(
     override val subId: Int,
     override val tableLogBuffer: TableLogBuffer,
-    defaultNetworkName: NetworkNameModel,
+    private val telephonyManager: TelephonyManager,
     @Application private val scope: CoroutineScope,
     val wifiRepository: WifiRepository,
 ) : MobileConnectionRepository {
+    init {
+        if (telephonyManager.subscriptionId != subId) {
+            throw IllegalStateException(
+                "CarrierMergedRepo: TelephonyManager should be created with subId($subId). " +
+                    "Found ${telephonyManager.subscriptionId} instead."
+            )
+        }
+    }
 
     /**
      * Outputs the carrier merged network to use, or null if we don't have a valid carrier merged
@@ -86,21 +94,19 @@ class CarrierMergedConnectionRepository(
             }
         }
 
-    override val connectionInfo: StateFlow<MobileConnectionModel> =
-        network
-            .map { it.toMobileConnectionModel() }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectionModel())
+    override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(ROAMING).asStateFlow()
 
-    // TODO(b/238425913): Add logging to this class.
-    // TODO(b/238425913): Make sure SignalStrength.getEmptyState is used when appropriate.
-
-    // Carrier merged is never roaming.
-    override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
-
-    // TODO(b/238425913): Fetch the carrier merged network name.
     override val networkName: StateFlow<NetworkNameModel> =
-        flowOf(defaultNetworkName)
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
+        network
+            // The SIM operator name should be the same throughout the lifetime of a subId, **but**
+            // it may not be available when this repo is created because it takes time to load. To
+            // be safe, we re-fetch it each time the network has changed.
+            .map { NetworkNameModel.SimDerived(telephonyManager.simOperatorName) }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                NetworkNameModel.SimDerived(telephonyManager.simOperatorName),
+            )
 
     override val numberOfLevels: StateFlow<Int> =
         wifiRepository.wifiNetwork
@@ -113,64 +119,75 @@ class CarrierMergedConnectionRepository(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DEFAULT_NUM_LEVELS)
 
+    override val primaryLevel =
+        network
+            .map { it?.level ?: SIGNAL_STRENGTH_NONE_OR_UNKNOWN }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
+
+    override val cdmaLevel =
+        network
+            .map { it?.level ?: SIGNAL_STRENGTH_NONE_OR_UNKNOWN }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
+
+    override val dataActivityDirection = wifiRepository.wifiActivity
+
+    override val resolvedNetworkType =
+        network
+            .map {
+                if (it != null) {
+                    ResolvedNetworkType.CarrierMergedNetworkType
+                } else {
+                    ResolvedNetworkType.UnknownNetworkType
+                }
+            }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                ResolvedNetworkType.UnknownNetworkType
+            )
+
+    override val dataConnectionState =
+        network
+            .map {
+                if (it != null) {
+                    DataConnectionState.Connected
+                } else {
+                    DataConnectionState.Disconnected
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), DataConnectionState.Disconnected)
+
+    override val isRoaming = MutableStateFlow(false).asStateFlow()
+    override val carrierId = MutableStateFlow(INVALID_SUBSCRIPTION_ID).asStateFlow()
+    override val isEmergencyOnly = MutableStateFlow(false).asStateFlow()
+    override val operatorAlphaShort = MutableStateFlow(null).asStateFlow()
+    override val isInService = MutableStateFlow(true).asStateFlow()
+    override val isGsm = MutableStateFlow(false).asStateFlow()
+    override val carrierNetworkChangeActive = MutableStateFlow(false).asStateFlow()
+
     override val dataEnabled: StateFlow<Boolean> = wifiRepository.isWifiEnabled
 
-    private fun WifiNetworkModel.CarrierMerged?.toMobileConnectionModel(): MobileConnectionModel {
-        if (this == null) {
-            return MobileConnectionModel()
-        }
-
-        return createCarrierMergedConnectionModel(level)
-    }
-
     companion object {
-        /**
-         * Creates an instance of [MobileConnectionModel] that represents a carrier merged network
-         * with the given [level].
-         */
-        fun createCarrierMergedConnectionModel(level: Int): MobileConnectionModel {
-            return MobileConnectionModel(
-                primaryLevel = level,
-                cdmaLevel = level,
-                // A [WifiNetworkModel.CarrierMerged] instance is always connected.
-                // (A [WifiNetworkModel.Inactive] represents a disconnected network.)
-                dataConnectionState = DataConnectionState.Connected,
-                // TODO(b/238425913): This should come from [WifiRepository.wifiActivity].
-                dataActivityDirection =
-                    DataActivityModel(
-                        hasActivityIn = false,
-                        hasActivityOut = false,
-                    ),
-                resolvedNetworkType = ResolvedNetworkType.CarrierMergedNetworkType,
-                // Carrier merged is never roaming
-                isRoaming = false,
-
-                // TODO(b/238425913): Verify that these fields never change for carrier merged.
-                isEmergencyOnly = false,
-                operatorAlphaShort = null,
-                isInService = true,
-                isGsm = false,
-                carrierNetworkChangeActive = false,
-            )
-        }
+        // Carrier merged is never roaming
+        private const val ROAMING = false
     }
 
     @SysUISingleton
     class Factory
     @Inject
     constructor(
+        private val telephonyManager: TelephonyManager,
         @Application private val scope: CoroutineScope,
         private val wifiRepository: WifiRepository,
     ) {
         fun build(
             subId: Int,
             mobileLogger: TableLogBuffer,
-            defaultNetworkName: NetworkNameModel,
         ): MobileConnectionRepository {
             return CarrierMergedConnectionRepository(
                 subId,
                 mobileLogger,
-                defaultNetworkName,
+                telephonyManager.createForSubscriptionId(subId),
                 scope,
                 wifiRepository,
             )

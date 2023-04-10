@@ -65,6 +65,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -121,13 +122,21 @@ public class InputMethodManagerServiceTestBase {
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
 
+    @BeforeClass
+    public static void setupClass() {
+        // Make sure DeviceConfig's lazy-initialized ContentProvider gets
+        // a real instance before we stub out all system services below.
+        // TODO(b/272229177): remove dependency on real ContentProvider
+        new InputMethodDeviceConfigs().destroy();
+    }
+
     @Before
     public void setUp() throws RemoteException {
         mMockingSession =
                 mockitoSession()
                         .initMocks(this)
                         .strictness(Strictness.LENIENT)
-                        .mockStatic(LocalServices.class)
+                        .spyStatic(LocalServices.class)
                         .mockStatic(ServiceManager.class)
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
@@ -212,6 +221,7 @@ public class InputMethodManagerServiceTestBase {
                 new InputMethodManagerService.Lifecycle(mContext, mInputMethodManagerService);
 
         // Public local InputMethodManagerService.
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
         try {
             // After this boot phase, services can broadcast Intents.
@@ -230,6 +240,10 @@ public class InputMethodManagerServiceTestBase {
 
     @After
     public void tearDown() {
+        if (mInputMethodManagerService != null) {
+            mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
+        }
+
         if (mServiceThread != null) {
             mServiceThread.quitSafely();
         }
@@ -237,6 +251,7 @@ public class InputMethodManagerServiceTestBase {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
     }
 
     protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput)

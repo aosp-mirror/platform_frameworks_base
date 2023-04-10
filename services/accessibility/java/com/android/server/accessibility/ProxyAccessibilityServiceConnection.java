@@ -38,13 +38,18 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityDisplayProxy;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.R;
+import com.android.internal.util.DumpUtils;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -60,8 +65,19 @@ import java.util.Set;
  * TODO(241429275): Initialize this when a proxy is registered.
  */
 public class ProxyAccessibilityServiceConnection extends AccessibilityServiceConnection {
+    private static final String LOG_TAG = "ProxyAccessibilityServiceConnection";
+
+    private int mDeviceId;
     private int mDisplayId;
     private List<AccessibilityServiceInfo> mInstalledAndEnabledServices;
+
+    /** The stroke width of the focus rectangle in pixels */
+    private int mFocusStrokeWidth;
+    /** The color of the focus rectangle */
+    private int mFocusColor;
+
+    private int mInteractiveTimeout;
+    private int mNonInteractiveTimeout;
 
     ProxyAccessibilityServiceConnection(
             Context context,
@@ -71,12 +87,24 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
             AccessibilitySecurityPolicy securityPolicy,
             SystemSupport systemSupport, AccessibilityTrace trace,
             WindowManagerInternal windowManagerInternal,
-            AccessibilityWindowManager awm, int displayId) {
+            AccessibilityWindowManager awm, int displayId, int deviceId) {
         super(/* userState= */null, context, componentName, accessibilityServiceInfo, id,
                 mainHandler, lock, securityPolicy, systemSupport, trace, windowManagerInternal,
                 /* systemActionPerformer= */ null, awm, /* activityTaskManagerService= */ null);
         mDisplayId = displayId;
         setDisplayTypes(DISPLAY_TYPE_PROXY);
+        mFocusStrokeWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.accessibility_focus_highlight_stroke_width);
+        mFocusColor = mContext.getResources().getColor(
+                R.color.accessibility_focus_highlight_color);
+        mDeviceId = deviceId;
+    }
+
+    int getDisplayId() {
+        return mDisplayId;
+    }
+    int getDeviceId() {
+        return mDeviceId;
     }
 
     /**
@@ -139,6 +167,8 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
                 proxyInfo.setAccessibilityTool(isAccessibilityTool);
                 proxyInfo.setInteractiveUiTimeoutMillis(interactiveUiTimeout);
                 proxyInfo.setNonInteractiveUiTimeoutMillis(nonInteractiveUiTimeout);
+                mInteractiveTimeout = interactiveUiTimeout;
+                mNonInteractiveTimeout = nonInteractiveUiTimeout;
 
                 // If any one service info doesn't set package names, i.e. if it's interested in all
                 // apps, the proxy shouldn't filter by package name even if some infos specify this.
@@ -151,7 +181,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
                 // Update connection with mAccessibilityServiceInfo values.
                 setDynamicallyConfigurableProperties(proxyInfo);
                 // Notify manager service.
-                mSystemSupport.onClientChangeLocked(true);
+                mSystemSupport.onProxyChanged(mDeviceId);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -200,6 +230,61 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         // proxy connections.
         displayWindows.put(mDisplayId, allWindows.get(mDisplayId, Collections.emptyList()));
         return displayWindows;
+    }
+
+    @Override
+    public void setFocusAppearance(int strokeWidth, int color) {
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return;
+            }
+
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+                return;
+            }
+
+            if (getFocusStrokeWidthLocked() == strokeWidth && getFocusColorLocked() == color) {
+                return;
+            }
+
+            mFocusStrokeWidth = strokeWidth;
+            mFocusColor = color;
+            mSystemSupport.onProxyChanged(mDeviceId);
+        }
+    }
+
+    /**
+     * Gets the stroke width of the focus rectangle.
+     * @return The stroke width.
+     */
+    public int getFocusStrokeWidthLocked() {
+        return mFocusStrokeWidth;
+    }
+
+    /**
+     * Gets the color of the focus rectangle.
+     * @return The color.
+     */
+    public int getFocusColorLocked() {
+        return mFocusColor;
+    }
+
+    @Override
+    int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
+        if (windowId == AccessibilityWindowInfo.ANY_WINDOW_ID) {
+            final int focusedWindowId = mA11yWindowManager.getFocusedWindowId(focusType,
+                    mDisplayId);
+            // If the caller is a proxy and the found window doesn't belong to a proxy display
+            // (or vice versa), then return null. This doesn't work if there are multiple active
+            // proxys, but in the future this code shouldn't be needed if input focus
+            // properly split. (so we will deal with the issues if we see them).
+            //TODO(254545943): Remove this when there is user and proxy separation of input
+            if (!mA11yWindowManager.windowIdBelongsToDisplayType(focusedWindowId, mDisplayTypes)) {
+                return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+            }
+            return focusedWindowId;
+        }
+        return windowId;
     }
 
     @Override
@@ -494,5 +579,60 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     @Override
     public void setAnimationScale(float scale) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("setAnimationScale is not supported");
+    }
+
+    public int getInteractiveTimeout() {
+        return mInteractiveTimeout;
+    }
+
+    public int getNonInteractiveTimeout() {
+        return mNonInteractiveTimeout;
+    }
+
+    /**
+     * Returns true if a timeout was updated.
+     */
+    public boolean updateTimeouts(int nonInteractiveUiTimeout, int interactiveUiTimeout) {
+        final int newInteractiveUiTimeout = interactiveUiTimeout != 0
+                ? interactiveUiTimeout
+                : mAccessibilityServiceInfo.getInteractiveUiTimeoutMillis();
+        final int newNonInteractiveUiTimeout = nonInteractiveUiTimeout != 0
+                ? nonInteractiveUiTimeout
+                : mAccessibilityServiceInfo.getNonInteractiveUiTimeoutMillis();
+        boolean updated = false;
+
+        if (mInteractiveTimeout != newInteractiveUiTimeout) {
+            mInteractiveTimeout =  newInteractiveUiTimeout;
+            updated = true;
+        }
+        if (mNonInteractiveTimeout != newNonInteractiveUiTimeout) {
+            mNonInteractiveTimeout = newNonInteractiveUiTimeout;
+            updated = true;
+        }
+        return updated;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
+        synchronized (mLock) {
+            pw.append("Proxy[displayId=" + mDisplayId);
+            pw.append(", deviceId=" + mDeviceId);
+            pw.append(", feedbackType"
+                    + AccessibilityServiceInfo.feedbackTypeToString(mFeedbackType));
+            pw.append(", capabilities=" + mAccessibilityServiceInfo.getCapabilities());
+            pw.append(", eventTypes="
+                    + AccessibilityEvent.eventTypeToString(mEventTypes));
+            pw.append(", notificationTimeout=" + mNotificationTimeout);
+            pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveTimeout));
+            pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveTimeout));
+            pw.append(", focusStrokeWidth=").append(String.valueOf(mFocusStrokeWidth));
+            pw.append(", focusColor=").append(String.valueOf(mFocusColor));
+            pw.append(", installedAndEnabledServiceCount=").append(String.valueOf(
+                    mInstalledAndEnabledServices.size()));
+            pw.append(", installedAndEnabledServices=").append(
+                    mInstalledAndEnabledServices.toString());
+            pw.append("]");
+        }
     }
 }

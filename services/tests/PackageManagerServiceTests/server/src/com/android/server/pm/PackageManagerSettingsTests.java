@@ -56,7 +56,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.Log;
 import android.util.LongSparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -108,7 +107,6 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageManagerSettingsTests {
-    private static final String TAG = "PackageManagerSettingsTests";
     private static final String PACKAGE_NAME_1 = "com.android.app1";
     private static final String PACKAGE_NAME_2 = "com.android.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
@@ -140,6 +138,25 @@ public class PackageManagerSettingsTests {
     public void setup() {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
+    }
+
+    @Before
+    public void createUserManagerServiceRef() throws ReflectiveOperationException {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync((Runnable) () -> {
+            try {
+                // unregister the user manager from the local service
+                LocalServices.removeServiceForTest(UserManagerInternal.class);
+                new UserManagerService(InstrumentationRegistry.getContext());
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail("Could not create user manager service; " + e);
+            }
+        });
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        deleteFolder(InstrumentationRegistry.getContext().getFilesDir());
     }
 
     /** make sure our initialized KeySetManagerService metadata matches packages.xml */
@@ -541,6 +558,22 @@ public class PackageManagerSettingsTests {
 
         populateDistractionFlags(settingsUnderTest);
         settingsUnderTest.writePackageRestrictionsLPr(0, /*sync=*/true);
+
+        // now read and verify
+        populateDefaultSettings(settingsUnderTest);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsUnderTest);
+    }
+
+    @Test
+    public void testWriteCorruptReadPackageRestrictions() {
+        final Settings settingsUnderTest = makeSettings();
+
+        populateDistractionFlags(settingsUnderTest);
+        settingsUnderTest.writePackageRestrictionsLPr(0, /*sync=*/true);
+
+        // Corrupt primary file.
+        writeCorruptedPackageRestrictions(0);
 
         // now read and verify
         populateDefaultSettings(settingsUnderTest);
@@ -1112,6 +1145,7 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1156,6 +1190,7 @@ public class PackageManagerSettingsTests {
                 true /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1200,6 +1235,7 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1245,6 +1281,7 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1265,6 +1302,48 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, false /*notLaunched*/, false /*stopped*/, true /*installed*/);
+    }
+
+    /** Create a new stopped system PackageSetting */
+    @Test
+    public void testCreateNewSetting05() {
+        final PackageSetting testPkgSetting01 = Settings.createNewSetting(
+                PACKAGE_NAME,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*realPkgName*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                UserHandle.SYSTEM /*installUser*/,
+                false /*allowInstall*/,
+                false /*instantApp*/,
+                false /*virtualPreload*/,
+                true /* stopped */,
+                UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/,
+                null /*mimeGroups*/,
+                UUID.randomUUID());
+        assertThat(testPkgSetting01.getAppId(), is(0));
+        assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
+        assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
+        assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
+        assertThat(testPkgSetting01.getPrivateFlags(), is(0));
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
+        assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
+        final PackageUserState userState = testPkgSetting01.readUserState(0);
+        verifyUserState(userState, false /*notLaunched*/, true /*stopped*/, true /*installed*/);
     }
 
     @Test
@@ -1612,13 +1691,13 @@ public class PackageManagerSettingsTests {
                 UUID.randomUUID());
     }
 
-    private @NonNull List<UserInfo> createFakeUsers() {
+    static @NonNull List<UserInfo> createFakeUsers() {
         ArrayList<UserInfo> users = new ArrayList<>();
         users.add(new UserInfo(UserHandle.USER_SYSTEM, "test user", UserInfo.FLAG_INITIALIZED));
         return users;
     }
 
-    private void writeFile(File file, byte[] data) {
+    private static void writeFile(File file, byte[] data) {
         file.mkdirs();
         try {
             AtomicFile aFile = new AtomicFile(file);
@@ -1626,7 +1705,7 @@ public class PackageManagerSettingsTests {
             fos.write(data);
             aFile.finishWrite(fos);
         } catch (IOException ioe) {
-            Log.e(TAG, "Cannot write file " + file.getPath());
+            throw new RuntimeException("Cannot write file " + file.getPath(), ioe);
         }
     }
 
@@ -1640,7 +1719,7 @@ public class PackageManagerSettingsTests {
                 ).getBytes());
     }
 
-    private void writePackagesXml(String fileName) {
+    static void writePackagesXml(String fileName) {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), fileName),
                 ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<packages>"
@@ -1748,7 +1827,15 @@ public class PackageManagerSettingsTests {
                         .getBytes());
     }
 
-    private void writeStoppedPackagesXml() {
+    private void writeCorruptedPackageRestrictions(final int userId) {
+        writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/users/"
+                        + userId + "/package-restrictions.xml"),
+                ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                        + "<package-restrictions>\n"
+                        + "    <pkg name=\"" + PACKAGE_NAME_1 + "\" ").getBytes());
+    }
+
+    private static void writeStoppedPackagesXml() {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages-stopped.xml"),
                 ( "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<stopped-packages>"
@@ -1758,7 +1845,7 @@ public class PackageManagerSettingsTests {
                 .getBytes());
     }
 
-    private void writePackagesList() {
+    private static void writePackagesList() {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages.list"),
                 ( "com.android.app1 11000 0 /data/data/com.android.app1 seinfo1"
                 + "com.android.app2 11001 0 /data/data/com.android.app2 seinfo2"
@@ -1766,7 +1853,7 @@ public class PackageManagerSettingsTests {
                 .getBytes());
     }
 
-    private void deleteSystemFolder() {
+    private static void deleteSystemFolder() {
         File systemFolder = new File(InstrumentationRegistry.getContext().getFilesDir(), "system");
         deleteFolder(systemFolder);
     }
@@ -1781,7 +1868,7 @@ public class PackageManagerSettingsTests {
         folder.delete();
     }
 
-    private void writeOldFiles() {
+    static void writeOldFiles() {
         deleteSystemFolder();
         writePackagesXml("system/packages.xml");
         writeStoppedPackagesXml();
@@ -1795,25 +1882,6 @@ public class PackageManagerSettingsTests {
         writePackagesList();
     }
 
-    @Before
-    public void createUserManagerServiceRef() throws ReflectiveOperationException {
-        InstrumentationRegistry.getInstrumentation().runOnMainSync((Runnable) () -> {
-            try {
-                // unregister the user manager from the local service
-                LocalServices.removeServiceForTest(UserManagerInternal.class);
-                new UserManagerService(InstrumentationRegistry.getContext());
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail("Could not create user manager service; " + e);
-            }
-        });
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        deleteFolder(InstrumentationRegistry.getTargetContext().getFilesDir());
-    }
-
     private Settings makeSettings() {
         return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider,
@@ -1821,7 +1889,7 @@ public class PackageManagerSettingsTests {
                 new PackageManagerTracedLock());
     }
 
-    private void verifyKeySetMetaData(Settings settings)
+    static void verifyKeySetMetaData(Settings settings)
             throws ReflectiveOperationException, IllegalAccessException {
         WatchedArrayMap<String, PackageSetting> packages = settings.mPackages;
         KeySetManagerService ksms = settings.getKeySetManagerService();

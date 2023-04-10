@@ -225,7 +225,7 @@ public class BroadcastConstants {
     public int MAX_HISTORY_COMPLETE_SIZE = DEFAULT_MAX_HISTORY_COMPLETE_SIZE;
     private static final String KEY_MAX_HISTORY_COMPLETE_SIZE = "bcast_max_history_complete_size";
     private static final int DEFAULT_MAX_HISTORY_COMPLETE_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
+            ActivityManager.isLowRamDeviceStatic() ? 64 : 256;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of summarized
@@ -234,16 +234,15 @@ public class BroadcastConstants {
     public int MAX_HISTORY_SUMMARY_SIZE = DEFAULT_MAX_HISTORY_SUMMARY_SIZE;
     private static final String KEY_MAX_HISTORY_SUMMARY_SIZE = "bcast_max_history_summary_size";
     private static final int DEFAULT_MAX_HISTORY_SUMMARY_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
+            ActivityManager.isLowRamDeviceStatic() ? 256 : 1024;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of broadcast receivers to process in a
-     * single synchronized block.  Up to this many messages may be dispatched in a single binder
-     * call.  Set this to 1 (or zero) for pre-batch behavior.
+     * For {@link BroadcastRecord}: Default to treating all broadcasts sent by
+     * the system as be {@link BroadcastOptions#DEFERRAL_POLICY_UNTIL_ACTIVE}.
      */
-    public int MAX_BROADCAST_BATCH_SIZE = DEFAULT_MAX_BROADCAST_BATCH_SIZE;
-    private static final String KEY_MAX_BROADCAST_BATCH_SIZE = "bcast_max_batch_size";
-    private static final int DEFAULT_MAX_BROADCAST_BATCH_SIZE = 1;
+    public boolean CORE_DEFER_UNTIL_ACTIVE = DEFAULT_CORE_DEFER_UNTIL_ACTIVE;
+    private static final String KEY_CORE_DEFER_UNTIL_ACTIVE = "bcast_core_defer_until_active";
+    private static final boolean DEFAULT_CORE_DEFER_UNTIL_ACTIVE = true;
 
     // Settings override tracking for this instance
     private String mSettingsKey;
@@ -382,9 +381,12 @@ public class BroadcastConstants {
                     DEFAULT_MAX_HISTORY_COMPLETE_SIZE);
             MAX_HISTORY_SUMMARY_SIZE = getDeviceConfigInt(KEY_MAX_HISTORY_SUMMARY_SIZE,
                     DEFAULT_MAX_HISTORY_SUMMARY_SIZE);
-            MAX_BROADCAST_BATCH_SIZE = getDeviceConfigInt(KEY_MAX_BROADCAST_BATCH_SIZE,
-                    DEFAULT_MAX_BROADCAST_BATCH_SIZE);
+            CORE_DEFER_UNTIL_ACTIVE = getDeviceConfigBoolean(KEY_CORE_DEFER_UNTIL_ACTIVE,
+                    DEFAULT_CORE_DEFER_UNTIL_ACTIVE);
         }
+
+        // TODO: migrate BroadcastRecord to accept a BroadcastConstants
+        BroadcastRecord.CORE_DEFER_UNTIL_ACTIVE = CORE_DEFER_UNTIL_ACTIVE;
     }
 
     /**
@@ -429,7 +431,8 @@ public class BroadcastConstants {
                     MAX_CONSECUTIVE_URGENT_DISPATCHES).println();
             pw.print(KEY_MAX_CONSECUTIVE_NORMAL_DISPATCHES,
                     MAX_CONSECUTIVE_NORMAL_DISPATCHES).println();
-            pw.print(KEY_MAX_BROADCAST_BATCH_SIZE, MAX_BROADCAST_BATCH_SIZE).println();
+            pw.print(KEY_CORE_DEFER_UNTIL_ACTIVE,
+                    CORE_DEFER_UNTIL_ACTIVE).println();
             pw.decreaseIndent();
             pw.println();
         }

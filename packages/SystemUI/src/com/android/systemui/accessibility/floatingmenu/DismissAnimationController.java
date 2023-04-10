@@ -33,6 +33,7 @@ import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
  * {@link MagnetizedObject.MagneticTarget}.
  */
 class DismissAnimationController {
+    private static final boolean ENABLE_FLING_TO_DISMISS_MENU = false;
     private static final float COMPLETELY_OPAQUE = 1.0f;
     private static final float COMPLETELY_TRANSPARENT = 0.0f;
     private static final float CIRCLE_VIEW_DEFAULT_SCALE = 1.0f;
@@ -101,6 +102,7 @@ class DismissAnimationController {
         final MagnetizedObject.MagneticTarget magneticTarget = new MagnetizedObject.MagneticTarget(
                 dismissView.getCircle(), (int) mMinDismissSize);
         mMagnetizedObject.addTarget(magneticTarget);
+        mMagnetizedObject.setFlingToTargetEnabled(ENABLE_FLING_TO_DISMISS_MENU);
     }
 
     void showDismissView(boolean show) {

@@ -115,6 +115,20 @@ public interface TimeDetector {
     String SHELL_COMMAND_CONFIRM_TIME = "confirm_time";
 
     /**
+     * A shell command that clears the network time signal used by {@link
+     * SystemClock#currentNetworkTimeClock()}.
+     * @hide
+     */
+    String SHELL_COMMAND_CLEAR_SYSTEM_CLOCK_NETWORK_TIME = "clear_system_clock_network_time";
+
+    /**
+     * A shell command that sets the network time signal used by {@link
+     * SystemClock#currentNetworkTimeClock()}.
+     * @hide
+     */
+    String SHELL_COMMAND_SET_SYSTEM_CLOCK_NETWORK_TIME = "set_system_clock_network_time";
+
+    /**
      * A shared utility method to create a {@link ManualTimeSuggestion}.
      *
      * @hide

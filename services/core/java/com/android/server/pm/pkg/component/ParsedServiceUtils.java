@@ -115,7 +115,7 @@ public class ParsedServiceUtils {
             sa.recycle();
         }
 
-        if (pkg.isCantSaveState()) {
+        if (pkg.isSaveStateDisallowed()) {
             // A heavy-weight application can not have services in its main process
             // We can do direct compare because we intern all strings.
             if (Objects.equals(service.getProcessName(), packageName)) {

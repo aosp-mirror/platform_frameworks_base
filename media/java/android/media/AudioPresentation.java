@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.icu.util.ULocale;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -49,7 +52,7 @@ import java.util.Objects;
  * Applications that parse media streams and extract presentation information on their own
  * can create instances of AudioPresentation by using {@link AudioPresentation.Builder} class.
  */
-public final class AudioPresentation {
+public final class AudioPresentation implements Parcelable {
     private final int mPresentationId;
     private final int mProgramId;
     private final ULocale mLanguage;
@@ -126,7 +129,7 @@ public final class AudioPresentation {
     private final boolean mAudioDescriptionAvailable;
     private final boolean mSpokenSubtitlesAvailable;
     private final boolean mDialogueEnhancementAvailable;
-    private final Map<ULocale, CharSequence> mLabels;
+    private final HashMap<ULocale, String> mLabels;
 
     /**
      * No preferred reproduction channel layout.
@@ -160,9 +163,14 @@ public final class AudioPresentation {
     public static final int MASTERED_FOR_HEADPHONE          = 4;
 
     /**
-     * This ID is reserved. No items can be explicitly assigned this ID.
+     * Unknown audio presentation ID, this indicates audio presentation ID is not selected.
      */
-    private static final int UNKNOWN_ID = -1;
+    public static final int PRESENTATION_ID_UNKNOWN = -1;
+
+    /**
+     * Unknown audio program ID, this indicates audio program ID is not selected.
+     */
+    public static final int PROGRAM_ID_UNKNOWN = -1;
 
     /**
      * This allows an application developer to construct an AudioPresentation object with all the
@@ -191,7 +199,7 @@ public final class AudioPresentation {
                              boolean audioDescriptionAvailable,
                              boolean spokenSubtitlesAvailable,
                              boolean dialogueEnhancementAvailable,
-                             @NonNull Map<ULocale, CharSequence> labels) {
+                             @NonNull Map<ULocale, String> labels) {
         mPresentationId = presentationId;
         mProgramId = programId;
         mLanguage = language;
@@ -199,7 +207,18 @@ public final class AudioPresentation {
         mAudioDescriptionAvailable = audioDescriptionAvailable;
         mSpokenSubtitlesAvailable = spokenSubtitlesAvailable;
         mDialogueEnhancementAvailable = dialogueEnhancementAvailable;
-        mLabels = new HashMap<ULocale, CharSequence>(labels);
+        mLabels = new HashMap<ULocale, String>(labels);
+    }
+
+    private AudioPresentation(@NonNull Parcel in) {
+        mPresentationId = in.readInt();
+        mProgramId = in.readInt();
+        mLanguage = in.readSerializable(ULocale.class.getClassLoader(), ULocale.class);
+        mMasteringIndication = in.readInt();
+        mAudioDescriptionAvailable = in.readBoolean();
+        mSpokenSubtitlesAvailable = in.readBoolean();
+        mDialogueEnhancementAvailable = in.readBoolean();
+        mLabels = in.readSerializable(HashMap.class.getClassLoader(), HashMap.class);
     }
 
     /**
@@ -225,13 +244,13 @@ public final class AudioPresentation {
      */
     public Map<Locale, String> getLabels() {
         Map<Locale, String> localeLabels = new HashMap<Locale, String>(mLabels.size());
-        for (Map.Entry<ULocale, CharSequence> entry : mLabels.entrySet()) {
-            localeLabels.put(entry.getKey().toLocale(), entry.getValue().toString());
+        for (Map.Entry<ULocale, String> entry : mLabels.entrySet()) {
+            localeLabels.put(entry.getKey().toLocale(), entry.getValue());
         }
         return localeLabels;
     }
 
-    private Map<ULocale, CharSequence> getULabels() {
+    private Map<ULocale, String> getULabels() {
         return mLabels;
     }
 
@@ -335,13 +354,13 @@ public final class AudioPresentation {
      */
     public static final class Builder {
         private final int mPresentationId;
-        private int mProgramId = UNKNOWN_ID;
+        private int mProgramId = PROGRAM_ID_UNKNOWN;
         private ULocale mLanguage = new ULocale("");
         private int mMasteringIndication = MASTERING_NOT_INDICATED;
         private boolean mAudioDescriptionAvailable = false;
         private boolean mSpokenSubtitlesAvailable = false;
         private boolean mDialogueEnhancementAvailable = false;
-        private Map<ULocale, CharSequence> mLabels = new HashMap<ULocale, CharSequence>();
+        private HashMap<ULocale, String> mLabels = new HashMap<ULocale, String>();
 
         /**
          * Create a {@link Builder}. Any field that should be included in the
@@ -402,7 +421,10 @@ public final class AudioPresentation {
          * @param labels Text label indexed by its locale corresponding to the language code.
          */
         public @NonNull Builder setLabels(@NonNull Map<ULocale, CharSequence> labels) {
-            mLabels = new HashMap<ULocale, CharSequence>(labels);
+            mLabels.clear();
+            for (Map.Entry<ULocale, CharSequence> entry : labels.entrySet()) {
+                mLabels.put(entry.getKey(), entry.getValue().toString());
+            }
             return this;
         }
 
@@ -448,4 +470,35 @@ public final class AudioPresentation {
                                            mDialogueEnhancementAvailable, mLabels);
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(getPresentationId());
+        dest.writeInt(getProgramId());
+        dest.writeSerializable(getULocale());
+        dest.writeInt(getMasteringIndication());
+        dest.writeBoolean(hasAudioDescription());
+        dest.writeBoolean(hasSpokenSubtitles());
+        dest.writeBoolean(hasDialogueEnhancement());
+        dest.writeSerializable(mLabels);
+    }
+
+    @NonNull
+    public static final Parcelable.Creator<AudioPresentation> CREATOR =
+            new Parcelable.Creator<AudioPresentation>() {
+            @Override
+            public AudioPresentation createFromParcel(@NonNull Parcel in) {
+                return new AudioPresentation(in);
+            }
+
+            @Override
+            public AudioPresentation[] newArray(int size) {
+                return new AudioPresentation[size];
+            }
+    };
 }

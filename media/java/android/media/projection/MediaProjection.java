@@ -16,47 +16,68 @@
 
 package android.media.projection;
 
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
+import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.ContentRecordingSession;
+import android.util.Slog;
 import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A token granting applications the ability to capture screen contents and/or
  * record system audio. The exact capabilities granted depend on the type of
  * MediaProjection.
  *
- * <p>
- * A screen capture session can be started through {@link
+ * <p>A screen capture session can be started through {@link
  * MediaProjectionManager#createScreenCaptureIntent}. This grants the ability to
  * capture screen contents, but not system audio.
- * </p>
  */
 public final class MediaProjection {
     private static final String TAG = "MediaProjection";
 
+    /**
+     * Requires an app registers a {@link Callback} before invoking
+     * {@link #createVirtualDisplay(String, int, int, int, int, Surface, VirtualDisplay.Callback,
+     * Handler) createVirtualDisplay}.
+     *
+     * <p>Enabled after version 33 (Android T), so applies to target SDK of 34+ (Android U+).
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long MEDIA_PROJECTION_REQUIRES_CALLBACK = 269849258L; // buganizer id
+
     private final IMediaProjection mImpl;
     private final Context mContext;
-    private final Map<Callback, CallbackRecord> mCallbacks;
-    @Nullable private IMediaProjectionManager mProjectionService = null;
+    private final DisplayManager mDisplayManager;
+    @NonNull
+    private final Map<Callback, CallbackRecord> mCallbacks = new ArrayMap<>();
 
     /** @hide */
     public MediaProjection(Context context, IMediaProjection impl) {
-        mCallbacks = new ArrayMap<Callback, CallbackRecord>();
+        this(context, impl, context.getSystemService(DisplayManager.class));
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public MediaProjection(Context context, IMediaProjection impl, DisplayManager displayManager) {
         mContext = context;
         mImpl = impl;
         try {
@@ -64,46 +85,43 @@ public final class MediaProjection {
         } catch (RemoteException e) {
             throw new RuntimeException("Failed to start media projection", e);
         }
+        mDisplayManager = displayManager;
     }
 
     /**
      * Register a listener to receive notifications about when the {@link MediaProjection} or
      * captured content changes state.
-     * <p>
-     * The callback should be registered before invoking
+     *
+     * <p>The callback must be registered before invoking
      * {@link #createVirtualDisplay(String, int, int, int, int, Surface, VirtualDisplay.Callback,
-     * Handler)}
-     * to ensure that any notifications on the callback are not missed.
-     * </p>
+     * Handler)} to ensure that any notifications on the callback are not missed. The client must
+     * implement {@link Callback#onStop()} and clean up any resources it is holding, e.g. the
+     * {@link VirtualDisplay} and {@link Surface}.
      *
      * @param callback The callback to call.
      * @param handler  The handler on which the callback should be invoked, or
      *                 null if the callback should be invoked on the calling thread's looper.
-     * @throws IllegalArgumentException If the given callback is null.
+     * @throws NullPointerException If the given callback is null.
      * @see #unregisterCallback
      */
-    public void registerCallback(Callback callback, Handler handler) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback should not be null");
-        }
+    public void registerCallback(@NonNull Callback callback, @Nullable Handler handler) {
+        final Callback c = Objects.requireNonNull(callback);
         if (handler == null) {
             handler = new Handler();
         }
-        mCallbacks.put(callback, new CallbackRecord(callback, handler));
+        mCallbacks.put(c, new CallbackRecord(c, handler));
     }
 
     /**
      * Unregister a {@link MediaProjection} listener.
      *
      * @param callback The callback to unregister.
-     * @throws IllegalArgumentException If the given callback is null.
+     * @throws NullPointerException If the given callback is null.
      * @see #registerCallback
      */
-    public void unregisterCallback(Callback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback should not be null");
-        }
-        mCallbacks.remove(callback);
+    public void unregisterCallback(@NonNull Callback callback) {
+        final Callback c = Objects.requireNonNull(callback);
+        mCallbacks.remove(c);
     }
 
     /**
@@ -122,43 +140,68 @@ public final class MediaProjection {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        VirtualDisplay virtualDisplay = createVirtualDisplay(builder, callback, handler);
-        return virtualDisplay;
+        return createVirtualDisplay(builder, callback, handler);
     }
 
     /**
      * Creates a {@link android.hardware.display.VirtualDisplay} to capture the
      * contents of the screen.
      *
-     * @param name The name of the virtual display, must be non-empty.
-     * @param width The width of the virtual display in pixels. Must be
-     * greater than 0.
-     * @param height The height of the virtual display in pixels. Must be
-     * greater than 0.
-     * @param dpi The density of the virtual display in dpi. Must be greater
-     * than 0.
-     * @param surface The surface to which the content of the virtual display
-     * should be rendered, or null if there is none initially.
-     * @param flags A combination of virtual display flags. See {@link DisplayManager} for the full
-     * list of flags.
-     * @param callback Callback to call when the virtual display's state
-     * changes, or null if none.
-     * @param handler The {@link android.os.Handler} on which the callback should be
-     * invoked, or null if the callback should be invoked on the calling
-     * thread's main {@link android.os.Looper}.
+     * <p>To correctly clean up resources associated with a capture, the application must register a
+     * {@link Callback} before invocation. The app must override {@link Callback#onStop()} to clean
+     * up (by invoking{@link VirtualDisplay#release()}, {@link Surface#release()} and related
+     * resources).
      *
-     * @see android.hardware.display.VirtualDisplay
+     * @param name     The name of the virtual display, must be non-empty.
+     * @param width    The width of the virtual display in pixels. Must be greater than 0.
+     * @param height   The height of the virtual display in pixels. Must be greater than 0.
+     * @param dpi      The density of the virtual display in dpi. Must be greater than 0.
+     * @param surface  The surface to which the content of the virtual display should be rendered,
+     *                 or null if there is none initially.
+     * @param flags    A combination of virtual display flags. See {@link DisplayManager} for the
+     *                 full list of flags.
+     * @param callback Callback invoked when the virtual display's state changes, or null.
+     * @param handler  The {@link android.os.Handler} on which the callback should be invoked, or
+     *                 null if the callback should be invoked on the calling thread's main
+     *                 {@link android.os.Looper}.
+     * @throws IllegalStateException In the following scenarios, if the target SDK is {@link
+     *                               android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up:
+     *                               <ol>
+     *                                 <li>If no {@link Callback} is registered.</li>
+     *                                 <li>If {@link MediaProjectionManager#getMediaProjection}
+     *                                 was invoked more than once to get this
+     *                                 {@code MediaProjection} instance.
+     *                                 <li>If this instance has already taken a recording through
+     *                                 {@code #createVirtualDisplay}.
+     *                               </ol>
+     *                               However, if the target SDK is less than
+     *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}, no
+     *                               exception is thrown. In case 1, recording begins even without
+     *                               the callback. In case 2 & 3, recording doesn't begin
+     *                               until the user re-grants consent in the dialog.
+     * @throws SecurityException If attempting to create a new virtual display associated with this
+     *                           MediaProjection instance after it has been stopped by invoking
+     *                           {@link #stop()}.
+     *
+     * @see VirtualDisplay
+     * @see VirtualDisplay.Callback
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, int flags, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+        if (shouldMediaProjectionRequireCallback()) {
+            if (mCallbacks.isEmpty()) {
+                throw new IllegalStateException(
+                        "Must register a callback before starting capture, to manage resources in"
+                                + " response to MediaProjection states.");
+            }
+        }
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, dpi).setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
         }
-        VirtualDisplay virtualDisplay = createVirtualDisplay(builder, callback, handler);
-        return virtualDisplay;
+        return createVirtualDisplay(builder, callback, handler);
     }
 
     /**
@@ -179,45 +222,37 @@ public final class MediaProjection {
     public VirtualDisplay createVirtualDisplay(
             @NonNull VirtualDisplayConfig.Builder virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        try {
-            final IBinder launchCookie = mImpl.getLaunchCookie();
-            Context windowContext = null;
-            ContentRecordingSession session;
-            if (launchCookie == null) {
-                windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
-                        TYPE_APPLICATION, null /* options */);
-                session = ContentRecordingSession.createDisplaySession(
-                        windowContext.getWindowContextToken());
-            } else {
-                session = ContentRecordingSession.createTaskSession(launchCookie);
-            }
-            virtualDisplayConfig.setWindowManagerMirroring(true);
-            final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
-            final VirtualDisplay virtualDisplay = dm.createVirtualDisplay(this,
-                    virtualDisplayConfig.build(), callback, handler, windowContext);
-            if (virtualDisplay == null) {
-                // Since WM handling a new display and DM creating a new VirtualDisplay is async,
-                // WM may have tried to start task recording and encountered an error that required
-                // stopping recording entirely. The VirtualDisplay would then be null when the
-                // MediaProjection is no longer active.
-                return null;
-            }
-            session.setDisplayId(virtualDisplay.getDisplay().getDisplayId());
-            // Successfully set up, so save the current session details.
-            getProjectionService().setContentRecordingSession(session, mImpl);
-            return virtualDisplay;
-        } catch (RemoteException e) {
-            // Can not capture if WMS is not accessible, so bail out.
-            throw e.rethrowFromSystemServer();
+        // Pass in the current session details, so they are guaranteed to only be set in
+        // WindowManagerService AFTER a VirtualDisplay is constructed (assuming there are no
+        // errors during set-up).
+        // Do not introduce a separate aidl call here to prevent a race
+        // condition between setting up the VirtualDisplay and checking token validity.
+        virtualDisplayConfig.setWindowManagerMirroringEnabled(true);
+        // Do not declare a display id to mirror; default to the default display.
+        // DisplayManagerService will ask MediaProjectionManagerService to check if the app
+        // is re-using consent. Always return the projection instance to keep this call
+        // non-blocking; no content is sent to the app until the user re-grants consent.
+        final VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(this,
+                virtualDisplayConfig.build(), callback, handler);
+        if (virtualDisplay == null) {
+            // Since WindowManager handling a new display and DisplayManager creating a new
+            // VirtualDisplay is async, WindowManager may have tried to start task recording
+            // and encountered an error that required stopping recording entirely. The
+            // VirtualDisplay would then be null and the MediaProjection is no longer active.
+            Slog.w(TAG, "Failed to create virtual display.");
+            return null;
         }
+        return virtualDisplay;
     }
 
-    private IMediaProjectionManager getProjectionService() {
-        if (mProjectionService == null) {
-            mProjectionService = IMediaProjectionManager.Stub.asInterface(
-                    ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE));
-        }
-        return mProjectionService;
+    /**
+     * Returns {@code true} when MediaProjection requires the app registers a callback before
+     * beginning to capture via
+     * {@link #createVirtualDisplay(String, int, int, int, int, Surface, VirtualDisplay.Callback,
+     * Handler)}.
+     */
+    private boolean shouldMediaProjectionRequireCallback() {
+        return CompatChanges.isChangeEnabled(MEDIA_PROJECTION_REQUIRES_CALLBACK);
     }
 
     /**
@@ -245,32 +280,26 @@ public final class MediaProjection {
     public abstract static class Callback {
         /**
          * Called when the MediaProjection session is no longer valid.
-         * <p>
-         * Once a MediaProjection has been stopped, it's up to the application to release any
-         * resources it may be holding (e.g. {@link android.hardware.display.VirtualDisplay}s).
-         * </p>
+         *
+         * <p>Once a MediaProjection has been stopped, it's up to the application to release any
+         * resources it may be holding (e.g. releasing the {@link VirtualDisplay} and
+         * {@link Surface}).
          */
         public void onStop() { }
 
         /**
-         * Indicates the width and height of the captured region in pixels. Called immediately after
-         * capture begins to provide the app with accurate sizing for the stream. Also called
-         * when the region captured in this MediaProjection session is resized.
-         * <p>
-         * The given width and height, in pixels, corresponds to the same width and height that
-         * would be returned from {@link android.view.WindowMetrics#getBounds()}
-         * </p>
-         * <p>
-         * Without the application resizing the {@link VirtualDisplay} (returned from
-         * {@code MediaProjection#createVirtualDisplay}) and output {@link Surface} (provided
-         * to {@code MediaProjection#createVirtualDisplay}), the captured stream will have
-         * letterboxing (black bars) around the recorded content to make up for the
-         * difference in aspect ratio.
-         * </p>
-         * <p>
-         * The application can prevent the letterboxing by overriding this method, and
-         * updating the size of both the {@link VirtualDisplay} and output {@link Surface}:
-         * </p>
+         * Invoked immediately after capture begins or when the size of the captured region changes,
+         * providing the accurate sizing for the streamed capture.
+         *
+         * <p>The given width and height, in pixels, corresponds to the same width and height that
+         * would be returned from {@link android.view.WindowMetrics#getBounds()} of the captured
+         * region.
+         *
+         * <p>If the recorded content has a different aspect ratio from either the
+         * {@link VirtualDisplay} or output {@link Surface}, the captured stream has letterboxing
+         * (black bars) around the recorded content. The application can avoid the letterboxing
+         * around the recorded content by updating the size of both the {@link VirtualDisplay} and
+         * output {@link Surface}:
          *
          * <pre>
          * &#x40;Override
@@ -293,30 +322,30 @@ public final class MediaProjection {
         public void onCapturedContentResize(int width, int height) { }
 
         /**
-         * Indicates the visibility of the captured region has changed. Called immediately after
-         * capture begins with the initial visibility state, and when visibility changes. Provides
-         * the app with accurate state for presenting its own UI. The application can take advantage
-         * of this by showing or hiding the captured content, based on if the captured region is
-         * currently visible to the user.
-         * <p>
-         * For example, if the user elected to capture a single app (from the activity shown from
-         * {@link MediaProjectionManager#createScreenCaptureIntent()}), the callback may be
-         * triggered for the following reasons:
+         * Invoked immediately after capture begins or when the visibility of the captured region
+         * changes, providing the current visibility of the captured region.
+         *
+         * <p>Applications can take advantage of this callback by showing or hiding the captured
+         * content from the output {@link Surface}, based on if the captured region is currently
+         * visible to the user.
+         *
+         * <p>For example, if the user elected to capture a single app (from the activity shown from
+         * {@link MediaProjectionManager#createScreenCaptureIntent()}), the following scenarios
+         * trigger the callback:
          * <ul>
          *     <li>
-         *         The captured region may become visible ({@code isVisible} with value
-         *         {@code true}), because the captured app is at least partially visible. This may
-         *         happen if the captured app was previously covered by another app. The other app
-         *         moves to show at least some portion of the captured app.
+         *         The captured region is visible ({@code isVisible} with value {@code true}),
+         *         because the captured app is at least partially visible. This may happen if the
+         *         user moves the covering app to show at least some portion of the captured app
+         *         (e.g. the user has multiple apps visible in a multi-window mode such as split
+         *         screen).
          *     </li>
          *     <li>
-         *         The captured region may become invisible ({@code isVisible} with value
-         *         {@code false}) if it is entirely hidden. This may happen if the captured app is
-         *         entirely covered by another app, or the user navigates away from the captured
-         *         app.
+         *         The captured region is invisible ({@code isVisible} with value {@code false}) if
+         *         it is entirely hidden. This may happen if another app entirely covers the
+         *         captured app, or the user navigates away from the captured app.
          *     </li>
          * </ul>
-         * </p>
          */
         public void onCapturedContentVisibilityChanged(boolean isVisible) { }
     }
@@ -324,6 +353,7 @@ public final class MediaProjection {
     private final class MediaProjectionCallback extends IMediaProjectionCallback.Stub {
         @Override
         public void onStop() {
+            Slog.v(TAG, "Dispatch stop to " + mCallbacks.size() + " callbacks.");
             for (CallbackRecord cbr : mCallbacks.values()) {
                 cbr.onStop();
             }
@@ -344,7 +374,7 @@ public final class MediaProjection {
         }
     }
 
-    private final static class CallbackRecord {
+    private static final class CallbackRecord extends Callback {
         private final Callback mCallback;
         private final Handler mHandler;
 
@@ -353,6 +383,8 @@ public final class MediaProjection {
             mHandler = handler;
         }
 
+
+        @Override
         public void onStop() {
             mHandler.post(new Runnable() {
                 @Override
@@ -362,10 +394,12 @@ public final class MediaProjection {
             });
         }
 
+        @Override
         public void onCapturedContentResize(int width, int height) {
             mHandler.post(() -> mCallback.onCapturedContentResize(width, height));
         }
 
+        @Override
         public void onCapturedContentVisibilityChanged(boolean isVisible) {
             mHandler.post(() -> mCallback.onCapturedContentVisibilityChanged(isVisible));
         }

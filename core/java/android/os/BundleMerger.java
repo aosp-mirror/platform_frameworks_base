@@ -85,37 +85,43 @@ public class BundleMerger implements Parcelable {
     /**
      * Merge strategy that numerically adds both conflicting values.
      */
-    public static final int STRATEGY_NUMBER_ADD = 5;
+    public static final int STRATEGY_NUMBER_ADD = 10;
 
     /**
      * Merge strategy that numerically increments the first conflicting value by
      * {@code 1} and ignores the last conflicting value.
      */
-    public static final int STRATEGY_NUMBER_INCREMENT_FIRST = 6;
+    public static final int STRATEGY_NUMBER_INCREMENT_FIRST = 20;
+
+    /**
+     * Merge strategy that numerically increments the first conflicting value by
+     * {@code 1} and also numerically adds both conflicting values.
+     */
+    public static final int STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD = 25;
 
     /**
      * Merge strategy that combines conflicting values using a boolean "and"
      * operation.
      */
-    public static final int STRATEGY_BOOLEAN_AND = 7;
+    public static final int STRATEGY_BOOLEAN_AND = 30;
 
     /**
      * Merge strategy that combines conflicting values using a boolean "or"
      * operation.
      */
-    public static final int STRATEGY_BOOLEAN_OR = 8;
+    public static final int STRATEGY_BOOLEAN_OR = 40;
 
     /**
      * Merge strategy that combines two conflicting array values by appending
      * the last array after the first array.
      */
-    public static final int STRATEGY_ARRAY_APPEND = 9;
+    public static final int STRATEGY_ARRAY_APPEND = 50;
 
     /**
      * Merge strategy that combines two conflicting {@link ArrayList} values by
      * appending the last {@link ArrayList} after the first {@link ArrayList}.
      */
-    public static final int STRATEGY_ARRAY_LIST_APPEND = 10;
+    public static final int STRATEGY_ARRAY_LIST_APPEND = 60;
 
     @IntDef(flag = false, prefix = { "STRATEGY_" }, value = {
             STRATEGY_REJECT,
@@ -125,6 +131,7 @@ public class BundleMerger implements Parcelable {
             STRATEGY_COMPARABLE_MAX,
             STRATEGY_NUMBER_ADD,
             STRATEGY_NUMBER_INCREMENT_FIRST,
+            STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD,
             STRATEGY_BOOLEAN_AND,
             STRATEGY_BOOLEAN_OR,
             STRATEGY_ARRAY_APPEND,
@@ -282,6 +289,8 @@ public class BundleMerger implements Parcelable {
                 return numberAdd(first, last);
             case STRATEGY_NUMBER_INCREMENT_FIRST:
                 return numberIncrementFirst(first, last);
+            case STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD:
+                return numberAdd(numberIncrementFirst(first, last), last);
             case STRATEGY_BOOLEAN_AND:
                 return booleanAnd(first, last);
             case STRATEGY_BOOLEAN_OR:

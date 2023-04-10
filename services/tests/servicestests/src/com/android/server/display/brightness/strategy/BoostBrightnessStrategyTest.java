@@ -44,7 +44,7 @@ public class BoostBrightnessStrategyTest {
     }
 
     @Test
-    public void updateBrightnessWorksAsExpectedWhenBoostBrightnessIsRequested() {
+    public void testUpdateBrightnessWhenBoostBrightnessIsRequested() {
         DisplayManagerInternal.DisplayPowerRequest
                 displayPowerRequest = new DisplayManagerInternal.DisplayPowerRequest();
         displayPowerRequest.boostScreenBrightness = true;
@@ -55,6 +55,7 @@ public class BoostBrightnessStrategyTest {
                         .setBrightness(PowerManager.BRIGHTNESS_MAX)
                         .setBrightnessReason(brightnessReason)
                         .setSdrBrightness(PowerManager.BRIGHTNESS_MAX)
+                        .setDisplayBrightnessStrategyName(mBoostBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mBoostBrightnessStrategy.updateBrightness(displayPowerRequest);

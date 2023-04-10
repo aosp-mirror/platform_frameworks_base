@@ -20,10 +20,13 @@ import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implementation of {@link DevicePolicyCache}, to which {@link DevicePolicyManagerService} pushes
@@ -51,20 +54,18 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private final SparseIntArray mPermissionPolicy = new SparseIntArray();
 
-    /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}.
-     *
-     * <p>For users affiliated with the device, they inherit the policy from {@code DO} so
-     * it will map to the {@code DO}'s policy. Otherwise it will map to the admin of the requesting
-     * user.
-     */
     @GuardedBy("mLock")
-    private final SparseBooleanArray mCanGrantSensorsPermissions = new SparseBooleanArray();
+    private List<String> mLauncherShortcutOverrides =
+            new ArrayList<>();
+
+
+    /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}. */
+    private final AtomicBoolean mCanGrantSensorsPermissions = new AtomicBoolean(false);
 
     public void onUserRemoved(int userHandle) {
         synchronized (mLock) {
             mPasswordQuality.delete(userHandle);
             mPermissionPolicy.delete(userHandle);
-            mCanGrantSensorsPermissions.delete(userHandle);
         }
     }
 
@@ -119,28 +120,43 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userId) {
+    public boolean canAdminGrantSensorsPermissions() {
+        return mCanGrantSensorsPermissions.get();
+    }
+
+    /** Sets admin control over permission grants. */
+    public void setAdminCanGrantSensorsPermissions(boolean canGrant) {
+        mCanGrantSensorsPermissions.set(canGrant);
+    }
+
+    @Override
+    public List<String> getLauncherShortcutOverrides() {
         synchronized (mLock) {
-            return mCanGrantSensorsPermissions.get(userId, false);
+            return new ArrayList<>(mLauncherShortcutOverrides);
         }
     }
 
-    /** Sets ahmin control over permission grants for user. */
-    public void setAdminCanGrantSensorsPermissions(@UserIdInt int userId, boolean canGrant) {
+    /**
+     * Sets a list of packages for which shortcuts should be replaced by their badged version.
+     */
+    public void setLauncherShortcutOverrides(List<String> launcherShortcutOverrides) {
         synchronized (mLock) {
-            mCanGrantSensorsPermissions.put(userId, canGrant);
+            mLauncherShortcutOverrides = new ArrayList<>(launcherShortcutOverrides);
         }
     }
 
     /** Dump content */
     public void dump(IndentingPrintWriter pw) {
-        pw.println("Device policy cache:");
-        pw.increaseIndent();
-        pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
-        pw.println("Password quality: " + mPasswordQuality.toString());
-        pw.println("Permission policy: " + mPermissionPolicy.toString());
-        pw.println("Admin can grant sensors permission: "
-                + mCanGrantSensorsPermissions.toString());
-        pw.decreaseIndent();
+        synchronized (mLock) {
+            pw.println("Device policy cache:");
+            pw.increaseIndent();
+            pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
+            pw.println("Password quality: " + mPasswordQuality);
+            pw.println("Permission policy: " + mPermissionPolicy);
+            pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions.get());
+            pw.print("Shortcuts overrides: ");
+            pw.println(mLauncherShortcutOverrides);
+            pw.decreaseIndent();
+        }
     }
 }

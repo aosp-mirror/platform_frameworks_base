@@ -22,8 +22,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.provider.DeviceConfig;
 
+import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
@@ -49,18 +49,19 @@ public class NoFilteringResolver extends CrossProfileResolver {
             "allow_intent_redirection_for_clone_profile";
 
     /**
-     * Returns true if intent redirection for clone profile feature flag is set
-     * and if its query, then check if calling user have necessary permission
+     * Returns true if intent redirection for clone profile feature flag
+     * (enable_app_cloning_building_blocks) is set and if its query,
+     * then check if calling user have necessary permission
      * (android.permission.QUERY_CLONED_APPS) as well as required flag
      * (PackageManager.MATCH_CLONE_PROFILE) bit set.
      * @return true if resolver would be used for cross profile resolution.
      */
     public static boolean isIntentRedirectionAllowed(Context context,
-            boolean resolveForStart, long flags) {
+            AppCloningDeviceConfigHelper appCloningDeviceConfigHelper, boolean resolveForStart,
+            long flags) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_APP_CLONING,
-                    FLAG_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE, false /* defaultValue */)
+            return appCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks()
                     && (resolveForStart || (((flags & PackageManager.MATCH_CLONE_PROFILE) != 0)
                     && hasPermission(context, Manifest.permission.QUERY_CLONED_APPS)));
         } finally {

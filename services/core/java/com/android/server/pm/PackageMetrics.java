@@ -41,19 +41,21 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 /**
- * Metrics class for reporting stats to logging infrastructures like Westworld
+ * Metrics class for reporting stats to logging infrastructures like statsd
  */
 final class PackageMetrics {
     public static final int STEP_PREPARE = 1;
     public static final int STEP_SCAN = 2;
     public static final int STEP_RECONCILE = 3;
     public static final int STEP_COMMIT = 4;
+    public static final int STEP_DEXOPT = 5;
 
     @IntDef(prefix = {"STEP_"}, value = {
             STEP_PREPARE,
             STEP_SCAN,
             STEP_RECONCILE,
             STEP_COMMIT,
+            STEP_DEXOPT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StepInt {
@@ -122,7 +124,7 @@ final class PackageMetrics {
                 originalUsers /* original_user_ids */,
                 userManagerInternal.getUserTypesForStatsd(originalUsers) /* original_user_types */,
                 mInstallRequest.getReturnCode() /* public_return_code */,
-                0 /* internal_error_code */,
+                mInstallRequest.getInternalErrorCode() /* internal_error_code */,
                 apksSize /* apks_size_bytes */,
                 versionCode /* version_code */,
                 stepDurations.first /* install_steps */,
@@ -175,6 +177,10 @@ final class PackageMetrics {
         }
     }
 
+    public void onStepFinished(@StepInt int step, long durationMillis) {
+        mInstallSteps.put(step, new InstallStep(durationMillis));
+    }
+
     // List of steps (e.g., 1, 2, 3) and corresponding list of durations (e.g., 200ms, 100ms, 150ms)
     private Pair<int[], long[]> getInstallStepDurations() {
         ArrayList<Integer> steps = new ArrayList<>();
@@ -201,6 +207,11 @@ final class PackageMetrics {
 
         InstallStep() {
             mStartTimestampMillis = System.currentTimeMillis();
+        }
+
+        InstallStep(long durationMillis) {
+            mStartTimestampMillis = -1;
+            mDurationMillis = durationMillis;
         }
 
         void finish() {

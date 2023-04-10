@@ -42,7 +42,7 @@ private const val TAG = "SpaSearchProvider"
  * One can query the provider result by:
  *   $ adb shell content query --uri content://<AuthorityPath>/<QueryPath>
  * For gallery, AuthorityPath = com.android.spa.gallery.search.provider
- * For Settings, AuthorityPath = com.android.settings.spa.search.provider"
+ * For Settings, AuthorityPath = com.android.settings.spa.search.provider
  * Some examples:
  *   $ adb shell content query --uri content://<AuthorityPath>/search_static_data
  *   $ adb shell content query --uri content://<AuthorityPath>/search_dynamic_data
@@ -205,6 +205,7 @@ class SpaSearchProvider : ContentProvider() {
         val searchData = entry.getSearchData() ?: return
         val intent = entry.createIntent(SESSION_SEARCH)
         val row = cursor.newRow().add(ColumnEnum.ENTRY_ID.id, entry.id)
+            .add(ColumnEnum.ENTRY_LABEL.id, entry.label)
             .add(ColumnEnum.SEARCH_TITLE.id, searchData.title)
             .add(ColumnEnum.SEARCH_KEYWORD.id, searchData.keyword)
             .add(
@@ -221,7 +222,6 @@ class SpaSearchProvider : ContentProvider() {
                 ColumnEnum.SLICE_URI.id, Uri.Builder()
                     .fromEntry(entry, spaEnvironment.sliceProviderAuthorities)
             )
-        // TODO: support legacy key
     }
 
     private fun fetchStatusData(entry: SettingsEntry, cursor: MatrixCursor) {
@@ -229,6 +229,7 @@ class SpaSearchProvider : ContentProvider() {
         val statusData = entry.getStatusData() ?: return
         cursor.newRow()
             .add(ColumnEnum.ENTRY_ID.id, entry.id)
+            .add(ColumnEnum.ENTRY_LABEL.id, entry.label)
             .add(ColumnEnum.ENTRY_DISABLED.id, statusData.isDisabled)
     }
 
@@ -239,6 +240,7 @@ class SpaSearchProvider : ContentProvider() {
         val searchData = entry.getSearchData() ?: return
         val intent = entry.createIntent(SESSION_SEARCH)
         val row = cursor.newRow().add(ColumnEnum.ENTRY_ID.id, entry.id)
+            .add(ColumnEnum.ENTRY_LABEL.id, entry.label)
             .add(ColumnEnum.SEARCH_TITLE.id, searchData.title)
             .add(ColumnEnum.SEARCH_KEYWORD.id, searchData.keyword)
             .add(
@@ -255,8 +257,6 @@ class SpaSearchProvider : ContentProvider() {
                 ColumnEnum.SLICE_URI.id, Uri.Builder()
                     .fromEntry(entry, spaEnvironment.sliceProviderAuthorities)
             )
-        // TODO: support legacy key
-
         // Fetch status data. We can add runtime arguments later if necessary
         val statusData = entry.getStatusData() ?: return
         row.add(ColumnEnum.ENTRY_DISABLED.id, statusData.isDisabled)

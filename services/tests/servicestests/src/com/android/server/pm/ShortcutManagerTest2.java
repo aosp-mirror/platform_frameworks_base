@@ -2349,7 +2349,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
      * can still be read.
      */
     public void testLoadLegacySavedFile() throws Exception {
-        final File path = mService.getUserFile(USER_0);
+        final File path = mService.getUserFile(USER_0).getBaseFile();
         path.getParentFile().mkdirs();
         try (Writer w = new FileWriter(path)) {
             w.write(readTestAsset("shortcut/shortcut_legacy_file.xml"));

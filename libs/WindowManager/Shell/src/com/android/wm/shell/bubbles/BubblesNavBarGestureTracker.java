@@ -64,8 +64,8 @@ class BubblesNavBarGestureTracker {
 
         stopInternal();
 
-        mInputMonitor = InputManager.getInstance().monitorGestureInput(GESTURE_MONITOR,
-                mContext.getDisplayId());
+        mInputMonitor = mContext.getSystemService(InputManager.class)
+                .monitorGestureInput(GESTURE_MONITOR, mContext.getDisplayId());
         InputChannel inputChannel = mInputMonitor.getInputChannel();
 
         BubblesNavBarMotionEventHandler motionEventHandler =

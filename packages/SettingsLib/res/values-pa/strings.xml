@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ਕਲਿੱਪ ਸੀਮਾਵਾਂ, ਹਾਸ਼ੀਏ ਆਦਿ ਦਿਖਾਓ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਖਾਕਾ ਲਾਗੂ ਕਰੋ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ ਲਈ ਸਕ੍ਰੀਨ \'ਤੇ ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਖਾਕਾ ਲਾਗੂ ਕਰੋ"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"ਪਾਰਦਰਸ਼ੀ ਨੈਵੀਗੇਸ਼ਨ ਵਾਲੀ ਪੱਟੀ"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ਨੈਵੀਗੇਸ਼ਨ ਵਾਲੀ ਪੱਟੀ ਦੇ ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ ਨੂੰ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਤੌਰ \'ਤੇ ਪਾਰਦਰਸ਼ੀ ਬਣਾਓ"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ਵਿੰਡੋ-ਪੱਧਰ \'ਤੇ ਧੁੰਦਲਾ ਕਰਨ ਦਿਓ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ਜ਼ਬਰਦਸਤੀ ਲਾਗੂ ਕਰੋ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ਐਪਾਂ ਵਿੱਚ 4x MSAA ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ਇਹ ਫ਼ੋਨ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ਇਹ ਟੈਬਲੈੱਟ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ਇਹ ਫ਼ੋਨ"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ਸਵਿੱਚ ਕਰਨ ਲਈ ਖਾਤੇ ਨੂੰ ਅੱਪਗ੍ਰੇਡ ਕਰੋ"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ਡਾਊਨਲੋਡਾਂ ਨੂੰ ਇੱਥੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ਵਿਗਿਆਪਨ ਤੋਂ ਬਾਅਦ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ਇੱਥੇ ਮੀਡੀਆ ਚਲਾਉਣ ਲਈ ਡੀਵਾਈਸ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ਡੀਵਾਈਸ ਨੂੰ ਮੀਡੀਆ ਚਲਾਉਣ ਦੀ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ਇਸ ਮੀਡੀਆ ਨੂੰ ਇੱਥੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ਕਨੈਕਟ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ। ਡੀਵਾਈਸ ਨੂੰ ਬੰਦ ਕਰਕੇ ਵਾਪਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ਤਾਰ ਵਾਲਾ ਆਡੀਓ ਡੀਵਾਈਸ"</string>
     <string name="help_label" msgid="3528360748637781274">"ਮਦਦ ਅਤੇ ਵਿਚਾਰ"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ਪਿਛਲੇ ਐਨੀਮੇਸ਼ਨਾਂ ਦਾ ਪੂਰਵ-ਅਨੁਮਾਨ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ਪੂਰਵ-ਅਨੁਮਾਨ ਵਾਪਸੀ ਲਈ ਸਿਸਟਮ ਐਨੀਮੇਸ਼ਨਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ਇਹ ਸੈਟਿੰਗ ਪੂਰਵ-ਅਨੁਮਾਨ ਇਸ਼ਾਰਾ ਐਨੀਮੇਸ਼ਨ ਲਈ ਸਿਸਟਮ ਐਨੀਮੇਸ਼ਨਾਂ ਨੂੰ ਚਾਲੂ ਕਰਦੀ ਹੈ। ਮੈਨੀਫ਼ੈਸਟ ਫ਼ਾਈਲ ਵਿੱਚ enableOnBackInvokedCallback ਸੈਟਿੰਗ ਨੂੰ ਪ੍ਰਤੀ-ਐਪ \'ਸਹੀ\' \'ਤੇ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"ਖੱਬੇ ਲਿਜਾਓ"</item>
+    <item msgid="5425394847942513942">"ਹੇਠਾਂ ਲਿਜਾਓ"</item>
+    <item msgid="7728484337962740316">"ਸੱਜੇ ਲਿਜਾਓ"</item>
+    <item msgid="324200556467459329">"ਉੱਪਰ ਲਿਜਾਓ"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

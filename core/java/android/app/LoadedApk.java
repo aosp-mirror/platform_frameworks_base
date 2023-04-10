@@ -1683,12 +1683,13 @@ public final class LoadedApk {
                 performReceive(intent, resultCode, data, extras, ordered, sticky,
                         BroadcastReceiver.PendingResult.guessAssumeDelivered(
                                 BroadcastReceiver.PendingResult.TYPE_REGISTERED, ordered),
-                        sendingUser);
+                        sendingUser, /*sendingUid=*/ Process.INVALID_UID,
+                        /*sendingPackage=*/ null);
             }
 
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
-                    int sendingUser) {
+                    int sendingUser, int sendingUid, String sendingPackage) {
                 final LoadedApk.ReceiverDispatcher rd;
                 if (intent == null) {
                     Log.wtf(TAG, "Null intent received");
@@ -1703,7 +1704,8 @@ public final class LoadedApk {
                 }
                 if (rd != null) {
                     rd.performReceive(intent, resultCode, data, extras,
-                            ordered, sticky, assumeDelivered, sendingUser);
+                            ordered, sticky, assumeDelivered, sendingUser,
+                            sendingUid, sendingPackage);
                 } else if (!assumeDelivered) {
                     // The activity manager dispatched a broadcast to a registered
                     // receiver in this process, but before it could be delivered the
@@ -1743,11 +1745,12 @@ public final class LoadedApk {
             private boolean mRunCalled;
 
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
-                    boolean ordered, boolean sticky, boolean assumeDelivered, int sendingUser) {
+                    boolean ordered, boolean sticky, boolean assumeDelivered, int sendingUser,
+                    int sendingUid, String sendingPackage) {
                 super(resultCode, resultData, resultExtras,
                         mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED, ordered,
                         sticky, assumeDelivered, mAppThread.asBinder(), sendingUser,
-                        intent.getFlags());
+                        intent.getFlags(), sendingUid, sendingPackage);
                 mCurIntent = intent;
             }
 
@@ -1871,9 +1874,9 @@ public final class LoadedApk {
 
         public void performReceive(Intent intent, int resultCode, String data,
                 Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
-                int sendingUser) {
+                int sendingUser, int sendingUid, String sendingPackage) {
             final Args args = new Args(intent, resultCode, data, extras, ordered,
-                    sticky, assumeDelivered, sendingUser);
+                    sticky, assumeDelivered, sendingUser, sendingUid, sendingPackage);
             if (intent == null) {
                 Log.wtf(TAG, "Null intent received");
             } else {
@@ -1895,17 +1898,17 @@ public final class LoadedApk {
 
     @UnsupportedAppUsage
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
-            Context context, Handler handler, int flags) {
+            Context context, Handler handler, long flags) {
         return getServiceDispatcherCommon(c, context, handler, null, flags);
     }
 
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
-            Context context, Executor executor, int flags) {
+            Context context, Executor executor, long flags) {
         return getServiceDispatcherCommon(c, context, null, executor, flags);
     }
 
     private IServiceConnection getServiceDispatcherCommon(ServiceConnection c,
-            Context context, Handler handler, Executor executor, int flags) {
+            Context context, Handler handler, Executor executor, long flags) {
         synchronized (mServices) {
             LoadedApk.ServiceDispatcher sd = null;
             ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
@@ -2005,7 +2008,7 @@ public final class LoadedApk {
         private final Handler mActivityThread;
         private final Executor mActivityExecutor;
         private final ServiceConnectionLeaked mLocation;
-        private final int mFlags;
+        private final long mFlags;
 
         private RuntimeException mUnbindLocation;
 
@@ -2038,7 +2041,7 @@ public final class LoadedApk {
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ServiceDispatcher(ServiceConnection conn,
-                Context context, Handler activityThread, int flags) {
+                Context context, Handler activityThread, long flags) {
             mIServiceConnection = new InnerConnection(this);
             mConnection = conn;
             mContext = context;
@@ -2050,7 +2053,7 @@ public final class LoadedApk {
         }
 
         ServiceDispatcher(ServiceConnection conn,
-                Context context, Executor activityExecutor, int flags) {
+                Context context, Executor activityExecutor, long flags) {
             mIServiceConnection = new InnerConnection(this);
             mConnection = conn;
             mContext = context;
@@ -2106,7 +2109,7 @@ public final class LoadedApk {
             return mIServiceConnection;
         }
 
-        int getFlags() {
+        long getFlags() {
             return mFlags;
         }
 

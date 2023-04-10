@@ -18,6 +18,7 @@ package android.service.credentials;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
@@ -90,14 +91,15 @@ public abstract class CredentialProviderService extends Service {
     /**
      * Intent extra: The result of an authentication flow, to be set on finish of the
      * {@link android.app.Activity} invoked through the {@link android.app.PendingIntent} set on
-     * a {@link BeginGetCredentialResponse}. This result should contain the actual content,
+     * an authentication {@link Action}, as part of the original
+     * {@link BeginGetCredentialResponse}. This result should contain the actual content,
      * including credential entries and action entries, to be shown on the selector.
      *
      * <p>
-     * Type: {@link CredentialsResponseContent}
+     * Type: {@link BeginGetCredentialResponse}
      */
-    public static final String EXTRA_CREDENTIALS_RESPONSE_CONTENT =
-            "android.service.credentials.extra.CREDENTIALS_RESPONSE_CONTENT";
+    public static final String EXTRA_BEGIN_GET_CREDENTIAL_RESPONSE =
+            "android.service.credentials.extra.BEGIN_GET_CREDENTIAL_RESPONSE";
 
     /**
      * Intent extra: The failure exception set at the final stage of a get flow.
@@ -133,7 +135,7 @@ public abstract class CredentialProviderService extends Service {
      * <p>When a provider app receives a {@link BeginGetCredentialRequest} through the
      * {@link CredentialProviderService#onBeginGetCredential} call, it can construct the
      * {@link BeginGetCredentialResponse} with either an authentication {@link Action} (if the app
-     * is locked), or a {@link CredentialsResponseContent} (if the app is unlocked). In the former
+     * is locked), or a {@link BeginGetCredentialResponse} (if the app is unlocked). In the former
      * case, i.e. the app is locked, user will be shown the authentication action. When selected,
      * the underlying {@link PendingIntent} will be invoked which will lead the user to provider's
      * unlock activity. This pending intent will also contain the original
@@ -141,7 +143,7 @@ public abstract class CredentialProviderService extends Service {
      * flow is complete.
      *
      * <p>After the app is unlocked, the {@link BeginGetCredentialResponse} must be constructed
-     * using a {@link CredentialsResponseContent}, which must be set on an {@link Intent} as an
+     * using a {@link BeginGetCredentialResponse}, which must be set on an {@link Intent} as an
      * intent extra against CredentialProviderService#EXTRA_CREDENTIALS_RESPONSE_CONTENT}.
      * This intent should then be set as a result through {@link android.app.Activity#setResult}
      * before finishing the activity.
@@ -154,7 +156,38 @@ public abstract class CredentialProviderService extends Service {
 
     private static final String TAG = "CredProviderService";
 
-    public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
+     /**
+      * Name under which a Credential Provider service component publishes information
+      * about itself.  This meta-data must reference an XML resource containing
+      * an
+      * <code>&lt;{@link android.R.styleable#CredentialProvider credential-provider}&gt;</code>
+      * tag.
+      *
+      * For example (AndroidManifest.xml):
+      * <code>
+      * <meta-data
+      *         android:name="android.credentials.provider"
+      *          android:resource="@xml/provider"/>
+      * </code>
+      *
+      * For example (xml/provider.xml):
+      * <code>
+      * <credential-provider xmlns:android="http://schemas.android.com/apk/res/android"
+      *       android:settingsSubtitle="@string/providerSubtitle">
+      *      <capabilities>
+      *          <capability>@string/passwords</capability>
+      *          <capability>@string/passkeys</capability>
+      *      </capabilities>
+      *      <string name="passwords">android.credentials.TYPE_PASSWORD_CREDENTIAL</string>
+      *      <string name="passkeys">android.credentials.TYPE_PUBLIC_KEY_CREDENTIAL</string>
+      *  </credential-provider>
+      * </code>
+      */
+    public static final String SERVICE_META_DATA = "android.credentials.provider";
+
+    /** @hide */
+    public static final String TEST_SYSTEM_PROVIDER_META_DATA_KEY =
+            "android.credentials.testsystemprovider";
 
     private Handler mHandler;
 
@@ -198,12 +231,18 @@ public abstract class CredentialProviderService extends Service {
     }
 
     private final ICredentialProviderService mInterface = new ICredentialProviderService.Stub() {
-        public ICancellationSignal onBeginGetCredential(BeginGetCredentialRequest request,
+        @Override
+        public void onBeginGetCredential(BeginGetCredentialRequest request,
                 IBeginGetCredentialCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onBeginGetCredential,
@@ -213,6 +252,11 @@ public abstract class CredentialProviderService extends Service {
                             GetCredentialException>() {
                         @Override
                         public void onResult(BeginGetCredentialResponse result) {
+                            // If provider service does not possess the HYBRID permission, this
+                            // check will throw an exception in the provider process.
+                            if (result.getRemoteCredentialEntry() != null) {
+                                enforceRemoteEntryPermission();
+                            }
                             try {
                                 callback.onSuccess(result);
                             } catch (RemoteException e) {
@@ -229,16 +273,29 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
+        }
+        private void enforceRemoteEntryPermission() {
+            String permission =
+                    Manifest.permission.PROVIDE_REMOTE_CREDENTIALS;
+            getApplicationContext().enforceCallingOrSelfPermission(
+                    permission,
+                    String.format("Provider must have %s, in order to set a "
+                            + "remote entry", permission)
+            );
         }
 
         @Override
-        public ICancellationSignal onBeginCreateCredential(BeginCreateCredentialRequest request,
+        public void onBeginCreateCredential(BeginCreateCredentialRequest request,
                 IBeginCreateCredentialCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onBeginCreateCredential,
@@ -248,6 +305,11 @@ public abstract class CredentialProviderService extends Service {
                             BeginCreateCredentialResponse, CreateCredentialException>() {
                         @Override
                         public void onResult(BeginCreateCredentialResponse result) {
+                            // If provider service does not possess the HYBRID permission, this
+                            // check will throw an exception in the provider process.
+                            if (result.getRemoteCreateEntry() != null) {
+                                enforceRemoteEntryPermission();
+                            }
                             try {
                                 callback.onSuccess(result);
                             } catch (RemoteException e) {
@@ -264,16 +326,20 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
         }
 
         @Override
-        public ICancellationSignal onClearCredentialState(ClearCredentialStateRequest request,
+        public void onClearCredentialState(ClearCredentialStateRequest request,
                 IClearCredentialStateCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onClearCredentialState,
@@ -298,7 +364,6 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
         }
     };
 
@@ -308,7 +373,7 @@ public abstract class CredentialProviderService extends Service {
      *
      * <p>This API denotes a query stage request for getting user's credentials from a given
      * credential provider. The request contains a list of
-     * {@link android.credentials.GetCredentialOption} that have parameters to be used for
+     * {@link BeginGetCredentialOption} that have parameters to be used for
      * populating candidate credentials, as a list of {@link CredentialEntry} to be set
      * on the {@link BeginGetCredentialResponse}. This list is then shown to the user on a
      * selector.

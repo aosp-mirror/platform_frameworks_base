@@ -26,10 +26,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
@@ -37,16 +37,20 @@ public class WorkLockActivityController {
     private static final String TAG = WorkLockActivityController.class.getSimpleName();
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final IActivityTaskManager mIatm;
 
-    public WorkLockActivityController(Context context) {
-        this(context, TaskStackChangeListeners.getInstance(), ActivityTaskManager.getService());
+    public WorkLockActivityController(Context context, UserTracker userTracker) {
+        this(context, userTracker, TaskStackChangeListeners.getInstance(),
+                ActivityTaskManager.getService());
     }
 
     @VisibleForTesting
     WorkLockActivityController(
-            Context context, TaskStackChangeListeners tscl, IActivityTaskManager iAtm) {
+            Context context, UserTracker userTracker, TaskStackChangeListeners tscl,
+            IActivityTaskManager iAtm) {
         mContext = context;
+        mUserTracker = userTracker;
         mIatm = iAtm;
 
         tscl.registerTaskStackListener(mLockListener);
@@ -65,7 +69,8 @@ public class WorkLockActivityController {
         options.setLaunchTaskId(info.taskId);
         options.setTaskOverlay(true, false /* canResume */);
 
-        final int result = startActivityAsUser(intent, options.toBundle(), UserHandle.USER_CURRENT);
+        final int result = startActivityAsUser(intent, options.toBundle(),
+                mUserTracker.getUserId());
         if (ActivityManager.isStartResultSuccessful(result)) {
             // OK
         } else {

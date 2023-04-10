@@ -108,12 +108,6 @@ class TaskContainer {
     }
 
     @NonNull
-    Configuration getConfiguration() {
-        // Make a copy in case the config is updated unexpectedly.
-        return new Configuration(mConfiguration);
-    }
-
-    @NonNull
     TaskProperties getTaskProperties() {
         return new TaskProperties(mDisplayId, mConfiguration);
     }
@@ -157,7 +151,7 @@ class TaskContainer {
 
     @WindowingMode
     private int getWindowingMode() {
-        return getConfiguration().windowConfiguration.getWindowingMode();
+        return mConfiguration.windowConfiguration.getWindowingMode();
     }
 
     /** Whether there is any {@link TaskFragmentContainer} below this Task. */
@@ -220,10 +214,7 @@ class TaskContainer {
         }
     }
 
-    /**
-     * A wrapper class which contains the display ID and {@link Configuration} of a
-     * {@link TaskContainer}
-     */
+    /** A wrapper class which contains the information of {@link TaskContainer} */
     static final class TaskProperties {
         private final int mDisplayId;
         @NonNull
@@ -241,6 +232,15 @@ class TaskContainer {
         @NonNull
         Configuration getConfiguration() {
             return mConfiguration;
+        }
+
+        /** Translates the given absolute bounds to relative bounds in this Task coordinate. */
+        void translateAbsoluteBoundsToRelativeBounds(@NonNull Rect inOutBounds) {
+            if (inOutBounds.isEmpty()) {
+                return;
+            }
+            final Rect taskBounds = mConfiguration.windowConfiguration.getBounds();
+            inOutBounds.offset(-taskBounds.left, -taskBounds.top);
         }
 
         /**

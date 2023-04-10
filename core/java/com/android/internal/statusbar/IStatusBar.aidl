@@ -28,6 +28,7 @@ import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
@@ -53,9 +54,10 @@ oneway interface IStatusBar
             boolean showImeSwitcher);
     void setWindowState(int display, int window, int state);
 
-    void showRecentApps(boolean triggeredFromAltTab, boolean forward);
+    void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
+    void toggleTaskbar();
     void toggleSplitScreen();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
@@ -140,7 +142,7 @@ oneway interface IStatusBar
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
     void clickQsTile(in ComponentName tile);
-    void handleSystemKey(in int key);
+    void handleSystemKey(in KeyEvent key);
 
     /**
      * Methods to show toast messages for screen pinning
@@ -214,11 +216,11 @@ oneway interface IStatusBar
      * bar and navigation bar which are temporarily visible to the user.
      *
      * @param displayId the ID of the display to notify.
-     * @param types the internal insets types of the bars are about to show transiently.
+     * @param types the insets types of the bars are about to show transiently.
      * @param isGestureOnSystemBar whether the gesture to show the transient bar was a gesture on
      *        one of the bars itself.
      */
-    void showTransient(int displayId, in int[] types, boolean isGestureOnSystemBar);
+    void showTransient(int displayId, int types, boolean isGestureOnSystemBar);
 
     /**
      * Notifies System UI to abort the transient state of system bars, which prevents the bars being
@@ -226,9 +228,9 @@ oneway interface IStatusBar
      * bars again.
      *
      * @param displayId the ID of the display to notify.
-     * @param types the internal insets types of the bars are about to abort the transient state.
+     * @param types the insets types of the bars are about to abort the transient state.
      */
-    void abortTransient(int displayId, in int[] types);
+    void abortTransient(int displayId, int types);
 
     /**
      * Show a warning that the device is about to go to sleep due to user inactivity.

@@ -16,14 +16,19 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
+import android.util.Log
 import android.view.View
+import com.android.keyguard.KeyguardConstants
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.DejankUtils
+import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -32,17 +37,16 @@ import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /**
  * Encapsulates business logic for interacting with the lock-screen primary (pin/pattern/password)
@@ -60,8 +64,9 @@ constructor(
     private val primaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor,
     private val falsingCollector: FalsingCollector,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
+    private val context: Context,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     keyguardBypassController: KeyguardBypassController,
-    keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) {
     /** Whether we want to wait for face auth. */
     private val primaryBouncerFaceDelay =
@@ -75,24 +80,14 @@ constructor(
 
     /** Runnable to show the primary bouncer. */
     val showRunnable = Runnable {
-        repository.setPrimaryVisible(true)
-        repository.setPrimaryShow(
-            KeyguardBouncerModel(
-                promptReason = repository.bouncerPromptReason ?: 0,
-                errorMessage = repository.bouncerErrorMessage,
-                expansionAmount = repository.panelExpansionAmount.value
-            )
-        )
+        repository.setPrimaryShow(true)
         repository.setPrimaryShowingSoon(false)
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.VISIBLE)
     }
 
     val keyguardAuthenticated: Flow<Boolean> = repository.keyguardAuthenticated.filterNotNull()
-    val screenTurnedOff: Flow<Unit> = repository.onScreenTurnedOff.filter { it }.map {}
-    val show: Flow<KeyguardBouncerModel> = repository.primaryBouncerShow.filterNotNull()
-    val hide: Flow<Unit> = repository.primaryBouncerHide.filter { it }.map {}
+    val isShowing: Flow<Boolean> = repository.primaryBouncerShow
     val startingToHide: Flow<Unit> = repository.primaryBouncerStartingToHide.filter { it }.map {}
-    val isVisible: Flow<Boolean> = repository.primaryBouncerVisible
     val isBackButtonEnabled: Flow<Boolean> = repository.isBackButtonEnabled.filterNotNull()
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
     val startingDisappearAnimation: Flow<Runnable> =
@@ -102,15 +97,37 @@ constructor(
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
     /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
     val bouncerExpansion: Flow<Float> =
-        combine(repository.panelExpansionAmount, repository.primaryBouncerVisible) {
+        combine(repository.panelExpansionAmount, repository.primaryBouncerShow) {
             panelExpansion,
-            primaryBouncerVisible ->
-            if (primaryBouncerVisible) {
+            primaryBouncerIsShowing ->
+            if (primaryBouncerIsShowing) {
                 1f - panelExpansion
             } else {
                 0f
             }
         }
+    /** Allow for interaction when just about fully visible */
+    val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
+    val sideFpsShowing: Flow<Boolean> = repository.sideFpsShowing
+
+    /** This callback needs to be a class field so it does not get garbage collected. */
+    val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onBiometricRunningStateChanged(
+                running: Boolean,
+                biometricSourceType: BiometricSourceType?
+            ) {
+                updateSideFpsVisibility()
+            }
+
+            override fun onStrongAuthStateChanged(userId: Int) {
+                updateSideFpsVisibility()
+            }
+        }
+
+    init {
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+    }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
     // TODO(b/243695312): Encapsulate all of the show logic for the bouncer.
@@ -118,19 +135,12 @@ constructor(
     @JvmOverloads
     fun show(isScrimmed: Boolean) {
         // Reset some states as we show the bouncer.
-        repository.setOnScreenTurnedOff(false)
         repository.setKeyguardAuthenticated(null)
-        repository.setPrimaryHide(false)
         repository.setPrimaryStartingToHide(false)
 
         val resumeBouncer =
-            (repository.primaryBouncerVisible.value ||
-                repository.primaryBouncerShowingSoon.value) && needsFullscreenBouncer()
-
-        if (!resumeBouncer && repository.primaryBouncerShow.value != null) {
-            // If bouncer is visible, the bouncer is already showing.
-            return
-        }
+            (isBouncerShowing() || repository.primaryBouncerShowingSoon.value) &&
+                needsFullscreenBouncer()
 
         Trace.beginSection("KeyguardBouncer#show")
         repository.setPrimaryScrimmed(isScrimmed)
@@ -138,11 +148,12 @@ constructor(
             setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
         }
 
+        // In this special case, we want to hide the bouncer and show it again. We want to emit
+        // show(true) again so that we can reinflate the new view.
         if (resumeBouncer) {
-            primaryBouncerView.delegate?.resume()
-            // Bouncer is showing the next security screen and we just need to prompt a resume.
-            return
+            repository.setPrimaryShow(false)
         }
+
         if (primaryBouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
             // Keyguard is done.
             return
@@ -154,7 +165,7 @@ constructor(
         } else {
             DejankUtils.postAfterTraversal(showRunnable)
         }
-        keyguardStateController.notifyBouncerShowing(true)
+        keyguardStateController.notifyPrimaryBouncerShowing(true)
         primaryBouncerCallbackInteractor.dispatchStartingToShow()
         Trace.endSection()
     }
@@ -170,13 +181,12 @@ constructor(
             dismissCallbackRegistry.notifyDismissCancelled()
         }
 
+        repository.setPrimaryStartDisappearAnimation(null)
         falsingCollector.onBouncerHidden()
-        keyguardStateController.notifyBouncerShowing(false /* showing */)
+        keyguardStateController.notifyPrimaryBouncerShowing(false /* showing */)
         cancelShowRunnable()
         repository.setPrimaryShowingSoon(false)
-        repository.setPrimaryVisible(false)
-        repository.setPrimaryHide(true)
-        repository.setPrimaryShow(null)
+        repository.setPrimaryShow(false)
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.INVISIBLE)
         Trace.endSection()
     }
@@ -252,11 +262,6 @@ constructor(
         repository.setKeyguardAuthenticated(strongAuth)
     }
 
-    /** Tell the bouncer the screen has turned off. */
-    fun onScreenTurnedOff() {
-        repository.setOnScreenTurnedOff(true)
-    }
-
     /** Update the position of the bouncer when showing. */
     fun setKeyguardPosition(position: Float) {
         repository.setKeyguardPosition(position)
@@ -284,17 +289,45 @@ constructor(
 
     /** Tell the bouncer to start the pre hide animation. */
     fun startDisappearAnimation(runnable: Runnable) {
-        val finishRunnable = Runnable {
+        if (willRunDismissFromKeyguard()) {
             runnable.run()
-            repository.setPrimaryStartDisappearAnimation(null)
+            return
         }
-        repository.setPrimaryStartDisappearAnimation(finishRunnable)
+
+        repository.setPrimaryStartDisappearAnimation(runnable)
+    }
+
+    /** Determine whether to show the side fps animation. */
+    fun updateSideFpsVisibility() {
+        val sfpsEnabled: Boolean =
+            context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
+        val fpsDetectionRunning: Boolean = keyguardUpdateMonitor.isFingerprintDetectionRunning
+        val isUnlockingWithFpAllowed: Boolean =
+            keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed
+        val toShow =
+            (isBouncerShowing() &&
+                sfpsEnabled &&
+                fpsDetectionRunning &&
+                isUnlockingWithFpAllowed &&
+                !isAnimatingAway())
+
+        if (KeyguardConstants.DEBUG) {
+            Log.d(
+                TAG,
+                ("sideFpsToShow=$toShow\n" +
+                    "isBouncerShowing=${isBouncerShowing()}\n" +
+                    "configEnabled=$sfpsEnabled\n" +
+                    "fpsDetectionRunning=$fpsDetectionRunning\n" +
+                    "isUnlockingWithFpAllowed=$isUnlockingWithFpAllowed\n" +
+                    "isAnimatingAway=${isAnimatingAway()}")
+            )
+        }
+        repository.setSideFpsShowing(toShow)
     }
 
     /** Returns whether bouncer is fully showing. */
     fun isFullyShowing(): Boolean {
-        return (repository.primaryBouncerShowingSoon.value ||
-            repository.primaryBouncerVisible.value) &&
+        return (repository.primaryBouncerShowingSoon.value || isBouncerShowing()) &&
             repository.panelExpansionAmount.value == KeyguardBouncerConstants.EXPANSION_VISIBLE &&
             repository.primaryBouncerStartingDisappearAnimation.value == null
     }
@@ -321,6 +354,11 @@ constructor(
         return primaryBouncerView.delegate?.willDismissWithActions() == true
     }
 
+    /** Will the dismissal run from the keyguard layout (instead of from bouncer) */
+    fun willRunDismissFromKeyguard(): Boolean {
+        return primaryBouncerView.delegate?.willRunDismissFromKeyguard() == true
+    }
+
     /** Returns whether the bouncer should be full screen. */
     private fun needsFullscreenBouncer(): Boolean {
         val mode: KeyguardSecurityModel.SecurityMode =
@@ -333,5 +371,13 @@ constructor(
     private fun cancelShowRunnable() {
         DejankUtils.removeCallbacks(showRunnable)
         mainHandler.removeCallbacks(showRunnable)
+    }
+
+    private fun isBouncerShowing(): Boolean {
+        return repository.primaryBouncerShow.value
+    }
+
+    companion object {
+        private const val TAG = "PrimaryBouncerInteractor"
     }
 }

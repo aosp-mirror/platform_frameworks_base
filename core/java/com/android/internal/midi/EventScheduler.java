@@ -16,7 +16,6 @@
 
 package com.android.internal.midi;
 
-import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -26,11 +25,11 @@ import java.util.TreeMap;
  * And only one Thread can read from the buffer.
  */
 public class EventScheduler {
-    private static final long NANOS_PER_MILLI = 1000000;
+    public static final long NANOS_PER_MILLI = 1000000;
 
     private final Object mLock = new Object();
-    volatile private SortedMap<Long, FastEventQueue> mEventBuffer;
-    private FastEventQueue mEventPool = null;
+    protected volatile SortedMap<Long, FastEventQueue> mEventBuffer;
+    protected FastEventQueue mEventPool = null;
     private int mMaxPoolSize = 200;
     private boolean mClosed;
 
@@ -38,9 +37,13 @@ public class EventScheduler {
         mEventBuffer = new TreeMap<Long, FastEventQueue>();
     }
 
-    // If we keep at least one node in the list then it can be atomic
-    // and non-blocking.
-    private class FastEventQueue {
+    /**
+     * Class for a fast event queue.
+     *
+     * If we keep at least one node in the list then it can be atomic
+     * and non-blocking.
+     */
+    public static class FastEventQueue {
         // One thread takes from the beginning of the list.
         volatile SchedulableEvent mFirst;
         // A second thread returns events to the end of the list.
@@ -48,7 +51,7 @@ public class EventScheduler {
         volatile long mEventsAdded;
         volatile long mEventsRemoved;
 
-        FastEventQueue(SchedulableEvent event) {
+        public FastEventQueue(SchedulableEvent event) {
             mFirst = event;
             mLast = mFirst;
             mEventsAdded = 1;
@@ -149,7 +152,8 @@ public class EventScheduler {
      * @param event
      */
     public void add(SchedulableEvent event) {
-        synchronized (mLock) {
+        Object lock = getLock();
+        synchronized (lock) {
             FastEventQueue list = mEventBuffer.get(event.getTimestamp());
             if (list == null) {
                 long lowestTime = mEventBuffer.isEmpty() ? Long.MAX_VALUE
@@ -159,7 +163,7 @@ public class EventScheduler {
                 // If the event we added is earlier than the previous earliest
                 // event then notify any threads waiting for the next event.
                 if (event.getTimestamp() < lowestTime) {
-                    mLock.notify();
+                    lock.notify();
                 }
             } else {
                 list.add(event);
@@ -167,7 +171,7 @@ public class EventScheduler {
         }
     }
 
-    private SchedulableEvent removeNextEventLocked(long lowestTime) {
+    protected SchedulableEvent removeNextEventLocked(long lowestTime) {
         SchedulableEvent event;
         FastEventQueue list = mEventBuffer.get(lowestTime);
         // Remove list from tree if this is the last node.
@@ -186,7 +190,8 @@ public class EventScheduler {
      */
     public SchedulableEvent getNextEvent(long time) {
         SchedulableEvent event = null;
-        synchronized (mLock) {
+        Object lock = getLock();
+        synchronized (lock) {
             if (!mEventBuffer.isEmpty()) {
                 long lowestTime = mEventBuffer.firstKey();
                 // Is it time for this list to be processed?
@@ -209,7 +214,8 @@ public class EventScheduler {
      */
     public SchedulableEvent waitNextEvent() throws InterruptedException {
         SchedulableEvent event = null;
-        synchronized (mLock) {
+        Object lock = getLock();
+        synchronized (lock) {
             while (!mClosed) {
                 long millisToWait = Integer.MAX_VALUE;
                 if (!mEventBuffer.isEmpty()) {
@@ -231,7 +237,7 @@ public class EventScheduler {
                         }
                     }
                 }
-                mLock.wait((int) millisToWait);
+                lock.wait((int) millisToWait);
             }
         }
         return event;
@@ -242,10 +248,25 @@ public class EventScheduler {
         mEventBuffer = new TreeMap<Long, FastEventQueue>();
     }
 
+    /**
+     * Stops the EventScheduler.
+     * The subscriber calling waitNextEvent() will get one final SchedulableEvent returning null.
+     */
     public void close() {
-        synchronized (mLock) {
+        Object lock = getLock();
+        synchronized (lock) {
             mClosed = true;
-            mLock.notify();
+            lock.notify();
         }
+    }
+
+    /**
+     * Gets the lock. This doesn't lock it in anyway.
+     * Subclasses can override this.
+     *
+     * @return Object
+     */
+    protected Object getLock() {
+        return mLock;
     }
 }

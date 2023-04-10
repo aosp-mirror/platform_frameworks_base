@@ -49,14 +49,12 @@ internal object ComposeInitializerImpl : ComposeInitializer {
         // initializer are created once, when the process is started.
         val savedStateRegistryOwner =
             object : SavedStateRegistryOwner {
-                private val savedStateRegistry =
+                private val savedStateRegistryController =
                     SavedStateRegistryController.create(this).apply { performRestore(null) }
 
-                override fun getLifecycle(): Lifecycle = lifecycleOwner.lifecycle
+                override val savedStateRegistry = savedStateRegistryController.savedStateRegistry
 
-                override fun getSavedStateRegistry(): SavedStateRegistry {
-                    return savedStateRegistry.savedStateRegistry
-                }
+                override fun getLifecycle(): Lifecycle = lifecycleOwner.lifecycle
             }
 
         // We must call [ViewLifecycleOwner.onCreate] after creating the [SavedStateRegistryOwner]

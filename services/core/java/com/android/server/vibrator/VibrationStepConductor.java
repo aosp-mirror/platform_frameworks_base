@@ -68,7 +68,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     // Not guarded by lock because they're not modified by this conductor, it's used here only to
     // check immutable attributes. The status and other mutable states are changed by the service or
     // by the vibrator steps.
-    private final Vibration mVibration;
+    private final HalVibration mVibration;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
 
     private final PriorityQueue<Step> mNextSteps = new PriorityQueue<>();
@@ -95,7 +95,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     private int mRemainingStartSequentialEffectSteps;
     private int mSuccessfulVibratorOnSteps;
 
-    VibrationStepConductor(Vibration vib, VibrationSettings vibrationSettings,
+    VibrationStepConductor(HalVibration vib, VibrationSettings vibrationSettings,
             DeviceVibrationEffectAdapter effectAdapter,
             SparseArray<VibratorController> availableVibrators,
             VibrationThread.VibratorManagerHooks vibratorManagerHooks) {
@@ -157,10 +157,10 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         mNextSteps.offer(new StartSequentialEffectStep(this, sequentialEffect));
         // Vibration will start playing in the Vibrator, following the effect timings and delays.
         // Report current time as the vibration start time, for debugging.
-        mVibration.stats().reportStarted();
+        mVibration.stats.reportStarted();
     }
 
-    public Vibration getVibration() {
+    public HalVibration getVibration() {
         // No thread assertion: immutable
         return mVibration;
     }

@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DISABLED;
 
+import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
@@ -189,7 +190,7 @@ public class PackageDexOptimizer {
         }
 
         // We do not dexopt a package with no code.
-        if (!pkg.isHasCode()) {
+        if (!pkg.isDeclaredHavingCode()) {
             return false;
         }
 
@@ -287,7 +288,7 @@ public class PackageDexOptimizer {
         // For each code path in the package, this array contains the class loader context that
         // needs to be passed to dexopt in order to ensure correct optimizations.
         boolean[] pathsWithCode = new boolean[paths.size()];
-        pathsWithCode[0] = pkg.isHasCode();
+        pathsWithCode[0] = pkg.isDeclaredHavingCode();
         for (int i = 1; i < paths.size(); i++) {
             pathsWithCode[i] = (pkg.getSplitFlags()[i - 1] & ApplicationInfo.FLAG_HAS_CODE) != 0;
         }
@@ -329,8 +330,22 @@ public class PackageDexOptimizer {
 
             String profileName = ArtManager.getProfileName(
                     i == 0 ? null : pkg.getSplitNames()[i - 1]);
-            final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
-                    || packageUseInfo.isUsedByOtherApps(path);
+
+            final boolean isUsedByOtherApps;
+            if (options.isDexoptAsSharedLibrary()) {
+                isUsedByOtherApps = true;
+            } else if (useArtService()) {
+                // We get here when collecting dexopt commands in OTA preopt, even when ART Service
+                // is in use. packageUseInfo isn't useful in that case since the legacy dex use
+                // database hasn't been updated. So we'd have to query ART Service instead, but it
+                // doesn't provide that API. Just cop-out and bypass the cloud profile handling.
+                // That means such apps will get preopted wrong, and we'll leave it to a later
+                // background dexopt after reboot instead.
+                isUsedByOtherApps = false;
+            } else {
+                isUsedByOtherApps = packageUseInfo.isUsedByOtherApps(path);
+            }
+
             String compilerFilter = getRealCompilerFilter(pkg, options.getCompilerFilter());
             // If the app is used by other apps, we must not use the existing profile because it
             // may contain user data, unless the profile is newly created on install.
@@ -386,7 +401,7 @@ public class PackageDexOptimizer {
                             options.getCompilationReason());
                     // OTAPreopt doesn't have stats so don't report in that case.
                     if (packageStats != null) {
-                        Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
+                        Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "dex2oat-metrics");
                         try {
                             long sessionId = sRandom.nextLong();
                             ArtStatsLogUtils.writeStatsLog(
@@ -403,7 +418,7 @@ public class PackageDexOptimizer {
                                     dexCodeIsa,
                                     path);
                         } finally {
-                            Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
+                            Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
                         }
                     }
 
@@ -446,6 +461,14 @@ public class PackageDexOptimizer {
     private boolean prepareCloudProfile(AndroidPackage pkg, String profileName, String path,
             @Nullable String dexMetadataPath) throws LegacyDexoptDisabledException {
         if (dexMetadataPath != null) {
+            if (mInstaller.isIsolated()) {
+                // If the installer is isolated, the two calls to it below will return immediately,
+                // so this only short-circuits that a bit. We need to do it to avoid the
+                // LegacyDexoptDisabledException getting thrown first, when we get here during OTA
+                // preopt and ART Service is enabled.
+                return true;
+            }
+
             try {
                 // Make sure we don't keep any existing contents.
                 mInstaller.deleteReferenceProfile(pkg.getPackageName(), profileName);
@@ -879,7 +902,12 @@ public class PackageDexOptimizer {
     private int getDexoptNeeded(String packageName, String path, String isa, String compilerFilter,
             String classLoaderContext, int profileAnalysisResult, boolean downgrade,
             int dexoptFlags, String oatDir) throws LegacyDexoptDisabledException {
-        Installer.checkLegacyDexoptDisabled();
+        // Allow calls from OtaDexoptService even when ART Service is in use. The installer is
+        // isolated in that case so later calls to it won't call into installd anyway.
+        if (!mInstaller.isIsolated()) {
+            Installer.checkLegacyDexoptDisabled();
+        }
+
         final boolean shouldBePublic = (dexoptFlags & DEXOPT_PUBLIC) != 0;
         final boolean isProfileGuidedFilter = (dexoptFlags & DEXOPT_PROFILE_GUIDED) != 0;
         boolean newProfile = profileAnalysisResult == PROFILE_ANALYSIS_OPTIMIZE;
@@ -948,6 +976,8 @@ public class PackageDexOptimizer {
      */
     private int analyseProfiles(AndroidPackage pkg, int uid, String profileName,
             String compilerFilter) throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
+
         // Check if we are allowed to merge and if the compiler filter is profile guided.
         if (!isProfileGuidedCompilerFilter(compilerFilter)) {
             return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;

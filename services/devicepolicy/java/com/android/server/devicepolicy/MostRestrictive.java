@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
+import android.app.admin.PolicyValue;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,25 +25,31 @@ import java.util.Map;
 
 final class MostRestrictive<V> extends ResolutionMechanism<V> {
 
-    private List<V> mMostToLeastRestrictive;
+    private List<PolicyValue<V>> mMostToLeastRestrictive;
 
-    MostRestrictive(@NonNull List<V> mostToLeastRestrictive) {
+    MostRestrictive(@NonNull List<PolicyValue<V>> mostToLeastRestrictive) {
         mMostToLeastRestrictive = mostToLeastRestrictive;
     }
 
     @Override
-    V resolve(@NonNull LinkedHashMap<EnforcingAdmin, V> adminPolicies) {
+    PolicyValue<V> resolve(@NonNull LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminPolicies) {
         if (adminPolicies.isEmpty()) {
             return null;
         }
-        for (V value : mMostToLeastRestrictive) {
+        for (PolicyValue<V> value : mMostToLeastRestrictive) {
             if (adminPolicies.containsValue(value)) {
                 return value;
             }
         }
         // Return first set policy if none can be found in known values
-        Map.Entry<EnforcingAdmin, V> policy = adminPolicies.entrySet().stream().findFirst().get();
+        Map.Entry<EnforcingAdmin, PolicyValue<V>> policy =
+                adminPolicies.entrySet().stream().findFirst().get();
         return policy.getValue();
+    }
+
+    @Override
+    android.app.admin.MostRestrictive<V> getParcelableResolutionMechanism() {
+        return new android.app.admin.MostRestrictive<V>(mMostToLeastRestrictive);
     }
 
     @Override

@@ -17,10 +17,8 @@
 package com.android.systemui.screenshot;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
-import static com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
@@ -44,8 +42,8 @@ import android.app.ExitTransitionCoordinator;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
 import android.app.ICompatCameraControlCallback;
 import android.app.Notification;
+import android.app.assist.AssistContent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -99,8 +97,10 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.util.Assert;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -113,6 +113,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -272,6 +274,7 @@ public class ScreenshotController {
     private final ScrollCaptureClient mScrollCaptureClient;
     private final PhoneWindow mWindow;
     private final DisplayManager mDisplayManager;
+    private final DisplayTracker mDisplayTracker;
     private final ScrollCaptureController mScrollCaptureController;
     private final LongScreenshotData mLongScreenshotHolder;
     private final boolean mIsLowRamDevice;
@@ -280,16 +283,17 @@ public class ScreenshotController {
     private final TimeoutHandler mScreenshotHandler;
     private final ActionIntentExecutor mActionExecutor;
     private final UserManager mUserManager;
-    private final WorkProfileMessageController mWorkProfileMessageController;
+    private final AssistContentRequester mAssistContentRequester;
 
     private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
         if (DEBUG_INPUT) {
             Log.d(TAG, "Predictive Back callback dispatched");
         }
-        respondToBack();
+        respondToKeyDismissal();
     };
 
     private ScreenshotView mScreenshotView;
+    private final MessageContainerController mMessageContainerController;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
@@ -328,7 +332,9 @@ public class ScreenshotController {
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
             ActionIntentExecutor actionExecutor,
             UserManager userManager,
-            WorkProfileMessageController workProfileMessageController
+            AssistContentRequester assistContentRequester,
+            MessageContainerController messageContainerController,
+            DisplayTracker displayTracker
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
@@ -354,13 +360,15 @@ public class ScreenshotController {
         });
 
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
+        mDisplayTracker = displayTracker;
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mFlags = flags;
         mActionExecutor = actionExecutor;
         mUserManager = userManager;
-        mWorkProfileMessageController = workProfileMessageController;
+        mMessageContainerController = messageContainerController;
+        mAssistContentRequester = assistContentRequester;
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
@@ -390,41 +398,130 @@ public class ScreenshotController {
                 ClipboardOverlayController.SELF_PERMISSION, null, Context.RECEIVER_NOT_EXPORTED);
     }
 
-    @MainThread
-    void takeScreenshotFullscreen(ComponentName topComponent, Consumer<Uri> finisher,
+    void handleScreenshot(ScreenshotData screenshot, Consumer<Uri> finisher,
             RequestCallback requestCallback) {
         Assert.isMainThread();
         mCurrentRequestCallback = requestCallback;
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getDefaultDisplay().getRealMetrics(displayMetrics);
-        takeScreenshotInternal(
-                topComponent, finisher,
-                new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
-    }
+        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN) {
+            Rect bounds = getFullScreenRect();
+            screenshot.setBitmap(
+                    mImageCapture.captureDisplay(mDisplayTracker.getDefaultDisplayId(), bounds));
+            screenshot.setScreenBounds(bounds);
+        }
 
-    @MainThread
-    void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
-            Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
-            Consumer<Uri> finisher, RequestCallback requestCallback) {
-        Assert.isMainThread();
-        if (screenshot == null) {
-            Log.e(TAG, "Got null bitmap from screenshot message");
+        if (screenshot.getBitmap() == null) {
+            Log.e(TAG, "handleScreenshot: Screenshot bitmap was null");
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_capture_text);
-            requestCallback.reportError();
+            if (mCurrentRequestCallback != null) {
+                mCurrentRequestCallback.reportError();
+            }
             return;
         }
 
-        boolean showFlash = false;
-        if (screenshotScreenBounds == null
-                || !aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
-            showFlash = true;
-            visibleInsets = Insets.NONE;
-            screenshotScreenBounds = new Rect(0, 0, screenshot.getWidth(), screenshot.getHeight());
+        mScreenBitmap = screenshot.getBitmap();
+        String oldPackageName = mPackageName;
+        mPackageName = screenshot.getPackageNameString();
+
+        if (!isUserSetupComplete(Process.myUserHandle())) {
+            Log.w(TAG, "User setup not complete, displaying toast only");
+            // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
+            // and sharing shouldn't be exposed to the user.
+            saveScreenshotAndToast(screenshot.getUserHandle(), finisher);
+            return;
         }
-        mCurrentRequestCallback = requestCallback;
-        saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, topComponent,
-                showFlash, UserHandle.of(userId));
+
+        mBroadcastSender.sendBroadcast(new Intent(ClipboardOverlayController.SCREENSHOT_ACTION),
+                ClipboardOverlayController.SELF_PERMISSION);
+
+        mScreenshotTakenInPortrait =
+                mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
+
+        // Optimizations
+        mScreenBitmap.setHasAlpha(false);
+        mScreenBitmap.prepareToDraw();
+
+        prepareViewForNewScreenshot(screenshot, oldPackageName);
+
+        saveScreenshotInWorkerThread(screenshot.getUserHandle(), finisher,
+                this::showUiOnActionsReady, this::showUiOnQuickShareActionReady);
+
+        // The window is focusable by default
+        setWindowFocusable(true);
+        mScreenshotView.requestFocus();
+
+        enqueueScrollCaptureRequest(screenshot.getUserHandle());
+
+        attachWindow();
+
+        boolean showFlash = true;
+        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+            if (screenshot.getScreenBounds() != null
+                    && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getInsets(),
+                            screenshot.getScreenBounds())) {
+                showFlash = false;
+            } else {
+                showFlash = true;
+                screenshot.setInsets(Insets.NONE);
+                screenshot.setScreenBounds(new Rect(0, 0, screenshot.getBitmap().getWidth(),
+                        screenshot.getBitmap().getHeight()));
+            }
+        }
+
+        prepareAnimation(screenshot.getScreenBounds(), showFlash, () -> {
+            mMessageContainerController.onScreenshotTaken(screenshot);
+        });
+
+        mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
+                mContext.getDrawable(R.drawable.overlay_badge_background),
+                screenshot.getUserHandle()));
+        mScreenshotView.setScreenshot(screenshot);
+
+        if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && screenshot.getTaskId() >= 0) {
+            mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
+                    new AssistContentRequester.Callback() {
+                        @Override
+                        public void onAssistContentAvailable(AssistContent assistContent) {
+                            screenshot.setContextUrl(assistContent.getWebUri());
+                        }
+                    });
+        }
+
+        // ignore system bar insets for the purpose of window layout
+        mWindow.getDecorView().setOnApplyWindowInsetsListener(
+                (v, insets) -> WindowInsets.CONSUMED);
+        mScreenshotHandler.cancelTimeout(); // restarted after animation
+    }
+
+    void prepareViewForNewScreenshot(ScreenshotData screenshot, String oldPackageName) {
+        withWindowAttached(() -> {
+            if (mUserManager.isManagedProfile(screenshot.getUserHandle().getIdentifier())) {
+                mScreenshotView.announceForAccessibility(mContext.getResources().getString(
+                        R.string.screenshot_saving_work_profile_title));
+            } else {
+                mScreenshotView.announceForAccessibility(
+                        mContext.getResources().getString(R.string.screenshot_saving_title));
+            }
+        });
+
+        mScreenshotView.reset();
+
+        if (mScreenshotView.isAttachedToWindow()) {
+            // if we didn't already dismiss for another reason
+            if (!mScreenshotView.isDismissing()) {
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_REENTERED, 0,
+                        oldPackageName);
+            }
+            if (DEBUG_WINDOW) {
+                Log.d(TAG, "saveScreenshot: screenshotView is already attached, resetting. "
+                        + "(dismissing=" + mScreenshotView.isDismissing() + ")");
+            }
+        }
+
+        mScreenshotView.setPackageName(mPackageName);
+
+        mScreenshotView.updateOrientation(
+                mWindowManager.getCurrentWindowMetrics().getWindowInsets());
     }
 
     /**
@@ -474,15 +571,17 @@ public class ScreenshotController {
         // Note that this may block if the sound is still being loaded (very unlikely) but we can't
         // reliably release in the background because the service is being destroyed.
         try {
-            MediaPlayer player = mCameraSound.get();
+            MediaPlayer player = mCameraSound.get(1, TimeUnit.SECONDS);
             if (player != null) {
                 player.release();
             }
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            mCameraSound.cancel(true);
+            Log.w(TAG, "Error releasing shutter sound", e);
         }
     }
 
-    private void respondToBack() {
+    private void respondToKeyDismissal() {
         dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
     }
 
@@ -497,6 +596,7 @@ public class ScreenshotController {
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.screenshot, null);
+        mMessageContainerController.setView(mScreenshotView);
         mScreenshotView.addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
                     @Override
@@ -537,14 +637,15 @@ public class ScreenshotController {
                 setWindowFocusable(false);
             }
         }, mActionExecutor, mFlags);
+        mScreenshotView.setDefaultDisplay(mDisplayTracker.getDefaultDisplayId());
         mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
                 if (DEBUG_INPUT) {
-                    Log.d(TAG, "onKeyEvent: KeyEvent.KEYCODE_BACK");
+                    Log.d(TAG, "onKeyEvent: " + keyCode);
                 }
-                respondToBack();
+                respondToKeyDismissal();
                 return true;
             }
             return false;
@@ -560,87 +661,23 @@ public class ScreenshotController {
         setContentView(mScreenshotView);
     }
 
-    /**
-     * Takes a screenshot of the current display and shows an animation.
-     */
-    private void takeScreenshotInternal(ComponentName topComponent, Consumer<Uri> finisher,
-            Rect crop) {
-        mScreenshotTakenInPortrait =
-                mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
-
-        // copy the input Rect, since SurfaceControl.screenshot can mutate it
-        Rect screenRect = new Rect(crop);
-        Bitmap screenshot = mImageCapture.captureDisplay(DEFAULT_DISPLAY, crop);
-
-        if (screenshot == null) {
-            Log.e(TAG, "takeScreenshotInternal: Screenshot bitmap was null");
-            mNotificationsController.notifyScreenshotError(
-                    R.string.screenshot_failed_to_capture_text);
-            if (mCurrentRequestCallback != null) {
-                mCurrentRequestCallback.reportError();
-            }
-            return;
-        }
-
-        saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, topComponent, true,
-                Process.myUserHandle());
-
-        mBroadcastSender.sendBroadcast(new Intent(ClipboardOverlayController.SCREENSHOT_ACTION),
-                ClipboardOverlayController.SELF_PERMISSION);
+    private void prepareAnimation(Rect screenRect, boolean showFlash,
+            Runnable onAnimationComplete) {
+        mScreenshotView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        if (DEBUG_WINDOW) {
+                            Log.d(TAG, "onPreDraw: startAnimation");
+                        }
+                        mScreenshotView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        startAnimation(screenRect, showFlash, onAnimationComplete);
+                        return true;
+                    }
+                });
     }
 
-    private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
-            Insets screenInsets, ComponentName topComponent, boolean showFlash, UserHandle owner) {
-        withWindowAttached(() -> {
-            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
-                    && mUserManager.isManagedProfile(owner.getIdentifier())) {
-                mScreenshotView.announceForAccessibility(mContext.getResources().getString(
-                        R.string.screenshot_saving_work_profile_title));
-            } else {
-                mScreenshotView.announceForAccessibility(
-                        mContext.getResources().getString(R.string.screenshot_saving_title));
-            }
-        });
-
-        mScreenshotView.reset();
-
-        if (mScreenshotView.isAttachedToWindow()) {
-            // if we didn't already dismiss for another reason
-            if (!mScreenshotView.isDismissing()) {
-                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_REENTERED, 0, mPackageName);
-            }
-            if (DEBUG_WINDOW) {
-                Log.d(TAG, "saveScreenshot: screenshotView is already attached, resetting. "
-                        + "(dismissing=" + mScreenshotView.isDismissing() + ")");
-            }
-        }
-        mPackageName = topComponent == null ? "" : topComponent.getPackageName();
-        mScreenshotView.setPackageName(mPackageName);
-
-        mScreenshotView.updateOrientation(
-                mWindowManager.getCurrentWindowMetrics().getWindowInsets());
-
-        mScreenBitmap = screenshot;
-
-        if (!isUserSetupComplete(owner)) {
-            Log.w(TAG, "User setup not complete, displaying toast only");
-            // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
-            // and sharing shouldn't be exposed to the user.
-            saveScreenshotAndToast(owner, finisher);
-            return;
-        }
-
-        // Optimizations
-        mScreenBitmap.setHasAlpha(false);
-        mScreenBitmap.prepareToDraw();
-
-        saveScreenshotInWorkerThread(owner, finisher, this::showUiOnActionsReady,
-                this::showUiOnQuickShareActionReady);
-
-        // The window is focusable by default
-        setWindowFocusable(true);
-        mScreenshotView.requestFocus();
-
+    private void enqueueScrollCaptureRequest(UserHandle owner) {
         // Wait until this window is attached to request because it is
         // the reference used to locate the target window (below).
         withWindowAttached(() -> {
@@ -678,30 +715,6 @@ public class ScreenshotController {
                         }
                     });
         });
-
-        attachWindow();
-        mScreenshotView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        if (DEBUG_WINDOW) {
-                            Log.d(TAG, "onPreDraw: startAnimation");
-                        }
-                        mScreenshotView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        startAnimation(screenRect, showFlash);
-                        return true;
-                    }
-                });
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
-                    mContext.getDrawable(R.drawable.overlay_badge_background), owner));
-        }
-        mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
-
-        // ignore system bar insets for the purpose of window layout
-        mWindow.getDecorView().setOnApplyWindowInsetsListener(
-                (v, insets) -> WindowInsets.CONSUMED);
-        mScreenshotHandler.cancelTimeout(); // restarted after animation
     }
 
     private void requestScrollCapture(UserHandle owner) {
@@ -714,7 +727,7 @@ public class ScreenshotController {
             mLastScrollCaptureRequest.cancel(true);
         }
         final ListenableFuture<ScrollCaptureResponse> future =
-                mScrollCaptureClient.request(DEFAULT_DISPLAY);
+                mScrollCaptureClient.request(mDisplayTracker.getDefaultDisplayId());
         mLastScrollCaptureRequest = future;
         mLastScrollCaptureRequest.addListener(() ->
                 onScrollCaptureResponseReady(future, owner), mMainExecutor);
@@ -745,7 +758,8 @@ public class ScreenshotController {
             mScreenshotView.showScrollChip(response.getPackageName(), /* onClick */ () -> {
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 getDefaultDisplay().getRealMetrics(displayMetrics);
-                Bitmap newScreenshot = mImageCapture.captureDisplay(DEFAULT_DISPLAY,
+                Bitmap newScreenshot = mImageCapture.captureDisplay(
+                        mDisplayTracker.getDefaultDisplayId(),
                         new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
                 mScreenshotView.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
@@ -793,7 +807,7 @@ public class ScreenshotController {
                                 transitionDestination, onTransitionEnd,
                                 longScreenshot);
                         // TODO: Do this via ActionIntentExecutor instead.
-                        mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                        mContext.closeSystemDialogs();
                     }
             );
 
@@ -809,7 +823,8 @@ public class ScreenshotController {
                     SCREENSHOT_REMOTE_RUNNER, 0, 0);
             try {
                 WindowManagerGlobal.getWindowManagerService()
-                        .overridePendingAppTransitionRemote(runner, DEFAULT_DISPLAY);
+                        .overridePendingAppTransitionRemote(runner,
+                                mDisplayTracker.getDefaultDisplayId());
             } catch (Exception e) {
                 Log.e(TAG, "Error overriding screenshot app transition", e);
             }
@@ -937,13 +952,22 @@ public class ScreenshotController {
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation(Rect screenRect, boolean showFlash) {
+    private void startAnimation(Rect screenRect, boolean showFlash, Runnable onAnimationComplete) {
         if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
             mScreenshotAnimation.cancel();
         }
 
         mScreenshotAnimation =
                 mScreenshotView.createScreenshotDropInAnimation(screenRect, showFlash);
+        if (onAnimationComplete != null) {
+            mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    onAnimationComplete.run();
+                }
+            });
+        }
 
         // Play the shutter sound to notify that we've taken a screenshot
         playCameraSound();
@@ -956,9 +980,7 @@ public class ScreenshotController {
 
     /** Reset screenshot view and then call onCompleteRunnable */
     private void finishDismiss() {
-        if (DEBUG_DISMISS) {
-            Log.d(TAG, "finishDismiss");
-        }
+        Log.d(TAG, "finishDismiss");
         if (mLastScrollCaptureRequest != null) {
             mLastScrollCaptureRequest.cancel(true);
             mLastScrollCaptureRequest = null;
@@ -1042,9 +1064,6 @@ public class ScreenshotController {
 
     private void doPostAnimation(ScreenshotController.SavedImageData imageData) {
         mScreenshotView.setChipIntents(imageData);
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mWorkProfileMessageController.onScreenshotTaken(imageData.owner, mScreenshotView);
-        }
     }
 
     /**
@@ -1101,8 +1120,7 @@ public class ScreenshotController {
                     R.string.screenshot_failed_to_save_text);
         } else {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
-            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
-                    && mUserManager.isManagedProfile(imageData.owner.getIdentifier())) {
+            if (mUserManager.isManagedProfile(imageData.owner.getIdentifier())) {
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED_TO_WORK_PROFILE, 0,
                         mPackageName);
             }
@@ -1110,13 +1128,8 @@ public class ScreenshotController {
     }
 
     private boolean isUserSetupComplete(UserHandle owner) {
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
-                    .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
-        } else {
-            return Settings.Secure.getInt(mContext.getContentResolver(),
-                    SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
-        }
+        return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
+                .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     /**
@@ -1147,11 +1160,17 @@ public class ScreenshotController {
     }
 
     private Display getDefaultDisplay() {
-        return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+        return mDisplayManager.getDisplay(mDisplayTracker.getDefaultDisplayId());
     }
 
     private boolean allowLongScreenshots() {
         return !mIsLowRamDevice;
+    }
+
+    private Rect getFullScreenRect() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getDefaultDisplay().getRealMetrics(displayMetrics);
+        return new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
     }
 
     /** Does the aspect ratio of the bitmap with insets removed match the bounds. */

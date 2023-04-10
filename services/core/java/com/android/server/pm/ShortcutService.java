@@ -27,6 +27,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.IUriGrantsManager;
+import android.app.UidObserver;
 import android.app.UriGrantsManager;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -121,8 +122,6 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.uri.UriGrantsManagerInternal;
 
-import libcore.io.IoUtils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -181,6 +180,9 @@ public class ShortcutService extends IShortcutService.Stub {
     static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = 15;
 
     @VisibleForTesting
+    static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 100;
+
+    @VisibleForTesting
     static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
 
     @VisibleForTesting
@@ -206,6 +208,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     static final String FILENAME_USER_PACKAGES = "shortcuts.xml";
+
+    @VisibleForTesting
+    static final String FILENAME_USER_PACKAGES_RESERVE_COPY =
+            FILENAME_USER_PACKAGES + ".reservecopy";
 
     static final String DIRECTORY_BITMAPS = "bitmaps";
 
@@ -255,6 +261,11 @@ public class ShortcutService extends IShortcutService.Stub {
          * Key name for the max dynamic shortcuts per activity. (int)
          */
         String KEY_MAX_SHORTCUTS = "max_shortcuts";
+
+        /**
+         * Key name for the max shortcuts can be retained in system ram per app. (int)
+         */
+        String KEY_MAX_SHORTCUTS_PER_APP = "max_shortcuts_per_app";
 
         /**
          * Key name for icon compression quality, 0-100.
@@ -329,9 +340,14 @@ public class ShortcutService extends IShortcutService.Stub {
             new SparseArray<>();
 
     /**
-     * Max number of dynamic + manifest shortcuts that each application can have at a time.
+     * Max number of dynamic + manifest shortcuts that each activity can have at a time.
      */
     private int mMaxShortcuts;
+
+    /**
+     * Max number of shortcuts that can exists in system ram for each application.
+     */
+    private int mMaxShortcutsPerApp;
 
     /**
      * Max number of updating API calls that each application can make during the interval.
@@ -575,7 +591,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+    final private IUidObserver mUidObserver = new UidObserver() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             injectPostToHandler(() -> handleOnUidStateChanged(uid, procState));
@@ -585,20 +601,6 @@ public class ShortcutService extends IShortcutService.Stub {
         public void onUidGone(int uid, boolean disabled) {
             injectPostToHandler(() ->
                     handleOnUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT));
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
@@ -806,6 +808,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
         mMaxShortcuts = Math.max(0, (int) parser.getLong(
                 ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY));
+
+        mMaxShortcutsPerApp = Math.max(0, (int) parser.getLong(
+                ConfigConstants.KEY_MAX_SHORTCUTS_PER_APP, DEFAULT_MAX_SHORTCUTS_PER_APP));
 
         final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
                 ? (int) parser.getLong(
@@ -1051,32 +1056,38 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @VisibleForTesting
-    final File getUserFile(@UserIdInt int userId) {
-        return new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
+    final ResilientAtomicFile getUserFile(@UserIdInt int userId) {
+        File mainFile = new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
+        File temporaryBackup = new File(injectUserDataPath(userId),
+                FILENAME_USER_PACKAGES + ".backup");
+        File reserveCopy = new File(injectUserDataPath(userId),
+                FILENAME_USER_PACKAGES_RESERVE_COPY);
+        int fileMode = FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH;
+        return new ResilientAtomicFile(mainFile, temporaryBackup, reserveCopy, fileMode,
+                "user shortcut", null);
     }
 
     @GuardedBy("mLock")
     private void saveUserLocked(@UserIdInt int userId) {
-        final File path = getUserFile(userId);
-        if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Saving to " + path);
-        }
+        try (ResilientAtomicFile file = getUserFile(userId)) {
+            FileOutputStream os = null;
+            try {
+                if (DEBUG || DEBUG_REBOOT) {
+                    Slog.d(TAG, "Saving to " + file);
+                }
 
-        path.getParentFile().mkdirs();
-        final AtomicFile file = new AtomicFile(path);
-        FileOutputStream os = null;
-        try {
-            os = file.startWrite();
+                os = file.startWrite();
 
-            saveUserInternalLocked(userId, os, /* forBackup= */ false);
+                saveUserInternalLocked(userId, os, /* forBackup= */ false);
 
-            file.finishWrite(os);
+                file.finishWrite(os);
 
-            // Remove all dangling bitmap files.
-            cleanupDanglingBitmapDirectoriesLocked(userId);
-        } catch (XmlPullParserException | IOException e) {
-            Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
-            file.failWrite(os);
+                // Remove all dangling bitmap files.
+                cleanupDanglingBitmapDirectoriesLocked(userId);
+            } catch (XmlPullParserException | IOException e) {
+                Slog.e(TAG, "Failed to write to file " + file, e);
+                file.failWrite(os);
+            }
         }
 
         getUserShortcutsLocked(userId).logSharingShortcutStats(mMetricsLogger);
@@ -1113,29 +1124,25 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Nullable
     private ShortcutUser loadUserLocked(@UserIdInt int userId) {
-        final File path = getUserFile(userId);
-        if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Loading from " + path);
-        }
-        final AtomicFile file = new AtomicFile(path);
-
-        final FileInputStream in;
-        try {
-            in = file.openRead();
-        } catch (FileNotFoundException e) {
-            if (DEBUG || DEBUG_REBOOT) {
-                Slog.d(TAG, "Not found " + path);
+        try (ResilientAtomicFile file = getUserFile(userId)) {
+            FileInputStream in = null;
+            try {
+                if (DEBUG || DEBUG_REBOOT) {
+                    Slog.d(TAG, "Loading from " + file);
+                }
+                in = file.openRead();
+                if (in == null) {
+                    if (DEBUG || DEBUG_REBOOT) {
+                        Slog.d(TAG, "Not found " + file);
+                    }
+                    return null;
+                }
+                return loadUserInternal(userId, in, /* forBackup= */ false);
+            } catch (Exception e) {
+                // Remove corrupted file and retry.
+                file.failRead(in, e);
+                return loadUserLocked(userId);
             }
-            return null;
-        }
-        try {
-            final ShortcutUser ret = loadUserInternal(userId, in, /* forBackup= */ false);
-            return ret;
-        } catch (IOException | XmlPullParserException | InvalidFileFormatException e) {
-            Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
-            return null;
-        } finally {
-            IoUtils.closeQuietly(in);
         }
     }
 
@@ -1625,7 +1632,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return false;
         }
         int uid = injectGetPackageUid(systemChooser.getPackageName(), UserHandle.USER_SYSTEM);
-        return uid == callingUid;
+        return UserHandle.getAppId(uid) == UserHandle.getAppId(callingUid);
     }
 
     private void enforceSystemOrShell() {
@@ -1756,6 +1763,13 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     int getMaxActivityShortcuts() {
         return mMaxShortcuts;
+    }
+
+    /**
+     * Return the max number of shortcuts can be retaiend in system ram for each application.
+     */
+    int getMaxAppShortcuts() {
+        return mMaxShortcutsPerApp;
     }
 
     /**
@@ -2512,11 +2526,17 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS,
                 "getShareTargets");
+        final ComponentName chooser = injectChooserActivity();
+        final String pkg = (chooser != null
+                && mPackageManagerInternal.getComponentEnabledSetting(chooser,
+                injectBinderCallingUid(), userId) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+                ? chooser.getPackageName() : mContext.getPackageName();
         synchronized (mLock) {
             throwIfUserLockedL(userId);
             final List<ShortcutManager.ShareShortcutInfo> shortcutInfoList = new ArrayList<>();
             final ShortcutUser user = getUserShortcutsLocked(userId);
-            user.forAllPackages(p -> shortcutInfoList.addAll(p.getMatchingShareTargets(filter)));
+            user.forAllPackages(p -> shortcutInfoList.addAll(
+                    p.getMatchingShareTargets(filter, pkg)));
             return new ParceledListSlice<>(shortcutInfoList);
         }
     }

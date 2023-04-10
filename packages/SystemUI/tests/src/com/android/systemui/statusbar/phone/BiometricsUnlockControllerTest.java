@@ -89,7 +89,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardViewMediator mKeyguardViewMediator;
     @Mock
-    private BiometricUnlockController.BiometricModeListener mBiometricModeListener;
+    private BiometricUnlockController.BiometricUnlockEventsListener mBiometricUnlockEventsListener;
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
@@ -145,7 +145,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mSystemClock
         );
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
-        mBiometricUnlockController.addBiometricModeListener(mBiometricModeListener);
+        mBiometricUnlockController.addListener(mBiometricUnlockEventsListener);
         when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
     }
 
@@ -515,6 +515,26 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
         // THEN always vibrate the device
         verify(mVibratorHelper).vibrateAuthError(anyString());
+    }
+
+    @Test
+    public void onFingerprintDetect_showBouncer() {
+        // WHEN fingerprint detect occurs
+        mBiometricUnlockController.onBiometricDetected(UserHandle.USER_CURRENT,
+                BiometricSourceType.FINGERPRINT, true /* isStrongBiometric */);
+
+        // THEN shows primary bouncer
+        verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(anyBoolean());
+    }
+
+    @Test
+    public void onFaceDetect_showBouncer() {
+        // WHEN face detect occurs
+        mBiometricUnlockController.onBiometricDetected(UserHandle.USER_CURRENT,
+                BiometricSourceType.FACE, false /* isStrongBiometric */);
+
+        // THEN shows primary bouncer
+        verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(anyBoolean());
     }
 
     private void givenFingerprintModeUnlockCollapsing() {

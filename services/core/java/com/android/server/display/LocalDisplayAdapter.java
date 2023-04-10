@@ -42,10 +42,12 @@ import android.view.DisplayShape;
 import android.view.RoundedCorners;
 import android.view.SurfaceControl;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 
@@ -204,6 +206,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         // This is only set in the runnable returned from requestDisplayStateLocked.
         private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private float mSdrBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        private float mCurrentHdrSdrRatio = Float.NaN;
         private int mDefaultModeId = INVALID_MODE_ID;
         private int mSystemPreferredModeId = INVALID_MODE_ID;
         private int mDefaultModeGroup;
@@ -673,14 +676,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.flags |= DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY;
 
                 if (mIsFirstDisplay) {
-                    if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
+                    if (res.getBoolean(R.bool.config_mainBuiltInDisplayIsRound)
                             || (Build.IS_EMULATOR
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
                 } else {
-                    if (!res.getBoolean(
-                                com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
+                    if (!res.getBoolean(R.bool.config_localDisplaysMirrorContent)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                     }
 
@@ -709,18 +711,23 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.displayShape = DisplayShape.fromResources(
                         res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
+                mInfo.name = getDisplayDeviceConfig().getName();
+
                 if (mStaticDisplayInfo.isInternal) {
                     mInfo.type = Display.TYPE_INTERNAL;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                     mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
-                    mInfo.name = res.getString(
-                            com.android.internal.R.string.display_manager_built_in_display_name);
+                    if (mInfo.name == null) {
+                        mInfo.name = res.getString(R.string.display_manager_built_in_display_name);
+                    }
                 } else {
                     mInfo.type = Display.TYPE_EXTERNAL;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
-                    mInfo.name = getContext().getResources().getString(
-                            com.android.internal.R.string.display_manager_hdmi_display_name);
+                    if (mInfo.name == null) {
+                        mInfo.name = getContext().getResources().getString(
+                                R.string.display_manager_hdmi_display_name);
+                    }
                 }
                 mInfo.frameRateOverrides = mFrameRateOverrides;
 
@@ -729,6 +736,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
                 mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
                 mInfo.brightnessDefault = getDisplayDeviceConfig().getBrightnessDefault();
+                mInfo.hdrSdrRatio = mCurrentHdrSdrRatio;
             }
             return mInfo;
         }
@@ -840,12 +848,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     private void setCommittedState(int state) {
                         // After the display state is set, let's update the committed state.
-                        getHandler().post(() -> {
-                            synchronized (getSyncRoot()) {
-                                mCommittedState = state;
-                                updateDeviceInfoLocked();
-                            }
-                        });
+                        synchronized (getSyncRoot()) {
+                            mCommittedState = state;
+                            updateDeviceInfoLocked();
+                        }
                     }
 
                     private void setDisplayBrightness(float brightnessState,
@@ -881,6 +887,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     "SdrScreenBrightness",
                                     BrightnessSynchronizer.brightnessFloatToInt(
                                             sdrBrightnessState));
+
+                            handleHdrSdrNitsChanged(nits, sdrNits);
+
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
@@ -896,6 +905,24 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     private float backlightToNits(float backlight) {
                         return getDisplayDeviceConfig().getNitsFromBacklight(backlight);
+                    }
+
+                    void handleHdrSdrNitsChanged(float displayNits, float sdrNits) {
+                        final float newHdrSdrRatio;
+                        if (displayNits != DisplayDeviceConfig.NITS_INVALID
+                                && sdrNits != DisplayDeviceConfig.NITS_INVALID) {
+                            // Ensure the ratio stays >= 1.0f as values below that are nonsensical
+                            newHdrSdrRatio = Math.max(1.f, displayNits / sdrNits);
+                        } else {
+                            newHdrSdrRatio = Float.NaN;
+                        }
+                        if (!BrightnessSynchronizer.floatEquals(
+                                mCurrentHdrSdrRatio, newHdrSdrRatio)) {
+                            synchronized (getSyncRoot()) {
+                                mCurrentHdrSdrRatio = newHdrSdrRatio;
+                                updateDeviceInfoLocked();
+                            }
+                        }
                     }
                 };
             }
@@ -1234,8 +1261,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 return false;
             }
             final Resources res = getOverlayContext().getResources();
-            int[] ports = res.getIntArray(
-                    com.android.internal.R.array.config_localPrivateDisplayPorts);
+            int[] ports = res.getIntArray(R.array.config_localPrivateDisplayPorts);
             if (ports != null) {
                 int port = physicalAddress.getPort();
                 for (int p : ports) {

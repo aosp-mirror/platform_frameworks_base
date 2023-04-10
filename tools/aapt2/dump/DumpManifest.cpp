@@ -16,6 +16,8 @@
 
 #include "DumpManifest.h"
 
+#include <androidfw/ApkParsing.h>
+
 #include <algorithm>
 #include <array>
 #include <memory>
@@ -2118,6 +2120,33 @@ class InputType : public ManifestExtractor::Element {
   }
 };
 
+/** Represents <install-constraints> elements. **/
+class InstallConstraints : public ManifestExtractor::Element {
+ public:
+  InstallConstraints() = default;
+  std::vector<std::string> fingerprint_prefixes;
+
+  void Extract(xml::Element* element) override {
+    for (xml::Element* child : element->GetChildElements()) {
+      if (child->name == "fingerprint-prefix") {
+        xml::Attribute* attr = child->FindAttribute(kAndroidNamespace, "value");
+        if (attr) {
+          fingerprint_prefixes.push_back(attr->value);
+        }
+      }
+    }
+  }
+
+  void Print(text::Printer* printer) override {
+    if (!fingerprint_prefixes.empty()) {
+      printer->Print(StringPrintf("install-constraints:\n"));
+      for (const auto& prefix : fingerprint_prefixes) {
+        printer->Print(StringPrintf("  fingerprint-prefix='%s'\n", prefix.c_str()));
+      }
+    }
+  }
+};
+
 /** Represents <original-package> elements. **/
 class OriginalPackage : public ManifestExtractor::Element {
  public:
@@ -2729,19 +2758,25 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
       }));
   supports_screen_ = screen ? screen : &default_screens;
 
-  // Gather the supported architectures_ of the app
-  std::set<std::string> architectures_from_apk;
+  bool has_renderscript_bitcode = false;
   auto it = apk_->GetFileCollection()->Iterator();
   while (it->HasNext()) {
-    auto file_path = it->Next()->GetSource().path;
-    if (file_path.starts_with("lib/")) {
-      file_path = file_path.substr(4);
-      size_t pos = file_path.find('/');
-      if (pos != std::string::npos) {
-        file_path = file_path.substr(0, pos);
-      }
+    if (it->Next()->GetSource().path.ends_with(".bc")) {
+      has_renderscript_bitcode = true;
+      break;
+    }
+  }
 
-      architectures_from_apk.insert(file_path);
+  // Gather the supported architectures_ of the app
+  std::set<std::string> architectures_from_apk;
+  it = apk_->GetFileCollection()->Iterator();
+  while (it->HasNext()) {
+    auto file_path = it->Next()->GetSource().path.c_str();
+
+    const char* last_slash =
+        android::util::ValidLibraryPathLastSlash(file_path, has_renderscript_bitcode, false);
+    if (last_slash) {
+      architectures_from_apk.insert(std::string(file_path + APK_LIB_LEN, last_slash));
     }
   }
 
@@ -2861,7 +2896,7 @@ template <typename T>
 constexpr const char* GetExpectedTagForType() {
   // This array does not appear at runtime, as GetExpectedTagForType function is used by compiler
   // to inject proper 'expected_tag' into ElementCast.
-  std::array<std::pair<const char*, bool>, 37> tags = {
+  std::array<std::pair<const char*, bool>, 38> tags = {
       std::make_pair("action", std::is_same<Action, T>::value),
       std::make_pair("activity", std::is_same<Activity, T>::value),
       std::make_pair("additional-certificate", std::is_same<AdditionalCertificate, T>::value),
@@ -2870,6 +2905,7 @@ constexpr const char* GetExpectedTagForType() {
       std::make_pair("compatible-screens", std::is_same<CompatibleScreens, T>::value),
       std::make_pair("feature-group", std::is_same<FeatureGroup, T>::value),
       std::make_pair("input-type", std::is_same<InputType, T>::value),
+      std::make_pair("install-constraints", std::is_same<InstallConstraints, T>::value),
       std::make_pair("intent-filter", std::is_same<IntentFilter, T>::value),
       std::make_pair("meta-data", std::is_same<MetaData, T>::value),
       std::make_pair("manifest", std::is_same<Manifest, T>::value),
@@ -2940,6 +2976,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"compatible-screens", &CreateType<CompatibleScreens>},
           {"feature-group", &CreateType<FeatureGroup>},
           {"input-type", &CreateType<InputType>},
+          {"install-constraints", &CreateType<InstallConstraints>},
           {"intent-filter", &CreateType<IntentFilter>},
           {"manifest", &CreateType<Manifest>},
           {"meta-data", &CreateType<MetaData>},

@@ -30,6 +30,8 @@ public final class CategoryKey {
     public static final String CATEGORY_APPS = "com.android.settings.category.ia.apps";
     public static final String CATEGORY_APPS_DEFAULT =
             "com.android.settings.category.ia.apps.default";
+    public static final String CATEGORY_SPECIAL_APP_ACCESS =
+            "com.android.settings.category.ia.special_app_access";
     public static final String CATEGORY_BATTERY = "com.android.settings.category.ia.battery";
     public static final String CATEGORY_DISPLAY = "com.android.settings.category.ia.display";
     public static final String CATEGORY_SOUND = "com.android.settings.category.ia.sound";
@@ -68,6 +70,8 @@ public final class CategoryKey {
             "com.android.settings.category.ia.smart_battery_settings";
     public static final String CATEGORY_COMMUNAL_SETTINGS =
             "com.android.settings.category.ia.communal";
+    public static final String CATEGORY_MORE_SECURITY_PRIVACY_SETTINGS =
+            "com.android.settings.category.ia.more_security_privacy_settings";
 
     public static final Map<String, String> KEY_COMPAT_MAP;
 

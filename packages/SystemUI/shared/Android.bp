@@ -91,6 +91,9 @@ java_library {
     static_libs: [
         "SystemUI-flag-types",
     ],
+    optimize: {
+        proguard_flags_files: ["proguard_flags.flags"],
+    },
     java_version: "1.8",
     min_sdk_version: "current",
 }

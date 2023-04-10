@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doReturn;
@@ -42,11 +43,11 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
 import android.window.TaskConstants;
 import android.window.WindowContainerTransaction;
@@ -107,6 +108,9 @@ public class WindowDecorationTests extends ShellTestCase {
     private SurfaceControl.Transaction mMockSurfaceControlFinishT;
     private SurfaceControl.Transaction mMockSurfaceControlAddWindowT;
     private WindowDecoration.RelayoutParams mRelayoutParams = new WindowDecoration.RelayoutParams();
+    private int mCaptionMenuWidthId;
+    private int mCaptionMenuShadowRadiusId;
+    private int mCaptionMenuCornerRadiusId;
 
     @Before
     public void setUp() {
@@ -116,8 +120,9 @@ public class WindowDecorationTests extends ShellTestCase {
 
         mRelayoutParams.mLayoutResId = 0;
         mRelayoutParams.mCaptionHeightId = R.dimen.test_freeform_decor_caption_height;
-        // Caption should have fixed width except in testLayoutResultCalculation_fullWidthCaption()
-        mRelayoutParams.mCaptionWidthId = R.dimen.test_freeform_decor_caption_width;
+        mCaptionMenuWidthId = R.dimen.test_freeform_decor_caption_menu_width;
+        mCaptionMenuShadowRadiusId = R.dimen.test_caption_menu_shadow_radius;
+        mCaptionMenuCornerRadiusId = R.dimen.test_caption_menu_corner_radius;
         mRelayoutParams.mShadowRadiusId = R.dimen.test_window_decor_shadow_radius;
 
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory)
@@ -240,7 +245,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
         verify(captionContainerSurfaceBuilder).setContainerLayer();
         verify(mMockSurfaceControlStartT).setPosition(captionContainerSurface, 20, 40);
-        verify(mMockSurfaceControlStartT).setWindowCrop(captionContainerSurface, 432, 64);
+        verify(mMockSurfaceControlStartT).setWindowCrop(captionContainerSurface, 300, 64);
         verify(mMockSurfaceControlStartT).show(captionContainerSurface);
 
         verify(mMockSurfaceControlViewHostFactory).create(any(), eq(defaultDisplay), any());
@@ -248,14 +253,16 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlViewHost)
                 .setView(same(mMockView),
                         argThat(lp -> lp.height == 64
-                                && lp.width == 432
+                                && lp.width == 300
                                 && (lp.flags & LayoutParams.FLAG_NOT_FOCUSABLE) != 0));
         if (ViewRootImpl.CAPTION_ON_SHELL) {
             verify(mMockView).setTaskFocusState(true);
-            verify(mMockWindowContainerTransaction)
-                    .addRectInsetsProvider(taskInfo.token,
-                            new Rect(100, 300, 400, 364),
-                            new int[] { InsetsState.ITYPE_CAPTION_BAR });
+            verify(mMockWindowContainerTransaction).addInsetsSource(
+                    eq(taskInfo.token),
+                    any(),
+                    eq(0 /* index */),
+                    eq(WindowInsets.Type.captionBar()),
+                    eq(new Rect(100, 300, 400, 364)));
         }
 
         verify(mMockSurfaceControlFinishT)
@@ -319,7 +326,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlViewHost, never()).release();
         verify(t, never()).apply();
         verify(mMockWindowContainerTransaction, never())
-                .removeInsetsProvider(eq(taskInfo.token), any());
+                .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
 
         taskInfo.isVisible = false;
         windowDecor.relayout(taskInfo);
@@ -330,7 +337,8 @@ public class WindowDecorationTests extends ShellTestCase {
         releaseOrder.verify(t).remove(decorContainerSurface);
         releaseOrder.verify(t).remove(taskBackgroundSurface);
         releaseOrder.verify(t).apply();
-        verify(mMockWindowContainerTransaction).removeInsetsProvider(eq(taskInfo.token), any());
+        verify(mMockWindowContainerTransaction)
+                .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -431,7 +439,19 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(additionalWindowSurfaceBuilder).setParent(decorContainerSurface);
         verify(additionalWindowSurfaceBuilder).build();
         verify(mMockSurfaceControlAddWindowT).setPosition(additionalWindowSurface, 20, 40);
-        verify(mMockSurfaceControlAddWindowT).setWindowCrop(additionalWindowSurface, 432, 64);
+        final int width = WindowDecoration.loadDimensionPixelSize(
+                mContext.getResources(), mCaptionMenuWidthId);
+        final int height = WindowDecoration.loadDimensionPixelSize(
+                mContext.getResources(), mRelayoutParams.mCaptionHeightId);
+        verify(mMockSurfaceControlAddWindowT).setWindowCrop(additionalWindowSurface, width, height);
+        final int shadowRadius = WindowDecoration.loadDimensionPixelSize(mContext.getResources(),
+                mCaptionMenuShadowRadiusId);
+        verify(mMockSurfaceControlAddWindowT)
+                .setShadowRadius(additionalWindowSurface, shadowRadius);
+        final int cornerRadius = WindowDecoration.loadDimensionPixelSize(mContext.getResources(),
+                mCaptionMenuCornerRadiusId);
+        verify(mMockSurfaceControlAddWindowT)
+                .setCornerRadius(additionalWindowSurface, cornerRadius);
         verify(mMockSurfaceControlAddWindowT).show(additionalWindowSurface);
         verify(mMockSurfaceControlViewHostFactory, Mockito.times(2))
                 .create(any(), eq(defaultDisplay), any());
@@ -484,7 +504,6 @@ public class WindowDecorationTests extends ShellTestCase {
         final SurfaceControl taskSurface = mock(SurfaceControl.class);
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
 
-        mRelayoutParams.mCaptionWidthId = Resources.ID_NULL;
         windowDecor.relayout(taskInfo);
 
         verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
@@ -558,15 +577,17 @@ public class WindowDecorationTests extends ShellTestCase {
             final Resources resources = mDecorWindowContext.getResources();
             int x = mRelayoutParams.mCaptionX;
             int y = mRelayoutParams.mCaptionY;
-            int width = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionWidthId);
+            int width = loadDimensionPixelSize(resources, mCaptionMenuWidthId);
             int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
+            int shadowRadius = loadDimensionPixelSize(resources, mCaptionMenuShadowRadiusId);
+            int cornerRadius = loadDimensionPixelSize(resources, mCaptionMenuCornerRadiusId);
             String name = "Test Window";
             WindowDecoration.AdditionalWindow additionalWindow =
-                    addWindow(R.layout.desktop_mode_decor_handle_menu, name,
+                    addWindow(R.layout.desktop_mode_window_decor_handle_menu_app_info_pill, name,
                             mMockSurfaceControlAddWindowT,
                             x - mRelayoutResult.mDecorContainerOffsetX,
                             y - mRelayoutResult.mDecorContainerOffsetY,
-                            width, height);
+                            width, height, shadowRadius, cornerRadius);
             return additionalWindow;
         }
     }

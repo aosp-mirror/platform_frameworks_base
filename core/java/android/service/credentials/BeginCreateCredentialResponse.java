@@ -16,8 +16,10 @@
 
 package android.service.credentials;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,13 +34,21 @@ import java.util.Objects;
  */
 public final class BeginCreateCredentialResponse implements Parcelable {
     private final @NonNull List<CreateEntry> mCreateEntries;
-    private final @Nullable CreateEntry mRemoteCreateEntry;
+    private final @Nullable RemoteEntry mRemoteCreateEntry;
+
+    /**
+     * Creates an empty response instance, to be used when there are no {@link CreateEntry}
+     * to return.
+     */
+    public BeginCreateCredentialResponse() {
+        this(/*createEntries=*/new ArrayList<>(), /*remoteCreateEntry=*/null);
+    }
 
     private BeginCreateCredentialResponse(@NonNull Parcel in) {
         List<CreateEntry> createEntries = new ArrayList<>();
         in.readTypedList(createEntries, CreateEntry.CREATOR);
         mCreateEntries = createEntries;
-        mRemoteCreateEntry = in.readTypedObject(CreateEntry.CREATOR);
+        mRemoteCreateEntry = in.readTypedObject(RemoteEntry.CREATOR);
     }
 
     @Override
@@ -67,7 +77,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
 
     /* package-private */ BeginCreateCredentialResponse(
             @NonNull List<CreateEntry> createEntries,
-            @Nullable CreateEntry remoteCreateEntry) {
+            @Nullable RemoteEntry remoteCreateEntry) {
         this.mCreateEntries = createEntries;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mCreateEntries);
@@ -80,7 +90,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
     }
 
     /** Returns the remote create entry to be displayed on the UI. */
-    public @Nullable CreateEntry getRemoteCreateEntry() {
+    public @Nullable RemoteEntry getRemoteCreateEntry() {
         return mRemoteCreateEntry;
     }
 
@@ -90,7 +100,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     public static final class Builder {
         private @NonNull List<CreateEntry> mCreateEntries = new ArrayList<>();
-        private @Nullable CreateEntry mRemoteCreateEntry;
+        private @Nullable RemoteEntry mRemoteCreateEntry;
 
         /**
          * Sets the list of create entries to be shown on the UI.
@@ -129,21 +139,26 @@ public final class BeginCreateCredentialResponse implements Parcelable {
          * result should be set to {@link android.app.Activity#RESULT_OK} and an extra with the
          * {@link CredentialProviderService#EXTRA_CREATE_CREDENTIAL_RESPONSE} key should be populated
          * with a {@link android.credentials.CreateCredentialResponse} object.
+         *
+         * <p> Note that as a provider service you will only be able to set a remote entry if :
+         * - Provider service possesses the
+         * {@link Manifest.permission.PROVIDE_REMOTE_CREDENTIALS} permission.
+         * - Provider service is configured as the provider that can provide remote entries.
+         *
+         * If the above conditions are not met, setting back {@link BeginCreateCredentialResponse}
+         * on the callback from {@link CredentialProviderService#onBeginCreateCredential}
+         * will throw a {@link SecurityException}.
          */
-        public @NonNull Builder setRemoteCreateEntry(@Nullable CreateEntry remoteCreateEntry) {
+        @RequiresPermission(Manifest.permission.PROVIDE_REMOTE_CREDENTIALS)
+        public @NonNull Builder setRemoteCreateEntry(@Nullable RemoteEntry remoteCreateEntry) {
             mRemoteCreateEntry = remoteCreateEntry;
             return this;
         }
 
         /**
          * Builds a new instance of {@link BeginCreateCredentialResponse}.
-         *
-         * @throws NullPointerException If {@code createEntries} is null.
-         * @throws IllegalArgumentException If {@code createEntries} is empty.
          */
         public @NonNull BeginCreateCredentialResponse build() {
-            Preconditions.checkCollectionNotEmpty(mCreateEntries, "createEntries must "
-                    + "not be null, or empty");
             return new BeginCreateCredentialResponse(mCreateEntries, mRemoteCreateEntry);
         }
     }

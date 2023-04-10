@@ -56,8 +56,6 @@ constructor(
 
     private fun listenForDreamingToLockscreen() {
         scope.launch {
-            // Using isDreamingWithOverlay provides an optimized path to LOCKSCREEN state, which
-            // otherwise would have gone through OCCLUDED first
             keyguardInteractor.isAbleToDream
                 .sample(
                     combine(

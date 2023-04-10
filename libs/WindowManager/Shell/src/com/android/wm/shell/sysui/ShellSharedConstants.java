@@ -22,6 +22,8 @@ package com.android.wm.shell.sysui;
 public class ShellSharedConstants {
     // See IPip.aidl
     public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
+    // See IBubbles.aidl
+    public static final String KEY_EXTRA_SHELL_BUBBLES = "extra_shell_bubbles";
     // See ISplitScreen.aidl
     public static final String KEY_EXTRA_SHELL_SPLIT_SCREEN = "extra_shell_split_screen";
     // See IOneHanded.aidl

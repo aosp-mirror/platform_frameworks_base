@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <!-- user customized shortcuts preference -->
-  <string name="pref_user_shortcuts">accessibility_menu_user_shortcuts</string>
-  <!-- key for user customized shortcuts -->
-  <string name="pref_user_shortcuts_key">pref_user_shortcuts_key</string>
-  <!-- value for empty shortcut -->
-  <string name="pref_user_shortcuts_value_empty">[]</string>
   <!-- empty string for shortcut label -->
   <string name="empty_content"></string>
 
@@ -14,4 +8,6 @@
   <!-- key for Help&feedback settings [CHAR_LIMIT=NONE] -->
   <string name="pref_help">pref_help</string>
 
+  <!-- url for help page -->
+  <string name="help_url">https://support.google.com/accessibility/android/answer/9078941</string>
 </resources>

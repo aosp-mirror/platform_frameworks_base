@@ -1,14 +1,30 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.credentialmanager.ui.theme
 
+import android.annotation.AttrRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
-val Grey100 = Color(0xFFF1F3F4)
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
-val lightColorAccentSecondary = Color(0xFFC2E7FF)
-val lightBackgroundColor = Color(0xFFF0F0F0)
-val lightSurface1 = Color(0xFF6991D6)
-val textColorSecondary = Color(0xFF40484B)
-val textColorPrimary = Color(0xFF191C1D)
+/** Read the [Color] from the given [attribute]. */
+@Composable
+@ReadOnlyComposable
+fun colorAttr(@AttrRes attribute: Int): Color {
+    return AndroidColorScheme.getColor(LocalContext.current, attribute)
+}

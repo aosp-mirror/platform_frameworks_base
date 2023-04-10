@@ -29,6 +29,7 @@ import static com.android.server.display.DisplayDeviceConfig.HDR_PERCENT_OF_SCRE
 import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -96,12 +97,14 @@ public class HighBrightnessModeControllerTest {
     private Binder mDisplayToken;
     private String mDisplayUniqueId;
     private Context mContextSpy;
+    private HighBrightnessModeMetadata mHighBrightnessModeMetadata;
 
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     @Mock IThermalService mThermalServiceMock;
     @Mock Injector mInjectorMock;
+    @Mock HighBrightnessModeController.HdrBrightnessDeviceConfig mHdrBrightnessDeviceConfigMock;
 
     @Captor ArgumentCaptor<IThermalEventListener> mThermalEventListenerCaptor;
 
@@ -118,6 +121,7 @@ public class HighBrightnessModeControllerTest {
         mTestLooper = new TestLooper(mClock::now);
         mDisplayToken = null;
         mDisplayUniqueId = "unique_id";
+
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         final MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(resolver);
@@ -134,7 +138,8 @@ public class HighBrightnessModeControllerTest {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
                 mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken,
-                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, null, () -> {}, mContextSpy);
+                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, null, () -> {},
+                null, mContextSpy);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
         assertEquals(hbmc.getTransitionPoint(), HBM_TRANSITION_POINT_INVALID, 0.0f);
     }
@@ -144,7 +149,8 @@ public class HighBrightnessModeControllerTest {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
                 mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken,
-                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, null, () -> {}, mContextSpy);
+                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, null, () -> {},
+                null, mContextSpy);
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1); // below allowed range
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
@@ -372,16 +378,47 @@ public class HighBrightnessModeControllerTest {
 
         // ensure hdr doesn't turn on if layer is too small
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                layerWidth, smallLayerHeight, 0 /*flags*/);
+                layerWidth, smallLayerHeight, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_OFF, hbmc.getHighBrightnessMode());
 
         // Now check with layer larger than 50%
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                layerWidth, largeLayerHeight, 0 /*flags*/);
+                layerWidth, largeLayerHeight, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_HDR, hbmc.getHighBrightnessMode());
     }
+
+    @Test
+    public void testHdrRespectsMaxDesiredHdrSdrRatio() {
+        final HighBrightnessModeController hbmc = new TestHbmBuilder()
+                .setClock(new OffsettableClock())
+                .setHdrBrightnessConfig(mHdrBrightnessDeviceConfigMock)
+                .build();
+
+        // Passthrough return the max desired hdr/sdr ratio
+        when(mHdrBrightnessDeviceConfigMock.getHdrBrightnessFromSdr(anyFloat(), anyFloat()))
+                .thenAnswer(i -> i.getArgument(1));
+
+        hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 2.0f /*maxDesiredHdrSdrRatio*/);
+        advanceTime(0);
+        assertEquals(2.0f, hbmc.getHdrBrightnessValue(), EPSILON);
+
+        // The hdr ratio cannot be less than 1.
+        hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 0.5f /*maxDesiredHdrSdrRatio*/);
+        advanceTime(0);
+        assertEquals(1.0f, hbmc.getHdrBrightnessValue(), EPSILON);
+
+        // The hdr ratio can be as much as positive infinity
+        hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/,
+                Float.POSITIVE_INFINITY /*maxDesiredHdrSdrRatio*/);
+        advanceTime(0);
+        assertEquals(Float.POSITIVE_INFINITY, hbmc.getHdrBrightnessValue(), 0.0);
+    }
+
 
     @Test
     public void testHdrTrumpsSunlight() {
@@ -396,7 +433,7 @@ public class HighBrightnessModeControllerTest {
 
         // turn on hdr
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_HDR, hbmc.getHighBrightnessMode());
         assertEquals(TRANSITION_POINT, hbmc.getCurrentBrightnessMax(), EPSILON);
@@ -408,14 +445,14 @@ public class HighBrightnessModeControllerTest {
 
         // Check limit when HBM is off
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_HDR, hbmc.getHighBrightnessMode());
         assertEquals(TRANSITION_POINT, hbmc.getCurrentBrightnessMax(), EPSILON);
 
         // Check limit with HBM is set to HDR
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 0 /*numberOfHdrLayers*/,
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_OFF, hbmc.getHighBrightnessMode());
         assertEquals(TRANSITION_POINT, hbmc.getCurrentBrightnessMax(), EPSILON);
@@ -426,7 +463,7 @@ public class HighBrightnessModeControllerTest {
         final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
 
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_HDR, hbmc.getHighBrightnessMode());
 
@@ -469,7 +506,7 @@ public class HighBrightnessModeControllerTest {
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT);
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_HDR, hbmc.getHighBrightnessMode());
 
@@ -479,7 +516,7 @@ public class HighBrightnessModeControllerTest {
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_TRANSITION_REASON_UNKNOWN));
 
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 0 /*numberOfHdrLayers*/,
-                0, 0, 0 /*flags*/);
+                0, 0, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
 
         // Verify Stats HBM_OFF
@@ -513,7 +550,7 @@ public class HighBrightnessModeControllerTest {
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmcOnBrightnessChanged(hbmc, DEFAULT_MIN);
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
         assertEquals(HIGH_BRIGHTNESS_MODE_HDR, hbmc.getHighBrightnessMode());
 
@@ -653,7 +690,7 @@ public class HighBrightnessModeControllerTest {
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_TRANSITION_REASON_UNKNOWN));
 
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
-                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 1.0f /*maxDesiredHdrSdrRatio*/);
         advanceTime(0);
 
         verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
@@ -692,16 +729,42 @@ public class HighBrightnessModeControllerTest {
         assertEquals(hbmMode, hbmc.getHighBrightnessMode());
     }
 
+    private class TestHbmBuilder {
+        OffsettableClock mClock;
+        HighBrightnessModeController.HdrBrightnessDeviceConfig mHdrBrightnessCfg;
+
+        TestHbmBuilder setClock(OffsettableClock clock) {
+            mClock = clock;
+            return this;
+        }
+
+        TestHbmBuilder setHdrBrightnessConfig(
+                HighBrightnessModeController.HdrBrightnessDeviceConfig hdrBrightnessCfg
+        ) {
+            mHdrBrightnessCfg = hdrBrightnessCfg;
+            return this;
+        }
+
+        HighBrightnessModeController build() {
+            initHandler(mClock);
+            if (mHighBrightnessModeMetadata == null) {
+                mHighBrightnessModeMetadata = new HighBrightnessModeMetadata();
+            }
+            return new HighBrightnessModeController(mInjectorMock, mHandler, DISPLAY_WIDTH,
+                    DISPLAY_HEIGHT, mDisplayToken, mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX,
+                    DEFAULT_HBM_DATA, mHdrBrightnessCfg, () -> {}, mHighBrightnessModeMetadata,
+                    mContextSpy);
+        }
+
+    }
+
     private HighBrightnessModeController createDefaultHbm() {
-        return createDefaultHbm(null);
+        return new TestHbmBuilder().build();
     }
 
     // Creates instance with standard initialization values.
     private HighBrightnessModeController createDefaultHbm(OffsettableClock clock) {
-        initHandler(clock);
-        return new HighBrightnessModeController(mInjectorMock, mHandler, DISPLAY_WIDTH,
-                DISPLAY_HEIGHT, mDisplayToken, mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX,
-                DEFAULT_HBM_DATA, null, () -> {}, mContextSpy);
+        return new TestHbmBuilder().setClock(clock).build();
     }
 
     private void initHandler(OffsettableClock clock) {

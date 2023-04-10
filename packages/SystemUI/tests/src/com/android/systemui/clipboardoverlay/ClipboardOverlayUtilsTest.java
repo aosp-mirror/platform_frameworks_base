@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
@@ -77,18 +78,15 @@ public class ClipboardOverlayUtilsTest extends SysuiTestCase {
 
     @Test
     public void test_getAction_noLinks_returnsEmptyOptional() {
-        ClipData.Item item = new ClipData.Item("no text links");
-        item.setTextLinks(Mockito.mock(TextLinks.class));
-
-        Optional<RemoteAction> action = mClipboardUtils.getAction(item, "");
+        Optional<RemoteAction> action =
+                mClipboardUtils.getAction(Mockito.mock(TextLinks.class), "abc");
 
         assertTrue(action.isEmpty());
     }
 
     @Test
     public void test_getAction_returnsFirstLink() {
-        when(mClipDataItem.getTextLinks()).thenReturn(getFakeTextLinks());
-        when(mClipDataItem.getText()).thenReturn("");
+        TextLinks links = getFakeTextLinksBuilder().build();
         RemoteAction actionA = constructRemoteAction("abc");
         RemoteAction actionB = constructRemoteAction("def");
         TextClassification classificationA = Mockito.mock(TextClassification.class);
@@ -98,15 +96,14 @@ public class ClipboardOverlayUtilsTest extends SysuiTestCase {
         when(mTextClassifier.classifyText(anyString(), anyInt(), anyInt(), isNull())).thenReturn(
                 classificationA, classificationB);
 
-        RemoteAction result = mClipboardUtils.getAction(mClipDataItem, "def").orElse(null);
+        RemoteAction result = mClipboardUtils.getAction(links, "test").orElse(null);
 
         assertEquals(actionA, result);
     }
 
     @Test
     public void test_getAction_skipsMatchingComponent() {
-        when(mClipDataItem.getTextLinks()).thenReturn(getFakeTextLinks());
-        when(mClipDataItem.getText()).thenReturn("");
+        TextLinks links = getFakeTextLinksBuilder().build();
         RemoteAction actionA = constructRemoteAction("abc");
         RemoteAction actionB = constructRemoteAction("def");
         TextClassification classificationA = Mockito.mock(TextClassification.class);
@@ -116,7 +113,31 @@ public class ClipboardOverlayUtilsTest extends SysuiTestCase {
         when(mTextClassifier.classifyText(anyString(), anyInt(), anyInt(), isNull())).thenReturn(
                 classificationA, classificationB);
 
-        RemoteAction result = mClipboardUtils.getAction(mClipDataItem, "abc").orElse(null);
+        RemoteAction result = mClipboardUtils.getAction(links, "abc").orElse(null);
+
+        assertEquals(actionB, result);
+    }
+
+    @Test
+    public void test_getAction_skipsShortEntity() {
+        TextLinks.Builder textLinks = new TextLinks.Builder("test text of length 22");
+        final Map<String, Float> scores = new ArrayMap<>();
+        scores.put(TextClassifier.TYPE_EMAIL, 1f);
+        textLinks.addLink(20, 22, scores);
+        textLinks.addLink(0, 22, scores);
+
+        RemoteAction actionA = constructRemoteAction("abc");
+        RemoteAction actionB = constructRemoteAction("def");
+        TextClassification classificationA = Mockito.mock(TextClassification.class);
+        when(classificationA.getActions()).thenReturn(Lists.newArrayList(actionA));
+        TextClassification classificationB = Mockito.mock(TextClassification.class);
+        when(classificationB.getActions()).thenReturn(Lists.newArrayList(actionB));
+        when(mTextClassifier.classifyText(anyString(), eq(20), eq(22), isNull())).thenReturn(
+                classificationA);
+        when(mTextClassifier.classifyText(anyString(), eq(0), eq(22), isNull())).thenReturn(
+                classificationB);
+
+        RemoteAction result = mClipboardUtils.getAction(textLinks.build(), "test").orElse(null);
 
         assertEquals(actionB, result);
     }
@@ -184,12 +205,12 @@ public class ClipboardOverlayUtilsTest extends SysuiTestCase {
         return action;
     }
 
-    private static TextLinks getFakeTextLinks() {
-        TextLinks.Builder textLinks = new TextLinks.Builder("test");
+    private static TextLinks.Builder getFakeTextLinksBuilder() {
+        TextLinks.Builder textLinks = new TextLinks.Builder("test text of length 22");
         final Map<String, Float> scores = new ArrayMap<>();
         scores.put(TextClassifier.TYPE_EMAIL, 1f);
-        textLinks.addLink(0, 0, scores);
-        textLinks.addLink(0, 0, scores);
-        return textLinks.build();
+        textLinks.addLink(0, 22, scores);
+        textLinks.addLink(0, 22, scores);
+        return textLinks;
     }
 }

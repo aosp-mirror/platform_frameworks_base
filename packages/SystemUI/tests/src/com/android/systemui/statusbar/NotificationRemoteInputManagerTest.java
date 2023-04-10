@@ -34,12 +34,15 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,8 +51,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -84,6 +85,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 () -> Optional.of(mock(CentralSurfaces.class)),
                 mStateController,
                 mRemoteInputUriController,
+                mock(RemoteInputControllerLogger.class),
                 mClickNotifier,
                 mock(ActionClickLogger.class),
                 mock(DumpManager.class));
@@ -141,6 +143,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
                 StatusBarStateController statusBarStateController,
                 RemoteInputUriController remoteInputUriController,
+                RemoteInputControllerLogger remoteInputControllerLogger,
                 NotificationClickNotifier clickNotifier,
                 ActionClickLogger actionClickLogger,
                 DumpManager dumpManager) {
@@ -153,6 +156,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     centralSurfacesOptionalLazy,
                     statusBarStateController,
                     remoteInputUriController,
+                    remoteInputControllerLogger,
                     clickNotifier,
                     actionClickLogger,
                     dumpManager);

@@ -56,14 +56,14 @@ public class BaseDialogResult implements Parcelable {
      * The intent extra key for the {@code BaseDialogResult} object when the credential
      * selector activity finishes.
      */
-    private static final String EXTRA_BASE_RESULT =
-            "android.credentials.ui.extra.BASE_RESULT";
+    private static final String EXTRA_BASE_RESULT = "android.credentials.ui.extra.BASE_RESULT";
 
     /** @hide **/
     @IntDef(prefix = {"RESULT_CODE_"}, value = {
             RESULT_CODE_DIALOG_USER_CANCELED,
             RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS,
             RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION,
+            RESULT_CODE_DATA_PARSING_FAILURE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
@@ -80,6 +80,10 @@ public class BaseDialogResult implements Parcelable {
      * {@code resultData}.
      */
     public static final int RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION = 2;
+    /**
+     * The UI was canceled because it failed to parse the incoming data.
+     */
+    public static final int RESULT_CODE_DATA_PARSING_FAILURE = 3;
 
     @NonNull
     private final IBinder mRequestToken;

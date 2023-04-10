@@ -23,6 +23,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
@@ -44,8 +45,8 @@ import java.util.function.Supplier;
 /**
  * A class to keep track of the authentication state for a given client.
  */
-public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
-        implements AuthenticationConsumer {
+public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
+        extends AcquisitionClient<T> implements AuthenticationConsumer {
 
     // New, has not started yet
     public static final int STATE_NEW = 0;
@@ -73,9 +74,9 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Nullable
     private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
+    private final O mOptions;
     private final boolean mIsRestricted;
     private final boolean mAllowBackgroundAuthentication;
-    private final boolean mIsKeyguardBypassEnabled;
     // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
     //  the state. We should think of a way to improve this in the future.
     @State
@@ -90,14 +91,15 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     public AuthenticationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int targetUserId, long operationId, boolean restricted, @NonNull String owner,
-            int cookie, boolean requireConfirmation, int sensorId,
+            long operationId, boolean restricted, @NonNull O options,
+            int cookie, boolean requireConfirmation,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
-            boolean shouldVibrate, boolean isKeyguardBypassEnabled, int sensorStrength) {
-        super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
-                shouldVibrate, biometricLogger, biometricContext);
+            boolean shouldVibrate, int sensorStrength) {
+        super(context, lazyDaemon, token, listener, options.getUserId(),
+                options.getOpPackageName(), cookie, options.getSensorId(), shouldVibrate,
+                biometricLogger, biometricContext);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
@@ -107,9 +109,9 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
         mAllowBackgroundAuthentication = allowBackgroundAuthentication;
-        mIsKeyguardBypassEnabled = isKeyguardBypassEnabled;
         mShouldUseLockoutTracker = lockoutTracker != null;
         mSensorStrength = sensorStrength;
+        mOptions = options;
     }
 
     @LockoutTracker.LockoutMode
@@ -149,6 +151,11 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     private boolean isSettings() {
         return Utils.isSettings(getContext(), getOwnerString());
+    }
+
+    /** The options requested at the start of the operation. */
+    protected O getOptions() {
+        return mOptions;
     }
 
     @Override
@@ -372,14 +379,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @State
     public int getState() {
         return mState;
-    }
-
-    /**
-     * @return true if the client supports bypass (e.g. passive auth such as face), and if it's
-     * enabled by the user.
-     */
-    public boolean isKeyguardBypassEnabled() {
-        return mIsKeyguardBypassEnabled;
     }
 
     @Override

@@ -54,6 +54,8 @@ interface ITvInteractiveAppManager {
     void sendStreamVolume(in IBinder sessionToken, float volume, int userId);
     void sendTrackInfoList(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
     void sendCurrentTvInputId(in IBinder sessionToken, in String inputId, int userId);
+    void sendTimeShiftMode(in IBinder sessionToken, int mode, int userId);
+    void sendAvailableSpeeds(in IBinder sessionToken, in float[] speeds, int userId);
     void sendSigningResult(in IBinder sessionToken, in String signingId, in byte[] result,
             int userId);
     void sendTvRecordingInfo(in IBinder sessionToken, in TvRecordingInfo recordingInfo, int userId);
@@ -68,6 +70,16 @@ interface ITvInteractiveAppManager {
             in IBinder sessionToken, in String inputId, long timeMs, int userId);
     void notifyTimeShiftCurrentPositionChanged(
             in IBinder sessionToken, in String inputId, long timeMs, int userId);
+    void notifyRecordingConnectionFailed(
+            in IBinder sessionToken, in String recordingId, in String inputId, int userId);
+    void notifyRecordingDisconnected(
+            in IBinder sessionToken, in String recordingId, in String inputId, int userId);
+    void notifyRecordingTuned(
+            in IBinder sessionToken, in String recordingId, in Uri channelUri, int userId);
+    void notifyRecordingError(
+            in IBinder sessionToken, in String recordingId, int err, int userId);
+    void notifyRecordingScheduled(
+            in IBinder sessionToken, in String recordingId, in String requestId, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
@@ -79,9 +91,10 @@ interface ITvInteractiveAppManager {
     void notifyContentAllowed(in IBinder sessionToken, int userId);
     void notifyContentBlocked(in IBinder sessionToken, in String rating, int userId);
     void notifySignalStrength(in IBinder sessionToken, int stength, int userId);
-    void notifyRecordingStarted(in IBinder sessionToken, in String recordingId, int userId);
+    void notifyRecordingStarted(in IBinder sessionToken, in String recordingId, String requestId,
+            int userId);
     void notifyRecordingStopped(in IBinder sessionToken, in String recordingId, int userId);
-    void notifyTvMessage(in IBinder sessionToken, in String type, in Bundle data, int userId);
+    void notifyTvMessage(in IBinder sessionToken, in int type, in Bundle data, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);

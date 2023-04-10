@@ -22,7 +22,7 @@ import dagger.Module
 import dagger.multibindings.IntoSet
 
 @Module
-internal interface NoteTaskQuickAffordanceModule {
+interface NoteTaskQuickAffordanceModule {
 
     @[Binds IntoSet]
     fun NoteTaskQuickAffordanceConfig.bindNoteTaskQuickAffordance(): KeyguardQuickAffordanceConfig

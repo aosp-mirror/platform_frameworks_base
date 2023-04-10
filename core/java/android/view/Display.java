@@ -56,6 +56,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -110,6 +112,8 @@ public final class Display {
     private long mLastCachedAppSizeUpdate;
     private int mCachedAppWidthCompat;
     private int mCachedAppHeightCompat;
+
+    private ArrayList<HdrSdrRatioListenerWrapper> mHdrSdrRatioListeners = new ArrayList<>();
 
     /**
      * The default Display id, which is the id of the primary display assuming there is one.
@@ -358,6 +362,17 @@ public final class Display {
      * @see #getFlags()
      */
     public static final int FLAG_STEAL_TOP_FOCUS_DISABLED = 1 << 12;
+
+    /**
+     * Display flag: Indicates that the display is a rear display.
+     * <p>
+     * This flag identifies complementary displays that are facing away from the user.
+     * </p>
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_REAR = 1 << 13;
 
     /**
      * Display flag: Indicates that the contents of the display should not be scaled
@@ -1203,63 +1218,64 @@ public final class Display {
     }
 
     /**
-     * Returns the display's HDR capabilities.
+     * Returns the current display mode's HDR capabilities.
      *
      * @see #isHdr()
      */
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
-                return mDisplayInfo.hdrCapabilities;
-            }
-
             if (mDisplayInfo.hdrCapabilities == null) {
                 return null;
             }
-
-            ArraySet<Integer> enabledTypesSet = new ArraySet<>();
-            for (int supportedType : mDisplayInfo.hdrCapabilities.getSupportedHdrTypes()) {
-                boolean typeDisabled = false;
-                for (int userDisabledType : mDisplayInfo.userDisabledHdrTypes) {
-                    if (supportedType == userDisabledType) {
-                        typeDisabled = true;
-                        break;
+            int[] supportedHdrTypes;
+            if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
+                int[] modeSupportedHdrTypes = getMode().getSupportedHdrTypes();
+                supportedHdrTypes = Arrays.copyOf(modeSupportedHdrTypes,
+                        modeSupportedHdrTypes.length);
+            } else {
+                ArraySet<Integer> enabledTypesSet = new ArraySet<>();
+                for (int supportedType : getMode().getSupportedHdrTypes()) {
+                    if (!contains(mDisplayInfo.userDisabledHdrTypes, supportedType)) {
+                        enabledTypesSet.add(supportedType);
                     }
                 }
-                if (!typeDisabled) {
-                    enabledTypesSet.add(supportedType);
+
+                supportedHdrTypes = new int[enabledTypesSet.size()];
+                int index = 0;
+                for (int enabledType : enabledTypesSet) {
+                    supportedHdrTypes[index++] = enabledType;
                 }
             }
-
-            int[] enabledTypes = new int[enabledTypesSet.size()];
-            int index = 0;
-            for (int enabledType : enabledTypesSet) {
-                enabledTypes[index++] = enabledType;
-            }
-            return new HdrCapabilities(enabledTypes,
+            return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,
                     mDisplayInfo.hdrCapabilities.mMinLuminance);
         }
     }
 
+    private boolean contains(int[] disabledHdrTypes, int hdrType) {
+        for (Integer disabledHdrFormat : disabledHdrTypes) {
+            if (disabledHdrFormat == hdrType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @hide
-     * Returns the display's HDR supported types.
+     * Returns the current mode's supported HDR types.
      *
      * @see #isHdr()
-     * @see HdrCapabilities#getSupportedHdrTypes()
+     * @see Mode#getSupportedHdrTypes()
      */
     @TestApi
     @NonNull
     public int[] getReportedHdrTypes() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null) {
-                return new int[0];
-            }
-            return mDisplayInfo.hdrCapabilities.getSupportedHdrTypes();
+            return mDisplayInfo.getMode().getSupportedHdrTypes();
         }
     }
 
@@ -1277,6 +1293,93 @@ public final class Display {
                 return false;
             }
             return !(hdrCapabilities.getSupportedHdrTypes().length == 0);
+        }
+    }
+
+    /**
+     * @return Whether the display supports reporting an hdr/sdr ratio. If this is false,
+     *         {@link #getHdrSdrRatio()} will always be 1.0f
+     */
+    public boolean isHdrSdrRatioAvailable() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return !Float.isNaN(mDisplayInfo.hdrSdrRatio);
+        }
+    }
+
+    /**
+     * @return The current hdr/sdr ratio expressed as the ratio of targetHdrPeakBrightnessInNits /
+     *         targetSdrWhitePointInNits. If {@link #isHdrSdrRatioAvailable()} is false, this
+     *         always returns 1.0f.
+     */
+    public float getHdrSdrRatio() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return Float.isNaN(mDisplayInfo.hdrSdrRatio)
+                    ? 1.0f : mDisplayInfo.hdrSdrRatio;
+        }
+    }
+
+    private int findHdrSdrRatioListenerLocked(Consumer<Display> listener) {
+        for (int i = 0; i < mHdrSdrRatioListeners.size(); i++) {
+            final HdrSdrRatioListenerWrapper wrapper = mHdrSdrRatioListeners.get(i);
+            if (wrapper.mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Registers a listener that will be invoked whenever the display's hdr/sdr ratio has changed.
+     * After receiving the callback on the specified Executor, call {@link #getHdrSdrRatio()} to
+     * get the updated value.
+     * If {@link #isHdrSdrRatioAvailable()} is false, then an IllegalStateException will be thrown
+     *
+     * @see #unregisterHdrSdrRatioChangedListener(Consumer)
+     * @param executor The executor to invoke the listener on
+     * @param listener The listener to invoke when the HDR/SDR ratio changes
+     * @throws IllegalStateException if {@link #isHdrSdrRatioAvailable()} is false
+     */
+    public void registerHdrSdrRatioChangedListener(@NonNull Executor executor,
+            @NonNull Consumer<Display> listener) {
+        if (!isHdrSdrRatioAvailable()) {
+            throw new IllegalStateException("HDR/SDR ratio changed not available");
+        }
+        HdrSdrRatioListenerWrapper toRegister = null;
+        synchronized (mLock) {
+            if (findHdrSdrRatioListenerLocked(listener) == -1) {
+                toRegister = new HdrSdrRatioListenerWrapper(listener);
+                mHdrSdrRatioListeners.add(toRegister);
+            } // else already listening, don't do anything
+        }
+        if (toRegister != null) {
+            // Although we only care about the HDR/SDR ratio changing, that can also come in the
+            // form of the larger DISPLAY_CHANGED event
+            mGlobal.registerDisplayListener(toRegister, executor,
+                    DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
+                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+        }
+
+    }
+
+    /**
+     * @param listener  The previously
+     *                  {@link #registerHdrSdrRatioChangedListener(Executor, Consumer) registered}
+     *                  hdr/sdr ratio listener to remove.
+     *
+     * @see #registerHdrSdrRatioChangedListener(Executor, Consumer)
+     */
+    public void unregisterHdrSdrRatioChangedListener(@NonNull Consumer<Display> listener) {
+        HdrSdrRatioListenerWrapper toRemove = null;
+        synchronized (mLock) {
+            int index = findHdrSdrRatioListenerLocked(listener);
+            if (index != -1) {
+                toRemove = mHdrSdrRatioListeners.remove(index);
+            }
+        }
+        if (toRemove != null) {
+            mGlobal.unregisterDisplayListener(toRemove);
         }
     }
 
@@ -2323,6 +2426,10 @@ public final class Display {
          */
         public static final float INVALID_LUMINANCE = -1;
         /**
+         * Invalid HDR type value.
+         */
+        public static final int HDR_TYPE_INVALID = -1;
+        /**
          * Dolby Vision high dynamic range (HDR) display.
          */
         public static final int HDR_TYPE_DOLBY_VISION = 1;
@@ -2350,6 +2457,7 @@ public final class Display {
 
         /** @hide */
         @IntDef(prefix = { "HDR_TYPE_" }, value = {
+                HDR_TYPE_INVALID,
                 HDR_TYPE_DOLBY_VISION,
                 HDR_TYPE_HDR10,
                 HDR_TYPE_HLG,
@@ -2491,6 +2599,54 @@ public final class Display {
                     + ", mMaxLuminance=" + mMaxLuminance
                     + ", mMaxAverageLuminance=" + mMaxAverageLuminance
                     + ", mMinLuminance=" + mMinLuminance + '}';
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public static String hdrTypeToString(int hdrType) {
+            switch (hdrType) {
+                case HDR_TYPE_DOLBY_VISION:
+                    return "HDR_TYPE_DOLBY_VISION";
+                case HDR_TYPE_HDR10:
+                    return "HDR_TYPE_HDR10";
+                case HDR_TYPE_HLG:
+                    return "HDR_TYPE_HLG";
+                case HDR_TYPE_HDR10_PLUS:
+                    return "HDR_TYPE_HDR10_PLUS";
+                default:
+                    return "HDR_TYPE_INVALID";
+            }
+        }
+    }
+
+    private class HdrSdrRatioListenerWrapper implements DisplayManager.DisplayListener {
+        Consumer<Display> mListener;
+        float mLastReportedRatio = 1.f;
+
+        private HdrSdrRatioListenerWrapper(Consumer<Display> listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+            // don't care
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            // don't care
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            if (displayId == getDisplayId()) {
+                float newRatio = getHdrSdrRatio();
+                if (newRatio != mLastReportedRatio) {
+                    mListener.accept(Display.this);
+                }
+            }
         }
     }
 }

@@ -87,7 +87,8 @@ public:
     void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     void setHardwareBufferRenderParams(const HardwareBufferRenderParams& params);
     void setOpaque(bool opaque);
-    void setColorMode(ColorMode mode);
+    float setColorMode(ColorMode mode);
+    void setRenderSdrHdrRatio(float ratio);
     int64_t* frameInfo();
     void forceDrawNextFrame();
     int syncAndDrawFrame();
@@ -112,6 +113,7 @@ public:
     void stopDrawing();
     void notifyFramePending();
     void notifyCallbackPending();
+    void notifyExpensiveFrame();
 
     void dumpProfileInfo(int fd, int dumpFlags);
     // Not exported, only used for testing

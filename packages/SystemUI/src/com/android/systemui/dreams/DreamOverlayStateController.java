@@ -27,6 +27,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
@@ -56,6 +58,8 @@ public class DreamOverlayStateController implements
     public static final int STATE_LOW_LIGHT_ACTIVE = 1 << 1;
     public static final int STATE_DREAM_ENTRY_ANIMATIONS_FINISHED = 1 << 2;
     public static final int STATE_DREAM_EXIT_ANIMATIONS_RUNNING = 1 << 3;
+    public static final int STATE_HAS_ASSISTANT_ATTENTION = 1 << 4;
+    public static final int STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE = 1 << 5;
 
     private static final int OP_CLEAR_STATE = 1;
     private static final int OP_SET_STATE = 2;
@@ -83,6 +87,12 @@ public class DreamOverlayStateController implements
          */
         default void onAvailableComplicationTypesChanged() {
         }
+
+        /**
+         * Called when the low light dream is exiting and transitioning back to the user dream.
+         */
+        default void onExitLowLight() {
+        }
     }
 
     private final Executor mExecutor;
@@ -96,12 +106,24 @@ public class DreamOverlayStateController implements
 
     private final Collection<Complication> mComplications = new HashSet();
 
+    private final FeatureFlags mFeatureFlags;
+
+    private final int mSupportedTypes;
+
     @VisibleForTesting
     @Inject
     public DreamOverlayStateController(@Main Executor executor,
-            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled) {
+            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled,
+            FeatureFlags featureFlags) {
         mExecutor = executor;
         mOverlayEnabled = overlayEnabled;
+        mFeatureFlags = featureFlags;
+        if (mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)) {
+            mSupportedTypes = Complication.COMPLICATION_TYPE_NONE
+                    | Complication.COMPLICATION_TYPE_HOME_CONTROLS;
+        } else {
+            mSupportedTypes = Complication.COMPLICATION_TYPE_NONE;
+        }
         if (DEBUG) {
             Log.d(TAG, "Dream overlay enabled:" + mOverlayEnabled);
         }
@@ -173,7 +195,7 @@ public class DreamOverlayStateController implements
                     if (mShouldShowComplications) {
                         return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                     }
-                    return requiredTypes == Complication.COMPLICATION_TYPE_NONE;
+                    return (requiredTypes & mSupportedTypes) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);
@@ -245,6 +267,22 @@ public class DreamOverlayStateController implements
         return containsState(STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
     }
 
+    /**
+     * Returns whether assistant currently has the user's attention.
+     * @return {@code true} if assistant has the user's attention, {@code false} otherwise.
+     */
+    public boolean hasAssistantAttention() {
+        return containsState(STATE_HAS_ASSISTANT_ATTENTION);
+    }
+
+    /**
+     * Returns whether the dream overlay status bar is currently visible.
+     * @return {@code true} if the status bar is visible, {@code false} otherwise.
+     */
+    public boolean isDreamOverlayStatusBarVisible() {
+        return containsState(STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE);
+    }
+
     private boolean containsState(int state) {
         return (mState & state) != 0;
     }
@@ -278,6 +316,10 @@ public class DreamOverlayStateController implements
      * @param active {@code true} if low light mode is active, {@code false} otherwise.
      */
     public void setLowLightActive(boolean active) {
+        if (isLowLightActive() && !active) {
+            // Notify that we're exiting low light only on the transition from active to not active.
+            mCallbacks.forEach(Callback::onExitLowLight);
+        }
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_LOW_LIGHT_ACTIVE);
     }
 
@@ -297,6 +339,23 @@ public class DreamOverlayStateController implements
     public void setExitAnimationsRunning(boolean running) {
         modifyState(running ? OP_SET_STATE : OP_CLEAR_STATE,
                 STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
+    }
+
+    /**
+     * Sets whether assistant currently has the user's attention.
+     * @param hasAttention {@code true} if has the user's attention, {@code false} otherwise.
+     */
+    public void setHasAssistantAttention(boolean hasAttention) {
+        modifyState(hasAttention ? OP_SET_STATE : OP_CLEAR_STATE, STATE_HAS_ASSISTANT_ATTENTION);
+    }
+
+    /**
+     * Sets whether the dream overlay status bar is visible.
+     * @param visible {@code true} if the status bar is visible, {@code false} otherwise.
+     */
+    public void setDreamOverlayStatusBarVisible(boolean visible) {
+        modifyState(
+                visible ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE);
     }
 
     /**

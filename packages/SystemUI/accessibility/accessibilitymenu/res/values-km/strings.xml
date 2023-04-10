@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"ម៉ឺនុយ​ភាពងាយស្រួល"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"ម៉ឺនុយភាពងាយស្រួលផ្ដល់ម៉ឺនុយធំនៅលើអេក្រង់ ដើម្បីគ្រប់គ្រងឧបករណ៍របស់អ្នក។ អ្នកអាច​ចាក់សោឧបករណ៍​របស់អ្នក គ្រប់គ្រងកម្រិតសំឡេងនិងពន្លឺ ថតរូបអេក្រង់ និង​អ្វីៗច្រើនទៀត។"</string>
+    <string name="assistant_label" msgid="6796392082252272356">"ជំនួយការ"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Google Assistant"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"ការកំណត់​ភាព​ងាយស្រួល"</string>
+    <string name="power_label" msgid="7699720321491287839">"ថាមពល"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"ជម្រើស​ថាមពល"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"កម្មវិធី​ថ្មីៗ"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"អេក្រង់​ចាក់សោ"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"ការកំណត់រហ័ស"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"ការ​ជូនដំណឹង"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"រូបថតអេក្រង់"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"ថត​រូបថត​អេក្រង់"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"ដំឡើង​កម្រិត​សំឡេង"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"បន្ថយកម្រិតសំឡេង"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"បង្កើន​​ពន្លឺ"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"បន្ថយ​ពន្លឺ"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"ចូល​ទៅ​កាន់​អេក្រង់​មុន"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"ចូល​ទៅកាន់​អេក្រង់​បន្ទាប់​"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"ម៉ឺនុយភាពងាយស្រួលផ្ដល់ម៉ឺនុយធំនៅលើអេក្រង់ ដើម្បីគ្រប់គ្រងឧបករណ៍របស់អ្នក។ អ្នកអាច​ចាក់សោឧបករណ៍​របស់អ្នក គ្រប់គ្រងកម្រិតសំឡេងនិងពន្លឺ ថតរូបអេក្រង់ និង​អ្វីៗច្រើនទៀត។"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"គ្រប់គ្រងឧបករណ៍តាមរយៈម៉ឺនុយធំ"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"ការកំណត់​ម៉ឺនុយ​ភាពងាយស្រួល"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"ប៊ូតុង​ធំ"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"បង្កើន​ទំហំ​ប៊ូតុង​ម៉ឺនុយភាពងាយស្រួល"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"ជំនួយ"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"ពន្លឺ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"កម្រិត​សំឡេង​តន្ត្រី <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+</resources>

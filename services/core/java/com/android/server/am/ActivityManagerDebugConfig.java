@@ -16,6 +16,11 @@
 
 package com.android.server.am;
 
+import android.util.Log;
+import android.util.LogWriter;
+
+import java.io.PrintWriter;
+
 /**
  * Common class for the various debug {@link android.util.Log} output configuration in the activity
  * manager package.
@@ -37,6 +42,10 @@ class ActivityManagerDebugConfig {
 
     // Default log tag for the activity manager package.
     static final String TAG_AM = "ActivityManager";
+
+    // Default writer that emits "info" log events for the activity manager package.
+    static final PrintWriter LOG_WRITER_INFO = new PrintWriter(
+            new LogWriter(Log.INFO, TAG_AM));
 
     // Enable all debug log categories.
     static final boolean DEBUG_ALL = false;

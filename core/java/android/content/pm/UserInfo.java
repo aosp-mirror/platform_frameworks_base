@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -59,10 +60,17 @@ public class UserInfo implements Parcelable {
      */
 
     /**
-     * Primary user. Only one user can have this flag set. It identifies the first human user
-     * on a device. This flag is not supported in headless system user mode.
+     * Primary user. In practice, this is just synonymous with {@link #FLAG_SYSTEM}.
+     *
+     * <p>On many devices, this will also be the first human user.
+     * However, in {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, this
+     * should be regarded as unsupported since the system user may not be a human.
+     *
+     * @deprecated For checking for user 0, use {@link #FLAG_SYSTEM}.
+     *             For checking for the designated "main human user", use {@link #FLAG_MAIN}.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public static final int FLAG_PRIMARY = 0x00000001;
 
     /**
@@ -253,14 +261,17 @@ public class UserInfo implements Parcelable {
     public boolean guestToRemove;
 
     /**
-     * This is used to optimize the creation of an user, i.e. OEMs might choose to pre-create a
+     * This is used to optimize the creation of a user, i.e. OEMs might choose to pre-create a
      * number of users at the first boot, so the actual creation later is faster.
      *
      * <p>A {@code preCreated} user is not a real user yet, so it should not show up on regular
      * user operations (other than user creation per se).
      *
-     * <p>Once the pre-created is used to create a "real" user later on, {@code preCreate} is set to
-     * {@code false}.
+     * <p>Once the pre-created is used to create a "real" user later on, {@code preCreated} is set
+     * to {@code false}.
+     *
+     * <p><b>NOTE: Pre-created users are deprecated. This field remains to be able to recognize
+     * pre-created users in older versions, but will eventually be removed.
      */
     public boolean preCreated;
 
@@ -269,6 +280,9 @@ public class UserInfo implements Parcelable {
      * user.
      *
      * <p><b>NOTE: </b>only used for debugging purposes, it's not set when marshalled to a parcel.
+     *
+     * <p><b>NOTE: Pre-created users are deprecated. This field remains to be able to recognize
+     * pre-created users in older versions, but will eventually ve removed.
      */
     public boolean convertedFromPreCreated;
 
@@ -334,7 +348,12 @@ public class UserInfo implements Parcelable {
         }
     }
 
+    /**
+     * @deprecated For checking for user 0, compare {@link #id} to {@link UserHandle#USER_SYSTEM}.
+     *             For checking for the designated "main human user", use {@link #isMain()}.
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public boolean isPrimary() {
         return (flags & FLAG_PRIMARY) == FLAG_PRIMARY;
     }
@@ -418,16 +437,25 @@ public class UserInfo implements Parcelable {
             // Don't support switching to pre-created users until they become "real" users.
             return false;
         }
-        return !isProfile();
+        return isFull() || canSwitchToHeadlessSystemUser();
+    }
+
+    /**
+     * @return true if user is of type {@link UserManager#USER_TYPE_SYSTEM_HEADLESS} and
+     * {@link com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser} is true.
+     */
+    private boolean canSwitchToHeadlessSystemUser() {
+        return UserManager.USER_TYPE_SYSTEM_HEADLESS.equals(userType) && Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser);
     }
 
     /**
      * @return true if this user can be switched to by end user through UI.
+     * @deprecated Use {@link UserInfo#supportsSwitchTo} instead.
      */
+    @Deprecated
     public boolean supportsSwitchToByUser() {
-        // Hide the system user when it does not represent a human user.
-        boolean hideSystemUser = UserManager.isHeadlessSystemUserMode();
-        return (!hideSystemUser || id != UserHandle.USER_SYSTEM) && supportsSwitchTo();
+        return supportsSwitchTo();
     }
 
     // TODO(b/142482943): Make this logic more specific and customizable. (canHaveProfile(userType))
@@ -436,11 +464,7 @@ public class UserInfo implements Parcelable {
         if (isProfile() || isGuest() || isRestricted()) {
             return false;
         }
-        if (UserManager.isHeadlessSystemUserMode()) {
-            return id != UserHandle.USER_SYSTEM;
-        } else {
-            return id == UserHandle.USER_SYSTEM;
-        }
+        return isMain();
     }
 
     // TODO(b/142482943): Get rid of this (after removing it from all tests) if feasible.

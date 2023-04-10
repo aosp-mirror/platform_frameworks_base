@@ -23,6 +23,18 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
+            "name": "CtsScopedStorageCoreHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageDeviceOnlyTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {
@@ -39,21 +51,29 @@
                 }
             ],
             "file_patterns": ["BinaryTransparencyService\\.java"]
+        },
+        {
+            "name": "BinaryTransparencyHostTest",
+            "file_patterns": [
+                "BinaryTransparencyService\\.java"
+            ]
+        },
+        {
+            "name": "CtsMediaProjectionTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                }
+            ]
         }
     ],
     "presubmit-large": [
-        {
-            "name": "CtsScopedStorageCoreHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageDeviceOnlyTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
         {
             "name": "CtsContentTestCases",
             "options": [

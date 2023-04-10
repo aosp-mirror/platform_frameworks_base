@@ -253,6 +253,7 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(this, UserHandle.ALL, intentFilter, null,
                 FgThread.getHandler());
     }

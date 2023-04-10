@@ -17,9 +17,9 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.credentials.GetCredentialOption;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,7 +33,7 @@ import java.util.Objects;
 /**
  * Query stage request for getting user's credentials from a given credential provider.
  *
- * <p>This request contains a list of {@link GetCredentialOption} that have parameters
+ * <p>This request contains a list of {@link BeginGetCredentialOption} that have parameters
  * to be used to query credentials, and return a list of {@link CredentialEntry} to be set
  * on the {@link BeginGetCredentialResponse}. This list is then shown to the user on a selector.
  *
@@ -44,7 +44,7 @@ import java.util.Objects;
  */
 public final class BeginGetCredentialRequest implements Parcelable {
     /** Info pertaining to the app requesting for credentials. */
-    @NonNull private final CallingAppInfo mCallingAppInfo;
+    @Nullable private final CallingAppInfo mCallingAppInfo;
 
     /**
      * List of credential options. Each {@link BeginGetCredentialOption} object holds parameters to
@@ -52,12 +52,12 @@ public final class BeginGetCredentialRequest implements Parcelable {
      *
      * This request does not reveal sensitive parameters. Complete list of parameters
      * is retrieved through the {@link PendingIntent} set on each {@link CredentialEntry}
-     * on {@link CredentialsResponseContent} set on {@link BeginGetCredentialResponse},
+     * on {@link BeginGetCredentialResponse} set on {@link BeginGetCredentialResponse},
      * when the user selects one of these entries.
      */
     @NonNull private final List<BeginGetCredentialOption> mBeginGetCredentialOptions;
 
-    private BeginGetCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
+    private BeginGetCredentialRequest(@Nullable CallingAppInfo callingAppInfo,
             @NonNull List<BeginGetCredentialOption> getBeginCredentialOptions) {
         this.mCallingAppInfo = callingAppInfo;
         this.mBeginGetCredentialOptions = getBeginCredentialOptions;
@@ -99,7 +99,7 @@ public final class BeginGetCredentialRequest implements Parcelable {
     /**
      * Returns info pertaining to the app requesting credentials.
      */
-    public @NonNull CallingAppInfo getCallingAppInfo() {
+    public @Nullable CallingAppInfo getCallingAppInfo() {
         return mCallingAppInfo;
     }
 
@@ -115,17 +115,16 @@ public final class BeginGetCredentialRequest implements Parcelable {
      * Builder for {@link BeginGetCredentialRequest}.
      */
     public static final class Builder {
-        private CallingAppInfo mCallingAppInfo;
+        private CallingAppInfo mCallingAppInfo = null;
         private List<BeginGetCredentialOption> mBeginGetCredentialOptions = new ArrayList<>();
 
         /**
-         * Creates a new builder.
-         * @param callingAppInfo info pertaining to the app requesting credentials
-         *
-         * @throws IllegalArgumentException If {@code callingAppInfo} is null or empty.
+         * Sets information pertaining to the calling app.
+         * @param callingAppInfo the info object containing the package name, and app signatures
          */
-        public Builder(@NonNull CallingAppInfo callingAppInfo) {
-            mCallingAppInfo = Objects.requireNonNull(callingAppInfo);
+        public @NonNull Builder setCallingAppInfo(@Nullable CallingAppInfo callingAppInfo) {
+            mCallingAppInfo = callingAppInfo;
+            return this;
         }
 
         /**
@@ -166,7 +165,6 @@ public final class BeginGetCredentialRequest implements Parcelable {
          * {@code callingAppInfo} is null or empty.
          */
         public @NonNull BeginGetCredentialRequest build() {
-            Objects.requireNonNull(mCallingAppInfo, "callingAppInfo");
             Preconditions.checkCollectionNotEmpty(mBeginGetCredentialOptions,
                     "beginGetCredentialOptions");
             return new BeginGetCredentialRequest(mCallingAppInfo, mBeginGetCredentialOptions);

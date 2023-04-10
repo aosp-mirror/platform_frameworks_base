@@ -81,7 +81,8 @@ public class AnrHelperTest {
             final ActivityManagerService service = new ActivityManagerService(
                     new ActivityManagerService.Injector(context) {
                     @Override
-                    public AppOpsService getAppOpsService(File file, Handler handler) {
+                    public AppOpsService getAppOpsService(File recentAccessesFile, File storageFile,
+                            Handler handler) {
                         return null;
                     }
 

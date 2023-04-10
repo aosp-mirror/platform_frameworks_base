@@ -23,7 +23,6 @@ import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.function.Consumer
@@ -45,6 +44,7 @@ class RequestProcessor @Inject constructor(
      *
      * @param request the request to process
      */
+    // TODO: Delete once SCREENSHOT_METADATA flag is launched
     suspend fun process(request: ScreenshotRequest): ScreenshotRequest {
         var result = request
 
@@ -56,9 +56,7 @@ class RequestProcessor @Inject constructor(
         // Whenever displayContentInfo is fetched, the topComponent is also populated
         // regardless of the managed profile status.
 
-        if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE &&
-                flags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
-        ) {
+        if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
 
             val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
             Log.d(TAG, "findPrimaryContent: $info")
@@ -93,9 +91,62 @@ class RequestProcessor @Inject constructor(
      * @param request the request to process
      * @param callback the callback to provide the processed request, invoked from the main thread
      */
+    // TODO: Delete once SCREENSHOT_METADATA flag is launched
     fun processAsync(request: ScreenshotRequest, callback: Consumer<ScreenshotRequest>) {
         mainScope.launch {
             val result = process(request)
+            callback.accept(result)
+        }
+    }
+
+    /**
+     * Inspects the incoming ScreenshotData, potentially modifying it based upon policy.
+     *
+     * @param screenshot the screenshot to process
+     */
+    suspend fun process(screenshot: ScreenshotData): ScreenshotData {
+        var result = screenshot
+
+        // Apply work profile screenshots policy:
+        //
+        // If the focused app belongs to a work profile, transforms a full screen
+        // (or partial) screenshot request to a task snapshot (provided image) screenshot.
+
+        // Whenever displayContentInfo is fetched, the topComponent is also populated
+        // regardless of the managed profile status.
+
+        if (screenshot.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+            val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
+            Log.d(TAG, "findPrimaryContent: $info")
+            result.taskId = info.taskId
+            result.topComponent = info.component
+            result.userHandle = info.user
+
+            if (policy.isManagedProfile(info.user.identifier)) {
+                val image = capture.captureTask(info.taskId)
+                    ?: error("Task snapshot returned a null Bitmap!")
+
+                // Provide the task snapshot as the screenshot
+                result.type = TAKE_SCREENSHOT_PROVIDED_IMAGE
+                result.bitmap = image
+                result.screenBounds = info.bounds
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Note: This is for compatibility with existing Java. Prefer the suspending function when
+     * calling from a Coroutine context.
+     *
+     * @param screenshot the screenshot to process
+     * @param callback the callback to provide the processed screenshot, invoked from the main
+     *                 thread
+     */
+    fun processAsync(screenshot: ScreenshotData, callback: Consumer<ScreenshotData>) {
+        mainScope.launch {
+            val result = process(screenshot)
             callback.accept(result)
         }
     }

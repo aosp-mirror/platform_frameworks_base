@@ -17,6 +17,7 @@
 package com.android.server.display.brightness;
 
 import android.os.PowerManager;
+import android.util.MathUtils;
 
 import com.android.server.display.DisplayBrightnessState;
 
@@ -33,16 +34,26 @@ public final class BrightnessUtils {
     }
 
     /**
+     * Clamps the brightness value in the maximum and the minimum brightness range
+     */
+    public static float clampAbsoluteBrightness(float value) {
+        return MathUtils.constrain(value, PowerManager.BRIGHTNESS_MIN,
+                PowerManager.BRIGHTNESS_MAX);
+    }
+
+    /**
      * A utility to construct the DisplayBrightnessState
      */
     public static DisplayBrightnessState constructDisplayBrightnessState(
-            int brightnessChangeReason, float brightness, float sdrBrightness) {
+            int brightnessChangeReason, float brightness, float sdrBrightness,
+            String displayBrightnessStrategyName) {
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(brightnessChangeReason);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
                 .setSdrBrightness(sdrBrightness)
                 .setBrightnessReason(brightnessReason)
+                .setDisplayBrightnessStrategyName(displayBrightnessStrategyName)
                 .build();
     }
 }

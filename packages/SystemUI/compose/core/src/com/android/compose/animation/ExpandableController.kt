@@ -156,9 +156,9 @@ internal class ExpandableControllerImpl(
      * Create a [LaunchAnimator.Controller] that is going to be used to drive an activity or dialog
      * animation. This controller will:
      * 1. Compute the start/end animation state using [boundsInComposeViewRoot] and the location of
-     * composeViewRoot on the screen.
+     *    composeViewRoot on the screen.
      * 2. Update [animatorState] with the current animation state if we are animating, or null
-     * otherwise.
+     *    otherwise.
      */
     private fun launchController(): LaunchAnimator.Controller {
         return object : LaunchAnimator.Controller {

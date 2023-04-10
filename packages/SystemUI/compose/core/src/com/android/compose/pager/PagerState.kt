@@ -198,7 +198,7 @@ class PagerState(
      *
      * @param page the page to animate to. Must be between 0 and [pageCount] (inclusive).
      * @param pageOffset the percentage of the page width to offset, from the start of [page]. Must
-     * be in the range 0f..1f.
+     *   be in the range 0f..1f.
      */
     suspend fun animateScrollToPage(
         @IntRange(from = 0) page: Int,

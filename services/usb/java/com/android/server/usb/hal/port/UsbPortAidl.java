@@ -639,7 +639,9 @@ public final class UsbPortAidl implements UsbPortHal {
                             altModeData.getDisplayPortAltModeData();
                     return new DisplayPortAltModeInfo(displayPortData.partnerSinkStatus,
                             displayPortData.cableStatus,
-                            toDisplayPortAltModeNumLanesInt(displayPortData.pinAssignment));
+                            toDisplayPortAltModeNumLanesInt(displayPortData.pinAssignment),
+                            displayPortData.hpd,
+                            displayPortData.linkTrainingStatus);
                 }
             }
             return null;

@@ -360,6 +360,18 @@ public final class Call {
             "android.telecom.extra.DIAGNOSTIC_MESSAGE";
 
     /**
+     * Event reported from the Telecom stack to indicate that the {@link Connection} is not able to
+     * find any network and likely will not get connected. Upon receiving this event, the dialer
+     * app should show satellite SOS button if satellite is provisioned.
+     * <p>
+     * The dialer app receives this event via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * @hide
+     */
+    public static final String EVENT_DISPLAY_SOS_MESSAGE =
+            "android.telecom.event.DISPLAY_SOS_MESSAGE";
+
+    /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
      * call because they have declined to answer it.  This typically means that they are unable
      * to answer the call at this time and would prefer it be sent to voicemail.
@@ -1869,8 +1881,15 @@ public final class Call {
 
     /**
      * Instructs this {@code Call} to play a dual-tone multi-frequency signaling (DTMF) tone.
-     *
-     * Any other currently playing DTMF tone in the specified call is immediately stopped.
+     * <p>
+     * Tones are both played locally for the user to hear and sent to the network to be relayed
+     * to the remote device.
+     * <p>
+     * You must ensure that any call to {@link #playDtmfTone(char}) is followed by a matching
+     * call to {@link #stopDtmfTone()} and that each tone is stopped before a new one is started.
+     * The play and stop commands are relayed to the underlying
+     * {@link android.telecom.ConnectionService} as executed; implementations may not correctly
+     * handle out of order commands.
      *
      * @param digit A character representing the DTMF digit for which to play the tone. This
      *         value must be one of {@code '0'} through {@code '9'}, {@code '*'} or {@code '#'}.

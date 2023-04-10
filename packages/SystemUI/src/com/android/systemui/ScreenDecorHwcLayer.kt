@@ -40,6 +40,8 @@ import android.view.RoundedCorner
 import android.view.RoundedCorners
 import android.view.Surface
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.util.asIndenting
+import java.io.PrintWriter
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -47,8 +49,8 @@ import kotlin.math.floor
  * When the HWC of the device supports Composition.DISPLAY_DECORATION, we use this layer to draw
  * screen decorations.
  */
-class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDecorationSupport)
-    : DisplayCutoutBaseView(context) {
+class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDecorationSupport) :
+        DisplayCutoutBaseView(context) {
     val colorMode: Int
     private val useInvertedAlphaColor: Boolean
     private val color: Int
@@ -404,6 +406,20 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
                     roundedCornerBottomSize)
         }
         invalidate()
+    }
+
+    override fun dump(pw: PrintWriter) {
+        val ipw = pw.asIndenting()
+        ipw.increaseIndent()
+        ipw.println("ScreenDecorHwcLayer:")
+        super.dump(pw)
+        ipw.println("this=$this")
+        ipw.println("transparentRect=$transparentRect")
+        ipw.println("hasTopRoundedCorner=$hasTopRoundedCorner")
+        ipw.println("hasBottomRoundedCorner=$hasBottomRoundedCorner")
+        ipw.println("roundedCornerTopSize=$roundedCornerTopSize")
+        ipw.println("roundedCornerBottomSize=$roundedCornerBottomSize")
+        ipw.decreaseIndent()
     }
 
     companion object {

@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"wifi-samtal"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wifi-samtal"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring via mobilnätverk"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Privata appar blockeras tills du aktiverar jobbprofilen"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Privata appar blockeras den <xliff:g id="DATE">%1$s</xliff:g> kl. <xliff:g id="TIME">%2$s</xliff:g>. IT-administratören tillåter inte att din jobbprofil är inaktiverad i mer än <xliff:g id="NUMBER">%3$d</xliff:g> dagar."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivera"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Samtal och meddelanden är av"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Du har pausat jobbappar. Du får inga telefonsamtal eller sms."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Jobbappar på"</string>
     <string name="me" msgid="6207584824693813140">"Jag"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Alternativ för surfplattan"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Alternativ för Android TV"</string>
@@ -296,7 +300,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"få tillgång till dina kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Plats"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"plats"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"komma åt enhetens platsuppgifter"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
@@ -337,7 +341,8 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmbild"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmbild av skärmen."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ta en skärmbild av skärmen."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Förhandsgranskar <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Tillåter att appen får åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur och blodets syrehalt, medan appen används."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Åtkomst till data från kroppssensorer, t.ex. puls, i bakgrunden"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Tillåter att appen får åtkomst till data från kroppssensorer, t.ex. puls, kroppstemperatur och blodets syrehalt, medan appen är i bakgrunden."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Åtkomst till data om handledstemperatur från kroppssensorer medan appen används."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Tillåter att appen får åtkomst till data om handledstemperatur från kroppssensorer medan appen används."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Åtkomst till data om handledstemperatur från kroppssensorer medan appen är i bakgrunden."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Tillåter att appen får åtkomst till data om handledstemperatur från kroppssensorer medan appen är i bakgrunden."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Läsa kalenderhändelser och kalenderuppgifter"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Appen kan läsa alla kalenderhändelser som sparats på surfplattan och dela eller spara uppgifter i din kalender."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Appen kan läsa alla kalenderhändelser som sparats på Android TV-enheten och dela eller spara uppgifter i din kalender."</string>
@@ -791,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Tillåter att innehavaren börjar visa information om funktioner för en app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"åtkomst till sensordata med en hög samplingsfrekvens"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Tillåter att appen får åtkomst till sensordata med en högre samplingsfrekvens än 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Övervaka försök att låsa upp skärmen"</string>
@@ -1241,10 +1254,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android startar …"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Surfplattan startar …"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Enheten startar …"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Lagringsutrymmet optimeras."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Systemuppdatering avslutas …"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> uppgraderas …"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Optimerar app <xliff:g id="NUMBER_0">%1$d</xliff:g> av <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> förbereds."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Appar startas."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Uppgraderingen är klar."</string>
@@ -1356,6 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB har aktiverats"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Internetdelning via USB har aktiverats"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB har aktiverats"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Enheten är ansluten som webbkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-tillbehör anslutet"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Tryck för fler alternativ."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Den anslutna enheten laddas. Tryck om du vill ha fler alternativ."</string>
@@ -1386,7 +1398,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Välj inmatningsmetod"</string>
     <string name="show_ime" msgid="6406112007347443383">"Ha kvar det på skärmen när det fysiska tangentbordet används"</string>
     <string name="hardware" msgid="1800597768237606953">"Visa virtuellt tangentbord"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurera fysiskt tangentbord"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfigurera <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Konfigurera fysiska tangentbord"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tryck om du vill välja språk och layout"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1704,14 +1717,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Inaktivera kortkommandot"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Använd kortkommandot"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverterade färger"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inverterade färger"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Färgkorrigering"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhandsläge"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extradimmat"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörapparater"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har aktiverats."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har inaktiverats."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tryck och håll båda volymknapparna i tre sekunder för att använda <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Släpp volymknapparna. Du kan aktivera <xliff:g id="SERVICE_NAME">%1$s</xliff:g> genom att hålla båda volymknapparna nedtryckta i tre sekunder igen."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Välj en funktion som ska användas när du trycker på tillgänglighetsknappen:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Välj en funktion som ska användas med tillgänglighetsrörelsen (svepa uppåt med två fingrar från skärmens nederkant):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Välj en funktion som ska användas med tillgänglighetsrörelsen (svepa uppåt med tre fingrar från skärmens nederkant):"</string>
@@ -1842,6 +1855,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visar på fullskärm"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Svep nedåt från skärmens överkant för att avsluta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotera för att få en bättre vy"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Stäng delad skärm för att få en bättre vy"</string>
     <string name="done_label" msgid="7283767013231718521">"Klart"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkelreglage för minuter"</string>
@@ -1853,6 +1868,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> för arbetet"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Andra <xliff:g id="LABEL">%1$s</xliff:g> för jobbet"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Tredje <xliff:g id="LABEL">%1$s</xliff:g> för jobbet"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Klona <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Be om pinkod innan skärmen slutar fästas"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Be om upplåsningsmönster innan skärmen slutar fästas"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Be om lösenord innan skärmen slutar fästas"</string>
@@ -1943,10 +1959,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Vill du aktivera jobbappar?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Få åtkomst till jobbappar och aviseringar"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivera"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Nödsituation"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Få åtkomst till jobbappar och samtal"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> är inte tillgänglig"</string>
@@ -2309,4 +2323,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tillåter att en tillhörande app startar förgrundstjänster i bakgrunden."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen är tillgänglig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen är blockerad"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dubbel skärm"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dubbel skärm är på"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> använder båda skärmarna för att visa innehåll"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Enheten är för varm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dubbel skärm kan inte användas eftersom telefonen börjar bli för varm"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen är inte tillgängligt"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen kan inte användas eftersom battersparläget är aktiverat. Du kan inaktivera detta i inställningarna."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Öppna inställningarna"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Stäng av"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> har konfigurerats"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Tangentbordslayouten har ställts in på <xliff:g id="LAYOUT_1">%s</xliff:g>. Tryck om du vill ändra."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Tangentbordslayouten har ställts in på <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tryck om du vill ändra."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Tangentbordslayouten har ställts in på <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Tryck om du vill ändra."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tangentbordslayouten är inställd på <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> … Tryck om du vill ändra."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fysiska tangentbord har konfigurerats"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tryck för att visa tangentbord"</string>
 </resources>

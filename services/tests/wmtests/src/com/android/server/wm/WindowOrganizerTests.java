@@ -30,7 +30,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
-import static android.view.InsetsState.ITYPE_TOP_GENERIC_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -42,7 +41,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
-import static com.android.server.wm.BLASTSyncEngine.METHOD_BLAST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
@@ -78,6 +76,7 @@ import android.util.ArrayMap;
 import android.util.Rational;
 import android.view.Display;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.StartingWindowInfo;
@@ -786,47 +785,53 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAddRectInsetsProvider() {
+    public void testAddInsetsSource() {
         final Task rootTask = createTask(mDisplayContent);
 
         final Task navigationBarInsetsReceiverTask = createTaskInRootTask(rootTask, 0);
         navigationBarInsetsReceiverTask.getConfiguration().windowConfiguration.setBounds(new Rect(
                 0, 200, 1080, 700));
 
-        final Rect navigationBarInsetsProviderRect = new Rect(0, 0, 1080, 200);
-
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.addRectInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
-                        .toWindowContainerToken(), navigationBarInsetsProviderRect,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        wct.addInsetsSource(
+                navigationBarInsetsReceiverTask.mRemoteToken.toWindowContainerToken(),
+                new Binder(),
+                0 /* index */,
+                WindowInsets.Type.systemOverlays(),
+                new Rect(0, 0, 1080, 200));
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
-        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders
-                .valueAt(0).getSource().getId()).isEqualTo(ITYPE_TOP_GENERIC_OVERLAY);
+        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSources
+                .valueAt(0).getType()).isEqualTo(
+                        WindowInsets.Type.systemOverlays());
     }
 
     @Test
-    public void testRemoveInsetsProvider() {
+    public void testRemoveInsetsSource() {
         final Task rootTask = createTask(mDisplayContent);
 
         final Task navigationBarInsetsReceiverTask = createTaskInRootTask(rootTask, 0);
         navigationBarInsetsReceiverTask.getConfiguration().windowConfiguration.setBounds(new Rect(
                 0, 200, 1080, 700));
-
-        final Rect navigationBarInsetsProviderRect = new Rect(0, 0, 1080, 200);
-
+        final Binder owner = new Binder();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.addRectInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
-                        .toWindowContainerToken(), navigationBarInsetsProviderRect,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        wct.addInsetsSource(
+                navigationBarInsetsReceiverTask.mRemoteToken.toWindowContainerToken(),
+                owner,
+                0 /* index */,
+                WindowInsets.Type.systemOverlays(),
+                new Rect(0, 0, 1080, 200));
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         final WindowContainerTransaction wct2 = new WindowContainerTransaction();
-        wct2.removeInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
-                .toWindowContainerToken(), new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        wct2.removeInsetsSource(
+                navigationBarInsetsReceiverTask.mRemoteToken.toWindowContainerToken(),
+                owner,
+                0 /* index */,
+                WindowInsets.Type.systemOverlays());
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct2);
 
-        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders.size()).isEqualTo(0);
+        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSources.size()).isEqualTo(0);
     }
 
     @Test
@@ -871,6 +876,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         lastReportedTiles.clear();
         called[0] = false;
         task1.positionChildAt(POSITION_TOP, rootTask, false /* includingParents */);
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
         assertTrue(called[0]);
         assertEquals(ACTIVITY_TYPE_STANDARD, lastReportedTiles.get(0).topActivityType);
 
@@ -1000,7 +1006,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener transactionListener =
                 mock(BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = bse.startSyncSet(transactionListener, BLAST_TIMEOUT_DURATION, "", METHOD_BLAST);
+        final int id = bse.startSyncSet(transactionListener, BLAST_TIMEOUT_DURATION, "Test");
         bse.addToSyncSet(id, task);
         bse.setReady(id);
         bse.onSurfacePlacement();
@@ -1022,7 +1028,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         RunningTaskInfo mInfo;
 
         @Override
-        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) { }
+        public void addStartingWindow(StartingWindowInfo info) { }
         @Override
         public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) { }
         @Override
@@ -1124,11 +1130,11 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         rootTask.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription"));
-        waitUntilHandlersIdle();
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
         assertEquals("TestDescription", o.mChangedInfo.taskDescription.getLabel());
     }
 
@@ -1288,6 +1294,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testAppearDeferThenInfoChange() {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
+        // Flush EVENT_APPEARED.
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1310,6 +1318,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testAppearDeferThenVanish() {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
+        // Flush EVENT_APPEARED.
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1328,7 +1338,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1358,7 +1368,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1381,7 +1391,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1400,7 +1410,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1465,13 +1475,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord activity = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord activity = createActivityRecordAndDispatchPendingEvents(task);
         final ArgumentCaptor<RunningTaskInfo> infoCaptor =
                 ArgumentCaptor.forClass(RunningTaskInfo.class);
 
         assertTrue(rootTask.isOrganized());
 
-        spyOn(activity);
         doReturn(true).when(activity).inSizeCompatMode();
         doReturn(true).when(activity).isState(RESUMED);
 
@@ -1483,9 +1492,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(rootTask.mTaskId, info.taskId);
         assertTrue(info.topActivityInSizeCompat);
 
-        // Ensure task info show top activity that is not in foreground as not in size compat.
+        // Ensure task info show top activity that is not visible as not in size compat.
         clearInvocations(organizer);
-        doReturn(false).when(activity).isState(RESUMED);
+        doReturn(false).when(activity).isVisible();
         rootTask.onSizeCompatActivityChanged();
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         verify(organizer).onTaskInfoChanged(infoCaptor.capture());
@@ -1495,7 +1504,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         // Ensure task info show non size compat top activity as not in size compat.
         clearInvocations(organizer);
-        doReturn(true).when(activity).isState(RESUMED);
+        doReturn(true).when(activity).isVisible();
         doReturn(false).when(activity).inSizeCompatMode();
         rootTask.onSizeCompatActivityChanged();
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1548,6 +1557,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
         t.setWindowingMode(newToken, WINDOWING_MODE_FULLSCREEN);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
+    }
+
+    private ActivityRecord createActivityRecordAndDispatchPendingEvents(Task task) {
+        final ActivityRecord record = createActivityRecord(task);
+        // Flush EVENT_APPEARED.
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
+        return record;
     }
 
     /**

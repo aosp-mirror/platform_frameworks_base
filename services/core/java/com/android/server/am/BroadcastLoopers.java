@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -74,7 +73,7 @@ public class BroadcastLoopers {
      * defined by {@link MessageQueue#isIdle()}. Note that {@link Message#when}
      * still in the future are ignored for the purposes of the idle test.
      */
-    public static void waitForIdle(@Nullable PrintWriter pw) {
+    public static void waitForIdle(@NonNull PrintWriter pw) {
         waitForCondition(pw, (looper, latch) -> {
             final MessageQueue queue = looper.getQueue();
             queue.addIdleHandler(() -> {
@@ -89,7 +88,7 @@ public class BroadcastLoopers {
      * Note that {@link Message#when} still in the future are ignored for the purposes
      * of the idle test.
      */
-    public static void waitForBarrier(@Nullable PrintWriter pw) {
+    public static void waitForBarrier(@NonNull PrintWriter pw) {
         waitForCondition(pw, (looper, latch) -> {
             (new Handler(looper)).post(() -> {
                 latch.countDown();
@@ -100,7 +99,7 @@ public class BroadcastLoopers {
     /**
      * Wait for all registered {@link Looper} instances to meet a certain condition.
      */
-    private static void waitForCondition(@Nullable PrintWriter pw,
+    private static void waitForCondition(@NonNull PrintWriter pw,
             @NonNull BiConsumer<Looper, CountDownLatch> condition) {
         final CountDownLatch latch;
         synchronized (sLoopers) {
@@ -122,18 +121,12 @@ public class BroadcastLoopers {
             final long now = SystemClock.uptimeMillis();
             if (now >= lastPrint + 1000) {
                 lastPrint = now;
-                logv("Waiting for " + latch.getCount() + " loopers to drain...", pw);
+                pw.println("Waiting for " + latch.getCount() + " loopers to drain...");
+                pw.flush();
             }
             SystemClock.sleep(100);
         }
-        logv("Loopers drained!", pw);
-    }
-
-    private static void logv(@NonNull String msg, @Nullable PrintWriter pw) {
-        Slog.v(TAG, msg);
-        if (pw != null) {
-            pw.println(msg);
-            pw.flush();
-        }
+        pw.println("Loopers drained!");
+        pw.flush();
     }
 }

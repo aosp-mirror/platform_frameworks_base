@@ -17,12 +17,18 @@
 package android.app;
 
 import android.app.IOnProjectionStateChangedListener;
+import android.app.IUiModeManagerCallback;
 
 /**
  * Interface used to control special UI modes.
  * @hide
  */
 interface IUiModeManager {
+    /**
+     * @hide
+     */
+    void addCallback(IUiModeManagerCallback callback);
+
     /**
      * Enables the car mode. Only the system can do this.
      * @hide
@@ -173,4 +179,9 @@ interface IUiModeManager {
     * Returns currently set projection types.
     */
     int getActiveProjectionTypes();
+
+    /**
+    * Returns the contrast for the current user
+    */
+    float getContrast();
 }

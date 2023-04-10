@@ -17,53 +17,45 @@
 package com.android.systemui.clipboardoverlay;
 
 import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_ACTIONS;
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISSED_OTHER;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EDIT_TAPPED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_REMOTE_COPY_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHARE_TAPPED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_EXPANDED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_MINIMIZED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TAP_OUTSIDE;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TIMED_OUT;
 import static com.android.systemui.flags.Flags.CLIPBOARD_REMOTE_BEHAVIOR;
-
-import static java.util.Objects.requireNonNull;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Looper;
 import android.provider.DeviceConfig;
-import android.text.TextUtils;
-import android.util.Log;
-import android.util.Size;
-import android.view.Display;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
 import android.view.MotionEvent;
+import android.view.WindowInsets;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -73,7 +65,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.screenshot.TimeoutHandler;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -95,7 +86,6 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private final Context mContext;
     private final ClipboardLogger mClipboardLogger;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final DisplayManager mDisplayManager;
     private final ClipboardOverlayWindow mWindow;
     private final TimeoutHandler mTimeoutHandler;
     private final ClipboardOverlayUtils mClipboardUtils;
@@ -107,7 +97,6 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private Runnable mOnSessionCompleteListener;
     private Runnable mOnRemoteCopyTapped;
     private Runnable mOnShareTapped;
-    private Runnable mOnEditTapped;
     private Runnable mOnPreviewTapped;
 
     private InputMonitor mInputMonitor;
@@ -120,6 +109,9 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private Animator mEnterAnimator;
 
     private Runnable mOnUiUpdate;
+
+    private boolean mIsMinimized;
+    private ClipboardModel mClipboardModel;
 
     private final ClipboardOverlayView.ClipboardOverlayCallbacks mClipboardCallbacks =
             new ClipboardOverlayView.ClipboardOverlayCallbacks() {
@@ -156,13 +148,6 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 }
 
                 @Override
-                public void onEditButtonTapped() {
-                    if (mOnEditTapped != null) {
-                        mOnEditTapped.run();
-                    }
-                }
-
-                @Override
                 public void onRemoteCopyButtonTapped() {
                     if (mOnRemoteCopyTapped != null) {
                         mOnRemoteCopyTapped.run();
@@ -173,6 +158,11 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 public void onDismissButtonTapped() {
                     mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_DISMISS_TAPPED);
                     animateOut();
+                }
+
+                @Override
+                public void onMinimizedViewTapped() {
+                    animateFromMinimized();
                 }
             };
 
@@ -187,29 +177,26 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             ClipboardOverlayUtils clipboardUtils,
             @Background Executor bgExecutor,
             UiEventLogger uiEventLogger) {
+        mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
-        mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
-        final Context displayContext = context.createDisplayContext(getDefaultDisplay());
-        mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
 
         mClipboardLogger = new ClipboardLogger(uiEventLogger);
 
         mView = clipboardOverlayView;
         mWindow = clipboardOverlayWindow;
-        mWindow.init(mView::setInsets, () -> {
+        mWindow.init(this::onInsetsChanged, () -> {
             mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_DISMISSED_OTHER);
             hideImmediate();
         });
 
+        mFeatureFlags = featureFlags;
         mTimeoutHandler = timeoutHandler;
         mTimeoutHandler.setDefaultTimeoutMillis(CLIPBOARD_DEFAULT_TIMEOUT_MILLIS);
 
-        mFeatureFlags = featureFlags;
         mClipboardUtils = clipboardUtils;
         mBgExecutor = bgExecutor;
 
         mView.setCallbacks(mClipboardCallbacks);
-
 
         mWindow.withWindowAttached(() -> {
             mWindow.setContentView(mView);
@@ -255,59 +242,151 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         broadcastSender.sendBroadcast(copyIntent, SELF_PERMISSION);
     }
 
+    @VisibleForTesting
+    void onInsetsChanged(WindowInsets insets, int orientation) {
+        mView.setInsets(insets, orientation);
+        if (shouldShowMinimized(insets) && !mIsMinimized) {
+            mIsMinimized = true;
+            mView.setMinimized(true);
+        }
+    }
+
     @Override // ClipboardListener.ClipboardOverlay
-    public void setClipData(ClipData clipData, String clipSource) {
-        if (mExitAnimator != null && mExitAnimator.isRunning()) {
+    public void setClipData(ClipData data, String source) {
+        ClipboardModel model = ClipboardModel.fromClipData(mContext, mClipboardUtils, data, source);
+        boolean wasExiting = (mExitAnimator != null && mExitAnimator.isRunning());
+        if (wasExiting) {
             mExitAnimator.cancel();
         }
-        reset();
-        mClipboardLogger.setClipSource(clipSource);
-        String accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
-
-        boolean isSensitive = clipData != null && clipData.getDescription().getExtras() != null
-                && clipData.getDescription().getExtras()
-                .getBoolean(ClipDescription.EXTRA_IS_SENSITIVE);
-        boolean isRemote = mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR)
-                && mClipboardUtils.isRemoteCopy(mContext, clipData, clipSource);
-        if (clipData == null || clipData.getItemCount() == 0) {
-            mView.showDefaultTextPreview();
-        } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
-            ClipData.Item item = clipData.getItemAt(0);
-            if (isRemote || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
-                if (item.getTextLinks() != null) {
-                    classifyText(clipData.getItemAt(0), clipSource);
-                }
-            }
-            if (isSensitive) {
-                showEditableText(mContext.getString(R.string.clipboard_asterisks), true);
+        boolean shouldAnimate = !model.dataMatches(mClipboardModel) || wasExiting;
+        mClipboardModel = model;
+        mClipboardLogger.setClipSource(mClipboardModel.getSource());
+        if (shouldAnimate) {
+            reset();
+            mClipboardLogger.setClipSource(mClipboardModel.getSource());
+            if (shouldShowMinimized(mWindow.getWindowInsets())) {
+                mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_SHOWN_MINIMIZED);
+                mIsMinimized = true;
+                mView.setMinimized(true);
             } else {
-                showEditableText(item.getText(), false);
+                mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_SHOWN_EXPANDED);
+                setExpandedView();
             }
-            mOnShareTapped = () -> shareContent(clipData);
-            mView.showShareChip();
-            accessibilityAnnouncement = mContext.getString(R.string.clipboard_text_copied);
-        } else if (clipData.getItemAt(0).getUri() != null) {
-            if (tryShowEditableImage(clipData.getItemAt(0).getUri(), isSensitive)) {
-                mOnShareTapped = () -> shareContent(clipData);
-                mView.showShareChip();
-                accessibilityAnnouncement = mContext.getString(R.string.clipboard_image_copied);
-            }
-        } else {
-            mView.showDefaultTextPreview();
+            animateIn();
+            mView.announceForAccessibility(getAccessibilityAnnouncement(mClipboardModel.getType()));
+        } else if (!mIsMinimized) {
+            setExpandedView();
         }
-        if (!isRemote) {
-            maybeShowRemoteCopy(clipData);
-        }
-        animateIn();
-        mView.announceForAccessibility(accessibilityAnnouncement);
-        if (isRemote) {
+        if (mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR) && mClipboardModel.isRemote()) {
             mTimeoutHandler.cancelTimeout();
             mOnUiUpdate = null;
         } else {
             mOnUiUpdate = mTimeoutHandler::resetTimeout;
             mOnUiUpdate.run();
         }
+    }
+
+    private void setExpandedView() {
+        final ClipboardModel model = mClipboardModel;
+        mView.setMinimized(false);
+        switch (model.getType()) {
+            case TEXT:
+                if ((mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR) && model.isRemote())
+                        || DeviceConfig.getBoolean(
+                        DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
+                    if (model.getTextLinks() != null) {
+                        classifyText(model);
+                    }
+                }
+                if (model.isSensitive()) {
+                    mView.showTextPreview(mContext.getString(R.string.clipboard_asterisks), true);
+                } else {
+                    mView.showTextPreview(model.getText().toString(), false);
+                }
+                mView.setEditAccessibilityAction(true);
+                mOnPreviewTapped = this::editText;
+                break;
+            case IMAGE:
+                mBgExecutor.execute(() -> {
+                    if (model.isSensitive() || model.loadThumbnail(mContext) != null) {
+                        mView.post(() -> {
+                            mView.showImagePreview(
+                                    model.isSensitive() ? null : model.loadThumbnail(mContext));
+                            mView.setEditAccessibilityAction(true);
+                        });
+                        mOnPreviewTapped = () -> editImage(model.getUri());
+                    } else {
+                        // image loading failed
+                        mView.post(mView::showDefaultTextPreview);
+                    }
+                });
+                break;
+            case URI:
+            case OTHER:
+                mView.showDefaultTextPreview();
+                break;
+        }
+        if (mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR)) {
+            if (!model.isRemote()) {
+                maybeShowRemoteCopy(model.getClipData());
+            }
+        } else {
+            maybeShowRemoteCopy(model.getClipData());
+        }
+        if (model.getType() != ClipboardModel.Type.OTHER) {
+            mOnShareTapped = () -> shareContent(model.getClipData());
+            mView.showShareChip();
+        }
+    }
+
+    private boolean shouldShowMinimized(WindowInsets insets) {
+        return insets.getInsets(WindowInsets.Type.ime()).bottom > 0;
+    }
+
+    private void animateFromMinimized() {
+        if (mEnterAnimator != null && mEnterAnimator.isRunning()) {
+            mEnterAnimator.cancel();
+        }
+        mEnterAnimator = mView.getMinimizedFadeoutAnimation();
+        mEnterAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (mIsMinimized) {
+                    mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED);
+                    mIsMinimized = false;
+                }
+                setExpandedView();
+                animateIn();
+            }
+        });
+        mEnterAnimator.start();
+    }
+
+    private String getAccessibilityAnnouncement(ClipboardModel.Type type) {
+        if (type == ClipboardModel.Type.TEXT) {
+            return mContext.getString(R.string.clipboard_text_copied);
+        } else if (type == ClipboardModel.Type.IMAGE) {
+            return mContext.getString(R.string.clipboard_image_copied);
+        } else {
+            return mContext.getString(R.string.clipboard_content_copied);
+        }
+    }
+
+    private void classifyText(ClipboardModel model) {
+        mBgExecutor.execute(() -> {
+            Optional<RemoteAction> remoteAction =
+                    mClipboardUtils.getAction(model.getTextLinks(), model.getSource());
+            if (model.equals(mClipboardModel)) {
+                remoteAction.ifPresent(action -> {
+                    mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_ACTION_SHOWN);
+                    mView.post(() -> mView.setActionChip(action, () -> {
+                        mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_ACTION_TAPPED);
+                        animateOut();
+                    }));
+                });
+            }
+        });
     }
 
     private void maybeShowRemoteCopy(ClipData clipData) {
@@ -330,22 +409,6 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     @Override // ClipboardListener.ClipboardOverlay
     public void setOnSessionCompleteListener(Runnable runnable) {
         mOnSessionCompleteListener = runnable;
-    }
-
-    private void classifyText(ClipData.Item item, String source) {
-        mBgExecutor.execute(() -> {
-            Optional<RemoteAction> action = mClipboardUtils.getAction(item, source);
-            mView.post(() -> {
-                mView.resetActionChips();
-                action.ifPresent(remoteAction -> {
-                    mView.setActionChip(remoteAction, () -> {
-                        mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_ACTION_TAPPED);
-                        animateOut();
-                    });
-                    mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_ACTION_SHOWN);
-                });
-            });
-        });
     }
 
     private void monitorOutsideTouches() {
@@ -386,52 +449,6 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_SHARE_TAPPED);
         mContext.startActivity(IntentCreator.getShareIntent(clip, mContext));
         animateOut();
-    }
-
-    private void showEditableText(CharSequence text, boolean hidden) {
-        mView.showTextPreview(text, hidden);
-        mView.setEditAccessibilityAction(true);
-        mOnPreviewTapped = this::editText;
-        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON, false)) {
-            mOnEditTapped = this::editText;
-            mView.showEditChip(mContext.getString(R.string.clipboard_edit_text_description));
-        }
-    }
-
-    private boolean tryShowEditableImage(Uri uri, boolean isSensitive) {
-        Runnable listener = () -> editImage(uri);
-        ContentResolver resolver = mContext.getContentResolver();
-        String mimeType = resolver.getType(uri);
-        boolean isEditableImage = mimeType != null && mimeType.startsWith("image");
-        if (isSensitive) {
-            mView.showImagePreview(null);
-            if (isEditableImage) {
-                mOnPreviewTapped = listener;
-                mView.setEditAccessibilityAction(true);
-            }
-        } else if (isEditableImage) { // if the MIMEtype is image, try to load
-            try {
-                int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
-                // The width of the view is capped, height maintains aspect ratio, so allow it to be
-                // taller if needed.
-                Bitmap thumbnail = resolver.loadThumbnail(uri, new Size(size, size * 4), null);
-                mView.showImagePreview(thumbnail);
-                mView.setEditAccessibilityAction(true);
-                mOnPreviewTapped = listener;
-            } catch (IOException e) {
-                Log.e(TAG, "Thumbnail loading failed", e);
-                mView.showDefaultTextPreview();
-                isEditableImage = false;
-            }
-        } else {
-            mView.showDefaultTextPreview();
-        }
-        if (isEditableImage && DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON, false)) {
-            mView.showEditChip(mContext.getString(R.string.clipboard_edit_image_description));
-        }
-        return isEditableImage;
     }
 
     private void animateIn() {
@@ -506,15 +523,10 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private void reset() {
         mOnRemoteCopyTapped = null;
         mOnShareTapped = null;
-        mOnEditTapped = null;
         mOnPreviewTapped = null;
         mView.reset();
         mTimeoutHandler.cancelTimeout();
         mClipboardLogger.reset();
-    }
-
-    private Display getDefaultDisplay() {
-        return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
     }
 
     static class ClipboardLogger {

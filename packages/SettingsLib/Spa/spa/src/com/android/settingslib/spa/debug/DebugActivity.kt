@@ -62,7 +62,7 @@ private const val PARAM_NAME_ENTRY_ID = "eid"
 /**
  * The Debug Activity to display all Spa Pages & Entries.
  * One can open the debug activity by:
- *   $ adb shell am start -n <Package>/com.android.settingslib.spa.framework.debug.DebugActivity
+ *   $ adb shell am start -n <Package>/com.android.settingslib.spa.debug.DebugActivity
  * For gallery, Package = com.android.settingslib.spa.gallery
  */
 class DebugActivity : ComponentActivity() {
@@ -175,6 +175,7 @@ class DebugActivity : ComponentActivity() {
         RegularScaffold(title = "Page - ${page.debugBrief()}") {
             Text(text = "id = ${page.id}")
             Text(text = page.debugArguments())
+            Text(text = "enabled = ${page.isEnabled()}")
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"

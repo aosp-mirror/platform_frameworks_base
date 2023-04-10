@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"クリップの境界線、マージンなどを表示"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL レイアウト方向を使用"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"すべての言語/地域で画面レイアウト方向を RTL に設定"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"透明なナビゲーション バー"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ナビゲーション バーの背景色をデフォルトで透明にします"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ウィンドウ レベルでのぼかしを許可"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA を適用"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 アプリで 4x MSAA を有効にする"</string>
@@ -467,8 +469,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"完了まであと <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 完了まであと <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電最適化済み"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電最適化済み"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電が最適化されています"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電が最適化されています"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"急速充電中"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このスマートフォン"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"このタブレット"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"このスマートフォン"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"このデバイスで再生できません"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"アカウントを更新して切り替えてください"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ダウンロードしたコンテンツをここでは再生できません"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"広告が表示されてから、もう一度試してください"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ここで再生するにはデバイスを起動してください"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"このデバイスでの再生が許可されていません"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"このメディアはここで再生できません"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線オーディオ デバイス"</string>
     <string name="help_label" msgid="3528360748637781274">"ヘルプとフィードバック"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"予測型「戻る」アニメーション"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"予測型「戻る」のシステム アニメーションを有効にする。"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"この設定は、予測型操作のシステム アニメーションを有効にします。アプリごとにマニフェスト ファイルで enableOnBackInvokedCallback を true に設定する必要があります。"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"左に移動"</item>
+    <item msgid="5425394847942513942">"下に移動"</item>
+    <item msgid="7728484337962740316">"右に移動"</item>
+    <item msgid="324200556467459329">"上に移動"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

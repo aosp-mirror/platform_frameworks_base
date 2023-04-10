@@ -39,6 +39,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -58,7 +59,8 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
-
+    @Mock
+    private SecureSettings mSecureSettings;
     @Mock
     private DismissAnimationController.DismissCallback mStubDismissCallback;
 
@@ -73,7 +75,8 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                mSecureSettings);
 
         final int halfScreenHeight =
                 stubWindowManager.getCurrentWindowMetrics().getBounds().height() / 2;

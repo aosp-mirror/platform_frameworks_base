@@ -43,16 +43,15 @@ public:
     MouseCursorController(PointerControllerContext& context);
     ~MouseCursorController();
 
-    bool getBounds(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
+    std::optional<FloatRect> getBounds() const;
     void move(float deltaX, float deltaY);
-    void setButtonState(int32_t buttonState);
-    int32_t getButtonState() const;
     void setPosition(float x, float y);
-    void getPosition(float* outX, float* outY) const;
+    FloatPoint getPosition() const;
     int32_t getDisplayId() const;
     void fade(PointerControllerInterface::Transition transition);
     void unfade(PointerControllerInterface::Transition transition);
     void setDisplayViewport(const DisplayViewport& viewport, bool getAdditionalMouseResources);
+    void setStylusHoverMode(bool stylusHoverMode);
 
     void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
@@ -74,6 +73,7 @@ private:
 
     struct Locked {
         DisplayViewport viewport;
+        bool stylusHoverMode;
 
         size_t animationFrameIndex;
         nsecs_t lastFrameUpdatedTime;
@@ -92,14 +92,13 @@ private:
         std::map<PointerIconStyle, PointerAnimation> animationResources;
 
         PointerIconStyle requestedPointerType;
-
-        int32_t buttonState;
+        PointerIconStyle resolvedPointerType;
 
         bool animating{false};
 
     } mLocked GUARDED_BY(mLock);
 
-    bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
+    std::optional<FloatRect> getBoundsLocked() const;
     void setPositionLocked(float x, float y);
 
     void updatePointerLocked();

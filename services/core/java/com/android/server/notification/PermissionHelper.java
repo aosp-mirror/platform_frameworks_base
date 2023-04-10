@@ -78,6 +78,30 @@ public final class PermissionHelper {
     }
 
     /**
+     * Returns whether the given app requested the given permission. Must not be called
+     * with a lock held.
+     */
+    public boolean hasRequestedPermission(String permission, String pkg, @UserIdInt int userId) {
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            PackageInfo pi = mPackageManager.getPackageInfo(pkg, GET_PERMISSIONS, userId);
+            if (pi == null || pi.requestedPermissions == null) {
+                return false;
+            }
+            for (String perm : pi.requestedPermissions) {
+                if (permission.equals(perm)) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.d(TAG, "Could not reach system server", e);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+        return false;
+    }
+
+    /**
      * Returns all of the apps that have requested the notification permission in a given user.
      * Must not be called with a lock held. Format: uid, packageName
      */

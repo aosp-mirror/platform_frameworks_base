@@ -30,14 +30,10 @@ data class SettingsPageWithEntry(
     val injectEntry: SettingsEntry,
 )
 
-private fun SettingsPage.getTitle(sppRepository: SettingsPageProviderRepository): String {
-    return sppRepository.getProviderOrNull(sppName)!!.getTitle(arguments)
-}
-
 /**
  * The repository to maintain all Settings entries
  */
-class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRepository) {
+class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
     // Map of entry unique Id to entry
     private val entryMap: Map<String, SettingsEntry>
 
@@ -49,7 +45,7 @@ class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRep
         entryMap = mutableMapOf()
         pageWithEntryMap = mutableMapOf()
 
-        val nullPage = SettingsPage.createNull()
+        val nullPage = NullPageProvider.createSettingsPage()
         val entryQueue = LinkedList<SettingsEntry>()
         for (page in sppRepository.getAllRootPages()) {
             val rootEntry =
@@ -66,6 +62,9 @@ class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRep
             if (page == null || pageWithEntryMap.containsKey(page.id)) continue
             val spp = sppRepository.getProviderOrNull(page.sppName) ?: continue
             val newEntries = spp.buildEntry(page.arguments)
+            // The page id could be existed already, if there are 2+ pages go to the same one.
+            // For now, override the previous ones, which means only the last from-page is kept.
+            // TODO: support multiple from-pages if necessary.
             pageWithEntryMap[page.id] = SettingsPageWithEntry(
                 page = page,
                 entries = newEntries,
@@ -112,9 +111,9 @@ class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRep
         return entryPath
     }
 
-    fun getEntryPathWithDisplayName(entryId: String): List<String> {
+    fun getEntryPathWithLabel(entryId: String): List<String> {
         val entryPath = getEntryPath(entryId)
-        return entryPath.map { it.displayName }
+        return entryPath.map { it.label }
     }
 
     fun getEntryPathWithTitle(entryId: String, defaultTitle: String): List<String> {
@@ -123,7 +122,7 @@ class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRep
             if (it.toPage == null)
                 defaultTitle
             else {
-                it.toPage.getTitle(sppRepository)
+                it.toPage.getTitle()
             }
         }
     }

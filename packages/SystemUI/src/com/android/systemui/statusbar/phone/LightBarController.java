@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
@@ -38,6 +37,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.io.PrintWriter;
@@ -88,13 +88,16 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private boolean mDirectReplying;
     private boolean mNavbarColorManagedByIme;
 
+    private boolean mIsCustomizingForBackNav;
+
     @Inject
     public LightBarController(
             Context ctx,
             DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController,
             NavigationModeController navModeController,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            DisplayTracker displayTracker) {
         mDarkIconColor = ctx.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightIconColor = ctx.getColor(R.color.light_mode_icon_color_single_tone);
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
@@ -104,7 +107,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             mNavigationMode = mode;
         });
 
-        if (ctx.getDisplayId() == DEFAULT_DISPLAY) {
+        if (ctx.getDisplayId() == displayTracker.getDefaultDisplayId()) {
             dumpManager.registerDumpable(getClass().getSimpleName(), this);
         }
     }
@@ -136,16 +139,17 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         for (int i = 0; i < numStacks && !stackAppearancesChanged; i++) {
             stackAppearancesChanged |= !appearanceRegions[i].equals(mAppearanceRegions[i]);
         }
-        if (stackAppearancesChanged || sbModeChanged) {
+        if (stackAppearancesChanged || sbModeChanged || mIsCustomizingForBackNav) {
             mAppearanceRegions = appearanceRegions;
             onStatusBarModeChanged(statusBarMode);
+            mIsCustomizingForBackNav = false;
         }
         mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
     void onStatusBarModeChanged(int newBarMode) {
         mStatusBarMode = newBarMode;
-        updateStatus();
+        updateStatus(mAppearanceRegions);
     }
 
     public void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
@@ -182,6 +186,31 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         if (mQsCustomizing == customizing) return;
         mQsCustomizing = customizing;
         reevaluate();
+    }
+
+    /**
+     * Controls the light status bar temporarily for back navigation.
+     * @param appearance the custmoized appearance.
+     */
+    public void customizeStatusBarAppearance(AppearanceRegion appearance) {
+        if (appearance != null) {
+            final ArrayList<AppearanceRegion> appearancesList = new ArrayList<>();
+            appearancesList.add(appearance);
+            for (int i = 0; i < mAppearanceRegions.length; i++) {
+                final AppearanceRegion ar = mAppearanceRegions[i];
+                if (appearance.getBounds().contains(ar.getBounds())) {
+                    continue;
+                }
+                appearancesList.add(ar);
+            }
+
+            final AppearanceRegion[] newAppearances = new AppearanceRegion[appearancesList.size()];
+            updateStatus(appearancesList.toArray(newAppearances));
+            mIsCustomizingForBackNav = true;
+        } else {
+            mIsCustomizingForBackNav = false;
+            updateStatus(mAppearanceRegions);
+        }
     }
 
     /**
@@ -225,12 +254,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 && unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
     }
 
-    private void updateStatus() {
-        final int numStacks = mAppearanceRegions.length;
+    private void updateStatus(AppearanceRegion[] appearanceRegions) {
+        final int numStacks = appearanceRegions.length;
         final ArrayList<Rect> lightBarBounds = new ArrayList<>();
 
         for (int i = 0; i < numStacks; i++) {
-            final AppearanceRegion ar = mAppearanceRegions[i];
+            final AppearanceRegion ar = appearanceRegions[i];
             if (isLight(ar.getAppearance(), mStatusBarMode, APPEARANCE_LIGHT_STATUS_BARS)) {
                 lightBarBounds.add(ar.getBounds());
             }
@@ -246,7 +275,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         else if (lightBarBounds.size() == numStacks) {
             mStatusBarIconController.setIconsDarkArea(null);
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
-
         }
 
         // Not the same for every stack, magic!
@@ -317,24 +345,27 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         private final BatteryController mBatteryController;
         private final NavigationModeController mNavModeController;
         private final DumpManager mDumpManager;
+        private final DisplayTracker mDisplayTracker;
 
         @Inject
         public Factory(
                 DarkIconDispatcher darkIconDispatcher,
                 BatteryController batteryController,
                 NavigationModeController navModeController,
-                DumpManager dumpManager) {
+                DumpManager dumpManager,
+                DisplayTracker displayTracker) {
 
             mDarkIconDispatcher = darkIconDispatcher;
             mBatteryController = batteryController;
             mNavModeController = navModeController;
             mDumpManager = dumpManager;
+            mDisplayTracker = displayTracker;
         }
 
         /** Create an {@link LightBarController} */
         public LightBarController create(Context context) {
             return new LightBarController(context, mDarkIconDispatcher, mBatteryController,
-                    mNavModeController, mDumpManager);
+                    mNavModeController, mDumpManager, mDisplayTracker);
         }
     }
 }

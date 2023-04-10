@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
 
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -232,11 +233,55 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         return Checker.isOnBackInvokedCallbackEnabled(mChecker.getContext());
     }
 
+    /**
+     * Dump information about this WindowOnBackInvokedDispatcher
+     * @param prefix the prefix that will be prepended to each line of the produced output
+     * @param writer the writer that will receive the resulting text
+     */
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "    ";
+        writer.println(prefix + "WindowOnBackDispatcher:");
+        if (mAllCallbacks.isEmpty()) {
+            writer.println(prefix + "<None>");
+            return;
+        }
+
+        writer.println(innerPrefix + "Top Callback: " + getTopCallback());
+        writer.println(innerPrefix + "Callbacks: ");
+        mAllCallbacks.forEach((callback, priority) -> {
+            writer.println(innerPrefix + "  Callback: " + callback + " Priority=" + priority);
+        });
+    }
+
     static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
-        private final WeakReference<OnBackInvokedCallback> mCallback;
+        static class CallbackRef {
+            final WeakReference<OnBackInvokedCallback> mWeakRef;
+            final OnBackInvokedCallback mStrongRef;
+            CallbackRef(@NonNull OnBackInvokedCallback callback, boolean useWeakRef) {
+                if (useWeakRef) {
+                    mWeakRef = new WeakReference<>(callback);
+                    mStrongRef = null;
+                } else {
+                    mStrongRef = callback;
+                    mWeakRef = null;
+                }
+            }
+
+            OnBackInvokedCallback get() {
+                if (mStrongRef != null) {
+                    return mStrongRef;
+                }
+                return mWeakRef.get();
+            }
+        }
+        final CallbackRef mCallbackRef;
 
         OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
-            mCallback = new WeakReference<>(callback);
+            mCallbackRef = new CallbackRef(callback, true /* useWeakRef */);
+        }
+
+        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback, boolean useWeakRef) {
+            mCallbackRef = new CallbackRef(callback, useWeakRef);
         }
 
         @Override
@@ -279,8 +324,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         public void onBackInvoked() throws RemoteException {
             Handler.getMain().post(() -> {
                 mProgressAnimator.reset();
-                final OnBackInvokedCallback callback = mCallback.get();
+                final OnBackInvokedCallback callback = mCallbackRef.get();
                 if (callback == null) {
+                    Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
                     return;
                 }
                 callback.onBackInvoked();
@@ -289,7 +335,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
         @Nullable
         private OnBackAnimationCallback getBackAnimationCallback() {
-            OnBackInvokedCallback callback = mCallback.get();
+            OnBackInvokedCallback callback = mCallbackRef.get();
             return callback instanceof OnBackAnimationCallback ? (OnBackAnimationCallback) callback
                     : null;
         }
@@ -309,6 +355,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void setImeOnBackInvokedDispatcher(
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         mImeDispatcher = imeDispatcher;
+    }
+
+    /** Returns true if a non-null {@link ImeOnBackInvokedDispatcher} has been set. **/
+    public boolean hasImeOnBackInvokedDispatcher() {
+        return mImeDispatcher != null;
     }
 
     /**

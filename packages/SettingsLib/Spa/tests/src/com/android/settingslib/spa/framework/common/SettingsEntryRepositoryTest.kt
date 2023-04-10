@@ -19,12 +19,12 @@ package com.android.settingslib.spa.framework.common
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.framework.util.genEntryId
+import com.android.settingslib.spa.framework.util.genPageId
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.tests.testutils.SppLayer1
 import com.android.settingslib.spa.tests.testutils.SppLayer2
-import com.android.settingslib.spa.tests.testutils.getUniqueEntryId
-import com.android.settingslib.spa.tests.testutils.getUniquePageId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,18 +41,18 @@ class SettingsEntryRepositoryTest {
         val pageWithEntry = entryRepository.getAllPageWithEntry()
         assertThat(pageWithEntry.size).isEqualTo(3)
         assertThat(
-            entryRepository.getPageWithEntry(getUniquePageId("SppHome"))
+            entryRepository.getPageWithEntry(genPageId("SppHome"))
                 ?.entries?.size
         ).isEqualTo(1)
         assertThat(
-            entryRepository.getPageWithEntry(getUniquePageId("SppLayer1"))
+            entryRepository.getPageWithEntry(genPageId("SppLayer1"))
                 ?.entries?.size
         ).isEqualTo(3)
         assertThat(
-            entryRepository.getPageWithEntry(getUniquePageId("SppLayer2"))
+            entryRepository.getPageWithEntry(genPageId("SppLayer2"))
                 ?.entries?.size
         ).isEqualTo(2)
-        assertThat(entryRepository.getPageWithEntry(getUniquePageId("SppWithParam"))).isNull()
+        assertThat(entryRepository.getPageWithEntry(genPageId("SppWithParam"))).isNull()
     }
 
     @Test
@@ -61,17 +61,17 @@ class SettingsEntryRepositoryTest {
         assertThat(entry.size).isEqualTo(7)
         assertThat(
             entryRepository.getEntry(
-                getUniqueEntryId(
+                genEntryId(
                     "ROOT",
                     SppHome.createSettingsPage(),
-                    SettingsPage.createNull(),
+                    NullPageProvider.createSettingsPage(),
                     SppHome.createSettingsPage(),
                 )
             )
         ).isNotNull()
         assertThat(
             entryRepository.getEntry(
-                getUniqueEntryId(
+                genEntryId(
                     "INJECT",
                     SppLayer1.createSettingsPage(),
                     SppHome.createSettingsPage(),
@@ -81,7 +81,7 @@ class SettingsEntryRepositoryTest {
         ).isNotNull()
         assertThat(
             entryRepository.getEntry(
-                getUniqueEntryId(
+                genEntryId(
                     "INJECT",
                     SppLayer2.createSettingsPage(),
                     SppLayer1.createSettingsPage(),
@@ -91,45 +91,46 @@ class SettingsEntryRepositoryTest {
         ).isNotNull()
         assertThat(
             entryRepository.getEntry(
-                getUniqueEntryId("Layer1Entry1", SppLayer1.createSettingsPage())
+                genEntryId("Layer1Entry1", SppLayer1.createSettingsPage())
             )
         ).isNotNull()
         assertThat(
             entryRepository.getEntry(
-                getUniqueEntryId("Layer1Entry2", SppLayer1.createSettingsPage())
+                genEntryId("Layer1Entry2", SppLayer1.createSettingsPage())
             )
         ).isNotNull()
         assertThat(
             entryRepository.getEntry(
-                getUniqueEntryId("Layer2Entry1", SppLayer2.createSettingsPage())
+                genEntryId("Layer2Entry1", SppLayer2.createSettingsPage())
             )
         ).isNotNull()
         assertThat(
             entryRepository.getEntry(
-                getUniqueEntryId("Layer2Entry2", SppLayer2.createSettingsPage())
+                genEntryId("Layer2Entry2", SppLayer2.createSettingsPage())
             )
         ).isNotNull()
     }
 
     @Test
     fun testGetEntryPath() {
+        SpaEnvironmentFactory.reset(spaEnvironment)
         assertThat(
-            entryRepository.getEntryPathWithDisplayName(
-                getUniqueEntryId("Layer2Entry1", SppLayer2.createSettingsPage())
+            entryRepository.getEntryPathWithLabel(
+                genEntryId("Layer2Entry1", SppLayer2.createSettingsPage())
             )
         ).containsExactly("Layer2Entry1", "INJECT_SppLayer2", "INJECT_SppLayer1", "ROOT_SppHome")
             .inOrder()
 
         assertThat(
             entryRepository.getEntryPathWithTitle(
-                getUniqueEntryId("Layer2Entry2", SppLayer2.createSettingsPage()),
+                genEntryId("Layer2Entry2", SppLayer2.createSettingsPage()),
                 "entryTitle"
             )
         ).containsExactly("entryTitle", "SppLayer2", "TitleLayer1", "TitleHome").inOrder()
 
         assertThat(
-            entryRepository.getEntryPathWithDisplayName(
-                getUniqueEntryId(
+            entryRepository.getEntryPathWithLabel(
+                genEntryId(
                     "INJECT",
                     SppLayer1.createSettingsPage(),
                     SppHome.createSettingsPage(),
@@ -140,7 +141,7 @@ class SettingsEntryRepositoryTest {
 
         assertThat(
             entryRepository.getEntryPathWithTitle(
-                getUniqueEntryId(
+                genEntryId(
                     "INJECT",
                     SppLayer2.createSettingsPage(),
                     SppLayer1.createSettingsPage(),

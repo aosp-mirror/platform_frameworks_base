@@ -22,6 +22,7 @@ import android.app.AppOpsManager.MODE_ERRORED
 import android.app.AppOpsManager.MODE_IGNORED
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spaprivileged.framework.common.appOpsManager
@@ -31,6 +32,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.any
+import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.Spy
@@ -45,9 +50,13 @@ class AppOpsControllerTest {
 
     @Mock private lateinit var appOpsManager: AppOpsManager
 
+    @Mock private lateinit var packageManager: PackageManager
+
     @Before
     fun setUp() {
         whenever(context.appOpsManager).thenReturn(appOpsManager)
+        doNothing().`when`(packageManager)
+                .updatePermissionFlags(anyString(), anyString(), anyInt(), anyInt(), any())
     }
 
     @Test

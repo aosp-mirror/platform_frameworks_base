@@ -65,7 +65,7 @@ public final class BrightnessReasonTest {
 
     @Test
     public void setReasonDoesntSetIfModifierIsBeyondExtremes() {
-        int extremeReason = 10;
+        int extremeReason = BrightnessReason.REASON_MAX + 1;
         mBrightnessReason.setReason(extremeReason);
         assertEquals(mBrightnessReason.getReason(), BrightnessReason.REASON_DOZE);
 

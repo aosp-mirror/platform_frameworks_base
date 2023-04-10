@@ -534,6 +534,8 @@ class AppErrors {
             }
         }
 
+        mService.mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(initialPid,
+                CachedAppOptimizer.UNFREEZE_REASON_PROCESS_END);
         proc.scheduleCrashLocked(message, exceptionTypeId, extras);
         if (force) {
             // If the app is responsive, the scheduled crash will happen as expected

@@ -19,6 +19,7 @@ package com.android.systemui.unfold
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.progress.FixedTimingTransitionProgressProvider
 import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgressProvider
+import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.unfold.updates.DeviceFoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.hinge.EmptyHingeAngleProvider
@@ -101,5 +102,17 @@ internal class UnfoldSharedInternalModule {
         } else {
             EmptyHingeAngleProvider
         }
+    }
+
+    @Provides
+    @Singleton
+    fun provideProgressForwarder(
+            config: UnfoldTransitionConfig,
+            progressForwarder: Provider<UnfoldTransitionProgressForwarder>
+    ): Optional<UnfoldTransitionProgressForwarder> {
+        if (!config.isEnabled) {
+            return Optional.empty()
+        }
+        return Optional.of(progressForwarder.get())
     }
 }

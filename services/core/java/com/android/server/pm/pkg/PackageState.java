@@ -160,6 +160,14 @@ public interface PackageState {
     /**
      * List of shared libraries that this package declares a dependency on. This includes all
      * types of libraries, system or app provided and Java or native.
+     * <p/>
+     * This includes libraries declared in the manifest under the following tags:
+     * <ul>
+     *     <li>uses-library</li>
+     *     <li>uses-native-library</li>
+     *     <li>uses-sdk-library</li>
+     *     <li>uses-static-library</li>
+     * </ul>
      */
     @NonNull
     List<SharedLibrary> getSharedLibraryDependencies();

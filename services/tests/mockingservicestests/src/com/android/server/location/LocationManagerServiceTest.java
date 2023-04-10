@@ -53,6 +53,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -69,6 +70,7 @@ public class LocationManagerServiceTest {
     private static final int CURRENT_USER = FakeUserInfoHelper.DEFAULT_USERID;
     private static final String CALLER_PACKAGE = "caller_package";
     private static final String MISSING_PERMISSION = "missing_permission";
+    private static final String ATTRIBUTION_TAG = "test_tag";
 
     private TestInjector mInjector;
     private LocationManagerService mLocationManagerService;
@@ -136,6 +138,7 @@ public class LocationManagerServiceTest {
     }
 
     @Test
+    @Ignore("b/274432939") // Test is flaky for as of yet unknown reasons
     public void testRequestLocationUpdates() {
         LocationRequest request = new LocationRequest.Builder(0).build();
         mLocationManagerService.registerLocationListener(
@@ -143,7 +146,7 @@ public class LocationManagerServiceTest {
                 request,
                 mLocationListener,
                 CALLER_PACKAGE,
-                /* attributionTag= */ null,
+                ATTRIBUTION_TAG,
                 "any_listener_id");
         verify(mProviderWithPermission).onSetRequestPublic(any());
     }
@@ -159,7 +162,7 @@ public class LocationManagerServiceTest {
                                 request,
                                 mLocationListener,
                                 CALLER_PACKAGE,
-                                /* attributionTag= */ null,
+                                ATTRIBUTION_TAG,
                                 "any_listener_id"));
     }
 

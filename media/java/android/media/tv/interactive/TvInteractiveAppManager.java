@@ -33,6 +33,7 @@ import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.interactive.TvInteractiveAppService.Session;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -517,14 +518,38 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onRequestStartRecording(Uri programUri, int seq) {
+            public void onRequestTimeShiftMode(int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postRequestStartRecording(programUri);
+                    record.postRequestTimeShiftMode();
+                }
+            }
+
+            @Override
+            public void onRequestAvailableSpeeds(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestAvailableSpeeds();
+                }
+            }
+
+            @Override
+            public void onRequestStartRecording(String requestId, Uri programUri, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestStartRecording(requestId, programUri);
                 }
             }
 
@@ -537,6 +562,35 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postRequestStopRecording(recordingId);
+                }
+            }
+
+            @Override
+            public void onRequestScheduleRecording(String requestId, String inputId, Uri channelUri,
+                    Uri programUri, Bundle params, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestScheduleRecording(
+                            requestId, inputId, channelUri, programUri, params);
+                }
+            }
+
+            @Override
+            public void onRequestScheduleRecording2(String requestId, String inputId,
+                    Uri channelUri, long startTime, long duration, int repeatDays, Bundle params,
+                    int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestScheduleRecording(requestId, inputId, channelUri, startTime,
+                            duration, repeatDays, params);
                 }
             }
 
@@ -627,14 +681,14 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onAdBuffer(AdBuffer buffer, int seq) {
+            public void onAdBufferReady(AdBuffer buffer, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postAdBuffer(buffer);
+                    record.postAdBufferReady(buffer);
                 }
             }
         };
@@ -883,7 +937,6 @@ public final class TvInteractiveAppManager {
      * can be detected by the system.
      *
      * @return List of {@link AppLinkInfo} for each package that deslares its app link information.
-     * @hide
      */
     @NonNull
     public List<AppLinkInfo> getAppLinkInfoList() {
@@ -1168,6 +1221,30 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        void sendTimeShiftMode(int mode) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendTimeShiftMode(mToken, mode, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendAvailableSpeeds(float[] speeds) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendAvailableSpeeds(mToken, speeds, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
@@ -1192,13 +1269,13 @@ public final class TvInteractiveAppManager {
             }
         }
 
-        void notifyRecordingStarted(String recordingId) {
+        void notifyRecordingStarted(String recordingId, String requestId) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.notifyRecordingStarted(mToken, recordingId, mUserId);
+                mService.notifyRecordingStarted(mToken, recordingId, requestId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1284,6 +1361,66 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.notifyTimeShiftCurrentPositionChanged(mToken, inputId, timeMs, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingConnectionFailed(@NonNull String recordingId, @NonNull String inputId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingConnectionFailed(mToken, recordingId, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingDisconnected(@NonNull String recordingId, @NonNull String inputId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingDisconnected(mToken, recordingId, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingTuned(@NonNull String recordingId, @NonNull Uri channelUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingTuned(mToken, recordingId, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingError(@NonNull String recordingId, int err) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingError(mToken, recordingId, err, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingScheduled(@NonNull String recordingId, @Nullable String requestId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingScheduled(mToken, recordingId, requestId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1614,7 +1751,7 @@ public final class TvInteractiveAppManager {
         /**
          * Notifies Interactive APP session when a new TV message is received.
          */
-        public void notifyTvMessage(String type, Bundle data) {
+        public void notifyTvMessage(int type, Bundle data) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
@@ -1976,11 +2113,29 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        void postRequestStartRecording(Uri programUri) {
+        void postRequestTimeShiftMode() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onRequestStartRecording(mSession, programUri);
+                    mSessionCallback.onRequestTimeShiftMode(mSession);
+                }
+            });
+        }
+
+        void postRequestAvailableSpeeds() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestAvailableSpeeds(mSession);
+                }
+            });
+        }
+
+        void postRequestStartRecording(String requestId, Uri programUri) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestStartRecording(mSession, requestId, programUri);
                 }
             });
         }
@@ -1990,6 +2145,28 @@ public final class TvInteractiveAppManager {
                 @Override
                 public void run() {
                     mSessionCallback.onRequestStopRecording(mSession, recordingId);
+                }
+            });
+        }
+
+        void postRequestScheduleRecording(String requestId, String inputId, Uri channelUri,
+                Uri programUri, Bundle params) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestScheduleRecording(
+                            mSession, requestId, inputId, channelUri, programUri, params);
+                }
+            });
+        }
+
+        void postRequestScheduleRecording(String requestId, String inputId, Uri channelUri,
+                long startTime, long duration, int repeatDays, Bundle params) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestScheduleRecording(mSession, requestId, inputId,
+                            channelUri, startTime, duration, repeatDays, params);
                 }
             });
         }
@@ -2068,12 +2245,12 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        void postAdBuffer(AdBuffer buffer) {
+        void postAdBufferReady(AdBuffer buffer) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mSession.getInputSession() != null) {
-                        mSession.getInputSession().notifyAdBuffer(buffer);
+                        mSession.getInputSession().notifyAdBufferReady(buffer);
                     }
                 }
             });
@@ -2144,7 +2321,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#SetVideoBounds} is called.
+         * This is called when {@link TvInteractiveAppService.Session#setVideoBounds} is called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
@@ -2152,7 +2329,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentVideoBounds} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentVideoBounds} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2161,7 +2338,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelUri} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentChannelUri} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2170,7 +2347,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelLcn} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentChannelLcn} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2179,7 +2356,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestStreamVolume} is
+         * This is called when {@link TvInteractiveAppService.Session#requestStreamVolume} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2188,7 +2365,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestTrackInfoList} is
+         * This is called when {@link TvInteractiveAppService.Session#requestTrackInfoList} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2197,7 +2374,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentTvInputId} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentTvInputId} is
          * called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
@@ -2206,23 +2383,83 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestStartRecording} is
+         * This is called when {@link TvInteractiveAppService.Session#requestTimeShiftMode()} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         */
+        public void onRequestTimeShiftMode(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestAvailableSpeeds()} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         */
+        public void onRequestAvailableSpeeds(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestStartRecording} is
          * called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          * @param programUri The Uri of the program to be recorded.
          */
-        public void onRequestStartRecording(Session session, Uri programUri) {
+        public void onRequestStartRecording(Session session, String requestId, Uri programUri) {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestStopRecording} is
-         * called.
+         * This is called when {@link TvInteractiveAppService.Session#requestStopRecording(String)}
+         * is called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          * @param recordingId The recordingId of the recording to be stopped.
          */
         public void onRequestStopRecording(Session session, String recordingId) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, String, Uri, Uri, Bundle)}
+         * is called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param programUri The URI of the TV program to be recorded.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
+         */
+        public void onRequestScheduleRecording(Session session, @NonNull String requestId,
+                @NonNull String inputId, @NonNull Uri channelUri, @NonNull Uri programUri,
+                @NonNull Bundle params) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, String, Uri, long, long, int, Bundle)}
+         * is called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param startTime The start time of the recording in milliseconds since epoch.
+         * @param duration The duration of the recording in milliseconds.
+         * @param repeatDays The repeated days. 0 if not repeated.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
+         */
+        public void onRequestScheduleRecording(Session session, @NonNull String requestId,
+                @NonNull String inputId, @NonNull Uri channelUri, long startTime, long duration,
+                int repeatDays, @NonNull Bundle params) {
         }
 
         /**

@@ -55,7 +55,7 @@ class DeletePackageHelperTest {
 
         mPms = createPackageManagerService()
         doAnswer { false }.`when`(mPms).isPackageDeviceAdmin(any(), any())
-        doAnswer { null }.`when`(mPms).freezePackageForDelete(any(), any(), any(), any())
+        doAnswer { null }.`when`(mPms).freezePackageForDelete(any(), any(), any(), any(), any())
     }
 
     private fun createPackageManagerService(): PackageManagerService {

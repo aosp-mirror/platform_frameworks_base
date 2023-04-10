@@ -25,6 +25,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
@@ -43,12 +44,14 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnl
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
 interface KeyguardRepository {
@@ -80,14 +83,14 @@ interface KeyguardRepository {
      */
     val isKeyguardShowing: Flow<Boolean>
 
+    /** Is the keyguard in a unlocked state? */
+    val isKeyguardUnlocked: Flow<Boolean>
+
     /** Is an activity showing over the keyguard? */
     val isKeyguardOccluded: Flow<Boolean>
 
     /** Observable for the signal that keyguard is about to go away. */
     val isKeyguardGoingAway: Flow<Boolean>
-
-    /** Observable for whether the bouncer is showing. */
-    val isBouncerShowing: Flow<Boolean>
 
     /** Is the always-on display available to be used? */
     val isAodAvailable: Flow<Boolean>
@@ -148,6 +151,9 @@ interface KeyguardRepository {
     /** Source of the most recent biometric unlock, such as fingerprint or face. */
     val biometricUnlockSource: Flow<BiometricUnlockSource?>
 
+    /** Whether quick settings or quick-quick settings is visible. */
+    val isQuickSettingsVisible: Flow<Boolean>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -172,6 +178,9 @@ interface KeyguardRepository {
      * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
      */
     fun isUdfpsSupported(): Boolean
+
+    /** Sets whether quick settings or quick-quick settings is visible. */
+    fun setQuickSettingsVisible(isVisible: Boolean)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -189,6 +198,7 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val authController: AuthController,
     private val dreamOverlayCallbackController: DreamOverlayCallbackController,
+    @Main private val mainDispatcher: CoroutineDispatcher
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -275,6 +285,31 @@ constructor(
             }
             .distinctUntilChanged()
 
+    override val isKeyguardUnlocked: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardStateController.Callback {
+                        override fun onUnlockedChanged() {
+                            trySendWithFailureLogging(
+                                keyguardStateController.isUnlocked,
+                                TAG,
+                                "updated isKeyguardUnlocked"
+                            )
+                        }
+                    }
+
+                keyguardStateController.addCallback(callback)
+                // Adding the callback does not send an initial update.
+                trySendWithFailureLogging(
+                    keyguardStateController.isUnlocked,
+                    TAG,
+                    "initial isKeyguardUnlocked"
+                )
+
+                awaitClose { keyguardStateController.removeCallback(callback) }
+            }
+            .distinctUntilChanged()
+
     override val isKeyguardGoingAway: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
             object : KeyguardStateController.Callback {
@@ -293,29 +328,6 @@ constructor(
             keyguardStateController.isKeyguardGoingAway,
             TAG,
             "initial isKeyguardGoingAway"
-        )
-
-        awaitClose { keyguardStateController.removeCallback(callback) }
-    }
-
-    override val isBouncerShowing: Flow<Boolean> = conflatedCallbackFlow {
-        val callback =
-            object : KeyguardStateController.Callback {
-                override fun onBouncerShowingChanged() {
-                    trySendWithFailureLogging(
-                        keyguardStateController.isBouncerShowing,
-                        TAG,
-                        "updated isBouncerShowing"
-                    )
-                }
-            }
-
-        keyguardStateController.addCallback(callback)
-        // Adding the callback does not send an initial update.
-        trySendWithFailureLogging(
-            keyguardStateController.isBouncerShowing,
-            TAG,
-            "initial isBouncerShowing"
         )
 
         awaitClose { keyguardStateController.removeCallback(callback) }
@@ -379,6 +391,7 @@ constructor(
 
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
+            .flowOn(mainDispatcher)
             .distinctUntilChanged()
 
     override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {
@@ -458,7 +471,7 @@ constructor(
         }
 
         val callback =
-            object : BiometricUnlockController.BiometricModeListener {
+            object : BiometricUnlockController.BiometricUnlockEventsListener {
                 override fun onModeChanged(@WakeAndUnlockMode mode: Int) {
                     dispatchUpdate()
                 }
@@ -468,10 +481,10 @@ constructor(
                 }
             }
 
-        biometricUnlockController.addBiometricModeListener(callback)
+        biometricUnlockController.addListener(callback)
         dispatchUpdate()
 
-        awaitClose { biometricUnlockController.removeBiometricModeListener(callback) }
+        awaitClose { biometricUnlockController.removeListener(callback) }
     }
 
     override val wakefulness: Flow<WakefulnessModel> = conflatedCallbackFlow {
@@ -581,6 +594,9 @@ constructor(
         awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
     }
 
+    private val _isQuickSettingsVisible = MutableStateFlow(false)
+    override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
     }
@@ -594,6 +610,10 @@ constructor(
     }
 
     override fun isUdfpsSupported(): Boolean = keyguardUpdateMonitor.isUdfpsSupported
+
+    override fun setQuickSettingsVisible(isVisible: Boolean) {
+        _isQuickSettingsVisible.value = isVisible
+    }
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {
         return when (value) {

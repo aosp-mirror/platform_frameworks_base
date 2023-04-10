@@ -91,6 +91,7 @@ void DrawFrameTask::run() {
     ATRACE_FORMAT("DrawFrames %" PRId64, vsyncId);
 
     mContext->setSyncDelayDuration(systemTime(SYSTEM_TIME_MONOTONIC) - mSyncQueued);
+    mContext->setTargetSdrHdrRatio(mRenderSdrHdrRatio);
 
     auto hardwareBufferParams = mHardwareBufferParams;
     mContext->setHardwareBufferRenderParams(hardwareBufferParams);

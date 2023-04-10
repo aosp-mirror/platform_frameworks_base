@@ -310,7 +310,7 @@
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"లాగర్ నిరంతర నిల్వలోని డేటాను తీసివేయాలా?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"మేము నిరంతర లాగర్‌తో ఇక పర్యవేక్షించనప్పుడు, మీ పరికరంలోని లాగర్ డేటాను మేము తొలగించాల్సి ఉంటుంది."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"పరికరంలో లాగర్ డేటా నిరంతరం స్టోర్ చేయి"</string>
-    <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"పరికరంలో నిరంతరం నిల్వ చేయాల్సిన లాగ్ బఫర్‌లను ఎంచుకోండి"</string>
+    <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"పరికరంలో నిరంతరం స్టోరేజ్‌ చేయాల్సిన లాగ్ బఫర్‌లను ఎంచుకోండి"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"డమ్మీ లొకేషన్లను అనుమతించండి"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL లేఅవుట్ దిశను నిర్బంధం చేయండి"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"అన్ని లొకేల్‌ల కోసం RTLకి స్క్రీన్ లేఅవుట్ దిశను నిర్భందించు"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"పారదర్శక నావిగేషన్ బార్"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"నావిగేషన్ బార్ బ్యాక్‌గ్రౌండ్ రంగును ఆటోమేటిక్‌గా పారదర్శకంగా చేయండి"</string>
     <string name="window_blurs" msgid="6831008984828425106">"విండో-స్థాయి బ్లర్ అనుమతించండి"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA అమలు తప్పనిసరి"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 యాప్‌లలో 4x MSAAను ప్రారంభించండి"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ఈ ఫోన్"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ఈ టాబ్లెట్"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ఈ ఫోన్"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ఈ పరికరంలో ప్లే చేయడం సాధ్యపడదు"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"మారడానికి ఖాతాను అప్‌గ్రేడ్ చేయండి"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ఇక్కడ డౌన్‌లోడ్‌లను ప్లే చేయడం సాధ్యపడదు"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"యాడ్ తర్వాత మళ్లీ ట్రై చేయండి"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ఇక్కడ ప్లే చేయడానికి పరికరాన్ని మేల్కొలపండి"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ప్లే చేయడానికి పరికరానికి అధికారం ఇవ్వలేదు"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ఇక్కడ ఈ మీడియాను ప్లే చేయడం సాధ్యపడదు"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"కనెక్ట్ చేయడంలో సమస్య ఉంది. పరికరాన్ని ఆఫ్ చేసి, ఆపై తిరిగి ఆన్ చేయండి"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"వైర్ గల ఆడియో పరికరం"</string>
     <string name="help_label" msgid="3528360748637781274">"సహాయం &amp; ఫీడ్‌బ్యాక్"</string>
@@ -567,7 +576,7 @@
     <string name="user_grant_admin_title" msgid="5565796912475193314">"వీరికి అడ్మిన్ హక్కు ఇవ్వాలా?"</string>
     <string name="user_grant_admin_message" msgid="7925257971286380976">"ఒక అడ్మిన్‌గా, వారు ఇతర యూజర్‌లను మేనేజ్ చేయగలరు, పరికర సెట్టింగ్‌లను ఎడిట్ చేయగలరు, పరికరాన్ని ఫ్యాక్టరీ రీసెట్ చేయగలరు."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"యూజర్‌ను ఇప్పుడే సెటప్ చేయాలా?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి నిల్వ స్థలాన్ని సెటప్ చేయండి"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి స్టోరేజ్‌ స్థలాన్ని సెటప్ చేయండి"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ఇప్పుడు ప్రొఫైల్‌ను సెటప్ చేయాలా?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ఇప్పుడే సెట‌ప్ చేయి"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ఇప్పుడు కాదు"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ఊహించదగిన బ్యాక్ యానిమేషన్‌లు"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ఊహించదగిన బ్యాక్ యానిమేషన్‌ల కోసం సిస్టమ్ యానిమేషన్‌లను ఎనేబుల్ చేయండి."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ఊహించదగిన సంజ్ఞ యానిమేషన్ కోసం ఈ సెట్టింగ్ సిస్టమ్ యానిమేషన్‌లను ఎనేబుల్ చేస్తుంది. దీనికి మ్యానిఫెస్ట్ ఫైల్‌లో ఒక్కో యాప్‌లో enableOnBackInvokedCallback సెట్టింగ్‌ను ఒప్పునకు సెట్ చేయవలసి ఉంటుంది."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"ఎడమ వైపుగా జరపండి"</item>
+    <item msgid="5425394847942513942">"కిందికి జరపండి"</item>
+    <item msgid="7728484337962740316">"కుడి వైపుగా జరపండి"</item>
+    <item msgid="324200556467459329">"పైకి జరపండి"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

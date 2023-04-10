@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -30,9 +31,9 @@ import java.util.List;
 public interface JobSchedulerInternal {
 
     /**
-     * Returns a list of pending jobs scheduled by the system service.
+     * Returns a list of jobs scheduled by the system service for itself.
      */
-    List<JobInfo> getSystemScheduledPendingJobs();
+    List<JobInfo> getSystemScheduledOwnJobs(@Nullable String namespace);
 
     /**
      * Cancel the jobs for a given uid (e.g. when app data is cleared)
@@ -57,6 +58,19 @@ public interface JobSchedulerInternal {
      * The user has started interacting with the app.  Take any appropriate action.
      */
     void reportAppUsage(String packageName, int userId);
+
+    /**
+     * @return {@code true} if the given notification is associated with any user-initiated jobs.
+     */
+    boolean isNotificationAssociatedWithAnyUserInitiatedJobs(int notificationId,
+            int userId, @NonNull String packageName);
+
+    /**
+     * @return {@code true} if the given notification channel is associated with any user-initiated
+     * jobs.
+     */
+    boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(String notificationChannel,
+            int userId, String packageName);
 
     /**
      * Report a snapshot of sync-related jobs back to the sync manager

@@ -21,24 +21,21 @@ import android.app.WallpaperManager
 import android.content.res.Resources
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
+import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
+import android.tools.common.datatypes.component.ComponentSplashScreenMatcher
+import android.tools.common.datatypes.component.IComponentMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.DEFAULT_TASK_DISPLAY_AREA
-import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.SPLASH_SCREEN
-import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
-import com.android.server.wm.traces.common.ComponentSplashScreenMatcher
-import com.android.server.wm.traces.common.IComponentMatcher
-import com.android.server.wm.traces.parser.toFlickerComponent
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -123,22 +120,8 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     /** Checks that a color background is visible while the task transition is occurring. */
     @Presubmit
     @Test
-    fun transitionHasColorBackground_legacy() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        transitionHasColorBackground(DEFAULT_TASK_DISPLAY_AREA)
-    }
-
-    /** Checks that a color background is visible while the task transition is occurring. */
-    @Presubmit
-    @Test
-    fun transitionHasColorBackground_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        transitionHasColorBackground(ComponentNameMatcher("", "Animation Background"))
-    }
-
-    private fun transitionHasColorBackground(backgroundColorLayer: IComponentMatcher) {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-
+    fun transitionHasColorBackground() {
+        val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
         flicker.assertLayers {
             this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
@@ -219,9 +202,14 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
             val resourceId =
                 Resources.getSystem()
                     .getIdentifier("image_wallpaper_component", "string", "android")
-            return ComponentNameMatcher.unflattenFromString(
-                instrumentation.targetContext.resources.getString(resourceId)
-            )
+            // frameworks/base/core/res/res/values/config.xml returns package plus class name,
+            // but wallpaper layer has only class name
+            val rawComponentMatcher =
+                ComponentNameMatcher.unflattenFromString(
+                    instrumentation.targetContext.resources.getString(resourceId)
+                )
+
+            return ComponentNameMatcher(rawComponentMatcher.className)
         }
 
         @Parameterized.Parameters(name = "{0}")

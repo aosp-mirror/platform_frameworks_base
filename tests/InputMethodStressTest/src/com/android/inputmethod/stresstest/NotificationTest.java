@@ -42,6 +42,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
 import org.junit.After;
@@ -74,7 +75,7 @@ public final class NotificationTest {
 
     // This is for AOSP System UI for phones. When testing customized System UI, please modify here.
     private static final BySelector REPLY_SEND_BUTTON_SELECTOR =
-            By.res("com.android.systemui", "remote_input_send");
+            By.res("com.android.systemui", "remote_input_send").enabled(true);
 
     @Rule
     public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
@@ -119,7 +120,15 @@ public final class NotificationTest {
         mUiDevice.pressKeyCode(KeyEvent.KEYCODE_A);
         mUiDevice.pressKeyCode(KeyEvent.KEYCODE_B);
         mUiDevice.pressKeyCode(KeyEvent.KEYCODE_C);
-        mUiDevice.wait(Until.findObject(REPLY_SEND_BUTTON_SELECTOR.enabled(true)), TIMEOUT).click();
+        UiObject2 sendButton = mUiDevice.wait(
+                Until.findObject(REPLY_SEND_BUTTON_SELECTOR), TIMEOUT);
+        if (sendButton == null) {
+            // If the screen is too small, sendButton may be hidden by IME.
+            // Dismiss IME and try again.
+            mUiDevice.pressBack();
+            sendButton = mUiDevice.wait(Until.findObject(REPLY_SEND_BUTTON_SELECTOR), TIMEOUT);
+        }
+        sendButton.click();
         // Verify that IME is gone.
         assertThat(mUiDevice.wait(Until.gone(By.pkg(getImePackage(mContext))), TIMEOUT)).isTrue();
     }

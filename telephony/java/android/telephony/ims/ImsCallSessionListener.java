@@ -35,6 +35,7 @@ import com.android.ims.internal.IImsCallSession;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Listener interface for notifying the Framework's {@link ImsCallSession} for updates to an ongoing
@@ -50,6 +51,7 @@ import java.util.Set;
 public class ImsCallSessionListener {
     private static final String TAG = "ImsCallSessionListener";
     private final IImsCallSessionListener mListener;
+    private Executor mExecutor = null;
 
     /** @hide */
     public ImsCallSessionListener(IImsCallSessionListener l) {
@@ -247,6 +249,9 @@ public class ImsCallSessionListener {
     public void callSessionMergeStarted(ImsCallSessionImplBase newSession, ImsCallProfile profile)
     {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionMergeStarted(newSession != null ?
                             newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
@@ -278,6 +283,9 @@ public class ImsCallSessionListener {
      */
     public void callSessionMergeComplete(ImsCallSessionImplBase newSession) {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionMergeComplete(newSession != null ?
                     newSession.getServiceImpl() : null);
         } catch (RemoteException e) {
@@ -365,6 +373,9 @@ public class ImsCallSessionListener {
     public void callSessionConferenceExtended(ImsCallSessionImplBase newSession,
             ImsCallProfile profile) {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionConferenceExtended(
                     newSession != null ? newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
@@ -410,6 +421,9 @@ public class ImsCallSessionListener {
     public void callSessionConferenceExtendReceived(ImsCallSessionImplBase newSession,
             ImsCallProfile profile) {
         try {
+            if (newSession != null && mExecutor != null) {
+                newSession.setDefaultExecutor(mExecutor);
+            }
             mListener.callSessionConferenceExtendReceived(newSession != null
                     ? newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
@@ -834,6 +848,20 @@ public class ImsCallSessionListener {
             mListener.callSessionSendAnbrQuery(mediaType, direction, bitsPerSecond);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set default Executor from ImsService.
+     * @param executor The default executor to use when executing the methods by the vendor
+     *                 implementation of {@link ImsCallSessionImplBase} for conference call.
+     *                 This executor is dedicated to set vendor CallSessionImpl
+     *                 only when conference call is established.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mExecutor == null) {
+            mExecutor = executor;
         }
     }
 }

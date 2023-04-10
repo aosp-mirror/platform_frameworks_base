@@ -90,7 +90,7 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
 
         if (mEnableSyncSwitch.isChecked()) {
             mSyncGroup = new SurfaceSyncGroup(TAG);
-            mSyncGroup.addToSync(container.getRootSurfaceControl());
+            mSyncGroup.add(container.getRootSurfaceControl(), null /* runnable */);
         }
 
         ViewGroup.LayoutParams svParams = mSurfaceView.getLayoutParams();
@@ -114,7 +114,7 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
                 mRenderingThread.renderFrame(null, width, height);
                 return;
             }
-            mSyncGroup.addToSync(mSurfaceView, frameCallback ->
+            mSyncGroup.add(mSurfaceView, frameCallback ->
                     mRenderingThread.renderFrame(frameCallback, width, height));
             mSyncGroup.markSyncReady();
             mSyncGroup = null;

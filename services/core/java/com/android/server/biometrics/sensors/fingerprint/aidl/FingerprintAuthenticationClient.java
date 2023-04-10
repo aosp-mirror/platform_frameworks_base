@@ -26,6 +26,7 @@ import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcqu
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.fingerprint.PointerContext;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlay;
@@ -65,7 +66,8 @@ import java.util.function.Supplier;
  * Fingerprint-specific authentication client supporting the {@link
  * android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
+class FingerprintAuthenticationClient
+        extends AuthenticationClient<AidlSession, FingerprintAuthenticateOptions>
         implements Udfps, LockoutConsumer, PowerPressHandler {
     private static final String TAG = "FingerprintAuthenticationClient";
     private static final int MESSAGE_AUTH_SUCCESS = 2;
@@ -97,13 +99,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
             @NonNull IBinder token,
             long requestId,
             @NonNull ClientMonitorCallbackConverter listener,
-            int targetUserId,
             long operationId,
             boolean restricted,
-            @NonNull String owner,
+            @NonNull FingerprintAuthenticateOptions options,
             int cookie,
             boolean requireConfirmation,
-            int sensorId,
             @NonNull BiometricLogger biometricLogger,
             @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric,
@@ -122,13 +122,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                 lazyDaemon,
                 token,
                 listener,
-                targetUserId,
                 operationId,
                 restricted,
-                owner,
+                options,
                 cookie,
                 requireConfirmation,
-                sensorId,
                 biometricLogger,
                 biometricContext,
                 isStrongBiometric,
@@ -136,7 +134,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                 null /* lockoutCache */,
                 allowBackgroundAuthentication,
                 false /* shouldVibrate */,
-                false /* isKeyguardBypassEnabled */,
                 biometricStrength);
         setRequestId(requestId);
         mSensorOverlays = new SensorOverlays(udfpsOverlayController,
@@ -265,6 +262,14 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         final AidlSession session = getFreshDaemon();
 
         final OperationContextExt opContext = getOperationContext();
+        final ICancellationSignal cancel;
+        if (session.hasContextMethods()) {
+            cancel = session.getSession().authenticateWithContext(
+                    mOperationId, opContext.toAidlContext(getOptions()));
+        } else {
+            cancel = session.getSession().authenticate(mOperationId);
+        }
+
         getBiometricContext().subscribe(opContext, ctx -> {
             if (session.hasContextMethods()) {
                 try {
@@ -286,12 +291,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
             mALSProbeCallback.getProbe().enable();
         }
 
-        if (session.hasContextMethods()) {
-            return session.getSession().authenticateWithContext(
-                    mOperationId, opContext.toAidlContext());
-        } else {
-            return session.getSession().authenticate(mOperationId);
-        }
+        return cancel;
     }
 
     @Override

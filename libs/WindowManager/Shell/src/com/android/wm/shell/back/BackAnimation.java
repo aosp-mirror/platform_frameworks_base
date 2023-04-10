@@ -52,4 +52,10 @@ public interface BackAnimation {
      * @param progressThreshold the max threshold to keep progressing back animation.
      */
     void setSwipeThresholds(float triggerThreshold, float progressThreshold);
+
+    /**
+     * Sets the system bar listener to control the system bar color.
+     * @param customizer the controller to control system bar color.
+     */
+    void setStatusBarCustomizer(StatusBarCustomizer customizer);
 }

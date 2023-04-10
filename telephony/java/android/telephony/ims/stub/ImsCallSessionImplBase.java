@@ -220,8 +220,9 @@ public class ImsCallSessionImplBase implements AutoCloseable {
 
         @Override
         public void setListener(IImsCallSessionListener listener) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.setListener(
-                    new ImsCallSessionListener(listener)), "setListener");
+            ImsCallSessionListener iCSL = new ImsCallSessionListener(listener);
+            iCSL.setDefaultExecutor(mExecutor);
+            executeMethodAsync(() -> ImsCallSessionImplBase.this.setListener(iCSL), "setListener");
         }
 
         @Override

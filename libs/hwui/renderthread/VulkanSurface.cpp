@@ -63,6 +63,18 @@ static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
     return SkMatrix::I();
 }
 
+static SkM44 GetPixelSnapMatrix(SkISize windowSize, int transform) {
+    // Small (~1/16th) nudge to ensure that pixel-aligned non-AA'd draws fill the
+    // desired fragment
+    static const SkScalar kOffset = 0.063f;
+    SkMatrix preRotation = GetPreTransformMatrix(windowSize, transform);
+    SkMatrix invert;
+    LOG_ALWAYS_FATAL_IF(!preRotation.invert(&invert));
+    return SkM44::Translate(kOffset, kOffset)
+            .postConcat(SkM44(preRotation))
+            .preConcat(SkM44(invert));
+}
+
 static bool ConnectAndSetWindowDefaults(ANativeWindow* window) {
     ATRACE_CALL();
 
@@ -178,6 +190,8 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
 
     outWindowInfo->preTransform =
             GetPreTransformMatrix(outWindowInfo->size, outWindowInfo->transform);
+    outWindowInfo->pixelSnapMatrix =
+            GetPixelSnapMatrix(outWindowInfo->size, outWindowInfo->transform);
 
     err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
     if (err != 0 || query_value < 0) {
@@ -199,7 +213,14 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
 
     outWindowInfo->bufferFormat = ColorTypeToBufferFormat(colorType);
     outWindowInfo->colorspace = colorSpace;
-    outWindowInfo->dataspace = ColorSpaceToADataSpace(colorSpace.get(), colorType);
+    outWindowInfo->colorMode = colorMode;
+
+    if (colorMode == ColorMode::Hdr || colorMode == ColorMode::Hdr10) {
+        outWindowInfo->dataspace =
+                static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
+    } else {
+        outWindowInfo->dataspace = ColorSpaceToADataSpace(colorSpace.get(), colorType);
+    }
     LOG_ALWAYS_FATAL_IF(
             outWindowInfo->dataspace == HAL_DATASPACE_UNKNOWN && colorType != kAlpha_8_SkColorType,
             "Unsupported colorspace");
@@ -406,6 +427,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
         }
 
         mWindowInfo.preTransform = GetPreTransformMatrix(mWindowInfo.size, mWindowInfo.transform);
+        mWindowInfo.pixelSnapMatrix = GetPixelSnapMatrix(mWindowInfo.size, mWindowInfo.transform);
     }
 
     uint32_t idx;
@@ -494,6 +516,43 @@ int VulkanSurface::getCurrentBuffersAge() {
     LOG_ALWAYS_FATAL_IF(!mCurrentBufferInfo);
     VulkanSurface::NativeBufferInfo& currentBuffer = *mCurrentBufferInfo;
     return currentBuffer.hasValidContents ? (mPresentCount - currentBuffer.lastPresentedCount) : 0;
+}
+
+void VulkanSurface::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
+    mWindowInfo.colorspace = std::move(colorSpace);
+    for (int i = 0; i < kNumBufferSlots; i++) {
+        mNativeBuffers[i].skSurface.reset();
+    }
+
+    if (mWindowInfo.colorMode == ColorMode::Hdr || mWindowInfo.colorMode == ColorMode::Hdr10) {
+        mWindowInfo.dataspace =
+                static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
+    } else {
+        mWindowInfo.dataspace = ColorSpaceToADataSpace(
+                mWindowInfo.colorspace.get(), BufferFormatToColorType(mWindowInfo.bufferFormat));
+    }
+    LOG_ALWAYS_FATAL_IF(mWindowInfo.dataspace == HAL_DATASPACE_UNKNOWN &&
+                                mWindowInfo.bufferFormat != AHARDWAREBUFFER_FORMAT_R8_UNORM,
+                        "Unsupported colorspace");
+
+    if (mNativeWindow) {
+        int err = ANativeWindow_setBuffersDataSpace(mNativeWindow.get(), mWindowInfo.dataspace);
+        if (err != 0) {
+            ALOGE("VulkanSurface::setColorSpace() native_window_set_buffers_data_space(%d) "
+                  "failed: %s (%d)",
+                  mWindowInfo.dataspace, strerror(-err), err);
+        }
+    }
+}
+
+bool VulkanSurface::isBeyond8Bit() const {
+    switch (mWindowInfo.bufferFormat) {
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
+        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+            return true;
+        default:
+            return false;
+    }
 }
 
 } /* namespace renderthread */

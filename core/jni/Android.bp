@@ -40,6 +40,12 @@ cc_library_shared {
 
     cppflags: ["-Wno-conversion-null"],
 
+    product_variables: {
+        eng: {
+            cflags: ["-DNO_RESET_STACK_PROTECTOR"],
+        },
+    },
+
     cpp_std: "gnu++20",
 
     srcs: [
@@ -219,7 +225,7 @@ cc_library_shared {
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
                 "com_android_internal_content_om_OverlayManagerImpl.cpp",
-                "com_android_internal_expresslog_Counter.cpp",
+                "com_android_internal_expresslog_Utils.cpp",
                 "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
@@ -266,7 +272,6 @@ cc_library_shared {
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
                 "libandroid_net",
-                "libandroidicu",
                 "libbattery",
                 "libnetdutils",
                 "libmemtrack",
@@ -287,6 +292,7 @@ cc_library_shared {
                 "libPlatformProperties",
                 "libsensor",
                 "libinput",
+                "libicu",
                 "libcamera_client",
                 "libcamera_metadata",
                 "libprocinfo",
@@ -328,8 +334,6 @@ cc_library_shared {
                 "libtimeinstate",
                 "server_configurable_flags",
                 "libimage_io",
-                "libjpegdecoder",
-                "libjpegencoder",
                 "libjpegrecoverymap",
             ],
             export_shared_lib_headers: [
@@ -343,7 +347,9 @@ cc_library_shared {
             header_libs: [
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
+                "flatbuffer_headers",
                 "libtextclassifier_hash_headers",
+                "tensorflow_headers",
             ],
             runtime_libs: [
                 "libidmap2",

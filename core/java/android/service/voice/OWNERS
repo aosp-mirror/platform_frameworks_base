@@ -1,3 +1,7 @@
 # Bug component: 533220
 
 include /core/java/android/app/assist/OWNERS
+
+# The owner here should not be assist owner
+liangyuchen@google.com
+tuanng@google.com

@@ -80,10 +80,32 @@ public class InsertModeTransformationMethod implements TransformationMethod, Tex
      */
     public InsertModeTransformationMethod(@IntRange(from = 0) int offset, boolean singleLine,
             @NonNull TransformationMethod oldTransformationMethod) {
-        mStart = offset;
-        mEnd = offset;
+        this(offset, offset, singleLine, oldTransformationMethod);
+    }
+
+    private InsertModeTransformationMethod(int start, int end, boolean singleLine,
+            @NonNull TransformationMethod oldTransformationMethod) {
+        mStart = start;
+        mEnd = end;
         mSingleLine = singleLine;
         mOldTransformationMethod = oldTransformationMethod;
+    }
+
+    /**
+     * Create a new {@code InsertModeTransformation} with the given new inner
+     * {@code oldTransformationMethod} and the {@code singleLine} value. The returned
+     * {@link InsertModeTransformationMethod} will keep the highlight range.
+     *
+     * @param oldTransformationMethod the updated inner transformation method at the
+     * {@link android.widget.TextView}.
+     * @param singleLine the updated singleLine value.
+     * @return the new {@link InsertModeTransformationMethod} with the updated
+     * {@code oldTransformationMethod} and {@code singleLine} value.
+     */
+    public InsertModeTransformationMethod update(TransformationMethod oldTransformationMethod,
+            boolean singleLine) {
+        return new InsertModeTransformationMethod(mStart, mEnd, singleLine,
+                oldTransformationMethod);
     }
 
     public TransformationMethod getOldTransformationMethod() {

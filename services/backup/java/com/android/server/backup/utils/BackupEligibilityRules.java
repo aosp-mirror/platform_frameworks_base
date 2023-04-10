@@ -31,6 +31,7 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -39,10 +40,12 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.backup.SetUtils;
 import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 
@@ -56,13 +59,26 @@ import java.util.Set;
  */
 public class BackupEligibilityRules {
     private static final boolean DEBUG = false;
-    // List of system packages that are eligible for backup in non-system users.
-    private static final Set<String> systemPackagesAllowedForAllUsers = Sets.newArraySet(
-            PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME, WALLPAPER_PACKAGE, SETTINGS_PACKAGE);
+
+    /**
+     * List of system packages that are eligible for backup in "profile" users (such as work
+     * profile). See {@link UserManager#isProfile()}. This is a subset of {@link
+     * #systemPackagesAllowedForNonSystemUsers}
+     */
+    private static final Set<String> systemPackagesAllowedForProfileUser =
+            Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME);
+
+    /**
+     * List of system packages that are eligible for backup in non-system users.
+     */
+    private static final Set<String> systemPackagesAllowedForNonSystemUsers = SetUtils.union(
+            systemPackagesAllowedForProfileUser,
+            Sets.newArraySet(WALLPAPER_PACKAGE, SETTINGS_PACKAGE));
 
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
     private final int mUserId;
+    private boolean mIsProfileUser = false;
     @BackupDestination  private final int mBackupDestination;
 
     /**
@@ -85,19 +101,23 @@ public class BackupEligibilityRules {
 
     public static BackupEligibilityRules forBackup(PackageManager packageManager,
             PackageManagerInternal packageManagerInternal,
-            int userId) {
-        return new BackupEligibilityRules(packageManager, packageManagerInternal, userId,
+            int userId,
+            Context context) {
+        return new BackupEligibilityRules(packageManager, packageManagerInternal, userId, context,
                 BackupDestination.CLOUD);
     }
 
     public BackupEligibilityRules(PackageManager packageManager,
             PackageManagerInternal packageManagerInternal,
             int userId,
+            Context context,
             @BackupDestination int backupDestination) {
         mPackageManager = packageManager;
         mPackageManagerInternal = packageManagerInternal;
         mUserId = userId;
         mBackupDestination = backupDestination;
+        UserManager userManager = context.getSystemService(UserManager.class);
+        mIsProfileUser = userManager.isProfile();
     }
 
     /**
@@ -125,11 +145,17 @@ public class BackupEligibilityRules {
 
         // 2. they run as a system-level uid
         if (UserHandle.isCore(app.uid)) {
-            // and the backup is happening for a non-system user on a package that is not explicitly
-            // allowed.
-            if (mUserId != UserHandle.USER_SYSTEM
-                    && !systemPackagesAllowedForAllUsers.contains(app.packageName)) {
-                return false;
+            // and the backup is happening for a non-system user or profile on a package that is
+            // not explicitly allowed.
+            if (mUserId != UserHandle.USER_SYSTEM) {
+                if (mIsProfileUser && !systemPackagesAllowedForProfileUser.contains(
+                        app.packageName)) {
+                    return false;
+                }
+                if (!mIsProfileUser && !systemPackagesAllowedForNonSystemUsers.contains(
+                        app.packageName)) {
+                    return false;
+                }
             }
 
             // or do not supply their own backup agent

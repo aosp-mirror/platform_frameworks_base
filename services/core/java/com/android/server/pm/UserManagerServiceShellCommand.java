@@ -25,6 +25,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
@@ -36,6 +37,8 @@ import android.os.UserManager;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
+import com.android.internal.R;
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
@@ -100,10 +103,26 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         pw.println("          --reboot (which does a full reboot) or");
         pw.println("          --no-restart (which requires a manual restart)");
         pw.println();
+        pw.println("  is-headless-system-user-mode [-v | --verbose]");
+        pw.println("    Checks whether the device uses headless system user mode.");
+        pw.println("  is-visible-background-users-on-default-display-supported [-v | --verbose]");
+        pw.println("    Checks whether the device allows users to be start visible on background "
+                + "in the default display.");
+        pw.println("    It returns the effective mode, even when using emulation");
+        pw.println("    (to get the real mode as well, use -v or --verbose)");
+        pw.println();
+        pw.println("  is-visible-background-users-supported [-v | --verbose]");
+        pw.println("    Checks whether the device allows users to be start visible on background.");
+        pw.println("    It returns the effective mode, even when using emulation");
+        pw.println("    (to get the real mode as well, use -v or --verbose)");
+        pw.println();
         pw.println("  is-user-visible [--display DISPLAY_ID] <USER_ID>");
         pw.println("    Checks if the given user is visible in the given display.");
         pw.println("    If the display option is not set, it uses the user's context to check");
         pw.println("    (so it emulates what apps would get from UserManager.isUserVisible())");
+        pw.println();
+        pw.println("  get-main-user ");
+        pw.println("    Displays main user id or message if there is no main user");
         pw.println();
     }
 
@@ -121,8 +140,20 @@ public class UserManagerServiceShellCommand extends ShellCommand {
                     return runReportPackageAllowlistProblems();
                 case "set-system-user-mode-emulation":
                     return runSetSystemUserModeEmulation();
+                case "is-headless-system-user-mode":
+                    return runIsHeadlessSystemUserMode();
+                case "is-visible-background-users-supported":
+                    return runIsVisibleBackgroundUserSupported();
+                case "is-visible-background-users-on-default-display-supported":
+                    return runIsVisibleBackgroundUserOnDefaultDisplaySupported();
                 case "is-user-visible":
                     return runIsUserVisible();
+                case "get-main-user":
+                    return runGetMainUserId();
+                case "can-switch-to-headless-system-user":
+                    return canSwitchToHeadlessSystemUser();
+                case "is-main-user-permanent-admin":
+                    return isMainUserPermanentAdmin();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -349,6 +380,7 @@ public class UserManagerServiceShellCommand extends ShellCommand {
             final int pid = Process.myPid();
             Slogf.i(LOG_TAG, "Restarting Android runtime(PID=%d) to finalize changes", pid);
             pw.println("Restarting Android runtime to finalize changes");
+            pw.println("The restart may trigger a 'Broken pipe' message; this is to be expected.");
             pw.flush();
 
             // Ideally there should be a cleaner / safer option to restart system_server, but
@@ -403,7 +435,119 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         } else {
             isVisible = getUserManagerForUser(userId).isUserVisible();
         }
+        // NOTE: do not change output below (or command name / args), as it's used by ITestDevice
         pw.println(isVisible);
+        return 0;
+    }
+
+    private int runIsHeadlessSystemUserMode() {
+        PrintWriter pw = getOutPrintWriter();
+
+        boolean verbose = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-v":
+                case "--verbose":
+                    verbose = true;
+                    break;
+                default:
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+            }
+        }
+        boolean effective = mService.isHeadlessSystemUserMode();
+        if (!verbose) {
+            // NOTE: do not change output below, as it's used by ITestDevice
+            // (it's ok to change the verbose option though)
+            pw.println(effective);
+        } else {
+            pw.printf("effective=%b real=%b\n", effective,
+                    RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER);
+        }
+        return 0;
+    }
+
+    private int runIsVisibleBackgroundUserSupported() {
+        PrintWriter pw = getOutPrintWriter();
+
+        boolean verbose = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-v":
+                case "--verbose":
+                    verbose = true;
+                    break;
+                default:
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+            }
+        }
+
+        boolean effective = UserManager.isVisibleBackgroundUsersEnabled();
+        if (!verbose) {
+            // NOTE: do not change output below, as it's used by ITestDevice
+            // (it's ok to change the verbose option though)
+            pw.println(effective);
+        } else {
+            pw.printf("effective=%b real=%b\n", effective, Resources.getSystem()
+                    .getBoolean(R.bool.config_multiuserVisibleBackgroundUsers));
+        }
+        return 0;
+    }
+
+    private int runIsVisibleBackgroundUserOnDefaultDisplaySupported() {
+        PrintWriter pw = getOutPrintWriter();
+
+        boolean verbose = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-v":
+                case "--verbose":
+                    verbose = true;
+                    break;
+                default:
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+            }
+        }
+
+        boolean effective = UserManager.isVisibleBackgroundUsersOnDefaultDisplayEnabled();
+        if (!verbose) {
+            // NOTE: do not change output below, as it's used by ITestDevice
+            // (it's ok to change the verbose option though)
+            pw.println(effective);
+        } else {
+            pw.printf("effective=%b real=%b\n", effective, Resources.getSystem()
+                    .getBoolean(R.bool.config_multiuserVisibleBackgroundUsersOnDefaultDisplay));
+        }
+        return 0;
+    }
+
+    private int runGetMainUserId() {
+        PrintWriter pw = getOutPrintWriter();
+        final int mainUserId = mService.getMainUserId();
+        if (mainUserId == UserHandle.USER_NULL) {
+            pw.println("None");
+            return 1;
+        }
+        pw.println(mainUserId);
+        return 0;
+    }
+
+    private int canSwitchToHeadlessSystemUser() {
+        PrintWriter pw = getOutPrintWriter();
+        boolean canSwitchToHeadlessSystemUser = mService.canSwitchToHeadlessSystemUser();
+        pw.println(canSwitchToHeadlessSystemUser);
+        return 0;
+    }
+
+    private int isMainUserPermanentAdmin() {
+        PrintWriter pw = getOutPrintWriter();
+        boolean isMainUserPermanentAdmin = mService.isMainUserPermanentAdmin();
+        pw.println(isMainUserPermanentAdmin);
         return 0;
     }
 

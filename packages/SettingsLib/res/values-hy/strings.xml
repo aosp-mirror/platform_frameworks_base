@@ -173,7 +173,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Օգտատեր՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Որոշ կանխադրված կարգավորումներ կան"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Կանխադրված կարգավորումներ չկան"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Տեքստի հնչեցման կարգավորումներ"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Տեքստի հնչեցման կարգա­վորումներ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Տեքստի հնչեցում"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Խոսքի արագությունը"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Տեքստի արտասանման արագությունը"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Ցույց տալ կտրվածքի սահմանները, լուսանցքները և այլն"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Ուղղությունը դարձնել RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Բոլոր լեզուների համար էկրանի տեքստի ուղղությունը դարձնել աջից ձախ"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Նավիգացիայի թափանցիկ գոտի"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Նավիգացիայի գոտին դարձնել թափանցիկ ըստ կանխադրման"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Շաղում պատուհանի մակարդակում"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Ստիպել  4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Միացնել 4x MSAA-ը  OpenGL ES 2.0 հավելվածներում"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Այս հեռախոսը"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Այս պլանշետը"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Այս հեռախոսը"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Հնարավոր չէ նվագարկել այս սարքում"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Փոխելու համար անցեք հաշվի պրեմիում տարբերակին"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Հնարավոր չէ նվագարկել ներբեռնումներն այստեղ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Նորից փորձեք գովազդից հետո"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Արթնացրեք սարքը՝ այստեղ նվագարկելու համար"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Նվագարկելու համար հաստատեք սարքը"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Չհաջողվեց նվագարկել մեդիա ֆայլն այստեղ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Կապի խնդիր կա: Սարքն անջատեք և նորից միացրեք:"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Լարով աուդիո սարք"</string>
     <string name="help_label" msgid="3528360748637781274">"Օգնություն և հետադարձ կապ"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"«Հետ» ժեստի հուշման շարժանկարներ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Միացնել համակարգի անիմացիաները «Հետ» ժեստի հուշման համար"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Այս կարգավորման միջոցով կարելի է միացնել համակարգային շարժանկարները ժեստի հուշման համար։ Կարգավորումը պահանջում է մանիֆեստի ֆայլում սահմանել true արժեքը per-app enableOnBackInvokedCallback հատկության համար։"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Տեղափոխել ձախ"</item>
+    <item msgid="5425394847942513942">"Տեղափոխել ներքև"</item>
+    <item msgid="7728484337962740316">"Տեղափոխել աջ"</item>
+    <item msgid="324200556467459329">"Տեղափոխել վերև"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

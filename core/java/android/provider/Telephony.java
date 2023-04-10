@@ -3396,8 +3396,10 @@ public final class Telephony {
         public static final int MATCH_ALL_APN_SET_ID = -1;
 
         /**
-         * A unique carrier id associated with this APN
-         * {@see TelephonyManager#getSimCarrierId()}
+         * A unique carrier id associated with this APN {@link TelephonyManager#getSimCarrierId()}
+         * In case of matching carrier information, this should be used by default instead of
+         * those fields of {@link #MCC}, {@link #MNC}, {@link #NUMERIC}, {@link #MVNO_TYPE},
+         * {@link #MVNO_MATCH_DATA}, etc.
          * <p>Type: STRING</p>
          */
         public static final String CARRIER_ID = "carrier_id";
@@ -4847,6 +4849,14 @@ public final class Telephony {
          */
         public static final String COLUMN_USER_HANDLE = "user_handle";
 
+        /**
+         * TelephonyProvider column name for satellite enabled.
+         * By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SATELLITE_ENABLED = "satellite_enabled";
+
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
                 COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID,
@@ -4915,12 +4925,75 @@ public final class Telephony {
                 COLUMN_PORT_INDEX,
                 COLUMN_USAGE_SETTING,
                 COLUMN_TP_MESSAGE_REF,
-                COLUMN_USER_HANDLE
+                COLUMN_USER_HANDLE,
+                COLUMN_SATELLITE_ENABLED
         );
 
         /**
          * @return All columns in {@link SimInfo} table.
          *
+         * @hide
+         */
+        @NonNull
+        public static List<String> getAllColumns() {
+            return ALL_COLUMNS;
+        }
+    }
+
+    /**
+     * Stores incoming satellite datagrams.
+     * @hide
+     */
+    public static final class SatelliteDatagrams {
+        /**
+         * Not instantiable.
+         * @hide
+         */
+        private SatelliteDatagrams() {}
+
+        /**
+         * Provider name for Satellite Datagrams table.
+         */
+        public static final String PROVIDER_NAME = "satellite";
+
+        /**
+         * Table name for Satellite Datagrams table.
+         */
+        public static final String TABLE_NAME = "incoming_datagrams";
+
+        /**
+         * URL for satellite incoming datagrams table.
+         */
+        private static final String URL = "content://" + PROVIDER_NAME + "/" + TABLE_NAME;
+
+        /**
+         * The {@code content://} style URI for this provider.
+         * @hide
+         */
+        public static final Uri CONTENT_URI = Uri.parse(URL);
+
+        /**
+         * SatelliteProvider unique key column name is the datagram id.
+         * <P>Type: INTEGER (int)</P>
+         * @hide
+         */
+        public static final String COLUMN_UNIQUE_KEY_DATAGRAM_ID = "datagram_id";
+
+        /**
+         * SatelliteProvider column name for storing datagram.
+         * <p>TYPE: BLOB
+         * @hide
+         */
+        public static final String COLUMN_DATAGRAM = "datagram";
+
+        /** All columns in {@link SatelliteDatagrams} table. */
+        private static final List<String> ALL_COLUMNS = List.of(
+                COLUMN_UNIQUE_KEY_DATAGRAM_ID,
+                COLUMN_DATAGRAM
+        );
+
+        /**
+         * @return All columns in {@link SatelliteDatagrams} table.
          * @hide
          */
         @NonNull

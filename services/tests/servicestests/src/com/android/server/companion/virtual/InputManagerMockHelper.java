@@ -79,7 +79,7 @@ class InputManagerMockHelper {
         InputManager.resetInstance(mIInputManagerMock);
     }
 
-    private Void handleNativeOpenInputDevice(InvocationOnMock inv) {
+    private long handleNativeOpenInputDevice(InvocationOnMock inv) {
         Objects.requireNonNull(mDevicesChangedListener,
                 "InputController did not register an InputDevicesChangedListener.");
 
@@ -101,6 +101,7 @@ class InputManagerMockHelper {
         }
         // Process the device added notification.
         mTestableLooper.processAllMessages();
-        return null;
+        // Return a placeholder pointer to the native input device.
+        return 1L;
     }
 }

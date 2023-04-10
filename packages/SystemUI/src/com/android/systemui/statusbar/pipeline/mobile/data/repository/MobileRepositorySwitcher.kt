@@ -24,7 +24,6 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
@@ -47,7 +46,6 @@ import kotlinx.coroutines.flow.stateIn
  * interface in its own repository, completely separate from the real version, while still using all
  * of the prod implementations for the rest of the pipeline (interactors and onward). Looks
  * something like this:
- *
  * ```
  * RealRepository
  *                 │
@@ -115,13 +113,22 @@ constructor(
             .flatMapLatest { it.subscriptions }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.subscriptions.value)
 
-    override val activeMobileDataSubscriptionId: StateFlow<Int> =
+    override val activeMobileDataSubscriptionId: StateFlow<Int?> =
         activeRepo
             .flatMapLatest { it.activeMobileDataSubscriptionId }
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
                 realRepository.activeMobileDataSubscriptionId.value
+            )
+
+    override val activeMobileDataRepository: StateFlow<MobileConnectionRepository?> =
+        activeRepo
+            .flatMapLatest { it.activeMobileDataRepository }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                realRepository.activeMobileDataRepository.value
             )
 
     override val activeSubChangedInGroupEvent: Flow<Unit> =
@@ -147,17 +154,28 @@ constructor(
             .flatMapLatest { it.defaultDataSubId }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.defaultDataSubId.value)
 
-    override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
+    override val mobileIsDefault: StateFlow<Boolean> =
         activeRepo
-            .flatMapLatest { it.defaultMobileNetworkConnectivity }
+            .flatMapLatest { it.mobileIsDefault }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.mobileIsDefault.value)
+
+    override val hasCarrierMergedConnection: StateFlow<Boolean> =
+        activeRepo
+            .flatMapLatest { it.hasCarrierMergedConnection }
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                realRepository.defaultMobileNetworkConnectivity.value
+                realRepository.hasCarrierMergedConnection.value,
             )
 
-    override val globalMobileDataSettingChangedEvent: Flow<Unit> =
-        activeRepo.flatMapLatest { it.globalMobileDataSettingChangedEvent }
+    override val defaultConnectionIsValidated: StateFlow<Boolean> =
+        activeRepo
+            .flatMapLatest { it.defaultConnectionIsValidated }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                realRepository.defaultConnectionIsValidated.value
+            )
 
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         if (isDemoMode.value) {

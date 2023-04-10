@@ -243,11 +243,13 @@ public class CameraServiceProxy extends SystemService
         public List<CameraStreamStats> mStreamStats;
         public String mUserTag;
         public int mVideoStabilizationMode;
+        public final long mLogId;
 
         private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
 
         CameraUsageEvent(String cameraId, int facing, String clientName, int apiLevel,
-                boolean isNdk, int action, int latencyMs, int operatingMode) {
+                boolean isNdk, int action, int latencyMs, int operatingMode, boolean deviceError,
+                long logId) {
             mCameraId = cameraId;
             mCameraFacing = facing;
             mClientName = clientName;
@@ -258,6 +260,8 @@ public class CameraServiceProxy extends SystemService
             mAction = action;
             mLatencyMs = latencyMs;
             mOperatingMode = operatingMode;
+            mDeviceError = deviceError;
+            mLogId = logId;
         }
 
         public void markCompleted(int internalReconfigure, long requestCount,
@@ -498,7 +502,8 @@ public class CameraServiceProxy extends SystemService
 
             if ((recentTasks != null) && (!recentTasks.getList().isEmpty())) {
                 for (ActivityManager.RecentTaskInfo task : recentTasks.getList()) {
-                    if (packageName.equals(task.topActivityInfo.packageName)) {
+                    if (task.topActivityInfo != null && packageName.equals(
+                            task.topActivityInfo.packageName)) {
                         taskInfo = new TaskInfo();
                         taskInfo.frontTaskId = task.taskId;
                         taskInfo.isResizeable =
@@ -838,7 +843,8 @@ public class CameraServiceProxy extends SystemService
                         + ", deviceError " + e.mDeviceError
                         + ", streamCount is " + streamCount
                         + ", userTag is " + e.mUserTag
-                        + ", videoStabilizationMode " + e.mVideoStabilizationMode);
+                        + ", videoStabilizationMode " + e.mVideoStabilizationMode
+                        + ", logId " + e.mLogId);
             }
             // Convert from CameraStreamStats to CameraStreamProto
             CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
@@ -898,7 +904,7 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[2]),
                     MessageNano.toByteArray(streamProtos[3]),
                     MessageNano.toByteArray(streamProtos[4]),
-                    e.mUserTag, e.mVideoStabilizationMode);
+                    e.mUserTag, e.mVideoStabilizationMode, e.mLogId);
         }
     }
 
@@ -1087,6 +1093,7 @@ public class CameraServiceProxy extends SystemService
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
         String userTag = cameraState.getUserTag();
         int videoStabilizationMode = cameraState.getVideoStabilizationMode();
+        long logId = cameraState.getLogId();
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -1108,7 +1115,7 @@ public class CameraServiceProxy extends SystemService
                     CameraUsageEvent openEvent = new CameraUsageEvent(
                             cameraId, facing, clientName, apiLevel, isNdk,
                             FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__OPEN,
-                            latencyMs, sessionType);
+                            latencyMs, sessionType, deviceError, logId);
                     mCameraUsageHistory.add(openEvent);
                     break;
                 case CameraSessionStats.CAMERA_STATE_ACTIVE:
@@ -1135,7 +1142,7 @@ public class CameraServiceProxy extends SystemService
                     CameraUsageEvent newEvent = new CameraUsageEvent(
                             cameraId, facing, clientName, apiLevel, isNdk,
                             FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__SESSION,
-                            latencyMs, sessionType);
+                            latencyMs, sessionType, deviceError, logId);
                     CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
                     if (oldEvent != null) {
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
@@ -1154,6 +1161,8 @@ public class CameraServiceProxy extends SystemService
                                 resultErrorCount, deviceError, streamStats, userTag,
                                 videoStabilizationMode);
                         mCameraUsageHistory.add(doneEvent);
+                        // Do not double count device error
+                        deviceError = false;
 
                         // Check current active camera IDs to see if this package is still
                         // talking to some camera
@@ -1177,7 +1186,7 @@ public class CameraServiceProxy extends SystemService
                         CameraUsageEvent closeEvent = new CameraUsageEvent(
                                 cameraId, facing, clientName, apiLevel, isNdk,
                                 FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__CLOSE,
-                                latencyMs, sessionType);
+                                latencyMs, sessionType, deviceError, logId);
                         mCameraUsageHistory.add(closeEvent);
                     }
 

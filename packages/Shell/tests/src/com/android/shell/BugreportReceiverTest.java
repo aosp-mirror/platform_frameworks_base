@@ -677,7 +677,7 @@ public class BugreportReceiverTest {
         if (mScreenshotFd != null) {
             writeScreenshotFile(mScreenshotFd, SCREENSHOT_CONTENT);
         }
-        mIDumpstateListener.onFinished();
+        mIDumpstateListener.onFinished("");
         getInstrumentation().waitForIdleSync();
     }
 

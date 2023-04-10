@@ -120,7 +120,9 @@ class Owners {
                 } else {
                     mDeviceStateCache.setDeviceOwnerType(NO_DEVICE_OWNER);
                 }
-
+                for (int userId : usersIds) {
+                    mDeviceStateCache.setHasProfileOwner(userId, hasProfileOwner(userId));
+                }
             } else {
                 mUserManagerInternal.setDeviceManaged(hasDeviceOwner());
                 for (int userId : usersIds) {
@@ -576,6 +578,19 @@ class Owners {
     public SystemUpdateInfo getSystemUpdateInfo() {
         synchronized (mData) {
             return mData.mSystemUpdateInfo;
+        }
+    }
+
+    void markMigrationToPolicyEngine() {
+        synchronized (mData) {
+            mData.mMigratedToPolicyEngine = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isMigratedToPolicyEngine() {
+        synchronized (mData) {
+            return mData.mMigratedToPolicyEngine;
         }
     }
 

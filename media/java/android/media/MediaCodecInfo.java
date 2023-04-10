@@ -4182,6 +4182,77 @@ public final class MediaCodecInfo {
         @SuppressLint("AllUpper")
         public static final int DTS_UHDProfileP2 = 0x2;
 
+        // Profiles and levels for AC-4 Codec, corresponding to the definitions in
+        // "The MIME codecs parameter", Annex E.13
+        // found at https://www.etsi.org/deliver/etsi_ts/103100_103199/10319002/01.02.01_60/ts_10319002v010201p.pdf
+        // profile = ((1 << bitstream_version) << 8) | (1 << presentation_version);
+        // level = 1 << mdcompat;
+
+        @SuppressLint("AllUpper")
+        private static final int AC4BitstreamVersion0 = 0x01;
+        @SuppressLint("AllUpper")
+        private static final int AC4BitstreamVersion1 = 0x02;
+        @SuppressLint("AllUpper")
+        private static final int AC4BitstreamVersion2 = 0x04;
+
+        @SuppressLint("AllUpper")
+        private static final int AC4PresentationVersion0 = 0x01;
+        @SuppressLint("AllUpper")
+        private static final int AC4PresentationVersion1 = 0x02;
+        @SuppressLint("AllUpper")
+        private static final int AC4PresentationVersion2 = 0x04;
+
+        /**
+         * AC-4 codec profile with bitstream_version 0 and presentation_version 0
+         * as per ETSI TS 103 190-2 v1.2.1
+         */
+        @SuppressLint("AllUpper")
+        public static final int AC4Profile00 = AC4BitstreamVersion0 << 8 | AC4PresentationVersion0;
+
+        /**
+         * AC-4 codec profile with bitstream_version 1 and presentation_version 0
+         * as per ETSI TS 103 190-2 v1.2.1
+         */
+        @SuppressLint("AllUpper")
+        public static final int AC4Profile10 = AC4BitstreamVersion1 << 8 | AC4PresentationVersion0;
+
+        /**
+         * AC-4 codec profile with bitstream_version 1 and presentation_version 1
+         * as per ETSI TS 103 190-2 v1.2.1
+         */
+        @SuppressLint("AllUpper")
+        public static final int AC4Profile11 = AC4BitstreamVersion1 << 8 | AC4PresentationVersion1;
+
+        /**
+         * AC-4 codec profile with bitstream_version 2 and presentation_version 1
+         * as per ETSI TS 103 190-2 v1.2.1
+         */
+        @SuppressLint("AllUpper")
+        public static final int AC4Profile21 = AC4BitstreamVersion2 << 8 | AC4PresentationVersion1;
+
+        /**
+         * AC-4 codec profile with bitstream_version 2 and presentation_version 2
+         * as per ETSI TS 103 190-2 v1.2.1
+         */
+        @SuppressLint("AllUpper")
+        public static final int AC4Profile22 = AC4BitstreamVersion2 << 8 | AC4PresentationVersion2;
+
+        /** AC-4 codec level corresponding to mdcompat 0 as per ETSI TS 103 190-2 v1.2.1 */
+        @SuppressLint("AllUpper")
+        public static final int AC4Level0       = 0x01;
+        /** AC-4 codec level corresponding to mdcompat 1 as per ETSI TS 103 190-2 v1.2.1 */
+        @SuppressLint("AllUpper")
+        public static final int AC4Level1       = 0x02;
+        /** AC-4 codec level corresponding to mdcompat 2 as per ETSI TS 103 190-2 v1.2.1 */
+        @SuppressLint("AllUpper")
+        public static final int AC4Level2       = 0x04;
+        /** AC-4 codec level corresponding to mdcompat 3 as per ETSI TS 103 190-2 v1.2.1 */
+        @SuppressLint("AllUpper")
+        public static final int AC4Level3       = 0x08;
+        /** AC-4 codec level corresponding to mdcompat 4 as per ETSI TS 103 190-2 v1.2.1 */
+        @SuppressLint("AllUpper")
+        public static final int AC4Level4       = 0x10;
+
         /**
          * The profile of the media content. Depending on the type of media this can be
          * one of the profile values defined in this class.

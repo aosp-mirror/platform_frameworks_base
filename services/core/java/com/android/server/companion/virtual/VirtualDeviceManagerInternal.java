@@ -19,7 +19,9 @@ package com.android.server.companion.virtual;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.os.LocaleList;
+import android.util.ArraySet;
 
 import java.util.Set;
 
@@ -77,6 +79,15 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract int getDeviceOwnerUid(int deviceId);
 
     /**
+     * Returns the VirtualSensor for the given deviceId and sensor handle, if any.
+     *
+     * @param deviceId the virtual device that owns the sensor
+     * @param handle the sensor handle
+     * @return the VirtualSensor with the given handle, or {@code null} if no such sensor exists.
+     */
+    public abstract @Nullable VirtualSensor getVirtualSensor(int deviceId, int handle);
+
+    /**
      * Finds VirtualDevices where an app is running.
      *
      * @param uid - the app's uid
@@ -84,7 +95,7 @@ public abstract class VirtualDeviceManagerInternal {
      * *Note* this only checks VirtualDevices, and does not include information about whether
      * the app is running on the default device or not.
      */
-    public abstract @NonNull Set<Integer> getDeviceIdsForUid(int uid);
+    public abstract @NonNull ArraySet<Integer> getDeviceIdsForUid(int uid);
 
     /**
      * Notifies that a virtual display is created.
@@ -132,4 +143,12 @@ public abstract class VirtualDeviceManagerInternal {
      * Returns true if the {@code displayId} is owned by any virtual device
      */
     public abstract boolean isDisplayOwnedByAnyVirtualDevice(int displayId);
+
+    /**
+     * Gets the ids of VirtualDisplays owned by a VirtualDevice.
+     *
+     * @param deviceId which device we're asking about
+     * @return the set of display ids for all VirtualDisplays owned by the device
+     */
+    public abstract @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId);
 }

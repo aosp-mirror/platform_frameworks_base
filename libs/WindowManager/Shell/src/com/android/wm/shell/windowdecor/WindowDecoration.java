@@ -24,13 +24,14 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.view.Display;
-import android.view.InsetsState;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.TaskConstants;
@@ -58,7 +59,6 @@ import java.util.function.Supplier;
  */
 public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         implements AutoCloseable {
-    private static final int[] CAPTION_INSETS_TYPES = { InsetsState.ITYPE_CAPTION_BAR };
 
     /**
      * System-wide context. Only used to create context with overridden configurations.
@@ -84,6 +84,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             };
 
     RunningTaskInfo mTaskInfo;
+    int mLayoutResId;
     final SurfaceControl mTaskSurface;
 
     Display mDisplay;
@@ -95,6 +96,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     private WindowlessWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
 
+    private final Binder mOwner = new Binder();
     private final Rect mCaptionInsetsRect = new Rect();
     private final Rect mTaskSurfaceCrop = new Rect();
     private final float[] mTmpColor = new float[3];
@@ -131,7 +133,17 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
-        mDecorWindowContext = mContext.createConfigurationContext(mTaskInfo.getConfiguration());
+        mDecorWindowContext = mContext.createConfigurationContext(
+                getConfigurationWithOverrides(mTaskInfo));
+    }
+
+    /**
+     * Get {@link Configuration} from supplied {@link RunningTaskInfo}.
+     *
+     * Allows values to be overridden before returning the configuration.
+     */
+    protected Configuration getConfigurationWithOverrides(RunningTaskInfo taskInfo) {
+        return taskInfo.getConfiguration();
     }
 
     /**
@@ -152,6 +164,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         if (params.mRunningTaskInfo != null) {
             mTaskInfo = params.mRunningTaskInfo;
         }
+        final int oldLayoutResId = mLayoutResId;
+        mLayoutResId = params.mLayoutResId;
 
         if (!mTaskInfo.isVisible) {
             releaseViews();
@@ -165,10 +179,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         outResult.mRootView = rootView;
         rootView = null; // Clear it just in case we use it accidentally
-        final Configuration taskConfig = mTaskInfo.getConfiguration();
+        final Configuration taskConfig = getConfigurationWithOverrides(mTaskInfo);
         if (oldTaskConfig.densityDpi != taskConfig.densityDpi
                 || mDisplay == null
-                || mDisplay.getDisplayId() != mTaskInfo.displayId) {
+                || mDisplay.getDisplayId() != mTaskInfo.displayId
+                || oldLayoutResId != mLayoutResId) {
             releaseViews();
 
             if (!obtainDisplayOrRegisterListener()) {
@@ -252,9 +267,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
-        final int captionWidth = params.mCaptionWidthId == Resources.ID_NULL
-                ? taskBounds.width()
-                : loadDimensionPixelSize(resources, params.mCaptionWidthId);
+        final int captionWidth = taskBounds.width();
 
         startT.setPosition(
                         mCaptionContainerSurface,
@@ -292,10 +305,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             // Caption insets
             mCaptionInsetsRect.set(taskBounds);
-            mCaptionInsetsRect.bottom =
-                    mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
-            wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect,
-                    CAPTION_INSETS_TYPES);
+            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
+            wct.addInsetsSource(mTaskInfo.token,
+                    mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect);
         } else {
             startT.hide(mCaptionContainerSurface);
         }
@@ -360,7 +372,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
-        wct.removeInsetsProvider(mTaskInfo.token, CAPTION_INSETS_TYPES);
+        wct.removeInsetsSource(mTaskInfo.token,
+                mOwner, 0 /* index */, WindowInsets.Type.captionBar());
         mTaskOrganizer.applyTransaction(wct);
     }
 
@@ -393,10 +406,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param yPos y position of new window
      * @param width width of new window
      * @param height height of new window
-     * @return
+     * @param shadowRadius radius of the shadow of the new window
+     * @param cornerRadius radius of the corners of the new window
+     * @return the {@link AdditionalWindow} that was added.
      */
-    AdditionalWindow addWindow(int layoutId, String namePrefix,
-            SurfaceControl.Transaction t, int xPos, int yPos, int width, int height) {
+    AdditionalWindow addWindow(int layoutId, String namePrefix, SurfaceControl.Transaction t,
+            int xPos, int yPos, int width, int height, int shadowRadius, int cornerRadius) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -405,9 +420,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .build();
         View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
 
-        t.setPosition(
-                windowSurfaceControl, xPos, yPos)
+        t.setPosition(windowSurfaceControl, xPos, yPos)
                 .setWindowCrop(windowSurfaceControl, width, height)
+                .setShadowRadius(windowSurfaceControl, shadowRadius)
+                .setCornerRadius(windowSurfaceControl, cornerRadius)
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
@@ -485,7 +501,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     interface SurfaceControlViewHostFactory {
         default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
-            return new SurfaceControlViewHost(c, d, wmm);
+            return new SurfaceControlViewHost(c, d, wmm, "WindowDecoration");
         }
     }
 

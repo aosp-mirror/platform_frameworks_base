@@ -124,7 +124,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>Note that if 2 surfaces share the same stream via {@link
      * OutputConfiguration#enableSurfaceSharing} and {@link OutputConfiguration#addSurface},
-     * prepare() only needs to be called on one surface, and {link
+     * prepare() only needs to be called on one surface, and {@link
      * StateCallback#onSurfacePrepared} will be triggered for both surfaces.</p>
      *
      * <p>{@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}
@@ -661,7 +661,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>Repeating burst requests are a simple way for an application to
      * maintain a preview or other continuous stream of frames where each
-     * request is different in a predicatable way, without having to continually
+     * request is different in a predictable way, without having to continually
      * submit requests through {@link #captureBurst}.</p>
      *
      * <p>To stop the repeating capture, call {@link #stopRepeating}. Any
@@ -902,7 +902,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING OFFLINE_PROCESSING}
      * capability in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}. When this method
      * is supported, applications can use it to improve the latency of closing camera or recreating
-     * capture session without losing the in progresss capture request outputs.</p>
+     * capture session without losing the in progress capture request outputs.</p>
      *
      * <p>Offline processing mode and the corresponding {@link CameraOfflineSession} differ from
      * a regular online camera capture session in several ways. Successful offline switches will
@@ -1001,7 +1001,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>Note that for common usage scenarios like creating a new session or closing the camera
      * device, it is faster to call respective APIs directly (see below for more details) without
-     * calling into this method. This API is only useful when application wants to uncofigure the
+     * calling into this method. This API is only useful when application wants to unconfigure the
      * camera but keep the device open for later use.</p>
      *
      * <p>Creating a new capture session with {@link CameraDevice#createCaptureSession}
@@ -1246,7 +1246,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * between frames.</p>
          *
          * <p>The timestamps match the timestamps of the output surfaces with readout timestamp
-         * enabled (via {@link OutputConfiguration#useReadoutTimestamp}) if:</p>
+         * enabled (via {@link OutputConfiguration#setReadoutTimestampEnabled}) if:</p>
          * <ul>
          * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_DEFAULT} and the
          * output

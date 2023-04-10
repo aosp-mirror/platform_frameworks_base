@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"വൈഫൈ"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"വൈഫൈ കോളിംഗ്"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"Voവൈഫൈ"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"വൈഫൈ കോൾ"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ഓഫ്"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"വൈഫൈ മുഖേനയുള്ള കോൾ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"മൊബൈൽ നെറ്റ്‌വർക്ക് മുഖേനയുള്ള കോൾ"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുന്നത് വരെ നിങ്ങളുടെ വ്യക്തിപരമായ ആപ്പുകൾ ബ്ലോക്കായിരിക്കും"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"വ്യക്തിപര ആപ്പുകൾ <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>-ന് ബ്ലോക്ക് ചെയ്യപ്പെടും. നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ <xliff:g id="NUMBER">%3$d</xliff:g> ദിവസത്തിൽ കൂടുതൽ ഓഫായ നിലയിൽ തുടരാൻ നിങ്ങളുടെ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ഓണാക്കുക"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"കോളുകളും സന്ദേശങ്ങളും ഓഫാണ്"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"നിങ്ങൾ ഔദ്യോഗിക ആപ്പുകൾ താൽകാലികമായി നിർത്തി. നിങ്ങൾക്ക് ഫോൺ കോളുകളോ ടെക്സ്റ്റ് സന്ദേശങ്ങളോ ലഭിക്കില്ല."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"വർക്ക് ആപ്പ് ഓണാക്കൂ"</string>
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ഓപ്‌ഷനുകൾ"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ഡിസ്‌പ്ലേയുടെ സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിയും."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"പ്രിവ്യൂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ആപ്പ് ഉപയോഗത്തിലുള്ളപ്പോൾ അതിനെ ഹൃദയമിടിപ്പ്, ശരീരോഷ്മാവ്, രക്തത്തിലെ ഓക്സിജൻ ശതമാനം എന്നിവ പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"പശ്ചാത്തലത്തിലുള്ളപ്പോൾ ഹൃദയമിടിപ്പ് പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ആപ്പ് പശ്ചാത്തലത്തിലുള്ളപ്പോൾ അതിനെ ഹൃദയമിടിപ്പ്, ശരീരോഷ്മാവ്, രക്തത്തിലെ ഓക്സിജൻ ശതമാനം എന്നിവ പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യുക."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പശ്ചാത്തലത്തിൽ പ്രവർത്തിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യുക."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പശ്ചാത്തലത്തിൽ പ്രവർത്തിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"കലണ്ടർ ഇവന്റുകളും വിശദാംശങ്ങളും വായിക്കുക"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ഈ ആപ്പിന് നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ സംഭരിച്ചിരിക്കുന്ന എല്ലാ കലണ്ടർ ഇവന്റുകളും വായിക്കാനും നിങ്ങളുടെ കലണ്ടർ വിവരങ്ങൾ പങ്കിടാനും അല്ലെങ്കിൽ സംരക്ഷിക്കാനും കഴിയും."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ഈ ആപ്പിന് നിങ്ങളുടെ Android TV-യിൽ സംഭരിച്ചിരിക്കുന്ന എല്ലാ കലണ്ടർ ഇവന്റുകളും വായിക്കാനും നിങ്ങളുടെ കലണ്ടർ ഡാറ്റ പങ്കിടാനോ സംരക്ഷിക്കാനോ സാധിക്കുകയും ചെയ്യും."</string>
@@ -791,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ആപ്പിനുള്ള ഫീച്ചറുകളുടെ വിവരങ്ങൾ കാണാൻ ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ഉയർന്ന സാം‍പ്ലിംഗ് റേറ്റിൽ സെൻസർ ഡാറ്റ ആക്സസ് ചെയ്യുക"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-നേക്കാൾ ഉയർന്ന റേറ്റിൽ സെൻസർ ഡാറ്റ സാമ്പിൾ ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ഉപയോക്താവിന്റെ പ്രവർത്തനമില്ലാതെ തന്നെ ആപ്പ് അപ്ഡേറ്റ് ചെയ്യുക"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"മുമ്പ് ഹോൾഡർ ഇൻസ്റ്റാൾ ചെയ്ത ആപ്പ്, ഉപയോക്താവിന്റെ പ്രവർത്തനമില്ലാതെ തന്നെ അപ്ഡേറ്റ് ചെയ്യാൻ ആ ഹോൾഡറെ അനുവദിക്കുന്നു"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -1168,7 +1179,7 @@
     <string name="not_checked" msgid="7972320087569023342">"പരിശോധിക്കാത്തത്"</string>
     <string name="selected" msgid="6614607926197755875">"തിരഞ്ഞെടുത്തു"</string>
     <string name="not_selected" msgid="410652016565864475">"തിരഞ്ഞെടുത്തിട്ടില്ല"</string>
-    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}-ൽ ഒരു നക്ഷത്ര ചിഹ്നം}other{{max}-ൽ # നക്ഷത്ര ചിഹ്നം}}"</string>
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}-ൽ ഒരു സ്റ്റാർ}other{{max}-ൽ # സ്റ്റാർ}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"പുരോഗതിയിലാണ്"</string>
     <string name="whichApplication" msgid="5432266899591255759">"പൂർണ്ണമായ പ്രവർത്തനം ഉപയോഗിക്കുന്നു"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ഉപയോഗിച്ച് പ്രവർത്തനം പൂർത്തിയാക്കുക"</string>
@@ -1241,10 +1252,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android ആരംഭിക്കുന്നു…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ടാബ്‌ലെറ്റ് ആരംഭിക്കുന്നു…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ഉപകരണം ആരംഭിക്കുന്നു…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"സ്റ്റോറേജ്  ഒപ്‌റ്റിമൈസ് ചെയ്യുന്നു."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"സിസ്‌റ്റം അപ്‌ഡേറ്റ് പൂർത്തിയാക്കുന്നു…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> അപ്ഗ്രേഡ് ചെയ്യുന്നു…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> അപ്ലിക്കേഷൻ ഓപ്റ്റിമൈസ് ചെയ്യുന്നു."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> തയ്യാറാക്കുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
@@ -1356,6 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB വഴിയുള്ള PTP ഓണാക്കി"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB ടെതറിംഗ് ഓണാക്കി"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB വഴിയുള്ള MIDI ഓണാക്കി"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ഉപകരണം വെബ്‌ക്യാം ആയി കണക്റ്റ് ചെയ്തു"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ആക്‌സസറി കണക്റ്റ് ചെയ്തു"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"കണക്‌റ്റ് ചെയ്‌ത ഉപകരണം ചാർജ് ചെയ്യുന്നു. കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പ് ചെയ്യുക."</string>
@@ -1386,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"ഇൻപുട്ട് രീതി തിരഞ്ഞെടുക്കുക"</string>
     <string name="show_ime" msgid="6406112007347443383">"ഫിസിക്കൽ കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
     <string name="hardware" msgid="1800597768237606953">"വെർച്വൽ കീബോർഡ് കാണിക്കുക"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ഫിസിക്കൽ കീബോർഡ് കോൺഫിഗർ ചെയ്യുക"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്യുക"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"യഥാർത്ഥ കീബോർഡുകൾ കോൺഫിഗർ ചെയ്യുക"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പ് ചെയ്യുക"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1704,14 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"പൂർത്തിയാക്കി"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"കുറുക്കുവഴി ഉപയോഗിക്കുക"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"വർണ്ണ വിപര്യയം"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"നിറം വിപരീതമാക്കൽ"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"നിറം ശരിയാക്കൽ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ഒറ്റക്കൈ മോഡ്"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"കൂടുതൽ ഡിം ചെയ്യൽ"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ശ്രവണ ഉപകരണങ്ങൾ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"വോളിയം കീകൾ അമർത്തിപ്പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫാക്കി."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഉപയോഗിക്കാൻ, രണ്ട് വോളിയം കീകളും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"വോളിയം കീകൾ വിടുക. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കാൻ, രണ്ട് വോളിയം കീകളും വീണ്ടും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"നിങ്ങൾ ഉപയോഗസഹായി ബട്ടൺ ടാപ്പ് ചെയ്യുമ്പോൾ ഉപയോഗിക്കുന്നതിന് ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ഉപയോഗസഹായി വിരൽചലനത്തോടൊപ്പം ഉപയോഗിക്കാൻ ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക (രണ്ട് വിരലുകളുപയോഗിച്ച് സ്‌ക്രീനിന്റെ താഴെ നിന്ന് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ഉപയോഗസഹായി വിരൽചലനത്തോടൊപ്പം ഉപയോഗിക്കാൻ ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക (മൂന്ന് വിരലുകളുപയോഗിച്ച് സ്‌ക്രീനിന്റെ താഴെ നിന്ന് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക):"</string>
@@ -1842,6 +1853,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"മനസ്സിലായി"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"മികച്ച കാഴ്‌ചയ്‌ക്കായി റൊട്ടേറ്റ് ചെയ്യുക"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"മികച്ച കാഴ്‌ചയ്‌ക്കായി സ്‌ക്രീൻ വിഭജന മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
     <string name="done_label" msgid="7283767013231718521">"പൂർത്തിയാക്കി"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ചാക്രികമായി മണിക്കൂറുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ചാക്രികമായി മിനിറ്റുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
@@ -1853,6 +1866,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"രണ്ടാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"മൂന്നാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"ക്ലോൺ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ചെയ്യുംമുമ്പ് പിൻ ചോദിക്കൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"അൺപിന്നിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടൂ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"അൺപിന്നിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടൂ"</string>
@@ -1943,10 +1957,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"ഔദ്യോഗിക ആപ്പുകൾ ഓണാക്കണോ?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകളിലേക്കും അറിയിപ്പുകളിലേക്കും ആക്‌സസ് നേടുക"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ഓണാക്കുക"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"അടിയന്തരം"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകളിലേക്കും കോളുകളിലേക്കും ആക്‌സസ് നേടുക"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ലഭ്യമല്ല"</string>
@@ -2309,4 +2321,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"പശ്ചാത്തലത്തിൽ നിന്ന് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ ആരംഭിക്കാൻ സഹകാരി ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"മൈക്രോഫോൺ ലഭ്യമാണ്"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"മൈക്രോഫോൺ ബ്ലോക്ക് ചെയ്‌തു"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ഡ്യുവൽ സ്ക്രീൻ"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ഡ്യുവൽ സ്ക്രീൻ ഓണാണ്"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ഉള്ളടക്കം കാണിക്കാൻ <xliff:g id="APP_NAME">%1$s</xliff:g> രണ്ട് ഡിസ്പ്ലേകളും ഉപയോഗിക്കുന്നു"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ഉപകരണത്തിന് ചൂട് കൂടുതലാണ്"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"നിങ്ങളുടെ ഫോൺ വളരെയധികം ചൂടാകുന്നതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി ലാഭിക്കൽ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ക്രമീകരണത്തിലേക്ക് പോകുക"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ഓഫാക്കുക"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്‌തു"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"കീബോർഡ് ലേഔട്ട് ആയി <xliff:g id="LAYOUT_1">%s</xliff:g> സജ്ജീകരിച്ചു. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"കീബോർഡ് ലേഔട്ട് ആയി <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> എന്നിവ സജ്ജീകരിച്ചു. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"കീബോർഡ് ലേഔട്ട് ആയി <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> എന്നിവ സജ്ജീകരിച്ചു. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"കീബോർഡ് ലേഔട്ട് ആയി ഇനിപ്പറയുന്നവ സജ്ജീകരിച്ചു: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"യഥാർത്ഥ കീബോർഡുകൾ കോൺഫിഗർ ചെയ്‌തു"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"കീബോർഡുകൾ കാണാൻ ടാപ്പ് ചെയ്യുക"</string>
 </resources>

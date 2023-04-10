@@ -38,8 +38,11 @@ import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.net.Uri;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -928,6 +931,8 @@ public final class ImageDecoder implements AutoCloseable {
             case "image/x-pentax-pef":
             case "image/x-samsung-srw":
                 return true;
+            case "image/avif":
+                return isP010SupportedForAV1();
             default:
                 return false;
         }
@@ -2061,6 +2066,53 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src) throws IOException {
         return decodeBitmapImpl(src, null);
+    }
+
+    private static boolean sIsP010SupportedForAV1 = false;
+    private static boolean sIsP010SupportedForAV1Initialized = false;
+    private static final Object sIsP010SupportedForAV1Lock = new Object();
+
+    /**
+     * Checks if the device supports decoding 10-bit AV1.
+     */
+    @SuppressWarnings("AndroidFrameworkCompatChange")  // This is not an app-visible API.
+    private static boolean isP010SupportedForAV1() {
+        synchronized (sIsP010SupportedForAV1Lock) {
+            if (sIsP010SupportedForAV1Initialized) {
+                return sIsP010SupportedForAV1;
+            }
+
+            sIsP010SupportedForAV1Initialized = true;
+
+            if (hasHardwareDecoder("video/av01")) {
+                sIsP010SupportedForAV1 = true;
+                return true;
+            }
+
+            sIsP010SupportedForAV1 = Build.VERSION.DEVICE_INITIAL_SDK_INT
+                    >= Build.VERSION_CODES.S;
+            return sIsP010SupportedForAV1;
+        }
+    }
+
+    /**
+     * Checks if the device has hardware decoder for the target mime type.
+     */
+    private static boolean hasHardwareDecoder(String mime) {
+        final MediaCodecList sMCL = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        for (MediaCodecInfo info : sMCL.getCodecInfos()) {
+            if (info.isEncoder() == false && info.isHardwareAccelerated()) {
+                try {
+                     if (info.getCapabilitiesForType(mime) != null) {
+                         return true;
+                     }
+                } catch (IllegalArgumentException e) {
+                     // mime is not supported
+                     return false;
+                }
+            }
+        }
+        return false;
     }
 
     /**

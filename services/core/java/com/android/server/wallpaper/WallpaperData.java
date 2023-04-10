@@ -30,7 +30,7 @@ import android.app.WallpaperManager.SetWallpaperFlags;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
-import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import java.io.File;
 
@@ -54,6 +54,12 @@ class WallpaperData {
      * Which wallpaper is set. Flag values are from {@link SetWallpaperFlags}.
      */
     int mWhich;
+
+    /**
+     * True if the system wallpaper was also used for lock screen before this wallpaper was set.
+     * This is needed to update state after setting the wallpaper.
+     */
+    boolean mSystemWasBoth;
 
     /**
      * Callback once the set + crop is finished
@@ -109,7 +115,7 @@ class WallpaperData {
      * A map to keep track of the dimming set by different applications. The key is the calling
      * UID and the value is the dim amount.
      */
-    ArrayMap<Integer, Float> mUidToDimAmount = new ArrayMap<>();
+    SparseArray<Float> mUidToDimAmount = new SparseArray<>();
 
     /**
      * Whether we need to extract the wallpaper colors again to calculate the dark hints
@@ -137,6 +143,63 @@ class WallpaperData {
         this(userId, getWallpaperDir(userId),
                 (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_ORIG : WALLPAPER,
                 (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_CROP : WALLPAPER_CROP);
+    }
+
+    /**
+     * Copies the essential properties of a WallpaperData to a new instance, including the id and
+     * WallpaperConnection, usually in preparation for migrating a system+lock wallpaper to system-
+     * or lock-only. NB: the source object retains the pointer to the connection and it is the
+     * caller's responsibility to set this to null or otherwise be sure the connection is not shared
+     * between WallpaperData instances.
+     *
+     * @param source WallpaperData object to copy
+     */
+    WallpaperData(WallpaperData source) {
+        this.userId = source.userId;
+        this.wallpaperFile = source.wallpaperFile;
+        this.cropFile = source.cropFile;
+        this.wallpaperComponent = source.wallpaperComponent;
+        this.mWhich = source.mWhich;
+        this.wallpaperId = source.wallpaperId;
+        this.cropHint.set(source.cropHint);
+        this.allowBackup = source.allowBackup;
+        this.primaryColors = source.primaryColors;
+        this.mWallpaperDimAmount = source.mWallpaperDimAmount;
+        this.connection = source.connection;
+        if (this.connection != null) {
+            this.connection.mWallpaper = this;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder(defaultString(this));
+        out.append(", id: ");
+        out.append(wallpaperId);
+        out.append(", which: ");
+        out.append(mWhich);
+        out.append(", file mod: ");
+        out.append(wallpaperFile != null ? wallpaperFile.lastModified() : "null");
+        if (connection == null) {
+            out.append(", no connection");
+        } else {
+            out.append(", info: ");
+            out.append(connection.mInfo);
+            out.append(", engine(s):");
+            connection.forEachDisplayConnector(connector -> {
+                if (connector.mEngine != null) {
+                    out.append(" ");
+                    out.append(defaultString(connector.mEngine));
+                } else {
+                    out.append(" null");
+                }
+            });
+        }
+        return out.toString();
+    }
+
+    private static String defaultString(Object o) {
+        return o.getClass().getSimpleName() + "@" + Integer.toHexString(o.hashCode());
     }
 
     // Called during initialization of a given user's wallpaper bookkeeping

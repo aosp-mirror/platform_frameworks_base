@@ -30,6 +30,7 @@ import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.INearbyMediaDevicesUpdateCallback;
@@ -45,8 +46,10 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.KeyEvent;
 import android.view.View;
 
+import com.android.internal.statusbar.AppClipsServiceConnector;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
@@ -738,7 +741,7 @@ public class StatusBarManager {
      */
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     @TestApi
-    public void handleSystemKey(int key) {
+    public void handleSystemKey(@NonNull KeyEvent key) {
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
@@ -747,6 +750,29 @@ public class StatusBarManager {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Gets the last handled system key. A system key is a KeyEvent that the
+     * {@link com.android.server.policy.PhoneWindowManager} sends directly to the
+     * status bar, rather than forwarding to apps. If a key has never been sent to the
+     * status bar, will return -1.
+     *
+     * @return the keycode of the last KeyEvent that has been sent to the system.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    @TestApi
+    public int getLastSystemKey() {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                return svc.getLastSystemKey();
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**
@@ -938,7 +964,7 @@ public class StatusBarManager {
      * @param tileLabel label of the tile to show to the user.
      * @param icon icon to use in the tile shown to the user.
      * @param resultExecutor an executor to run the callback on
-     * @param resultCallback callback to indicate the {@link RequestResult}.
+     * @param resultCallback callback to indicate the result of the request.
      *
      * @see android.service.quicksettings.TileService
      */
@@ -1188,6 +1214,37 @@ public class StatusBarManager {
             android.Manifest.permission.LOG_COMPAT_CHANGE})
     public static boolean useMediaSessionActionsForApp(String packageName, UserHandle user) {
         return CompatChanges.isChangeEnabled(MEDIA_CONTROL_SESSION_ACTIONS, packageName, user);
+    }
+
+    /**
+     * Checks whether the supplied activity can {@link Activity#startActivityForResult(Intent, int)}
+     * a system activity that captures content on the screen to take a screenshot.
+     *
+     * <p>Note: The result should not be cached.
+     *
+     * <p>The system activity displays an editing tool that allows user to edit the screenshot, save
+     * it on device, and return the edited screenshot as {@link android.net.Uri} to the calling
+     * activity. User interaction is required to return the edited screenshot to the calling
+     * activity.
+     *
+     * <p>When {@code true}, callers can use {@link Activity#startActivityForResult(Intent, int)}
+     * to start start the content capture activity using
+     * {@link Intent#ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE}.
+     *
+     * @param activity Calling activity
+     * @return true if the activity supports launching the capture content activity for note.
+     *
+     * @see Intent#ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE
+     * @see Manifest.permission#LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE
+     * @see android.app.role.RoleManager#ROLE_NOTES
+     */
+    @RequiresPermission(Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE)
+    public boolean canLaunchCaptureContentActivityForNote(@NonNull Activity activity) {
+        Objects.requireNonNull(activity);
+        IBinder activityToken = activity.getActivityToken();
+        int taskId = ActivityClient.getInstance().getTaskForActivity(activityToken, false);
+        return new AppClipsServiceConnector(mContext)
+                .canLaunchCaptureContentActivityForNote(taskId);
     }
 
     /** @hide */

@@ -36,7 +36,9 @@
     <dimen name="pip_menu_arrow_size">24dp</dimen>
     <dimen name="pip_menu_arrow_elevation">5dp</dimen>
 
-    <dimen name="pip_menu_elevation">1dp</dimen>
+    <dimen name="pip_menu_elevation_no_menu">1dp</dimen>
+    <dimen name="pip_menu_elevation_move_menu">7dp</dimen>
+    <dimen name="pip_menu_elevation_all_actions_menu">4dp</dimen>
 
     <dimen name="pip_menu_edu_text_view_height">24dp</dimen>
     <dimen name="pip_menu_edu_text_home_icon">9sp</dimen>

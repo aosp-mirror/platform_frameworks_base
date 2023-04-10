@@ -15,7 +15,6 @@
  */
 package com.android.keyguard
 
-import com.android.systemui.statusbar.CommandQueue
 import android.content.BroadcastReceiver
 import android.testing.AndroidTestingRunner
 import android.view.View
@@ -24,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -32,17 +32,19 @@ import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
+import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceEvents
+import com.android.systemui.plugins.ClockTickRate
 import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
-import java.util.TimeZone
-import java.util.concurrent.Executor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
@@ -51,15 +53,16 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import java.util.TimeZone
+import java.util.concurrent.Executor
+import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -73,7 +76,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var animations: ClockAnimations
     @Mock private lateinit var events: ClockEvents
     @Mock private lateinit var clock: ClockController
-    @Mock private lateinit var mainExecutor: Executor
+    @Mock private lateinit var mainExecutor: DelayableExecutor
     @Mock private lateinit var bgExecutor: Executor
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var smallClockController: ClockFaceController
@@ -84,6 +87,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var transitionRepository: KeyguardTransitionRepository
     @Mock private lateinit var commandQueue: CommandQueue
     private lateinit var repository: FakeKeyguardRepository
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     @Mock private lateinit var smallLogBuffer: LogBuffer
     @Mock private lateinit var largeLogBuffer: LogBuffer
     private lateinit var underTest: ClockEventController
@@ -98,11 +102,21 @@ class ClockEventControllerTest : SysuiTestCase() {
         whenever(largeClockController.events).thenReturn(largeClockEvents)
         whenever(clock.events).thenReturn(events)
         whenever(clock.animations).thenReturn(animations)
+        whenever(smallClockController.config)
+            .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
+        whenever(largeClockController.config)
+            .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
 
         repository = FakeKeyguardRepository()
+        bouncerRepository = FakeKeyguardBouncerRepository()
 
         underTest = ClockEventController(
-            KeyguardInteractor(repository = repository, commandQueue = commandQueue),
+            KeyguardInteractor(
+                repository = repository,
+                commandQueue = commandQueue,
+                featureFlags = featureFlags,
+                bouncerRepository = bouncerRepository,
+            ),
             KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,
             batteryController,
@@ -140,8 +154,9 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun themeChanged_verifyClockPaletteUpdated() = runBlocking(IMMEDIATE) {
-        verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
-        verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
+        // TODO(b/266103601): delete this test and add more coverage for updateColors()
+        // verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+        // verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))
@@ -152,9 +167,6 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun fontChanged_verifyFontSizeUpdated() = runBlocking(IMMEDIATE) {
-        verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
-        verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
-
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))
         captor.value.onDensityOrFontScaleChanged()

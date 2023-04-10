@@ -59,6 +59,8 @@ import android.companion.DeviceNotAssociatedException;
 import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IOnAssociationsChangedListener;
+import android.companion.IOnMessageReceivedListener;
+import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.content.ComponentName;
 import android.content.Context;
@@ -232,7 +234,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 /* cdmService */this, mAssociationStore);
         mCompanionAppController = new CompanionApplicationController(
                 context, mAssociationStore, mDevicePresenceMonitor);
-        mTransportManager = new CompanionTransportManager(context);
+        mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
 
@@ -601,6 +603,37 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
+        public void addOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            mTransportManager.addListener(listener);
+        }
+
+        @Override
+        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
+        public void removeOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            mTransportManager.removeListener(listener);
+        }
+
+        @Override
+        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
+        public void sendMessage(int messageType, byte[] data, int[] associationIds) {
+            mTransportManager.sendMessage(messageType, data, associationIds);
+        }
+
+        @Override
+        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
+        public void addOnMessageReceivedListener(int messageType,
+                IOnMessageReceivedListener listener) {
+            mTransportManager.addListener(messageType, listener);
+        }
+
+        @Override
+        public void removeOnMessageReceivedListener(int messageType,
+                IOnMessageReceivedListener listener) {
+            mTransportManager.removeListener(messageType, listener);
+        }
+
+        @Override
         public void legacyDisassociate(String deviceMacAddress, String packageName, int userId) {
             Log.i(TAG, "legacyDisassociate() pkg=u" + userId + "/" + packageName
                     + ", macAddress=" + deviceMacAddress);
@@ -723,6 +756,11 @@ public class CompanionDeviceManagerService extends SystemService {
         public void disableSystemDataSync(int associationId, int flags) {
             getAssociationWithCallerChecks(associationId);
             mAssociationRequestsProcessor.disableSystemDataSync(associationId, flags);
+        }
+
+        @Override
+        public void enableSecureTransport(boolean enabled) {
+            mTransportManager.enableSecureTransport(enabled);
         }
 
         @Override
@@ -1097,7 +1135,7 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     /**
-     * Remove the revoked association form the cache and also remove the uid form the map if
+     * Remove the revoked association from the cache and also remove the uid from the map if
      * there are other associations with the same package still pending for role holder removal.
      *
      * @see #mRevokedAssociationsPendingRoleHolderRemoval
@@ -1116,7 +1154,7 @@ public class CompanionDeviceManagerService extends SystemService {
             final boolean shouldKeepUidForRemoval = any(
                     getPendingRoleHolderRemovalAssociationsForUser(userId),
                     ai -> packageName.equals(ai.getPackageName()));
-            // Do not remove the uid form the map since other associations with
+            // Do not remove the uid from the map since other associations with
             // the same packageName still pending for role holder removal.
             if (!shouldKeepUidForRemoval) {
                 mUidsPendingRoleHolderRemoval.remove(uid);

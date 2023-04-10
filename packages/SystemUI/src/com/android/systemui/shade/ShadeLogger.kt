@@ -20,7 +20,9 @@ import android.view.MotionEvent
 import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.plugins.log.LogMessage
+import com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE
+import com.android.systemui.shade.NotificationPanelViewController.FLING_EXPAND
+import com.android.systemui.shade.NotificationPanelViewController.FLING_HIDE
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -51,7 +53,6 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         h: Float,
         touchSlop: Float,
         qsExpanded: Boolean,
-        collapsedOnDown: Boolean,
         keyguardShowing: Boolean,
         qsExpansionEnabled: Boolean
     ) {
@@ -64,13 +65,12 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 long1 = h.toLong()
                 double1 = touchSlop.toDouble()
                 bool1 = qsExpanded
-                bool2 = collapsedOnDown
-                bool3 = keyguardShowing
-                bool4 = qsExpansionEnabled
+                bool2 = keyguardShowing
+                bool3 = qsExpansionEnabled
             },
             {
                 "QsTrackingNotStarted: initTouchY=$int1,y=$int2,h=$long1,slop=$double1,qsExpanded" +
-                    "=$bool1,collapsedDown=$bool2,keyguardShowing=$bool3,qsExpansion=$bool4"
+                    "=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
             }
         )
     }
@@ -153,13 +153,23 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logQsExpandImmediateChanged(newValue: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = newValue
+            },
+            { "qsExpandImmediate=$bool1" }
+        )
+    }
+
     fun logQsExpansionChanged(
             message: String,
             qsExpanded: Boolean,
             qsMinExpansionHeight: Int,
             qsMaxExpansionHeight: Int,
             stackScrollerOverscrolling: Boolean,
-            dozing: Boolean,
             qsAnimatorExpand: Boolean,
             animatingQs: Boolean
     ) {
@@ -172,14 +182,13 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 int1 = qsMinExpansionHeight
                 int2 = qsMaxExpansionHeight
                 bool2 = stackScrollerOverscrolling
-                bool3 = dozing
-                bool4 = qsAnimatorExpand
+                bool3 = qsAnimatorExpand
                 // 0 = false, 1 = true
                 long1 = animatingQs.compareTo(false).toLong()
             },
             {
                 "$str1 qsExpanded=$bool1,qsMinExpansionHeight=$int1,qsMaxExpansionHeight=$int2," +
-                    "stackScrollerOverscrolling=$bool2,dozing=$bool3,qsAnimatorExpand=$bool4," +
+                    "stackScrollerOverscrolling=$bool2,qsAnimatorExpand=$bool3," +
                     "animatingQs=$long1"
             }
         )
@@ -232,6 +241,79 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 "NPVC not intercepting touch, instantExpanding: $bool1, " +
                     "!notificationsDragEnabled: $bool2, touchDisabled: $bool3"
             }
+        )
+    }
+
+    fun logLastFlingWasExpanding(expand: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { bool1 = expand },
+            { "NPVC mLastFlingWasExpanding set to: $bool1" }
+        )
+    }
+
+    fun flingQs(flingType: Int, isClick: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = flingTypeToString(flingType)
+                bool1 = isClick
+            },
+            { "QS fling with type $str1, originated from click: $isClick" }
+        )
+    }
+
+    private fun flingTypeToString(flingType: Int) = when (flingType) {
+        FLING_EXPAND -> "FLING_EXPAND"
+        FLING_COLLAPSE -> "FLING_COLLAPSE"
+        FLING_HIDE -> "FLING_HIDE"
+        else -> "UNKNOWN"
+    }
+
+    fun logSplitShadeChanged(splitShadeEnabled: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { bool1 = splitShadeEnabled },
+            { "Split shade state changed: split shade ${if (bool1) "enabled" else "disabled"}" }
+        )
+    }
+
+    fun logNotificationsTopPadding(message: String, padding: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                int1 = padding
+            },
+            { "QSC NotificationsTopPadding $str1: $int1"}
+        )
+    }
+
+    fun logClippingTopBound(message: String, top: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                int1 = top
+            },
+            { "QSC ClippingTopBound $str1: $int1" }
+        )
+    }
+
+    fun logNotificationsClippingTopBound(top: Int, nsslTop: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                int1 = top
+                int2 = nsslTop
+            },
+            { "QSC NotificationsClippingTopBound set to $int1 - $int2" }
         )
     }
 }

@@ -43,9 +43,8 @@ object FlagsFactory {
         id: Int,
         name: String,
         namespace: String = "systemui",
-        teamfood: Boolean = false
     ): ReleasedFlag {
-        val flag = ReleasedFlag(id = id, name = name, namespace = namespace, teamfood = teamfood)
+        val flag = ReleasedFlag(id = id, name = name, namespace = namespace, teamfood = false)
         flagMap[name] = flag
         return flag
     }
@@ -55,7 +54,6 @@ object FlagsFactory {
         @BoolRes resourceId: Int,
         name: String,
         namespace: String = "systemui",
-        teamfood: Boolean = false
     ): ResourceBooleanFlag {
         val flag =
             ResourceBooleanFlag(
@@ -63,7 +61,7 @@ object FlagsFactory {
                 name = name,
                 namespace = namespace,
                 resourceId = resourceId,
-                teamfood = teamfood
+                teamfood = false,
             )
         flagMap[name] = flag
         return flag

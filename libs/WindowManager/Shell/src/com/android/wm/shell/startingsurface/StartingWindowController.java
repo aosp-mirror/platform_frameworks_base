@@ -21,6 +21,7 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_WINDOWLESS;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_STARTING_WINDOW;
@@ -29,7 +30,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.IBinder;
 import android.os.Trace;
 import android.util.SparseIntArray;
 import android.window.StartingWindowInfo;
@@ -152,22 +152,23 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     /**
      * Called when a task need a starting window.
      */
-    public void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
+    public void addStartingWindow(StartingWindowInfo windowInfo) {
         mSplashScreenExecutor.execute(() -> {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "addStartingWindow");
 
             final int suggestionType = mStartingWindowTypeAlgorithm.getSuggestedWindowType(
                     windowInfo);
             final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
-            if (isSplashScreenType(suggestionType)) {
-                mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken,
-                        suggestionType);
+            if (suggestionType == STARTING_WINDOW_TYPE_WINDOWLESS) {
+                mStartingSurfaceDrawer.addWindowlessStartingSurface(windowInfo);
+            } else if (isSplashScreenType(suggestionType)) {
+                mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, suggestionType);
             } else if (suggestionType == STARTING_WINDOW_TYPE_SNAPSHOT) {
                 final TaskSnapshot snapshot = windowInfo.taskSnapshot;
-                mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, appToken,
-                        snapshot);
+                mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, snapshot);
             }
-            if (suggestionType != STARTING_WINDOW_TYPE_NONE) {
+            if (suggestionType != STARTING_WINDOW_TYPE_NONE
+                    && suggestionType != STARTING_WINDOW_TYPE_WINDOWLESS) {
                 int taskId = runningTaskInfo.taskId;
                 int color = mStartingSurfaceDrawer
                         .getStartingWindowBackgroundColorForTask(taskId);
@@ -218,11 +219,13 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) {
         mSplashScreenExecutor.execute(() -> mStartingSurfaceDrawer.removeStartingWindow(
                 removalInfo));
-        mSplashScreenExecutor.executeDelayed(() -> {
-            synchronized (mTaskBackgroundColors) {
-                mTaskBackgroundColors.delete(removalInfo.taskId);
-            }
-        }, TASK_BG_COLOR_RETAIN_TIME_MS);
+        if (!removalInfo.windowlessSurface) {
+            mSplashScreenExecutor.executeDelayed(() -> {
+                synchronized (mTaskBackgroundColors) {
+                    mTaskBackgroundColors.delete(removalInfo.taskId);
+                }
+            }, TASK_BG_COLOR_RETAIN_TIME_MS);
+        }
     }
 
     /**

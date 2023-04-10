@@ -37,14 +37,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.hardware.usb.gadget.V1_0.GadgetFunction;
-import android.hardware.usb.gadget.V1_2.UsbSpeed;
+import android.hardware.usb.gadget.GadgetFunction;
+import android.hardware.usb.gadget.UsbSpeed;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -54,15 +55,12 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class allows you to access the state of USB and communicate with USB devices.
@@ -78,7 +76,7 @@ import java.util.function.Consumer;
 public class UsbManager {
     private static final String TAG = "UsbManager";
 
-   /**
+    /**
      * Broadcast Action:  A sticky broadcast for USB state change events when in device mode.
      *
      * This is a sticky broadcast for clients that includes USB connected/disconnected state,
@@ -102,9 +100,11 @@ public class UsbManager {
      * audio source function is enabled
      * <li> {@link #USB_FUNCTION_MIDI} boolean extra indicating whether the
      * MIDI function is enabled
+     * <li> {@link #USB_FUNCTION_UVC} boolean extra indicating whether the
+     * UVC function is enabled
      * </ul>
      * If the sticky intent has not been found, that indicates USB is disconnected,
-     * USB is not configued, MTP function is enabled, and all the other functions are disabled.
+     * USB is not configured, MTP function is enabled, and all the other functions are disabled.
      *
      * @hide
      */
@@ -124,7 +124,7 @@ public class UsbManager {
     public static final String ACTION_USB_PORT_CHANGED =
             "android.hardware.usb.action.USB_PORT_CHANGED";
 
-     /**
+    /**
      * Broadcast Action: A broadcast for USB compliance warning changes.
      *
      * This intent is sent when a port partner's
@@ -137,7 +137,7 @@ public class UsbManager {
     public static final String ACTION_USB_PORT_COMPLIANCE_CHANGED =
             "android.hardware.usb.action.USB_PORT_COMPLIANCE_CHANGED";
 
-   /**
+    /**
      * Activity intent sent when user attaches a USB device.
      *
      * This intent is sent when a USB device is attached to the USB bus when in host mode.
@@ -150,7 +150,7 @@ public class UsbManager {
     public static final String ACTION_USB_DEVICE_ATTACHED =
             "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 
-   /**
+    /**
      * Broadcast Action:  A broadcast for USB device detached event.
      *
      * This intent is sent when a USB device is detached from the USB bus when in host mode.
@@ -163,7 +163,7 @@ public class UsbManager {
     public static final String ACTION_USB_DEVICE_DETACHED =
             "android.hardware.usb.action.USB_DEVICE_DETACHED";
 
-   /**
+    /**
      * Activity intent sent when user attaches a USB accessory.
      *
      * <ul>
@@ -175,7 +175,7 @@ public class UsbManager {
     public static final String ACTION_USB_ACCESSORY_ATTACHED =
             "android.hardware.usb.action.USB_ACCESSORY_ATTACHED";
 
-   /**
+    /**
      * Broadcast Action:  A broadcast for USB accessory detached event.
      *
      * This intent is sent when a USB accessory is detached.
@@ -315,6 +315,14 @@ public class UsbManager {
      */
     @SystemApi
     public static final String USB_FUNCTION_NCM = "ncm";
+
+    /**
+     * Name of the UVC USB function.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * @hide
+     */
+    public static final String USB_FUNCTION_UVC = "uvc";
 
     /**
      * Name of Gadget Hal Not Present;
@@ -616,6 +624,7 @@ public class UsbManager {
 
     /**
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#NONE}
      * @hide
      */
     @SystemApi
@@ -623,62 +632,79 @@ public class UsbManager {
 
     /**
      * Code for the mtp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#MTP}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_MTP = GadgetFunction.MTP;
+    public static final long FUNCTION_MTP = 1 << 2;
 
     /**
      * Code for the ptp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#PTP}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_PTP = GadgetFunction.PTP;
+    public static final long FUNCTION_PTP = 1 << 4;
 
     /**
      * Code for the rndis usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#RNDIS}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_RNDIS = GadgetFunction.RNDIS;
+    public static final long FUNCTION_RNDIS = 1 << 5;
 
     /**
      * Code for the midi usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#MIDI}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_MIDI = GadgetFunction.MIDI;
+    public static final long FUNCTION_MIDI = 1 << 3;
 
     /**
      * Code for the accessory usb function.
+     * Must be equal to {@link GadgetFunction#ACCESSORY}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_ACCESSORY = GadgetFunction.ACCESSORY;
+    public static final long FUNCTION_ACCESSORY = 1 << 1;
 
     /**
      * Code for the audio source usb function.
+     * Must be equal to {@link GadgetFunction#AUDIO_SOURCE}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_AUDIO_SOURCE = GadgetFunction.AUDIO_SOURCE;
+    public static final long FUNCTION_AUDIO_SOURCE = 1 << 6;
 
     /**
      * Code for the adb usb function.
+     * Must be equal to {@link GadgetFunction#ADB}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_ADB = GadgetFunction.ADB;
+    public static final long FUNCTION_ADB = 1;
 
     /**
      * Code for the ncm source usb function.
+     * Must be equal to {@link GadgetFunction#NCM}
      * @hide
      */
     @SystemApi
     public static final long FUNCTION_NCM = 1 << 10;
 
+    /**
+     * Code for the uvc usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Only supported if {@link #isUvcSupportEnabled()} returns true.
+     * Must be equal to {@link GadgetFunction#UVC}
+     * @hide
+     */
+    @SystemApi
+    public static final long FUNCTION_UVC = 1 << 7;
+
     private static final long SETTABLE_FUNCTIONS = FUNCTION_MTP | FUNCTION_PTP | FUNCTION_RNDIS
-            | FUNCTION_MIDI | FUNCTION_NCM;
+            | FUNCTION_MIDI | FUNCTION_NCM | FUNCTION_UVC;
 
     private static final Map<String, Long> FUNCTION_NAME_TO_CODE = new HashMap<>();
 
@@ -696,6 +722,7 @@ public class UsbManager {
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_AUDIO_SOURCE, FUNCTION_AUDIO_SOURCE);
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_ADB, FUNCTION_ADB);
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_NCM, FUNCTION_NCM);
+        FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_UVC, FUNCTION_UVC);
     }
 
     /** @hide */
@@ -709,6 +736,7 @@ public class UsbManager {
             FUNCTION_AUDIO_SOURCE,
             FUNCTION_ADB,
             FUNCTION_NCM,
+            FUNCTION_UVC,
     })
     public @interface UsbFunctionMode {}
 
@@ -998,7 +1026,7 @@ public class UsbManager {
         }
     }
 
-   /**
+    /**
      * Requests temporary permission for the given package to access the device.
      * This may result in a system dialog being displayed to the user
      * if permission had not already been granted.
@@ -1331,6 +1359,21 @@ public class UsbManager {
     }
 
     /**
+     * Returns whether UVC is advertised to be supported or not. SELinux
+     * enforces that this function returns {@code false} when called from a
+     * process that doesn't belong either to a system app, or the
+     * DeviceAsWebcam Service.
+     *
+     * @return true if UVC is supported, false if UVC is not supported or if
+     *         called from a non-system app that isn't DeviceAsWebcam Service.
+     * @hide
+     */
+    @SystemApi
+    public static boolean isUvcSupportEnabled() {
+        return SystemProperties.getBoolean("ro.usb.uvc.enabled", false);
+    }
+
+    /**
      * Enable/Disable the USB data signaling.
      * <p>
      * Enables/Disables USB data path of all USB ports.
@@ -1604,7 +1647,7 @@ public class UsbManager {
     /**
      * Registers the given listener to listen for DisplayPort Alt Mode changes.
      * <p>
-     * If this method returns true, the caller should ensure to call
+     * If this method returns without Exceptions, the caller should ensure to call
      * {@link #unregisterDisplayPortAltModeListener} when it no longer requires updates.
      *
      * @param executor          Executor on which to run the listener.
@@ -1612,14 +1655,14 @@ public class UsbManager {
      *                          changes. See {@link #DisplayPortAltModeInfoListener} for listener
      *                          details.
      *
-     * @return true on successful register, false on failed register due to listener already being
-     *         registered or an internal error.
+     * @throws IllegalStateException if listener has already been registered previously but not
+     * unregistered or an unexpected system failure occurs.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
-    public boolean registerDisplayPortAltModeInfoListener(
+    public void registerDisplayPortAltModeInfoListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull DisplayPortAltModeInfoListener listener) {
         Objects.requireNonNull(executor, "registerDisplayPortAltModeInfoListener: "
@@ -1635,15 +1678,15 @@ public class UsbManager {
 
             if (mDisplayPortServiceListener == null) {
                 if (!registerDisplayPortAltModeEventsIfNeededLocked()) {
-                    return false;
+                    throw new IllegalStateException("Unexpected failure registering service "
+                            + "listener");
                 }
             }
             if (mDisplayPortListeners.containsKey(listener)) {
-                return false;
+                throw new IllegalStateException("Listener has already been registered.");
             }
 
             mDisplayPortListeners.put(listener, executor);
-            return true;
         }
     }
 
@@ -1710,7 +1753,7 @@ public class UsbManager {
 
     /**
      * Returns whether the given functions are valid inputs to UsbManager.
-     * Currently the empty functions or any of MTP, PTP, RNDIS, MIDI, NCM are accepted.
+     * Currently the empty functions or any of MTP, PTP, RNDIS, MIDI, NCM, UVC are accepted.
      *
      * Only one function may be set at a time, except for RNDIS and NCM, which can be set together
      * because from a user perspective they are the same function (tethering).
@@ -1755,6 +1798,9 @@ public class UsbManager {
         }
         if ((functions & FUNCTION_NCM) != 0) {
             joiner.add(UsbManager.USB_FUNCTION_NCM);
+        }
+        if ((functions & FUNCTION_UVC) != 0) {
+            joiner.add(UsbManager.USB_FUNCTION_UVC);
         }
         if ((functions & FUNCTION_ADB) != 0) {
             joiner.add(UsbManager.USB_FUNCTION_ADB);

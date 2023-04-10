@@ -38,6 +38,8 @@ parcelable ReceiverInfo {
     int sendingUser;
     int processState;
     int resultCode;
+    int sendingUid = -1;
+    String sendingPackage;
 
     /**
      * True if this instance represents a registered receiver and false if this instance

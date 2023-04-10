@@ -531,6 +531,29 @@ public class IntentFilter implements Parcelable {
         mInstantAppVisibility = o.mInstantAppVisibility;
     }
 
+    /** @hide */
+    public String toLongString() {
+        // Not implemented directly as toString() due to potential memory regression
+        final StringBuilder sb = new StringBuilder();
+        sb.append("IntentFilter {");
+        sb.append(" pri=");
+        sb.append(mPriority);
+        if (countActions() > 0) {
+            sb.append(" act=");
+            sb.append(mActions.toString());
+        }
+        if (countCategories() > 0) {
+            sb.append(" cat=");
+            sb.append(mCategories.toString());
+        }
+        if (countDataSchemes() > 0) {
+            sb.append(" sch=");
+            sb.append(mDataSchemes.toString());
+        }
+        sb.append(" }");
+        return sb.toString();
+    }
+
     /**
      * Modify priority of this filter.  This only affects receiver filters.
      * The priority of activity filters are set in XML and cannot be changed
@@ -2184,7 +2207,6 @@ public class IntentFilter implements Parcelable {
      * @param extras The intent extras to match against.
      * @hide
      */
-    @SystemApi
     public final void setExtras(@NonNull PersistableBundle extras) {
         mExtras = extras;
     }
@@ -2196,9 +2218,7 @@ public class IntentFilter implements Parcelable {
      *         an empty {@link PersistableBundle} object if no extras were set.
      * @hide
      */
-    @SystemApi
-    @NonNull
-    public final PersistableBundle getExtras() {
+    public final @NonNull PersistableBundle getExtras() {
         return mExtras == null ? new PersistableBundle() : mExtras;
     }
 
@@ -3038,5 +3058,82 @@ public class IntentFilter implements Parcelable {
     public String[] getHosts() {
         ArrayList<String> list = getHostsList();
         return list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean filterEquals(IntentFilter f1, IntentFilter f2) {
+        int s1 = f1.countActions();
+        int s2 = f2.countActions();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasAction(f1.getAction(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countCategories();
+        s2 = f2.countCategories();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasCategory(f1.getCategory(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataTypes();
+        s2 = f2.countDataTypes();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasExactDataType(f1.getDataType(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataSchemes();
+        s2 = f2.countDataSchemes();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataScheme(f1.getDataScheme(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataAuthorities();
+        s2 = f2.countDataAuthorities();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataAuthority(f1.getDataAuthority(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataPaths();
+        s2 = f2.countDataPaths();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataPath(f1.getDataPath(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataSchemeSpecificParts();
+        s2 = f2.countDataSchemeSpecificParts();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataSchemeSpecificPart(f1.getDataSchemeSpecificPart(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

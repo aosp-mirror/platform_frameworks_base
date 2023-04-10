@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi 통화"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi 통화"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"꺼짐"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi를 통해 통화"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"모바일 네트워크를 통해 통화"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"직장 프로필을 사용 설정할 때까지 개인 앱이 차단됩니다."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"개인 앱이 <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>에 차단됩니다. IT 관리자가 <xliff:g id="NUMBER">%3$d</xliff:g>일 넘게 직장 프로필을 중지하도록 허용하지 않습니다."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"사용 설정"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"전화 및 메시지 사용 중지됨"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"직장 앱을 일시중지했습니다. 전화나 문자 메시지를 수신하지 않습니다."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"직장 앱 일시중지 해제"</string>
     <string name="me" msgid="6207584824693813140">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"태블릿 옵션"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 옵션"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"기기 지문 센서에서 동작을 캡처합니다."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"스크린샷 촬영"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"디스플레이 스크린샷을 촬영할 수 있습니다."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"미리보기, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"상태 표시줄에 위치"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"앱이 사용 중에 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"백그라운드에서 심박수와 같은 생체 신호 센서 데이터에 액세스"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"앱이 백그라운드에서 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"앱 사용 중에 생체 신호 센서 손목 온도 데이터에 액세스합니다"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"앱이 사용 중에 생체 신호 센서 손목 온도 데이터에 액세스하도록 허용합니다."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"앱이 백그라운드에 있을 때 생체 신호 센서 손목 온도 데이터에 액세스합니다"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"앱이 백그라운드에서 생체 신호 센서 손목 온도 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"앱이 Android TV 기기에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
@@ -628,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"전원 누름이 감지되었습니다."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
@@ -791,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"권한을 보유한 앱에서 앱의 기능 정보를 보도록 허용합니다."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"더 높은 샘플링 레이트로 센서 데이터 액세스"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"앱에서 200Hz보다 빠른 속도로 센서 데이터를 샘플링하도록 허용합니다."</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"화면 잠금 해제 시도 모니터링"</string>
@@ -1241,10 +1254,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android가 시작되는 중…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"태블릿을 시작하는 중…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"기기를 시작하는 중…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"저장소 최적화 중"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"시스템 업데이트를 완료하는 중…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> 업그레이드 중…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"앱 <xliff:g id="NUMBER_1">%2$d</xliff:g>개 중 <xliff:g id="NUMBER_0">%1$d</xliff:g>개 최적화 중"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> 준비 중..."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"부팅 완료"</string>
@@ -1350,18 +1361,19 @@
     <string name="no_permissions" msgid="5729199278862516390">"권한 필요 없음"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"비용이 부과될 수 있습니다."</string>
     <string name="dlg_ok" msgid="5103447663504839312">"확인"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중."</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB를 통해 연결된 기기 충전"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB 파일 전송 사용 설정됨"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB를 통해 PTP 사용 설정됨"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB 테더링 사용 설정됨"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB를 통해 MIDI 사용 설정됨"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"기기가 웹캠으로 연결됨"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB 액세서리 연결됨"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"옵션을 더 보려면 탭하세요."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"연결된 기기를 충전합니다. 옵션을 더 보려면 탭하세요."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"아날로그 오디오 액세서리가 감지됨"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"연결된 기기가 이 휴대전화와 호환되지 않습니다. 자세히 알아보려면 탭하세요."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB 디버깅 연결됨"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB 디버깅 연결됨."</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB 디버깅을 사용 중지하려면 탭하세요."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"무선 디버깅 연결됨"</string>
@@ -1386,7 +1398,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"입력 방법 선택"</string>
     <string name="show_ime" msgid="6406112007347443383">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>
     <string name="hardware" msgid="1800597768237606953">"가상 키보드 표시"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"물리적 키보드 설정"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> 설정"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"실제 키보드 설정"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1704,14 +1717,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"완료"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"단축키 사용 중지"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"단축키 사용"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"색상 반전"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"색상 반전"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"색상 보정"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"한 손 모드"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"더 어둡게"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"보청기"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 서비스를 사용하려면 두 볼륨 키를 3초 동안 길게 누르세요"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"볼륨 키에서 손을 뗍니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>을 켜려면 볼륨 키 2개를 3초 동안 길게 누르세요."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"접근성 버튼을 탭할 때 사용할 기능을 선택하세요."</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"접근성 동작(두 손가락을 사용하여 화면 하단에서 위로 스와이프)으로 실행할 기능을 선택하세요."</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"접근성 동작(세 손가락을 사용하여 화면 하단에서 위로 스와이프)으로 실행할 기능을 선택하세요."</string>
@@ -1842,6 +1855,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"전체 화면 모드"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"확인"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"카메라 미리보기 화면이 잘 보이도록 회전하세요."</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"카메라 미리보기 화면이 잘 보이도록 화면 분할을 종료하세요."</string>
     <string name="done_label" msgid="7283767013231718521">"완료"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"시간 원형 슬라이더"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"분 원형 슬라이더"</string>
@@ -1853,6 +1868,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> 복사"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"고정 해제 시 잠금 해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"고정 해제 이전에 비밀번호 요청"</string>
@@ -1943,10 +1959,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"직장 앱을 사용 설정하시겠습니까?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"직장 앱 및 알림에 액세스하세요."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"사용 설정"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"긴급 전화"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"직장 앱 및 전화 통화에 대한 액세스를 요청하세요."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>
@@ -2309,4 +2323,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"호환 앱이 백그라운드에서 포그라운드 서비스를 시작할 수 있게 허용합니다."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"마이크 사용 가능"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"마이크가 차단됨"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"듀얼 스크린"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"듀얼 스크린 켜짐"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 두 화면을 모두 사용하여 콘텐츠를 표시합니다."</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"기기 온도가 너무 높음"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"휴대전화 온도가 너무 높아지고 있으므로 듀얼 스크린을 사용할 수 없습니다."</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen을 사용할 수 없음"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"절전 모드가 사용 설정되어 있어 Dual Screen을 사용할 수 없습니다. 설정에서 이 기능을 사용 중지할 수 있습니다."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"설정으로 이동"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"사용 중지"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>에 설정 완료됨"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g> 및 <xliff:g id="LAYOUT_2">%2$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"실제 키보드에 구성됨"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"키보드를 보려면 탭하세요."</string>
 </resources>

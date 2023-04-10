@@ -43,6 +43,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -325,11 +326,19 @@ public class ImsRegistrationImplBase {
     }
 
     private void addRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
+        // This is purposefully not synchronized with broadcastToCallbacksLocked because the
+        // list of callbacks to notify is copied over from the original list modified here. I also
+        // do not want to risk introducing a deadlock by using the same mCallbacks Object to
+        // synchronize on outgoing and incoming operations.
         mCallbacks.register(c);
         updateNewCallbackWithState(c);
     }
 
     private void removeRegistrationCallback(IImsRegistrationCallback c) {
+        // This is purposefully not synchronized with broadcastToCallbacksLocked because the
+        // list of callbacks to notify is copied over from the original list modified here. I also
+        // do not want to risk introducing a deadlock by using the same mCallbacks Object to
+        // synchronize on outgoing and incoming operations.
         mCallbacks.unregister(c);
     }
 
@@ -420,7 +429,7 @@ public class ImsRegistrationImplBase {
     @SystemApi
     public final void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
         updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERED);
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onRegistered(attributes);
             } catch (RemoteException e) {
@@ -449,7 +458,7 @@ public class ImsRegistrationImplBase {
     @SystemApi
     public final void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
         updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERING);
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onRegistering(attributes);
             } catch (RemoteException e) {
@@ -507,7 +516,7 @@ public class ImsRegistrationImplBase {
         updateToDisconnectedState(info, suggestedAction, imsRadioTech);
         // ImsReasonInfo should never be null.
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onDeregistered(reasonInfo, suggestedAction, imsRadioTech);
             } catch (RemoteException e) {
@@ -569,7 +578,7 @@ public class ImsRegistrationImplBase {
         updateToDisconnectedState(info, suggestedAction, imsRadioTech);
         // ImsReasonInfo should never be null.
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onDeregisteredWithDetails(reasonInfo, suggestedAction, imsRadioTech, details);
             } catch (RemoteException e) {
@@ -591,7 +600,7 @@ public class ImsRegistrationImplBase {
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
             ImsReasonInfo info) {
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
-        mCallbacks.broadcastAction((c) -> {
+        broadcastToCallbacksLocked((c) -> {
             try {
                 c.onTechnologyChangeFailed(imsRadioTech, reasonInfo);
             } catch (RemoteException e) {
@@ -614,7 +623,20 @@ public class ImsRegistrationImplBase {
             mUris = ArrayUtils.cloneOrNull(uris);
             mUrisSet = true;
         }
-        mCallbacks.broadcastAction((c) -> onSubscriberAssociatedUriChanged(c, uris));
+        broadcastToCallbacksLocked((c) -> onSubscriberAssociatedUriChanged(c, uris));
+    }
+
+    /**
+     * Broadcast the specified operation in a synchronized manner so that multiple threads do not
+     * try to call broadcast at the same time, which will generate an error.
+     * @param c The Consumer lambda method containing the callback to call.
+     */
+    private void broadcastToCallbacksLocked(Consumer<IImsRegistrationCallback> c) {
+        // One broadcast can happen at a time, so synchronize threads so only one
+        // beginBroadcast/endBroadcast happens at a time.
+        synchronized (mCallbacks) {
+            mCallbacks.broadcastAction(c);
+        }
     }
 
     private void onSubscriberAssociatedUriChanged(IImsRegistrationCallback callback, Uri[] uris) {

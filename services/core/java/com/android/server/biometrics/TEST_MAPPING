@@ -6,5 +6,24 @@
         {
             "name": "CtsBiometricsHostTestCases"
         }
-    ]
+    ],
+    "ironwood-postsubmit": [
+     {
+      "name": "BiometricsE2eTests",
+      "options": [
+        {
+            "include-annotation": "android.platform.test.annotations.IwTest"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "include-filter": "android.platform.test.scenario.biometrics"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        }
+      ]
+    }
+   ]
 }

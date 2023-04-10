@@ -4,7 +4,7 @@
     <issue
         id="NewApi"
         message="Call requires API level 24 (current min is 21): `java.lang.Iterable#forEach`"
-        errorLine1="        controllers.forEach(controller -> {"
+        errorLine1="        controllers.forEach(controller -&gt; {"
         errorLine2="                    ~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/SwitchesProvider.java"
@@ -14,68 +14,42 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level 29 (current min is 21): `android.os.Parcel#readBoolean`"
-        errorLine1="        final boolean isProviderTile = in.readBoolean();"
-        errorLine2="                                          ~~~~~~~~~~~">
+        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#createWithResource`">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="83"
-            column="43"/>
+            line="312"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 29 (current min is 21): `android.os.Parcel#writeBoolean`"
-        errorLine1="        dest.writeBoolean(this instanceof ProviderTile);"
-        errorLine2="             ~~~~~~~~~~~~">
+        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#setTint`">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="102"
-            column="14"/>
+            line="318"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#createWithResource`"
-        errorLine1="            final Icon icon = Icon.createWithResource(componentInfo.packageName, iconResId);"
-        errorLine2="                                   ~~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 29 (current min is 21): `android.os.Parcel#readBoolean`">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="314"
-            column="36"/>
+            line="373"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#setTint`"
-        errorLine1="                icon.setTint(tintColor);"
-        errorLine2="                     ~~~~~~~">
+        message="Call requires API level 29 (current min is 21): `android.os.Parcel#writeBoolean`">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="320"
-            column="22"/>
+            line="108"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 29 (current min is 21): `android.os.Parcel#readBoolean`"
-        errorLine1="            final boolean isProviderTile = source.readBoolean();"
-        errorLine2="                                                  ~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="364"
-            column="51"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 31 (current min is 21): `android.content.Context#getAttributionSource`"
-        errorLine1="            return provider.call(context.getAttributionSource(),"
-        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 21): `android.content.Context#getAttributionSource`">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/TileUtils.java"
-            line="558"
-            column="42"/>
+            line="565"/>
     </issue>
 
 </issues>

@@ -552,7 +552,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         /** Please use the {@link Builder} to create. */
         DualDisplayContent(RootWindowContainer rootWindowContainer,
                 Display display) {
-            super(rootWindowContainer, display);
+            super(rootWindowContainer, display, mock(DeviceStateController.class));
 
             mFirstRoot = getGroupRoot(FEATURE_FIRST_ROOT);
             mSecondRoot = getGroupRoot(FEATURE_SECOND_ROOT);

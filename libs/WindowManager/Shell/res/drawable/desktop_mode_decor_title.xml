@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 <shape android:shape="rectangle"
+       android:tintMode="multiply"
+       android:tint="@color/decor_title_color"
        xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@android:color/white" />
-    <corners android:radius="20dp" />
 </shape>

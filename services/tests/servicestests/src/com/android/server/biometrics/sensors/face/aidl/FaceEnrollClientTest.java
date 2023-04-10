@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyByte;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -51,6 +54,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.function.Consumer;
 
 @Presubmit
 @SmallTest
@@ -81,6 +86,8 @@ public class FaceEnrollClientTest {
     private Sensor.HalSessionCallback mHalSessionCallback;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
+    @Captor
+    private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -108,9 +115,36 @@ public class FaceEnrollClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).enrollWithContext(any(), anyByte(), any(), any(),
-                same(mOperationContextCaptor.getValue().toAidlContext()));
+
+        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
+        order.verify(mHal).enrollWithContext(any(), anyByte(), any(), any(), same(aidlContext));
         verify(mHal, never()).enroll(any(), anyByte(), any(), any());
+    }
+
+    @Test
+    public void notifyHalWhenContextChanges() throws RemoteException {
+        final FaceEnrollClient client = createClient();
+        client.start(mCallback);
+
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).enrollWithContext(any(), anyByte(), any(), any(), captor.capture());
+        OperationContext opContext = captor.getValue();
+
+        // fake an update to the context
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(opContext).isSameInstanceAs(
+                mOperationContextCaptor.getValue().toAidlContext());
+        mContextInjector.getValue().accept(opContext);
+        verify(mHal).onContextChanged(same(opContext));
+
+        client.stopHalOperation();
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
+    }
+
+    private FaceEnrollClient createClient() throws RemoteException {
+        return createClient(200 /* version */);
     }
 
     private FaceEnrollClient createClient(int version) throws RemoteException {

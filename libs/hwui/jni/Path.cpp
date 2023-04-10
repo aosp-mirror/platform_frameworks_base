@@ -182,11 +182,7 @@ public:
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         SkPathDirection dir = static_cast<SkPathDirection>(dirHandle);
         AutoJavaFloatArray  afa(env, array, 8);
-#ifdef SK_SCALAR_IS_FLOAT
         const float* src = afa.ptr();
-#else
-        #error Need to convert float array to SkScalar array before calling the following function.
-#endif
         obj->addRoundRect(rect, src, dir);
     }
 

@@ -27,16 +27,15 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.function.Consumer;
+
 /**
  * Internal class used to store all the display data relevant to the wallpapers
  */
 class WallpaperDisplayHelper {
 
-    @VisibleForTesting
     static final class DisplayData {
         int mWidth = -1;
         int mHeight = -1;

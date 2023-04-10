@@ -22,7 +22,9 @@ import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ProcessRecord.TAG;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AnrController;
 import android.app.ApplicationErrorReport;
@@ -49,12 +51,14 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.expresslog.Counter;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.anr.AnrLatencyTracker;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
+import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.File;
@@ -260,6 +264,28 @@ class ProcessErrorStateRecord {
         mDialogController = new ErrorDialogController(app);
     }
 
+    @GuardedBy("mService")
+    boolean skipAnrLocked(String annotation) {
+        // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
+        if (mService.mAtmInternal.isShuttingDown()) {
+            Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
+            return true;
+        } else if (isNotResponding()) {
+            Slog.i(TAG, "Skipping duplicate ANR: " + this + " " + annotation);
+            return true;
+        } else if (isCrashing()) {
+            Slog.i(TAG, "Crashing app skipping ANR: " + this + " " + annotation);
+            return true;
+        } else if (mApp.isKilledByAm()) {
+            Slog.i(TAG, "App already killed by AM skipping ANR: " + this + " " + annotation);
+            return true;
+        } else if (mApp.isKilled()) {
+            Slog.i(TAG, "Skipping died app ANR: " + this + " " + annotation);
+            return true;
+        }
+        return false;
+    }
+
     void appNotResponding(String activityShortComponentName, ApplicationInfo aInfo,
             String parentShortComponentName, WindowProcessController parentProcess,
             boolean aboveSystem, TimeoutRecord timeoutRecord,
@@ -303,26 +329,10 @@ class ProcessErrorStateRecord {
             // Store annotation here as instance above will not be hit on all paths.
             setAnrAnnotation(annotation);
 
-            // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
-            if (mService.mAtmInternal.isShuttingDown()) {
-                Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
+            Counter.logIncrement("stability_anr.value_total_anrs");
+            if (skipAnrLocked(annotation)) {
                 latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (isNotResponding()) {
-                Slog.i(TAG, "Skipping duplicate ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (isCrashing()) {
-                Slog.i(TAG, "Crashing app skipping ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (mApp.isKilledByAm()) {
-                Slog.i(TAG, "App already killed by AM skipping ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (mApp.isKilled()) {
-                Slog.i(TAG, "Skipping died app ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
+                Counter.logIncrement("stability_anr.value_skipped_anrs");
                 return;
             }
 
@@ -341,7 +351,8 @@ class ProcessErrorStateRecord {
             if (mService.mTraceErrorLogger != null
                     && mService.mTraceErrorLogger.isAddErrorIdEnabled()) {
                 errorId = mService.mTraceErrorLogger.generateErrorId();
-                mService.mTraceErrorLogger.addErrorIdToTrace(mApp.processName, errorId);
+                mService.mTraceErrorLogger.addProcessInfoAndErrorIdToTrace(
+                        mApp.processName, pid, errorId);
                 mService.mTraceErrorLogger.addSubjectToTrace(annotation, errorId);
             } else {
                 errorId = null;
@@ -388,6 +399,8 @@ class ProcessErrorStateRecord {
                 });
             }
         }
+        // Build memory headers for the ANRing process.
+        String memoryHeaders = buildMemoryHeadersFor(pid);
 
         // Get critical event log before logging the ANR so that it doesn't occur in the log.
         latencyTracker.criticalEventLogStarted();
@@ -452,7 +465,10 @@ class ProcessErrorStateRecord {
                         // don't dump native PIDs for background ANRs unless
                         // it is the process of interest
                         String[] nativeProcs = null;
-                        if (isSilentAnr || onlyDumpSelf) {
+                        boolean isSystemApp = mApp.info.isSystemApp() || mApp.info.isSystemExt();
+                        // Do not collect system daemons dumps as this is not likely to be useful
+                        // for non-system apps.
+                        if (!isSystemApp || isSilentAnr || onlyDumpSelf) {
                             for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
                                 if (NATIVE_STACKS_OF_INTEREST[i].equals(mApp.processName)) {
                                     nativeProcs = new String[] { mApp.processName };
@@ -482,10 +498,10 @@ class ProcessErrorStateRecord {
         StringWriter tracesFileException = new StringWriter();
         // To hold the start and end offset to the ANR trace file respectively.
         final AtomicLong firstPidEndOffset = new AtomicLong(-1);
-        File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
+        File tracesFile = StackTracesDumpHelper.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
                 nativePidsFuture, tracesFileException, firstPidEndOffset, annotation,
-                criticalEventLog, auxiliaryTaskExecutor, latencyTracker);
+                criticalEventLog, memoryHeaders, auxiliaryTaskExecutor, latencyTracker);
 
         if (isMonitorCpuUsage()) {
             // Wait for the first call to finish
@@ -699,6 +715,27 @@ class ProcessErrorStateRecord {
             resolver.getUserId()) != 0;
     }
 
+    private @Nullable String buildMemoryHeadersFor(int pid) {
+        if (pid <= 0) {
+            Slog.i(TAG, "Memory header requested with invalid pid: " + pid);
+            return null;
+        }
+        MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
+        if (snapshot == null) {
+            Slog.i(TAG, "Failed to get memory snapshot for pid:" + pid);
+            return null;
+        }
+
+        StringBuilder memoryHeaders = new StringBuilder();
+        memoryHeaders.append("RssHwmKb: ")
+            .append(snapshot.rssHighWaterMarkInKilobytes)
+            .append("\n");
+        memoryHeaders.append("RssKb: ").append(snapshot.rssInKilobytes).append("\n");
+        memoryHeaders.append("RssAnonKb: ").append(snapshot.anonRssInKilobytes).append("\n");
+        memoryHeaders.append("RssShmemKb: ").append(snapshot.rssShmemKilobytes).append("\n");
+        memoryHeaders.append("VmSwapKb: ").append(snapshot.swapInKilobytes).append("\n");
+        return memoryHeaders.toString();
+    }
     /**
      * Unless configured otherwise, swallow ANRs in background processes & kill the process.
      * Non-private access is for tests only.

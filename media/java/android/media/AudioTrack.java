@@ -28,6 +28,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
 import android.content.Context;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
@@ -39,6 +41,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -269,15 +272,19 @@ public class AudioTrack extends PlayerBase
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
-    /* Enumeration of metadata types permitted for use by
+    /**
+     * Enumeration of metadata types permitted for use by
      * encapsulation mode audio streams.
+     * @hide
      */
-    /** @hide */
-    @IntDef(prefix = { "ENCAPSULATION_METADATA_TYPE_" }, value = {
-        ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
-        ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
-        ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
-    })
+    @IntDef(prefix = {"ENCAPSULATION_METADATA_TYPE_"},
+            value =
+                    {
+                            ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
+                            ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
+                            ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
+                            ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT,
+                    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapsulationMetadataType {}
 
@@ -300,6 +307,45 @@ public class AudioTrack extends PlayerBase
      * This metadata is formatted per ETSI TS 101 154 Table E.1: AD_descriptor.
      */
     public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2;
+
+    /**
+     * Encapsulation metadata type for placement of supplementary audio.
+     *
+     * A 32 bit integer constant, one of {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL}, {@link
+     * #SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT}, {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT}.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT = 3;
+
+    /**
+     * Enumeration of supplementary audio placement types.
+     * @hide
+     */
+    @IntDef(prefix = {"SUPPLEMENTARY_AUDIO_PLACEMENT_"},
+            value =
+                    {
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT,
+                    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SupplementaryAudioPlacement {}
+    // Important: The SUPPLEMENTARY_AUDIO_PLACEMENT values must be kept in sync with native header
+    // files.
+
+    /**
+     * Supplementary audio placement normal.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL = 0;
+
+    /**
+     * Supplementary audio placement left.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT = 1;
+
+    /**
+     * Supplementary audio placement right.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT = 2;
 
     /* Dual Mono handling is used when a stereo audio stream
      * contains separate audio content on the left and right channels.
@@ -822,15 +868,20 @@ public class AudioTrack extends PlayerBase
         int[] session = new int[1];
         session[0] = resolvePlaybackSessionId(context, sessionId);
 
+        AttributionSource attributionSource = context == null
+                ? AttributionSource.myAttributionSource() : context.getAttributionSource();
+
         // native initialization
-        int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
-                sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
-                mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/,
-                offload, encapsulationMode, tunerConfiguration,
-                getCurrentOpPackageName());
-        if (initResult != SUCCESS) {
-            loge("Error code "+initResult+" when initializing AudioTrack.");
-            return; // with mState == STATE_UNINITIALIZED
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
+                    sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
+                    mNativeBufferSizeInBytes, mDataLoadMode, session,
+                    attributionSourceState.getParcel(), 0 /*nativeTrackInJavaObj*/, offload,
+                    encapsulationMode, tunerConfiguration, getCurrentOpPackageName());
+            if (initResult != SUCCESS) {
+                loge("Error code " + initResult + " when initializing AudioTrack.");
+                return; // with mState == STATE_UNINITIALIZED
+            }
         }
 
         mSampleRate = sampleRate[0];
@@ -902,23 +953,27 @@ public class AudioTrack extends PlayerBase
             // *Native* AudioTrack, so the attributes parameters to native_setup() are ignored.
             int[] session = { 0 };
             int[] rates = { 0 };
-            int initResult = native_setup(new WeakReference<AudioTrack>(this),
-                    null /*mAttributes - NA*/,
-                    rates /*sampleRate - NA*/,
-                    0 /*mChannelMask - NA*/,
-                    0 /*mChannelIndexMask - NA*/,
-                    0 /*mAudioFormat - NA*/,
-                    0 /*mNativeBufferSizeInBytes - NA*/,
-                    0 /*mDataLoadMode - NA*/,
-                    session,
-                    nativeTrackInJavaObj,
-                    false /*offload*/,
-                    ENCAPSULATION_MODE_NONE,
-                    null /* tunerConfiguration */,
-                    "" /* opPackagename */);
-            if (initResult != SUCCESS) {
-                loge("Error code "+initResult+" when initializing AudioTrack.");
-                return; // with mState == STATE_UNINITIALIZED
+            try (ScopedParcelState attributionSourceState =
+                         AttributionSource.myAttributionSource().asScopedParcelState()) {
+                int initResult = native_setup(new WeakReference<AudioTrack>(this),
+                        null /*mAttributes - NA*/,
+                        rates /*sampleRate - NA*/,
+                        0 /*mChannelMask - NA*/,
+                        0 /*mChannelIndexMask - NA*/,
+                        0 /*mAudioFormat - NA*/,
+                        0 /*mNativeBufferSizeInBytes - NA*/,
+                        0 /*mDataLoadMode - NA*/,
+                        session,
+                        attributionSourceState.getParcel(),
+                        nativeTrackInJavaObj,
+                        false /*offload*/,
+                        ENCAPSULATION_MODE_NONE,
+                        null /* tunerConfiguration */,
+                        "" /* opPackagename */);
+                if (initResult != SUCCESS) {
+                    loge("Error code " + initResult + " when initializing AudioTrack.");
+                    return; // with mState == STATE_UNINITIALIZED
+                }
             }
 
             mSessionId = session[0];
@@ -4371,9 +4426,9 @@ public class AudioTrack extends PlayerBase
     private native final int native_setup(Object /*WeakReference<AudioTrack>*/ audiotrack_this,
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
-            int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack,
-            boolean offload, int encapsulationMode, Object tunerConfiguration,
-            @NonNull String opPackageName);
+            int buffSizeInBytes, int mode, int[] sessionId, @NonNull Parcel attributionSource,
+            long nativeAudioTrack, boolean offload, int encapsulationMode,
+            Object tunerConfiguration, @NonNull String opPackageName);
 
     private native final void native_finalize();
 

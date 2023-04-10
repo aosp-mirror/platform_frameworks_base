@@ -182,6 +182,11 @@ public class QwertyKeyListener extends BaseKeyListener {
                     char accent = content.charAt(selStart);
                     int composed = event.getDeadChar(accent, i);
 
+                    // Prevent a dead key repetition from inserting
+                    if (i == composed && event.getRepeatCount() > 0) {
+                        return true;
+                    }
+
                     if (composed != 0) {
                         i = composed;
                         replace = true;
@@ -355,6 +360,15 @@ public class QwertyKeyListener extends BaseKeyListener {
                     return super.onKeyDown(view, content, keyCode, event);
                 }
 
+                return true;
+            }
+        } else if (keyCode == KeyEvent.KEYCODE_ESCAPE && event.hasNoModifiers()) {
+            // If user is in the process of composing with a dead key, and
+            // presses Escape, cancel it. We need special handling because
+            // the Escape key will not produce a Unicode character
+            if (activeStart == selStart && activeEnd == selEnd) {
+                Selection.setSelection(content, selEnd);
+                content.removeSpan(TextKeyListener.ACTIVE);
                 return true;
             }
         }

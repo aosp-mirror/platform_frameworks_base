@@ -42,6 +42,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -49,6 +50,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Prefs;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -65,6 +67,9 @@ class MenuInfoRepository {
     private static final float DEFAULT_MENU_POSITION_X_PERCENT = 1.0f;
 
     @FloatRange(from = 0.0, to = 1.0)
+    private static final float DEFAULT_MENU_POSITION_X_PERCENT_RTL = 0.0f;
+
+    @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.77f;
     private static final boolean DEFAULT_MOVE_TO_TUCKED_VALUE = false;
     private static final boolean DEFAULT_HAS_SEEN_DOCK_TOOLTIP_VALUE = false;
@@ -77,6 +82,7 @@ class MenuInfoRepository {
             mA11yServicesStateChangeListener = manager -> onTargetFeaturesChanged();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final OnSettingsContentsChanged mSettingsContentsCallback;
+    private final SecureSettings mSecureSettings;
     private Position mPercentagePosition;
 
     @IntDef({
@@ -104,7 +110,7 @@ class MenuInfoRepository {
                 @Override
                 public void onChange(boolean selfChange) {
                     mSettingsContentsCallback.onSizeTypeChanged(
-                            getMenuSizeTypeFromSettings(mContext));
+                            getMenuSizeTypeFromSettings());
                 }
             };
 
@@ -142,11 +148,12 @@ class MenuInfoRepository {
     };
 
     MenuInfoRepository(Context context, AccessibilityManager accessibilityManager,
-            OnSettingsContentsChanged settingsContentsChanged) {
+            OnSettingsContentsChanged settingsContentsChanged, SecureSettings secureSettings) {
         mContext = context;
         mAccessibilityManager = accessibilityManager;
         mConfiguration = new Configuration(context.getResources().getConfiguration());
         mSettingsContentsCallback = settingsContentsChanged;
+        mSecureSettings = secureSettings;
 
         mPercentagePosition = getStartPosition();
     }
@@ -164,7 +171,7 @@ class MenuInfoRepository {
     }
 
     void loadMigrationTooltipVisibility(OnInfoReady<Boolean> callback) {
-        callback.onReady(Settings.Secure.getIntForUser(mContext.getContentResolver(),
+        callback.onReady(mSecureSettings.getIntForUser(
                 ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                 DEFAULT_MIGRATION_TOOLTIP_VALUE_PROMPT, UserHandle.USER_CURRENT)
                 == MigrationPrompt.ENABLED);
@@ -179,7 +186,7 @@ class MenuInfoRepository {
     }
 
     void loadMenuSizeType(OnInfoReady<Integer> callback) {
-        callback.onReady(getMenuSizeTypeFromSettings(mContext));
+        callback.onReady(getMenuSizeTypeFromSettings());
     }
 
     void loadMenuFadeEffectInfo(OnInfoReady<MenuFadeEffectInfo> callback) {
@@ -187,8 +194,8 @@ class MenuInfoRepository {
     }
 
     private MenuFadeEffectInfo getMenuFadeEffectInfo() {
-        return new MenuFadeEffectInfo(isMenuFadeEffectEnabledFromSettings(mContext),
-                getMenuOpacityFromSettings(mContext));
+        return new MenuFadeEffectInfo(isMenuFadeEffectEnabledFromSettings(),
+                getMenuOpacityFromSettings());
     }
 
     void updateMoveToTucked(boolean isMoveToTucked) {
@@ -208,7 +215,7 @@ class MenuInfoRepository {
     }
 
     void updateMigrationTooltipVisibility(boolean visible) {
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+        mSecureSettings.putIntForUser(
                 ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                 visible ? MigrationPrompt.ENABLED : MigrationPrompt.DISABLED,
                 UserHandle.USER_CURRENT);
@@ -223,30 +230,35 @@ class MenuInfoRepository {
         final String absolutePositionString = Prefs.getString(mContext,
                 Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
 
+        final float defaultPositionXPercent =
+                mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
+                        ? DEFAULT_MENU_POSITION_X_PERCENT_RTL
+                        : DEFAULT_MENU_POSITION_X_PERCENT;
         return TextUtils.isEmpty(absolutePositionString)
-                ? new Position(DEFAULT_MENU_POSITION_X_PERCENT, DEFAULT_MENU_POSITION_Y_PERCENT)
+                ? new Position(defaultPositionXPercent, DEFAULT_MENU_POSITION_Y_PERCENT)
                 : Position.fromString(absolutePositionString);
     }
 
     void registerObserversAndCallbacks() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
+        mSecureSettings.registerContentObserverForUser(
+                mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
                 UserHandle.USER_CURRENT);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
+        mSecureSettings.registerContentObserverForUser(
+                mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
                 /* notifyForDescendants */ false,
-                mMenuTargetFeaturesContentObserver, UserHandle.USER_CURRENT);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
+                mMenuTargetFeaturesContentObserver,
+                UserHandle.USER_CURRENT);
+        mSecureSettings.registerContentObserverForUser(
+                mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
                 /* notifyForDescendants */ false, mMenuSizeContentObserver,
                 UserHandle.USER_CURRENT);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED),
+        mSecureSettings.registerContentObserverForUser(
+                mSecureSettings.getUriFor(ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED),
                 /* notifyForDescendants */ false, mMenuFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(ACCESSIBILITY_FLOATING_MENU_OPACITY),
+        mSecureSettings.registerContentObserverForUser(
+                mSecureSettings.getUriFor(ACCESSIBILITY_FLOATING_MENU_OPACITY),
                 /* notifyForDescendants */ false, mMenuFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
         mContext.registerComponentCallbacks(mComponentCallbacks);
@@ -277,19 +289,19 @@ class MenuInfoRepository {
         void onReady(T info);
     }
 
-    private static int getMenuSizeTypeFromSettings(Context context) {
-        return Settings.Secure.getIntForUser(context.getContentResolver(),
+    private int getMenuSizeTypeFromSettings() {
+        return mSecureSettings.getIntForUser(
                 ACCESSIBILITY_FLOATING_MENU_SIZE, SMALL, UserHandle.USER_CURRENT);
     }
 
-    private static boolean isMenuFadeEffectEnabledFromSettings(Context context) {
-        return Settings.Secure.getIntForUser(context.getContentResolver(),
+    private boolean isMenuFadeEffectEnabledFromSettings() {
+        return mSecureSettings.getIntForUser(
                 ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
                 DEFAULT_FADE_EFFECT_IS_ENABLED, UserHandle.USER_CURRENT) == /* enabled */ 1;
     }
 
-    private static float getMenuOpacityFromSettings(Context context) {
-        return Settings.Secure.getFloatForUser(context.getContentResolver(),
+    private float getMenuOpacityFromSettings() {
+        return mSecureSettings.getFloatForUser(
                 ACCESSIBILITY_FLOATING_MENU_OPACITY, DEFAULT_OPACITY_VALUE,
                 UserHandle.USER_CURRENT);
     }

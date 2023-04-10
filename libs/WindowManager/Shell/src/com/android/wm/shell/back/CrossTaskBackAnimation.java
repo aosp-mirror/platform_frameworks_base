@@ -141,7 +141,8 @@ class CrossTaskBackAnimation {
         mStartTaskRect.offsetTo(0, 0);
 
         // Draw background.
-        mBackground.ensureBackground(BACKGROUNDCOLOR, mTransaction);
+        mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
+                BACKGROUNDCOLOR, mTransaction);
     }
 
     private void updateGestureBackProgress(float progress, BackEvent event) {
@@ -189,6 +190,8 @@ class CrossTaskBackAnimation {
         applyColorTransform(mClosingTarget.leash, closingColorScale);
         applyTransform(mEnteringTarget.leash, mEnteringCurrentRect, mCornerRadius);
         mTransaction.apply();
+
+        mBackground.onBackProgressed(progress);
     }
 
     private void updatePostCommitClosingAnimation(float progress) {

@@ -24,8 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Class containing the reason for the policy (set from {@link DevicePolicyManager}) update (e.g.
  * success, failure reasons, etc.). This is passed in to
- * {@link PolicyUpdatesReceiver#onPolicySetResult}) and
- * {@link PolicyUpdatesReceiver#onPolicyChanged}).
+ * {@link PolicyUpdateReceiver#onPolicySetResult}) and
+ * {@link PolicyUpdateReceiver#onPolicyChanged}).
  */
 public final class PolicyUpdateResult {
 
@@ -39,13 +39,40 @@ public final class PolicyUpdateResult {
      * Result code to indicate that the policy has been changed to the desired value set by
      * the admin.
      */
-    public static final int RESULT_SUCCESS = 0;
+    public static final int RESULT_POLICY_SET = 0;
 
     /**
      * Result code to indicate that the policy has not been enforced or has changed because another
      * admin has set a conflicting policy on the device.
+     *
+     * <p>The system will automatically try to enforce the policy when it can without additional
+     * calls from the admin.
      */
     public static final int RESULT_FAILURE_CONFLICTING_ADMIN_POLICY = 1;
+
+    /**
+     * Result code to indicate that the policy set by the admin has been successfully cleared,
+     * admins will no longer receive policy updates for this policy after this point.
+     *
+     * <p>Note that the policy can still be enforced by some other admin.
+     */
+    public static final int RESULT_POLICY_CLEARED = 2;
+
+    /**
+     * Result code to indicate that the policy set by the admin has not been enforced because the
+     * local storage has reached its max limit.
+     *
+     * <p>The system will NOT try to automatically store and enforce this policy again.
+     */
+    public static final int RESULT_FAILURE_STORAGE_LIMIT_REACHED = 3;
+
+    /**
+     * Result code to indicate that the policy set by the admin has not been enforced because of a
+     * permanent hardware limitation/issue.
+     *
+     * <p>The system will NOT try to automatically store and enforce this policy again.
+     */
+    public static final int RESULT_FAILURE_HARDWARE_LIMITATION = 4;
 
     /**
      * Reason codes for {@link #getResultCode()}.
@@ -53,17 +80,20 @@ public final class PolicyUpdateResult {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "RESULT_" }, value = {
+    @IntDef(prefix = { "RESULT_" }, value = {
             RESULT_FAILURE_UNKNOWN,
-            RESULT_SUCCESS,
-            RESULT_FAILURE_CONFLICTING_ADMIN_POLICY
+            RESULT_POLICY_SET,
+            RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+            RESULT_POLICY_CLEARED,
+            RESULT_FAILURE_STORAGE_LIMIT_REACHED,
+            RESULT_FAILURE_HARDWARE_LIMITATION
     })
     public @interface ResultCode {}
 
     private final int mResultCode;
 
     /**
-     * Constructor for {@code PolicyUpdateReason} that takes in a result code describing why the
+     * Constructor for {@code PolicyUpdateResult} that takes in a result code describing why the
      * policy has changed.
      *
      * @param resultCode Describes why the policy has changed.

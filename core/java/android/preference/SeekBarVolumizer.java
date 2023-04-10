@@ -141,12 +141,15 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     private int mRingerMode;
     private int mZenMode;
     private boolean mPlaySample;
+    private final boolean mDeviceHasProductStrategies;
 
     private static final int MSG_SET_STREAM_VOLUME = 0;
     private static final int MSG_START_SAMPLE = 1;
     private static final int MSG_STOP_SAMPLE = 2;
     private static final int MSG_INIT_SAMPLE = 3;
+    private static final int MSG_UPDATE_SLIDER_MAYBE_LATER = 4;
     private static final int CHECK_RINGTONE_PLAYBACK_DELAY_MS = 1000;
+    private static final int CHECK_UPDATE_SLIDER_LATER_MS = 500;
     private static final long SET_STREAM_VOLUME_DELAY_MS = TimeUnit.MILLISECONDS.toMillis(500);
     private static final long START_SAMPLE_DELAY_MS = TimeUnit.MILLISECONDS.toMillis(500);
     private static final long DURATION_TO_START_DELAYING = TimeUnit.MILLISECONDS.toMillis(2000);
@@ -170,6 +173,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             boolean playSample) {
         mContext = context;
         mAudioManager = context.getSystemService(AudioManager.class);
+        mDeviceHasProductStrategies = hasAudioProductStrategies();
         mNotificationManager = context.getSystemService(NotificationManager.class);
         mNotificationPolicy = mNotificationManager.getConsolidatedNotificationPolicy();
         mAllowAlarms = (mNotificationPolicy.priorityCategories & NotificationManager.Policy
@@ -186,7 +190,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
         mZenMode = mNotificationManager.getZenMode();
 
-        if (hasAudioProductStrategies()) {
+        if (mDeviceHasProductStrategies) {
             mVolumeGroupId = getVolumeGroupIdForLegacyStreamType(mStreamType);
             mAttributes = getAudioAttributesForLegacyStreamType(
                     mStreamType);
@@ -213,6 +217,12 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         mDefaultUri = defaultUri;
     }
 
+    /**
+     * DO NOT CALL every time this is needed, use once in constructor,
+     * read mDeviceHasProductStrategies instead
+     * @return true if stream types are used for volume management, false if volume groups are
+     *     used for volume management
+     */
     private boolean hasAudioProductStrategies() {
         return AudioManager.getAudioProductStrategies().size() > 0;
     }
@@ -330,6 +340,9 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                     onInitSample();
                 }
                 break;
+            case MSG_UPDATE_SLIDER_MAYBE_LATER:
+                onUpdateSliderMaybeLater();
+                break;
             default:
                 Log.e(TAG, "invalid SeekBarVolumizer message: "+msg.what);
         }
@@ -351,6 +364,21 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_START_SAMPLE),
                 isSamplePlaying() ? CHECK_RINGTONE_PLAYBACK_DELAY_MS
                         : isDelay() ? START_SAMPLE_DELAY_MS : 0);
+    }
+
+    private void onUpdateSliderMaybeLater() {
+        if (isDelay()) {
+            postUpdateSliderMaybeLater();
+            return;
+        }
+        updateSlider();
+    }
+
+    private void postUpdateSliderMaybeLater() {
+        if (mHandler == null) return;
+        mHandler.removeMessages(MSG_UPDATE_SLIDER_MAYBE_LATER);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_UPDATE_SLIDER_MAYBE_LATER),
+                CHECK_UPDATE_SLIDER_LATER_MS);
     }
 
     // After stop volume it needs to add a small delay when playing volume or set stream.
@@ -422,7 +450,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         postStopSample();
         mContext.getContentResolver().unregisterContentObserver(mVolumeObserver);
         mReceiver.setListening(false);
-        if (hasAudioProductStrategies()) {
+        if (mDeviceHasProductStrategies) {
             unregisterVolumeGroupCb();
         }
         mSeekBar.setOnSeekBarChangeListener(null);
@@ -442,7 +470,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 System.getUriFor(System.VOLUME_SETTINGS_INT[mStreamType]),
                 false, mVolumeObserver);
         mReceiver.setListening(true);
-        if (hasAudioProductStrategies()) {
+        if (mDeviceHasProductStrategies) {
             registerVolumeGroupCb();
         }
     }
@@ -466,6 +494,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         mLastProgress = progress;
         mHandler.removeMessages(MSG_SET_STREAM_VOLUME);
         mHandler.removeMessages(MSG_START_SAMPLE);
+        mHandler.removeMessages(MSG_UPDATE_SLIDER_MAYBE_LATER);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SET_STREAM_VOLUME),
                 isDelay() ? SET_STREAM_VOLUME_DELAY_MS : 0);
     }
@@ -609,7 +638,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             if (AudioManager.VOLUME_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 int streamValue = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
-                if (hasAudioProductStrategies() && !isDelay()) {
+                if (mDeviceHasProductStrategies && !isDelay()) {
                     updateVolumeSlider(streamType, streamValue);
                 }
             } else if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
@@ -621,9 +650,16 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 }
             } else if (AudioManager.STREAM_DEVICES_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
-                if (hasAudioProductStrategies() && !isDelay()) {
-                    int streamVolume = mAudioManager.getStreamVolume(streamType);
-                    updateVolumeSlider(streamType, streamVolume);
+
+                if (mDeviceHasProductStrategies) {
+                    if (isDelay()) {
+                        // not the right time to update the sliders, try again later
+                        postUpdateSliderMaybeLater();
+                    } else {
+                        int streamVolume = mAudioManager.getStreamVolume(streamType);
+                        updateVolumeSlider(streamType, streamVolume);
+                    }
+
                 } else {
                     int volumeGroup = getVolumeGroupIdForLegacyStreamType(streamType);
                     if (volumeGroup != AudioVolumeGroup.DEFAULT_VOLUME_GROUP

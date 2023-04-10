@@ -23,7 +23,6 @@ import android.annotation.MainThread;
 import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 
@@ -33,12 +32,14 @@ import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -149,7 +150,7 @@ public class DozeMachine {
     private final DozeHost mDozeHost;
     private final DockManager mDockManager;
     private final Part[] mParts;
-
+    private final UserTracker mUserTracker;
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
     private State mState = State.UNINITIALIZED;
     private int mPulseReason;
@@ -161,7 +162,7 @@ public class DozeMachine {
             AmbientDisplayConfiguration ambientDisplayConfig,
             WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle,
             DozeLog dozeLog, DockManager dockManager,
-            DozeHost dozeHost, Part[] parts) {
+            DozeHost dozeHost, Part[] parts, UserTracker userTracker) {
         mDozeService = service;
         mAmbientDisplayConfig = ambientDisplayConfig;
         mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -170,6 +171,7 @@ public class DozeMachine {
         mDockManager = dockManager;
         mDozeHost = dozeHost;
         mParts = parts;
+        mUserTracker = userTracker;
         for (Part part : parts) {
             part.setDozeMachine(this);
         }
@@ -396,7 +398,8 @@ public class DozeMachine {
         }
         if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD_PAUSING
                 || mState == State.DOZE_AOD || mState == State.DOZE
-                || mState == State.DOZE_AOD_DOCKED) && requestedState == State.DOZE_PULSE_DONE) {
+                || mState == State.DOZE_AOD_DOCKED || mState == State.DOZE_SUSPEND_TRIGGERS)
+                && requestedState == State.DOZE_PULSE_DONE) {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
         }
@@ -429,7 +432,7 @@ public class DozeMachine {
                     nextState = State.FINISH;
                 } else if (mDockManager.isDocked()) {
                     nextState = mDockManager.isHidden() ? State.DOZE : State.DOZE_AOD_DOCKED;
-                } else if (mAmbientDisplayConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
+                } else if (mAmbientDisplayConfig.alwaysOnEnabled(mUserTracker.getUserId())) {
                     nextState = State.DOZE_AOD;
                 } else {
                     nextState = State.DOZE;
@@ -509,9 +512,11 @@ public class DozeMachine {
 
         class Delegate implements Service {
             private final Service mDelegate;
+            private final Executor mBgExecutor;
 
-            public Delegate(Service delegate) {
+            public Delegate(Service delegate, Executor bgExecutor) {
                 mDelegate = delegate;
+                mBgExecutor = bgExecutor;
             }
 
             @Override
@@ -531,7 +536,9 @@ public class DozeMachine {
 
             @Override
             public void setDozeScreenBrightness(int brightness) {
-                mDelegate.setDozeScreenBrightness(brightness);
+                mBgExecutor.execute(() -> {
+                    mDelegate.setDozeScreenBrightness(brightness);
+                });
             }
         }
     }

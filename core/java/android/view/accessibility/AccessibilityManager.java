@@ -25,7 +25,6 @@ import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
-import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -76,7 +75,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -140,21 +138,6 @@ public final class AccessibilityManager {
     public static final int AUTOCLICK_DELAY_DEFAULT = 600;
 
     /**
-     * The contrast is defined as a float in [-1, 1], with a default value of 0.
-     * @hide
-     */
-    public static final float CONTRAST_MIN_VALUE = -1f;
-
-    /** @hide */
-    public static final float CONTRAST_MAX_VALUE = 1f;
-
-    /** @hide */
-    public static final float CONTRAST_DEFAULT_VALUE = 0f;
-
-    /** @hide */
-    public static final float CONTRAST_NOT_SET = Float.MIN_VALUE;
-
-    /**
      * Activity action: Launch UI to manage which accessibility service or feature is assigned
      * to the navigation bar Accessibility button.
      * <p>
@@ -186,6 +169,18 @@ public final class AccessibilityManager {
      */
     public static final int ACCESSIBILITY_SHORTCUT_KEY = 1;
 
+    /** @hide */
+    public static final int FLASH_REASON_CALL = 1;
+
+    /** @hide */
+    public static final int FLASH_REASON_ALARM = 2;
+
+    /** @hide */
+    public static final int FLASH_REASON_NOTIFICATION = 3;
+
+    /** @hide */
+    public static final int FLASH_REASON_PREVIEW = 4;
+
     /**
      * Annotations for the shortcut type.
      * @hide
@@ -208,6 +203,19 @@ public final class AccessibilityManager {
             FLAG_CONTENT_CONTROLS
     })
     public @interface ContentFlag {}
+
+    /**
+     * Annotations for reason of Flash notification.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "FLASH_REASON_" }, value = {
+            FLASH_REASON_CALL,
+            FLASH_REASON_ALARM,
+            FLASH_REASON_NOTIFICATION,
+            FLASH_REASON_PREVIEW
+    })
+    public @interface FlashNotificationReason {}
 
     /**
      * Use this flag to indicate the content of a UI that times out contains icons.
@@ -263,8 +271,6 @@ public final class AccessibilityManager {
     @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
 
-    private float mUiContrast;
-
     boolean mIsAudioDescriptionByDefaultRequested;
 
     // accessibility tracing state
@@ -289,9 +295,6 @@ public final class AccessibilityManager {
     private final ArrayMap<HighTextContrastChangeListener, Handler>
             mHighTextContrastStateChangeListeners = new ArrayMap<>();
 
-    private final ArrayMap<UiContrastChangeListener, Executor>
-            mUiContrastChangeListeners = new ArrayMap<>();
-
     private final ArrayMap<AccessibilityServicesStateChangeListener, Executor>
             mServicesStateChangeListeners = new ArrayMap<>();
 
@@ -304,6 +307,13 @@ public final class AccessibilityManager {
      * Map from a view's accessibility id to the list of request preparers set for that view
      */
     private SparseArray<List<AccessibilityRequestPreparer>> mRequestPreparerLists;
+
+    /**
+     * Binder for flash notification.
+     *
+     * @see #startFlashNotificationSequence(Context, int)
+     */
+    private final Binder mBinder = new Binder();
 
     /**
      * Listener for the system accessibility state. To listen for changes to the
@@ -358,7 +368,7 @@ public final class AccessibilityManager {
          *
          * @param manager The manager that is calling back
          */
-        void onAccessibilityServicesStateChanged(@NonNull AccessibilityManager manager);
+        void onAccessibilityServicesStateChanged(@NonNull  AccessibilityManager manager);
     }
 
     /**
@@ -377,21 +387,6 @@ public final class AccessibilityManager {
          * @param enabled Whether high text contrast is enabled.
          */
         void onHighTextContrastStateChanged(boolean enabled);
-    }
-
-    /**
-     * Listener for the UI contrast. To listen for changes to
-     * the UI contrast on the device, implement this interface and
-     * register it with the system by calling {@link #addUiContrastChangeListener}.
-     */
-    public interface UiContrastChangeListener {
-
-        /**
-         * Called when the color contrast enabled state changes.
-         *
-         * @param uiContrast The color contrast as in {@link #getUiContrast}
-         */
-        void onUiContrastChanged(@FloatRange(from = -1.0f, to = 1.0f) float uiContrast);
     }
 
     /**
@@ -507,16 +502,6 @@ public final class AccessibilityManager {
             synchronized (mLock) {
                 updateFocusAppearanceLocked(strokeWidth, color);
             }
-        }
-
-        @Override
-        public void setUiContrast(float contrast) {
-            synchronized (mLock) {
-                // if value changed in the settings, update the cached value and notify listeners
-                if (Math.abs(mUiContrast - contrast) < 1e-10) return;
-                mUiContrast = contrast;
-            }
-            mHandler.obtainMessage(MyCallback.MSG_NOTIFY_CONTRAST_CHANGED).sendToTarget();
         }
     };
 
@@ -688,7 +673,7 @@ public final class AccessibilityManager {
     /**
      * Returns if the high text contrast in the system is enabled.
      * <p>
-     * <strong>Note:</strong> You need to query this only if your application is
+     * <strong>Note:</strong> You need to query this only if you application is
      * doing its own rendering and does not rely on the platform rendering pipeline.
      * </p>
      *
@@ -704,24 +689,6 @@ public final class AccessibilityManager {
                 return false;
             }
             return mIsHighTextContrastEnabled;
-        }
-    }
-
-    /**
-     * Returns the color contrast for the user.
-     * <p>
-     * <strong>Note:</strong> You need to query this only if your application is
-     * doing its own rendering and does not rely on the platform rendering pipeline.
-     * </p>
-     * @return The color contrast, float in [-1, 1] where
-     *          0 corresponds to the default contrast
-     *         -1 corresponds to the minimum contrast that the user can set
-     *          1 corresponds to the maximum contrast that the user can set
-     */
-    @FloatRange(from = -1.0f, to = 1.0f)
-    public float getUiContrast() {
-        synchronized (mLock) {
-            return mUiContrast;
         }
     }
 
@@ -1310,35 +1277,6 @@ public final class AccessibilityManager {
             @NonNull HighTextContrastChangeListener listener) {
         synchronized (mLock) {
             mHighTextContrastStateChangeListeners.remove(listener);
-        }
-    }
-
-    /**
-     * Registers a {@link UiContrastChangeListener} for the current user.
-     *
-     * @param executor The executor on which the listener should be called back.
-     * @param listener The listener.
-     */
-    public void addUiContrastChangeListener(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull UiContrastChangeListener listener) {
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(listener);
-        synchronized (mLock) {
-            mUiContrastChangeListeners.put(listener, executor);
-        }
-    }
-
-    /**
-     * Unregisters a {@link UiContrastChangeListener} for the current user.
-     * If the listener was not registered, does nothing and returns.
-     *
-     * @param listener The listener to unregister.
-     */
-    public void removeUiContrastChangeListener(@NonNull UiContrastChangeListener listener) {
-        Objects.requireNonNull(listener);
-        synchronized (mLock) {
-            mUiContrastChangeListeners.remove(listener);
         }
     }
 
@@ -2036,12 +1974,14 @@ public final class AccessibilityManager {
      * {@link android.view.Display#INVALID_DISPLAY}, or is already being proxy-ed.
      *
      * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission.
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
+     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @RequiresPermission(allOf = {Manifest.permission.MANAGE_ACCESSIBILITY,
+            Manifest.permission.CREATE_VIRTUAL_DEVICE})
     public boolean registerDisplayProxy(@NonNull AccessibilityDisplayProxy proxy) {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -2064,12 +2004,14 @@ public final class AccessibilityManager {
      * @return {@code true} if the proxy is successfully unregistered.
      *
      * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission.
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
+     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @RequiresPermission(allOf = {Manifest.permission.MANAGE_ACCESSIBILITY,
+            Manifest.permission.CREATE_VIRTUAL_DEVICE})
     public boolean unregisterDisplayProxy(@NonNull AccessibilityDisplayProxy proxy)  {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -2082,6 +2024,147 @@ public final class AccessibilityManager {
             return service.unregisterProxyForDisplay(proxy.getDisplayId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start sequence (infinite) type of flash notification. Use
+     * {@code Context.getOpPackageName()} as the identifier of this flash notification.
+     * The notification can be cancelled later by calling {@link #stopFlashNotificationSequence}
+     * with same {@code Context.getOpPackageName()}.
+     * If the binder associated with this {@link AccessibilityManager} instance dies then the
+     * sequence will stop automatically. It is strongly recommended to call
+     * {@link #stopFlashNotificationSequence} within a reasonable amount of time after calling
+     * this method.
+     *
+     * @param context The context in which this manager operates.
+     * @param reason The triggering reason of flash notification.
+     * @return {@code true} if flash notification works properly.
+     * @hide
+     */
+    public boolean startFlashNotificationSequence(@NonNull Context context,
+            @FlashNotificationReason int reason) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.startFlashNotificationSequence(context.getOpPackageName(),
+                    reason, mBinder);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while start flash notification sequence", re);
+            return false;
+        }
+    }
+
+    /**
+     * Stop sequence (infinite) type of flash notification. The flash notification with
+     * {@code Context.getOpPackageName()} as identifier will be stopped if exist.
+     * It is strongly recommended to call this method within a reasonable amount of time after
+     * calling {@link #startFlashNotificationSequence} method.
+     *
+     * @param context The context in which this manager operates.
+     * @return {@code true} if flash notification stops properly.
+     * @hide
+     */
+    public boolean stopFlashNotificationSequence(@NonNull Context context) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.stopFlashNotificationSequence(context.getOpPackageName());
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while stop flash notification sequence", re);
+            return false;
+        }
+    }
+
+    /**
+     * Start event (finite) type of flash notification.
+     *
+     * @param context The context in which this manager operates.
+     * @param reason The triggering reason of flash notification.
+     * @param reasonPkg The package that trigger the flash notification.
+     * @return {@code true} if flash notification works properly.
+     * @hide
+     */
+    public boolean startFlashNotificationEvent(@NonNull Context context,
+            @FlashNotificationReason int reason, @Nullable String reasonPkg) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.startFlashNotificationEvent(context.getOpPackageName(),
+                    reason, reasonPkg);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while start flash notification event", re);
+            return false;
+        }
+    }
+
+    /**
+     * Determines if the accessibility target is allowed.
+     *
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param userId The id of the user for whom to perform the operation.
+     * @return {@code true} the accessibility target is allowed.
+     * @hide
+     */
+    public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.isAccessibilityTargetAllowed(packageName, uid, userId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while check accessibility target status", re);
+            return false;
+        }
+    }
+
+    /**
+     * Sends restricted dialog intent if the accessibility target is disallowed.
+     *
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param userId The id of the user for whom to perform the operation.
+     * @return {@code true} if the restricted dialog is shown.
+     * @hide
+     */
+    public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.sendRestrictedDialogIntent(packageName, uid, userId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while show restricted dialog", re);
+            return false;
         }
     }
 
@@ -2107,7 +2190,6 @@ public final class AccessibilityManager {
             mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
             updateUiTimeout(service.getRecommendedTimeoutMillis());
             updateFocusAppearanceLocked(service.getFocusStrokeWidth(), service.getFocusColor());
-            mUiContrast = service.getUiContrast();
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
@@ -2183,22 +2265,6 @@ public final class AccessibilityManager {
             listeners.valueAt(i).post(() ->
                     listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
-    }
-
-    /**
-     * Notifies the registered {@link UiContrastChangeListener}s if the value changed.
-     */
-    private void notifyUiContrastChanged() {
-        final ArrayMap<UiContrastChangeListener, Executor> listeners;
-        synchronized (mLock) {
-            listeners = new ArrayMap<>(mUiContrastChangeListeners);
-        }
-
-        listeners.entrySet().forEach(entry -> {
-            UiContrastChangeListener listener = entry.getKey();
-            Executor executor = entry.getValue();
-            executor.execute(() -> listener.onUiContrastChanged(mUiContrast));
-        });
     }
 
     /**
@@ -2291,7 +2357,6 @@ public final class AccessibilityManager {
 
     private final class MyCallback implements Handler.Callback {
         public static final int MSG_SET_STATE = 1;
-        public static final int MSG_NOTIFY_CONTRAST_CHANGED = 2;
 
         @Override
         public boolean handleMessage(Message message) {
@@ -2303,11 +2368,35 @@ public final class AccessibilityManager {
                         setStateLocked(state);
                     }
                 } break;
-                case MSG_NOTIFY_CONTRAST_CHANGED: {
-                    notifyUiContrastChanged();
-                }
             }
             return true;
+        }
+    }
+
+    /**
+     * Retrieves the window's transformation matrix and magnification spec.
+     *
+     * <p>
+     * Used by callers outside of the AccessibilityManagerService process which need
+     * this information, like {@link android.view.accessibility.DirectAccessibilityConnection}.
+     * </p>
+     *
+     * @return The transformation spec
+     * @hide
+     */
+    public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
+            int windowId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return null;
+            }
+        }
+        try {
+            return service.getWindowTransformationSpec(windowId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 }

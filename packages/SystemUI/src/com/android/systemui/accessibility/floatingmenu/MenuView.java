@@ -32,6 +32,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
@@ -222,14 +223,17 @@ class MenuView extends FrameLayout implements
     }
 
     private void onTargetFeaturesChanged(List<AccessibilityTarget> newTargetFeatures) {
-        // TODO(b/252756133): Should update specific item instead of the whole list
         mMenuAnimationController.fadeInNowIfEnabled();
 
+        final List<AccessibilityTarget> targetFeatures =
+                Collections.unmodifiableList(mTargetFeatures.stream().toList());
         mTargetFeatures.clear();
         mTargetFeatures.addAll(newTargetFeatures);
-        mMenuViewAppearance.setTargetFeaturesSize(mTargetFeatures.size());
+        mMenuViewAppearance.setTargetFeaturesSize(newTargetFeatures.size());
         mTargetFeaturesView.setOverScrollMode(mMenuViewAppearance.getMenuScrollMode());
-        mAdapter.notifyDataSetChanged();
+        DiffUtil.calculateDiff(
+                new MenuTargetsCallback(targetFeatures, newTargetFeatures)).dispatchUpdatesTo(
+                mAdapter);
 
         onSizeChanged();
         onEdgeChanged();

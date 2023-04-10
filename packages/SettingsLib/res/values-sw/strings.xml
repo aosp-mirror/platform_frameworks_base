@@ -213,7 +213,7 @@
     <item msgid="6946761421234586000">"Asilimia 400"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Ya Binafsi"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Binafsi"</string>
     <string name="category_work" msgid="4014193632325996115">"Ya Kazini"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Onyesha mipaka ya picha, kingo, nk."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Lazimisha uelekezaji wa muundo wa RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Lazimisha mkao wa skrini uwe wa kulia kwenda kushoto kwa lugha zote"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Sehemu angavu ya viungo muhimu"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Fanya rangi ya mandharinyuma ya sehemu ya viungo muhimu iwe angavu kwa chaguomsingi"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Ruhusu ukungu wa kiwango cha dirisha"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Lazimisha 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Wezesha 4x MSAA katika programu za OpenGL ES 2.0"</string>
@@ -518,7 +520,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Muda kidogo."</string>
     <string name="cancel" msgid="5665114069455378395">"Ghairi"</string>
     <string name="okay" msgid="949938843324579502">"Sawa"</string>
-    <string name="done" msgid="381184316122520313">"Imemaliza"</string>
+    <string name="done" msgid="381184316122520313">"Nimemaliza"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ving\'ora na vikumbusho"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Ruhusu iweke kengele na vikumbusho"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Kengele na vikumbusho"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Simu hii"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Kompyuta kibao hii"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Simu hii"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Huwezi kucheza maudhui kwenye kifaa hiki"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Pata toleo jipya la akaunti ili ubadilishe"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Imeshindwa kucheza maudhui yaliyopakuliwa hapa"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Jaribu tena baada ya tangazo"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Washa skrini ya kifaa ili ucheze maudhui hapa"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Kifaa hakijaidhinishwa ili kucheza maudhui"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Huwezi kucheza maudhui haya hapa"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kuna tatizo la kuunganisha kwenye Intaneti. Zima kisha uwashe kifaa"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kifaa cha sauti kinachotumia waya"</string>
     <string name="help_label" msgid="3528360748637781274">"Usaidizi na maoni"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Uhuishaji wa utabiri wa kurudi nyuma"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ruhusu uhuishaji wa mfumo wa utabiri wa kurudi nyuma."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Mipangilio hii inaruhusu uhuishaji wa mfumo wa uhuishaji wa utabiri wa ishara. Inahitaji kuweka mipangilio kwa kila programu enableOnBackInvokedCallback kuwa true katika faili ya maelezo."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Sogeza kushoto"</item>
+    <item msgid="5425394847942513942">"Sogeza chini"</item>
+    <item msgid="7728484337962740316">"Sogeza kulia"</item>
+    <item msgid="324200556467459329">"Sogeza juu"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"Asilimia <xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
 </resources>

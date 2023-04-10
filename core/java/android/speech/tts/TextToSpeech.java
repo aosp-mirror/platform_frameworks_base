@@ -2422,6 +2422,7 @@ public class TextToSpeech {
                     @Override
                     public void onDisconnected() {
                         onServiceDisconnected(/* componentName= */ null);
+                        mSession = null;
                     }
 
                     @Override

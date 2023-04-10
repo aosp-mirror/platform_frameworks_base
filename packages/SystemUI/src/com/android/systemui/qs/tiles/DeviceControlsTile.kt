@@ -159,4 +159,8 @@ class DeviceControlsTile @Inject constructor(
     override fun getTileLabel(): CharSequence {
         return mContext.getText(controlsComponent.getTileTitleId())
     }
+
+    companion object {
+        const val TILE_SPEC = "controls"
+    }
 }

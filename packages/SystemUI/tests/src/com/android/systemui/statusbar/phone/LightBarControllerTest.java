@@ -38,6 +38,7 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.Before;
@@ -67,7 +68,8 @@ public class LightBarControllerTest extends SysuiTestCase {
                 mStatusBarIconController,
                 mock(BatteryController.class),
                 mock(NavigationModeController.class),
-                mock(DumpManager.class));
+                mock(DumpManager.class),
+                new FakeDisplayTracker(mContext));
     }
 
     @Test

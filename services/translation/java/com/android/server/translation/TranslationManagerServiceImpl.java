@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -160,11 +161,20 @@ final class TranslationManagerServiceImpl extends
                 return null;
             }
             final ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
-            if (!isServiceAvailableForUser(serviceComponent)) {
+            boolean isServiceAvailableForUser;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                isServiceAvailableForUser = isServiceAvailableForUser(serviceComponent);
                 if (mMaster.verbose) {
-                    Slog.v(TAG, "ensureRemoteServiceLocked(): " + serviceComponent
-                            + " is not available,");
+                    Slog.v(TAG, "ensureRemoteServiceLocked(): isServiceAvailableForUser="
+                            + isServiceAvailableForUser);
                 }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            if (!isServiceAvailableForUser) {
+                Slog.w(TAG, "ensureRemoteServiceLocked(): " + serviceComponent
+                        + " is not available,");
                 return null;
             }
             mRemoteTranslationService = new RemoteTranslationService(getContext(), serviceComponent,

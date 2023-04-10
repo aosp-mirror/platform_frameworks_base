@@ -41,9 +41,10 @@ import java.util.List;
  * </p>
  *
  * <p>
- * All instances of CameraMetadata are immutable. The list of keys with {@link #getKeys()}
- * never changes, nor do the values returned by any key with {@code #get} throughout
- * the lifetime of the object.
+ * All instances of CameraMetadata are immutable. Beginning with API level 32, the list of keys
+ * returned by {@link #getKeys()} may change depending on the state of the device, as may the
+ * values returned by any key with {@code #get} throughout the lifetime of the object. For
+ * information on whether a specific value is fixed, see the documentation for its key.
  * </p>
  *
  * @see CameraDevice
@@ -159,7 +160,7 @@ public abstract class CameraMetadata<TKey> {
      * Optionally, if {@code filterTags} is not {@code null}, then filter out any keys
      * whose native {@code tag} is not in {@code filterTags}. The {@code filterTags} array will be
      * sorted as a side effect.
-     * {@code includeSynthetic} Includes public syntenthic fields by default.
+     * {@code includeSynthetic} Includes public synthetic fields by default.
      * </p>
      */
      /*package*/ @SuppressWarnings("unchecked")
@@ -1000,24 +1001,25 @@ public abstract class CameraMetadata<TKey> {
      * camera's crop region is set to maximum size, the FOV of the physical streams for the
      * ultrawide lens will be the same as the logical stream, by making the crop region
      * smaller than its active array size to compensate for the smaller focal length.</p>
-     * <p>There are two ways for the application to capture RAW images from a logical camera
-     * with RAW capability:</p>
+     * <p>For a logical camera, typically the underlying physical cameras have different RAW
+     * capabilities (such as resolution or CFA pattern). There are two ways for the
+     * application to capture RAW images from the logical camera:</p>
      * <ul>
-     * <li>Because the underlying physical cameras may have different RAW capabilities (such
-     * as resolution or CFA pattern), to maintain backward compatibility, when a RAW stream
-     * is configured, the camera device makes sure the default active physical camera remains
-     * active and does not switch to other physical cameras. (One exception is that, if the
-     * logical camera consists of identical image sensors and advertises multiple focalLength
-     * due to different lenses, the camera device may generate RAW images from different
-     * physical cameras based on the focalLength being set by the application.) This
-     * backward-compatible approach usually results in loss of optical zoom, to telephoto
-     * lens or to ultrawide lens.</li>
-     * <li>Alternatively, to take advantage of the full zoomRatio range of the logical camera,
-     * the application should use {@link android.hardware.camera2.MultiResolutionImageReader }
-     * to capture RAW images from the currently active physical camera. Because different
-     * physical camera may have different RAW characteristics, the application needs to use
-     * the characteristics and result metadata of the active physical camera for the
-     * relevant RAW metadata.</li>
+     * <li>If the logical camera has RAW capability, the application can create and use RAW
+     * streams in the same way as before. In case a RAW stream is configured, to maintain
+     * backward compatibility, the camera device makes sure the default active physical
+     * camera remains active and does not switch to other physical cameras. (One exception
+     * is that, if the logical camera consists of identical image sensors and advertises
+     * multiple focalLength due to different lenses, the camera device may generate RAW
+     * images from different physical cameras based on the focalLength being set by the
+     * application.) This backward-compatible approach usually results in loss of optical
+     * zoom, to telephoto lens or to ultrawide lens.</li>
+     * <li>Alternatively, if supported by the device,
+     * {@link android.hardware.camera2.MultiResolutionImageReader }
+     * can be used to capture RAW images from one of the underlying physical cameras (
+     * depending on current zoom level). Because different physical cameras may have
+     * different RAW characteristics, the application needs to use the characteristics
+     * and result metadata of the active physical camera for the relevant RAW metadata.</li>
      * </ul>
      * <p>The capture request and result metadata tags required for backward compatible camera
      * functionalities will be solely based on the logical camera capability. On the other
@@ -2307,7 +2309,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>An external flash has been turned on.</p>
      * <p>It informs the camera device that an external flash has been turned on, and that
-     * metering (and continuous focus if active) should be quickly recaculated to account
+     * metering (and continuous focus if active) should be quickly recalculated to account
      * for the external flash. Otherwise, this mode acts like ON.</p>
      * <p>When the external flash is turned off, AE mode should be changed to one of the
      * other available AE modes.</p>
@@ -3284,6 +3286,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Automatically select ON or OFF based on the system level preferences.</p>
      * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @hide
      */
     public static final int CONTROL_AUTOFRAMING_AUTO = 2;
 
@@ -3644,17 +3647,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>This is the default sensor pixel mode. This is the only sensor pixel mode
-     * supported unless a camera device advertises
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.</p>
+     * <p>This is the default sensor pixel mode.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
     public static final int SENSOR_PIXEL_MODE_DEFAULT = 0;
 
     /**
-     * <p>This sensor pixel mode is offered by devices with capability
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.
-     * In this mode, sensors typically do not bin pixels, as a result can offer larger
+     * <p>In this mode, sensors typically do not bin pixels, as a result can offer larger
      * image sizes.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */

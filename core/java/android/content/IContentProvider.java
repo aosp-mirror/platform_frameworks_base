@@ -18,6 +18,7 @@ package android.content;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -44,14 +45,42 @@ public interface IContentProvider extends IInterface {
             @Nullable String[] projection,
             @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
             throws RemoteException;
-    String getType(Uri url) throws RemoteException;
+    /**
+     * getType function with AttributionSource
+     */
+    String getType(@NonNull AttributionSource attributionSource,
+            Uri url) throws RemoteException;
+    /**
+     * one way getType function with AttributionSource
+     */
+    void getTypeAsync(@NonNull AttributionSource attributionSource,
+            Uri url, RemoteCallback callback) throws RemoteException;
+    /**
+     * @deprecated -- use getType with AttributionSource
+     */
+    @Deprecated
+    default String getType(Uri url) throws RemoteException {
+        return getType(new AttributionSource(Binder.getCallingUid(),
+                AppGlobals.getPackageManager().getPackagesForUid(Binder.getCallingUid())[0],
+                null), url);
+    }
 
     /**
      * A oneway version of getType. The functionality is exactly the same, except that the
      * call returns immediately, and the resulting type is returned when available via
      * a binder callback.
+     *
+     * @deprecated -- use getTypeAsync with AttributionSource
      */
-    void getTypeAsync(Uri uri, RemoteCallback callback) throws RemoteException;
+    @Deprecated
+    default void getTypeAsync(Uri uri, RemoteCallback callback) throws RemoteException {
+        getTypeAsync(new AttributionSource(Binder.getCallingUid(),
+                AppGlobals.getPackageManager().getPackagesForUid(Binder.getCallingUid())[0],
+                null), uri, callback);
+    }
+
+    /** oneway version of getTypeAnonymous*/
+    void getTypeAnonymousAsync(Uri uri, RemoteCallback callback) throws RemoteException;
 
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
@@ -153,8 +182,19 @@ public interface IContentProvider extends IInterface {
     public boolean refresh(@NonNull AttributionSource attributionSource, Uri url,
             @Nullable Bundle extras, ICancellationSignal cancellationSignal) throws RemoteException;
 
+    /**
+     * @deprecated -- use getStreamTypes with AttributionSource
+     */
+    @Deprecated
+    default String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+        return getStreamTypes(new AttributionSource(Binder.getCallingUid(),
+                AppGlobals.getPackageManager().getPackagesForUid(Binder.getCallingUid())[0],
+                null), url, mimeTypeFilter);
+    }
+
     // Data interchange.
-    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
+    String[] getStreamTypes(AttributionSource attributionSource,
+            Uri url, String mimeTypeFilter) throws RemoteException;
 
     public AssetFileDescriptor openTypedAssetFile(@NonNull AttributionSource attributionSource,
             Uri url, String mimeType, Bundle opts, ICancellationSignal signal)
@@ -185,4 +225,7 @@ public interface IContentProvider extends IInterface {
     int GET_TYPE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 28;
     int CANONICALIZE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 29;
     int UNCANONICALIZE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 30;
+    int GET_TYPE_ANONYMOUS_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 31;
+
+
 }

@@ -31,6 +31,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -39,6 +40,7 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.tv.TvPipBoundsAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipBoundsController;
 import com.android.wm.shell.pip.tv.TvPipBoundsState;
@@ -52,10 +54,10 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
-import java.util.Optional;
-
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
 
 /**
  * Provides TV specific dependencies for Pip.
@@ -69,6 +71,7 @@ public abstract class TvPipModule {
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -89,6 +92,7 @@ public abstract class TvPipModule {
                         shellInit,
                         shellController,
                         tvPipBoundsState,
+                        pipDisplayLayoutState,
                         tvPipBoundsAlgorithm,
                         tvPipBoundsController,
                         pipAppOpsListener,
@@ -129,28 +133,45 @@ public abstract class TvPipModule {
     @WMSingleton
     @Provides
     static TvPipBoundsAlgorithm provideTvPipBoundsAlgorithm(Context context,
-            TvPipBoundsState tvPipBoundsState, PipSnapAlgorithm pipSnapAlgorithm) {
-        return new TvPipBoundsAlgorithm(context, tvPipBoundsState, pipSnapAlgorithm);
+            TvPipBoundsState tvPipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
+            PipSizeSpecHandler pipSizeSpecHandler) {
+        return new TvPipBoundsAlgorithm(context, tvPipBoundsState, pipSnapAlgorithm,
+                pipSizeSpecHandler);
     }
 
     @WMSingleton
     @Provides
-    static TvPipBoundsState provideTvPipBoundsState(Context context) {
-        return new TvPipBoundsState(context);
+    static TvPipBoundsState provideTvPipBoundsState(Context context,
+            PipSizeSpecHandler pipSizeSpecHandler, PipDisplayLayoutState pipDisplayLayoutState) {
+        return new TvPipBoundsState(context, pipSizeSpecHandler, pipDisplayLayoutState);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipSizeSpecHandler providePipSizeSpecHelper(Context context,
+            PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PipSizeSpecHandler(context, pipDisplayLayoutState);
     }
 
     // Handler needed for loadDrawableAsync() in PipControlsViewController
     @WMSingleton
     @Provides
     static PipTransitionController provideTvPipTransition(
+            Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             Transitions transitions,
-            PipAnimationController pipAnimationController,
+            TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
+            PipTransitionState pipTransitionState,
+            TvPipMenuController pipMenuController,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
-            TvPipBoundsState tvPipBoundsState, TvPipMenuController pipMenuController) {
-        return new TvPipTransition(shellInit, shellTaskOrganizer, transitions, tvPipBoundsState,
-                pipMenuController, tvPipBoundsAlgorithm, pipAnimationController);
+            PipAnimationController pipAnimationController,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
+        return new TvPipTransition(context, shellInit, shellTaskOrganizer, transitions,
+                tvPipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
+                tvPipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
+                Optional.empty());
     }
 
     @WMSingleton
@@ -191,6 +212,7 @@ public abstract class TvPipModule {
             TvPipMenuController tvPipMenuController,
             SyncTransactionQueue syncTransactionQueue,
             TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
             PipTransitionState pipTransitionState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
@@ -202,10 +224,11 @@ public abstract class TvPipModule {
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new TvPipTaskOrganizer(context,
-                syncTransactionQueue, pipTransitionState, tvPipBoundsState, tvPipBoundsAlgorithm,
-                tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, pipParamsChangedForwarder, splitScreenControllerOptional,
-                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+                syncTransactionQueue, pipTransitionState, tvPipBoundsState, pipDisplayLayoutState,
+                tvPipBoundsAlgorithm, tvPipMenuController, pipAnimationController,
+                pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
+                splitScreenControllerOptional, displayController, pipUiEventLogger,
+                shellTaskOrganizer, mainExecutor);
     }
 
     @WMSingleton

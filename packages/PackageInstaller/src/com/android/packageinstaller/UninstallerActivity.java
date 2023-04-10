@@ -67,6 +67,7 @@ public class UninstallerActivity extends Activity {
     private static final String TAG = "UninstallerActivity";
 
     private static final String UNINSTALLING_CHANNEL = "uninstalling";
+    private boolean mIsClonedApp;
 
     public static class DialogInfo {
         public ApplicationInfo appInfo;
@@ -277,6 +278,14 @@ public class UninstallerActivity extends Activity {
         fragment.show(ft, "dialog");
     }
 
+    /**
+     * Starts uninstall of app.
+     */
+    public void startUninstallProgress(boolean keepData, boolean isClonedApp) {
+        mIsClonedApp = isClonedApp;
+        startUninstallProgress(keepData);
+    }
+
     public void startUninstallProgress(boolean keepData) {
         boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
         CharSequence label = mDialogInfo.appInfo.loadSafeLabel(getPackageManager());
@@ -329,6 +338,7 @@ public class UninstallerActivity extends Activity {
             broadcastIntent.putExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO, mDialogInfo.appInfo);
             broadcastIntent.putExtra(UninstallFinish.EXTRA_APP_LABEL, label);
             broadcastIntent.putExtra(UninstallFinish.EXTRA_UNINSTALL_ID, uninstallId);
+            broadcastIntent.putExtra(UninstallFinish.EXTRA_IS_CLONE_APP, mIsClonedApp);
 
             PendingIntent pendingIntent =
                     PendingIntent.getBroadcast(this, uninstallId, broadcastIntent,
@@ -343,7 +353,10 @@ public class UninstallerActivity extends Activity {
             Notification uninstallingNotification =
                     (new Notification.Builder(this, UNINSTALLING_CHANNEL))
                     .setSmallIcon(R.drawable.ic_remove).setProgress(0, 1, true)
-                    .setContentTitle(getString(R.string.uninstalling_app, label)).setOngoing(true)
+                    .setContentTitle(mIsClonedApp
+                            ? getString(R.string.uninstalling_cloned_app, label)
+                            : getString(R.string.uninstalling_app, label))
+                            .setOngoing(true)
                     .build();
 
             notificationManager.notify(uninstallId, uninstallingNotification);

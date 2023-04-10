@@ -321,6 +321,7 @@ public class SystemConfig {
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
 
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
+    private final ArraySet<String> mAutomaticRollbackDenylistedPackages = new ArraySet<>();
     private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
     // A map from package name of vendor APEXes that can be updated to an installer package name
     // allowed to install updates for it.
@@ -331,6 +332,11 @@ public class SystemConfig {
     private String mModulesInstallerPackageName;
     // Update ownership for system applications and the installers eligible to update them.
     private final ArrayMap<String, String> mUpdateOwnersForSystemApps = new ArrayMap<>();
+
+    // Set of package names that should not be marked as "stopped" during initial device boot
+    // or when adding a new user. A new package not contained in this set will be
+    // marked as stopped by the system
+    @NonNull private final Set<String> mInitialNonStoppedSystemPackages = new ArraySet<>();
 
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
@@ -461,6 +467,10 @@ public class SystemConfig {
         return mRollbackWhitelistedPackages;
     }
 
+    public Set<String> getAutomaticRollbackDenylistedPackages() {
+        return mAutomaticRollbackDenylistedPackages;
+    }
+
     public Set<String> getWhitelistedStagedInstallers() {
         return mWhitelistedStagedInstallers;
     }
@@ -520,6 +530,10 @@ public class SystemConfig {
     public String getOverlayConfigSignaturePackage() {
         return TextUtils.isEmpty(mOverlayConfigSignaturePackage)
                 ? null : mOverlayConfigSignaturePackage;
+    }
+
+    public Set<String> getInitialNonStoppedSystemPackages() {
+        return mInitialNonStoppedSystemPackages;
     }
 
     /**
@@ -1356,6 +1370,16 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "automatic-rollback-denylisted-app": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mAutomaticRollbackDenylistedPackages.add(pkgname);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
                     case "whitelisted-staged-installer": {
                         if (allowAppConfigs) {
                             String pkgname = parser.getAttributeValue(null, "package");
@@ -1430,6 +1454,19 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "initial-package-state": {
+                        String pkgName = parser.getAttributeValue(null, "package");
+                        String stopped = parser.getAttributeValue(null, "stopped");
+                        if (TextUtils.isEmpty(pkgName)) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(stopped)) {
+                            Slog.w(TAG, "<" + name + "> without stopped in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (!Boolean.parseBoolean(stopped)) {
+                            mInitialNonStoppedSystemPackages.add(pkgName);
+                        }
+                    }
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "
                                 + permFile + " at " + parser.getPositionDescription());

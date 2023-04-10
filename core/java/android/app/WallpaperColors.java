@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
@@ -101,11 +102,13 @@ public final class WallpaperColors implements Parcelable {
     // Decides when dark theme is optimal for this wallpaper
     private static final float DARK_THEME_MEAN_LUMINANCE = 0.3f;
     // Minimum mean luminosity that an image needs to have to support dark text
-    private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = 0.7f;
+    private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = SystemProperties.getInt(
+            "persist.wallpapercolors.threshold", 70) / 100f;
     // We also check if the image has dark pixels in it,
     // to avoid bright images with some dark spots.
     private static final float DARK_PIXEL_CONTRAST = 5.5f;
-    private static final float MAX_DARK_AREA = 0.05f;
+    private static final float MAX_DARK_AREA = SystemProperties.getInt(
+            "persist.wallpapercolors.max_dark_area", 5) / 100f;
 
     private final List<Color> mMainColors;
     private final Map<Integer, Integer> mAllColors;

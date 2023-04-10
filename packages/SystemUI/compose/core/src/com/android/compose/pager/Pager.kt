@@ -86,21 +86,20 @@ object PagerDefaults {
 /**
  * A horizontally scrolling layout that allows users to flip between items to the left and right.
  *
- * @sample com.google.accompanist.sample.pager.HorizontalPagerSample
- *
  * @param count the number of pages.
  * @param modifier the modifier to apply to this layout.
  * @param state the state object to be used to control or observe the pager's state.
  * @param reverseLayout reverse the direction of scrolling and layout, when `true` items will be
- * composed from the end to the start and [PagerState.currentPage] == 0 will mean the first item is
- * located at the end.
+ *   composed from the end to the start and [PagerState.currentPage] == 0 will mean the first item
+ *   is located at the end.
  * @param itemSpacing horizontal spacing to add between items.
  * @param flingBehavior logic describing fling behavior.
  * @param key the scroll position will be maintained based on the key, which means if you add/remove
- * items before the current visible item the item with the given key will be kept as the first
- * visible one.
+ *   items before the current visible item the item with the given key will be kept as the first
+ *   visible one.
  * @param content a block which describes the content. Inside this block you can reference
- * [PagerScope.currentPage] and other properties in [PagerScope].
+ *   [PagerScope.currentPage] and other properties in [PagerScope].
+ * @sample com.google.accompanist.sample.pager.HorizontalPagerSample
  */
 @ExperimentalPagerApi
 @Composable
@@ -134,21 +133,20 @@ fun HorizontalPager(
 /**
  * A vertically scrolling layout that allows users to flip between items to the top and bottom.
  *
- * @sample com.google.accompanist.sample.pager.VerticalPagerSample
- *
  * @param count the number of pages.
  * @param modifier the modifier to apply to this layout.
  * @param state the state object to be used to control or observe the pager's state.
  * @param reverseLayout reverse the direction of scrolling and layout, when `true` items will be
- * composed from the bottom to the top and [PagerState.currentPage] == 0 will mean the first item is
- * located at the bottom.
+ *   composed from the bottom to the top and [PagerState.currentPage] == 0 will mean the first item
+ *   is located at the bottom.
  * @param itemSpacing vertical spacing to add between items.
  * @param flingBehavior logic describing fling behavior.
  * @param key the scroll position will be maintained based on the key, which means if you add/remove
- * items before the current visible item the item with the given key will be kept as the first
- * visible one.
+ *   items before the current visible item the item with the given key will be kept as the first
+ *   visible one.
  * @param content a block which describes the content. Inside this block you can reference
- * [PagerScope.currentPage] and other properties in [PagerScope].
+ *   [PagerScope.currentPage] and other properties in [PagerScope].
+ * @sample com.google.accompanist.sample.pager.VerticalPagerSample
  */
 @ExperimentalPagerApi
 @Composable
@@ -246,7 +244,9 @@ internal fun Pager(
                         // Constraint the content to be <= than the size of the pager.
                         .fillParentMaxHeight()
                         .wrapContentSize()
-                ) { pagerScope.content(page) }
+                ) {
+                    pagerScope.content(page)
+                }
             }
         }
     } else {
@@ -272,7 +272,9 @@ internal fun Pager(
                         // Constraint the content to be <= than the size of the pager.
                         .fillParentMaxWidth()
                         .wrapContentSize()
-                ) { pagerScope.content(page) }
+                ) {
+                    pagerScope.content(page)
+                }
             }
         }
     }

@@ -20,30 +20,36 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.ClearCredentialStateRequest;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
+import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Central session for a single clearCredentialState request. This class listens to the
  * responses from providers, and updates the provider(S) state.
  */
 public final class ClearRequestSession extends RequestSession<ClearCredentialStateRequest,
-        IClearCredentialStateCallback>
+        IClearCredentialStateCallback, Void>
         implements ProviderSession.ProviderInternalCallback<Void> {
     private static final String TAG = "GetRequestSession";
 
-    public ClearRequestSession(Context context, int userId, int callingUid,
+    public ClearRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
+            Object lock, int userId, int callingUid,
             IClearCredentialStateCallback callback, ClearCredentialStateRequest request,
-            CallingAppInfo callingAppInfo) {
-        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_UNDEFINED,
-                callingAppInfo);
+            CallingAppInfo callingAppInfo, Set<ComponentName> enabledProviders,
+            CancellationSignal cancellationSignal,
+            long startedTimestamp) {
+        super(context, sessionCallback, lock, userId, callingUid, request, callback,
+                RequestInfo.TYPE_UNDEFINED,
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
     }
 
     /**
@@ -70,7 +76,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
 
     @Override // from provider session
     public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
+            ComponentName componentName, ProviderSession.CredentialsSource source) {
         Log.i(TAG, "in onStatusChanged with status: " + status);
         if (ProviderSession.isTerminatingStatus(status)) {
             Log.i(TAG, "in onStatusChanged terminating status");
@@ -82,8 +88,13 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     }
 
     @Override
-    public void onFinalResponseReceived(ComponentName componentName, Void response) {
-        respondToClientWithResponseAndFinish();
+    public void onFinalResponseReceived(
+            ComponentName componentName,
+            Void response) {
+        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
+                mProviders.get(componentName.flattenToString()).mProviderSessionMetric
+                        .getCandidatePhasePerProviderMetric());
+        respondToClientWithResponseAndFinish(null);
     }
 
     protected void onProviderResponseComplete(ComponentName componentName) {
@@ -104,32 +115,20 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     }
 
     @Override
+    protected void invokeClientCallbackSuccess(Void response) throws RemoteException {
+        mClientCallback.onSuccess();
+    }
+
+    @Override
+    protected void invokeClientCallbackError(String errorType, String errorMsg)
+            throws RemoteException {
+        mClientCallback.onError(errorType, errorMsg);
+    }
+
+    @Override
     public void onFinalErrorReceived(ComponentName componentName, String errorType,
             String message) {
         //Not applicable for clearCredential as response is not picked by the user
-    }
-
-    private void respondToClientWithResponseAndFinish() {
-        Log.i(TAG, "respondToClientWithResponseAndFinish");
-        try {
-            mClientCallback.onSuccess();
-            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ true);
-        } catch (RemoteException e) {
-            Log.i(TAG, "Issue while propagating the response to the client");
-            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ false);
-        }
-        finishSession();
-    }
-
-    private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
-        Log.i(TAG, "respondToClientWithErrorAndFinish");
-        try {
-            mClientCallback.onError(errorType, errorMsg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ false);
-        finishSession();
     }
 
     private void processResponses() {
@@ -137,11 +136,21 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             if (session.isProviderResponseSet()) {
                 // If even one provider responded successfully, send back the response
                 // TODO: Aggregate other exceptions
-                respondToClientWithResponseAndFinish();
+                respondToClientWithResponseAndFinish(null);
                 return;
             }
         }
         // TODO: Replace with properly defined error type
         respondToClientWithErrorAndFinish("UNKNOWN", "All providers failed");
+    }
+
+    @Override
+    public void onUiCancellation(boolean isUserCancellation) {
+        // Not needed since UI is not involved
+    }
+
+    @Override
+    public void onUiSelectorInvocationFailure() {
+        // Not needed since UI is not involved
     }
 }

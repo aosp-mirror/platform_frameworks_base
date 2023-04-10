@@ -39,6 +39,7 @@ import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 
 interface IVoiceInteractionManagerService {
     void showSession(in Bundle sessionArgs, int flags, String attributionTag);
@@ -50,7 +51,7 @@ interface IVoiceInteractionManagerService {
     int startVoiceActivity(IBinder token, in Intent intent, String resolvedType,
             String attributionTag);
     int startAssistantActivity(IBinder token, in Intent intent, String resolvedType,
-            String attributionTag);
+            String attributionTag, in Bundle bundle);
     void setKeepAwake(IBinder token, boolean keepAwake);
     void closeSystemDialogs(IBinder token);
     void finish(IBinder token);
@@ -242,7 +243,14 @@ interface IVoiceInteractionManagerService {
      */
     IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
             in Identity originatorIdentity,
-            IBinder client);
+            IBinder client,
+            in SoundTrigger.ModuleProperties moduleProperties);
+
+    /**
+     * Lists properties of SoundTrigger modules that can be attached to by
+     * @{link createSoundTriggerSessionAsOriginator}.
+     */
+    List<SoundTrigger.ModuleProperties> listModuleProperties(in Identity originatorIdentity);
 
     /**
      * Set configuration and pass read-only data to hotword detection service.
@@ -299,6 +307,12 @@ interface IVoiceInteractionManagerService {
      * Requests to shutdown hotword detection service.
      */
     void shutdownHotwordDetectionService();
+
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    void enableVisualQueryDetection(in IVisualQueryDetectionAttentionListener Listener);
+
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    void disableVisualQueryDetection();
 
     void startPerceiving(in IVisualQueryDetectionVoiceInteractionCallback callback);
 

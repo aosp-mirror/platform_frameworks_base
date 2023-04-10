@@ -53,6 +53,7 @@ public final class BrightnessEvent {
     private int mFlags;
     private int mAdjustmentFlags;
     private boolean mAutomaticBrightnessEnabled;
+    private String mDisplayBrightnessStrategyName;
 
     public BrightnessEvent(BrightnessEvent that) {
         copyFrom(that);
@@ -92,13 +93,14 @@ public final class BrightnessEvent {
         mAdjustmentFlags = that.getAdjustmentFlags();
         // Auto-brightness setting
         mAutomaticBrightnessEnabled = that.isAutomaticBrightnessEnabled();
+        mDisplayBrightnessStrategyName = that.getDisplayBrightnessStrategyName();
     }
 
     /**
      * A utility to reset the BrightnessEvent to default values
      */
     public void reset() {
-        mReason.set(null);
+        mReason = new BrightnessReason();
         mTime = SystemClock.uptimeMillis();
         mPhysicalDisplayId = "";
         // Lux values
@@ -120,6 +122,7 @@ public final class BrightnessEvent {
         mAdjustmentFlags = 0;
         // Auto-brightness setting
         mAutomaticBrightnessEnabled = true;
+        mDisplayBrightnessStrategyName = "";
     }
 
     /**
@@ -139,8 +142,6 @@ public final class BrightnessEvent {
                 && Float.floatToRawIntBits(mLux) == Float.floatToRawIntBits(that.mLux)
                 && Float.floatToRawIntBits(mPreThresholdLux)
                 == Float.floatToRawIntBits(that.mPreThresholdLux)
-                && Float.floatToRawIntBits(mInitialBrightness)
-                == Float.floatToRawIntBits(that.mInitialBrightness)
                 && Float.floatToRawIntBits(mBrightness)
                 == Float.floatToRawIntBits(that.mBrightness)
                 && Float.floatToRawIntBits(mRecommendedBrightness)
@@ -157,7 +158,8 @@ public final class BrightnessEvent {
                 && mWasShortTermModelActive == that.mWasShortTermModelActive
                 && mFlags == that.mFlags
                 && mAdjustmentFlags == that.mAdjustmentFlags
-                && mAutomaticBrightnessEnabled == that.mAutomaticBrightnessEnabled;
+                && mAutomaticBrightnessEnabled == that.mAutomaticBrightnessEnabled
+                && mDisplayBrightnessStrategyName.equals(that.mDisplayBrightnessStrategyName);
     }
 
     /**
@@ -185,7 +187,8 @@ public final class BrightnessEvent {
                 + ", wasShortTermModelActive=" + mWasShortTermModelActive
                 + ", flags=" + flagsToString()
                 + ", reason=" + mReason.toString(mAdjustmentFlags)
-                + ", autoBrightness=" + mAutomaticBrightnessEnabled;
+                + ", autoBrightness=" + mAutomaticBrightnessEnabled
+                + ", strategy=" + mDisplayBrightnessStrategyName;
     }
 
     @Override
@@ -353,6 +356,14 @@ public final class BrightnessEvent {
 
     public boolean isAutomaticBrightnessEnabled() {
         return mAutomaticBrightnessEnabled;
+    }
+
+    public void setDisplayBrightnessStrategyName(String displayBrightnessStrategyName) {
+        mDisplayBrightnessStrategyName = displayBrightnessStrategyName;
+    }
+
+    public String getDisplayBrightnessStrategyName() {
+        return mDisplayBrightnessStrategyName;
     }
 
     public void setAutomaticBrightnessEnabled(boolean mAutomaticBrightnessEnabled) {

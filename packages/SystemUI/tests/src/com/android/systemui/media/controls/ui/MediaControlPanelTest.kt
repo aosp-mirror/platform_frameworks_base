@@ -27,6 +27,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
@@ -52,6 +53,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
+import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
@@ -77,6 +79,8 @@ import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
+import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -90,7 +94,6 @@ import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -98,6 +101,7 @@ import dagger.Lazy
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -204,6 +208,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var coverContainer1: ViewGroup
     @Mock private lateinit var coverContainer2: ViewGroup
     @Mock private lateinit var coverContainer3: ViewGroup
+    @Mock private lateinit var recAppIconItem: CachingIconView
+    @Mock private lateinit var recCardTitle: TextView
+    @Mock private lateinit var coverItem: ImageView
+    @Mock private lateinit var matrix: Matrix
     private lateinit var coverItem1: ImageView
     private lateinit var coverItem2: ImageView
     private lateinit var coverItem3: ImageView
@@ -213,6 +221,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var recSubtitle1: TextView
     private lateinit var recSubtitle2: TextView
     private lateinit var recSubtitle3: TextView
+    @Mock private lateinit var recProgressBar1: SeekBar
+    @Mock private lateinit var recProgressBar2: SeekBar
+    @Mock private lateinit var recProgressBar3: SeekBar
     private var shouldShowBroadcastButton: Boolean = false
     private val fakeFeatureFlag =
         FakeFeatureFlags().apply {
@@ -220,6 +231,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             this.set(Flags.UMO_TURBULENCE_NOISE, false)
             this.set(Flags.MEDIA_FALSING_PENALTY, true)
             this.set(Flags.MEDIA_EXPLICIT_INDICATOR, true)
+            this.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, false)
         }
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -622,10 +634,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindAlbumView_setAfterExecutors() {
-        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmp)
-        canvas.drawColor(Color.RED)
-        val albumArt = Icon.createWithBitmap(bmp)
+        val albumArt = getColorIcon(Color.RED)
         val state = mediaData.copy(artwork = albumArt)
 
         player.attachPlayer(viewHolder)
@@ -638,15 +647,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindAlbumView_bitmapInLaterStates_setAfterExecutors() {
-        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
-        val redCanvas = Canvas(redBmp)
-        redCanvas.drawColor(Color.RED)
-        val redArt = Icon.createWithBitmap(redBmp)
-
-        val greenBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
-        val greenCanvas = Canvas(greenBmp)
-        greenCanvas.drawColor(Color.GREEN)
-        val greenArt = Icon.createWithBitmap(greenBmp)
+        val redArt = getColorIcon(Color.RED)
+        val greenArt = getColorIcon(Color.GREEN)
 
         val state0 = mediaData.copy(artwork = null)
         val state1 = mediaData.copy(artwork = redArt)
@@ -686,6 +688,40 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
         verify(albumView, times(3)).setImageDrawable(any(Drawable::class.java))
+    }
+
+    @Test
+    fun addTwoPlayerGradients_differentStates() {
+        // Setup redArtwork and its color scheme.
+        val redArt = getColorIcon(Color.RED)
+        val redWallpaperColor = player.getWallpaperColor(redArt)
+        val redColorScheme = ColorScheme(redWallpaperColor, true, Style.CONTENT)
+
+        // Setup greenArt and its color scheme.
+        val greenArt = getColorIcon(Color.GREEN)
+        val greenWallpaperColor = player.getWallpaperColor(greenArt)
+        val greenColorScheme = ColorScheme(greenWallpaperColor, true, Style.CONTENT)
+
+        // Add gradient to both icons.
+        val redArtwork = player.addGradientToPlayerAlbum(redArt, redColorScheme, 10, 10)
+        val greenArtwork = player.addGradientToPlayerAlbum(greenArt, greenColorScheme, 10, 10)
+
+        // They should have different constant states as they have different gradient color.
+        assertThat(redArtwork.getDrawable(1).constantState)
+            .isNotEqualTo(greenArtwork.getDrawable(1).constantState)
+    }
+
+    @Test
+    fun getWallpaperColor_recycledBitmap_notCrashing() {
+        // Setup redArt icon.
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redArt = Icon.createWithBitmap(redBmp)
+
+        // Recycle bitmap of redArt icon.
+        redArt.bitmap.recycle()
+
+        // get wallpaperColor without illegal exception.
+        player.getWallpaperColor(redArt)
     }
 
     @Test
@@ -899,6 +935,17 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, ConstraintSet.GONE)
         verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.VISIBLE)
         verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun bind_resumeState_withProgress() {
+        val progress = 0.5
+        val state = mediaData.copy(resumption = true, resumeProgress = progress)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        verify(seekBarViewModel).updateStaticProgress(progress)
     }
 
     @Test
@@ -1697,7 +1744,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun tapContentView_showOverLockscreen_openActivity() {
         // WHEN we are on lockscreen and this activity can show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
-        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
 
         val clickIntent = mock(Intent::class.java)
         val pendingIntent = mock(PendingIntent::class.java)
@@ -1708,16 +1755,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(data, KEY)
         verify(viewHolder.player).setOnClickListener(captor.capture())
 
-        // THEN it shows without dismissing keyguard first
+        // THEN it sends the PendingIntent without dismissing keyguard first,
+        // and does not use the Intent directly (see b/271845008)
         captor.value.onClick(viewHolder.player)
-        verify(activityStarter).startActivity(eq(clickIntent), eq(true), nullable(), eq(true))
+        verify(pendingIntent).send()
+        verify(pendingIntent, never()).getIntent()
+        verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }
 
     @Test
     fun tapContentView_noShowOverLockscreen_dismissKeyguard() {
         // WHEN we are on lockscreen and the activity cannot show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
-        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(false)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
+            .thenReturn(false)
 
         val clickIntent = mock(Intent::class.java)
         val pendingIntent = mock(PendingIntent::class.java)
@@ -1971,12 +2022,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setExtras(Bundle.EMPTY)
                             .build(),
                         SmartspaceAction.Builder("id2", "title2")
-                            .setSubtitle("")
+                            .setSubtitle("subtitle2")
                             .setIcon(icon)
                             .setExtras(Bundle.EMPTY)
                             .build(),
                         SmartspaceAction.Builder("id3", "title3")
-                            .setSubtitle("subtitle3")
+                            .setSubtitle("")
                             .setIcon(icon)
                             .setExtras(Bundle.EMPTY)
                             .build()
@@ -2056,6 +2107,160 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(recTitle1.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(recTitle2.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(recTitle3.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindRecommendation_setAfterExecutors() {
+        setupUpdatedRecommendationViewHolder()
+        val albumArt = getColorIcon(Color.RED)
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
+            )
+
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(data)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+
+        verify(recCardTitle).setTextColor(any<Int>())
+        verify(recAppIconItem, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(coverItem, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(coverItem, times(3)).imageMatrix = any()
+    }
+
+    @Test
+    fun bindRecommendationWithProgressBars() {
+        useRealConstraintSets()
+        setupUpdatedRecommendationViewHolder()
+        val albumArt = getColorIcon(Color.RED)
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                )
+                putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, 0.5)
+            }
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(bundle)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
+            )
+
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(data)
+
+        verify(recProgressBar1).setProgress(50)
+        verify(recProgressBar1).visibility = View.VISIBLE
+        verify(recProgressBar2).visibility = View.GONE
+        verify(recProgressBar3).visibility = View.GONE
+        assertThat(recSubtitle1.visibility).isEqualTo(View.GONE)
+        assertThat(recSubtitle2.visibility).isEqualTo(View.VISIBLE)
+        assertThat(recSubtitle3.visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    @Ignore("b/276920368")
+    fun bindRecommendation_carouselNotFitThreeRecs() {
+        useRealConstraintSets()
+        setupUpdatedRecommendationViewHolder()
+        val albumArt = getColorIcon(Color.RED)
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
+            )
+
+        // set the screen width less than the width of media controls.
+        player.context.resources.configuration.screenWidthDp = 350
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(data)
+
+        assertThat(player.numberOfFittedRecommendations).isEqualTo(2)
+        assertThat(expandedSet.getVisibility(coverContainer1.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(collapsedSet.getVisibility(coverContainer1.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(expandedSet.getVisibility(coverContainer2.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(collapsedSet.getVisibility(coverContainer2.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(expandedSet.getVisibility(coverContainer3.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(coverContainer3.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun addTwoRecommendationGradients_differentStates() {
+        // Setup redArtwork and its color scheme.
+        val redArt = getColorIcon(Color.RED)
+        val redWallpaperColor = player.getWallpaperColor(redArt)
+        val redColorScheme = ColorScheme(redWallpaperColor, true, Style.CONTENT)
+
+        // Setup greenArt and its color scheme.
+        val greenArt = getColorIcon(Color.GREEN)
+        val greenWallpaperColor = player.getWallpaperColor(greenArt)
+        val greenColorScheme = ColorScheme(greenWallpaperColor, true, Style.CONTENT)
+
+        // Add gradient to both icons.
+        val redArtwork = player.addGradientToRecommendationAlbum(redArt, redColorScheme, 10, 10)
+        val greenArtwork =
+            player.addGradientToRecommendationAlbum(greenArt, greenColorScheme, 10, 10)
+
+        // They should have different constant states as they have different gradient color.
+        assertThat(redArtwork.getDrawable(1).constantState)
+            .isNotEqualTo(greenArtwork.getDrawable(1).constantState)
     }
 
     @Test
@@ -2141,6 +2346,76 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
             assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
         }
+    }
+
+    @Test
+    fun outputSwitcher_hasCustomIntent_openOverLockscreen() {
+        // When the device for a media player has an intent that opens over lockscreen
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.isActivity).thenReturn(true)
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val customDevice = device.copy(intent = pendingIntent)
+        val dataWithDevice = mediaData.copy(device = customDevice)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(dataWithDevice, KEY)
+
+        // When the user taps on the output switcher,
+        seamless.callOnClick()
+
+        // Then we send the pending intent as is, without modifying the original intent
+        verify(pendingIntent).send(any(Bundle::class.java))
+        verify(pendingIntent, never()).getIntent()
+    }
+
+    @Test
+    fun outputSwitcher_hasCustomIntent_requiresUnlock() {
+        // When the device for a media player has an intent that cannot open over lockscreen
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.isActivity).thenReturn(true)
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
+            .thenReturn(false)
+
+        val customDevice = device.copy(intent = pendingIntent)
+        val dataWithDevice = mediaData.copy(device = customDevice)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(dataWithDevice, KEY)
+
+        // When the user taps on the output switcher,
+        seamless.callOnClick()
+
+        // Then we request keyguard dismissal
+        verify(activityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent))
+    }
+
+    private fun setupUpdatedRecommendationViewHolder() {
+        fakeFeatureFlag.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, true)
+        whenever(recommendationViewHolder.mediaAppIcons)
+            .thenReturn(listOf(recAppIconItem, recAppIconItem, recAppIconItem))
+        whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
+        whenever(recommendationViewHolder.mediaCoverContainers)
+            .thenReturn(listOf(coverContainer1, coverContainer2, coverContainer3))
+        whenever(recommendationViewHolder.mediaCoverItems)
+            .thenReturn(listOf(coverItem, coverItem, coverItem))
+        whenever(recommendationViewHolder.mediaProgressBars)
+            .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
+        whenever(recommendationViewHolder.mediaSubtitles)
+            .thenReturn(listOf(recSubtitle1, recSubtitle2, recSubtitle3))
+        whenever(coverItem.imageMatrix).thenReturn(matrix)
+
+        // set ids for recommendation containers
+        whenever(coverContainer1.id).thenReturn(1)
+        whenever(coverContainer2.id).thenReturn(2)
+        whenever(coverContainer3.id).thenReturn(3)
+    }
+
+    private fun getColorIcon(color: Int): Icon {
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(color)
+        return Icon.createWithBitmap(bmp)
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =

@@ -20,6 +20,8 @@ import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+import static android.hardware.graphics.common.Hdr.DOLBY_VISION;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
@@ -32,12 +34,14 @@ import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
 import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.constrain;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
@@ -86,8 +90,10 @@ import android.bluetooth.UidTraffic;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -148,7 +154,6 @@ import android.security.metrics.Keystore2AtomWithOverflow;
 import android.security.metrics.KeystoreAtom;
 import android.security.metrics.KeystoreAtomPayload;
 import android.security.metrics.RkpErrorStats;
-import android.security.metrics.RkpPoolStats;
 import android.security.metrics.StorageStats;
 import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
@@ -245,6 +250,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /**
@@ -723,7 +729,6 @@ public class StatsPullAtomService extends SystemService {
                             return pullInstalledIncrementalPackagesLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
-                    case FrameworkStatsLog.RKP_POOL_STATS:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_PURPOSE_AND_MODES_INFO:
@@ -743,6 +748,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullSystemServerPinnerStats(atomTag, data);
                     case FrameworkStatsLog.PENDING_INTENTS_PER_PACKAGE:
                         return pullPendingIntentsPerPackage(atomTag, data);
+                    case FrameworkStatsLog.HDR_CAPABILITIES:
+                        return pullHdrCapabilities(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -929,7 +936,6 @@ public class StatsPullAtomService extends SystemService {
         registerSettingsStats();
         registerInstalledIncrementalPackages();
         registerKeystoreStorageStats();
-        registerRkpPoolStats();
         registerKeystoreKeyCreationWithGeneralInfo();
         registerKeystoreKeyCreationWithAuthInfo();
         registerKeystoreKeyCreationWithPurposeModesInfo();
@@ -943,6 +949,7 @@ public class StatsPullAtomService extends SystemService {
         registerMediaCapabilitiesStats();
         registerPendingIntentsPerPackagePuller();
         registerPinnerServiceStats();
+        registerHdrCapabilitiesPuller();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -2280,7 +2287,8 @@ public class StatsPullAtomService extends SystemService {
                     managedProcess.processName, managedProcess.pid, managedProcess.oomScore,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
-                    gpuMemPerPid.get(managedProcess.pid), managedProcess.hasForegroundServices));
+                    gpuMemPerPid.get(managedProcess.pid), managedProcess.hasForegroundServices,
+                    snapshot.rssShmemKilobytes));
         }
         // Complement the data with native system processes. Given these measurements can be taken
         // in response to LMKs happening, we want to first collect the managed app stats (to
@@ -2299,7 +2307,8 @@ public class StatsPullAtomService extends SystemService {
                     -1001 /*Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.*/,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
-                    gpuMemPerPid.get(pid), false /* has_foreground_services */));
+                    gpuMemPerPid.get(pid), false /* has_foreground_services */,
+                    snapshot.rssShmemKilobytes));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -4206,20 +4215,26 @@ public class StatsPullAtomService extends SystemService {
 
     int pullInstalledIncrementalPackagesLocked(int atomTag, List<StatsEvent> pulledData) {
         final PackageManager pm = mContext.getPackageManager();
+        final PackageManagerInternal pmIntenral =
+                LocalServices.getService(PackageManagerInternal.class);
         if (!pm.hasSystemFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY)) {
             // Incremental is not enabled on this device. The result list will be empty.
             return StatsManager.PULL_SUCCESS;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            final int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
             for (int userId : userIds) {
-                List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(0, userId);
+                final List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(
+                        0, userId);
                 for (PackageInfo pi : installedPackages) {
                     if (IncrementalManager.isIncrementalPath(
                             pi.applicationInfo.getBaseCodePath())) {
+                        final IncrementalStatesInfo info = pmIntenral.getIncrementalStatesInfo(
+                                pi.packageName, SYSTEM_UID, userId);
                         pulledData.add(
-                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid));
+                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid,
+                                        info.isLoading(), info.getLoadingCompletedTime()));
                     }
                 }
             }
@@ -4235,14 +4250,6 @@ public class StatsPullAtomService extends SystemService {
     private void registerKeystoreStorageStats() {
         mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.KEYSTORE2_STORAGE_STATS,
-                null, // use default PullAtomMetadata values,
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl);
-    }
-
-    private void registerRkpPoolStats() {
-        mStatsManager.setPullAtomCallback(
-                FrameworkStatsLog.RKP_POOL_STATS,
                 null, // use default PullAtomMetadata values,
                 DIRECT_EXECUTOR,
                 mStatsCallbackImpl);
@@ -4351,19 +4358,6 @@ public class StatsPullAtomService extends SystemService {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
                     FrameworkStatsLog.KEYSTORE2_STORAGE_STATS, atom.storage_type,
                     atom.size, atom.unused_size));
-        }
-        return StatsManager.PULL_SUCCESS;
-    }
-
-    int parseRkpPoolStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
-        for (KeystoreAtom atomWrapper : atoms) {
-            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.rkpPoolStats) {
-                return StatsManager.PULL_SKIP;
-            }
-            RkpPoolStats atom = atomWrapper.payload.getRkpPoolStats();
-            pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    FrameworkStatsLog.RKP_POOL_STATS, atom.security_level, atom.expiring,
-                    atom.unassigned, atom.attested, atom.total));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -4500,8 +4494,6 @@ public class StatsPullAtomService extends SystemService {
             switch (atomTag) {
                 case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
                     return parseKeystoreStorageStats(atoms, pulledData);
-                case FrameworkStatsLog.RKP_POOL_STATS:
-                    return parseRkpPoolStats(atoms, pulledData);
                 case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
                     return parseKeystoreKeyCreationWithGeneralInfo(atoms, pulledData);
                 case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
@@ -4642,7 +4634,7 @@ public class StatsPullAtomService extends SystemService {
         List<Integer> disabledSurroundEncodingsList = new ArrayList<>();
         List<Integer> enabledSurroundEncodingsList = new ArrayList<>();
         for (int surroundEncoding : surroundEncodingsMap.keySet()) {
-            if (!surroundEncodingsMap.get(surroundEncoding)) {
+            if (!audioManager.isSurroundFormatEnabled(surroundEncoding)) {
                 disabledSurroundEncodingsList.add(surroundEncoding);
             } else {
                 enabledSurroundEncodingsList.add(surroundEncoding);
@@ -4720,6 +4712,37 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    private int pullHdrCapabilities(int atomTag, List<StatsEvent> pulledData) {
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+
+        int hdrConversionMode = displayManager.getHdrConversionMode().getConversionMode();
+        int preferredHdrType = displayManager.getHdrConversionMode().getPreferredHdrOutputType();
+        boolean userDisabledHdrConversion = hdrConversionMode == HDR_CONVERSION_PASSTHROUGH;
+        int forceHdrFormat = preferredHdrType == HDR_TYPE_INVALID ? 0 : preferredHdrType;
+        boolean hasDolbyVisionIssue = hasDolbyVisionIssue(display);
+
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                new byte[0], userDisabledHdrConversion, forceHdrFormat, hasDolbyVisionIssue));
+
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private boolean hasDolbyVisionIssue(Display display) {
+        AtomicInteger modesSupportingDolbyVision = new AtomicInteger();
+        Arrays.stream(display.getSupportedModes())
+                .map(Display.Mode::getSupportedHdrTypes)
+                .filter(types -> Arrays.stream(types).anyMatch(hdrType -> hdrType == DOLBY_VISION))
+                .forEach(ignored -> modesSupportingDolbyVision.incrementAndGet());
+
+        if (modesSupportingDolbyVision.get() != 0
+                && modesSupportingDolbyVision.get() < display.getSupportedModes().length) {
+            return true;
+        }
+
+        return false;
+    }
+
     private int pullPendingIntentsPerPackage(int atomTag, List<StatsEvent> pulledData) {
         List<PendingIntentStats> pendingIntentStats =
                 LocalServices.getService(ActivityManagerInternal.class).getPendingIntentStats();
@@ -4732,6 +4755,16 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerPinnerServiceStats() {
         int tagId = FrameworkStatsLog.PINNED_FILE_SIZES_PER_PACKAGE;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerHdrCapabilitiesPuller() {
+        int tagId = FrameworkStatsLog.HDR_CAPABILITIES;
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values

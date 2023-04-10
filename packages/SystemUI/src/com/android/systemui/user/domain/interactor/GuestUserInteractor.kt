@@ -139,16 +139,16 @@ constructor(
         }
 
         applicationScope.launch {
-            var newUserId = UserHandle.USER_SYSTEM
+            var newUserId = repository.mainUserId
             if (targetUserId == UserHandle.USER_NULL) {
                 // When a target user is not specified switch to last non guest user:
                 val lastSelectedNonGuestUserHandle = repository.lastSelectedNonGuestUserId
-                if (lastSelectedNonGuestUserHandle != UserHandle.USER_SYSTEM) {
+                if (lastSelectedNonGuestUserHandle != repository.mainUserId) {
                     val info =
                         withContext(backgroundDispatcher) {
                             manager.getUserInfo(lastSelectedNonGuestUserHandle)
                         }
-                    if (info != null && info.isEnabled && info.supportsSwitchToByUser()) {
+                    if (info != null && info.isEnabled && info.supportsSwitchTo()) {
                         newUserId = info.id
                     }
                 }
@@ -215,8 +215,11 @@ constructor(
             // Create a new guest in the foreground, and then immediately switch to it
             val newGuestId = create(showDialog, dismissDialog)
             if (newGuestId == UserHandle.USER_NULL) {
-                Log.e(TAG, "Could not create new guest, switching back to system user")
-                switchUser(UserHandle.USER_SYSTEM)
+                Log.e(TAG, "Could not create new guest, switching back to main user")
+                val mainUser = withContext(backgroundDispatcher) { manager.mainUser?.identifier }
+
+                mainUser?.let { switchUser(it) }
+
                 withContext(backgroundDispatcher) {
                     manager.removeUserWhenPossible(
                         UserHandle.of(currentUser.id),
@@ -310,7 +313,7 @@ constructor(
      * to create a new one.
      *
      * @return The multi-user user ID of the newly created guest user, or [UserHandle.USER_NULL] if
-     * the guest couldn't be created.
+     *   the guest couldn't be created.
      */
     @UserIdInt
     private suspend fun createInBackground(): Int {

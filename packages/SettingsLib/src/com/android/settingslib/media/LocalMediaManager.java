@@ -20,8 +20,10 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
@@ -214,6 +216,16 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public boolean isPreferenceRouteListingExist() {
         return mInfoMediaManager.preferRouteListingOrdering();
+    }
+
+    /**
+     * Returns required component name for system to take the user back to the app by launching an
+     * intent with the returned {@link ComponentName}, using action {@link #ACTION_TRANSFER_MEDIA},
+     * with the extra {@link #EXTRA_ROUTE_ID}.
+     */
+    @Nullable
+    public ComponentName getLinkedItemComponentName() {
+        return mInfoMediaManager.getLinkedItemComponentName();
     }
 
     /**
@@ -555,9 +567,11 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         private boolean isMutingExpectedDevice(CachedBluetoothDevice cachedDevice) {
-            return mAudioManager.getMutingExpectedDevice() != null
-                    && cachedDevice.getAddress().equals(
-                    mAudioManager.getMutingExpectedDevice().getAddress());
+            AudioDeviceAttributes mutingExpectedDevice = mAudioManager.getMutingExpectedDevice();
+            if (mutingExpectedDevice == null || cachedDevice == null) {
+                return false;
+            }
+            return cachedDevice.getAddress().equals(mutingExpectedDevice.getAddress());
         }
 
         private List<MediaDevice> buildDisconnectedBluetoothDevice() {

@@ -47,7 +47,7 @@
     <string name="needPuk2" msgid="3910763547447344963">"Digita il codice PUK2 per sbloccare la SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Operazione non riuscita; attiva blocco SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
       <item quantity="other">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
       <item quantity="one">Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata.</item>
     </plurals>
@@ -141,6 +141,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Chiamate Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Chiamata WiFi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Chiamata tramite Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Chiamata su rete mobile"</string>
@@ -208,6 +209,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Le tue app personali saranno bloccate finché non attivi il tuo profilo di lavoro."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Le app personali verranno bloccate il giorno <xliff:g id="DATE">%1$s</xliff:g> alle ore <xliff:g id="TIME">%2$s</xliff:g>. L\'amministratore IT non consente di mantenere disattivato il profilo di lavoro per più di <xliff:g id="NUMBER">%3$d</xliff:g> giorni."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Attiva"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Chiamate e messaggi sono disattivati"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Hai messo in pausa le app di lavoro. Non riceverai telefonate o messaggi."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"App lavoro on"</string>
     <string name="me" msgid="6207584824693813140">"Io"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opzioni tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opzioni Android TV"</string>
@@ -294,7 +298,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passa al profilo personale"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Passa a profilo di lavoro"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Passa al profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"Possono accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>
@@ -339,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"È in grado di rilevare i gesti compiuti con il sensore di impronte dei dispositivi."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Acquisire screenshot"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Può acquisire uno screenshot del display."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> in anteprima"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"disattivazione o modifica della barra di stato"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Consente all\'applicazione di disattivare la barra di stato o di aggiungere e rimuovere icone di sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ruolo di barra di stato"</string>
@@ -459,6 +464,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Autorizza l\'app ad accedere ai dati dei sensori del corpo, ad esempio battito cardiaco, temperatura e percentuale di ossigeno nel sangue, mentre l\'app è in uso."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accesso ai dati dei sensori del corpo, come il battito cardiaco, in background"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Autorizza l\'app ad accedere ai dati dei sensori del corpo, ad esempio battito cardiaco, temperatura e percentuale di ossigeno nel sangue, mentre l\'app è in background."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accesso ai dati della temperatura del polso misurata dal sensore del corpo mentre l\'app è in uso."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Consente all\'app, mentre è in uso, di accedere ai dati della temperatura del polso misurata dal sensore del corpo."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accesso ai dati della temperatura del polso misurata dal sensore del corpo mentre l\'app è in background."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Consente all\'app, mentre è in background, di accedere ai dati della temperatura del polso misurata dal sensore del corpo."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"lettura di eventi di calendario e dettagli"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Questa app può leggere tutti gli eventi di calendario memorizzati sul tablet e condividere o salvare i dati di calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Questa app può leggere tutti gli eventi di calendario memorizzati sul dispositivo Android TV e condividere o salvare i dati di calendario."</string>
@@ -792,6 +801,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Consente all\'app che ha questa autorizzazione di iniziare a visualizzare le informazioni relative alle funzionalità di un\'app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Accesso ai dati dei sensori a una frequenza di campionamento elevata"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Consente all\'app di campionare i dati dei sensori a una frequenza maggiore di 200 Hz"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"Aggiornamento dell\'app senza l\'intervento dell\'utente"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Consente al titolare di questa autorizzazione di aggiornare l\'app installata in precedenza senza l\'intervento dell\'utente"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Impostare regole per le password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlla la lunghezza e i caratteri ammessi nelle password e nei PIN del blocco schermo."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorare tentativi di sblocco dello schermo"</string>
@@ -1026,7 +1037,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Selettore utente"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Stato"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotocamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Controlli media"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Controlli multimediali"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Riordino dei widget iniziato."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Riordino dei widget terminato."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> eliminato."</string>
@@ -1242,10 +1253,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Avvio di Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Avvio del tablet…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Avvio del dispositivo…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Ottimizzazione archiviazione."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Completamento aggiornamento di sistema…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Upgrade dell\'app <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Avvio app."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Conclusione dell\'avvio."</string>
@@ -1357,6 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Modalità PTP tramite USB attivata"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Tethering USB attivato"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Modalità MIDI tramite USB attivata"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo connesso come webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accessorio USB collegato"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Tocca per altre opzioni."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Dispositivo collegato in carica. Tocca per altre opzioni."</string>
@@ -1387,7 +1397,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Scegli il metodo di immissione"</string>
     <string name="show_ime" msgid="6406112007347443383">"Tieni sullo schermo quando è attiva la tastiera fisica"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostra tastiera virtuale"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configura la tastiera fisica"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura le tastiere fisiche"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tocca per selezionare la lingua e il layout"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1625,7 +1636,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Impostazioni"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Disconnetti"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Ricerca in corso..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"Connessione..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"Connessione in corso..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Disponibile"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"Non disponibili"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"In uso"</string>
@@ -1692,7 +1703,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vuoi consentire a <xliff:g id="SERVICE">%1$s</xliff:g> di avere il controllo totale del tuo dispositivo?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Il controllo totale è appropriato per le app che rispondono alle tue esigenze di accessibilità, ma non per gran parte delle app."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visualizzare e controllare lo schermo"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Può leggere i contenuti presenti sullo schermo e mostrare i contenuti su altre app."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Può leggere tutti i contenuti presenti sullo schermo e mostrare i contenuti sopra altre app."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visualizzare ed eseguire azioni"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Può tenere traccia delle tue interazioni con un\'app o un sensore hardware e interagire con app per tuo conto."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Consenti"</string>
@@ -1705,14 +1716,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fine"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Disattiva scorciatoia"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usa scorciatoia"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversione dei colori"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversione dei colori"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correzione del colore"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modalità a una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Attenuazione extra"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Apparecchi acustici"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tieni premuti entrambi i tasti del volume per tre secondi per utilizzare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Rilascia i tasti del volume. Per attivare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tieni di nuovo premuti entrambi i tasti del volume per 3 secondi."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Scegli una funzionalità da usare quando tocchi il pulsante Accessibilità:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Scegli una funzionalità da usare con il gesto di accessibilità (scorrimento verso l\'alto dalla parte inferiore dello schermo con due dita):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Scegli una funzionalità da usare con il gesto di accessibilità (scorrimento verso l\'alto dalla parte inferiore dello schermo con tre dita):"</string>
@@ -1843,6 +1854,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualizzazione a schermo intero"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Per uscire, scorri dall\'alto verso il basso."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ruota per migliorare l\'anteprima"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Esci dallo schermo diviso per migliorare l\'anteprima"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Dispositivo di scorrimento circolare per le ore"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Dispositivo di scorrimento circolare per i minuti"</string>
@@ -1854,6 +1867,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (2°)"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (3°)"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> (clone)"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Richiedi il PIN per lo sblocco"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Richiedi password prima di sbloccare"</string>
@@ -1944,10 +1958,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Attivare le app di lavoro?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Attiva l\'accesso alle app di lavoro e alle notifiche"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Attiva"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergenza"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Richiedi l\'accesso alle app di lavoro e alle chiamate"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
@@ -1977,14 +1989,14 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Tocca per sbloc. prof. di lav."</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Connesso a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Tocca per visualizzare i file"</string>
-    <string name="pin_target" msgid="8036028973110156895">"Blocca"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Fissa"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"Blocca <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Sgancia"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Sblocca <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Informazioni app"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Avvio della demo…"</string>
-    <string name="demo_restarting_message" msgid="1160053183701746766">"Ripristino del dispositivo…"</string>
+    <string name="demo_restarting_message" msgid="1160053183701746766">"Reset del dispositivo…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Widget <xliff:g id="LABEL">%1$s</xliff:g> disattivato"</string>
     <string name="conference_call" msgid="5731633152336490471">"Audioconferenza"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Descrizione comando"</string>
@@ -2310,4 +2322,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Consente a un\'app complementare di avviare servizi in primo piano dal background."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Microfono disponibile"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Microfono bloccato"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Doppio schermo"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Doppio schermo attivo"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> sta usando entrambi i display per mostrare contenuti"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Il dispositivo è troppo caldo"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Il doppio schermo non è disponibile perché il telefono si sta surriscaldando"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen non disponibile"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Il doppio schermo non è disponibile perché il Risparmio energetico è attivato. Puoi disattivare questa opzione in Impostazioni."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Vai a Impostazioni"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Disattiva"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g> configurato"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%s</xliff:g>. Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tastiere fisiche configurate"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tocca per visualizzare le tastiere"</string>
 </resources>

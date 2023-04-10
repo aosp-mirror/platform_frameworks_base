@@ -102,6 +102,11 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
          * Dumps the time zone debug log to the supplied {@link PrintWriter}.
          */
         void dumpDebugLog(PrintWriter printWriter);
+
+        /**
+         * Requests that the supplied runnable be invoked asynchronously.
+         */
+        void runAsync(@NonNull Runnable runnable);
     }
 
     private static final String LOG_TAG = TimeZoneDetectorService.TAG;
@@ -200,10 +205,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @NonNull
     private final ServiceConfigAccessor mServiceConfigAccessor;
 
-    /** The handler used for asynchronous operations triggered by this. */
-    @NonNull
-    private final Handler mStateChangeHandler;
-
     @GuardedBy("this")
     @NonNull private final List<StateChangeListener> mStateChangeListeners = new ArrayList<>();
 
@@ -246,17 +247,16 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     public static TimeZoneDetectorStrategyImpl create(
             @NonNull Handler handler, @NonNull ServiceConfigAccessor serviceConfigAccessor) {
 
-        Environment environment = new EnvironmentImpl();
-        return new TimeZoneDetectorStrategyImpl(serviceConfigAccessor, handler, environment);
+        Environment environment = new EnvironmentImpl(handler);
+        return new TimeZoneDetectorStrategyImpl(serviceConfigAccessor, environment);
     }
 
     @VisibleForTesting
     public TimeZoneDetectorStrategyImpl(
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
-            @NonNull Handler handler, @NonNull Environment environment) {
+            @NonNull Environment environment) {
         mEnvironment = Objects.requireNonNull(environment);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
-        mStateChangeHandler = Objects.requireNonNull(handler);
 
         // Start with telephony fallback enabled.
         mTelephonyTimeZoneFallbackEnabled =
@@ -349,7 +349,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private void notifyStateChangeListenersAsynchronously() {
         for (StateChangeListener listener : mStateChangeListeners) {
             // This is queuing asynchronous notification, so no need to surrender the "this" lock.
-            mStateChangeHandler.post(listener::onChange);
+            mEnvironment.runAsync(listener::onChange);
         }
     }
 
@@ -479,7 +479,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         ConfigurationInternal currentUserConfig = mCurrentConfigurationInternal;
         if (DBG) {
             Slog.d(LOG_TAG, "Telephony suggestion received. currentUserConfig=" + currentUserConfig
-                    + " newSuggestion=" + suggestion);
+                    + " suggestion=" + suggestion);
         }
         Objects.requireNonNull(suggestion);
 

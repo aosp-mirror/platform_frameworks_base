@@ -16,20 +16,19 @@
 
 package com.android.systemui.log.table
 
+import android.os.Trace
 import com.android.systemui.Dumpable
 import com.android.systemui.plugins.util.RingBuffer
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.flow.Flow
 
 /**
  * A logger that logs changes in table format.
  *
  * Some parts of System UI maintain a lot of pieces of state at once.
  * [com.android.systemui.plugins.log.LogBuffer] allows us to easily log change events:
- *
  * - 10-10 10:10:10.456: state2 updated to newVal2
  * - 10-10 10:11:00.000: stateN updated to StateN(val1=true, val2=1)
  * - 10-10 10:11:02.123: stateN updated to StateN(val1=true, val2=2)
@@ -37,7 +36,6 @@ import kotlinx.coroutines.flow.Flow
  * - 10-10 10:11:06.000: stateN updated to StateN(val1=false, val2=3)
  *
  * However, it can sometimes be more useful to view the state changes in table format:
- *
  * - timestamp--------- | state1- | state2- | ... | stateN.val1 | stateN.val2
  * - -------------------------------------------------------------------------
  * - 10-10 10:10:10.123 | val1--- | val2--- | ... | false------ | 0-----------
@@ -56,23 +54,18 @@ import kotlinx.coroutines.flow.Flow
  * individual fields.
  *
  * How it works:
- *
  * 1) Create an instance of this buffer via [TableLogBufferFactory].
- *
  * 2) For any states being logged, implement [Diffable]. Implementing [Diffable] allows the state to
- * only log the fields that have *changed* since the previous update, instead of always logging all
- * fields.
- *
+ *    only log the fields that have *changed* since the previous update, instead of always logging
+ *    all fields.
  * 3) Each time a change in a state happens, call [logDiffs]. If your state is emitted using a
- * [Flow], you should use the [logDiffsForTable] extension function to automatically log diffs any
- * time your flow emits a new value.
+ *    [Flow], you should use the [logDiffsForTable] extension function to automatically log diffs
+ *    any time your flow emits a new value.
  *
  * When a dump occurs, there will be two dumps:
- *
  * 1) The change events under the dumpable name "$name-changes".
- *
  * 2) This class will coalesce all the diffs into a table format and log them under the dumpable
- * name "$name-table".
+ *    name "$name-table".
  *
  * @param maxSize the maximum size of the buffer. Must be > 0.
  */
@@ -89,9 +82,28 @@ class TableLogBuffer(
 
     private val buffer = RingBuffer(maxSize) { TableChange() }
 
+    // Stores the most recently evicted value for each column name (indexed on column name).
+    //
+    // Why it's necessary: Because we use a RingBuffer of a fixed size, it's possible that a column
+    // that's logged infrequently will eventually get pushed out by a different column that's
+    // logged more frequently. Then, that infrequently-logged column isn't present in the RingBuffer
+    // at all and we have no logs that the column ever existed. This is a problem because the
+    // column's information is still relevant, valid, and may be critical to debugging issues.
+    //
+    // Fix: When a change is being evicted from the RingBuffer, we store it in this map (based on
+    // its [TableChange.getName()]. This ensures that we always have at least one value for every
+    // column ever logged. See b/272016422 for more details.
+    private val lastEvictedValues = mutableMapOf<String, TableChange>()
+
     // A [TableRowLogger] object, re-used each time [logDiffs] is called.
     // (Re-used to avoid object allocation.)
-    private val tempRow = TableRowLoggerImpl(0, columnPrefix = "", this)
+    private val tempRow =
+        TableRowLoggerImpl(
+            timestamp = 0,
+            columnPrefix = "",
+            isInitial = false,
+            tableLogBuffer = this,
+        )
 
     /**
      * Log the differences between [prevVal] and [newVal].
@@ -99,17 +111,18 @@ class TableLogBuffer(
      * The [newVal] object's method [Diffable.logDiffs] will be used to fetch the diffs.
      *
      * @param columnPrefix a prefix that will be applied to every column name that gets logged. This
-     * ensures that all the columns related to the same state object will be grouped together in the
-     * table.
-     *
+     *   ensures that all the columns related to the same state object will be grouped together in
+     *   the table.
      * @throws IllegalArgumentException if [columnPrefix] or column name contain "|". "|" is used as
-     * the separator token for parsing, so it can't be present in any part of the column name.
+     *   the separator token for parsing, so it can't be present in any part of the column name.
      */
     @Synchronized
     fun <T : Diffable<T>> logDiffs(columnPrefix: String, prevVal: T, newVal: T) {
         val row = tempRow
         row.timestamp = systemClock.currentTimeMillis()
         row.columnPrefix = columnPrefix
+        // Because we have a prevVal and a newVal, we know that this isn't the initial log.
+        row.isInitial = false
         newVal.logDiffs(prevVal, row)
     }
 
@@ -117,56 +130,109 @@ class TableLogBuffer(
      * Logs change(s) to the buffer using [rowInitializer].
      *
      * @param rowInitializer a function that will be called immediately to store relevant data on
-     * the row.
+     *   the row.
+     * @param isInitial true if this change represents the starting value for a particular column
+     *   (as opposed to a value that was updated after receiving new information). This is used to
+     *   help us identify which values were just default starting values, and which values were
+     *   derived from updated information. Most callers should use false for this value.
      */
     @Synchronized
-    fun logChange(columnPrefix: String, rowInitializer: (TableRowLogger) -> Unit) {
+    fun logChange(
+        columnPrefix: String,
+        isInitial: Boolean = false,
+        rowInitializer: (TableRowLogger) -> Unit
+    ) {
         val row = tempRow
         row.timestamp = systemClock.currentTimeMillis()
         row.columnPrefix = columnPrefix
+        row.isInitial = isInitial
         rowInitializer(row)
     }
 
-    /** Logs a String? change. */
-    fun logChange(prefix: String, columnName: String, value: String?) {
-        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    /**
+     * Logs a String? change.
+     *
+     * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
+     */
+    fun logChange(prefix: String, columnName: String, value: String?, isInitial: Boolean = false) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
-    /** Logs a boolean change. */
-    fun logChange(prefix: String, columnName: String, value: Boolean) {
-        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    /**
+     * Logs a boolean change.
+     *
+     * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
+     */
+    fun logChange(prefix: String, columnName: String, value: Boolean, isInitial: Boolean = false) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
-    /** Logs a Int change. */
-    fun logChange(prefix: String, columnName: String, value: Int) {
-        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    /**
+     * Logs a Int change.
+     *
+     * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
+     */
+    fun logChange(prefix: String, columnName: String, value: Int?, isInitial: Boolean = false) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
     // Keep these individual [logChange] methods private (don't let clients give us their own
     // timestamps.)
 
-    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: String?) {
-        val change = obtain(timestamp, prefix, columnName)
+    private fun logChange(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        value: String?,
+        isInitial: Boolean,
+    ) {
+        Trace.beginSection("TableLogBuffer#logChange(string)")
+        val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        Trace.endSection()
     }
 
-    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Boolean) {
-        val change = obtain(timestamp, prefix, columnName)
+    private fun logChange(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        value: Boolean,
+        isInitial: Boolean,
+    ) {
+        Trace.beginSection("TableLogBuffer#logChange(boolean)")
+        val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        Trace.endSection()
     }
 
-    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Int) {
-        val change = obtain(timestamp, prefix, columnName)
+    private fun logChange(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        value: Int?,
+        isInitial: Boolean,
+    ) {
+        Trace.beginSection("TableLogBuffer#logChange(int)")
+        val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        Trace.endSection()
     }
 
     // TODO(b/259454430): Add additional change types here.
 
     @Synchronized
-    private fun obtain(timestamp: Long, prefix: String, columnName: String): TableChange {
+    private fun obtain(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        isInitial: Boolean,
+    ): TableChange {
         verifyValidName(prefix, columnName)
         val tableChange = buffer.advance()
-        tableChange.reset(timestamp, prefix, columnName)
+        if (tableChange.hasData()) {
+            saveEvictedValue(tableChange)
+        }
+        tableChange.reset(timestamp, prefix, columnName, isInitial)
         return tableChange
     }
 
@@ -181,10 +247,23 @@ class TableLogBuffer(
         }
     }
 
+    private fun saveEvictedValue(change: TableChange) {
+        Trace.beginSection("TableLogBuffer#saveEvictedValue")
+        val name = change.getName()
+        val previouslyEvicted =
+            lastEvictedValues[name] ?: TableChange().also { lastEvictedValues[name] = it }
+        // For recycling purposes, update the existing object in the map with the new information
+        // instead of creating a new object.
+        previouslyEvicted.updateTo(change)
+        Trace.endSection()
+    }
+
     @Synchronized
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println(HEADER_PREFIX + name)
         pw.println("version $VERSION")
+
+        lastEvictedValues.values.sortedBy { it.timestamp }.forEach { it.dump(pw) }
         for (i in 0 until buffer.size) {
             buffer[i].dump(pw)
         }
@@ -213,21 +292,22 @@ class TableLogBuffer(
     private class TableRowLoggerImpl(
         var timestamp: Long,
         var columnPrefix: String,
+        var isInitial: Boolean,
         val tableLogBuffer: TableLogBuffer,
     ) : TableRowLogger {
         /** Logs a change to a string value. */
         override fun logChange(columnName: String, value: String?) {
-            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value)
+            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value, isInitial)
         }
 
         /** Logs a change to a boolean value. */
         override fun logChange(columnName: String, value: Boolean) {
-            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value)
+            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value, isInitial)
         }
 
         /** Logs a change to an int value. */
         override fun logChange(columnName: String, value: Int) {
-            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value)
+            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value, isInitial)
         }
     }
 }

@@ -20,15 +20,10 @@ import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DREAMING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.AnimationParams
-import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
-import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
+import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 
 /** Breaks down GONE->DREAMING transition into discrete steps for corresponding views to consume. */
 @SysUISingleton
@@ -38,32 +33,28 @@ constructor(
     private val interactor: KeyguardTransitionInteractor,
 ) {
 
+    private val transitionAnimation =
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = TO_DREAMING_DURATION,
+            transitionFlow = interactor.goneToDreamingTransition,
+        )
+
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return merge(
-            flowForAnimation(LOCKSCREEN_TRANSLATION_Y).map { value ->
-                (EMPHASIZED_ACCELERATE.getInterpolation(value) * translatePx)
-            },
-            // On end, reset the translation to 0
-            interactor.goneToDreamingTransition
-                .filter { it.transitionState == FINISHED || it.transitionState == CANCELED }
-                .map { 0f }
+        return transitionAnimation.createFlow(
+            duration = 500.milliseconds,
+            onStep = { it * translatePx },
+            // Reset on cancel or finish
+            onFinish = { 0f },
+            onCancel = { 0f },
+            interpolator = EMPHASIZED_ACCELERATE,
         )
     }
 
     /** Lockscreen views alpha */
-    val lockscreenAlpha: Flow<Float> = flowForAnimation(LOCKSCREEN_ALPHA).map { 1f - it }
-
-    private fun flowForAnimation(params: AnimationParams): Flow<Float> {
-        return interactor.transitionStepAnimation(
-            interactor.goneToDreamingTransition,
-            params,
-            totalDuration = TO_DREAMING_DURATION
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 250.milliseconds,
+            onStep = { 1f - it },
         )
-    }
-
-    companion object {
-        val LOCKSCREEN_TRANSLATION_Y = AnimationParams(duration = 500.milliseconds)
-        val LOCKSCREEN_ALPHA = AnimationParams(duration = 250.milliseconds)
-    }
 }

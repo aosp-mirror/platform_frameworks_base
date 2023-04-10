@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi 通話"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi 通話"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"使用 Wi-Fi 通話"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"使用流動網絡通話"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系統會封鎖您的個人應用程式，直至您開啟工作設定檔為止"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"個人應用程式將於 <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> 封鎖。IT 管理員不允許您的工作設定檔保持關閉狀態超過 <xliff:g id="NUMBER">%3$d</xliff:g> 天。"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"開啟"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"通話和訊息功能已關閉"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"您已暫停工作應用程式，因此無法接聽電話或接收訊息。"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"取消暫停工作應用程式"</string>
     <string name="me" msgid="6207584824693813140">"我本人"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板電腦選項"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 選項"</string>
@@ -338,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以擷取在裝置指紋感應器上執行的手勢。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"擷取螢幕擷圖"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可以擷取螢幕截圖。"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"預覽，<xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或修改狀態列"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"成為狀態列"</string>
@@ -458,6 +463,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用時存取人體感應器資料，例如心率、體溫、血氧百分比等。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時存取人體感應器資料，例如心率"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心率、體溫、血氧百分比等。"</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"應用程式在使用期間存取人體感應器手腕溫度資料。"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"允許應用程式在使用期間存取人體感應器手腕溫度資料。"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"應用程式在背景執行時存取人體感應器手腕溫度資料。"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"允許應用程式在背景執行時存取人體感應器手腕溫度資料。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此應用程式可以讀取所有儲存在您的平板電腦的日曆活動，並分享或儲存您的日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"此應用程式可以讀取所有儲存在 Android TV 裝置上的日曆活動，並分享或儲存您的日曆資料。"</string>
@@ -791,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許擁有者開始查看應用程式的功能資料。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"允許應用程式以大於 200 Hz 的頻率對感應器資料進行取樣"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"更新應用程式，無需使用者操作"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"允許擁有者更新先前安裝的應用程式，無需使用者操作"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"控制螢幕鎖定密碼和 PIN 所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
@@ -1241,10 +1252,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android 正在啟動…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"平板電腦正在啟動…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"裝置正在啟動…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"正在優化儲存空間。"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"正在完成系統更新…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"「<xliff:g id="APPLICATION">%1$s</xliff:g>」正在升級…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"正在優化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 個應用程式 (共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 個)。"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"正在準備 <xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在啟動應用程式。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"啟動完成。"</string>
@@ -1356,6 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已開啟 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已開啟 USB 的網絡共享模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已開啟 USB MIDI 模式"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"已連接裝置用作網絡攝影機"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"已連接 USB 配件"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"輕按即可查看更多選項。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在為連接的裝置充電。輕按即可查看更多選項。"</string>
@@ -1386,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"選擇輸入法"</string>
     <string name="show_ime" msgid="6406112007347443383">"在實體鍵盤處於連接狀態時保持顯示"</string>
     <string name="hardware" msgid="1800597768237606953">"顯示虛擬鍵盤"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"設定實體鍵盤"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"設定實體鍵盤"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"輕按即可選取語言和鍵盤配置"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1688,7 +1699,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置？"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要授予「<xliff:g id="SERVICE">%1$s</xliff:g>」裝置的完整控制權？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"對於為您提供無障礙功能的應用程式，您可授予完整控制權，但大部分應用程式都不應獲授予此權限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"這項功能可以讀出螢幕上的所有內容，並透過其他應用程式顯示內容。"</string>
@@ -1704,14 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"關閉快速鍵"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快速鍵"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"色彩反轉"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"色彩反轉"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色彩校正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"單手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助聽器"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量鍵。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 已開啟。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量鍵。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 已關閉。"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"㩒住兩個音量鍵 3 秒就可以用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"鬆開音量鍵。如果要開 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>，請同時㩒住兩個音量鍵 3 秒。"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"請選擇輕按「無障礙功能」按鈕時使用的功能："</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"請選擇要配搭無障礙手勢 (使用兩隻手指從螢幕底部向上滑動) 使用的功能："</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"請選擇要配搭無障礙手勢 (使用三隻手指從螢幕底部向上滑動) 使用的功能："</string>
@@ -1842,6 +1853,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"開啟全螢幕"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"由頂部向下滑動即可退出。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋轉以改善預覽效果"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"退出分割螢幕，以改善預覽效果"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小時環形滑桿"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分鐘環形滑桿"</string>
@@ -1853,6 +1866,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"第二個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"第三個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"複製 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定時必須提供解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消固定時必須輸入密碼"</string>
@@ -1943,10 +1957,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"要開啟工作應用程式存取權嗎？"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"開啟工作應用程式和通知的存取權"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"開啟"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"撥打緊急電話"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"要求存取工作應用程式和通話"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"無法使用應用程式"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"目前無法使用「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"無法使用「<xliff:g id="ACTIVITY">%1$s</xliff:g>」"</string>
@@ -2309,4 +2321,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"允許隨附應用程式從背景啟動前景服務。"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"可以使用麥克風"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"已封鎖麥克風"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"雙螢幕"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"已開啟雙螢幕功能"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用雙螢幕顯示內容"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"裝置過熱"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"由於手機過熱，雙螢幕功能無法使用"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"無法使用雙螢幕功能"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"由於「省電模式」已開啟，因此無法使用雙螢幕功能。您可以前往「設定」中關閉此模式。"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"前往「設定」"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"關閉"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"已設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"鍵盤版面配置已設定為<xliff:g id="LAYOUT_1">%s</xliff:g>。輕按即可變更。"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"鍵盤版面配置已設定為<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>。輕按即可變更。"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"鍵盤版面配置已設定為<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>。輕按即可變更。"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"鍵盤版面配置已設定為<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>…輕按即可變更。"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"已設定實體鍵盤"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"輕按即可查看鍵盤"</string>
 </resources>

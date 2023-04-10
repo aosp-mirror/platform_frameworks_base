@@ -26,6 +26,7 @@ import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +38,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -64,6 +66,8 @@ public class SessionTrackerTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     @Captor
     ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
@@ -87,7 +91,8 @@ public class SessionTrackerTest extends SysuiTestCase {
                 mStatusBarService,
                 mAuthController,
                 mKeyguardUpdateMonitor,
-                mKeyguardStateController
+                mKeyguardStateController,
+                mUiEventLogger
         );
     }
 
@@ -236,6 +241,62 @@ public class SessionTrackerTest extends SysuiTestCase {
         // THEN session end event gets sent to status bar service
         verify(mStatusBarService).onSessionEnded(
                 eq(SESSION_KEYGUARD), any(InstanceId.class));
+    }
+
+    @Test
+    public void uiEventLoggedOnEndSessionWhenDeviceStartsSleeping() throws RemoteException {
+        // GIVEN session tracker start
+        mSessionTracker.start();
+        captureKeyguardUpdateMonitorCallback();
+        captureKeyguardStateControllerCallback();
+
+        // GIVEN keyguard becomes visible (ie: from lockdown), so there's a valid keyguard
+        // session running
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mKeyguardStateCallback.onKeyguardShowingChanged();
+
+        // WHEN device starts going to sleep
+        mKeyguardUpdateMonitorCallback.onStartedGoingToSleep(0);
+
+        // THEN UI event is logged
+        verify(mUiEventLogger).log(
+                eq(SessionTracker.SessionUiEvent.KEYGUARD_SESSION_END_GOING_TO_SLEEP),
+                any(InstanceId.class));
+    }
+
+    @Test
+    public void noUiEventLoggedOnEndSessionWhenDeviceStartsSleepingWithoutStartSession()
+            throws RemoteException {
+        // GIVEN session tracker start without any valid sessions
+        mSessionTracker.start();
+        captureKeyguardUpdateMonitorCallback();
+
+        // WHEN device starts going to sleep when there was no started sessions
+        mKeyguardUpdateMonitorCallback.onStartedGoingToSleep(0);
+
+        // THEN UI event is never logged
+        verify(mUiEventLogger, never()).log(
+                eq(SessionTracker.SessionUiEvent.KEYGUARD_SESSION_END_GOING_TO_SLEEP),
+                any(InstanceId.class));
+    }
+
+    @Test
+    public void uiEventLoggedOnEndSessionWhenKeyguardGoingAway() throws RemoteException {
+        // GIVEN session tracker started w/o any sessions
+        mSessionTracker.start();
+        captureKeyguardUpdateMonitorCallback();
+        captureKeyguardStateControllerCallback();
+
+        // WHEN keyguard was showing and now it's not
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mKeyguardStateCallback.onKeyguardShowingChanged();
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        mKeyguardStateCallback.onKeyguardShowingChanged();
+
+        // THEN UI event is logged
+        verify(mUiEventLogger).log(
+                eq(SessionTracker.SessionUiEvent.KEYGUARD_SESSION_END_KEYGUARD_GOING_AWAY),
+                any(InstanceId.class));
     }
 
     void captureKeyguardUpdateMonitorCallback() {

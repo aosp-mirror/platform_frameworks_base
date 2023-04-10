@@ -19,34 +19,38 @@ package com.android.server.credentials;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CredentialOption;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
-import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialResponse;
+import android.credentials.ui.AuthenticationEntry;
 import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
+import android.os.ICancellationSignal;
 import android.service.credentials.Action;
 import android.service.credentials.BeginGetCredentialOption;
 import android.service.credentials.BeginGetCredentialRequest;
 import android.service.credentials.BeginGetCredentialResponse;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
-import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
-import android.service.credentials.CredentialsResponseContent;
 import android.service.credentials.GetCredentialRequest;
+import android.service.credentials.RemoteEntry;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Central provider session that listens for provider callbacks, and maintains provider state.
@@ -59,21 +63,18 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         implements
         RemoteCredentialService.ProviderCallbacks<BeginGetCredentialResponse> {
     private static final String TAG = "ProviderGetSession";
-
-    // Key to be used as an entry key for a credential entry
-    private static final String CREDENTIAL_ENTRY_KEY = "credential_key";
-
     // Key to be used as the entry key for an action entry
-    private static final String ACTION_ENTRY_KEY = "action_key";
+    public static final String ACTION_ENTRY_KEY = "action_key";
     // Key to be used as the entry key for the authentication entry
-    private static final String AUTHENTICATION_ACTION_ENTRY_KEY = "authentication_action_key";
+    public static final String AUTHENTICATION_ACTION_ENTRY_KEY = "authentication_action_key";
+    // Key to be used as an entry key for a remote entry
+    public static final String REMOTE_ENTRY_KEY = "remote_entry_key";
+    // Key to be used as an entry key for a credential entry
+    public static final String CREDENTIAL_ENTRY_KEY = "credential_key";
 
     @NonNull
-    private final Map<String, CredentialEntry> mUiCredentialEntries = new HashMap<>();
-    @NonNull
-    private final Map<String, Action> mUiActionsEntries = new HashMap<>();
-    @Nullable
-    private Pair<String, Action> mUiAuthenticationAction = null;
+    private final Map<String, CredentialOption> mBeginGetOptionToCredentialOptionMap;
+
 
     /** The complete request to be used in the second round. */
     private final android.credentials.GetCredentialRequest mCompleteRequest;
@@ -81,8 +82,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     private GetCredentialException mProviderException;
 
+    private final ProviderResponseDataHandler mProviderResponseDataHandler;
+
     /** Creates a new provider session to be used by the request session. */
-    @Nullable public static ProviderGetSession createNewSession(
+    @Nullable
+    public static ProviderGetSession createNewSession(
             Context context,
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
@@ -90,12 +94,26 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             RemoteCredentialService remoteCredentialService) {
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
-                        getRequestSession.mClientRequest);
+                        getRequestSession.mClientRequest,
+                        providerInfo);
         if (filteredRequest != null) {
-            BeginGetCredentialRequest beginGetCredentialRequest = constructQueryPhaseRequest(
-                    filteredRequest, getRequestSession.mClientAppInfo);
-            return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
-                    remoteCredentialService, beginGetCredentialRequest, filteredRequest);
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
+                    new HashMap<>();
+            return new ProviderGetSession(
+                    context,
+                    providerInfo,
+                    getRequestSession,
+                    userId,
+                    remoteCredentialService,
+                    constructQueryPhaseRequest(
+                            filteredRequest, getRequestSession.mClientAppInfo,
+                            getRequestSession.mClientRequest.alwaysSendAppInfoToProvider(),
+                            beginGetOptionToCredentialOptionMap),
+                    filteredRequest,
+                    getRequestSession.mClientAppInfo,
+                    beginGetOptionToCredentialOptionMap,
+                    getRequestSession.mHybridService
+            );
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
@@ -103,43 +121,71 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
-            CallingAppInfo callingAppInfo
+            CallingAppInfo callingAppInfo,
+            boolean propagateToProvider,
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap
     ) {
-        return new BeginGetCredentialRequest.Builder(callingAppInfo)
-                .setBeginGetCredentialOptions(
-                        filteredRequest.getGetCredentialOptions().stream().map(
-                                option -> {
-                                    return new BeginGetCredentialOption(
-                                            option.getType(),
-                                            option.getCandidateQueryData());
-                                }).collect(Collectors.toList()))
-                .build();
+        BeginGetCredentialRequest.Builder builder = new BeginGetCredentialRequest.Builder();
+        filteredRequest.getCredentialOptions().forEach(option -> {
+            String id = generateUniqueId();
+            builder.addBeginGetCredentialOption(
+                    new BeginGetCredentialOption(
+                            id, option.getType(), option.getCandidateQueryData())
+            );
+            beginGetOptionToCredentialOptionMap.put(id, option);
+        });
+        if (propagateToProvider) {
+            builder.setCallingAppInfo(callingAppInfo);
+        }
+        return builder.build();
     }
 
     @Nullable
     private static android.credentials.GetCredentialRequest filterOptions(
             List<String> providerCapabilities,
-            android.credentials.GetCredentialRequest clientRequest
+            android.credentials.GetCredentialRequest clientRequest,
+            CredentialProviderInfo info
     ) {
-        List<GetCredentialOption> filteredOptions = new ArrayList<>();
-        for (GetCredentialOption option : clientRequest.getGetCredentialOptions()) {
-            if (providerCapabilities.contains(option.getType())) {
+        List<CredentialOption> filteredOptions = new ArrayList<>();
+        for (CredentialOption option : clientRequest.getCredentialOptions()) {
+            if (providerCapabilities.contains(option.getType())
+                    && isProviderAllowed(option, info.getComponentName())
+                    && checkSystemProviderRequirement(option, info.isSystemProvider())) {
                 Log.i(TAG, "In createProviderRequest - capability found : "
                         + option.getType());
                 filteredOptions.add(option);
             } else {
                 Log.i(TAG, "In createProviderRequest - capability not "
-                        + "found : " + option.getType());
+                        + "found, or provider not allowed : " + option.getType());
             }
         }
         if (!filteredOptions.isEmpty()) {
             return new android.credentials.GetCredentialRequest
                     .Builder(clientRequest.getData())
-                    .setGetCredentialOptions(
+                    .setCredentialOptions(
                             filteredOptions).build();
         }
         Log.i(TAG, "In createProviderRequest - returning null");
         return null;
+    }
+
+    private static boolean isProviderAllowed(CredentialOption option, ComponentName componentName) {
+        if (!option.getAllowedProviders().isEmpty() && !option.getAllowedProviders().contains(
+                componentName)) {
+            Log.d(TAG, "Provider allow list specified but does not contain this provider: "
+                    + componentName.flattenToString());
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean checkSystemProviderRequirement(CredentialOption option,
+            boolean isSystemProvider) {
+        if (option.isSystemProviderRequired() && !isSystemProvider) {
+            Log.d(TAG, "System provider required, but this service is not a system provider");
+            return false;
+        }
+        return true;
     }
 
     public ProviderGetSession(Context context,
@@ -147,24 +193,24 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             ProviderInternalCallback<GetCredentialResponse> callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             BeginGetCredentialRequest beginGetRequest,
-            android.credentials.GetCredentialRequest completeGetRequest) {
-        super(context, info, beginGetRequest, callbacks, userId, remoteCredentialService);
+            android.credentials.GetCredentialRequest completeGetRequest,
+            CallingAppInfo callingAppInfo,
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap,
+            String hybridService) {
+        super(context, beginGetRequest, callbacks, info.getComponentName(),
+                userId, remoteCredentialService);
         mCompleteRequest = completeGetRequest;
-        mCallingAppInfo = beginGetRequest.getCallingAppInfo();
+        mCallingAppInfo = callingAppInfo;
         setStatus(Status.PENDING);
-    }
-
-    /** Returns the credential entry maintained in state by this provider session. */
-    @Nullable
-    public CredentialEntry getCredentialEntry(@NonNull String entryId) {
-        return mUiCredentialEntries.get(entryId);
+        mBeginGetOptionToCredentialOptionMap = new HashMap<>(beginGetOptionToCredentialOptionMap);
+        mProviderResponseDataHandler = new ProviderResponseDataHandler(
+                ComponentName.unflattenFromString(hybridService));
     }
 
     /** Called when the provider response has been updated by an external source. */
     @Override // Callback from the remote provider
     public void onProviderResponseSuccess(@Nullable BeginGetCredentialResponse response) {
-        Log.i(TAG, "in onProviderResponseSuccess");
-        onUpdateResponse(response);
+        onSetInitialRemoteResponse(response);
     }
 
     /** Called when the provider response resulted in a failure. */
@@ -173,35 +219,45 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         if (exception instanceof GetCredentialException) {
             mProviderException = (GetCredentialException) exception;
         }
-        updateStatusAndInvokeCallback(toStatus(errorCode));
+        mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
+        updateStatusAndInvokeCallback(toStatus(errorCode),
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when provider service dies. */
     @Override // Callback from the remote provider
     public void onProviderServiceDied(RemoteCredentialService service) {
-        if (service.getComponentName().equals(mProviderInfo.getServiceInfo().getComponentName())) {
-            updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
+        if (service.getComponentName().equals(mComponentName)) {
+            updateStatusAndInvokeCallback(Status.SERVICE_DEAD,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "
                     + "this should not happen");
         }
     }
 
+    @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        mProviderCancellationSignal = cancellation;
+    }
+
     @Override // Selection call from the request provider
     protected void onUiEntrySelected(String entryType, String entryKey,
             ProviderPendingIntentResponse providerPendingIntentResponse) {
+        Log.i(TAG, "onUiEntrySelected with entryKey: " + entryKey);
         switch (entryType) {
             case CREDENTIAL_ENTRY_KEY:
-                CredentialEntry credentialEntry = mUiCredentialEntries.get(entryKey);
+                CredentialEntry credentialEntry = mProviderResponseDataHandler
+                        .getCredentialEntry(entryKey);
                 if (credentialEntry == null) {
                     Log.i(TAG, "Unexpected credential entry key");
                     invokeCallbackOnInternalInvalidState();
                     return;
                 }
-                onCredentialEntrySelected(credentialEntry, providerPendingIntentResponse);
+                onCredentialEntrySelected(providerPendingIntentResponse);
                 break;
             case ACTION_ENTRY_KEY:
-                Action actionEntry = mUiActionsEntries.get(entryKey);
+                Action actionEntry = mProviderResponseDataHandler.getActionEntry(entryKey);
                 if (actionEntry == null) {
                     Log.i(TAG, "Unexpected action entry key");
                     invokeCallbackOnInternalInvalidState();
@@ -210,15 +266,32 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 onActionEntrySelected(providerPendingIntentResponse);
                 break;
             case AUTHENTICATION_ACTION_ENTRY_KEY:
-                if (mUiAuthenticationAction.first.equals(entryKey)) {
-                    onAuthenticationEntrySelected(providerPendingIntentResponse);
-                } else {
-                    Log.i(TAG, "Unexpected authentication entry key");
+                Action authenticationEntry = mProviderResponseDataHandler
+                        .getAuthenticationAction(entryKey);
+                if (authenticationEntry == null) {
+                    Log.i(TAG, "Unexpected authenticationEntry key");
                     invokeCallbackOnInternalInvalidState();
+                    return;
+                }
+                boolean additionalContentReceived =
+                        onAuthenticationEntrySelected(providerPendingIntentResponse);
+                if (additionalContentReceived) {
+                    Log.i(TAG, "Additional content received - removing authentication entry");
+                    mProviderResponseDataHandler.removeAuthenticationAction(entryKey);
+                    if (!mProviderResponseDataHandler.isEmptyResponse()) {
+                        updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
+                                /*source=*/ CredentialsSource.AUTH_ENTRY);
+                    }
+                } else {
+                    Log.i(TAG, "Additional content not received");
+                    mProviderResponseDataHandler
+                            .updateAuthEntryWithNoCredentialsReceived(entryKey);
+                    updateStatusAndInvokeCallback(Status.NO_CREDENTIALS_FROM_AUTH_ENTRY,
+                            /*source=*/ CredentialsSource.AUTH_ENTRY);
                 }
                 break;
             case REMOTE_ENTRY_KEY:
-                if (mUiRemoteEntry.first.equals(entryKey)) {
+                if (mProviderResponseDataHandler.getRemoteEntry(entryKey) != null) {
                     onRemoteEntrySelected(providerPendingIntentResponse);
                 } else {
                     Log.i(TAG, "Unexpected remote entry key");
@@ -227,201 +300,90 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 break;
             default:
                 Log.i(TAG, "Unsupported entry type selected");
+                invokeCallbackOnInternalInvalidState();
         }
     }
 
+    @Override
+    protected void invokeSession() {
+        if (mRemoteCredentialService != null) {
+            startCandidateMetrics();
+            mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
+        }
+    }
+
+    @NonNull
+    protected Set<String> getCredentialEntryTypes() {
+        return mProviderResponseDataHandler.getCredentialEntryTypes();
+    }
+
     @Override // Call from request session to data to be shown on the UI
-    @Nullable protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
+    @Nullable
+    protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
         Log.i(TAG, "In prepareUiData");
         if (!ProviderSession.isUiInvokingStatus(getStatus())) {
             Log.i(TAG, "In prepareUiData - provider does not want to show UI: "
                     + mComponentName.flattenToString());
             return null;
         }
-        if (mProviderResponse == null) {
-            Log.i(TAG, "In prepareUiData response null");
-            throw new IllegalStateException("Response must be in completion mode");
+        if (mProviderResponse != null && !mProviderResponseDataHandler.isEmptyResponse()) {
+            return mProviderResponseDataHandler.toGetCredentialProviderData();
         }
-        if (mProviderResponse.getAuthenticationAction() != null) {
-            Log.i(TAG, "In prepareUiData - top level authentication mode");
-            return prepareUiProviderData(null, null,
-                    prepareUiAuthenticationAction(mProviderResponse.getAuthenticationAction()),
-                    /*remoteEntry=*/null);
-        }
-        if (mProviderResponse.getCredentialsResponseContent() != null) {
-            Log.i(TAG, "In prepareUiData credentialsResponseContent not null");
-            return prepareUiProviderData(prepareUiActionEntries(
-                            mProviderResponse.getCredentialsResponseContent().getActions()),
-                    prepareUiCredentialEntries(mProviderResponse.getCredentialsResponseContent()
-                            .getCredentialEntries()),
-                    /*authenticationAction=*/null,
-                    prepareUiRemoteEntry(mProviderResponse
-                            .getCredentialsResponseContent().getRemoteCredentialEntry()));
-        }
+        Log.i(TAG, "In prepareUiData response null");
         return null;
     }
 
-    private Entry prepareUiRemoteEntry(CredentialEntry remoteCredentialEntry) {
-        if (remoteCredentialEntry == null) {
-            return null;
+    private Intent setUpFillInIntent(@NonNull String id) {
+        // TODO: Determine if we should skip this entry if entry id is not set, or is set
+        // but does not resolve to a valid option. For now, not skipping it because
+        // it may be possible that the provider adds their own extras and expects to receive
+        // those and complete the flow.
+        if (mBeginGetOptionToCredentialOptionMap.get(id) == null) {
+            Log.i(TAG, "Id from Credential Entry does not resolve to a valid option");
+            return new Intent();
         }
-        String entryId = generateEntryId();
-        Entry remoteEntry = new Entry(REMOTE_ENTRY_KEY, entryId, remoteCredentialEntry.getSlice());
-        mUiRemoteEntry = new Pair<>(entryId, remoteCredentialEntry);
-        return remoteEntry;
+        return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
+                new GetCredentialRequest(
+                        mCallingAppInfo, List.of(mBeginGetOptionToCredentialOptionMap.get(id))));
     }
 
-    private Entry prepareUiAuthenticationAction(@NonNull Action authenticationAction) {
-        String entryId = generateEntryId();
-        Entry authEntry = new Entry(
-                AUTHENTICATION_ACTION_ENTRY_KEY, entryId,
-                authenticationAction.getSlice(),
-                setUpFillInIntentForAuthentication());
-        mUiAuthenticationAction = new Pair<>(entryId, authenticationAction);
-        return authEntry;
-    }
-
-    private List<Entry> prepareUiCredentialEntries(@NonNull
-            List<CredentialEntry> credentialEntries) {
-        Log.i(TAG, "in prepareUiProviderDataWithCredentials");
-        List<Entry> credentialUiEntries = new ArrayList<>();
-
-        // Populate the credential entries
-        for (CredentialEntry credentialEntry : credentialEntries) {
-            String entryId = generateEntryId();
-            mUiCredentialEntries.put(entryId, credentialEntry);
-            Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
-            credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
-                    credentialEntry.getSlice(),
-                    /*fillInIntent=*/setUpFillInIntent(credentialEntry.getType())));
-        }
-        return credentialUiEntries;
-    }
-
-    private Intent setUpFillInIntent(String type) {
+    private Intent setUpFillInIntentWithQueryRequest() {
         Intent intent = new Intent();
-        for (GetCredentialOption option : mCompleteRequest.getGetCredentialOptions()) {
-            if (option.getType().equals(type)) {
-                intent.putExtra(
-                        CredentialProviderService
-                                .EXTRA_GET_CREDENTIAL_REQUEST,
-                        new GetCredentialRequest(mCallingAppInfo, option));
-                return intent;
-            }
-        }
-        return intent;
-    }
-
-    private Intent setUpFillInIntentForAuthentication() {
-        Intent intent = new Intent();
-        intent.putExtra(
-                CredentialProviderService
-                        .EXTRA_BEGIN_GET_CREDENTIAL_REQUEST,
+        intent.putExtra(CredentialProviderService.EXTRA_BEGIN_GET_CREDENTIAL_REQUEST,
                 mProviderRequest);
         return intent;
     }
 
-    private List<Entry> prepareUiActionEntries(@Nullable List<Action> actions) {
-        List<Entry> actionEntries = new ArrayList<>();
-        for (Action action : actions) {
-            String entryId = UUID.randomUUID().toString();
-            mUiActionsEntries.put(entryId, action);
-            // TODO : Remove conversion of string to int after change in Entry class
-            actionEntries.add(new Entry(ACTION_ENTRY_KEY, entryId, action.getSlice()));
-        }
-        return actionEntries;
-    }
-
-    private GetCredentialProviderData prepareUiProviderData(List<Entry> actionEntries,
-            List<Entry> credentialEntries, Entry authenticationActionEntry,
-            Entry remoteEntry) {
-        return new GetCredentialProviderData.Builder(
-                mComponentName.flattenToString()).setActionChips(actionEntries)
-                .setCredentialEntries(credentialEntries)
-                .setAuthenticationEntry(authenticationActionEntry)
-                .setRemoteEntry(remoteEntry)
-                .build();
-    }
-
-    private void onCredentialEntrySelected(CredentialEntry credentialEntry,
+    private void onRemoteEntrySelected(
             ProviderPendingIntentResponse providerPendingIntentResponse) {
-        if (providerPendingIntentResponse != null) {
-            // Check if pending intent has an error
-            GetCredentialException exception = maybeGetPendingIntentException(
-                    providerPendingIntentResponse);
-            if (exception != null) {
-                invokeCallbackWithError(exception.getType(),
-                        exception.getMessage());
-                return;
-            }
-
-            // Check if pending intent has a credential
-            GetCredentialResponse getCredentialResponse = PendingIntentResultHandler
-                    .extractGetCredentialResponse(
-                            providerPendingIntentResponse.getResultData());
-            if (getCredentialResponse != null) {
-                mCallbacks.onFinalResponseReceived(mComponentName,
-                        getCredentialResponse);
-                return;
-            }
-
-            Log.i(TAG, "Pending intent response contains no credential, or error");
-            invokeCallbackOnInternalInvalidState();
-        }
-        Log.i(TAG, "CredentialEntry does not have a credential or a pending intent result");
-        invokeCallbackOnInternalInvalidState();
+        onCredentialEntrySelected(providerPendingIntentResponse);
     }
 
-    private void onAuthenticationEntrySelected(
-            @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
-        //TODO: Other provider intent statuses
+    private void onCredentialEntrySelected(
+            ProviderPendingIntentResponse providerPendingIntentResponse) {
         if (providerPendingIntentResponse == null) {
-            Log.i(TAG, "providerPendingIntentResponse is null");
-            onUpdateEmptyResponse();
+            invokeCallbackOnInternalInvalidState();
+            return;
         }
-
+        // Check if pending intent has an error
         GetCredentialException exception = maybeGetPendingIntentException(
                 providerPendingIntentResponse);
         if (exception != null) {
-            invokeCallbackWithError(exception.getType(),
-                    exception.getMessage());
+            invokeCallbackWithError(exception.getType(), exception.getMessage());
             return;
         }
 
-        // Check if pending intent has the content
-        CredentialsResponseContent content = PendingIntentResultHandler
-                .extractResponseContent(providerPendingIntentResponse
-                        .getResultData());
-        if (content != null) {
-            onUpdateResponse(BeginGetCredentialResponse.createWithResponseContent(content));
+        // Check if pending intent has a credential response
+        GetCredentialResponse getCredentialResponse = PendingIntentResultHandler
+                .extractGetCredentialResponse(
+                        providerPendingIntentResponse.getResultData());
+        if (getCredentialResponse != null) {
+            mCallbacks.onFinalResponseReceived(mComponentName,
+                    getCredentialResponse);
             return;
         }
-
-        Log.i(TAG, "No error or respond found in pending intent response");
-        onUpdateEmptyResponse();
-    }
-
-    private void onActionEntrySelected(ProviderPendingIntentResponse
-            providerPendingIntentResponse) {
-        //TODO: Implement if any result expected after an action
-    }
-
-
-    /** Updates the response being maintained in state by this provider session. */
-    private void onUpdateResponse(BeginGetCredentialResponse response) {
-        mProviderResponse = response;
-        if (response.getAuthenticationAction() != null) {
-            Log.i(TAG , "updateResponse with authentication entry");
-            updateStatusAndInvokeCallback(Status.REQUIRES_AUTHENTICATION);
-        } else if (response.getCredentialsResponseContent() != null) {
-            Log.i(TAG , "updateResponse with credentialEntries");
-            // TODO validate response
-            updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
-        }
-    }
-
-    private void onUpdateEmptyResponse() {
-        updateStatusAndInvokeCallback(Status.NO_CREDENTIALS);
+        Log.i(TAG, "Pending intent response contains no credential, or error");
+        invokeCallbackOnInternalInvalidState();
     }
 
     @Nullable
@@ -447,11 +409,335 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     }
 
     /**
+     * Returns true if either an exception or a response is retrieved from the result.
+     * Returns false if the response is not set at all, or set to null, or empty.
+     */
+    private boolean onAuthenticationEntrySelected(
+            @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
+        Log.i(TAG, "onAuthenticationEntrySelected");
+        // Authentication entry is expected to have a BeginGetCredentialResponse instance. If it
+        // does not have it, we remove the authentication entry and do not add any more content.
+        if (providerPendingIntentResponse == null) {
+            Log.i(TAG, "providerPendingIntentResponse is null");
+            // Nothing received. This is equivalent to no content received.
+            return false;
+        }
+
+        GetCredentialException exception = maybeGetPendingIntentException(
+                providerPendingIntentResponse);
+        if (exception != null) {
+            // TODO (b/271135048), for AuthenticationEntry callback selection, set error
+            invokeCallbackWithError(exception.getType(),
+                    exception.getMessage());
+            // Additional content received is in the form of an exception which ends the flow.
+            return true;
+        }
+        // Check if pending intent has the response. If yes, remove this auth entry and
+        // replace it with the response content received.
+        BeginGetCredentialResponse response = PendingIntentResultHandler
+                .extractResponseContent(providerPendingIntentResponse
+                        .getResultData());
+        if (response != null && !mProviderResponseDataHandler.isEmptyResponse(response)) {
+            addToInitialRemoteResponse(response, /*isInitialResponse=*/ false);
+            // Additional content received is in the form of new response content.
+            return true;
+        }
+        // No response or exception found.
+        return false;
+    }
+
+    private void addToInitialRemoteResponse(BeginGetCredentialResponse content,
+            boolean isInitialResponse) {
+        if (content == null) {
+            return;
+        }
+        mProviderResponseDataHandler.addResponseContent(
+                content.getCredentialEntries(),
+                content.getActions(),
+                content.getAuthenticationActions(),
+                content.getRemoteCredentialEntry(),
+                isInitialResponse
+        );
+    }
+
+    /** Returns true if either an exception or a response is found. */
+    private void onActionEntrySelected(ProviderPendingIntentResponse
+            providerPendingIntentResponse) {
+        Log.i(TAG, "onActionEntrySelected");
+        onCredentialEntrySelected(providerPendingIntentResponse);
+    }
+
+
+    /** Updates the response being maintained in state by this provider session. */
+    private void onSetInitialRemoteResponse(BeginGetCredentialResponse response) {
+        mProviderResponse = response;
+        addToInitialRemoteResponse(response, /*isInitialResponse=*/true);
+        // Log the data.
+        if (mProviderResponseDataHandler.isEmptyResponse(response)) {
+            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
+            return;
+        }
+        mProviderSessionMetric.collectCandidateEntryMetrics(response);
+        updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
+    }
+
+    /**
      * When an invalid state occurs, e.g. entry mismatch or no response from provider,
-     * we send back a TYPE_UNKNOWN error as to the developer.
+     * we send back a TYPE_NO_CREDENTIAL error as to the developer.
      */
     private void invokeCallbackOnInternalInvalidState() {
         mCallbacks.onFinalErrorReceived(mComponentName,
-                GetCredentialException.TYPE_UNKNOWN, null);
+                GetCredentialException.TYPE_NO_CREDENTIAL, null);
+    }
+
+    /** Update auth entries status based on an auth entry selected from a different session. */
+    public void updateAuthEntriesStatusFromAnotherSession() {
+        // Pass null for entryKey if the auth entry selected belongs to a different session
+        mProviderResponseDataHandler.updateAuthEntryWithNoCredentialsReceived(/*entryKey=*/null);
+    }
+
+    /** Returns true if the provider response contains empty auth entries only, false otherwise. **/
+    public boolean containsEmptyAuthEntriesOnly() {
+        // We do not consider action entries here because if actions are the only entries,
+        // we don't show the UI
+        return mProviderResponseDataHandler.mUiCredentialEntries.isEmpty()
+                && mProviderResponseDataHandler.mUiRemoteEntry == null
+                && mProviderResponseDataHandler.mUiAuthenticationEntries
+                .values().stream().allMatch(
+                        e -> e.second.getStatus() == AuthenticationEntry
+                                .STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT
+                                || e.second.getStatus()
+                                == AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT
+                );
+    }
+
+    private class ProviderResponseDataHandler {
+        @Nullable
+        private final ComponentName mExpectedRemoteEntryProviderService;
+        @NonNull
+        private final Map<String, Pair<CredentialEntry, Entry>> mUiCredentialEntries =
+                new HashMap<>();
+        @NonNull
+        private final Map<String, Pair<Action, Entry>> mUiActionsEntries = new HashMap<>();
+        @Nullable
+        private final Map<String, Pair<Action, AuthenticationEntry>> mUiAuthenticationEntries =
+                new HashMap<>();
+
+        @NonNull
+        private final Set<String> mCredentialEntryTypes = new HashSet<>();
+
+        @Nullable
+        private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
+
+        ProviderResponseDataHandler(@Nullable ComponentName expectedRemoteEntryProviderService) {
+            mExpectedRemoteEntryProviderService = expectedRemoteEntryProviderService;
+        }
+
+        public void addResponseContent(List<CredentialEntry> credentialEntries,
+                List<Action> actions, List<Action> authenticationActions,
+                RemoteEntry remoteEntry, boolean isInitialResponse) {
+            credentialEntries.forEach(this::addCredentialEntry);
+            actions.forEach(this::addAction);
+            authenticationActions.forEach(
+                    authenticationAction -> addAuthenticationAction(authenticationAction,
+                            AuthenticationEntry.STATUS_LOCKED));
+            // In the query phase, it is likely most providers will return a null remote entry
+            // so no need to invoke the setter since it adds the overhead of checking for the
+            // hybrid permission, and then sets an already null value to null.
+            // If this is not the query phase, e.g. response after a locked entry is unlocked
+            // then it is valid for the provider to remove the remote entry, and so we allow
+            // them to set it to null.
+            if (remoteEntry != null || !isInitialResponse) {
+                setRemoteEntry(remoteEntry);
+            }
+        }
+
+        public void addCredentialEntry(CredentialEntry credentialEntry) {
+            String id = generateUniqueId();
+            Entry entry = new Entry(CREDENTIAL_ENTRY_KEY,
+                    id, credentialEntry.getSlice(),
+                    setUpFillInIntent(credentialEntry.getBeginGetCredentialOptionId()));
+            mUiCredentialEntries.put(id, new Pair<>(credentialEntry, entry));
+            mCredentialEntryTypes.add(credentialEntry.getType());
+        }
+
+        public void addAction(Action action) {
+            String id = generateUniqueId();
+            Entry entry = new Entry(ACTION_ENTRY_KEY,
+                    id, action.getSlice(),
+                    setUpFillInIntentWithQueryRequest());
+            mUiActionsEntries.put(id, new Pair<>(action, entry));
+        }
+
+        public void addAuthenticationAction(Action authenticationAction,
+                @AuthenticationEntry.Status int status) {
+            Log.i(TAG, "In addAuthenticationAction");
+            String id = generateUniqueId();
+            Log.i(TAG, "In addAuthenticationAction, id : " + id);
+            AuthenticationEntry entry = new AuthenticationEntry(
+                    AUTHENTICATION_ACTION_ENTRY_KEY,
+                    id, authenticationAction.getSlice(),
+                    status,
+                    setUpFillInIntentWithQueryRequest());
+            mUiAuthenticationEntries.put(id, new Pair<>(authenticationAction, entry));
+        }
+
+        public void removeAuthenticationAction(String id) {
+            mUiAuthenticationEntries.remove(id);
+        }
+
+        public void setRemoteEntry(@Nullable RemoteEntry remoteEntry) {
+            if (!enforceRemoteEntryRestrictions(mExpectedRemoteEntryProviderService)) {
+                Log.i(TAG, "Remote entry being dropped as it does not meet the restriction"
+                        + " checks.");
+                return;
+            }
+            if (remoteEntry == null) {
+                mUiRemoteEntry = null;
+                return;
+            }
+            String id = generateUniqueId();
+            Entry entry = new Entry(REMOTE_ENTRY_KEY,
+                    id, remoteEntry.getSlice(), setUpFillInIntentForRemoteEntry());
+            mUiRemoteEntry = new Pair<>(id, new Pair<>(remoteEntry, entry));
+        }
+
+
+        public GetCredentialProviderData toGetCredentialProviderData() {
+            return new GetCredentialProviderData.Builder(
+                    mComponentName.flattenToString()).setActionChips(prepareActionEntries())
+                    .setCredentialEntries(prepareCredentialEntries())
+                    .setAuthenticationEntries(prepareAuthenticationEntries())
+                    .setRemoteEntry(prepareRemoteEntry())
+                    .build();
+        }
+
+        private List<Entry> prepareActionEntries() {
+            List<Entry> actionEntries = new ArrayList<>();
+            for (String key : mUiActionsEntries.keySet()) {
+                actionEntries.add(mUiActionsEntries.get(key).second);
+            }
+            return actionEntries;
+        }
+
+        private List<AuthenticationEntry> prepareAuthenticationEntries() {
+            List<AuthenticationEntry> authEntries = new ArrayList<>();
+            for (String key : mUiAuthenticationEntries.keySet()) {
+                authEntries.add(mUiAuthenticationEntries.get(key).second);
+            }
+            return authEntries;
+        }
+
+        private List<Entry> prepareCredentialEntries() {
+            List<Entry> credEntries = new ArrayList<>();
+            for (String key : mUiCredentialEntries.keySet()) {
+                credEntries.add(mUiCredentialEntries.get(key).second);
+            }
+            return credEntries;
+        }
+
+        private Entry prepareRemoteEntry() {
+            if (mUiRemoteEntry == null || mUiRemoteEntry.first == null
+                    || mUiRemoteEntry.second == null) {
+                return null;
+            }
+            return mUiRemoteEntry.second.second;
+        }
+
+        private boolean isEmptyResponse() {
+            return mUiCredentialEntries.isEmpty() && mUiActionsEntries.isEmpty()
+                    && mUiAuthenticationEntries.isEmpty() && mUiRemoteEntry == null;
+        }
+
+        private boolean isEmptyResponse(BeginGetCredentialResponse response) {
+            return response.getCredentialEntries().isEmpty() && response.getActions().isEmpty()
+                    && response.getAuthenticationActions().isEmpty()
+                    && response.getRemoteCredentialEntry() == null;
+        }
+
+        @NonNull
+        public Set<String> getCredentialEntryTypes() {
+            return mCredentialEntryTypes;
+        }
+
+        @Nullable
+        public Action getAuthenticationAction(String entryKey) {
+            return mUiAuthenticationEntries.get(entryKey) == null ? null :
+                    mUiAuthenticationEntries.get(entryKey).first;
+        }
+
+        @Nullable
+        public Action getActionEntry(String entryKey) {
+            return mUiActionsEntries.get(entryKey) == null
+                    ? null : mUiActionsEntries.get(entryKey).first;
+        }
+
+        @Nullable
+        public RemoteEntry getRemoteEntry(String entryKey) {
+            return mUiRemoteEntry.first.equals(entryKey) && mUiRemoteEntry.second != null
+                    ? mUiRemoteEntry.second.first : null;
+        }
+
+        @Nullable
+        public CredentialEntry getCredentialEntry(String entryKey) {
+            return mUiCredentialEntries.get(entryKey) == null
+                    ? null : mUiCredentialEntries.get(entryKey).first;
+        }
+
+        public void updateAuthEntryWithNoCredentialsReceived(@Nullable String entryKey) {
+            if (entryKey == null) {
+                // Auth entry from a different provider was selected by the user.
+                updatePreviousMostRecentAuthEntry();
+                return;
+            }
+            updatePreviousMostRecentAuthEntry();
+            updateMostRecentAuthEntry(entryKey);
+        }
+
+        private void updateMostRecentAuthEntry(String entryKey) {
+            AuthenticationEntry previousAuthenticationEntry =
+                    mUiAuthenticationEntries.get(entryKey).second;
+            Action previousAuthenticationAction = mUiAuthenticationEntries.get(entryKey).first;
+            mUiAuthenticationEntries.put(entryKey, new Pair<>(
+                    previousAuthenticationAction,
+                    copyAuthEntryAndChangeStatus(
+                            previousAuthenticationEntry,
+                            AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT)));
+        }
+
+        private void updatePreviousMostRecentAuthEntry() {
+            Optional<Map.Entry<String, Pair<Action, AuthenticationEntry>>>
+                    previousMostRecentAuthEntry = mUiAuthenticationEntries
+                    .entrySet().stream().filter(e -> e.getValue().second.getStatus()
+                            == AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT)
+                    .findFirst();
+            if (previousMostRecentAuthEntry.isEmpty()) {
+                Log.i(TAG, "In updatePreviousMostRecentAuthEntry - previous entry not found");
+                return;
+            }
+            String id = previousMostRecentAuthEntry.get().getKey();
+            mUiAuthenticationEntries.remove(id);
+            mUiAuthenticationEntries.put(id, new Pair<>(
+                    previousMostRecentAuthEntry.get().getValue().first,
+                    copyAuthEntryAndChangeStatus(
+                            previousMostRecentAuthEntry.get().getValue().second,
+                            AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT)));
+        }
+
+        private AuthenticationEntry copyAuthEntryAndChangeStatus(
+                AuthenticationEntry from, Integer toStatus) {
+            return new AuthenticationEntry(AUTHENTICATION_ACTION_ENTRY_KEY, from.getSubkey(),
+                    from.getSlice(), toStatus,
+                    from.getFrameworkExtrasIntent());
+        }
+    }
+
+    private Intent setUpFillInIntentForRemoteEntry() {
+        return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
+                new GetCredentialRequest(
+                        mCallingAppInfo, mCompleteRequest.getCredentialOptions()));
     }
 }

@@ -16,80 +16,138 @@
 
 package com.android.server.wm;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 
+import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Class that registers callbacks with the {@link DeviceStateManager} and
- * responds to fold state changes by forwarding such events to a delegate.
+ * Class that registers callbacks with the {@link DeviceStateManager} and responds to device
+ * changes.
  */
-final class DeviceStateController {
+final class DeviceStateController implements DeviceStateManager.DeviceStateCallback {
+
+    @NonNull
     private final DeviceStateManager mDeviceStateManager;
-    private final Context mContext;
+    @NonNull
+    private final int[] mOpenDeviceStates;
+    @NonNull
+    private final int[] mHalfFoldedDeviceStates;
+    @NonNull
+    private final int[] mFoldedDeviceStates;
+    @NonNull
+    private final int[] mRearDisplayDeviceStates;
+    private final int mConcurrentDisplayDeviceState;
+    @NonNull
+    private final int[] mReverseRotationAroundZAxisStates;
+    @GuardedBy("this")
+    @NonNull
+    @VisibleForTesting
+    final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
 
-    private FoldStateListener mDeviceStateListener;
+    private final boolean mMatchBuiltInDisplayOrientationToDefaultDisplay;
 
-    public enum FoldState {
-        UNKNOWN, OPEN, FOLDED, HALF_FOLDED
+    @NonNull
+    private DeviceState mCurrentDeviceState = DeviceState.UNKNOWN;
+    private int mCurrentState;
+
+    public enum DeviceState {
+        UNKNOWN,
+        OPEN,
+        FOLDED,
+        HALF_FOLDED,
+        REAR,
+        CONCURRENT,
     }
 
-    DeviceStateController(Context context, Handler handler, Consumer<FoldState> delegate) {
-        mContext = context;
-        mDeviceStateManager = mContext.getSystemService(DeviceStateManager.class);
+    DeviceStateController(@NonNull Context context, @NonNull Handler handler) {
+        mDeviceStateManager = context.getSystemService(DeviceStateManager.class);
+
+        mOpenDeviceStates = context.getResources()
+                .getIntArray(R.array.config_openDeviceStates);
+        mHalfFoldedDeviceStates = context.getResources()
+                .getIntArray(R.array.config_halfFoldedDeviceStates);
+        mFoldedDeviceStates = context.getResources()
+                .getIntArray(R.array.config_foldedDeviceStates);
+        mRearDisplayDeviceStates = context.getResources()
+                .getIntArray(R.array.config_rearDisplayDeviceStates);
+        mConcurrentDisplayDeviceState = context.getResources()
+                .getInteger(R.integer.config_deviceStateConcurrentRearDisplay);
+        mReverseRotationAroundZAxisStates = context.getResources()
+                .getIntArray(R.array.config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis);
+        mMatchBuiltInDisplayOrientationToDefaultDisplay = context.getResources()
+                .getBoolean(R.bool
+                        .config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay);
+
         if (mDeviceStateManager != null) {
-            mDeviceStateListener = new FoldStateListener(mContext, delegate);
-            mDeviceStateManager
-                    .registerCallback(new HandlerExecutor(handler),
-                            mDeviceStateListener);
+            mDeviceStateManager.registerCallback(new HandlerExecutor(handler), this);
         }
     }
 
-    void unregisterFromDeviceStateManager() {
-        if (mDeviceStateListener != null) {
-            mDeviceStateManager.unregisterCallback(mDeviceStateListener);
+    void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
+        synchronized (this) {
+            mDeviceStateCallbacks.add(callback);
+        }
+    }
+
+    void unregisterDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
+        synchronized (this) {
+            mDeviceStateCallbacks.remove(callback);
         }
     }
 
     /**
-     * A listener for half-fold device state events that dispatches state changes to a delegate.
+     * @return true if the rotation direction on the Z axis should be reversed.
      */
-    static final class FoldStateListener implements DeviceStateManager.DeviceStateCallback {
+    boolean shouldReverseRotationDirectionAroundZAxis() {
+        return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
+    }
 
-        private final int[] mHalfFoldedDeviceStates;
-        private final int[] mFoldedDeviceStates;
+    /**
+     * @return true if non-default built-in displays should match the default display's rotation.
+     */
+    boolean shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay() {
+        // TODO(b/265991392): This should come from display_settings.xml once it's easier to
+        //  extend with complex configurations.
+        return mMatchBuiltInDisplayOrientationToDefaultDisplay;
+    }
 
-        @Nullable
-        private FoldState mLastResult;
-        private final Consumer<FoldState> mDelegate;
+    @Override
+    public void onStateChanged(int state) {
+        mCurrentState = state;
 
-        FoldStateListener(Context context, Consumer<FoldState> delegate) {
-            mFoldedDeviceStates = context.getResources().getIntArray(
-                    com.android.internal.R.array.config_foldedDeviceStates);
-            mHalfFoldedDeviceStates = context.getResources().getIntArray(
-                    com.android.internal.R.array.config_halfFoldedDeviceStates);
-            mDelegate = delegate;
+        final DeviceState deviceState;
+        if (ArrayUtils.contains(mHalfFoldedDeviceStates, state)) {
+            deviceState = DeviceState.HALF_FOLDED;
+        } else if (ArrayUtils.contains(mFoldedDeviceStates, state)) {
+            deviceState = DeviceState.FOLDED;
+        } else if (ArrayUtils.contains(mRearDisplayDeviceStates, state)) {
+            deviceState = DeviceState.REAR;
+        } else if (ArrayUtils.contains(mOpenDeviceStates, state)) {
+            deviceState = DeviceState.OPEN;
+        } else if (state == mConcurrentDisplayDeviceState) {
+            deviceState = DeviceState.CONCURRENT;
+        } else {
+            deviceState = DeviceState.UNKNOWN;
         }
 
-        @Override
-        public void onStateChanged(int state) {
-            final boolean halfFolded = ArrayUtils.contains(mHalfFoldedDeviceStates, state);
-            FoldState result;
-            if (halfFolded) {
-                result = FoldState.HALF_FOLDED;
-            } else {
-                final boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
-                result = folded ? FoldState.FOLDED : FoldState.OPEN;
-            }
-            if (mLastResult == null || !mLastResult.equals(result)) {
-                mLastResult = result;
-                mDelegate.accept(result);
+        if (mCurrentDeviceState == null || !mCurrentDeviceState.equals(deviceState)) {
+            mCurrentDeviceState = deviceState;
+
+            synchronized (this) {
+                for (Consumer<DeviceState> callback : mDeviceStateCallbacks) {
+                    callback.accept(mCurrentDeviceState);
+                }
             }
         }
     }

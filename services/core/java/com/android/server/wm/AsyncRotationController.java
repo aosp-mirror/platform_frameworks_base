@@ -93,6 +93,9 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     /** Whether the start transaction of the transition is committed (by shell). */
     private boolean mIsStartTransactionCommitted;
 
+    /** Whether all windows should wait for the start transaction. */
+    private boolean mAlwaysWaitForStartTransaction;
+
     /** Whether the target windows have been requested to sync their draw transactions. */
     private boolean mIsSyncDrawRequested;
 
@@ -144,6 +147,15 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mTransitionOp == OP_LEGACY) {
             mIsStartTransactionCommitted = true;
         } else if (displayContent.mTransitionController.isCollecting(displayContent)) {
+            final Transition transition =
+                    mDisplayContent.mTransitionController.getCollectingTransition();
+            if (transition != null) {
+                final BLASTSyncEngine.SyncGroup syncGroup =
+                        mDisplayContent.mWmService.mSyncEngine.getSyncSet(transition.getSyncId());
+                if (syncGroup != null && syncGroup.mSyncMethod == BLASTSyncEngine.METHOD_BLAST) {
+                    mAlwaysWaitForStartTransaction = true;
+                }
+            }
             keepAppearanceInPreviousRotation();
         }
     }
@@ -202,7 +214,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         // target windows. But the windows still need to use sync transaction to keep the appearance
         // in previous rotation, so request a no-op sync to keep the state.
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
-            if (mTargetWindowTokens.valueAt(i).canDrawBeforeStartTransaction()) {
+            if (canDrawBeforeStartTransaction(mTargetWindowTokens.valueAt(i))) {
                 // Expect a screenshot layer will cover the non seamless windows.
                 continue;
             }
@@ -217,13 +229,41 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (DEBUG) Slog.d(TAG, "Requested to sync draw transaction");
     }
 
+    /**
+     * If an async window is not requested to redraw or its surface is removed, then complete its
+     * operation directly to avoid waiting until timeout.
+     */
+    void updateTargetWindows() {
+        if (mTransitionOp == OP_LEGACY || !mIsStartTransactionCommitted) return;
+        for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+            final Operation op = mTargetWindowTokens.valueAt(i);
+            if (op.mIsCompletionPending || op.mAction == Operation.ACTION_SEAMLESS) {
+                // Skip completed target. And seamless windows use the signal from blast sync.
+                continue;
+            }
+            final WindowToken token = mTargetWindowTokens.keyAt(i);
+            int readyCount = 0;
+            final int childCount = token.getChildCount();
+            for (int j = childCount - 1; j >= 0; j--) {
+                final WindowState w = token.getChildAt(j);
+                // If the token no longer contains pending drawn windows, then it is ready.
+                if (w.isDrawn() || !w.mWinAnimator.getShown()) {
+                    readyCount++;
+                }
+            }
+            if (readyCount == childCount) {
+                mDisplayContent.finishAsyncRotation(token);
+            }
+        }
+    }
+
     /** Lets the window fit in new rotation naturally. */
     private void finishOp(WindowToken windowToken) {
         final Operation op = mTargetWindowTokens.remove(windowToken);
         if (op == null) return;
         if (op.mDrawTransaction != null) {
             // Unblock the window to show its latest content.
-            mDisplayContent.getPendingTransaction().merge(op.mDrawTransaction);
+            windowToken.getSyncTransaction().merge(op.mDrawTransaction);
             op.mDrawTransaction = null;
             if (DEBUG) Slog.d(TAG, "finishOp merge transaction " + windowToken.getTopChild());
         }
@@ -235,7 +275,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         } else if (op.mAction == Operation.ACTION_SEAMLESS && mRotator != null
                 && op.mLeash != null && op.mLeash.isValid()) {
             if (DEBUG) Slog.d(TAG, "finishOp undo seamless " + windowToken.getTopChild());
-            mRotator.setIdentityMatrix(mDisplayContent.getPendingTransaction(), op.mLeash);
+            mRotator.setIdentityMatrix(windowToken.getSyncTransaction(), op.mLeash);
         }
     }
 
@@ -322,7 +362,8 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mTimeoutRunnable == null) {
             mTimeoutRunnable = () -> {
                 synchronized (mService.mGlobalLock) {
-                    Slog.i(TAG, "Async rotation timeout: " + mTargetWindowTokens);
+                    Slog.i(TAG, "Async rotation timeout: " + (!mIsStartTransactionCommitted
+                            ? " start transaction is not committed" : mTargetWindowTokens));
                     mIsStartTransactionCommitted = true;
                     mDisplayContent.finishAsyncRotationIfPossible();
                     mService.mWindowPlacerLocked.performSurfacePlacement();
@@ -335,6 +376,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
     /** Hides the window immediately until it is drawn in new rotation. */
     void hideImmediately(WindowToken windowToken) {
+        if (isTargetToken(windowToken)) return;
         final boolean original = mHideImmediately;
         mHideImmediately = true;
         final Operation op = new Operation(Operation.ACTION_FADE);
@@ -484,12 +526,17 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * by this controller.
      */
     boolean handleFinishDrawing(WindowState w, SurfaceControl.Transaction postDrawTransaction) {
-        if (mTransitionOp == OP_LEGACY || postDrawTransaction == null || !mIsSyncDrawRequested) {
+        if (mTransitionOp == OP_LEGACY) {
             return false;
         }
         final Operation op = mTargetWindowTokens.get(w.mToken);
-        if (op == null || op.canDrawBeforeStartTransaction()) return false;
+        if (op == null) return false;
         if (DEBUG) Slog.d(TAG, "handleFinishDrawing " + w);
+        if (postDrawTransaction == null || !mIsSyncDrawRequested
+                || canDrawBeforeStartTransaction(op)) {
+            mDisplayContent.finishAsyncRotation(w.mToken);
+            return false;
+        }
         if (op.mDrawTransaction == null) {
             if (w.isClientLocal()) {
                 // Use a new transaction to merge the draw transaction of local window because the
@@ -528,6 +575,14 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         return super.getFadeOutAnimation();
     }
 
+    /**
+     * Returns {@code true} if the corresponding window can draw its latest content before the
+     * start transaction of rotation transition is applied.
+     */
+    private boolean canDrawBeforeStartTransaction(Operation op) {
+        return !mAlwaysWaitForStartTransaction && op.mAction != Operation.ACTION_SEAMLESS;
+    }
+
     /** The operation to control the rotation appearance associated with window token. */
     private static class Operation {
         @Retention(RetentionPolicy.SOURCE)
@@ -552,15 +607,6 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
         Operation(@Action int action) {
             mAction = action;
-        }
-
-        /**
-         * Returns {@code true} if the corresponding window can draw its latest content before the
-         * start transaction of rotation transition is applied.
-         */
-        boolean canDrawBeforeStartTransaction() {
-            return TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST
-                    && mAction != ACTION_SEAMLESS;
         }
     }
 }

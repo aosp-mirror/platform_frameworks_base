@@ -191,7 +191,7 @@ please see themes_device_defaults.xml.
         <item name="windowTranslucentNavigation">false</item>
         <item name="windowDrawsSystemBarBackgrounds">false</item>
         <item name="statusBarColor">@color/black</item>
-        <item name="navigationBarColor">@color/black</item>
+        <item name="navigationBarColor">@color/navigation_bar_default</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_action_bar</item>
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">false</item>
@@ -358,6 +358,8 @@ please see themes_device_defaults.xml.
         <item name="actionModeShareDrawable">@drawable/ic_menu_share_holo_dark</item>
         <item name="actionModeFindDrawable">@drawable/ic_menu_find_holo_dark</item>
         <item name="actionModeWebSearchDrawable">@drawable/ic_menu_search</item>
+        <item name="actionModeUndoDrawable">@drawable/ic_menu_undo_material</item>
+        <item name="actionModeRedoDrawable">@drawable/ic_menu_redo_material</item>
         <item name="actionBarTabStyle">@style/Widget.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.ActionBar.TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.ActionBar.TabText</item>

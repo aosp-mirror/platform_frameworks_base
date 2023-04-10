@@ -18,10 +18,10 @@ package com.android.systemui.statusbar.phone.ongoingcall
 
 import android.app.ActivityManager
 import android.app.IActivityManager
-import android.app.IUidObserver
 import android.app.Notification
 import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.app.PendingIntent
+import android.app.UidObserver
 import android.content.Context
 import android.util.Log
 import android.view.View
@@ -319,7 +319,7 @@ class OngoingCallController @Inject constructor(
     }
 
     /** Our implementation of a [IUidObserver]. */
-    inner class CallAppUidObserver : IUidObserver.Stub() {
+    inner class CallAppUidObserver : UidObserver() {
         /** True if the application managing the call is visible to the user. */
         var isCallAppVisible: Boolean = false
             private set
@@ -387,12 +387,6 @@ class OngoingCallController @Inject constructor(
                 }
             }
         }
-
-        override fun onUidGone(uid: Int, disabled: Boolean) {}
-        override fun onUidActive(uid: Int) {}
-        override fun onUidIdle(uid: Int, disabled: Boolean) {}
-        override fun onUidCachedChanged(uid: Int, cached: Boolean) {}
-        override fun onUidProcAdjChanged(uid: Int) {}
     }
 }
 

@@ -50,7 +50,7 @@ import android.os.IBinder;
  * <p>Starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
  * non-DPC admins can also optionally implement this service using the details
  * mentioned above to ensure they receive policy update broadcasts
- * (see {@link PolicyUpdatesReceiver}).
+ * (see {@link PolicyUpdateReceiver}).
  */
 public class DeviceAdminService extends Service {
     private final IDeviceAdminServiceImpl mImpl;

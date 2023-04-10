@@ -204,10 +204,12 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `exit - last non-guest was removed - returns to system`() =
+    fun `exit - last non-guest was removed - returns to main user`() =
         runBlocking(IMMEDIATE) {
             val removedUserId = 310
+            val mainUserId = 10
             repository.lastSelectedNonGuestUserId = removedUserId
+            repository.mainUserId = mainUserId
             repository.setSelectedUserInfo(GUEST_USER_INFO)
 
             underTest.exit(
@@ -221,7 +223,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
 
             verify(manager, never()).markGuestForDeletion(anyInt())
             verify(manager, never()).removeUser(anyInt())
-            verify(switchUser).invoke(UserHandle.USER_SYSTEM)
+            verify(switchUser).invoke(mainUserId)
         }
 
     @Test
@@ -382,14 +384,14 @@ class GuestUserInteractorTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ 818,
                 /* name= */ "non_guest",
-                /* flags= */ 0,
+                /* flags= */ UserInfo.FLAG_FULL,
             )
         private val GUEST_USER_INFO =
             UserInfo(
                 /* id= */ 669,
                 /* name= */ "guest",
                 /* iconPath= */ "",
-                /* flags= */ 0,
+                /* flags= */ UserInfo.FLAG_FULL,
                 UserManager.USER_TYPE_FULL_GUEST,
             )
         private val EPHEMERAL_GUEST_USER_INFO =
@@ -397,7 +399,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
                 /* id= */ 669,
                 /* name= */ "guest",
                 /* iconPath= */ "",
-                /* flags= */ UserInfo.FLAG_EPHEMERAL,
+                /* flags= */ UserInfo.FLAG_EPHEMERAL or UserInfo.FLAG_FULL,
                 UserManager.USER_TYPE_FULL_GUEST,
             )
         private val ALL_USERS =

@@ -93,6 +93,11 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private static final String TEST_SONG = "test_song";
     private static final String TEST_SESSION_ID = "test_session_id";
     private static final String TEST_SESSION_NAME = "test_session_name";
+    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final ActivityLaunchAnimator.Controller mActivityLaunchAnimatorController = mock(
+            ActivityLaunchAnimator.Controller.class);
+    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
+            NearbyMediaDevicesManager.class);
     // Mock
     private MediaController mMediaController = mock(MediaController.class);
     private MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
@@ -111,12 +116,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private KeyguardManager mKeyguardManager = mock(KeyguardManager.class);
     private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
     private CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
-    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private FeatureFlags mFlags = mock(FeatureFlags.class);
-    private final ActivityLaunchAnimator.Controller mActivityLaunchAnimatorController = mock(
-            ActivityLaunchAnimator.Controller.class);
-    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
-            NearbyMediaDevicesManager.class);
     private View mDialogLaunchView = mock(View.class);
     private MediaOutputController.Callback mCallback = mock(MediaOutputController.Callback.class);
 
@@ -240,7 +240,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         verify(mMediaController, never()).unregisterCallback(any());
     }
 
-
     @Test
     public void stop_nearbyMediaDevicesManagerNotNull_unregistersNearbyDevicesCallback() {
         mMediaOutputController.start(mCb);
@@ -249,6 +248,13 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController.stop();
 
         verify(mNearbyMediaDevicesManager).unregisterNearbyDevicesCallback(any());
+    }
+
+    @Test
+    public void tryToLaunchMediaApplication_nullIntent_skip() {
+        mMediaOutputController.tryToLaunchMediaApplication(mDialogLaunchView);
+
+        verify(mCb, never()).dismissDialog();
     }
 
     @Test
@@ -512,6 +518,17 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController.adjustSessionVolume(testVolume);
 
         verify(mLocalMediaManager).adjustSessionVolume(testVolume);
+    }
+
+    @Test
+    public void logInteractionAdjustVolume_triggersFromMetricLogger() {
+        MediaOutputMetricLogger spyMediaOutputMetricLogger = spy(
+                mMediaOutputController.mMetricLogger);
+        mMediaOutputController.mMetricLogger = spyMediaOutputMetricLogger;
+
+        mMediaOutputController.logInteractionAdjustVolume(mMediaDevice1);
+
+        verify(spyMediaOutputMetricLogger).logInteractionAdjustVolume(mMediaDevice1);
     }
 
     @Test

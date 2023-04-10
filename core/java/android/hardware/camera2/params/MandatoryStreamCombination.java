@@ -607,7 +607,7 @@ public final class MandatoryStreamCombination {
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM),
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM) },
-                "Maximum-resolution two-input in-app processsing"),
+                "Maximum-resolution two-input in-app processing"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW),
@@ -891,7 +891,7 @@ public final class MandatoryStreamCombination {
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s720p),
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.s1440p)},
-                "Standard stil image capture"),
+                "Standard still image capture"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s720p),
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.s1440p)},
@@ -1225,14 +1225,6 @@ public final class MandatoryStreamCombination {
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
                         STREAM_USE_CASE_PREVIEW),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD,
-                        STREAM_USE_CASE_RECORD),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
-                        STREAM_USE_CASE_STILL_CAPTURE)},
-                "Preview, video record and YUV video snapshot"),
-        new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
-                        STREAM_USE_CASE_PREVIEW),
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
                         STREAM_USE_CASE_RECORD),
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.RECORD,
@@ -1241,27 +1233,11 @@ public final class MandatoryStreamCombination {
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
                         STREAM_USE_CASE_PREVIEW),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
-                        STREAM_USE_CASE_RECORD),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
-                        STREAM_USE_CASE_STILL_CAPTURE)},
-                "Preview, in-application video processing and YUV video snapshot"),
-        new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
-                        STREAM_USE_CASE_PREVIEW),
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
                         STREAM_USE_CASE_PREVIEW),
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
                         STREAM_USE_CASE_STILL_CAPTURE)},
                 "Preview, in-application image processing, and JPEG still image capture"),
-        new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
-                        STREAM_USE_CASE_PREVIEW),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
-                        STREAM_USE_CASE_PREVIEW),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
-                        STREAM_USE_CASE_STILL_CAPTURE)},
-                "Preview, in-application image processing, and YUV still image capture"),
     };
 
     private static StreamCombinationTemplate sCroppedRawStreamUseCaseCombinations[] = {

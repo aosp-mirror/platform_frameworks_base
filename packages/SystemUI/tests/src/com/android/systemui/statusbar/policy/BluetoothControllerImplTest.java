@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bluetooth.BluetoothLogger;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +54,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -60,10 +64,11 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     private LocalBluetoothManager mMockBluetoothManager;
     private CachedBluetoothDeviceManager mMockDeviceManager;
-    private LocalBluetoothAdapter mMockAdapter;
+    private LocalBluetoothAdapter mMockLocalAdapter;
     private TestableLooper mTestableLooper;
     private DumpManager mMockDumpManager;
     private BluetoothControllerImpl mBluetoothControllerImpl;
+    private BluetoothAdapter mMockAdapter;
 
     private List<CachedBluetoothDevice> mDevices;
 
@@ -74,10 +79,11 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mDevices = new ArrayList<>();
         mUserTracker = mock(UserTracker.class);
         mMockDeviceManager = mock(CachedBluetoothDeviceManager.class);
+        mMockAdapter = mock(BluetoothAdapter.class);
         when(mMockDeviceManager.getCachedDevicesCopy()).thenReturn(mDevices);
         when(mMockBluetoothManager.getCachedDeviceManager()).thenReturn(mMockDeviceManager);
-        mMockAdapter = mock(LocalBluetoothAdapter.class);
-        when(mMockBluetoothManager.getBluetoothAdapter()).thenReturn(mMockAdapter);
+        mMockLocalAdapter = mock(LocalBluetoothAdapter.class);
+        when(mMockBluetoothManager.getBluetoothAdapter()).thenReturn(mMockLocalAdapter);
         when(mMockBluetoothManager.getEventManager()).thenReturn(mock(BluetoothEventManager.class));
         when(mMockBluetoothManager.getProfileManager())
                 .thenReturn(mock(LocalBluetoothProfileManager.class));
@@ -89,7 +95,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 mock(BluetoothLogger.class),
                 mTestableLooper.getLooper(),
                 mTestableLooper.getLooper(),
-                mMockBluetoothManager);
+                mMockBluetoothManager,
+                mMockAdapter);
     }
 
     @Test
@@ -98,7 +105,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         when(device.isConnected()).thenReturn(true);
         when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
         mDevices.add(device);
-        when(mMockAdapter.getConnectionState()).thenReturn(BluetoothAdapter.STATE_DISCONNECTED);
+        when(mMockLocalAdapter.getConnectionState())
+                .thenReturn(BluetoothAdapter.STATE_DISCONNECTED);
 
         mBluetoothControllerImpl.onConnectionStateChanged(null,
                 BluetoothAdapter.STATE_DISCONNECTED);
@@ -163,7 +171,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testOnServiceConnected_updatesConnectionState() {
-        when(mMockAdapter.getConnectionState()).thenReturn(BluetoothAdapter.STATE_CONNECTING);
+        when(mMockLocalAdapter.getConnectionState()).thenReturn(BluetoothAdapter.STATE_CONNECTING);
 
         mBluetoothControllerImpl.onServiceConnected();
 
@@ -184,7 +192,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testOnBluetoothStateChange_updatesConnectionState() {
-        when(mMockAdapter.getConnectionState()).thenReturn(
+        when(mMockLocalAdapter.getConnectionState()).thenReturn(
                 BluetoothAdapter.STATE_CONNECTING,
                 BluetoothAdapter.STATE_DISCONNECTED);
 
@@ -238,6 +246,33 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioActive());
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioProfileOnly());
+    }
+
+    @Test
+    public void testAddOnMetadataChangedListener_registersListenerOnAdapter() {
+        CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        BluetoothDevice device = mock(BluetoothDevice.class);
+        when(cachedDevice.getDevice()).thenReturn(device);
+        Executor executor = new FakeExecutor(new FakeSystemClock());
+        BluetoothAdapter.OnMetadataChangedListener listener = (bluetoothDevice, i, bytes) -> {
+        };
+
+        mBluetoothControllerImpl.addOnMetadataChangedListener(cachedDevice, executor, listener);
+
+        verify(mMockAdapter, times(1)).addOnMetadataChangedListener(device, executor, listener);
+    }
+
+    @Test
+    public void testRemoveOnMetadataChangedListener_removesListenerFromAdapter() {
+        CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        BluetoothDevice device = mock(BluetoothDevice.class);
+        when(cachedDevice.getDevice()).thenReturn(device);
+        BluetoothAdapter.OnMetadataChangedListener listener = (bluetoothDevice, i, bytes) -> {
+        };
+
+        mBluetoothControllerImpl.removeOnMetadataChangedListener(cachedDevice, listener);
+
+        verify(mMockAdapter, times(1)).removeOnMetadataChangedListener(device, listener);
     }
 
     /** Regression test for b/246876230. */

@@ -595,6 +595,56 @@ public class SystemConfigTest {
     }
 
     /**
+     * Test that getRollbackDenylistedPackages works correctly for the tag:
+     * {@code automatic-rollback-denylisted-app}.
+     */
+    @Test
+    public void automaticRollbackDeny_vending() throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <automatic-rollback-denylisted-app package=\"com.android.vending\" />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "automatic-rollback-denylisted-app.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages())
+            .containsExactly("com.android.vending");
+    }
+
+    /**
+     * Test that getRollbackDenylistedPackages works correctly for the tag:
+     * {@code automatic-rollback-denylisted-app} without any packages.
+     */
+    @Test
+    public void automaticRollbackDeny_empty() throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <automatic-rollback-denylisted-app />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "automatic-rollback-denylisted-app.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages()).isEmpty();
+    }
+
+    /**
+     * Test that getRollbackDenylistedPackages works correctly for the tag:
+     * {@code automatic-rollback-denylisted-app} without the corresponding config.
+     */
+    @Test
+    public void automaticRollbackDeny_noConfig() throws IOException {
+        final File folder = createTempSubfolder("folder");
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages()).isEmpty();
+    }
+
+    /**
      * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
      */
     @Test

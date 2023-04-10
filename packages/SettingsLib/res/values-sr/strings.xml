@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Приказује границе клипа, маргине итд."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Наметни смер распореда здесна налево"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Намеће смер распореда екрана здесна налево за све локалитете"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Прозирна трака за навигацију"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Нека боја позадине траке за навигацију буде подразумевано прозирна"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Дозволи замагљења прозора"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Наметни 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Омогућава 4x MSAA у OpenGL ES 2.0 апликацијама"</string>
@@ -540,6 +542,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Овај телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Овај таблет"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Овај телефон"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не можете да пустите на овом уређају"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надоградите налог ради пребацивања"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Преузимања не могу да се пуштају овде"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Пробајте поново после огласа"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Пробудите уређај да бисте пустили овде"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Уређај није одобрен за репродукцију"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Не можете да пустите овај медијски фајл овде"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Проблем при повезивању. Искључите уређај, па га поново укључите"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Жичани аудио уређај"</string>
     <string name="help_label" msgid="3528360748637781274">"Помоћ и повратне информације"</string>
@@ -666,4 +675,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Анимације за покрет повратка са предвиђањем"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Омогућите анимације система за покрет повратка са предвиђањем."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ово подешавање омогућава анимације система за покрет повратка са предвиђањем. Захтева подешавање дозволе enableOnBackInvokedCallback по апликацији на true у фајлу манифеста."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Померите налево"</item>
+    <item msgid="5425394847942513942">"Померите надоле"</item>
+    <item msgid="7728484337962740316">"Померите надесно"</item>
+    <item msgid="324200556467459329">"Померите нагоре"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

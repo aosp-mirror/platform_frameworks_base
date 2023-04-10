@@ -88,7 +88,17 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     // Called with SyncRoot lock held.
     public VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
-        this(syncRoot, context, handler, listener, DisplayControl::createDisplay);
+        this(syncRoot, context, handler, listener, new SurfaceControlDisplayFactory() {
+            @Override
+            public IBinder createDisplay(String name, boolean secure, float requestedRefreshRate) {
+                return DisplayControl.createDisplay(name, secure, requestedRefreshRate);
+            }
+
+            @Override
+            public void destroyDisplay(IBinder displayToken) {
+                DisplayControl.destroyDisplay(displayToken);
+            }
+        });
     }
 
     @VisibleForTesting
@@ -106,7 +116,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         String name = virtualDisplayConfig.getName();
         boolean secure = (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
         IBinder appToken = callback.asBinder();
-        IBinder displayToken = mSurfaceControlDisplayFactory.createDisplay(name, secure);
+        IBinder displayToken = mSurfaceControlDisplayFactory.createDisplay(name, secure,
+                virtualDisplayConfig.getRequestedRefreshRate());
         final String baseUniqueId =
                 UNIQUE_ID_PREFIX + ownerPackageName + "," + ownerUid + "," + name + ",";
         final int uniqueIndex = getNextUniqueIndex(baseUniqueId);
@@ -247,6 +258,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private int mWidth;
         private int mHeight;
         private int mDensityDpi;
+        private float mRequestedRefreshRate;
         private Surface mSurface;
         private DisplayDeviceInfo mInfo;
         private int mDisplayState;
@@ -270,8 +282,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mName = virtualDisplayConfig.getName();
             mWidth = virtualDisplayConfig.getWidth();
             mHeight = virtualDisplayConfig.getHeight();
-            mMode = createMode(mWidth, mHeight, REFRESH_RATE);
             mDensityDpi = virtualDisplayConfig.getDensityDpi();
+            mRequestedRefreshRate = virtualDisplayConfig.getRequestedRefreshRate();
+            mMode = createMode(mWidth, mHeight, getRefreshRate());
             mSurface = surface;
             mFlags = flags;
             mCallback = callback;
@@ -282,7 +295,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mUniqueIndex = uniqueIndex;
             mIsDisplayOn = surface != null;
             mDisplayIdToMirror = virtualDisplayConfig.getDisplayIdToMirror();
-            mIsWindowManagerMirroring = virtualDisplayConfig.isWindowManagerMirroring();
+            mIsWindowManagerMirroring = virtualDisplayConfig.isWindowManagerMirroringEnabled();
         }
 
         @Override
@@ -308,7 +321,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            DisplayControl.destroyDisplay(getDisplayTokenLocked());
+            mSurfaceControlDisplayFactory.destroyDisplay(getDisplayTokenLocked());
             if (mProjection != null && mMediaProjectionCallback != null) {
                 try {
                     mProjection.unregisterCallback(mMediaProjectionCallback);
@@ -410,7 +423,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 sendTraversalRequestLocked();
                 mWidth = width;
                 mHeight = height;
-                mMode = createMode(width, height, REFRESH_RATE);
+                mMode = createMode(width, height, getRefreshRate());
                 mDensityDpi = densityDpi;
                 mInfo = null;
                 mPendingChanges |= PENDING_RESIZE;
@@ -438,8 +451,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             pw.println("mStopped=" + mStopped);
             pw.println("mDisplayIdToMirror=" + mDisplayIdToMirror);
             pw.println("mWindowManagerMirroring=" + mIsWindowManagerMirroring);
+            pw.println("mRequestedRefreshRate=" + mRequestedRefreshRate);
         }
-
 
         @Override
         public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
@@ -456,7 +469,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
-                mInfo.presentationDeadlineNanos = 1000000000L / (int) REFRESH_RATE; // 1 frame
+                mInfo.presentationDeadlineNanos = 1000000000L / (int) getRefreshRate(); // 1 frame
                 mInfo.flags = 0;
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE
@@ -554,6 +567,10 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             }
             return mInfo;
         }
+
+        private float getRefreshRate() {
+            return (mRequestedRefreshRate != 0.0f) ? mRequestedRefreshRate : REFRESH_RATE;
+        }
     }
 
     private static class Callback extends Handler {
@@ -632,6 +649,26 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
     @VisibleForTesting
     public interface SurfaceControlDisplayFactory {
-        public IBinder createDisplay(String name, boolean secure);
+        /**
+         * Create a virtual display in SurfaceFlinger.
+         *
+         * @param name The name of the display
+         * @param secure Whether this display is secure.
+         * @param requestedRefreshRate
+         *     The refresh rate, frames per second, to request on the virtual display.
+         *     It should be a divisor of refresh rate of the leader physical display
+         *     that drives VSYNC, e.g. 30/60fps on 120fps display. If an arbitrary refresh
+         *     rate is specified, SurfaceFlinger rounds up or down to match a divisor of
+         *     the refresh rate of the leader physical display.
+         * @return The token reference for the display in SurfaceFlinger.
+         */
+        IBinder createDisplay(String name, boolean secure, float requestedRefreshRate);
+        
+        /**
+         * Destroy a display in SurfaceFlinger.
+         *
+         * @param displayToken The display token for the display to be destroyed.
+         */
+        void destroyDisplay(IBinder displayToken);
     }
 }

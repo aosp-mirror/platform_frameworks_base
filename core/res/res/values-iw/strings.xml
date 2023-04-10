@@ -141,6 +141,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"‏שיחות Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"‏שיחת WiFi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"כבוי"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"‏שיחה בחיבור Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"שיחה ברשת סלולרית"</string>
@@ -208,6 +209,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"האפליקציות שלך לשימוש אישי יהיו חסומות עד להפעלת פרופיל העבודה"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"‏אפליקציות לשימוש אישי ייחסמו ב-<xliff:g id="DATE">%1$s</xliff:g> בשעה <xliff:g id="TIME">%2$s</xliff:g>. מנהל ה-IT לא מתיר השבתה של פרופיל העבודה ליותר מ-<xliff:g id="NUMBER">%3$d</xliff:g> ימים."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"הפעלה"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"השיחות וההודעות מושבתות"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"השהית את האפליקציות לעבודה. לא יתקבלו שיחות טלפון או הודעות טקסט."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"הפעלת האפליקציות לעבודה"</string>
     <string name="me" msgid="6207584824693813140">"אני"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"אפשרויות טאבלט"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏אפשרויות Android TV"</string>
@@ -339,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"אפשרות לזהות תנועות בזמן נגיעה בחיישן טביעות האצבע של המכשיר."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"צילום המסך"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ניתן לצלם צילום מסך של התצוגה."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"תצוגה מקדימה, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"השבתה או שינוי של שורת הסטטוס"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"מאפשרת לאפליקציה להשבית את שורת הסטטוס או להוסיף ולהסיר סמלי מערכת."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"להיות שורת הסטטוס"</string>
@@ -459,6 +464,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של חיישני גוף, כמו דופק, חום גוף ושיעור החמצן בדם, כשנעשה שימוש באפליקציה."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"גישה לנתונים של חיישני גוף, כמו דופק, כשהאפליקציה פועלת ברקע"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של חיישני גוף, כמו דופק, חום גוף ושיעור החמצן בדם, כשהאפליקציה פועלת ברקע."</string>
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"הרשאת גישה לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשנעשה שימוש באפליקציה."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשנעשה שימוש באפליקציה."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"הרשאת גישה לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשהאפליקציה פועלת ברקע."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשהאפליקציה פועלת ברקע."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"קריאה של אירועי יומן והפרטים שלהם"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"האפליקציה הזו יכולה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, ולשתף או לשמור את נתוני היומן."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏האפליקציה הזו יכולה לקרוא את כל אירועי היומן המאוחסנים במכשיר ה-Android TV, ולשתף או לשמור את נתוני היומן."</string>
@@ -792,6 +801,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"בעלי ההרשאה יוכלו להתחיל לצפות בפרטי התכונות של אפליקציות."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"גישה לנתוני חיישנים בתדירות דגימה גבוהה"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"האפליקציה תוכל לדגום נתוני חיישנים בתדירות של מעל 200 הרץ"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"הגדרת כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי האימות של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
@@ -1242,10 +1255,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"‏הפעלת Android מתחילה…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"הטאבלט בתהליך הפעלה…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"הפעלת המכשיר מתחילה…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"מתבצעת אופטימיזציה של האחסון."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"עדכון המערכת לקראת סיום…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> בתהליך שדרוג…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"מתבצעת אופטימיזציה של אפליקציה <xliff:g id="NUMBER_0">%1$d</xliff:g> מתוך <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"המערכת מכינה את <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"מתבצעת הפעלה של אפליקציות."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"תהליך האתחול בשלבי סיום."</string>
@@ -1357,6 +1368,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"‏PTP באמצעות USB מופעל"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"‏שיתוף אינטרנט בין מכשירים באמצעות USB מופעל"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"‏MIDI באמצעות USB מופעל"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"המכשיר מחובר כמצלמת אינטרנט"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"‏אביזר USB מחובר"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"יש להקיש להצגת אפשרויות נוספות."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"המכשיר המחובר בטעינה. יש להקיש לאפשרויות נוספות."</string>
@@ -1387,7 +1399,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"בחירה של שיטת הזנה"</string>
     <string name="show_ime" msgid="6406112007347443383">"להשאיר במסך בזמן שהמקלדת הפיזית פעילה"</string>
     <string name="hardware" msgid="1800597768237606953">"הצגת מקלדת וירטואלית"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"הגדרת מקלדת פיזית"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"הגדרה של <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"הגדרת מקלדות פיזיות"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"יש להקיש כדי לבחור שפה ופריסה"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1705,14 +1718,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"סיום"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"השבתת קיצור הדרך"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"שימוש בקיצור הדרך"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"היפוך צבעים"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"היפוך צבעים"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"תיקון צבע"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"מצב שימוש ביד אחת"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"מעומעם במיוחד"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"מכשירי שמיעה"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"לחצני עוצמת הקול נלחצו בלחיצה ארוכה. שירות <xliff:g id="SERVICE_NAME">%1$s</xliff:g> הופעל."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"לחצני עוצמת הקול נלחצו בלחיצה ארוכה. שירות <xliff:g id="SERVICE_NAME">%1$s</xliff:g> הושבת."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"יש ללחוץ לחיצה ארוכה על שני לחצני עוצמת הקול למשך שלוש שניות כדי להשתמש בשירות <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"אפשר לשחרר את מקש עוצמת הקול. כדי להפעיל את השירות <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, צריך ללחוץ לחיצה ארוכה על שני המקשים של עוצמת הקול שוב במשך 3 שניות."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"צריך לבחור תכונה שתופעל כשלוחצים על לחצן הנגישות:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"יש לבחור תכונה שתופעל באמצעות תנועת הנגישות (החלקה למעלה מתחתית המסך בעזרת שתי אצבעות):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"יש לבחור תכונה שתופעל באמצעות תנועת הנגישות (החלקה למעלה מתחתית המסך בעזרת שלוש אצבעות):"</string>
@@ -1843,6 +1856,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"צפייה במסך מלא"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"הבנתי"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"מסובבים כדי לראות טוב יותר"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"צריך לצאת מהמסך המפוצל כדי לראות טוב יותר"</string>
     <string name="done_label" msgid="7283767013231718521">"סיום"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"מחוון שעות מעגלי"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"מחוון דקות מעגלי"</string>
@@ -1854,6 +1869,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"עבודה <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> שני בעבודה"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> שלישי בעבודה"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"שכפול של <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"יש לבקש קוד אימות לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"צריך לבקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"יש לבקש סיסמה לפני ביטול הצמדה"</string>
@@ -1944,10 +1960,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"להפעיל את האפליקציות לעבודה?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"קבלת גישה להתראות ולאפליקציות בפרופיל העבודה"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"הפעלה"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"שיחת חירום"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"קבלת גישה לשיחות ולאפליקציות בפרופיל העבודה"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> לא זמינה"</string>
@@ -2310,4 +2324,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ההרשאה הזו מאפשרת לאפליקציה נלווית להפעיל מהרקע שירותים שפועלים בחזית."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"המיקרופון זמין"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"המיקרופון חסום"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"מצב שני מסכים"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"מצב שני מסכים מופעל"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> משתמשת בשני המסכים כדי להציג תוכן"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"המכשיר חם מדי"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"מצב שני מסכים לא זמין כי הטלפון נהיה חם מדי"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏התכונה Dual Screen לא זמינה"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏התכונה Dual Screen לא זמינה כי מצב החיסכון בסוללה מופעל. אפשר להשבית את האפשרות הזו בהגדרות."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"מעבר להגדרות"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"השבתה"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"המקלדת <xliff:g id="DEVICE_NAME">%s</xliff:g> הוגדרה"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"פריסת המקלדת מוגדרת ל<xliff:g id="LAYOUT_1">%s</xliff:g>. אפשר להקיש כדי לשנות את ההגדרה הזו."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"פריסת המקלדת מוגדרת ל<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. אפשר להקיש כדי לשנות את ההגדרה הזו."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"פריסת המקלדת מוגדרת ל<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. אפשר להקיש כדי לשנות את ההגדרה הזו."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"פריסת המקלדת מוגדרת ל<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… אפשר להקיש כדי לשנות את ההגדרה הזו."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"הוגדרו מקלדות פיזיות"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"יש להקיש כדי להציג את המקלדות"</string>
 </resources>

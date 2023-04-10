@@ -146,17 +146,19 @@ java_library_static {
     ],
 
     static_libs: [
+        "android.frameworks.location.altitude-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",
-        "android.hardware.boot-V1.0-java",
-        "android.hardware.boot-V1.1-java",
-        "android.hardware.boot-V1.2-java",
+        "android.hardware.boot-V1.0-java", // HIDL
+        "android.hardware.boot-V1.1-java", // HIDL
+        "android.hardware.boot-V1.2-java", // HIDL
+        "android.hardware.boot-V1-java",   // AIDL
         "android.hardware.broadcastradio-V2.0-java", // HIDL
         "android.hardware.broadcastradio-V1-java", // AIDL
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
-        "android.hardware.health-V1-java", // AIDL
+        "android.hardware.health-V2-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
         "android.hardware.tv.cec-V1.1-java",
@@ -182,6 +184,7 @@ java_library_static {
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
         "ImmutabilityAnnotation",
+        "securebox",
     ],
     javac_shard_size: 50,
     javacflags: [

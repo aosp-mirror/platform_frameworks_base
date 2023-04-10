@@ -49,7 +49,7 @@ static RenderCallback createRenderCallback(JNIEnv* env, jobject releaseCallback)
     auto globalCallbackRef =
             std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(releaseCallback));
     return [globalCallbackRef](android::base::unique_fd&& fd, int status) {
-        GraphicsJNI::getJNIEnv()->CallStaticVoidMethod(
+        globalCallbackRef->env()->CallStaticVoidMethod(
                 gHardwareBufferRendererClassInfo.clazz,
                 gHardwareBufferRendererClassInfo.invokeRenderCallback, globalCallbackRef->object(),
                 reinterpret_cast<jint>(fd.release()), reinterpret_cast<jint>(status));
@@ -74,42 +74,34 @@ static long android_graphics_HardwareBufferRenderer_create(JNIEnv* env, jobject,
     auto* hardwareBuffer = HardwareBufferHelpers::AHardwareBuffer_fromHardwareBuffer(env, buffer);
     auto* rootRenderNode = reinterpret_cast<RootRenderNode*>(renderNodePtr);
     ContextFactoryImpl factory(rootRenderNode);
-    auto* proxy = new RenderProxy(true, rootRenderNode, &factory);
+    auto* proxy = new RenderProxy(false, rootRenderNode, &factory);
     proxy->setHardwareBuffer(hardwareBuffer);
     return (jlong)proxy;
 }
 
-static void HardwareBufferRenderer_destroy(jobject renderProxy) {
+static void HardwareBufferRenderer_destroy(jlong renderProxy) {
     auto* proxy = reinterpret_cast<RenderProxy*>(renderProxy);
     delete proxy;
 }
 
 static SkMatrix createMatrixFromBufferTransform(SkScalar width, SkScalar height, int transform) {
-    auto matrix = SkMatrix();
     switch (transform) {
         case ANATIVEWINDOW_TRANSFORM_ROTATE_90:
-            matrix.setRotate(90);
-            matrix.postTranslate(width, 0);
-            break;
+            return SkMatrix::MakeAll(0, -1, height, 1, 0, 0, 0, 0, 1);
         case ANATIVEWINDOW_TRANSFORM_ROTATE_180:
-            matrix.setRotate(180);
-            matrix.postTranslate(width, height);
-            break;
+            return SkMatrix::MakeAll(-1, 0, width, 0, -1, height, 0, 0, 1);
         case ANATIVEWINDOW_TRANSFORM_ROTATE_270:
-            matrix.setRotate(270);
-            matrix.postTranslate(0, width);
-            break;
+            return SkMatrix::MakeAll(0, 1, 0, -1, 0, width, 0, 0, 1);
         default:
             ALOGE("Invalid transform provided. Transform should be validated from"
                   "the java side. Leveraging identity transform as a fallback");
             [[fallthrough]];
         case ANATIVEWINDOW_TRANSFORM_IDENTITY:
-            break;
+            return SkMatrix::I();
     }
-    return matrix;
 }
 
-static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, jobject renderProxy,
+static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, jlong renderProxy,
                                                           jint transform, jint width, jint height,
                                                           jlong colorspacePtr, jobject consumer) {
     auto* proxy = reinterpret_cast<RenderProxy*>(renderProxy);
@@ -117,13 +109,19 @@ static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, 
     auto skHeight = static_cast<SkScalar>(height);
     auto matrix = createMatrixFromBufferTransform(skWidth, skHeight, transform);
     auto colorSpace = GraphicsJNI::getNativeColorSpace(colorspacePtr);
-    proxy->setHardwareBufferRenderParams(
-            HardwareBufferRenderParams(matrix, colorSpace, createRenderCallback(env, consumer)));
+    proxy->setHardwareBufferRenderParams(HardwareBufferRenderParams(
+            width, height, matrix, colorSpace, createRenderCallback(env, consumer)));
+    nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
+    UiFrameInfoBuilder(proxy->frameInfo())
+                .setVsync(vsync, vsync, UiFrameInfoBuilder::INVALID_VSYNC_ID,
+                    UiFrameInfoBuilder::UNKNOWN_DEADLINE,
+                    UiFrameInfoBuilder::UNKNOWN_FRAME_INTERVAL)
+                .addFlag(FrameInfoFlags::SurfaceCanvas);
     return proxy->syncAndDrawFrame();
 }
 
 static void android_graphics_HardwareBufferRenderer_setLightGeometry(JNIEnv*, jobject,
-                                                                     jobject renderProxyPtr,
+                                                                     jlong renderProxyPtr,
                                                                      jfloat lightX, jfloat lightY,
                                                                      jfloat lightZ,
                                                                      jfloat lightRadius) {
@@ -132,7 +130,7 @@ static void android_graphics_HardwareBufferRenderer_setLightGeometry(JNIEnv*, jo
 }
 
 static void android_graphics_HardwareBufferRenderer_setLightAlpha(JNIEnv* env, jobject,
-                                                                  jobject renderProxyPtr,
+                                                                  jlong renderProxyPtr,
                                                                   jfloat ambientShadowAlpha,
                                                                   jfloat spotShadowAlpha) {
     auto* proxy = reinterpret_cast<RenderProxy*>(renderProxyPtr);
@@ -166,7 +164,8 @@ static const JNINativeMethod gMethods[] = {
 int register_android_graphics_HardwareBufferRenderer(JNIEnv* env) {
     jclass hardwareBufferRendererClazz =
             FindClassOrDie(env, "android/graphics/HardwareBufferRenderer");
-    gHardwareBufferRendererClassInfo.clazz = hardwareBufferRendererClazz;
+    gHardwareBufferRendererClassInfo.clazz =
+            reinterpret_cast<jclass>(env->NewGlobalRef(hardwareBufferRendererClazz));
     gHardwareBufferRendererClassInfo.invokeRenderCallback =
             GetStaticMethodIDOrDie(env, hardwareBufferRendererClazz, "invokeRenderCallback",
                                    "(Ljava/util/function/Consumer;II)V");

@@ -96,7 +96,11 @@ public class BrightnessSetting {
         mListeners.remove(l);
     }
 
-    void setBrightness(float brightness) {
+    /**
+     * Sets the brigtness and broadcasts the change to the listeners.
+     * @param brightness The value to which the brightness is to be set.
+     */
+    public void setBrightness(float brightness) {
         if (Float.isNaN(brightness)) {
             Slog.w(TAG, "Attempting to set invalid brightness");
             return;
@@ -115,6 +119,23 @@ public class BrightnessSetting {
             Message msg = mHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED, toSend, 0);
             mHandler.sendMessage(msg);
         }
+    }
+
+    /**
+     * @return The brightness for the default display in nits. Used when the underlying display
+     * device has changed but we want to persist the nit value.
+     */
+    public float getBrightnessNitsForDefaultDisplay() {
+        return mPersistentDataStore.getBrightnessNitsForDefaultDisplay();
+    }
+
+    /**
+     * Set brightness in nits for the default display. Used when we want to persist the nit value
+     * even if the underlying display device changes.
+     * @param nits The brightness value in nits
+     */
+    public void setBrightnessNitsForDefaultDisplay(float nits) {
+        mPersistentDataStore.setBrightnessNitsForDefaultDisplay(nits);
     }
 
     private void notifyListeners(float brightness) {

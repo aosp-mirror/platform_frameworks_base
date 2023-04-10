@@ -37,6 +37,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -85,15 +86,21 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
 
     private PipBoundsState mPipBoundsState;
 
+    private PipSizeSpecHandler mPipSizeSpecHandler;
+
+    private PipDisplayLayoutState mPipDisplayLayoutState;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPipBoundsState = new PipBoundsState(mContext);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
         final PipSnapAlgorithm pipSnapAlgorithm = new PipSnapAlgorithm();
         final PipKeepClearAlgorithmInterface pipKeepClearAlgorithm =
                 new PipKeepClearAlgorithmInterface() {};
         final PipBoundsAlgorithm pipBoundsAlgorithm = new PipBoundsAlgorithm(mContext,
-                mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm);
+                mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm, mPipSizeSpecHandler);
         final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator);
@@ -152,7 +159,7 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         mPipResizeGestureHandler.onPinchResize(upEvent);
 
         verify(mPipTaskOrganizer, times(1))
-                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any());
+                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any(), any());
 
         assertTrue("The new size should be bigger than the original PiP size.",
                 mPipResizeGestureHandler.getLastResizeBounds().width()
@@ -191,7 +198,7 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         mPipResizeGestureHandler.onPinchResize(upEvent);
 
         verify(mPipTaskOrganizer, times(1))
-                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any());
+                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any(), any());
 
         assertTrue("The new size should be smaller than the original PiP size.",
                 mPipResizeGestureHandler.getLastResizeBounds().width()

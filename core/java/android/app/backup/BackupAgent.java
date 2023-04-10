@@ -265,15 +265,9 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onCreate() {
     }
 
-    /**
-     * Provided as a convenience for agent implementations that need an opportunity
-     * to do one-time initialization before the actual backup or restore operation
-     * is begun with information about the calling user.
-     * <p>
-     *
-     * @hide
-     */
+    /** @hide */
     public void onCreate(UserHandle user) {
+        mUser = user;
         onCreate();
     }
 
@@ -284,7 +278,6 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     @Deprecated
     public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
-        mUser = user;
         mBackupDestination = backupDestination;
 
         onCreate(user);
@@ -295,7 +288,6 @@ public abstract class BackupAgent extends ContextWrapper {
     */
     public void onCreate(UserHandle user, @BackupDestination int backupDestination,
             @OperationType int operationType) {
-        mUser = user;
         mBackupDestination = backupDestination;
         mLogger = new BackupRestoreEventLogger(operationType);
 
@@ -1058,6 +1050,18 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onRestoreFinished() {
     }
 
+    /**
+     * Clears all pending logs currently stored in the agent's event logger.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public final void clearBackupRestoreEventLogger() {
+        if (mLogger != null) {
+            mLogger.clearData();
+        }
+    }
+
     // ----- Core implementation -----
 
     /** @hide */
@@ -1345,6 +1349,20 @@ public abstract class BackupAgent extends ContextWrapper {
                 in.complete(mLogger.getLoggingResults());
             } else {
                 in.complete(Collections.emptyList());
+            }
+        }
+
+        @Override
+        public void clearBackupRestoreEventLogger() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                BackupAgent.this.clearBackupRestoreEventLogger();
+            } catch (Exception e) {
+                Log.d(TAG, "clearBackupRestoreEventLogger (" + BackupAgent.this.getClass().getName()
+                        + ") threw", e);
+                throw e;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }

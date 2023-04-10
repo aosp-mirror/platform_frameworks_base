@@ -23,7 +23,6 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.SystemUIInitializerFactory;
 import com.android.systemui.tv.TvWMComponent;
-import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.annotations.ShellMainThread;
@@ -38,12 +37,13 @@ import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.sysui.ShellInterface;
+import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.transition.ShellTransitions;
-
-import java.util.Optional;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+
+import java.util.Optional;
 
 /**
  * Dagger Subcomponent for WindowManager.  This class explicitly describes the interfaces exported

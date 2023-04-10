@@ -18,6 +18,7 @@ package com.android.server.timezonedetector;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 
@@ -27,6 +28,7 @@ import com.android.server.SystemTimeZone;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * The real implementation of {@link TimeZoneDetectorStrategyImpl.Environment}.
@@ -35,7 +37,10 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
 
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
-    EnvironmentImpl() {
+    @NonNull private final Handler mHandler;
+
+    EnvironmentImpl(@NonNull Handler handler) {
+        mHandler = Objects.requireNonNull(handler);
     }
 
     @Override
@@ -71,5 +76,10 @@ final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment 
     @Override
     public void dumpDebugLog(@NonNull PrintWriter printWriter) {
         SystemTimeZone.dump(printWriter);
+    }
+
+    @Override
+    public void runAsync(@NonNull Runnable runnable) {
+        mHandler.post(runnable);
     }
 }

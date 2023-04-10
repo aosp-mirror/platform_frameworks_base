@@ -274,6 +274,15 @@ public class PackageStateMutator {
 
         @NonNull
         @Override
+        public PackageStateWrite setLoadingCompletedTime(long loadingCompletedTime) {
+            if (mState != null) {
+                mState.setLoadingCompletedTime(loadingCompletedTime);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
         public PackageStateWrite setOverrideSeInfo(@Nullable String newSeInfo) {
             if (mState != null) {
                 mState.getTransientState().setOverrideSeInfo(newSeInfo);

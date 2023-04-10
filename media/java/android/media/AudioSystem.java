@@ -70,7 +70,7 @@ public class AudioSystem
         throw new UnsupportedOperationException("Trying to instantiate AudioSystem");
     }
 
-    /* These values must be kept in sync with system/audio.h */
+    /* These values must be kept in sync with system/media/audio/include/system/audio-hal-enums.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
@@ -273,10 +273,11 @@ public class AudioSystem
     /** @hide */
     @IntDef(flag = false, prefix = "DEVICE_", value = {
             DEVICE_OUT_BLUETOOTH_A2DP,
-            DEVICE_OUT_BLE_HEADSET}
+            DEVICE_OUT_BLE_HEADSET,
+            DEVICE_OUT_BLE_BROADCAST}
     )
     @Retention(RetentionPolicy.SOURCE)
-    public @interface DeviceType {}
+    public @interface BtOffloadDeviceType {}
 
     /**
      * @hide
@@ -960,7 +961,8 @@ public class AudioSystem
      */
 
     //
-    // audio device definitions: must be kept in sync with values in system/core/audio.h
+    // audio device definitions: must be kept in sync with values
+    // in system/media/audio/include/system/audio-hal-enums.h
     //
     /** @hide */
     public static final int DEVICE_NONE = 0x0;
@@ -1970,7 +1972,7 @@ public class AudioSystem
      * Returns a list of audio formats (codec) supported on the A2DP and LE audio offload path.
      */
     public static native int getHwOffloadFormatsSupportedForBluetoothMedia(
-            @DeviceType int deviceType, ArrayList<Integer> formatList);
+            @BtOffloadDeviceType int deviceType, ArrayList<Integer> formatList);
 
     /** @hide */
     public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);

@@ -69,6 +69,7 @@ public final class ServerFlags {
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
             KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
             KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
+            KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT,
             KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
             KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
     })
@@ -152,6 +153,14 @@ public final class ServerFlags {
     public static final @DeviceConfigKey String
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT =
             "location_time_zone_detection_setting_enabled_default";
+
+    /**
+     * The key to alter a device's "automatic time zone detection enabled" setting default value.
+     * This flag is only intended for internal testing.
+     */
+    public static final @DeviceConfigKey String
+            KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT =
+            "time_zone_detector_auto_detection_enabled_default";
 
     /**
      * The key to control support for time zone detection falling back to telephony detection under
@@ -304,7 +313,7 @@ public final class ServerFlags {
 
     /**
      * Returns an {@link Instant} from {@link DeviceConfig} from the system_time
-     * namespace, returns the {@code defaultValue} if the value is missing or invalid.
+     * namespace, returns {@link Optional#empty()} if there is no explicit value set.
      */
     @NonNull
     public Optional<Instant> getOptionalInstant(@DeviceConfigKey String key) {
@@ -341,16 +350,17 @@ public final class ServerFlags {
     }
 
     /**
-     * Returns a boolean value from {@link DeviceConfig} from the system_time
-     * namespace, or {@code defaultValue} if there is no explicit value set.
+     * Returns a boolean value from {@link DeviceConfig} from the system_time namespace, or
+     * {@code defaultValue} if there is no explicit value set.
      */
     public boolean getBoolean(@DeviceConfigKey String key, boolean defaultValue) {
         return DeviceConfig.getBoolean(NAMESPACE_SYSTEM_TIME, key, defaultValue);
     }
 
     /**
-     * Returns a positive duration from {@link DeviceConfig} from the system_time
-     * namespace, or {@code defaultValue} if there is no explicit value set.
+     * Returns a positive duration from {@link DeviceConfig} from the system_time namespace,
+     * or {@code defaultValue} if there is no explicit value set or if the value is not a number or
+     * is negative.
      */
     @Nullable
     public Duration getDurationFromMillis(

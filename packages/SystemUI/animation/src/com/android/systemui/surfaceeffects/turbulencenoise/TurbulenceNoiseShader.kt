@@ -19,8 +19,13 @@ import android.graphics.RuntimeShader
 import com.android.systemui.surfaceeffects.shaderutil.ShaderUtilLibrary
 import java.lang.Float.max
 
-/** Shader that renders turbulence simplex noise, with no octave. */
-class TurbulenceNoiseShader : RuntimeShader(TURBULENCE_NOISE_SHADER) {
+/**
+ * Shader that renders turbulence simplex noise, by default no octave.
+ *
+ * @param useFractal whether to use fractal noise (4 octaves).
+ */
+class TurbulenceNoiseShader(useFractal: Boolean = false) :
+    RuntimeShader(if (useFractal) FRACTAL_NOISE_SHADER else SIMPLEX_NOISE_SHADER) {
     // language=AGSL
     companion object {
         private const val UNIFORMS =
@@ -31,32 +36,19 @@ class TurbulenceNoiseShader : RuntimeShader(TURBULENCE_NOISE_SHADER) {
             uniform float in_aspectRatio;
             uniform float in_opacity;
             uniform float in_pixelDensity;
+            uniform float in_inverseLuma;
             layout(color) uniform vec4 in_color;
             layout(color) uniform vec4 in_backgroundColor;
         """
 
-        private const val SHADER_LIB =
-            """
-            float getLuminosity(vec3 c) {
-                return 0.3*c.r + 0.59*c.g + 0.11*c.b;
-            }
-
-            vec3 maskLuminosity(vec3 dest, float lum) {
-                dest.rgb *= vec3(lum);
-                // Clip back into the legal range
-                dest = clamp(dest, vec3(0.), vec3(1.0));
-                return dest;
-            }
-        """
-
-        private const val MAIN_SHADER =
+        private const val SIMPLEX_SHADER =
             """
             vec4 main(vec2 p) {
                 vec2 uv = p / in_size.xy;
                 uv.x *= in_aspectRatio;
 
                 vec3 noiseP = vec3(uv + in_noiseMove.xy, in_noiseMove.z) * in_gridNum;
-                float luma = simplex3d(noiseP) * in_opacity;
+                float luma = abs(in_inverseLuma - simplex3d(noiseP)) * in_opacity;
                 vec3 mask = maskLuminosity(in_color.rgb, luma);
                 vec3 color = in_backgroundColor.rgb + mask * 0.6;
 
@@ -71,8 +63,26 @@ class TurbulenceNoiseShader : RuntimeShader(TURBULENCE_NOISE_SHADER) {
             }
         """
 
-        private const val TURBULENCE_NOISE_SHADER =
-            ShaderUtilLibrary.SHADER_LIB + UNIFORMS + SHADER_LIB + MAIN_SHADER
+        private const val FRACTAL_SHADER =
+            """
+            vec4 main(vec2 p) {
+                vec2 uv = p / in_size.xy;
+                uv.x *= in_aspectRatio;
+
+                vec3 noiseP = vec3(uv + in_noiseMove.xy, in_noiseMove.z) * in_gridNum;
+                float luma = abs(in_inverseLuma - simplex3d_fractal(noiseP)) * in_opacity;
+                vec3 mask = maskLuminosity(in_color.rgb, luma);
+                vec3 color = in_backgroundColor.rgb + mask * 0.6;
+
+                // Skip dithering.
+                return vec4(color * in_color.a, in_color.a);
+            }
+        """
+
+        private const val SIMPLEX_NOISE_SHADER =
+            ShaderUtilLibrary.SHADER_LIB + UNIFORMS + SIMPLEX_SHADER
+        private const val FRACTAL_NOISE_SHADER =
+            ShaderUtilLibrary.SHADER_LIB + UNIFORMS + FRACTAL_SHADER
     }
 
     /** Sets the number of grid for generating noise. */
@@ -112,6 +122,17 @@ class TurbulenceNoiseShader : RuntimeShader(TURBULENCE_NOISE_SHADER) {
     fun setSize(width: Float, height: Float) {
         setFloatUniform("in_size", width, height)
         setFloatUniform("in_aspectRatio", width / max(height, 0.001f))
+    }
+
+    /**
+     * Sets whether to inverse the luminosity of the noise.
+     *
+     * By default noise will be used as a luma matte as is. This means that you will see color in
+     * the brighter area. If you want to invert it, meaning blend color onto the darker side, set to
+     * true.
+     */
+    fun setInverseNoiseLuminosity(inverse: Boolean) {
+        setFloatUniform("in_inverseLuma", if (inverse) 1f else 0f)
     }
 
     /** Current noise movements in x, y, and z axes. */

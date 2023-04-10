@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.permission.PermissionManager;
+import android.speech.IModelDownloadListener;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionServiceManagerCallback;
@@ -183,13 +184,19 @@ final class SpeechRecognitionManagerServiceImpl extends
                         @Override
                         public void checkRecognitionSupport(
                                 Intent recognizerIntent,
+                                AttributionSource attributionSource,
                                 IRecognitionSupportCallback callback) {
-                            service.checkRecognitionSupport(recognizerIntent, callback);
+                            service.checkRecognitionSupport(
+                                    recognizerIntent, attributionSource, callback);
                         }
 
                         @Override
-                        public void triggerModelDownload(Intent recognizerIntent) {
-                            service.triggerModelDownload(recognizerIntent);
+                        public void triggerModelDownload(
+                                Intent recognizerIntent,
+                                AttributionSource attributionSource,
+                                IModelDownloadListener listener) {
+                            service.triggerModelDownload(
+                                    recognizerIntent, attributionSource, listener);
                         }
                     });
                 } catch (RemoteException e) {

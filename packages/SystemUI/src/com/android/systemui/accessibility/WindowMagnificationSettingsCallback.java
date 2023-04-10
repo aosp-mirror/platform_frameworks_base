@@ -29,7 +29,8 @@ public interface WindowMagnificationSettingsCallback {
      *
      * @param index Magnification size index.
      * 0 : MagnificationSize.NONE, 1 : MagnificationSize.SMALL,
-     * 2 : MagnificationSize.MEDIUM, 3: MagnificationSize.LARGE
+     * 2 : MagnificationSize.MEDIUM, 3: MagnificationSize.LARGE,
+     * 4 : MagnificationSize.FULLSCREEN
      */
     void onSetMagnifierSize(@MagnificationSize int index);
 
@@ -61,4 +62,11 @@ public interface WindowMagnificationSettingsCallback {
      * 1 : ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, 2 : ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
      */
     void onModeSwitch(int newMode);
+
+    /**
+     * Called when the visibility of the magnification settings panel changed.
+     *
+     * @param shown The visibility of the magnification settings panel.
+     */
+    void onSettingsPanelVisibilityChanged(boolean shown);
 }

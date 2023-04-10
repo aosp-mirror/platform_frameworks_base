@@ -35,7 +35,7 @@ object FlagsFactory {
         teamfood: Boolean = false
     ): UnreleasedFlag {
         val flag = UnreleasedFlag(id = id, name = name, namespace = namespace, teamfood = teamfood)
-        FlagsFactory.checkForDupesAndAdd(flag)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
@@ -43,10 +43,9 @@ object FlagsFactory {
         id: Int,
         name: String,
         namespace: String = "systemui",
-        teamfood: Boolean = false
     ): ReleasedFlag {
-        val flag = ReleasedFlag(id = id, name = name, namespace = namespace, teamfood = teamfood)
-        FlagsFactory.checkForDupesAndAdd(flag)
+        val flag = ReleasedFlag(id = id, name = name, namespace = namespace, teamfood = false)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
@@ -55,7 +54,6 @@ object FlagsFactory {
         @BoolRes resourceId: Int,
         name: String,
         namespace: String = "systemui",
-        teamfood: Boolean = false
     ): ResourceBooleanFlag {
         val flag =
             ResourceBooleanFlag(
@@ -63,9 +61,9 @@ object FlagsFactory {
                 name = name,
                 namespace = namespace,
                 resourceId = resourceId,
-                teamfood = teamfood
+                teamfood = false,
             )
-        FlagsFactory.checkForDupesAndAdd(flag)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
@@ -77,18 +75,13 @@ object FlagsFactory {
     ): SysPropBooleanFlag {
         val flag =
             SysPropBooleanFlag(id = id, name = name, namespace = "systemui", default = default)
-        FlagsFactory.checkForDupesAndAdd(flag)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
     private fun checkForDupesAndAdd(flag: Flag<*>) {
         if (flagMap.containsKey(flag.name)) {
-            throw IllegalArgumentException("Name {flag.name} is already registered")
-        }
-        flagMap.forEach {
-            if (it.value.id == flag.id) {
-                throw IllegalArgumentException("Name {flag.id} is already registered")
-            }
+            throw IllegalArgumentException("Name {$flag.name} is already registered")
         }
         flagMap[flag.name] = flag
     }

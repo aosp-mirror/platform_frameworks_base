@@ -27,7 +27,7 @@ import com.android.systemui.util.ViewController
  * pass through to the window below.
  *
  * @param touchableRegionSetter a function that, given the view and an out rect, fills the rect with
- * the touchable region of this view.
+ *   the touchable region of this view.
  */
 class TouchableRegionViewController(
     view: View,

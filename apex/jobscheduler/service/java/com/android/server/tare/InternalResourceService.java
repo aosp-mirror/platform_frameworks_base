@@ -16,6 +16,10 @@
 
 package com.android.server.tare;
 
+import static android.app.tare.EconomyManager.ENABLED_MODE_OFF;
+import static android.app.tare.EconomyManager.ENABLED_MODE_ON;
+import static android.app.tare.EconomyManager.ENABLED_MODE_SHADOW;
+import static android.app.tare.EconomyManager.enabledModeToString;
 import static android.provider.Settings.Global.TARE_ALARM_MANAGER_CONSTANTS;
 import static android.provider.Settings.Global.TARE_JOB_SCHEDULER_CONSTANTS;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -201,8 +205,14 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArrayMap<String, ArraySet<String>> mInstallers = new SparseArrayMap<>();
 
+    /** The package name of the wellbeing app. */
+    @GuardedBy("mLock")
+    @Nullable
+    private String mWellbeingPackage;
+
     private volatile boolean mHasBattery = true;
-    private volatile boolean mIsEnabled;
+    @EconomyManager.EnabledMode
+    private volatile int mEnabledMode;
     private volatile int mBootPhase;
     private volatile boolean mExemptListLoaded;
     // In the range [0,100] to represent 0% to 100% battery.
@@ -474,13 +484,38 @@ public class InternalResourceService extends SystemService {
         }
     }
 
-    boolean isEnabled() {
-        return mIsEnabled;
+    @EconomyManager.EnabledMode
+    int getEnabledMode() {
+        return mEnabledMode;
     }
 
-    boolean isEnabled(int policyId) {
+    @EconomyManager.EnabledMode
+    int getEnabledMode(int policyId) {
         synchronized (mLock) {
-            return isEnabled() && mCompleteEconomicPolicy.isPolicyEnabled(policyId);
+            // For now, treat enabled policies as using the same enabled mode as full TARE.
+            // TODO: have enabled mode by policy
+            if (mCompleteEconomicPolicy.isPolicyEnabled(policyId)) {
+                return mEnabledMode;
+            }
+            return ENABLED_MODE_OFF;
+        }
+    }
+
+    boolean isHeadlessSystemApp(final int userId, @NonNull String pkgName) {
+        if (pkgName == null) {
+            Slog.wtfStack(TAG, "isHeadlessSystemApp called with null package");
+            return false;
+        }
+        synchronized (mLock) {
+            final InstalledPackageInfo ipo = getInstalledPackageInfo(userId, pkgName);
+            if (ipo != null && ipo.isHeadlessSystemApp) {
+                return true;
+            }
+            // The wellbeing app is pre-set on the device, not expected to be interacted with
+            // much by the user, but can be expected to do work in the background on behalf of
+            // the user. As such, it's a pseudo-headless system app, so treat it as a headless
+            // system app.
+            return pkgName.equals(mWellbeingPackage);
         }
     }
 
@@ -613,7 +648,8 @@ public class InternalResourceService extends SystemService {
             mPackageToUidCache.add(userId, pkgName, uid);
         }
         synchronized (mLock) {
-            final InstalledPackageInfo ipo = new InstalledPackageInfo(getContext(), packageInfo);
+            final InstalledPackageInfo ipo = new InstalledPackageInfo(getContext(), userId,
+                    packageInfo);
             final InstalledPackageInfo oldIpo = mPkgCache.add(userId, pkgName, ipo);
             maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             mUidToPackageCache.add(uid, pkgName);
@@ -671,7 +707,7 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo =
-                        new InstalledPackageInfo(getContext(), pkgs.get(i));
+                        new InstalledPackageInfo(getContext(), userId, pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
@@ -857,7 +893,7 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private void processUsageEventLocked(final int userId, @NonNull UsageEvents.Event event) {
-        if (!mIsEnabled) {
+        if (mEnabledMode == ENABLED_MODE_OFF) {
             return;
         }
         final String pkgName = event.getPackageName();
@@ -951,7 +987,7 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo =
-                        new InstalledPackageInfo(getContext(), pkgs.get(i));
+                        new InstalledPackageInfo(getContext(), userId, pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
@@ -1028,7 +1064,7 @@ public class InternalResourceService extends SystemService {
 
     /** Perform long-running and/or heavy setup work. This should be called off the main thread. */
     private void setupHeavyWork() {
-        if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || !mIsEnabled) {
+        if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || mEnabledMode == ENABLED_MODE_OFF) {
             return;
         }
         synchronized (mLock) {
@@ -1079,11 +1115,14 @@ public class InternalResourceService extends SystemService {
     }
 
     private void onBootPhaseSystemServicesReady() {
-        if (mBootPhase < PHASE_SYSTEM_SERVICES_READY || !mIsEnabled) {
+        if (mBootPhase < PHASE_SYSTEM_SERVICES_READY || mEnabledMode == ENABLED_MODE_OFF) {
             return;
         }
         synchronized (mLock) {
             registerListeners();
+            // As of Android UDC, users can't change the wellbeing package, so load it once
+            // as soon as possible and don't bother trying to update it afterwards.
+            mWellbeingPackage = mPackageManager.getWellbeingPackageName();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
             // Get the current battery presence, if available. This would succeed if TARE is
             // toggled long after boot.
@@ -1101,14 +1140,14 @@ public class InternalResourceService extends SystemService {
     }
 
     private void onBootPhaseThirdPartyAppsCanStart() {
-        if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || !mIsEnabled) {
+        if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || mEnabledMode == ENABLED_MODE_OFF) {
             return;
         }
         mHandler.post(this::setupHeavyWork);
     }
 
     private void onBootPhaseBootCompleted() {
-        if (mBootPhase < PHASE_BOOT_COMPLETED || !mIsEnabled) {
+        if (mBootPhase < PHASE_BOOT_COMPLETED || mEnabledMode == ENABLED_MODE_OFF) {
             return;
         }
         synchronized (mLock) {
@@ -1124,7 +1163,7 @@ public class InternalResourceService extends SystemService {
     }
 
     private void setupEverything() {
-        if (!mIsEnabled) {
+        if (mEnabledMode == ENABLED_MODE_OFF) {
             return;
         }
         if (mBootPhase >= PHASE_SYSTEM_SERVICES_READY) {
@@ -1139,7 +1178,7 @@ public class InternalResourceService extends SystemService {
     }
 
     private void tearDownEverything() {
-        if (mIsEnabled) {
+        if (mEnabledMode != ENABLED_MODE_OFF) {
             return;
         }
         synchronized (mLock) {
@@ -1231,7 +1270,7 @@ public class InternalResourceService extends SystemService {
                 case MSG_NOTIFY_STATE_CHANGE_LISTENER: {
                     final int policy = msg.arg1;
                     final TareStateChangeListener listener = (TareStateChangeListener) msg.obj;
-                    listener.onTareEnabledStateChanged(isEnabled(policy));
+                    listener.onTareEnabledModeChanged(getEnabledMode(policy));
                 }
                 break;
 
@@ -1246,10 +1285,10 @@ public class InternalResourceService extends SystemService {
                             }
                             final ArraySet<TareStateChangeListener> listeners =
                                     mStateChangeListeners.get(policy);
-                            final boolean isEnabled = isEnabled(policy);
+                            final int enabledMode = getEnabledMode(policy);
                             for (int p = listeners.size() - 1; p >= 0; --p) {
                                 final TareStateChangeListener listener = listeners.valueAt(p);
-                                listener.onTareEnabledStateChanged(isEnabled);
+                                listener.onTareEnabledModeChanged(enabledMode);
                             }
                         }
                     }
@@ -1382,7 +1421,7 @@ public class InternalResourceService extends SystemService {
 
         @Override
         public boolean canPayFor(int userId, @NonNull String pkgName, @NonNull ActionBill bill) {
-            if (!mIsEnabled) {
+            if (mEnabledMode == ENABLED_MODE_OFF) {
                 return true;
             }
             if (isVip(userId, pkgName)) {
@@ -1410,7 +1449,7 @@ public class InternalResourceService extends SystemService {
         @Override
         public long getMaxDurationMs(int userId, @NonNull String pkgName,
                 @NonNull ActionBill bill) {
-            if (!mIsEnabled) {
+            if (mEnabledMode == ENABLED_MODE_OFF) {
                 return FOREVER_MS;
             }
             if (isVip(userId, pkgName)) {
@@ -1437,19 +1476,19 @@ public class InternalResourceService extends SystemService {
         }
 
         @Override
-        public boolean isEnabled() {
-            return mIsEnabled;
+        public int getEnabledMode() {
+            return mEnabledMode;
         }
 
         @Override
-        public boolean isEnabled(int policyId) {
-            return InternalResourceService.this.isEnabled(policyId);
+        public int getEnabledMode(int policyId) {
+            return InternalResourceService.this.getEnabledMode(policyId);
         }
 
         @Override
         public void noteInstantaneousEvent(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
-            if (!mIsEnabled) {
+            if (mEnabledMode == ENABLED_MODE_OFF) {
                 return;
             }
             synchronized (mLock) {
@@ -1460,7 +1499,7 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteOngoingEventStarted(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
-            if (!mIsEnabled) {
+            if (mEnabledMode == ENABLED_MODE_OFF) {
                 return;
             }
             synchronized (mLock) {
@@ -1472,7 +1511,7 @@ public class InternalResourceService extends SystemService {
         @Override
         public void noteOngoingEventStopped(int userId, @NonNull String pkgName, int eventId,
                 @Nullable String tag) {
-            if (!mIsEnabled) {
+            if (mEnabledMode == ENABLED_MODE_OFF) {
                 return;
             }
             final long nowElapsed = SystemClock.elapsedRealtime();
@@ -1540,7 +1579,7 @@ public class InternalResourceService extends SystemService {
                         continue;
                     }
                     switch (name) {
-                        case EconomyManager.KEY_ENABLE_TARE:
+                        case EconomyManager.KEY_ENABLE_TARE_MODE:
                             updateEnabledStatus();
                             break;
                         case KEY_ENABLE_TIP3:
@@ -1567,17 +1606,33 @@ public class InternalResourceService extends SystemService {
 
         private void updateEnabledStatus() {
             // User setting should override DeviceConfig setting.
-            final boolean isTareEnabledDC = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TARE,
-                    EconomyManager.KEY_ENABLE_TARE, EconomyManager.DEFAULT_ENABLE_TARE);
-            final boolean isTareEnabled = isTareSupported()
-                    && Settings.Global.getInt(mContentResolver,
-                    Settings.Global.ENABLE_TARE, isTareEnabledDC ? 1 : 0) == 1;
-            if (mIsEnabled != isTareEnabled) {
-                mIsEnabled = isTareEnabled;
-                if (mIsEnabled) {
-                    setupEverything();
-                } else {
-                    tearDownEverything();
+            final int tareEnabledModeDC = DeviceConfig.getInt(DeviceConfig.NAMESPACE_TARE,
+                    EconomyManager.KEY_ENABLE_TARE_MODE, EconomyManager.DEFAULT_ENABLE_TARE_MODE);
+            final int tareEnabledModeConfig = isTareSupported()
+                    ? Settings.Global.getInt(mContentResolver,
+                            Settings.Global.ENABLE_TARE, tareEnabledModeDC)
+                    : ENABLED_MODE_OFF;
+            final int enabledMode;
+            if (tareEnabledModeConfig == ENABLED_MODE_OFF
+                    || tareEnabledModeConfig == ENABLED_MODE_ON
+                    || tareEnabledModeConfig == ENABLED_MODE_SHADOW) {
+                // Config has a valid enabled mode.
+                enabledMode = tareEnabledModeConfig;
+            } else {
+                enabledMode = EconomyManager.DEFAULT_ENABLE_TARE_MODE;
+            }
+            if (mEnabledMode != enabledMode) {
+                // A full change where we've gone from OFF to {SHADOW or ON}, or vie versa.
+                // With this transition, we'll have to set up or tear down.
+                final boolean fullEnableChange =
+                        mEnabledMode == ENABLED_MODE_OFF || enabledMode == ENABLED_MODE_OFF;
+                mEnabledMode = enabledMode;
+                if (fullEnableChange) {
+                    if (mEnabledMode != ENABLED_MODE_OFF) {
+                        setupEverything();
+                    } else {
+                        tearDownEverything();
+                    }
                 }
                 mHandler.obtainMessage(
                                 MSG_NOTIFY_STATE_CHANGE_LISTENERS, EconomicPolicy.ALL_POLICIES, 0)
@@ -1592,7 +1647,8 @@ public class InternalResourceService extends SystemService {
                 final int oldEnabledPolicies = mCompleteEconomicPolicy.getEnabledPolicyIds();
                 mCompleteEconomicPolicy.tearDown();
                 mCompleteEconomicPolicy = new CompleteEconomicPolicy(InternalResourceService.this);
-                if (mIsEnabled && mBootPhase >= PHASE_THIRD_PARTY_APPS_CAN_START) {
+                if (mEnabledMode != ENABLED_MODE_OFF
+                        && mBootPhase >= PHASE_THIRD_PARTY_APPS_CAN_START) {
                     mCompleteEconomicPolicy.setup(getAllDeviceConfigProperties());
                     if (minLimit != mCompleteEconomicPolicy.getMinSatiatedConsumptionLimit()
                             || maxLimit
@@ -1626,7 +1682,7 @@ public class InternalResourceService extends SystemService {
                 }
             }
             mVipOverrides.clear();
-            if (mIsEnabled) {
+            if (mEnabledMode != ENABLED_MODE_OFF) {
                 mAgent.onVipStatusChangedLocked(changedPkgs);
             }
         }
@@ -1645,7 +1701,7 @@ public class InternalResourceService extends SystemService {
                 mVipOverrides.add(userId, pkgName, newVipState);
             }
             changed = isVip(userId, pkgName) != wasVip;
-            if (mIsEnabled && changed) {
+            if (mEnabledMode != ENABLED_MODE_OFF && changed) {
                 mAgent.onVipStatusChangedLocked(userId, pkgName);
             }
         }
@@ -1668,8 +1724,8 @@ public class InternalResourceService extends SystemService {
             return;
         }
         synchronized (mLock) {
-            pw.print("Is enabled: ");
-            pw.println(mIsEnabled);
+            pw.print("Enabled mode: ");
+            pw.println(enabledModeToString(mEnabledMode));
 
             pw.print("Current battery level: ");
             pw.println(mCurrentBatteryLevel);
@@ -1701,6 +1757,10 @@ public class InternalResourceService extends SystemService {
             pw.println();
             pw.print("Exempted apps", mExemptedApps);
             pw.println();
+
+            pw.println();
+            pw.print("Wellbeing app=");
+            pw.println(mWellbeingPackage == null ? "None" : mWellbeingPackage);
 
             boolean printedVips = false;
             pw.println();
@@ -1780,6 +1840,37 @@ public class InternalResourceService extends SystemService {
 
             pw.println();
             mAnalyst.dump(pw);
+
+            // Put this at the end since this may be a lot and we want to have the earlier
+            // information easily accessible.
+            boolean printedInterestingIpos = false;
+            pw.println();
+            pw.print("Interesting apps:");
+            pw.increaseIndent();
+            for (int u = 0; u < mPkgCache.numMaps(); ++u) {
+                for (int p = 0; p < mPkgCache.numElementsForKeyAt(u); ++p) {
+                    final InstalledPackageInfo ipo = mPkgCache.valueAt(u, p);
+
+                    // Printing out every single app will be too much. Only print apps that
+                    // have some interesting characteristic.
+                    final boolean isInteresting = ipo.hasCode
+                            && ipo.isHeadlessSystemApp
+                            && !UserHandle.isCore(ipo.uid);
+                    if (!isInteresting) {
+                        continue;
+                    }
+
+                    printedInterestingIpos = true;
+                    pw.println();
+                    pw.print(ipo);
+                }
+            }
+            if (printedInterestingIpos) {
+                pw.println();
+            } else {
+                pw.print(" None");
+            }
+            pw.decreaseIndent();
         }
     }
 }

@@ -295,8 +295,8 @@ public class AppTransitionTests extends WindowTestsBase {
         dc2.prepareAppTransition(TRANSIT_CLOSE);
         // One activity window is visible for resuming & the other activity window is invisible
         // for finishing in different display.
-        activity1.setVisibility(true, false);
-        activity2.setVisibility(false, false);
+        activity1.setVisibility(true);
+        activity2.setVisibility(false);
 
         // Make sure each display is in animating stage.
         assertTrue(dc1.mOpeningApps.size() > 0);
@@ -365,7 +365,7 @@ public class AppTransitionTests extends WindowTestsBase {
         dc.prepareAppTransition(TRANSIT_CLOSE);
         assertTrue(dc.mAppTransition.containsTransitRequest(TRANSIT_CLOSE));
         dc.mAppTransition.overridePendingAppTransitionRemote(adapter);
-        exitingActivity.setVisibility(false, false);
+        exitingActivity.setVisibility(false);
         assertTrue(dc.mClosingApps.size() > 0);
 
         // Make sure window is in animating stage before freeze, and cancel after freeze.

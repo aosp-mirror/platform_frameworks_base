@@ -19,11 +19,18 @@ package com.android.wallpaperbackup;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 
+import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_INELIGIBLE;
+import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_METADATA;
+import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_WALLPAPER;
+import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_QUOTA_EXCEEDED;
+
 import android.app.AppGlobals;
 import android.app.WallpaperManager;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupManager;
+import android.app.backup.BackupRestoreEventLogger.BackupRestoreError;
 import android.app.backup.FullBackupDataOutput;
 import android.content.ComponentName;
 import android.content.Context;
@@ -103,6 +110,10 @@ public class WallpaperBackupAgent extends BackupAgent {
     private boolean mQuotaExceeded;
 
     private WallpaperManager mWallpaperManager;
+    private WallpaperEventLogger mEventLogger;
+
+    private boolean mSystemHasLiveComponent;
+    private boolean mLockHasLiveComponent;
 
     @Override
     public void onCreate() {
@@ -117,6 +128,9 @@ public class WallpaperBackupAgent extends BackupAgent {
         if (DEBUG) {
             Slog.v(TAG, "quota file " + mQuotaFile.getPath() + " exists=" + mQuotaExceeded);
         }
+
+        BackupManager backupManager = new BackupManager(getApplicationContext());
+        mEventLogger = new WallpaperEventLogger(backupManager, /* wallpaperAgent */ this);
     }
 
     @Override
@@ -149,11 +163,18 @@ public class WallpaperBackupAgent extends BackupAgent {
                 Slog.v(TAG, "lockGen=" + lockGeneration + " : lockChanged=" + lockChanged);
             }
 
+            // Due to the way image vs live wallpaper backup logic is intermingled, for logging
+            // purposes first check if we have live components for each wallpaper to avoid
+            // over-reporting errors.
+            mSystemHasLiveComponent = mWallpaperManager.getWallpaperInfo(FLAG_SYSTEM) != null;
+            mLockHasLiveComponent = mWallpaperManager.getWallpaperInfo(FLAG_LOCK) != null;
+
             backupWallpaperInfoFile(/* sysOrLockChanged= */ sysChanged || lockChanged, data);
             backupSystemWallpaperFile(sharedPrefs, sysChanged, sysGeneration, data);
             backupLockWallpaperFileIfItExists(sharedPrefs, lockChanged, lockGeneration, data);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to back up wallpaper", e);
+            mEventLogger.onBackupException(e);
         } finally {
             // Even if this time we had to back off on attempting to store the lock image
             // due to exceeding the data quota, try again next time.  This will alternate
@@ -170,6 +191,14 @@ public class WallpaperBackupAgent extends BackupAgent {
 
         if (wallpaperInfoFd == null) {
             Slog.w(TAG, "Wallpaper metadata file doesn't exist");
+            // If we have live components, getting the file to back up somehow failed, so log it
+            // as an error.
+            if (mSystemHasLiveComponent) {
+                mEventLogger.onSystemLiveWallpaperBackupFailed(ERROR_NO_METADATA);
+            }
+            if (mLockHasLiveComponent) {
+                mEventLogger.onLockLiveWallpaperBackupFailed(ERROR_NO_METADATA);
+            }
             return;
         }
 
@@ -182,12 +211,22 @@ public class WallpaperBackupAgent extends BackupAgent {
 
         if (DEBUG) Slog.v(TAG, "Storing wallpaper metadata");
         backupFile(infoStage, data);
+
+        // We've backed up the info file which contains the live component, so log it as success
+        if (mSystemHasLiveComponent) {
+            mEventLogger.onSystemLiveWallpaperBackedUp(
+                    mWallpaperManager.getWallpaperInfo(FLAG_SYSTEM));
+        }
+        if (mLockHasLiveComponent) {
+            mEventLogger.onLockLiveWallpaperBackedUp(mWallpaperManager.getWallpaperInfo(FLAG_LOCK));
+        }
     }
 
     private void backupSystemWallpaperFile(SharedPreferences sharedPrefs,
             boolean sysChanged, int sysGeneration, FullBackupDataOutput data) throws IOException {
         if (!mWallpaperManager.isWallpaperBackupEligible(FLAG_SYSTEM)) {
             Slog.d(TAG, "System wallpaper ineligible for backup");
+            logSystemImageErrorIfNoLiveComponent(ERROR_INELIGIBLE);
             return;
         }
 
@@ -197,6 +236,7 @@ public class WallpaperBackupAgent extends BackupAgent {
 
         if (systemWallpaperImageFd == null) {
             Slog.w(TAG, "System wallpaper doesn't exist");
+            logSystemImageErrorIfNoLiveComponent(ERROR_NO_WALLPAPER);
             return;
         }
 
@@ -210,7 +250,16 @@ public class WallpaperBackupAgent extends BackupAgent {
         if (DEBUG) Slog.v(TAG, "Storing system wallpaper image");
         backupFile(imageStage, data);
         sharedPrefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
+        mEventLogger.onSystemImageWallpaperBackedUp();
     }
+
+    private void logSystemImageErrorIfNoLiveComponent(@BackupRestoreError String error) {
+        if (mSystemHasLiveComponent) {
+            return;
+        }
+        mEventLogger.onSystemImageWallpaperBackupFailed(error);
+    }
+
 
     private void backupLockWallpaperFileIfItExists(SharedPreferences sharedPrefs,
             boolean lockChanged, int lockGeneration, FullBackupDataOutput data) throws IOException {
@@ -224,11 +273,13 @@ public class WallpaperBackupAgent extends BackupAgent {
             }
             Slog.d(TAG, "No lockscreen wallpaper set, add nothing to backup");
             sharedPrefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
+            logLockImageErrorIfNoLiveComponent(ERROR_NO_WALLPAPER);
             return;
         }
 
         if (!mWallpaperManager.isWallpaperBackupEligible(FLAG_LOCK)) {
             Slog.d(TAG, "Lock screen wallpaper ineligible for backup");
+            logLockImageErrorIfNoLiveComponent(ERROR_INELIGIBLE);
             return;
         }
 
@@ -239,11 +290,13 @@ public class WallpaperBackupAgent extends BackupAgent {
         // set, but we can't find it.
         if (lockWallpaperFd == null) {
             Slog.w(TAG, "Lock wallpaper doesn't exist");
+            logLockImageErrorIfNoLiveComponent(ERROR_NO_WALLPAPER);
             return;
         }
 
         if (mQuotaExceeded) {
             Slog.w(TAG, "Not backing up lock screen wallpaper. Quota was exceeded last time");
+            logLockImageErrorIfNoLiveComponent(ERROR_QUOTA_EXCEEDED);
             return;
         }
 
@@ -255,6 +308,14 @@ public class WallpaperBackupAgent extends BackupAgent {
         if (DEBUG) Slog.v(TAG, "Storing lock wallpaper image");
         backupFile(lockImageStage, data);
         sharedPrefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
+        mEventLogger.onLockImageWallpaperBackedUp();
+    }
+
+    private void logLockImageErrorIfNoLiveComponent(@BackupRestoreError String error) {
+        if (mLockHasLiveComponent) {
+            return;
+        }
+        mEventLogger.onLockImageWallpaperBackupFailed(error);
     }
 
     /**

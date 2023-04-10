@@ -80,14 +80,6 @@ public class TaskConstants {
     public static final int TASK_CHILD_LAYER_TASK_OVERLAY = 5 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
-     * Legacy machanism to force an activity to the top of the task (i.e. for work profile
-     * comfirmation).
-     * @hide
-     */
-    public static final int TASK_CHILD_LAYER_TASK_OVERLAY_ACTIVITIES =
-            6 * TASK_CHILD_LAYER_REGION_SIZE;
-
-    /**
      * Z-orders of task child layers other than activities, task fragments and layers interleaved
      * with them, e.g. IME windows. [-10000, 10000) is reserved for these layers.
      * @hide
@@ -99,8 +91,7 @@ public class TaskConstants {
             TASK_CHILD_LAYER_LETTERBOX_EDUCATION,
             TASK_CHILD_LAYER_WINDOW_DECORATIONS,
             TASK_CHILD_LAYER_RECENTS_ANIMATION_PIP_OVERLAY,
-            TASK_CHILD_LAYER_TASK_OVERLAY,
-            TASK_CHILD_LAYER_TASK_OVERLAY_ACTIVITIES
+            TASK_CHILD_LAYER_TASK_OVERLAY
     })
     public @interface TaskChildLayer {}
 }

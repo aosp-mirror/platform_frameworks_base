@@ -38,6 +38,7 @@ class CreateUserActivityTest : SysuiTestCase() {
             },
             /* activityManager = */ mock(),
             /* activityStarter = */ mock(),
+            mock(),
         )
 
     @get:Rule val activityRule = ActivityScenarioRule(CreateUserActivityTestable::class.java)

@@ -210,13 +210,16 @@ public abstract class CompanionDeviceService extends Service {
      * As an example, it's valid to provide streams obtained from a
      * {@link BluetoothSocket} to this method, since {@link BluetoothSocket}
      * meets the API contract described above.
+     * <p>
+     * This method passes through to
+     * {@link CompanionDeviceManager#attachSystemDataTransport(int, InputStream, OutputStream)}
+     * for your convenience if you get callbacks in this class.
      *
      * @param associationId id of the associated device
      * @param in already connected stream of data incoming from remote
      *            associated device
      * @param out already connected stream of data outgoing to remote associated
      *            device
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void attachSystemDataTransport(int associationId, @NonNull InputStream in,
@@ -230,9 +233,12 @@ public abstract class CompanionDeviceService extends Service {
     /**
      * Detach any bidirectional communication streams previously configured
      * through {@link #attachSystemDataTransport}.
+     * <p>
+     * This method passes through to
+     * {@link CompanionDeviceManager#detachSystemDataTransport(int)}
+     * for your convenience if you get callbacks in this class.
      *
      * @param associationId id of the associated device
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void detachSystemDataTransport(int associationId)

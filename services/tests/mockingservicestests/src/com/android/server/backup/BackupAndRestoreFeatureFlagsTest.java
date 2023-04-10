@@ -46,8 +46,9 @@ public class BackupAndRestoreFeatureFlagsTest {
 
     @Test
     public void getBackupTransportFutureTimeoutMillis_set_returnsSetValue() {
-        DeviceConfig.setProperty("backup_and_restore", "backup_transport_future_timeout_millis",
-                "1234", false);
+        DeviceConfig.setProperty(/*namespace=*/ "backup_and_restore",
+                /*name=*/ "backup_transport_future_timeout_millis",
+                /*value=*/ "1234", /*makeDefault=*/ false);
 
         assertThat(
                 BackupAndRestoreFeatureFlags.getBackupTransportFutureTimeoutMillis()).isEqualTo(
@@ -63,11 +64,44 @@ public class BackupAndRestoreFeatureFlagsTest {
 
     @Test
     public void getBackupTransportCallbackTimeoutMillis_set_returnsSetValue() {
-        DeviceConfig.setProperty("backup_and_restore", "backup_transport_callback_timeout_millis",
-                "5678", false);
+        DeviceConfig.setProperty(/*namespace=*/ "backup_and_restore",
+                /*name=*/ "backup_transport_callback_timeout_millis",
+                /*value=*/ "5678", /*makeDefault=*/ false);
 
         assertThat(
                 BackupAndRestoreFeatureFlags.getBackupTransportCallbackTimeoutMillis()).isEqualTo(
                 5678);
+    }
+
+    @Test
+    public void getFullBackupWriteToTransportBufferSizeBytes_notSet_returnsDefault() {
+        assertThat(BackupAndRestoreFeatureFlags.getFullBackupWriteToTransportBufferSizeBytes())
+                .isEqualTo(8 * 1024);
+    }
+
+    @Test
+    public void getFullBackupWriteToTransportBufferSizeBytes_set_returnsSetValue() {
+        DeviceConfig.setProperty(/*namespace=*/ "backup_and_restore",
+                /*name=*/ "full_backup_write_to_transport_buffer_size_bytes",
+                /*value=*/ "5678", /*makeDefault=*/ false);
+
+        assertThat(BackupAndRestoreFeatureFlags.getFullBackupWriteToTransportBufferSizeBytes())
+                .isEqualTo(5678);
+    }
+
+    @Test
+    public void getFullBackupUtilsRouteBufferSizeBytes_notSet_returnsDefault() {
+        assertThat(BackupAndRestoreFeatureFlags.getFullBackupUtilsRouteBufferSizeBytes())
+                .isEqualTo(32 * 1024);
+    }
+
+    @Test
+    public void getFullBackupUtilsRouteBufferSizeBytes_set_returnsSetValue() {
+        DeviceConfig.setProperty(/*namespace=*/ "backup_and_restore",
+                /*name=*/ "full_backup_utils_route_buffer_size_bytes",
+                /*value=*/ "5678", /*makeDefault=*/ false);
+
+        assertThat(BackupAndRestoreFeatureFlags.getFullBackupUtilsRouteBufferSizeBytes())
+                .isEqualTo(5678);
     }
 }

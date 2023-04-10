@@ -19,6 +19,7 @@ package com.android.systemui.statusbar
 import android.app.ActivityManager
 import android.content.res.Resources
 import android.os.SystemProperties
+import android.os.Trace
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.CrossWindowBlurListeners
@@ -42,7 +43,7 @@ open class BlurUtils @Inject constructor(
 ) : Dumpable {
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
-
+    private val traceCookie = System.identityHashCode(this)
     private var lastAppliedBlur = 0
 
     init {
@@ -85,10 +86,13 @@ open class BlurUtils @Inject constructor(
             if (supportsBlursOnWindows()) {
                 it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
                 if (lastAppliedBlur == 0 && radius != 0) {
+                    Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, TRACK_NAME,
+                            EARLY_WAKEUP_SLICE_NAME, traceCookie)
                     it.setEarlyWakeupStart()
                 }
                 if (lastAppliedBlur != 0 && radius == 0) {
                     it.setEarlyWakeupEnd()
+                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TRACK_NAME, traceCookie)
                 }
                 lastAppliedBlur = radius
             }
@@ -124,5 +128,10 @@ open class BlurUtils @Inject constructor(
             it.println("CROSS_WINDOW_BLUR_SUPPORTED: $CROSS_WINDOW_BLUR_SUPPORTED")
             it.println("isHighEndGfx: ${ActivityManager.isHighEndGfx()}")
         }
+    }
+
+    companion object {
+        const val TRACK_NAME = "BlurUtils"
+        const val EARLY_WAKEUP_SLICE_NAME = "eEarlyWakeup"
     }
 }

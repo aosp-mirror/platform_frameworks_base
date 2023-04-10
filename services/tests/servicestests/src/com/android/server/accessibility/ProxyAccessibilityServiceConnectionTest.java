@@ -28,6 +28,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -35,6 +36,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.android.server.wm.WindowManagerInternal;
 
@@ -48,6 +50,7 @@ import java.util.List;
 
 public class ProxyAccessibilityServiceConnectionTest {
     private static final int DISPLAY_ID = 1000;
+    private static final int DEVICE_ID = 2000;
     private static final int CONNECTION_ID = 1000;
     private static final ComponentName COMPONENT_NAME = new ComponentName(
             "com.android.server.accessibility", ".ProxyAccessibilityServiceConnectionTest");
@@ -79,13 +82,16 @@ public class ProxyAccessibilityServiceConnectionTest {
 
     @Before
     public void setup() {
+        final Resources resources = getInstrumentation().getContext().getResources();
         MockitoAnnotations.initMocks(this);
+        when(mMockContext.getResources()).thenReturn(resources);
+
         mAccessibilityServiceInfo = new AccessibilityServiceInfo();
         mProxyConnection = new ProxyAccessibilityServiceConnection(mMockContext, COMPONENT_NAME,
                 mAccessibilityServiceInfo, CONNECTION_ID , new Handler(
                         getInstrumentation().getContext().getMainLooper()),
                 mMockLock, mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
-                mMockWindowManagerInternal, mMockA11yWindowManager, DISPLAY_ID);
+                mMockWindowManagerInternal, mMockA11yWindowManager, DISPLAY_ID, DEVICE_ID);
     }
 
     @Test
@@ -96,7 +102,7 @@ public class ProxyAccessibilityServiceConnectionTest {
 
         mProxyConnection.setInstalledAndEnabledServices(infos);
 
-        verify(mMockSystemSupport).onClientChangeLocked(true);
+        verify(mMockSystemSupport).onProxyChanged(DEVICE_ID);
     }
 
     @Test

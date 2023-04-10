@@ -19,4 +19,12 @@
     android:id="@+id/udfps_animation_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <!-- The layout height/width are placeholders, which will be overwritten by
+     FingerprintSensorPropertiesInternal. -->
+    <View
+        android:id="@+id/udfps_enroll_accessibility_view"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/accessibility_fingerprint_label"/>
 </com.android.systemui.biometrics.UdfpsFpmEmptyView>

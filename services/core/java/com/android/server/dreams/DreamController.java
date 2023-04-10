@@ -16,6 +16,10 @@
 
 package com.android.server.dreams;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
+
+import android.app.ActivityTaskManager;
 import android.app.BroadcastOptions;
 import android.content.ComponentName;
 import android.content.Context;
@@ -43,6 +47,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -59,19 +64,25 @@ final class DreamController {
     // Time to allow the dream to perform an exit transition when waking up.
     private static final int DREAM_FINISH_TIMEOUT = 5 * 1000;
 
+    // Extras used with ACTION_CLOSE_SYSTEM_DIALOGS broadcast
+    private static final String EXTRA_REASON_KEY = "reason";
+    private static final String EXTRA_REASON_VALUE = "dream";
+
     private final Context mContext;
     private final Handler mHandler;
     private final Listener mListener;
+    private final ActivityTaskManager mActivityTaskManager;
 
     private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
-            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | FLAG_RECEIVER_FOREGROUND);
     private final Intent mDreamingStoppedIntent = new Intent(Intent.ACTION_DREAMING_STOPPED)
-            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | FLAG_RECEIVER_FOREGROUND);
     private static final String DREAMING_DELIVERY_GROUP_NAMESPACE = UUID.randomUUID().toString();
     private static final String DREAMING_DELIVERY_GROUP_KEY = UUID.randomUUID().toString();
     private final Bundle mDreamingStartedStoppedOptions = createDreamingStartedStoppedOptions();
 
     private final Intent mCloseNotificationShadeIntent;
+    private final Bundle mCloseNotificationShadeOptions;
 
     private DreamRecord mCurrentDream;
 
@@ -89,8 +100,16 @@ final class DreamController {
         mContext = context;
         mHandler = handler;
         mListener = listener;
+        mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mCloseNotificationShadeIntent.putExtra("reason", "dream");
+        mCloseNotificationShadeIntent.putExtra(EXTRA_REASON_KEY, EXTRA_REASON_VALUE);
+        mCloseNotificationShadeIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mCloseNotificationShadeOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS,
+                        EXTRA_REASON_VALUE)
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .toBundle();
     }
 
     /**
@@ -113,6 +132,8 @@ final class DreamController {
         //   are yet to be delivered.
         options.setDeliveryGroupMatchingKey(
                 DREAMING_DELIVERY_GROUP_NAMESPACE, DREAMING_DELIVERY_GROUP_KEY);
+        // This allows the broadcast delivery to be delayed to apps in the Cached state.
+        options.setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
         return options.toBundle();
     }
 
@@ -141,16 +162,26 @@ final class DreamController {
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
         try {
             // Close the notification shade. No need to send to all, but better to be explicit.
-            mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
+            mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL,
+                    null /* receiverPermission */, mCloseNotificationShadeOptions);
 
             Slog.i(TAG, "Starting dream: name=" + name
                     + ", isPreviewMode=" + isPreviewMode + ", canDoze=" + canDoze
                     + ", userId=" + userId + ", reason='" + reason + "'");
 
-            if (mCurrentDream != null) {
-                mPreviousDreams.add(mCurrentDream);
-            }
+            final DreamRecord oldDream = mCurrentDream;
             mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
+            if (oldDream != null) {
+                if (Objects.equals(oldDream.mName, mCurrentDream.mName)) {
+                    // We are attempting to start a dream that is currently waking up gently.
+                    // Let's silently stop the old instance here to clear the dream state.
+                    // This should happen after the new mCurrentDream is set to avoid announcing
+                    // a "dream stopped" state.
+                    stopDreamInstance(/* immediately */ true, "restarting same dream", oldDream);
+                } else {
+                    mPreviousDreams.add(oldDream);
+                }
+            }
 
             mCurrentDream.mDreamStartTime = SystemClock.elapsedRealtime();
             MetricsLogger.visible(mContext,
@@ -272,8 +303,12 @@ final class DreamController {
                     mSentStartBroadcast = false;
                 }
 
+                mActivityTaskManager.removeRootTasksWithActivityTypes(
+                        new int[] {ACTIVITY_TYPE_DREAM});
+
                 mListener.onDreamStopped(dream.mToken);
             }
+
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -298,7 +333,7 @@ final class DreamController {
         try {
             service.asBinder().linkToDeath(mCurrentDream, 0);
             service.attach(mCurrentDream.mToken, mCurrentDream.mCanDoze,
-                    mCurrentDream.mDreamingStartedCallback);
+                    mCurrentDream.mIsPreviewMode, mCurrentDream.mDreamingStartedCallback);
         } catch (RemoteException ex) {
             Slog.e(TAG, "The dream service died unexpectedly.", ex);
             stopDream(true /*immediate*/, "attach failed");
