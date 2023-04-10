@@ -37,7 +37,6 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -332,28 +331,6 @@ class TransitionController {
     /** @return {@code true} if a transition is running in a participant subtree of wc */
     boolean inTransition(@NonNull WindowContainer wc) {
         return inCollectingTransition(wc) || inPlayingTransition(wc);
-    }
-
-    boolean inRecentsTransition(@NonNull WindowContainer wc) {
-        for (WindowContainer p = wc; p != null; p = p.getParent()) {
-            // TODO(b/221417431): replace this with deterministic snapshots
-            if (mCollectingTransition == null) break;
-            if ((mCollectingTransition.getFlags() & TRANSIT_FLAG_IS_RECENTS) != 0
-                    && mCollectingTransition.mParticipants.contains(wc)) {
-                return true;
-            }
-        }
-
-        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
-            for (WindowContainer p = wc; p != null; p = p.getParent()) {
-                // TODO(b/221417431): replace this with deterministic snapshots
-                if ((mPlayingTransitions.get(i).getFlags() & TRANSIT_FLAG_IS_RECENTS) != 0
-                        && mPlayingTransitions.get(i).mParticipants.contains(p)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /** @return {@code true} if wc is in a participant subtree */
@@ -773,12 +750,12 @@ class TransitionController {
             // happening in app), so pause task snapshot persisting to not increase the load.
             mAtm.mWindowManager.mSnapshotController.setPause(true);
             mAnimatingState = true;
-            Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "transitAnim", 0);
+            Transition.asyncTraceBegin("animating", 0x41bfaf1 /* hashcode of TAG */);
         } else if (!animatingState && mAnimatingState) {
             t.setEarlyWakeupEnd();
             mAtm.mWindowManager.mSnapshotController.setPause(false);
             mAnimatingState = false;
-            Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "transitAnim", 0);
+            Transition.asyncTraceEnd(0x41bfaf1 /* hashcode of TAG */);
         }
     }
 
