@@ -2548,6 +2548,7 @@ class ActivityStarter {
         mAvoidMoveToFront = false;
         mFrozeTaskList = false;
         mTransientLaunch = false;
+        mPriorAboveTask = null;
         mDisplayLockAndOccluded = false;
 
         mVoiceSession = null;

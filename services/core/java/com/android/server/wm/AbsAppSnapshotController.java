@@ -466,8 +466,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     }
 
     boolean isAnimatingByRecents(@NonNull Task task) {
-        return task.isAnimatingByRecents()
-                || mService.mAtmService.getTransitionController().inRecentsTransition(task);
+        return task.isAnimatingByRecents();
     }
 
     void dump(PrintWriter pw, String prefix) {
