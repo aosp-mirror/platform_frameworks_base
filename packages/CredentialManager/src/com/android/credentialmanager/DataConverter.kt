@@ -252,13 +252,6 @@ class GetFlowUtils {
                         ))
                     }
                     is PublicKeyCredentialEntry -> {
-                        val passkeyUsername = credentialEntry.username.toString()
-                        val passkeyDisplayName = credentialEntry.displayName?.toString() ?: ""
-                        val (username, displayName) = userAndDisplayNameForPasskey(
-                            passkeyUsername = passkeyUsername,
-                            passkeyDisplayName = passkeyDisplayName,
-                        )
-
                         result.add(CredentialEntryInfo(
                             providerId = providerId,
                             providerDisplayName = providerLabel,
@@ -268,8 +261,8 @@ class GetFlowUtils {
                             fillInIntent = it.frameworkExtrasIntent,
                             credentialType = CredentialType.PASSKEY,
                             credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
-                            userName = username,
-                            displayName = displayName,
+                            userName = credentialEntry.username.toString(),
+                            displayName = credentialEntry.displayName?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
                             shouldTintIcon = credentialEntry.isDefaultIcon,
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
@@ -707,7 +700,7 @@ class CreateFlowUtils {
  * 2) username on top if display-name is not available.
  * 3) don't show username on second line if username == display-name
  */
-private fun userAndDisplayNameForPasskey(
+fun userAndDisplayNameForPasskey(
     passkeyUsername: String,
     passkeyDisplayName: String,
 ): Pair<String, String> {
