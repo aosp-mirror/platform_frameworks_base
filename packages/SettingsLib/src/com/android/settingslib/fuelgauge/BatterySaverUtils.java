@@ -120,9 +120,9 @@ public class BatterySaverUtils {
      * @return true if the request succeeded.
      */
     public static synchronized boolean setPowerSaveMode(Context context,
-            boolean enable, boolean needFirstTimeWarning) {
+            boolean enable, boolean needFirstTimeWarning, @SaverManualEnabledReason int reason) {
         if (DEBUG) {
-            Log.d(TAG, "Battery saver turning " + (enable ? "ON" : "OFF"));
+            Log.d(TAG, "Battery saver turning " + (enable ? "ON" : "OFF") + ", reason: " + reason);
         }
         final ContentResolver cr = context.getContentResolver();
 
@@ -152,6 +152,7 @@ public class BatterySaverUtils {
                     sendSystemUiBroadcast(context, ACTION_SHOW_AUTO_SAVER_SUGGESTION,
                             confirmationExtras);
                 }
+                recordBatterySaverEnabledReason(context, reason);
             }
 
             return true;

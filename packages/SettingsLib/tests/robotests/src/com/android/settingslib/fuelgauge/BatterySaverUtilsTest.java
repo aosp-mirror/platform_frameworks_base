@@ -16,6 +16,7 @@
 
 package com.android.settingslib.fuelgauge;
 
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_UNKNOWN;
 import static com.android.settingslib.fuelgauge.BatterySaverUtils.KEY_NO_SCHEDULE;
 import static com.android.settingslib.fuelgauge.BatterySaverUtils.KEY_PERCENTAGE;
 
@@ -72,7 +73,8 @@ public class BatterySaverUtilsTest {
         Secure.putString(mMockResolver, Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, "null");
         Secure.putString(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, "null");
 
-        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true)).isFalse();
+        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true,
+                SAVER_ENABLED_UNKNOWN)).isFalse();
 
         verify(mMockContext, times(1)).sendBroadcast(any(Intent.class));
         verify(mMockPowerManager, times(0)).setPowerSaveModeEnabled(anyBoolean());
@@ -92,7 +94,8 @@ public class BatterySaverUtilsTest {
         Secure.putInt(mMockResolver, Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, 1);
         Secure.putString(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, "null");
 
-        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true)).isTrue();
+        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true,
+                SAVER_ENABLED_UNKNOWN)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
         verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(true));
@@ -111,7 +114,8 @@ public class BatterySaverUtilsTest {
         Secure.putInt(mMockResolver, Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, 1);
         Secure.putInt(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, 1);
 
-        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true)).isTrue();
+        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true,
+                SAVER_ENABLED_UNKNOWN)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
         verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(true));
@@ -129,7 +133,8 @@ public class BatterySaverUtilsTest {
         Secure.putString(mMockResolver, Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, "null");
         Secure.putString(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, "null");
 
-        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, false)).isTrue();
+        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, false,
+                SAVER_ENABLED_UNKNOWN)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
         verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(true));
@@ -147,7 +152,8 @@ public class BatterySaverUtilsTest {
         Secure.putString(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, "null");
 
         // When disabling, needFirstTimeWarning doesn't matter.
-        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, false, false)).isTrue();
+        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, false, false,
+                SAVER_ENABLED_UNKNOWN)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
         verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(false));
@@ -166,7 +172,8 @@ public class BatterySaverUtilsTest {
         Secure.putString(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, "null");
 
         // When disabling, needFirstTimeWarning doesn't matter.
-        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, false, true)).isTrue();
+        assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, false, true,
+                SAVER_ENABLED_UNKNOWN)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
         verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(false));

@@ -21,6 +21,7 @@ import static android.os.BatteryManager.EXTRA_PRESENT;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
 
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -167,8 +168,10 @@ public class BatteryControllerTest extends SysuiTestCase {
         mBatteryController.setPowerSaveMode(false, mView);
 
         StaticInOrder inOrder = inOrder(staticMockMarker(BatterySaverUtils.class));
-        inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), true, true));
-        inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), false, true));
+        inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), true, true,
+                SAVER_ENABLED_QS));
+        inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), false, true,
+                SAVER_ENABLED_QS));
     }
 
     @Test
