@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,7 +34,7 @@ import java.util.Objects;
  * Response to a {@link BeginCreateCredentialRequest}.
  */
 public final class BeginCreateCredentialResponse implements Parcelable {
-    private final @NonNull List<CreateEntry> mCreateEntries;
+    private final @NonNull ParceledListSlice<CreateEntry> mCreateEntries;
     private final @Nullable RemoteEntry mRemoteCreateEntry;
 
     /**
@@ -41,19 +42,19 @@ public final class BeginCreateCredentialResponse implements Parcelable {
      * to return.
      */
     public BeginCreateCredentialResponse() {
-        this(/*createEntries=*/new ArrayList<>(), /*remoteCreateEntry=*/null);
+        this(/*createEntries=*/new ParceledListSlice<>(new ArrayList<>()),
+                /*remoteCreateEntry=*/null);
     }
 
     private BeginCreateCredentialResponse(@NonNull Parcel in) {
-        List<CreateEntry> createEntries = new ArrayList<>();
-        in.readTypedList(createEntries, CreateEntry.CREATOR);
-        mCreateEntries = createEntries;
+        mCreateEntries = in.readParcelable(
+                null, android.content.pm.ParceledListSlice.class);
         mRemoteCreateEntry = in.readTypedObject(RemoteEntry.CREATOR);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeTypedList(mCreateEntries);
+        dest.writeParcelable(mCreateEntries, flags);
         dest.writeTypedObject(mRemoteCreateEntry, flags);
     }
 
@@ -76,7 +77,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
             };
 
     /* package-private */ BeginCreateCredentialResponse(
-            @NonNull List<CreateEntry> createEntries,
+            @NonNull ParceledListSlice<CreateEntry> createEntries,
             @Nullable RemoteEntry remoteCreateEntry) {
         this.mCreateEntries = createEntries;
         com.android.internal.util.AnnotationValidations.validate(
@@ -86,7 +87,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
 
     /** Returns the list of create entries to be displayed on the UI. */
     public @NonNull List<CreateEntry> getCreateEntries() {
-        return mCreateEntries;
+        return mCreateEntries.getList();
     }
 
     /** Returns the remote create entry to be displayed on the UI. */
@@ -159,7 +160,9 @@ public final class BeginCreateCredentialResponse implements Parcelable {
          * Builds a new instance of {@link BeginCreateCredentialResponse}.
          */
         public @NonNull BeginCreateCredentialResponse build() {
-            return new BeginCreateCredentialResponse(mCreateEntries, mRemoteCreateEntry);
+            return new BeginCreateCredentialResponse(
+                    new ParceledListSlice<>(mCreateEntries),
+                    mRemoteCreateEntry);
         }
     }
 }
