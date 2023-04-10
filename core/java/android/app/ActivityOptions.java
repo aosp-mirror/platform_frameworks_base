@@ -403,8 +403,11 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_SPLASH_SCREEN_STYLE =
             "android.activity.splashScreenStyle";
 
-    /** See {@link #setTransientLaunch()}. */
-    private static final String KEY_TRANSIENT_LAUNCH = "android.activity.transientLaunch";
+    /**
+     * See {@link #setTransientLaunch()}.
+     * @hide
+     */
+    public static final String KEY_TRANSIENT_LAUNCH = "android.activity.transientLaunch";
 
     /** see {@link #makeLaunchIntoPip(PictureInPictureParams)}. */
     private static final String KEY_LAUNCH_INTO_PIP_PARAMS =

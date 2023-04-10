@@ -55,6 +55,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TASK_LAUNCHING_BEHIND;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.FLAG_WILL_IME_SHOWN;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
 
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
@@ -65,12 +66,14 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -85,6 +88,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ScreenCapture;
 import android.window.TransitionInfo;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
@@ -185,7 +189,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     final ArraySet<WindowContainer> mParticipants = new ArraySet<>();
 
     /** The final animation targets derived from participants after promotion. */
-    private ArrayList<ChangeInfo> mTargets;
+    ArrayList<ChangeInfo> mTargets;
 
     /** The displays that this transition is running on. */
     private final ArrayList<DisplayContent> mTargetDisplays = new ArrayList<>();
@@ -271,9 +275,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     /** Any 2 transitions of this type can run in parallel with each other. Used for testing. */
     static final int PARALLEL_TYPE_MUTUAL = 1;
 
+    /** This is a recents transition. */
+    static final int PARALLEL_TYPE_RECENTS = 2;
+
+
     @IntDef(prefix = { "PARALLEL_TYPE_" }, value = {
             PARALLEL_TYPE_NONE,
-            PARALLEL_TYPE_MUTUAL
+            PARALLEL_TYPE_MUTUAL,
+            PARALLEL_TYPE_RECENTS
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ParallelType {}
@@ -328,6 +337,21 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mFlags |= flag;
     }
 
+    void calcParallelCollectType(WindowContainerTransaction wct) {
+        for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
+            final WindowContainerTransaction.HierarchyOp hop = wct.getHierarchyOps().get(i);
+            if (hop.getType() != HIERARCHY_OP_TYPE_PENDING_INTENT) continue;
+            final Bundle b = hop.getLaunchOptions();
+            if (b == null || b.isEmpty()) continue;
+            final boolean transientLaunch = b.getBoolean(ActivityOptions.KEY_TRANSIENT_LAUNCH);
+            if (transientLaunch) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Starting a Recents transition which can be parallel.");
+                mParallelCollectType = PARALLEL_TYPE_RECENTS;
+            }
+        }
+    }
+
     /** Records an activity as transient-launch. This activity must be already collected. */
     void setTransientLaunch(@NonNull ActivityRecord activity, @Nullable Task restoreBelow) {
         if (mTransientLaunches == null) {
@@ -378,6 +402,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
         return false;
+    }
+
+    boolean hasTransientLaunch() {
+        return mTransientLaunches != null && !mTransientLaunches.isEmpty();
     }
 
     boolean isTransientLaunch(@NonNull ActivityRecord activity) {

@@ -299,6 +299,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     final boolean needsSetReady = t != null;
                     final Transition nextTransition = new Transition(type, 0 /* flags */,
                             mTransitionController, mService.mWindowManager.mSyncEngine);
+                    nextTransition.calcParallelCollectType(wct);
                     mTransitionController.startCollectOrQueue(nextTransition,
                             (deferred) -> {
                                 nextTransition.start();
