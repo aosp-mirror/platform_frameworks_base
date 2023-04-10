@@ -311,6 +311,31 @@ public class TelephonyManager {
     public static final int SRVCC_STATE_HANDOVER_CANCELED  = 3;
 
     /**
+     * Convert srvcc handover state to string.
+     *
+     * @param state The srvcc handover state.
+     * @return The srvcc handover state in string format.
+     *
+     * @hide
+     */
+    public static @NonNull String srvccStateToString(int state) {
+        switch (state) {
+            case TelephonyManager.SRVCC_STATE_HANDOVER_NONE:
+                return "NONE";
+            case TelephonyManager.SRVCC_STATE_HANDOVER_STARTED:
+                return "STARTED";
+            case TelephonyManager.SRVCC_STATE_HANDOVER_COMPLETED:
+                return "COMPLETED";
+            case TelephonyManager.SRVCC_STATE_HANDOVER_FAILED:
+                return "FAILED";
+            case TelephonyManager.SRVCC_STATE_HANDOVER_CANCELED:
+                return "CANCELED";
+            default:
+                return "UNKNOWN(" + state + ")";
+        }
+    }
+
+    /**
      * A UICC card identifier used if the device does not support the operation.
      * For example, {@link #getCardIdForDefaultEuicc()} returns this value if the device has no
      * eUICC, or the eUICC cannot be read.
