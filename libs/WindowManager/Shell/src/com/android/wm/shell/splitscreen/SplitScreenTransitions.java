@@ -37,7 +37,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -138,20 +137,13 @@ class SplitScreenTransitions {
                     t.setAlpha(parentChange.getLeash(), 1.f);
                     // and then animate this layer outside the parent (since, for example, this is
                     // the home task animating from fullscreen to part-screen).
-                    t.reparent(leash, info.getRoot(rootIdx).getLeash());
-                    t.setLayer(leash, info.getChanges().size() - i);
+                    t.reparent(parentChange.getLeash(), info.getRoot(rootIdx).getLeash());
+                    t.setLayer(parentChange.getLeash(), info.getChanges().size() - i);
                     // build the finish reparent/reposition
                     mFinishTransaction.reparent(leash, parentChange.getLeash());
                     mFinishTransaction.setPosition(leash,
                             change.getEndRelOffset().x, change.getEndRelOffset().y);
                 }
-                // TODO(shell-transitions): screenshot here
-                final Rect startBounds = new Rect(change.getStartAbsBounds());
-                final Rect endBounds = new Rect(change.getEndAbsBounds());
-                final Point rootOffset = info.getRoot(rootIdx).getOffset();
-                startBounds.offset(-rootOffset.x, -rootOffset.y);
-                endBounds.offset(-rootOffset.x, -rootOffset.y);
-                startExampleResizeAnimation(leash, startBounds, endBounds);
             }
             boolean isRootOrSplitSideRoot = change.getParent() == null
                     || topRoot.equals(change.getParent());
