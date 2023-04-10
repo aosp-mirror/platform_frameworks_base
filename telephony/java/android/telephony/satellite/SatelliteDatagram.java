@@ -17,7 +17,6 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,7 +32,6 @@ public final class SatelliteDatagram implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
     public SatelliteDatagram(@NonNull byte[] data) {
         mData = data;
     }

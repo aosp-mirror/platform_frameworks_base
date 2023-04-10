@@ -17,7 +17,6 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -57,7 +56,6 @@ public final class SatelliteCapabilities implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
     public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies,
             boolean isPointingRequired, int maxBytesPerOutgoingDatagram,
             @NonNull Map<Integer, AntennaPosition> antennaPositionMap) {
