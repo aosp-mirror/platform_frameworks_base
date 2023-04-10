@@ -62,7 +62,7 @@ import android.window.OnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
-import androidx.core.animation.AnimatorTestRule2;
+import androidx.core.animation.AnimatorTestRule;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -110,7 +110,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
     @ClassRule
-    public static AnimatorTestRule2 mAnimatorTestRule = new AnimatorTestRule2();
+    public static AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
     @Before
     public void setUp() throws Exception {
