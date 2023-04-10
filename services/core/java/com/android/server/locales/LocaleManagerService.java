@@ -323,7 +323,7 @@ public class LocaleManagerService extends SystemService {
      */
     void notifyInstallerOfAppWhoseLocaleChanged(String appPackageName, int userId,
             LocaleList locales) {
-        String installingPackageName = getInstallingPackageName(appPackageName);
+        String installingPackageName = getInstallingPackageName(appPackageName, userId);
         if (installingPackageName != null) {
             Intent intent = createBaseIntent(Intent.ACTION_APPLICATION_LOCALE_CHANGED,
                     appPackageName, locales);
@@ -464,7 +464,7 @@ public class LocaleManagerService extends SystemService {
      * Checks if the calling app is the installer of the app whose locale changed.
      */
     private boolean isCallerInstaller(String appPackageName, int userId) {
-        String installingPackageName = getInstallingPackageName(appPackageName);
+        String installingPackageName = getInstallingPackageName(appPackageName, userId);
         if (installingPackageName != null) {
             // Get the uid of installer-on-record to compare with the calling uid.
             int installerUid = getPackageUid(installingPackageName, userId);
@@ -513,10 +513,11 @@ public class LocaleManagerService extends SystemService {
     }
 
     @Nullable
-    String getInstallingPackageName(String packageName) {
+    String getInstallingPackageName(String packageName, int userId) {
         try {
-            return mContext.getPackageManager()
-                    .getInstallSourceInfo(packageName).getInstallingPackageName();
+            return mContext.createContextAsUser(UserHandle.of(userId), /* flags= */
+                    0).getPackageManager().getInstallSourceInfo(
+                    packageName).getInstallingPackageName();
         } catch (PackageManager.NameNotFoundException e) {
             Slog.w(TAG, "Package not found " + packageName);
         }
