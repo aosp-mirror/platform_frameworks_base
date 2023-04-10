@@ -92,6 +92,9 @@ interface DeviceEntryFaceAuthRepository {
     /** Current state of whether face authentication is running. */
     val isAuthRunning: Flow<Boolean>
 
+    /** Whether bypass is currently enabled */
+    val isBypassEnabled: Flow<Boolean>
+
     /**
      * Trigger face authentication.
      *
@@ -166,7 +169,7 @@ constructor(
     override val isAuthenticated: Flow<Boolean>
         get() = _isAuthenticated
 
-    private val bypassEnabled: Flow<Boolean> =
+    override val isBypassEnabled: Flow<Boolean> =
         keyguardBypassController?.let {
             conflatedCallbackFlow {
                 val callback =
@@ -222,7 +225,7 @@ constructor(
         // & detection is supported & biometric unlock is not allowed.
         listOf(
                 canFaceAuthOrDetectRun(),
-                logAndObserve(bypassEnabled, "bypassEnabled"),
+                logAndObserve(isBypassEnabled, "isBypassEnabled"),
                 logAndObserve(
                     biometricSettingsRepository.isNonStrongBiometricAllowed.isFalse(),
                     "nonStrongBiometricIsNotAllowed"
