@@ -334,6 +334,46 @@ public class SatelliteManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface NTRadioTechnology {}
 
+    /** Suggested device hold position is unknown. */
+    public static final int DEVICE_HOLD_POSITION_UNKNOWN = 0;
+    /** User is suggested to hold the device in portrait mode. */
+    public static final int DEVICE_HOLD_POSITION_PORTRAIT = 1;
+    /** User is suggested to hold the device in landscape mode with left hand. */
+    public static final int DEVICE_HOLD_POSITION_LANDSCAPE_LEFT = 2;
+    /** User is suggested to hold the device in landscape mode with right hand. */
+    public static final int DEVICE_HOLD_POSITION_LANDSCAPE_RIGHT = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"DEVICE_HOLD_POSITION_"}, value = {
+            DEVICE_HOLD_POSITION_UNKNOWN,
+            DEVICE_HOLD_POSITION_PORTRAIT,
+            DEVICE_HOLD_POSITION_LANDSCAPE_LEFT,
+            DEVICE_HOLD_POSITION_LANDSCAPE_RIGHT
+       })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceHoldPosition {}
+
+    /** Display mode is unknown. */
+    public static final int DISPLAY_MODE_UNKNOWN = 0;
+    /** Display mode of the device used for satellite communication for non-foldable phones. */
+    public static final int DISPLAY_MODE_FIXED = 1;
+    /** Display mode of the device used for satellite communication for foldabale phones when the
+     * device is opened. */
+    public static final int DISPLAY_MODE_OPENED = 2;
+    /** Display mode of the device used for satellite communication for foldabable phones when the
+     * device is closed. */
+    public static final int DISPLAY_MODE_CLOSED = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"ANTENNA_POSITION_"}, value = {
+            DISPLAY_MODE_UNKNOWN,
+            DISPLAY_MODE_FIXED,
+            DISPLAY_MODE_OPENED,
+            DISPLAY_MODE_CLOSED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DisplayMode {}
+
     /**
      * Request to enable or disable the satellite modem and demo mode. If the satellite modem is
      * enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
