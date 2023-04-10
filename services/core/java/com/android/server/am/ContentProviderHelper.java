@@ -16,6 +16,8 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.GET_ANY_PROVIDER_TYPE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_GET_PROVIDER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_PROVIDER;
 import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfile;
 import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
@@ -291,7 +293,7 @@ public class ContentProviderHelper {
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
                     boolean success = mService.updateOomAdjLocked(cpr.proc,
-                            OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
+                            OOM_ADJ_REASON_GET_PROVIDER);
                     // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                     // if the process has been successfully adjusted.  So to reduce races with
                     // it, we will check whether the process still exists.  Note that this doesn't
@@ -752,7 +754,7 @@ public class ContentProviderHelper {
 
             // update the app's oom adj value and each provider's usage stats
             if (providersPublished) {
-                mService.updateOomAdjLocked(r, OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
+                mService.updateOomAdjLocked(r, OOM_ADJ_REASON_GET_PROVIDER);
                 for (int i = 0, size = providers.size(); i < size; i++) {
                     ContentProviderHolder src = providers.get(i);
                     if (src == null || src.info == null || src.provider == null) {
@@ -830,8 +832,7 @@ public class ContentProviderHelper {
             ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp, userId);
             if (localCpr.hasExternalProcessHandles()) {
                 if (localCpr.removeExternalProcessHandleLocked(token)) {
-                    mService.updateOomAdjLocked(localCpr.proc,
-                            OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
+                    mService.updateOomAdjLocked(localCpr.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
                 } else {
                     Slog.e(TAG, "Attempt to remove content provider " + localCpr
                             + " with no external reference for token: " + token + ".");
@@ -1500,8 +1501,7 @@ public class ContentProviderHelper {
             mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
                     cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked(conn.provider.proc,
-                        OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
+                mService.updateOomAdjLocked(conn.provider.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
             }
         }
     }

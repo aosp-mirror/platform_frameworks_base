@@ -831,7 +831,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private final Runnable mUpdateOomAdjRunnable = new Runnable() {
         @Override
         public void run() {
-            mAmInternal.updateOomAdj();
+            mAmInternal.updateOomAdj(ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY);
         }
     };
 
