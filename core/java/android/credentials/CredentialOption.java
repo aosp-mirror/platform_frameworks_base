@@ -37,8 +37,7 @@ import java.util.Set;
 
 /**
  * Information about a specific type of credential to be requested during a {@link
- * CredentialManager#getCredential(GetCredentialRequest, Activity, CancellationSignal, Executor,
- * OutcomeReceiver)} operation.
+ * CredentialManager#getCredential} operation.
  */
 public final class CredentialOption implements Parcelable {
 
@@ -196,9 +195,8 @@ public final class CredentialOption implements Parcelable {
      * @throws NullPointerException If {@code credentialRetrievalData}, or
      * {@code candidateQueryData} is null.
      *
-     * @deprecated replaced by Builder
+     * @hide
      */
-    @Deprecated
     public CredentialOption(
             @NonNull String type,
             @NonNull Bundle credentialRetrievalData,
