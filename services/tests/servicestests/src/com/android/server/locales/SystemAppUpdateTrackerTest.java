@@ -131,6 +131,7 @@ public class SystemAppUpdateTrackerTest {
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
         doReturn(InstrumentationRegistry.getContext().getContentResolver())
                 .when(mMockContext).getContentResolver();
+        doReturn(mMockContext).when(mMockContext).createContextAsUser(any(), anyInt());
 
         mStoragefile = new AtomicFile(new File(
                 Environment.getExternalStorageDirectory(), "systemUpdateUnitTests.xml"));
