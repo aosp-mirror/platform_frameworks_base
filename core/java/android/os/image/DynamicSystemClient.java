@@ -224,6 +224,13 @@ public class DynamicSystemClient {
      */
     public static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
 
+    /**
+     * Intent key: Whether to leave DynamicSystem on device reboot.
+     *             False indicates a sticky mode where device stays in DynamicSystem across reboots.
+     * @hide
+     */
+    public static final String KEY_ONE_SHOT = "KEY_ONE_SHOT";
+
     private static class IncomingHandler extends Handler {
         private final WeakReference<DynamicSystemClient> mWeakClient;
 

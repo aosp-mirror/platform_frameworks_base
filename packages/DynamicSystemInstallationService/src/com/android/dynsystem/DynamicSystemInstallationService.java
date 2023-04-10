@@ -28,6 +28,7 @@ import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_CANCELLED;
 import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_COMPLETED;
 import static android.os.image.DynamicSystemClient.CAUSE_NOT_SPECIFIED;
 import static android.os.image.DynamicSystemClient.KEY_ENABLE_WHEN_COMPLETED;
+import static android.os.image.DynamicSystemClient.KEY_ONE_SHOT;
 import static android.os.image.DynamicSystemClient.STATUS_IN_PROGRESS;
 import static android.os.image.DynamicSystemClient.STATUS_IN_USE;
 import static android.os.image.DynamicSystemClient.STATUS_NOT_STARTED;
@@ -171,6 +172,7 @@ public class DynamicSystemInstallationService extends Service
 
     // This is for testing only now
     private boolean mEnableWhenCompleted;
+    private boolean mOneShot;
 
     private InstallationAsyncTask.Progress mInstallTaskProgress;
     private InstallationAsyncTask mInstallTask;
@@ -317,6 +319,7 @@ public class DynamicSystemInstallationService extends Service
         long systemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
         long userdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
         mEnableWhenCompleted = intent.getBooleanExtra(KEY_ENABLE_WHEN_COMPLETED, false);
+        mOneShot = intent.getBooleanExtra(KEY_ONE_SHOT, true);
         String dsuSlot = intent.getStringExtra(KEY_DSU_SLOT);
         String publicKey = intent.getStringExtra(KEY_PUBKEY);
 
@@ -383,9 +386,9 @@ public class DynamicSystemInstallationService extends Service
         boolean enabled = false;
 
         if (mInstallTask != null && mInstallTask.isCompleted()) {
-            enabled = mInstallTask.commit();
+            enabled = mInstallTask.commit(mOneShot);
         } else if (isDynamicSystemInstalled()) {
-            enabled = mDynSystem.setEnable(true, true);
+            enabled = mDynSystem.setEnable(true, mOneShot);
         } else {
             Log.e(TAG, "Trying to reboot to AOT while there is no complete installation");
             return;
