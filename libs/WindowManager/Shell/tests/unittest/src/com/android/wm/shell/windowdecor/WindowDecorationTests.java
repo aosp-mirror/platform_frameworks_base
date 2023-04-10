@@ -159,14 +159,8 @@ public class WindowDecorationTests extends ShellTestCase {
                 .setVisible(false)
                 .build();
         taskInfo.isFocused = false;
-        // Density is 2. Outsets are (20, 40, 60, 80) px. Shadow radius is 10px. Caption height is
-        // 64px.
+        // Density is 2. Shadow radius is 10px. Caption height is 64px.
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
-        mRelayoutParams.setOutsets(
-                R.dimen.test_window_decor_left_outset,
-                R.dimen.test_window_decor_top_outset,
-                R.dimen.test_window_decor_right_outset,
-                R.dimen.test_window_decor_bottom_outset);
 
         final SurfaceControl taskSurface = mock(SurfaceControl.class);
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
@@ -213,14 +207,8 @@ public class WindowDecorationTests extends ShellTestCase {
                 .setVisible(true)
                 .build();
         taskInfo.isFocused = true;
-        // Density is 2. Outsets are (20, 40, 60, 80) px. Shadow radius is 10px. Caption height is
-        // 64px.
+        // Density is 2. Shadow radius is 10px. Caption height is 64px.
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
-        mRelayoutParams.setOutsets(
-                R.dimen.test_window_decor_left_outset,
-                R.dimen.test_window_decor_top_outset,
-                R.dimen.test_window_decor_right_outset,
-                R.dimen.test_window_decor_bottom_outset);
         final SurfaceControl taskSurface = mock(SurfaceControl.class);
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
 
@@ -229,8 +217,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(decorContainerSurfaceBuilder).setParent(taskSurface);
         verify(decorContainerSurfaceBuilder).setContainerLayer();
         verify(mMockSurfaceControlStartT).setTrustedOverlay(decorContainerSurface, true);
-        verify(mMockSurfaceControlStartT).setPosition(decorContainerSurface, -20, -40);
-        verify(mMockSurfaceControlStartT).setWindowCrop(decorContainerSurface, 380, 220);
+        verify(mMockSurfaceControlStartT).setWindowCrop(decorContainerSurface, 300, 100);
 
         verify(taskBackgroundSurfaceBuilder).setParent(taskSurface);
         verify(taskBackgroundSurfaceBuilder).setEffectLayer();
@@ -244,7 +231,6 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
         verify(captionContainerSurfaceBuilder).setContainerLayer();
-        verify(mMockSurfaceControlStartT).setPosition(captionContainerSurface, 20, 40);
         verify(mMockSurfaceControlStartT).setWindowCrop(captionContainerSurface, 300, 64);
         verify(mMockSurfaceControlStartT).show(captionContainerSurface);
 
@@ -268,12 +254,12 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlFinishT)
                 .setPosition(taskSurface, TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y);
         verify(mMockSurfaceControlFinishT)
-                .setCrop(taskSurface, new Rect(-20, -40, 360, 180));
+                .setWindowCrop(taskSurface, 300, 100);
         verify(mMockSurfaceControlStartT)
                 .show(taskSurface);
 
-        assertEquals(380, mRelayoutResult.mWidth);
-        assertEquals(220, mRelayoutResult.mHeight);
+        assertEquals(300, mRelayoutResult.mWidth);
+        assertEquals(100, mRelayoutResult.mHeight);
     }
 
     @Test
@@ -309,14 +295,8 @@ public class WindowDecorationTests extends ShellTestCase {
                 .setVisible(true)
                 .build();
         taskInfo.isFocused = true;
-        // Density is 2. Outsets are (20, 40, 60, 80) px. Shadow radius is 10px. Caption height is
-        // 64px.
+        // Density is 2. Shadow radius is 10px. Caption height is 64px.
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
-        mRelayoutParams.setOutsets(
-                R.dimen.test_window_decor_left_outset,
-                R.dimen.test_window_decor_top_outset,
-                R.dimen.test_window_decor_right_outset,
-                R.dimen.test_window_decor_bottom_outset);
 
         final SurfaceControl taskSurface = mock(SurfaceControl.class);
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
@@ -419,11 +399,6 @@ public class WindowDecorationTests extends ShellTestCase {
                 .build();
         taskInfo.isFocused = true;
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
-        mRelayoutParams.setOutsets(
-                R.dimen.test_window_decor_left_outset,
-                R.dimen.test_window_decor_top_outset,
-                R.dimen.test_window_decor_right_outset,
-                R.dimen.test_window_decor_bottom_outset);
         final SurfaceControl taskSurface = mock(SurfaceControl.class);
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
         windowDecor.relayout(taskInfo);
@@ -438,7 +413,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(additionalWindowSurfaceBuilder).setContainerLayer();
         verify(additionalWindowSurfaceBuilder).setParent(decorContainerSurface);
         verify(additionalWindowSurfaceBuilder).build();
-        verify(mMockSurfaceControlAddWindowT).setPosition(additionalWindowSurface, 20, 40);
+        verify(mMockSurfaceControlAddWindowT).setPosition(additionalWindowSurface, 0, 0);
         final int width = WindowDecoration.loadDimensionPixelSize(
                 mContext.getResources(), mCaptionMenuWidthId);
         final int height = WindowDecoration.loadDimensionPixelSize(
@@ -496,11 +471,6 @@ public class WindowDecorationTests extends ShellTestCase {
                 .build();
         taskInfo.isFocused = true;
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
-        mRelayoutParams.setOutsets(
-                R.dimen.test_window_decor_left_outset,
-                R.dimen.test_window_decor_top_outset,
-                R.dimen.test_window_decor_right_outset,
-                R.dimen.test_window_decor_bottom_outset);
         final SurfaceControl taskSurface = mock(SurfaceControl.class);
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
 
@@ -508,7 +478,6 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
         verify(captionContainerSurfaceBuilder).setContainerLayer();
-        verify(mMockSurfaceControlStartT).setPosition(captionContainerSurface, 20, 40);
         // Width of the captionContainerSurface should match the width of TASK_BOUNDS
         verify(mMockSurfaceControlStartT).setWindowCrop(captionContainerSurface, 300, 64);
         verify(mMockSurfaceControlStartT).show(captionContainerSurface);
@@ -584,9 +553,7 @@ public class WindowDecorationTests extends ShellTestCase {
             String name = "Test Window";
             WindowDecoration.AdditionalWindow additionalWindow =
                     addWindow(R.layout.desktop_mode_window_decor_handle_menu_app_info_pill, name,
-                            mMockSurfaceControlAddWindowT,
-                            x - mRelayoutResult.mDecorContainerOffsetX,
-                            y - mRelayoutResult.mDecorContainerOffsetY,
+                            mMockSurfaceControlAddWindowT, x, y,
                             width, height, shadowRadius, cornerRadius);
             return additionalWindow;
         }
