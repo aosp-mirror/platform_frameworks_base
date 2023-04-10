@@ -104,4 +104,9 @@
         android:fromId="@id/unlocked"
         android:toId="@id/locked"
         android:drawable="@drawable/unlocked_to_locked" />
+
+    <transition
+        android:fromId="@id/locked_fp"
+        android:toId="@id/locked"
+        android:drawable="@drawable/fp_to_locked" />
 </animated-selector>
