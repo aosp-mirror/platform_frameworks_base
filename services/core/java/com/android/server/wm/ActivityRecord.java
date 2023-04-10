@@ -306,7 +306,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.LocaleList;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -10597,17 +10596,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        LocaleList locale;
         final ActivityTaskManagerInternal.PackageConfig appConfig =
                 mAtmService.mPackageConfigPersister.findPackageConfiguration(
                         task.realActivity.getPackageName(), mUserId);
-        // if there is no app locale for the package, clear the target activity's locale.
-        if (appConfig == null || appConfig.mLocales == null || appConfig.mLocales.isEmpty()) {
-            locale = LocaleList.getEmptyLocaleList();
-        } else {
-            locale = appConfig.mLocales;
+        // If package lookup yields locales, set the target activity's locales to match,
+        // otherwise leave target activity as-is.
+        if (appConfig != null && appConfig.mLocales != null && !appConfig.mLocales.isEmpty()) {
+            resolvedConfig.setLocales(appConfig.mLocales);
         }
-        resolvedConfig.setLocales(locale);
     }
 
     /**
