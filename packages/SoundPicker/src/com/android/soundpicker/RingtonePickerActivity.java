@@ -35,7 +35,6 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -194,16 +193,7 @@ public final class RingtonePickerActivity extends AlertActivity implements
         mHasDefaultItem = intent.getBooleanExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
         mUriForDefaultItem = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI);
         if (mUriForDefaultItem == null) {
-            if (mType == RingtoneManager.TYPE_NOTIFICATION) {
-                mUriForDefaultItem = Settings.System.DEFAULT_NOTIFICATION_URI;
-            } else if (mType == RingtoneManager.TYPE_ALARM) {
-                mUriForDefaultItem = Settings.System.DEFAULT_ALARM_ALERT_URI;
-            } else if (mType == RingtoneManager.TYPE_RINGTONE) {
-                mUriForDefaultItem = Settings.System.DEFAULT_RINGTONE_URI;
-            } else {
-                // or leave it null for silence.
-                mUriForDefaultItem = Settings.System.DEFAULT_RINGTONE_URI;
-            }
+            mUriForDefaultItem = RingtonePickerViewModel.getDefaultItemUriByType(mType);
         }
 
         // Get whether to show the 'Silent' item
@@ -242,17 +232,9 @@ public final class RingtonePickerActivity extends AlertActivity implements
             p.mPositiveButtonListener = this;
         }
         p.mOnPrepareListViewListener = this;
-
         p.mTitle = intent.getCharSequenceExtra(RingtoneManager.EXTRA_RINGTONE_TITLE);
         if (p.mTitle == null) {
-          if (mType == RingtoneManager.TYPE_ALARM) {
-              p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title_alarm);
-          } else if (mType == RingtoneManager.TYPE_NOTIFICATION) {
-              p.mTitle =
-                  getString(com.android.internal.R.string.ringtone_picker_title_notification);
-          } else {
-              p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title);
-          }
+            p.mTitle = getString(RingtonePickerViewModel.getTitleByType(mType));
         }
 
         setupAlert();
@@ -435,13 +417,8 @@ public final class RingtonePickerActivity extends AlertActivity implements
     }
 
     private int addDefaultRingtoneItem(ListView listView) {
-        if (mType == RingtoneManager.TYPE_NOTIFICATION) {
-            return addStaticItem(listView, R.string.notification_sound_default);
-        } else if (mType == RingtoneManager.TYPE_ALARM) {
-            return addStaticItem(listView, R.string.alarm_sound_default);
-        }
-
-        return addStaticItem(listView, R.string.ringtone_default);
+        return addStaticItem(listView,
+                RingtonePickerViewModel.getDefaultRingtoneItemTextByType(mType));
     }
 
     private int addSilentItem(ListView listView) {
@@ -453,13 +430,8 @@ public final class RingtonePickerActivity extends AlertActivity implements
                 false /* attachToRoot */);
         TextView text = (TextView)view.findViewById(R.id.add_new_sound_text);
 
-        if (mType == RingtoneManager.TYPE_ALARM) {
-            text.setText(R.string.add_alarm_text);
-        } else if (mType == RingtoneManager.TYPE_NOTIFICATION) {
-            text.setText(R.string.add_notification_text);
-        } else {
-            text.setText(R.string.add_ringtone_text);
-        }
+        text.setText(RingtonePickerViewModel.getAddNewItemTextByType(mType));
+
         listView.addFooterView(view);
     }
 
