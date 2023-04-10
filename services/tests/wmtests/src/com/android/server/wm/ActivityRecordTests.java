@@ -83,6 +83,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REQUESTED;
+import static com.android.server.wm.ActivityRecord.LAUNCH_SOURCE_TYPE_HOME;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.FINISHING;
@@ -3686,6 +3687,23 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Collect activity in the transition if the Task windowing mode is going to change.
         assertTrue(activity.inTransition());
+    }
+
+    /**
+     * Verifies the task is moved to back when back pressed if the root activity was originally
+     * started from Launcher.
+     */
+    @Test
+    public void testMoveTaskToBackWhenStartedFromLauncher() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord ar = createActivityRecord(task);
+        task.realActivity = ar.mActivityComponent;
+        ar.intent.setAction(Intent.ACTION_MAIN);
+        ar.intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        doReturn(true).when(ar).isLaunchSourceType(eq(LAUNCH_SOURCE_TYPE_HOME));
+
+        mAtm.mActivityClientController.onBackPressed(ar.token, null /* callback */);
+        verify(task).moveTaskToBack(any());
     }
 
     private ICompatCameraControlCallback getCompatCameraControlCallback() {
