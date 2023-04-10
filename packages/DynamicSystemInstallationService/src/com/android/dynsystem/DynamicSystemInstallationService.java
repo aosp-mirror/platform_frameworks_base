@@ -19,6 +19,7 @@ package com.android.dynsystem;
 import static android.os.AsyncTask.Status.FINISHED;
 import static android.os.AsyncTask.Status.PENDING;
 import static android.os.AsyncTask.Status.RUNNING;
+import static android.os.image.DynamicSystemClient.ACTION_HIDE_NOTIFICATION;
 import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE;
 import static android.os.image.DynamicSystemClient.ACTION_START_INSTALL;
 import static android.os.image.DynamicSystemClient.CAUSE_ERROR_EXCEPTION;
@@ -173,6 +174,7 @@ public class DynamicSystemInstallationService extends Service
     // This is for testing only now
     private boolean mEnableWhenCompleted;
     private boolean mOneShot;
+    private boolean mHideNotification;
 
     private InstallationAsyncTask.Progress mInstallTaskProgress;
     private InstallationAsyncTask mInstallTask;
@@ -230,6 +232,8 @@ public class DynamicSystemInstallationService extends Service
             executeRebootToNormalCommand();
         } else if (ACTION_NOTIFY_IF_IN_USE.equals(action)) {
             executeNotifyIfInUseCommand();
+        } else if (ACTION_HIDE_NOTIFICATION.equals(action)) {
+            executeHideNotificationCommand();
         }
 
         return Service.START_NOT_STICKY;
@@ -441,18 +445,32 @@ public class DynamicSystemInstallationService extends Service
     private void executeNotifyIfInUseCommand() {
         switch (getStatus()) {
             case STATUS_IN_USE:
-                startForeground(NOTIFICATION_ID,
-                        buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
+                if (!mHideNotification) {
+                    startForeground(NOTIFICATION_ID,
+                            buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
+                }
                 break;
             case STATUS_READY:
-                startForeground(NOTIFICATION_ID,
-                        buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
+                if (!mHideNotification) {
+                    startForeground(NOTIFICATION_ID,
+                            buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
+                }
                 break;
             case STATUS_IN_PROGRESS:
                 break;
             case STATUS_NOT_STARTED:
             default:
                 stopSelf();
+        }
+    }
+
+    private void executeHideNotificationCommand() {
+        mHideNotification = true;
+        switch (getStatus()) {
+            case STATUS_IN_USE:
+            case STATUS_READY:
+                stopForeground(STOP_FOREGROUND_REMOVE);
+                break;
         }
     }
 

@@ -202,6 +202,13 @@ public class DynamicSystemClient {
     public static final String ACTION_NOTIFY_IF_IN_USE =
             "android.os.image.action.NOTIFY_IF_IN_USE";
 
+    /**
+     * Intent action: hide notifications about the status of {@code DynamicSystem}.
+     * @hide
+     */
+    public static final String ACTION_HIDE_NOTIFICATION =
+            "android.os.image.action.HIDE_NOTIFICATION";
+
     /*
      * Intent Keys
      */
