@@ -1460,9 +1460,25 @@ public class AppOpsManager {
      */
     public static final int OP_USE_FULL_SCREEN_INTENT = AppProtoEnums.APP_OP_USE_FULL_SCREEN_INTENT;
 
+    /**
+     * Hides camera indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_CAMERA_SANDBOXED =
+            AppProtoEnums.APP_OP_CAMERA_SANDBOXED;
+
+    /**
+     * Hides microphone indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_RECORD_AUDIO_SANDBOXED =
+            AppProtoEnums.APP_OP_RECORD_AUDIO_SANDBOXED;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 134;
+    public static final int _NUM_OP = 136;
 
     /**
      * All app ops represented as strings.
@@ -1603,6 +1619,8 @@ public class AppOpsManager {
             OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
             OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OPSTR_USE_FULL_SCREEN_INTENT,
+            OPSTR_CAMERA_SANDBOXED,
+            OPSTR_RECORD_AUDIO_SANDBOXED
     })
     public @interface AppOpString {}
 
@@ -2009,6 +2027,20 @@ public class AppOpsManager {
      * @hide
      */
     public static final String OPSTR_COARSE_LOCATION_SOURCE = "android:coarse_location_source";
+
+    /**
+     * Camera is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_CAMERA_SANDBOXED = "android:camera_sandboxed";
+
+    /**
+     * Audio is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECORD_AUDIO_SANDBOXED = "android:record_audio_sandboxed";
 
     /**
      * Allow apps to create the requests to manage the media files without user confirmation.
@@ -2731,7 +2763,11 @@ public class AppOpsManager {
                 .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_USE_FULL_SCREEN_INTENT, OPSTR_USE_FULL_SCREEN_INTENT,
                 "USE_FULL_SCREEN_INTENT").setPermission(Manifest.permission.USE_FULL_SCREEN_INTENT)
-                .build()
+                .build(),
+        new AppOpInfo.Builder(OP_CAMERA_SANDBOXED, OPSTR_CAMERA_SANDBOXED,
+            "CAMERA_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECORD_AUDIO_SANDBOXED, OPSTR_RECORD_AUDIO_SANDBOXED,
+                "RECORD_AUDIO_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
