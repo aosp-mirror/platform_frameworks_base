@@ -81,7 +81,12 @@ final class VisualQueryDetectorSession extends DetectorSession {
     void informRestartProcessLocked() {
         Slog.v(TAG, "informRestartProcessLocked");
         mUpdateStateAfterStartFinished.set(false);
-        //TODO(b/261783819): Starts detection in VisualQueryDetectionService.
+        try {
+            mCallback.onProcessRestarted();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to communicate #onProcessRestarted", e);
+            notifyOnDetectorRemoteException();
+        }
     }
 
     void setVisualQueryDetectionAttentionListenerLocked(
