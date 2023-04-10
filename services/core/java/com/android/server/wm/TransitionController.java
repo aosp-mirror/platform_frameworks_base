@@ -443,26 +443,36 @@ class TransitionController {
         return type == TRANSIT_OPEN || type == TRANSIT_CLOSE;
     }
 
-    /** Whether the display change should run with blast sync. */
-    private static boolean shouldSync(@NonNull TransitionRequestInfo.DisplayChange displayChange) {
-        if ((displayChange.getStartRotation() + displayChange.getEndRotation()) % 2 == 0) {
+    /** Sets the sync method for the display change. */
+    private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
+            @NonNull Transition displayTransition, @NonNull DisplayContent displayContent) {
+        final int startRotation = displayChange.getStartRotation();
+        final int endRotation = displayChange.getEndRotation();
+        if (startRotation != endRotation && (startRotation + endRotation) % 2 == 0) {
             // 180 degrees rotation change may not change screen size. So the clients may draw
             // some frames before and after the display projection transaction is applied by the
             // remote player. That may cause some buffers to show in different rotation. So use
             // sync method to pause clients drawing until the projection transaction is applied.
-            return true;
+            mAtm.mWindowManager.mSyncEngine.setSyncMethod(displayTransition.getSyncId(),
+                    BLASTSyncEngine.METHOD_BLAST);
         }
         final Rect startBounds = displayChange.getStartAbsBounds();
         final Rect endBounds = displayChange.getEndAbsBounds();
-        if (startBounds == null || endBounds == null) return false;
+        if (startBounds == null || endBounds == null) return;
         final int startWidth = startBounds.width();
         final int startHeight = startBounds.height();
         final int endWidth = endBounds.width();
         final int endHeight = endBounds.height();
         // This is changing screen resolution. Because the screen decor layers are excluded from
         // screenshot, their draw transactions need to run with the start transaction.
-        return (endWidth > startWidth) == (endHeight > startHeight)
-                && (endWidth != startWidth || endHeight != startHeight);
+        if ((endWidth > startWidth) == (endHeight > startHeight)
+                && (endWidth != startWidth || endHeight != startHeight)) {
+            displayContent.forAllWindows(w -> {
+                if (w.mToken.mRoundedCornerOverlay && w.mHasSurface) {
+                    w.mSyncMethodOverride = BLASTSyncEngine.METHOD_BLAST;
+                }
+            }, true /* traverseTopToBottom */);
+        }
     }
 
     /**
@@ -494,9 +504,9 @@ class TransitionController {
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
                     trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
-            if (newTransition != null && displayChange != null && shouldSync(displayChange)) {
-                mAtm.mWindowManager.mSyncEngine.setSyncMethod(newTransition.getSyncId(),
-                        BLASTSyncEngine.METHOD_BLAST);
+            if (newTransition != null && displayChange != null && trigger != null
+                    && trigger.asDisplayContent() != null) {
+                setDisplaySyncMethod(displayChange, newTransition, trigger.asDisplayContent());
             }
         }
         if (trigger != null) {
