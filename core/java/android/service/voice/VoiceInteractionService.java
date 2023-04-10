@@ -50,6 +50,7 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -200,6 +201,9 @@ public class VoiceInteractionService extends Service {
 
     private final Set<HotwordDetector> mActiveDetectors = new ArraySet<>();
 
+    // True if any of the createAOHD methods should use the test ST module.
+    @GuardedBy("mLock")
+    private boolean mTestModuleForAlwaysOnHotwordDetectorEnabled = false;
 
     private void onDetectorRemoteException(@NonNull IBinder token, int detectorType) {
         Log.d(TAG, "onDetectorRemoteException for " + HotwordDetector.detectorTypeToString(
@@ -512,14 +516,14 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(callback);
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ false, /* options= */ null,
-                /* sharedMemory= */ null, /* moduleProperties */ null, executor, callback);
+                /* sharedMemory= */ null, /* moduleProperties= */ null, executor, callback);
     }
 
     /**
      * Same as {@link createAlwaysOnHotwordDetector(String, Locale, Executor,
      * AlwaysOnHotwordDetector.Callback)}, but allow explicit selection of the underlying ST
      * module to attach to.
-     * Use {@link listModuleProperties} to get available modules to attach to.
+     * Use {@link #listModuleProperties()} to get available modules to attach to.
      * @hide
      */
     @TestApi
@@ -645,14 +649,14 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(callback);
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ true, options, sharedMemory,
-                /* moduleProperties */ null, executor, callback);
+                /* moduleProperties= */ null, executor, callback);
     }
 
     /**
      * Same as {@link createAlwaysOnHotwordDetector(String, Locale,
      * PersistableBundle, SharedMemory, Executor, AlwaysOnHotwordDetector.Callback)},
      * but allow explicit selection of the underlying ST module to attach to.
-     * Use {@link listModuleProperties} to get available modules to attach to.
+     * Use {@link #listModuleProperties()} to get available modules to attach to.
      * @hide
      */
     @TestApi
@@ -717,6 +721,10 @@ public class VoiceInteractionService extends Service {
 
             try {
                 dspDetector.registerOnDestroyListener(this::onHotwordDetectorDestroyed);
+                // Check if we are currently overridden, and should use the test module.
+                if (mTestModuleForAlwaysOnHotwordDetectorEnabled) {
+                    moduleProperties = getTestModuleProperties();
+                }
                 // If moduleProperties is null, the default STModule is used.
                 dspDetector.initialize(options, sharedMemory, moduleProperties);
             } catch (Exception e) {
@@ -988,6 +996,44 @@ public class VoiceInteractionService extends Service {
     @VisibleForTesting
     protected final KeyphraseEnrollmentInfo getKeyphraseEnrollmentInfo() {
         return mKeyphraseEnrollmentInfo;
+    }
+
+
+    /**
+     * Configure {@link createAlwaysOnHotwordDetector(String, Locale,
+     * SoundTrigger.ModuleProperties, Executor, AlwaysOnHotwordDetector.Callback)}
+     * and similar overloads to utilize the test SoundTrigger module instead of the
+     * actual DSP module.
+     * @param isEnabled - {@code true} if subsequently created {@link AlwaysOnHotwordDetector}
+     * objects should attach to a test module. {@code false} if subsequently created
+     * {@link AlwaysOnHotwordDetector} should attach to the actual DSP module.
+     * @hide
+     */
+    @TestApi
+    public final void setTestModuleForAlwaysOnHotwordDetectorEnabled(boolean isEnabled) {
+        synchronized (mLock) {
+            mTestModuleForAlwaysOnHotwordDetectorEnabled = isEnabled;
+        }
+    }
+
+    /**
+     * Get the {@link SoundTrigger.ModuleProperties} representing the fake
+     * STHAL to attach to via {@link createAlwaysOnHotwordDetector(String, Locale,
+     * SoundTrigger.ModuleProperties, Executor, AlwaysOnHotwordDetector.Callback)} and
+     * similar overloads for test purposes.
+     * @return ModuleProperties to use for test purposes.
+     */
+    private final @NonNull SoundTrigger.ModuleProperties getTestModuleProperties() {
+        var moduleProps = listModuleProperties()
+                .stream()
+                .filter((SoundTrigger.ModuleProperties prop)
+                        -> prop.getSupportedModelArch().equals(SoundTrigger.FAKE_HAL_ARCH))
+                .findFirst()
+                .orElse(null);
+        if (moduleProps == null) {
+            throw new IllegalStateException("Fake ST HAL should always be available");
+        }
+        return moduleProps;
     }
 
     /**
