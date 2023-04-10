@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
@@ -80,6 +81,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
 
+    private final Point mPositionInParent = new Point();
     private final PointF mHandleMenuAppInfoPillPosition = new PointF();
     private final PointF mHandleMenuWindowingPillPosition = new PointF();
     private final PointF mHandleMenuMoreActionsPillPosition = new PointF();
@@ -91,6 +93,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private Drawable mAppIcon;
     private CharSequence mAppName;
+
+    private TaskCornersListener mCornersListener;
 
     private int mMenuWidth;
     private int mMarginMenuTop;
@@ -159,6 +163,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             View.OnTouchListener onCaptionTouchListener) {
         mOnCaptionButtonClickListener = onCaptionButtonClickListener;
         mOnCaptionTouchListener = onCaptionTouchListener;
+    }
+
+    void setCornersListener(TaskCornersListener cornersListener) {
+        mCornersListener = cornersListener;
     }
 
     void setDragPositioningCallback(DragPositioningCallback dragPositioningCallback) {
@@ -277,8 +285,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .getDimensionPixelSize(R.dimen.freeform_resize_handle);
         final int resize_corner = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_corner);
-        mDragResizeListener.setGeometry(
-                mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
+
+        // If either task geometry or position have changed, update this task's cornersListener
+        if (mDragResizeListener.setGeometry(
+                mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop)
+                || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
+            mCornersListener.onTaskCornersChanged(mTaskInfo.taskId, getGlobalCornersRegion());
+        }
+        mPositionInParent.set(mTaskInfo.positionInParent);
     }
 
     boolean isHandleMenuActive() {
@@ -585,6 +599,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     public void close() {
         closeDragResizeListener();
         closeHandleMenu();
+        mCornersListener.onTaskCornersRemoved(mTaskInfo.taskId);
         super.close();
     }
 
@@ -595,6 +610,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return windowingMode == WINDOWING_MODE_FREEFORM
                 ? R.layout.desktop_mode_app_controls_window_decor
                 : R.layout.desktop_mode_focused_window_decor;
+    }
+
+    /**
+     * Create a new region out of the corner rects of this task.
+     */
+    Region getGlobalCornersRegion() {
+        Region cornersRegion = mDragResizeListener.getCornersRegion();
+        cornersRegion.translate(mPositionInParent.x, mPositionInParent.y);
+        return cornersRegion;
     }
 
     static class Factory {
@@ -618,5 +642,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     choreographer,
                     syncQueue);
         }
+    }
+
+    interface TaskCornersListener {
+        /** Inform the implementing class of this task's change in corner resize handles */
+        void onTaskCornersChanged(int taskId, Region corner);
+
+        /** Inform the implementing class that this task no longer needs its corners tracked,
+         * likely due to it closing. */
+        void onTaskCornersRemoved(int taskId);
     }
 }

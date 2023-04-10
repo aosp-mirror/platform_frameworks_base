@@ -27,6 +27,7 @@ import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
+import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
 import android.view.SurfaceControl
@@ -487,6 +488,20 @@ class DesktopTasksController(
         return 2 * getStatusBarHeight(taskInfo)
     }
 
+    /**
+     * Update the corner region for a specified task
+     */
+    fun onTaskCornersChanged(taskId: Int, corner: Region) {
+        desktopModeTaskRepository.updateTaskCorners(taskId, corner)
+    }
+
+    /**
+     * Remove a previously tracked corner region for a specified task.
+     */
+    fun removeCornersForTask(taskId: Int) {
+        desktopModeTaskRepository.removeTaskCorners(taskId)
+    }
+
 
     /**
      * Adds a listener to find out about changes in the visibility of freeform tasks.
@@ -494,19 +509,46 @@ class DesktopTasksController(
      * @param listener the listener to add.
      * @param callbackExecutor the executor to call the listener on.
      */
-    fun addListener(listener: VisibleTasksListener, callbackExecutor: Executor) {
+    fun addVisibleTasksListener(listener: VisibleTasksListener, callbackExecutor: Executor) {
         desktopModeTaskRepository.addVisibleTasksListener(listener, callbackExecutor)
+    }
+
+    /**
+     * Adds a listener to track changes to desktop task corners
+     *
+     * @param listener the listener to add.
+     * @param callbackExecutor the executor to call the listener on.
+     */
+    fun setTaskCornerListener(
+            listener: Consumer<Region>,
+            callbackExecutor: Executor
+    ) {
+        desktopModeTaskRepository.setTaskCornerListener(listener, callbackExecutor)
     }
 
     /** The interface for calls from outside the shell, within the host process. */
     @ExternalThread
     private inner class DesktopModeImpl : DesktopMode {
-        override fun addListener(listener: VisibleTasksListener, callbackExecutor: Executor) {
+        override fun addVisibleTasksListener(
+                listener: VisibleTasksListener,
+                callbackExecutor: Executor
+        ) {
             mainExecutor.execute {
-                this@DesktopTasksController.addListener(listener, callbackExecutor)
+                this@DesktopTasksController.addVisibleTasksListener(listener, callbackExecutor)
+            }
+        }
+
+        override fun addDesktopGestureExclusionRegionListener(
+                listener: Consumer<Region>,
+                callbackExecutor: Executor
+        ) {
+            mainExecutor.execute {
+                this@DesktopTasksController.setTaskCornerListener(listener, callbackExecutor)
             }
         }
     }
+
+
 
     /** The interface for calls from outside the host process. */
     @BinderThread

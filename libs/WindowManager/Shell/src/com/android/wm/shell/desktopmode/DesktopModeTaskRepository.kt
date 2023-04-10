@@ -16,9 +16,13 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.graphics.Region
 import android.util.ArrayMap
 import android.util.ArraySet
+import android.util.SparseArray
+import androidx.core.util.valueIterator
 import java.util.concurrent.Executor
+import java.util.function.Consumer
 
 /**
  * Keeps track of task data related to desktop mode.
@@ -38,6 +42,10 @@ class DesktopModeTaskRepository {
     private val activeTasksListeners = ArraySet<ActiveTasksListener>()
     // Track visible tasks separately because a task may be part of the desktop but not visible.
     private val visibleTasksListeners = ArrayMap<VisibleTasksListener, Executor>()
+    // Track corners of desktop tasks, used to determine gesture exclusion
+    private val desktopCorners = SparseArray<Region>()
+    private var desktopGestureExclusionListener: Consumer<Region>? = null
+    private var desktopGestureExclusionExecutor: Executor? = null
 
     /**
      * Add a [ActiveTasksListener] to be notified of updates to active tasks in the repository.
@@ -53,6 +61,28 @@ class DesktopModeTaskRepository {
         visibleTasksListeners.put(visibleTasksListener, executor)
         executor.execute(
                 Runnable { visibleTasksListener.onVisibilityChanged(visibleTasks.size > 0) })
+    }
+
+    /**
+     * Add a Consumer which will inform other classes of changes to corners for all Desktop tasks.
+     */
+    fun setTaskCornerListener(cornersListener: Consumer<Region>, executor: Executor) {
+        desktopGestureExclusionListener = cornersListener
+        desktopGestureExclusionExecutor = executor
+        executor.execute {
+            desktopGestureExclusionListener?.accept(calculateDesktopExclusionRegion())
+        }
+    }
+
+    /**
+     * Create a new merged region representative of all corners in all desktop tasks.
+     */
+    private fun calculateDesktopExclusionRegion(): Region {
+        val desktopCornersRegion = Region()
+        desktopCorners.valueIterator().forEach { taskCorners ->
+            desktopCornersRegion.op(taskCorners, Region.Op.UNION)
+        }
+        return desktopCornersRegion
     }
 
     /**
@@ -164,6 +194,28 @@ class DesktopModeTaskRepository {
      */
     fun removeFreeformTask(taskId: Int) {
         freeformTasksInZOrder.remove(taskId)
+    }
+
+    /**
+     * Updates the active desktop corners; if desktopCorners has been accepted by
+     * desktopCornersListener, it will be updated in the appropriate classes.
+     */
+    fun updateTaskCorners(taskId: Int, taskCorners: Region) {
+        desktopCorners.put(taskId, taskCorners)
+        desktopGestureExclusionExecutor?.execute {
+            desktopGestureExclusionListener?.accept(calculateDesktopExclusionRegion())
+        }
+    }
+
+    /**
+     * Removes the active desktop corners for the specified task; if desktopCorners has been
+     * accepted by desktopCornersListener, it will be updated in the appropriate classes.
+     */
+    fun removeTaskCorners(taskId: Int) {
+        desktopCorners.delete(taskId)
+        desktopGestureExclusionExecutor?.execute {
+            desktopGestureExclusionListener?.accept(calculateDesktopExclusionRegion())
+        }
     }
 
     /**

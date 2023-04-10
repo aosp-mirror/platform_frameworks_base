@@ -34,6 +34,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.graphics.Region;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -69,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Handles windowing changes when desktop mode system setting changes
@@ -149,9 +151,19 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      * @param listener the listener to add.
      * @param callbackExecutor the executor to call the listener on.
      */
-    public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+    public void addVisibleTasksListener(DesktopModeTaskRepository.VisibleTasksListener listener,
             Executor callbackExecutor) {
         mDesktopModeTaskRepository.addVisibleTasksListener(listener, callbackExecutor);
+    }
+
+    /**
+     * Adds a listener to track changes to corners of desktop mode tasks.
+     * @param listener the listener to add.
+     * @param callbackExecutor the executor to call the listener on.
+     */
+    public void addTaskCornerListener(Consumer<Region> listener,
+            Executor callbackExecutor) {
+        mDesktopModeTaskRepository.setTaskCornerListener(listener, callbackExecutor);
     }
 
     @VisibleForTesting
@@ -312,6 +324,23 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     }
 
     /**
+     * Update corner rects stored for a specific task
+     * @param taskId task to update
+     * @param taskCorners task's new corner handles
+     */
+    public void onTaskCornersChanged(int taskId, Region taskCorners) {
+        mDesktopModeTaskRepository.updateTaskCorners(taskId, taskCorners);
+    }
+
+    /**
+     * Remove corners saved for a task. Likely used due to task closure.
+     * @param taskId task to remove
+     */
+    public void removeCornersForTask(int taskId) {
+        mDesktopModeTaskRepository.removeTaskCorners(taskId);
+    }
+
+    /**
      * Moves a specifc task to the front.
      * @param taskInfo the task to show in front.
      */
@@ -426,10 +455,19 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     private final class DesktopModeImpl implements DesktopMode {
 
         @Override
-        public void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+        public void addVisibleTasksListener(
+                DesktopModeTaskRepository.VisibleTasksListener listener,
                 Executor callbackExecutor) {
             mMainExecutor.execute(() -> {
-                DesktopModeController.this.addListener(listener, callbackExecutor);
+                DesktopModeController.this.addVisibleTasksListener(listener, callbackExecutor);
+            });
+        }
+
+        @Override
+        public void addDesktopGestureExclusionRegionListener(Consumer<Region> listener,
+                Executor callbackExecutor) {
+            mMainExecutor.execute(() -> {
+                DesktopModeController.this.addTaskCornerListener(listener, callbackExecutor);
             });
         }
     }
