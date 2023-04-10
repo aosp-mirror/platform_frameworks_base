@@ -6946,6 +6946,7 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             final boolean needsStylusPointerIcon = event.isStylusPointer()
+                    && event.isHoverEvent()
                     && mInputManager.isStylusPointerIconEnabled();
             if (needsStylusPointerIcon || event.isFromSource(InputDevice.SOURCE_MOUSE)) {
                 if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
