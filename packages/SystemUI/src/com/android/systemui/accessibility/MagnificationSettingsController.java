@@ -24,6 +24,7 @@ import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.Range;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -68,14 +69,18 @@ public class MagnificationSettingsController implements ComponentCallbacks {
             @NonNull Callback settingsControllerCallback,
             SecureSettings secureSettings,
             WindowMagnificationSettings windowMagnificationSettings) {
-        mContext = context;
+        mContext = context.createWindowContext(
+                context.getDisplay(),
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                null);
+        mContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
         mDisplayId = mContext.getDisplayId();
-        mConfiguration = new Configuration(context.getResources().getConfiguration());
+        mConfiguration = new Configuration(mContext.getResources().getConfiguration());
         mSettingsControllerCallback = settingsControllerCallback;
         if (windowMagnificationSettings != null) {
             mWindowMagnificationSettings = windowMagnificationSettings;
         } else {
-            mWindowMagnificationSettings = new WindowMagnificationSettings(context,
+            mWindowMagnificationSettings = new WindowMagnificationSettings(mContext,
                     mWindowMagnificationSettingsCallback,
                     sfVsyncFrameProvider, secureSettings);
         }
