@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,6 +97,8 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     private NotificationShelfController mController;
     private float mActualWidth = -1;
     private boolean mSensitiveRevealAnimEndabled;
+    private boolean mShelfRefactorFlagEnabled;
+    private boolean mCanModifyColorOfNotifications;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -425,7 +428,7 @@ public class NotificationShelf extends ActivatableNotificationView implements St
                     transitionAmount = inShelfAmount;
                 }
                 // We don't want to modify the color if the notification is hun'd
-                if (isLastChild && mController.canModifyColorOfNotifications()) {
+                if (isLastChild && canModifyColorOfNotifications()) {
                     if (colorOfViewBeforeLast == NO_COLOR) {
                         colorOfViewBeforeLast = ownColorUntinted;
                     }
@@ -487,6 +490,14 @@ public class NotificationShelf extends ActivatableNotificationView implements St
         setHideBackground(hideBackground);
         if (mNotGoneIndex == -1) {
             mNotGoneIndex = notGoneIndex;
+        }
+    }
+
+    private boolean canModifyColorOfNotifications() {
+        if (mShelfRefactorFlagEnabled) {
+            return mCanModifyColorOfNotifications && mAmbientState.isShadeExpanded();
+        } else {
+            return mController.canModifyColorOfNotifications();
         }
     }
 
@@ -959,8 +970,29 @@ public class NotificationShelf extends ActivatableNotificationView implements St
         return false;
     }
 
+    private void assertRefactorFlagDisabled() {
+        if (mShelfRefactorFlagEnabled) {
+            throw new IllegalStateException(
+                    "Code path not supported when Flags.NOTIFICATION_SHELF_REFACTOR is enabled.");
+        }
+    }
+
+    private boolean checkRefactorFlagEnabled() {
+        if (!mShelfRefactorFlagEnabled) {
+            Log.wtf(TAG,
+                    "Code path not supported when Flags.NOTIFICATION_SHELF_REFACTOR is disabled.");
+        }
+        return mShelfRefactorFlagEnabled;
+    }
+
     public void setController(NotificationShelfController notificationShelfController) {
+        assertRefactorFlagDisabled();
         mController = notificationShelfController;
+    }
+
+    public void setCanModifyColorOfNotifications(boolean canModifyColorOfNotifications) {
+        if (!checkRefactorFlagEnabled()) return;
+        mCanModifyColorOfNotifications = canModifyColorOfNotifications;
     }
 
     public void setIndexOfFirstViewInShelf(ExpandableView firstViewInShelf) {
@@ -973,6 +1005,10 @@ public class NotificationShelf extends ActivatableNotificationView implements St
      */
     public void setSensitiveRevealAnimEndabled(boolean enabled) {
         mSensitiveRevealAnimEndabled = enabled;
+    }
+
+    public void setRefactorFlagEnabled(boolean enabled) {
+        mShelfRefactorFlagEnabled = enabled;
     }
 
     /**
