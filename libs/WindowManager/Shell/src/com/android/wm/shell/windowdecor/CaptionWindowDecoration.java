@@ -110,19 +110,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        final int outsetLeftId = R.dimen.freeform_resize_handle;
-        final int outsetTopId = R.dimen.freeform_resize_handle;
-        final int outsetRightId = R.dimen.freeform_resize_handle;
-        final int outsetBottomId = R.dimen.freeform_resize_handle;
-
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
         mRelayoutParams.mLayoutResId = R.layout.caption_window_decor;
         mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
-        if (isDragResizeable) {
-            mRelayoutParams.setOutsets(outsetLeftId, outsetTopId, outsetRightId, outsetBottomId);
-        }
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
