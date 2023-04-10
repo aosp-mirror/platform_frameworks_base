@@ -123,7 +123,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         newState.systemState.packageStates.forEach { (_, packageState) ->
             evaluateAllPermissionStatesForPackageAndUser(packageState, userId, null)
         }
-        newState.systemState.appIds.forEachIndexed { _, appId, _ ->
+        newState.systemState.appIdPackageNames.forEachIndexed { _, appId, _ ->
             inheritImplicitPermissionStates(appId, userId)
         }
     }
@@ -203,7 +203,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
         val changedPermissionNames = MutableIndexedSet<String>()
         trimPermissions(packageName, changedPermissionNames)
-        if (appId in newState.systemState.appIds) {
+        if (appId in newState.systemState.appIdPackageNames) {
             trimPermissionStates(appId)
         }
         changedPermissionNames.forEachIndexed { _, permissionName ->
@@ -430,7 +430,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     )
                     // Remove permission state on owner change.
                     newState.systemState.userIds.forEachIndexed { _, userId ->
-                        newState.systemState.appIds.forEachIndexed { _, appId, _ ->
+                        newState.systemState.appIdPackageNames.forEachIndexed { _, appId, _ ->
                             setPermissionFlags(appId, userId, permissionName, 0)
                         }
                     }
@@ -460,7 +460,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     )
                     if (isPermissionGroupChanged || isPermissionTypeChanged) {
                         newState.systemState.userIds.forEachIndexed { _, userId ->
-                            newState.systemState.appIds.forEachIndexed { _, appId, _ ->
+                            newState.systemState.appIdPackageNames.forEachIndexed { _, appId, _ ->
                                 if (isPermissionGroupChanged) {
                                     // We might auto-grant permissions if any permission of
                                     // the group is already granted. Hence if the group of
@@ -559,7 +559,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 // system package isn't re-enabled yet, so we don't need to maintain that brittle
                 // special case either.
                 newState.systemState.userIds.forEachIndexed { _, userId ->
-                    newState.systemState.appIds.forEachIndexed { _, appId, _ ->
+                    newState.systemState.appIdPackageNames.forEachIndexed { _, appId, _ ->
                         setPermissionFlags(appId, userId, permissionName, 0)
                     }
                 }
@@ -645,7 +645,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
     ) {
         val systemState = newState.systemState
         systemState.userIds.forEachIndexed { _, userId ->
-            systemState.appIds.forEachIndexed { _, appId, _ ->
+            systemState.appIdPackageNames.forEachIndexed { _, appId, _ ->
                 val isPermissionRequested =
                     anyRequestingPackageInAppId(appId, permissionName) { true }
                 if (isPermissionRequested) {
@@ -684,7 +684,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         permissionName: String,
         installedPackageState: PackageState?
     ) {
-        val packageNames = newState.systemState.appIds[appId]!!
+        val packageNames = newState.systemState.appIdPackageNames[appId]!!
         val hasMissingPackage = packageNames.anyIndexed { _, packageName ->
             newState.systemState.packageStates[packageName]!!.androidPackage == null
         }
@@ -1084,7 +1084,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         predicate: (PackageState) -> Boolean
     ): Boolean {
-        val packageNames = state.systemState.appIds[appId]!!
+        val packageNames = state.systemState.appIdPackageNames[appId]!!
         return packageNames.anyIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             val androidPackage = packageState.androidPackage
@@ -1098,7 +1098,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         action: (PackageState) -> Unit
     ) {
-        val packageNames = state.systemState.appIds[appId]!!
+        val packageNames = state.systemState.appIdPackageNames[appId]!!
         packageNames.forEachIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             if (packageState.androidPackage != null) {
@@ -1113,7 +1113,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         action: (PackageState) -> Unit
     ) {
-        val packageNames = state.systemState.appIds[appId]!!
+        val packageNames = state.systemState.appIdPackageNames[appId]!!
         packageNames.forEachIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             val androidPackage = packageState.androidPackage

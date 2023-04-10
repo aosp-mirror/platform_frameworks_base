@@ -21,7 +21,6 @@ import android.util.Log
 import com.android.server.LocalServices
 import com.android.server.appop.AppOpMigrationHelper
 import com.android.server.permission.access.MutableAccessState
-import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.PackageVersionMigration
 
@@ -34,7 +33,7 @@ class AppIdAppOpMigration {
         val userState = state.mutateUserState(userId)!!
         val appIdAppOpModes = userState.mutateAppIdAppOpModes()
         legacyAppIdAppOpModes.forEach { (appId, legacyAppOpModes) ->
-            val packageNames = state.systemState.appIds[appId]
+            val packageNames = state.systemState.appIdPackageNames[appId]
             // Non-application UIDs may not have an Android package but may still have app op state.
             if (packageNames == null && appId >= Process.FIRST_APPLICATION_UID) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when migrating app op state")
