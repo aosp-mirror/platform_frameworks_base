@@ -149,7 +149,7 @@ class AppIdPermissionPersistence {
             }
         }
         appIdPermissionFlags.forEachReversedIndexed { appIdIndex, appId, _ ->
-            if (appId !in state.systemState.appIds) {
+            if (appId !in state.systemState.appIdPackageNames) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing permission state")
                 appIdPermissionFlags.removeAt(appIdIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)

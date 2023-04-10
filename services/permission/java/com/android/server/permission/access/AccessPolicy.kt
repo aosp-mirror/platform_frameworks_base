@@ -80,7 +80,8 @@ class AccessPolicy private constructor(
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (_, packageState) ->
-                mutateAppIds().mutateOrPut(packageState.appId) { MutableIndexedListSet() }
+                mutateAppIdPackageNames()
+                    .mutateOrPut(packageState.appId) { MutableIndexedListSet() }
                     .add(packageState.packageName)
             }
             setKnownPackages(knownPackages)
@@ -140,7 +141,7 @@ class AccessPolicy private constructor(
             packageStates.forEach { (packageName, packageState) ->
                 if (packageState.volumeUuid == volumeUuid) {
                     val appId = packageState.appId
-                    mutateAppIds().mutateOrPut(appId) {
+                    mutateAppIdPackageNames().mutateOrPut(appId) {
                         addedAppIds += appId
                         MutableIndexedListSet()
                     } += packageName
@@ -181,7 +182,7 @@ class AccessPolicy private constructor(
         newState.mutateSystemState(WriteMode.NONE).apply {
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
-            mutateAppIds().mutateOrPut(appId) {
+            mutateAppIdPackageNames().mutateOrPut(appId) {
                 isAppIdAdded = true
                 MutableIndexedListSet()
             } += packageName
@@ -215,10 +216,10 @@ class AccessPolicy private constructor(
         newState.mutateSystemState(WriteMode.NONE).apply {
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
-            mutateAppIds().mutate(appId)?.apply {
+            mutateAppIdPackageNames().mutate(appId)?.apply {
                 this -= packageName
                 if (isEmpty()) {
-                    mutateAppIds() -= appId
+                    mutateAppIdPackageNames() -= appId
                     isAppIdRemoved = true
                 }
             }

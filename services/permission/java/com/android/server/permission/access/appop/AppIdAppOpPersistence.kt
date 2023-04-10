@@ -25,7 +25,6 @@ import com.android.server.permission.access.AppIdAppOpModes
 import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.MutableAppIdAppOpModes
 import com.android.server.permission.access.WriteMode
-import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.forEachTag
@@ -52,7 +51,8 @@ class AppIdAppOpPersistence : BaseAppOpPersistence() {
         }
         userState.appIdAppOpModes.forEachReversedIndexed { appIdIndex, appId, _ ->
             // Non-application UIDs may not have an Android package but may still have app op state.
-            if (appId !in state.systemState.appIds && appId >= Process.FIRST_APPLICATION_UID) {
+            if (appId !in state.systemState.appIdPackageNames &&
+                appId >= Process.FIRST_APPLICATION_UID) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing app-op state")
                 appIdAppOpModes.removeAt(appIdIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)

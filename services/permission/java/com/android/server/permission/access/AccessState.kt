@@ -73,10 +73,11 @@ class MutableAccessState private constructor(
 
 private typealias UserIdsReference = MutableReference<IntSet, MutableIntSet>
 
-typealias AppIds = IntReferenceMap<IndexedListSet<String>, MutableIndexedListSet<String>>
-typealias MutableAppIds =
+typealias AppIdPackageNames = IntReferenceMap<IndexedListSet<String>, MutableIndexedListSet<String>>
+typealias MutableAppIdPackageNames =
     MutableIntReferenceMap<IndexedListSet<String>, MutableIndexedListSet<String>>
-private typealias AppIdsReference = MutableReference<AppIds, MutableAppIds>
+private typealias AppIdPackageNamesReference =
+    MutableReference<AppIdPackageNames, MutableAppIdPackageNames>
 
 private typealias PermissionGroupsReference = MutableReference<
     IndexedMap<String, PermissionGroupInfo>, MutableIndexedMap<String, PermissionGroupInfo>
@@ -92,7 +93,7 @@ sealed class SystemState(
     val userIdsReference: UserIdsReference,
     packageStates: Map<String, PackageState>,
     disabledSystemPackageStates: Map<String, PackageState>,
-    val appIdsReference: AppIdsReference,
+    val appIdPackageNamesReference: AppIdPackageNamesReference,
     knownPackages: IntMap<Array<String>>,
     isLeanback: Boolean,
     configPermissions: Map<String, SystemConfig.PermissionEntry>,
@@ -116,8 +117,8 @@ sealed class SystemState(
     var disabledSystemPackageStates: Map<String, PackageState> = disabledSystemPackageStates
         protected set
 
-    val appIds: AppIds
-        get() = appIdsReference.get()
+    val appIdPackageNames: AppIdPackageNames
+        get() = appIdPackageNamesReference.get()
 
     var knownPackages: IntMap<Array<String>> = knownPackages
         protected set
@@ -164,7 +165,7 @@ class MutableSystemState private constructor(
     userIdsReference: UserIdsReference,
     packageStates: Map<String, PackageState>,
     disabledSystemPackageStates: Map<String, PackageState>,
-    appIdsReference: AppIdsReference,
+    appIdPackageNamesReference: AppIdPackageNamesReference,
     knownPackages: IntMap<Array<String>>,
     isLeanback: Boolean,
     configPermissions: Map<String, SystemConfig.PermissionEntry>,
@@ -181,7 +182,7 @@ class MutableSystemState private constructor(
     userIdsReference,
     packageStates,
     disabledSystemPackageStates,
-    appIdsReference,
+    appIdPackageNamesReference,
     knownPackages,
     isLeanback,
     configPermissions,
@@ -199,7 +200,7 @@ class MutableSystemState private constructor(
         UserIdsReference(MutableIntSet()),
         emptyMap(),
         emptyMap(),
-        AppIdsReference(MutableAppIds()),
+        AppIdPackageNamesReference(MutableAppIdPackageNames()),
         MutableIntMap(),
         false,
         emptyMap(),
@@ -218,7 +219,7 @@ class MutableSystemState private constructor(
         systemState.userIdsReference.toImmutable(),
         systemState.packageStates,
         systemState.disabledSystemPackageStates,
-        systemState.appIdsReference.toImmutable(),
+        systemState.appIdPackageNamesReference.toImmutable(),
         systemState.knownPackages,
         systemState.isLeanback,
         systemState.configPermissions,
@@ -245,7 +246,7 @@ class MutableSystemState private constructor(
         this.disabledSystemPackageStates = disabledSystemPackageStates
     }
 
-    fun mutateAppIds(): MutableAppIds = appIdsReference.mutate()
+    fun mutateAppIdPackageNames(): MutableAppIdPackageNames = appIdPackageNamesReference.mutate()
 
     @JvmName("setKnownPackagesPublic")
     fun setKnownPackages(knownPackages: IntMap<Array<String>>) {

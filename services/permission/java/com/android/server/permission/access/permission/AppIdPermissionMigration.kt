@@ -19,7 +19,6 @@ package com.android.server.permission.access.permission
 import android.util.Log
 import com.android.server.LocalServices
 import com.android.server.permission.access.MutableAccessState
-import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.PackageVersionMigration
 import com.android.server.pm.permission.PermissionMigrationHelper
@@ -66,7 +65,7 @@ class AppIdPermissionMigration {
         val userState = state.mutateUserState(userId)!!
         val appIdPermissionFlags = userState.mutateAppIdPermissionFlags()
         legacyAppIdPermissionStates.forEach { (appId, legacyPermissionStates) ->
-            val packageNames = state.systemState.appIds[appId]
+            val packageNames = state.systemState.appIdPackageNames[appId]
             if (packageNames == null) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when migrating permission state")
                 return@forEach
