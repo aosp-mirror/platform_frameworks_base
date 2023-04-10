@@ -217,6 +217,12 @@ public class DynamicSystemClient {
      */
     public static final String KEY_USERDATA_SIZE = "KEY_USERDATA_SIZE";
 
+    /**
+     * Intent key: Whether to enable DynamicSystem immediately after installation is done.
+     *             Note this will reboot the device automatically.
+     * @hide
+     */
+    public static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
 
     private static class IncomingHandler extends Handler {
         private final WeakReference<DynamicSystemClient> mWeakClient;

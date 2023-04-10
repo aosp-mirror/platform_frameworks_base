@@ -27,6 +27,7 @@ import static android.os.image.DynamicSystemClient.CAUSE_ERROR_IO;
 import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_CANCELLED;
 import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_COMPLETED;
 import static android.os.image.DynamicSystemClient.CAUSE_NOT_SPECIFIED;
+import static android.os.image.DynamicSystemClient.KEY_ENABLE_WHEN_COMPLETED;
 import static android.os.image.DynamicSystemClient.STATUS_IN_PROGRESS;
 import static android.os.image.DynamicSystemClient.STATUS_IN_USE;
 import static android.os.image.DynamicSystemClient.STATUS_NOT_STARTED;
@@ -77,8 +78,6 @@ public class DynamicSystemInstallationService extends Service
 
     private static final String TAG = "DynamicSystemInstallationService";
 
-    // TODO (b/131866826): This is currently for test only. Will move this to System API.
-    static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
     static final String KEY_DSU_SLOT = "KEY_DSU_SLOT";
     static final String DEFAULT_DSU_SLOT = "dsu";
     static final String KEY_PUBKEY = "KEY_PUBKEY";
