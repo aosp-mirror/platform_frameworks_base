@@ -1981,6 +1981,46 @@ public class BroadcastQueueTest {
     }
 
     /**
+     * Confirm how many times a pathological broadcast pattern results in OOM
+     * adjusts; watches for performance regressions.
+     */
+    @Test
+    public void testOomAdjust_TriggerCount() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        // Send 8 broadcasts, 4 receivers in the first process,
+        // and 2 alternating in each of the remaining processes
+        synchronized (mAms) {
+            for (int i = 0; i < 8; i++) {
+                final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+                mQueue.enqueueBroadcastLocked(makeBroadcastRecord(intent, callerApp,
+                        List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                                makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW),
+                                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                                makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+            }
+        }
+        waitForIdle();
+
+        final int expectedTimes;
+        switch (mImpl) {
+            // Original stack requested for every single receiver; yikes
+            case DEFAULT: expectedTimes = 64; break;
+            // Modern stack requests once each time we promote a process to
+            // running; we promote "green" twice, and "blue" and "yellow" once
+            case MODERN: expectedTimes = 4; break;
+            default: throw new UnsupportedOperationException();
+        }
+
+        verify(mAms, times(expectedTimes))
+                .updateOomAdjPendingTargetsLocked(eq(OOM_ADJ_REASON_START_RECEIVER));
+    }
+
+    /**
      * Verify that expected events are triggered when a broadcast is finished.
      */
     @Test
