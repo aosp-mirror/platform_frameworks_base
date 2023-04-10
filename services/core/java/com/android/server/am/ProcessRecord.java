@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
+
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -1450,7 +1452,7 @@ class ProcessRecord implements WindowProcessListener {
             }
             mService.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked(this, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+                mService.updateOomAdjLocked(this, OOM_ADJ_REASON_ACTIVITY);
             }
         }
     }
