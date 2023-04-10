@@ -18,11 +18,13 @@ package android.media.soundtrigger;
 
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -45,6 +47,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -53,9 +56,9 @@ import com.android.internal.app.ISoundTriggerSession;
 import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides management of non-voice (general sound trigger) based sound recognition
@@ -609,4 +612,24 @@ public final class SoundTriggerManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Create a {@link SoundTriggerInstrumentation} for test purposes, which instruments a fake
+     * STHAL. Clients must attach to the appropriate underlying ST module.
+     * @param executor - Executor to dispatch global callbacks on
+     * @param callback - Callback for unsessioned events received by the fake STHAL
+     * @return - A {@link SoundTriggerInstrumentation} for observation/injection.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @NonNull
+    public static SoundTriggerInstrumentation attachInstrumentation(
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull SoundTriggerInstrumentation.GlobalCallback callback) {
+        ISoundTriggerService service = ISoundTriggerService.Stub.asInterface(
+                    ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE));
+        return new SoundTriggerInstrumentation(service, executor, callback);
+    }
+
 }
