@@ -43,6 +43,7 @@ import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -52,6 +53,7 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
@@ -83,6 +85,7 @@ public class AuthSessionTest {
     private static final long TEST_REQUEST_ID = 22;
 
     @Mock private Context mContext;
+    @Mock private Resources mResources;
     @Mock private BiometricContext mBiometricContext;
     @Mock private ITrustManager mTrustManager;
     @Mock private DevicePolicyManager mDevicePolicyManager;
@@ -104,6 +107,7 @@ public class AuthSessionTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        when(mContext.getResources()).thenReturn(mResources);
         when(mClientReceiver.asBinder()).thenReturn(mock(Binder.class));
         when(mBiometricContext.updateContext(any(), anyBoolean()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -340,6 +344,33 @@ public class AuthSessionTest {
     @Test
     public void testCancelAuthentication_whenDialogDismissed() throws RemoteException {
         testInvokesCancel(session -> session.onDialogDismissed(DISMISSED_REASON_NEGATIVE, null));
+    }
+
+    @Test
+    public void testCallbackOnAcquired() throws RemoteException {
+        final String acquiredStr = "test_acquired_info_callback";
+        final String acquiredStrVendor = "test_acquired_info_callback_vendor";
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_REAR);
+
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                0 /* operationId */,
+                0 /* userId */);
+
+        when(mContext.getString(com.android.internal.R.string.fingerprint_acquired_partial))
+            .thenReturn(acquiredStr);
+        session.onAcquired(0, FingerprintManager.FINGERPRINT_ACQUIRED_PARTIAL, 0);
+        verify(mStatusBarService).onBiometricHelp(anyInt(), eq(acquiredStr));
+        verify(mClientReceiver).onAcquired(eq(1), eq(acquiredStr));
+
+        when(mResources.getStringArray(com.android.internal.R.array.fingerprint_acquired_vendor))
+            .thenReturn(new String[]{acquiredStrVendor});
+        session.onAcquired(0, FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR, 0);
+        verify(mStatusBarService).onBiometricHelp(anyInt(), eq(acquiredStrVendor));
+        verify(mClientReceiver).onAcquired(
+                eq(FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR_BASE), eq(acquiredStrVendor));
     }
 
     // TODO (b/208484275) : Enable these tests
