@@ -156,6 +156,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.keyguard.domain.interactor.FaceAuthenticationListener;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.shared.constants.TrustAgentUiEvent;
 import com.android.systemui.keyguard.shared.model.AcquiredAuthenticationStatus;
 import com.android.systemui.keyguard.shared.model.AuthenticationStatus;
 import com.android.systemui.keyguard.shared.model.DetectionStatus;
@@ -537,6 +538,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
             mLogger.logTrustGrantedWithFlags(flags, newlyUnlocked, userId, message);
             if (userId == getCurrentUser()) {
+                if (newlyUnlocked) {
+                    // if this callback is ever removed, this should then be logged in
+                    // TrustRepository
+                    mUiEventLogger.log(
+                            TrustAgentUiEvent.TRUST_AGENT_NEWLY_UNLOCKED,
+                            getKeyguardSessionId()
+                    );
+                }
                 final TrustGrantFlags trustGrantFlags = new TrustGrantFlags(flags);
                 for (int i = 0; i < mCallbacks.size(); i++) {
                     KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
