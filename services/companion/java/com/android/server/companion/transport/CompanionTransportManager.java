@@ -42,6 +42,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.companion.AssociationStore;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -344,6 +345,21 @@ public class CompanionTransportManager {
      */
     public void enableSecureTransport(boolean enabled) {
         this.mSecureTransportEnabled = enabled;
+    }
+
+    /**
+     * For testing purpose only.
+     *
+     * Create a dummy RawTransport and notify onTransportChanged listeners.
+     */
+    public void createDummyTransport(int associationId) {
+        synchronized (mTransports) {
+            FileDescriptor fd = new FileDescriptor();
+            ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd);
+            Transport transport = new RawTransport(associationId, pfd, mContext);
+            mTransports.put(associationId, transport);
+            notifyOnTransportsChanged();
+        }
     }
 
     private boolean isSecureTransportEnabled() {
