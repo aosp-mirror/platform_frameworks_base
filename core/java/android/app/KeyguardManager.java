@@ -128,6 +128,15 @@ public class KeyguardManager {
             "android.app.action.PREPARE_REPAIR_MODE_DEVICE_CREDENTIAL";
 
     /**
+     * Intent used to prompt user for device credential that is written by
+     * {@link #ACTION_PREPARE_REPAIR_MODE_DEVICE_CREDENTIAL} for exiting
+     * repair mode.
+     * @hide
+     */
+    public static final String ACTION_CONFIRM_REPAIR_MODE_DEVICE_CREDENTIAL =
+            "android.app.action.CONFIRM_REPAIR_MODE_DEVICE_CREDENTIAL";
+
+    /**
      * A CharSequence dialog title to show to the user when used with a
      * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
      * @hide

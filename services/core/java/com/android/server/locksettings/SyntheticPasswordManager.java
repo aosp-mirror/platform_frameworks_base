@@ -16,9 +16,14 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
+import static com.android.internal.widget.LockPatternUtils.USER_FRP;
+import static com.android.internal.widget.LockPatternUtils.USER_REPAIR_MODE;
+import static com.android.internal.widget.LockPatternUtils.pinOrPasswordQualityToCredentialType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -718,11 +723,30 @@ class SyntheticPasswordManager {
         return PasswordData.fromBytes(passwordData).credentialType;
     }
 
-    static int getFrpCredentialType(byte[] payload) {
-        if (payload == null) {
+    int getSpecialUserCredentialType(int userId) {
+        final PersistentData data = getSpecialUserPersistentData(userId);
+        if (data.type != PersistentData.TYPE_SP_GATEKEEPER
+                && data.type != PersistentData.TYPE_SP_WEAVER) {
+            return CREDENTIAL_TYPE_NONE;
+        }
+        if (data.payload == null) {
             return LockPatternUtils.CREDENTIAL_TYPE_NONE;
         }
-        return PasswordData.fromBytes(payload).credentialType;
+        final int credentialType = PasswordData.fromBytes(data.payload).credentialType;
+        if (credentialType != CREDENTIAL_TYPE_PASSWORD_OR_PIN) {
+            return credentialType;
+        }
+        return pinOrPasswordQualityToCredentialType(data.qualityForUi);
+    }
+
+    private PersistentData getSpecialUserPersistentData(int userId) {
+        if (userId == USER_FRP) {
+            return mStorage.readPersistentDataBlock();
+        }
+        if (userId == USER_REPAIR_MODE) {
+            return mStorage.readRepairModePersistentData();
+        }
+        throw new IllegalArgumentException("Unknown special user id " + userId);
     }
 
     /**
@@ -1005,10 +1029,10 @@ class SyntheticPasswordManager {
         return sizeOfCredential;
     }
 
-    public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
-            LockscreenCredential userCredential,
+    public VerifyCredentialResponse verifySpecialUserCredential(int sourceUserId,
+            IGateKeeperService gatekeeper, LockscreenCredential userCredential,
             ICheckCredentialProgressCallback progressCallback) {
-        PersistentData persistentData = mStorage.readPersistentDataBlock();
+        final PersistentData persistentData = getSpecialUserPersistentData(sourceUserId);
         if (persistentData.type == PersistentData.TYPE_SP_GATEKEEPER) {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
             byte[] stretchedLskf = stretchLskf(userCredential, pwd);
@@ -1019,13 +1043,13 @@ class SyntheticPasswordManager {
                         0 /* challenge */, pwd.passwordHandle,
                         stretchedLskfToGkPassword(stretchedLskf));
             } catch (RemoteException e) {
-                Slog.e(TAG, "FRP verifyChallenge failed", e);
+                Slog.e(TAG, "Persistent data credential verifyChallenge failed", e);
                 return VerifyCredentialResponse.ERROR;
             }
             return VerifyCredentialResponse.fromGateKeeperResponse(response);
         } else if (persistentData.type == PersistentData.TYPE_SP_WEAVER) {
             if (!isWeaverAvailable()) {
-                Slog.e(TAG, "No weaver service to verify SP-based FRP credential");
+                Slog.e(TAG, "No weaver service to verify SP-based persistent data credential");
                 return VerifyCredentialResponse.ERROR;
             }
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);

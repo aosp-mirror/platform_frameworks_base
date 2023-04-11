@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.USER_REPAIR_MODE;
 import static com.android.internal.widget.LockPatternUtils.VERIFY_FLAG_WRITE_REPAIR_MODE_PW;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +32,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
-import com.android.server.locksettings.SyntheticPasswordManager.PasswordData;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +58,7 @@ public class LockscreenRepairModeTest extends BaseLockSettingsServiceTests {
                         newPin("1234"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
                         .getResponseCode());
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PIN,
-                getCredentialType(mStorage.readRepairModePersistentData()));
+                mService.getCredentialType(USER_REPAIR_MODE));
     }
 
     @Test
@@ -71,7 +71,7 @@ public class LockscreenRepairModeTest extends BaseLockSettingsServiceTests {
                         newPattern("4321"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
                         .getResponseCode());
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                getCredentialType(mStorage.readRepairModePersistentData()));
+                mService.getCredentialType(USER_REPAIR_MODE));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class LockscreenRepairModeTest extends BaseLockSettingsServiceTests {
                         newPassword("4321"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
                         .getResponseCode());
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                getCredentialType(mStorage.readRepairModePersistentData()));
+                mService.getCredentialType(USER_REPAIR_MODE));
     }
 
     @Test
@@ -109,21 +109,98 @@ public class LockscreenRepairModeTest extends BaseLockSettingsServiceTests {
                                 newPin("1234"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
                         .getResponseCode());
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PIN,
-                getCredentialType(mStorage.readRepairModePersistentData()));
+                mService.getCredentialType(USER_REPAIR_MODE));
 
         mService.deleteRepairModePersistentDataIfNeeded();
         assertSame(PersistentData.NONE, mStorage.readRepairModePersistentData());
     }
 
+    @Test
+    public void verifyPin_userRepairMode() {
+        mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
+        assertSame(PersistentData.NONE, mStorage.readRepairModePersistentData());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(
+                        newPin("1234"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
+                        .getResponseCode());
+        setRepairModeActive(true);
+
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PIN,
+                mService.getCredentialType(USER_REPAIR_MODE));
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(newPin("1234"), USER_REPAIR_MODE, 0 /* flags */)
+                        .getResponseCode());
+    }
+
+    @Test
+    public void verifyPattern_userRepairMode() {
+        mService.setLockCredential(newPattern("4321"), nonePassword(), PRIMARY_USER_ID);
+        assertSame(PersistentData.NONE, mStorage.readRepairModePersistentData());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(
+                        newPattern("4321"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
+                        .getResponseCode());
+        setRepairModeActive(true);
+
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
+                mService.getCredentialType(USER_REPAIR_MODE));
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(newPattern("4321"), USER_REPAIR_MODE, 0 /* flags */)
+                        .getResponseCode());
+    }
+
+    @Test
+    public void verifyPassword_userRepairMode() {
+        mService.setLockCredential(newPassword("4321"), nonePassword(), PRIMARY_USER_ID);
+        assertSame(PersistentData.NONE, mStorage.readRepairModePersistentData());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(
+                        newPassword("4321"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
+                        .getResponseCode());
+        setRepairModeActive(true);
+
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                mService.getCredentialType(USER_REPAIR_MODE));
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(newPassword("4321"), USER_REPAIR_MODE, 0 /* flags */)
+                        .getResponseCode());
+    }
+
+    @Test
+    public void verifyCredential_userRepairMode_repairModeIsNotActive() {
+        mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
+        assertSame(PersistentData.NONE, mStorage.readRepairModePersistentData());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(
+                                newPin("1234"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
+                        .getResponseCode());
+
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PIN,
+                mService.getCredentialType(USER_REPAIR_MODE));
+        assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
+                mService.verifyCredential(newPin("1234"), USER_REPAIR_MODE, 0 /* flags */)
+                        .getResponseCode());
+    }
+
+    @Test
+    public void verifyCredential_userRepairMode_wrongPin() {
+        mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
+        assertSame(PersistentData.NONE, mStorage.readRepairModePersistentData());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(
+                                newPin("1234"), PRIMARY_USER_ID, VERIFY_FLAG_WRITE_REPAIR_MODE_PW)
+                        .getResponseCode());
+        setRepairModeActive(true);
+
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PIN,
+                mService.getCredentialType(USER_REPAIR_MODE));
+        assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
+                mService.verifyCredential(newPin("5678"), USER_REPAIR_MODE, 0 /* flags */)
+                        .getResponseCode());
+    }
+
     private void setRepairModeActive(boolean active) {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REPAIR_MODE_ACTIVE, active ? 1 : 0);
-    }
-
-    private static int getCredentialType(PersistentData persistentData) {
-        if (persistentData == null || persistentData.payload == null) {
-            return LockPatternUtils.CREDENTIAL_TYPE_NONE;
-        }
-        return PasswordData.fromBytes(persistentData.payload).credentialType;
     }
 }
