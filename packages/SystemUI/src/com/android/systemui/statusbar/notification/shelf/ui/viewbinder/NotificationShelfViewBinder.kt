@@ -93,7 +93,7 @@ constructor(
     }
 
     override val intrinsicHeight: Int
-        get() = shelf.intrinsicHeight
+        get() = unsupported
 
     override val shelfIcons: NotificationIconContainer
         get() = unsupported

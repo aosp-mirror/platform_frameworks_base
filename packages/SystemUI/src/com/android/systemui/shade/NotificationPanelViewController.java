@@ -223,8 +223,6 @@ import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -235,6 +233,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import kotlin.Unit;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -1704,8 +1703,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         final float extraSpaceForShelf = lockIconPadding - noShelfOverlapBottomPadding;
 
         if (extraSpaceForShelf > 0f) {
-            return Math.min(mNotificationShelfController.getIntrinsicHeight(),
-                    extraSpaceForShelf);
+            return Math.min(getShelfHeight(), extraSpaceForShelf);
         }
         return 0f;
     }
@@ -1727,8 +1725,16 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mNotificationStackScrollLayoutController.getView(),
                 getVerticalSpaceForLockscreenNotifications(),
                 getVerticalSpaceForLockscreenShelf(),
-                mNotificationShelfController.getIntrinsicHeight()
+                getShelfHeight()
         );
+    }
+
+    private int getShelfHeight() {
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            return mNotificationStackScrollLayoutController.getShelfHeight();
+        } else {
+            return mNotificationShelfController.getIntrinsicHeight();
+        }
     }
 
     private void updateClock() {

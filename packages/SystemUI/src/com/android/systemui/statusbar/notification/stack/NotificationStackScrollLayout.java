@@ -5119,6 +5119,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         requestChildrenUpdate();
     }
 
+    @Nullable
+    public ExpandableView getShelf() {
+        if (NotificationShelfController.checkRefactorFlagEnabled(mAmbientState.getFeatureFlags())) {
+            return mShelf;
+        } else {
+            return null;
+        }
+    }
+
     public void setShelf(NotificationShelf shelf) {
         if (!NotificationShelfController.checkRefactorFlagEnabled(
                 mAmbientState.getFeatureFlags())) {

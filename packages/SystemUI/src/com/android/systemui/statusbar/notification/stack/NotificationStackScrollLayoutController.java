@@ -1592,6 +1592,14 @@ public class NotificationStackScrollLayoutController {
         mView.setShelf(shelf);
     }
 
+    public int getShelfHeight() {
+        if (!NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) {
+            return 0;
+        }
+        ExpandableView shelf = mView.getShelf();
+        return shelf == null ? 0 : shelf.getIntrinsicHeight();
+    }
+
     /**
      * Enum for UiEvent logged from this class
      */
