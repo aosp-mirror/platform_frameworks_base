@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
@@ -2875,7 +2877,7 @@ public final class ProcessList {
                     reasonCode, subReason, reason, !doFreeze /* async */);
         }
         killAppZygotesLocked(packageName, appId, userId, false /* force */);
-        mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
+        mService.updateOomAdjLocked(OOM_ADJ_REASON_PROCESS_END);
         if (doFreeze) {
             freezePackageCgroup(packageUID, false);
         }
@@ -5140,7 +5142,7 @@ public final class ProcessList {
                 }
             });
             /* Will be a no-op if nothing pending */
-            mService.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+            mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_RESTRICTION_CHANGE);
         }
     }
 

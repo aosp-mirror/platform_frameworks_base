@@ -191,6 +191,7 @@ import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.statusbar.AutoHideUiElement;

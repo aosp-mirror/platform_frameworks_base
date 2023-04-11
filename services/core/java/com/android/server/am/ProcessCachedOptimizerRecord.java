@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManagerInternal.OomAdjReason;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -51,7 +53,7 @@ final class ProcessCachedOptimizerRecord {
     /**
      * Last oom adjust change reason for this app.
      */
-    @GuardedBy("mProcLock") private @OomAdjuster.OomAdjReason int mLastOomAdjChangeReason;
+    @GuardedBy("mProcLock") private @OomAdjReason int mLastOomAdjChangeReason;
 
     /**
      * The most recent compaction action performed for this app.
@@ -139,12 +141,12 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
-    void setLastOomAdjChangeReason(@OomAdjuster.OomAdjReason int reason) {
+    void setLastOomAdjChangeReason(@OomAdjReason int reason) {
         mLastOomAdjChangeReason = reason;
     }
 
     @GuardedBy("mProcLock")
-    @OomAdjuster.OomAdjReason
+    @OomAdjReason
     int getLastOomAdjChangeReason() {
         return mLastOomAdjChangeReason;
     }

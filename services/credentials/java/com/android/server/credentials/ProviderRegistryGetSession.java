@@ -33,7 +33,7 @@ import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderService;
-import android.telecom.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -145,14 +145,12 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
 
     private List<Entry> prepareUiCredentialEntries(
             @NonNull List<CredentialEntry> credentialEntries) {
-        Log.i(TAG, "in prepareUiProviderDataWithCredentials");
         List<Entry> credentialUiEntries = new ArrayList<>();
 
         // Populate the credential entries
         for (CredentialEntry credentialEntry : credentialEntries) {
             String entryId = generateUniqueId();
             mUiCredentialEntries.put(entryId, credentialEntry);
-            Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
                     credentialEntry.getSlice(),
                     setUpFillInIntent()));
@@ -172,15 +170,13 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
 
     @Override
     protected ProviderData prepareUiData() {
-        Log.i(TAG, "In prepareUiData");
         if (!ProviderSession.isUiInvokingStatus(getStatus())) {
-            Log.i(TAG, "In prepareUiData - provider does not want to show UI: "
-                    + mComponentName.flattenToString());
+            Slog.d(TAG, "No date for UI coming from: " + mComponentName.flattenToString());
             return null;
         }
         if (mProviderResponse == null) {
-            Log.i(TAG, "In prepareUiData response null");
-            throw new IllegalStateException("Response must be in completion mode");
+            Slog.w(TAG, "In prepareUiData but response is null. This is strange.");
+            return null;
         }
         return new GetCredentialProviderData.Builder(
                 mComponentName.flattenToString()).setActionChips(null)
@@ -200,13 +196,13 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             case CREDENTIAL_ENTRY_KEY:
                 CredentialEntry credentialEntry = mUiCredentialEntries.get(entryKey);
                 if (credentialEntry == null) {
-                    Log.i(TAG, "Unexpected credential entry key");
+                    Slog.w(TAG, "Unexpected credential entry key");
                     return;
                 }
                 onCredentialEntrySelected(credentialEntry, providerPendingIntentResponse);
                 break;
             default:
-                Log.i(TAG, "Unsupported entry type selected");
+                Slog.w(TAG, "Unsupported entry type selected");
         }
     }
 
@@ -233,10 +229,8 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                 }
                 return;
             }
-
-            Log.i(TAG, "Pending intent response contains no credential, or error");
         }
-        Log.i(TAG, "CredentialEntry does not have a credential or a pending intent result");
+        Slog.w(TAG, "CredentialEntry does not have a credential or a pending intent result");
     }
 
     @Override
@@ -279,14 +273,13 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     protected GetCredentialException maybeGetPendingIntentException(
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
-            android.util.Log.i(TAG, "pendingIntentResponse is null");
             return null;
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             GetCredentialException exception = PendingIntentResultHandler
                     .extractGetCredentialException(pendingIntentResponse.getResultData());
             if (exception != null) {
-                android.util.Log.i(TAG, "Pending intent contains provider exception");
+                Slog.d(TAG, "Pending intent contains provider exception");
                 return exception;
             }
         } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {

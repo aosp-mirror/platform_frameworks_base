@@ -2682,71 +2682,76 @@ public class TelecomManager {
     }
 
     /**
-     * Reports a new call with the specified {@link CallAttributes} to the telecom service. This
-     * method can be used to report both incoming and outgoing calls.  By reporting the call, the
-     * system is aware of the call and can provide updates on services (ex. Another device wants to
-     * disconnect the call) or events (ex. a new Bluetooth route became available).
-     *
+     * Add a call to the Android system service Telecom. This allows the system to start tracking an
+     * incoming or outgoing call with the specified {@link CallAttributes}. Once the call is ready
+     * to be disconnected, use the {@link CallControl#disconnect(DisconnectCause, Executor,
+     * OutcomeReceiver)} which is provided by the {@code pendingControl#onResult(CallControl)}.
      * <p>
-     * The difference between this API call and {@link TelecomManager#placeCall(Uri, Bundle)} or
-     * {@link TelecomManager#addNewIncomingCall(PhoneAccountHandle, Bundle)} is that this API
-     * will asynchronously provide an update on whether the new call was added successfully via
-     * an {@link OutcomeReceiver}.  Additionally, callbacks will run on the executor thread that was
-     * passed in.
-     *
      * <p>
-     * Note: Only packages that register with
+     * <p>
+     * <b>Call Lifecycle</b>: Your app is given foreground execution priority as long as you have a
+     * valid call and are posting a {@link android.app.Notification.CallStyle} notification.
+     * When your application is given foreground execution priority, your app is treated as a
+     * foreground service. Foreground execution priority will prevent the
+     * {@link android.app.ActivityManager} from killing your application when it is placed the
+     * background. Foreground execution priority is removed from your app when all of your app's
+     * calls terminate or your app no longer posts a valid notification.
+     * <p>
+     * <p>
+     * <p>
+     * <b>Note</b>: Only packages that register with
      * {@link PhoneAccount#CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS}
      * can utilize this API. {@link PhoneAccount}s that set the capabilities
      * {@link PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION},
      * {@link PhoneAccount#CAPABILITY_CALL_PROVIDER},
      * {@link PhoneAccount#CAPABILITY_CONNECTION_MANAGER}
      * are not supported and will cause an exception to be thrown.
-     *
      * <p>
-     * Usage example:
+     * <p>
+     * <p>
+     * <b>Usage example:</b>
      * <pre>
-     *
-     *  // An app should first define their own construct of a Call that overrides all the
-     *  // {@link CallControlCallback}s and {@link CallEventCallback}s
-     *  private class MyVoipCall {
-     *   public String callId = "";
-     *
-     *   public CallControlCallEventCallback handshakes = new
-     *                       CallControlCallEventCallback() {
-     *                         // override/ implement all {@link CallControlCallback}s
+     *  // Its up to your app on how you want to wrap the objects. One such implementation can be:
+     *  class MyVoipCall {
+     *    ...
+     *      public CallControlCallEventCallback handshakes = new  CallControlCallback() {
+     *                         ...
      *                        }
-     *   public CallEventCallback events = new
-     *                       CallEventCallback() {
-     *                         // override/ implement all {@link CallEventCallback}s
+     *
+     *      public CallEventCallback events = new CallEventCallback() {
+     *                         ...
      *                        }
-     *   public MyVoipCall(String id){
-     *       callId = id;
+     *
+     *      public MyVoipCall(String id){
+     *          ...
+     *      }
      *  }
-     *
-     * PhoneAccountHandle handle = new PhoneAccountHandle(
-     *                          new ComponentName("com.example.voip.app",
-     *                                            "com.example.voip.app.NewCallActivity"), "123");
-     *
-     * CallAttributes callAttributes = new CallAttributes.Builder(handle,
-     *                                             CallAttributes.DIRECTION_OUTGOING,
-     *                                            "John Smith", Uri.fromParts("tel", "123", null))
-     *                                            .build();
      *
      * MyVoipCall myFirstOutgoingCall = new MyVoipCall("1");
      *
-     * telecomManager.addCall(callAttributes, Runnable::run, new OutcomeReceiver() {
+     * telecomManager.addCall(callAttributes,
+     *                        Runnable::run,
+     *                        new OutcomeReceiver() {
      *                              public void onResult(CallControl callControl) {
-     *                                 // The call has been added successfully
+     *                                 // The call has been added successfully. For demonstration
+     *                                 // purposes, the call is disconnected immediately ...
+     *                                 callControl.disconnect(
+     *                                                 new DisconnectCause(DisconnectCause.LOCAL) )
      *                              }
-     *                           }, myFirstOutgoingCall.handshakes, myFirstOutgoingCall.events);
+     *                           },
+     *                           myFirstOutgoingCall.handshakes,
+     *                           myFirstOutgoingCall.events);
      * </pre>
      *
-     * @param callAttributes    attributes of the new call (incoming or outgoing, address, etc. )
-     * @param executor          thread to run background CallEventCallback updates on
-     * @param pendingControl    OutcomeReceiver that receives the result of addCall transaction
-     * @param handshakes        object that overrides {@link CallControlCallback}s
-     * @param events            object that overrides {@link CallEventCallback}s
+     * @param callAttributes attributes of the new call (incoming or outgoing, address, etc.)
+     * @param executor       execution context to run {@link CallControlCallback} updates on
+     * @param pendingControl Receives the result of addCall transaction. Upon success, a
+     *                       CallControl object is provided which can be used to do things like
+     *                       disconnect the call that was added.
+     * @param handshakes     callback that receives <b>actionable</b> updates that originate from
+     *                       Telecom.
+     * @param events         callback that receives <b>non</b>-actionable updates that originate
+     *                       from Telecom.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS)
     @SuppressLint("SamShouldBeLast")

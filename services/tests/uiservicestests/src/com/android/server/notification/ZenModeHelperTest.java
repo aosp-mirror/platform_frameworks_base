@@ -69,8 +69,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -78,7 +76,6 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -90,7 +87,6 @@ import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.VolumePolicy;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -98,6 +94,7 @@ import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
+import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -877,7 +874,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals("Config mismatch: current vs expected: "
-                + mZenModeHelperSpy.mConfig.diff(expected), expected, mZenModeHelperSpy.mConfig);
+                + new ZenModeDiff.ConfigDiff(mZenModeHelperSpy.mConfig, expected), expected,
+                mZenModeHelperSpy.mConfig);
     }
 
     @Test
@@ -1046,7 +1044,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
         assertEquals(
-                "Config mismatch: current vs expected: " + actual.diff(config10), config10, actual);
+                "Config mismatch: current vs expected: "
+                        + new ZenModeDiff.ConfigDiff(actual, config10), config10, actual);
         assertNotEquals("Expected config mismatch", config11, mZenModeHelperSpy.mConfigs.get(11));
     }
 
@@ -1062,7 +1061,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
 
         assertEquals("Config mismatch: current vs original: "
-                + mZenModeHelperSpy.mConfig.diff(original), original, mZenModeHelperSpy.mConfig);
+                + new ZenModeDiff.ConfigDiff(mZenModeHelperSpy.mConfig, original),
+                original, mZenModeHelperSpy.mConfig);
         assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
     }
 
@@ -1083,8 +1083,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
         expected.user = 10;
-        assertEquals(
-                "Config mismatch: current vs original: " + actual.diff(expected), expected, actual);
+        assertEquals("Config mismatch: current vs original: "
+                        + new ZenModeDiff.ConfigDiff(actual, expected),
+                expected, actual);
         assertEquals(expected.hashCode(), actual.hashCode());
         expected.user = 0;
         assertNotEquals(expected, mZenModeHelperSpy.mConfig);

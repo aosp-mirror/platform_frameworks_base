@@ -413,6 +413,11 @@ public class FingerprintService extends SystemService {
                                 Slog.e(TAG, "Remote exception in onAuthenticationAcquired()", e);
                             }
                         }
+
+                        @Override
+                        public void onAuthenticationHelp(int acquireInfo, CharSequence helpString) {
+                            onAuthenticationAcquired(acquireInfo);
+                        }
                     };
 
             return biometricPrompt.authenticateForOperation(
