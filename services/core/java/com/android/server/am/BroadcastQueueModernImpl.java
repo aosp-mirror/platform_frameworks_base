@@ -1008,6 +1008,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         final BroadcastRecord r = queue.getActive();
+        final int index = queue.getActiveIndex();
         if (r.ordered) {
             r.resultCode = resultCode;
             r.resultData = resultData;
@@ -1015,18 +1016,24 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             if (!r.isNoAbort()) {
                 r.resultAbort = resultAbort;
             }
+        }
 
-            // When the caller aborted an ordered broadcast, we mark all
-            // remaining receivers as skipped
-            if (r.resultAbort) {
-                for (int i = r.terminalCount + 1; i < r.receivers.size(); i++) {
-                    setDeliveryState(null, null, r, i, r.receivers.get(i),
-                            BroadcastRecord.DELIVERY_SKIPPED, "resultAbort");
-                }
+        // To ensure that "beyond" high-water marks are updated in a monotonic
+        // way, we finish this receiver before possibly skipping any remaining
+        // aborted receivers
+        final boolean res = finishReceiverActiveLocked(queue,
+                BroadcastRecord.DELIVERY_DELIVERED, "remote app");
+
+        // When the caller aborted an ordered broadcast, we mark all
+        // remaining receivers as skipped
+        if (r.resultAbort) {
+            for (int i = index + 1; i < r.receivers.size(); i++) {
+                setDeliveryState(null, null, r, i, r.receivers.get(i),
+                        BroadcastRecord.DELIVERY_SKIPPED, "resultAbort");
             }
         }
 
-        return finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_DELIVERED, "remote app");
+        return res;
     }
 
     /**
@@ -1108,21 +1115,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             @NonNull Object receiver, @DeliveryState int newDeliveryState,
             @NonNull String reason) {
         final int cookie = traceBegin("setDeliveryState");
-        final int oldDeliveryState = getDeliveryState(r, index);
-        boolean checkFinished = false;
 
-        // Only apply state when we haven't already reached a terminal state;
-        // this is how we ignore racing timeout messages
-        if (!isDeliveryStateTerminal(oldDeliveryState)) {
-            r.setDeliveryState(index, newDeliveryState, reason);
-            if (oldDeliveryState == BroadcastRecord.DELIVERY_DEFERRED) {
-                r.deferredCount--;
-            } else if (newDeliveryState == BroadcastRecord.DELIVERY_DEFERRED) {
-                // If we're deferring a broadcast, maybe that's enough to unblock the final callback
-                r.deferredCount++;
-                checkFinished = true;
-            }
-        }
+        // Remember the old state and apply the new state
+        final int oldDeliveryState = getDeliveryState(r, index);
+        final boolean beyondCountChanged = r.setDeliveryState(index, newDeliveryState, reason);
 
         // Emit any relevant tracing results when we're changing the delivery
         // state as part of running from a queue
@@ -1147,15 +1143,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                         + deliveryStateToString(newDeliveryState) + " because " + reason);
             }
 
-            r.terminalCount++;
             notifyFinishReceiver(queue, app, r, index, receiver);
-            checkFinished = true;
         }
-        // When entire ordered broadcast finished, deliver final result
-        if (checkFinished) {
-            final boolean recordFinished =
-                    ((r.terminalCount + r.deferredCount) == r.receivers.size());
-            if (recordFinished) {
+
+        // When we've reached a new high-water mark, we might be in a position
+        // to unblock other receivers or the final resultTo
+        if (beyondCountChanged) {
+            if (r.beyondCount == r.receivers.size()) {
                 scheduleResultTo(r);
             }
 

@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
-import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
 import android.annotation.IntDef;
@@ -709,7 +708,7 @@ class BroadcastProcessQueue {
                 || consecutiveHighPriorityCount >= maxHighPriorityDispatchLimit);
         final boolean isLPQueueEligible = shouldConsiderLPQueue
                 && nextLPRecord.enqueueTime <= nextHPRecord.enqueueTime
-                && !blockedOnOrderedDispatch(nextLPRecord, nextLPRecordIndex);
+                && !nextLPRecord.isBlocked(nextLPRecordIndex);
         return isLPQueueEligible ? lowPriorityQueue : highPriorityQueue;
     }
 
@@ -912,39 +911,20 @@ class BroadcastProcessQueue {
         }
     }
 
-    private boolean blockedOnOrderedDispatch(BroadcastRecord r, int index) {
-        final int blockedUntilTerminalCount = r.blockedUntilTerminalCount[index];
-
-        int existingDeferredCount = 0;
-        if (r.deferUntilActive) {
-            for (int i = 0; i < index; i++) {
-                if (r.deferredUntilActive[i]) existingDeferredCount++;
-            }
-        }
-
-        // We might be blocked waiting for other receivers to finish,
-        // typically for an ordered broadcast or priority traunches
-        if ((r.terminalCount + existingDeferredCount) < blockedUntilTerminalCount
-                && !isDeliveryStateTerminal(r.getDeliveryState(index))) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Update {@link #getRunnableAt()} if it's currently invalidated.
      */
     private void updateRunnableAt() {
-        final SomeArgs next = peekNextBroadcast();
+        if (!mRunnableAtInvalidated) return;
         mRunnableAtInvalidated = false;
+
+        final SomeArgs next = peekNextBroadcast();
         if (next != null) {
             final BroadcastRecord r = (BroadcastRecord) next.arg1;
             final int index = next.argi1;
             final long runnableAt = r.enqueueTime;
 
-            // If we're specifically queued behind other ordered dispatch activity,
-            // we aren't runnable yet
-            if (blockedOnOrderedDispatch(r, index)) {
+            if (r.isBlocked(index)) {
                 mRunnableAt = Long.MAX_VALUE;
                 mRunnableAtReason = REASON_BLOCKED;
                 return;
@@ -1262,12 +1242,12 @@ class BroadcastProcessQueue {
             pw.print(info.activityInfo.name);
         }
         pw.println();
-        final int blockedUntilTerminalCount = record.blockedUntilTerminalCount[recordIndex];
-        if (blockedUntilTerminalCount != -1) {
+        final int blockedUntilBeyondCount = record.blockedUntilBeyondCount[recordIndex];
+        if (blockedUntilBeyondCount != -1) {
             pw.print("    blocked until ");
-            pw.print(blockedUntilTerminalCount);
+            pw.print(blockedUntilBeyondCount);
             pw.print(", currently at ");
-            pw.print(record.terminalCount);
+            pw.print(record.beyondCount);
             pw.print(" of ");
             pw.println(record.receivers.size());
         }
