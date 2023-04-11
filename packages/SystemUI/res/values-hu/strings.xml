@@ -910,7 +910,7 @@
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Nincs automatikus mobiladat-kapcsolat"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Nincs kapcsolat"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nincs több rendelkezésre álló hálózat"</string>
-    <string name="all_network_unavailable" msgid="4112774339909373349">"Nincs rendelkezésre álló hálózat"</string>
+    <string name="all_network_unavailable" msgid="4112774339909373349">"Nincs elérhető hálózat"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
     <string name="tap_a_network_to_connect" msgid="1565073330852369558">"A kapcsolódáshoz koppintson a kívánt hálózatra"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Zárolás feloldása a hálózatok megtekintéséhez"</string>
