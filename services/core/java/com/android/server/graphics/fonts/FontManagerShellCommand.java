@@ -334,8 +334,8 @@ public class FontManagerShellCommand extends ShellCommand {
     }
 
     private int installCert(ShellCommand shell) throws SystemFontException {
-        if (!(Build.IS_USERDEBUG || Build.IS_ENG)) {
-            throw new SecurityException("Only userdebug/eng device can add debug certificate");
+        if (!Build.IS_DEBUGGABLE) {
+            throw new SecurityException("Only debuggable device can add debug certificate");
         }
         if (Binder.getCallingUid() != Process.ROOT_UID) {
             throw new SecurityException("Only root can add debug certificate");
