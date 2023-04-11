@@ -17,6 +17,7 @@
 package com.android.wm.shell.compatui;
 
 import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,12 +47,6 @@ import java.util.function.Consumer;
  * TODO(b/263484314): Create abstraction of RestartDialogWindowManager and LetterboxEduWindowManager
  */
 class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
-
-    /**
-     * The restart dialog should be the topmost child of the Task in case there can be more
-     * than one child.
-     */
-    private static final int Z_ORDER = Integer.MAX_VALUE;
 
     private final DialogAnimationController<RestartDialogLayout> mAnimationController;
 
@@ -112,7 +107,7 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected int getZOrder() {
-        return Z_ORDER;
+        return TASK_CHILD_LAYER_COMPAT_UI + 2;
     }
 
     @Override
