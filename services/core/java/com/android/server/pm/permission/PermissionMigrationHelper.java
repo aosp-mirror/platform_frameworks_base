@@ -28,6 +28,11 @@ import java.util.Map;
  */
 public interface PermissionMigrationHelper {
     /**
+     * Whether legacy permission definitions/trees exist or not.
+     */
+    boolean hasLegacyPermission();
+
+    /**
      * @return legacy permission definitions.
      */
     @NonNull
@@ -48,7 +53,12 @@ public interface PermissionMigrationHelper {
     /**
      * @return permissions file version for the given user.
      */
-    int getLegacyPermissionsVersion(int userId);
+    int getLegacyPermissionStateVersion(int userId);
+
+    /**
+     * @return true if permissions state exists or not.
+     */
+    boolean hasLegacyPermissionState(int userId);
 
     /**
      * Legacy permission definition.

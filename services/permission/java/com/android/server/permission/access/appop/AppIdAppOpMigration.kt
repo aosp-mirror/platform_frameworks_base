@@ -27,6 +27,10 @@ import com.android.server.permission.access.util.PackageVersionMigration
 class AppIdAppOpMigration {
     fun migrateUserState(state: MutableAccessState, userId: Int) {
         val legacyAppOpsManager = LocalServices.getService(AppOpMigrationHelper::class.java)!!
+        if (!legacyAppOpsManager.hasLegacyAppOpState()) {
+            return
+        }
+
         val legacyAppIdAppOpModes = legacyAppOpsManager.getLegacyAppIdAppOpModes(userId)
         val version = PackageVersionMigration.getVersion(userId)
 

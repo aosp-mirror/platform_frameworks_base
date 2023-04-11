@@ -77,7 +77,19 @@ public class AppOpMigrationHelperImpl implements AppOpMigrationHelper {
                 new SparseArray<>();
 
         LegacyAppOpStateParser parser = new LegacyAppOpStateParser();
-        mVersionAtBoot = parser.readState(appOpFile, uidAppOpModes, packageAppOpModes);
+        final int version = parser.readState(appOpFile, uidAppOpModes, packageAppOpModes);
+        // -1 No app ops data available
+        // 0 appops.xml exist w/o any version
+        switch (version) {
+            case -2:
+                mVersionAtBoot = -1;
+                break;
+            case -1:
+                mVersionAtBoot = 0;
+                break;
+            default:
+                mVersionAtBoot = version;
+        }
         mAppIdAppOpModes = getAppIdAppOpModes(uidAppOpModes);
         mPackageAppOpModes = getPackageAppOpModes(packageAppOpModes);
     }
@@ -151,5 +163,10 @@ public class AppOpMigrationHelperImpl implements AppOpMigrationHelper {
             }
         }
         return mVersionAtBoot;
+    }
+
+    @Override
+    public boolean hasLegacyAppOpState() {
+        return getLegacyAppOpVersion() > -1;
     }
 }

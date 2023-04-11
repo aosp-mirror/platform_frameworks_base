@@ -26,10 +26,6 @@ class AppIdAppOpUpgrade(private val policy: AppIdAppOpPolicy) {
         userId: Int,
         version: Int,
     ) {
-        if (version == 0) {
-            return
-        }
-
         if (version <= 2) {
             with(policy) {
                 val appOpMode = getAppOpMode(

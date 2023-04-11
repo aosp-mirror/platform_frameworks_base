@@ -30,9 +30,13 @@ class AppIdPermissionMigration {
     internal fun migrateSystemState(state: MutableAccessState) {
         val legacyPermissionsManager =
             LocalServices.getService(PermissionMigrationHelper::class.java)!!
+        if (!legacyPermissionsManager.hasLegacyPermission()) {
+            return
+        }
+
         migratePermissions(state.mutateSystemState().mutatePermissions(),
             legacyPermissionsManager.legacyPermissions)
-        migratePermissions(state.mutateSystemState().mutatePermissions(),
+        migratePermissions(state.mutateSystemState().mutatePermissionTrees(),
             legacyPermissionsManager.legacyPermissionTrees, true)
     }
 
@@ -58,6 +62,10 @@ class AppIdPermissionMigration {
     internal fun migrateUserState(state: MutableAccessState, userId: Int) {
         val permissionMigrationHelper =
             LocalServices.getService(PermissionMigrationHelper::class.java)!!
+        if (!permissionMigrationHelper.hasLegacyPermissionState(userId)) {
+            return
+        }
+
         val legacyAppIdPermissionStates =
             permissionMigrationHelper.getLegacyPermissionStates(userId)
         val version = PackageVersionMigration.getVersion(userId)

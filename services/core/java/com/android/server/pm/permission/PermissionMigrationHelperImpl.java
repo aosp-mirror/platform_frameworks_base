@@ -39,6 +39,15 @@ import java.util.Map;
 public class PermissionMigrationHelperImpl implements PermissionMigrationHelper {
     private static final String LOG_TAG = PermissionMigrationHelperImpl.class.getSimpleName();
 
+    @Override
+    public boolean hasLegacyPermission() {
+        PackageManagerInternal packageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        LegacyPermissionSettings legacySettings = packageManagerInternal.getLegacyPermissions();
+        return !(legacySettings.getPermissions().isEmpty()
+                && legacySettings.getPermissionTrees().isEmpty());
+    }
+
     /**
      * @return legacy permission definitions.
      */
@@ -122,10 +131,25 @@ public class PermissionMigrationHelperImpl implements PermissionMigrationHelper 
     }
 
     @Override
-    public int getLegacyPermissionsVersion(int userId) {
+    public int getLegacyPermissionStateVersion(int userId) {
         PackageManagerInternal packageManagerInternal =
                 LocalServices.getService(PackageManagerInternal.class);
-        return packageManagerInternal.getLegacyPermissionsVersion(userId);
+        int version = packageManagerInternal.getLegacyPermissionsVersion(userId);
+        // -1 No permission data available
+        // 0 runtime-permissions.xml exist w/o any version
+        switch (version) {
+            case -1:
+                return 0;
+            case 0:
+                return -1;
+            default:
+                return version;
+        }
+    }
+
+    @Override
+    public boolean hasLegacyPermissionState(int userId) {
+        return getLegacyPermissionStateVersion(userId) > -1;
     }
 
     @NonNull

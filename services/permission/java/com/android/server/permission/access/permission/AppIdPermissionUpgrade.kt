@@ -41,13 +41,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         version: Int
     ) {
         val packageName = packageState.packageName
-        if (version == 0 || version == 1) {
-            Log.v(LOG_TAG, "No version available for package: $packageName.")
-            return
-        }
-
-        // Upgrade from Pie
-        if (version == 2 || version == 3) {
+        if (version <= 3) {
             Log.v(
                 LOG_TAG, "Allowlisting and upgrading background location permission for " +
                     "package: $packageName, version: $version, user:$userId"
