@@ -45,7 +45,6 @@ import dagger.Subcomponent;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import java.util.Set;
 
 import javax.inject.Named;
 import javax.inject.Scope;
@@ -60,7 +59,6 @@ import javax.inject.Scope;
  * outside the component. Should more items be moved *into* this component to avoid so many getters?
  */
 @Subcomponent(modules = {
-        CentralSurfacesStartableModule.class,
         NotificationStackScrollLayoutListContainerModule.class,
         StatusBarViewModule.class,
         StatusBarNotificationActivityStarterModule.class,
@@ -83,14 +81,6 @@ public interface CentralSurfacesComponent {
     @Retention(RUNTIME)
     @Scope
     @interface CentralSurfacesScope {}
-
-    /**
-     * Performs initialization logic after {@link CentralSurfacesComponent} has been constructed.
-     */
-    interface Startable {
-        void start();
-        void stop();
-    }
 
     /**
      * Creates a {@link NotificationShadeWindowView}.
@@ -147,11 +137,6 @@ public interface CentralSurfacesComponent {
      */
     @Named(STATUS_BAR_FRAGMENT)
     CollapsedStatusBarFragment createCollapsedStatusBarFragment();
-
-    /**
-     * Set of startables to be run after a CentralSurfacesComponent has been constructed.
-     */
-    Set<Startable> getStartables();
 
     NotificationActivityStarter getNotificationActivityStarter();
 

@@ -1635,10 +1635,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private void inflateStatusBarWindow() {
         if (mCentralSurfacesComponent != null) {
-            // Tear down
-            for (CentralSurfacesComponent.Startable s : mCentralSurfacesComponent.getStartables()) {
-                s.stop();
-            }
+            Log.e(TAG, "CentralSurfacesComponent being recreated; this is unexpected.");
         }
         mCentralSurfacesComponent = mCentralSurfacesComponentFactory.create();
         mFragmentService.addFragmentInstantiationProvider(
@@ -1682,11 +1679,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mCentralSurfacesComponent.getCentralSurfacesCommandQueueCallbacks();
         // Connect in to the status bar manager service
         mCommandQueue.addCallback(mCommandQueueCallbacks);
-
-        // Perform all other initialization for CentralSurfacesScope
-        for (CentralSurfacesComponent.Startable s : mCentralSurfacesComponent.getStartables()) {
-            s.start();
-        }
     }
 
     protected void startKeyguard() {
