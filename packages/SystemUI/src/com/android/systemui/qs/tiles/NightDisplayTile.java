@@ -45,6 +45,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -80,6 +81,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     @Inject
     public NightDisplayTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -91,7 +93,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
             ColorDisplayManager colorDisplayManager,
             NightDisplayListenerModule.Builder nightDisplayListenerBuilder
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mLocationController = locationController;
         mManager = colorDisplayManager;
