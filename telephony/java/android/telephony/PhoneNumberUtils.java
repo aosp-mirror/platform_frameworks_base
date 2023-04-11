@@ -111,6 +111,14 @@ public class PhoneNumberUtils {
     private static final String BCD_EF_ADN_EXTENDED = "*#,N;";
     private static final String BCD_CALLED_PARTY_EXTENDED = "*#abc";
 
+    private static final String PREFIX_WPS = "*272";
+
+    // WPS prefix when CLIR is being activated for the call.
+    private static final String PREFIX_WPS_CLIR_ACTIVATE = "*31#*272";
+
+    // WPS prefix when CLIR is being deactivated for the call.
+    private static final String PREFIX_WPS_CLIR_DEACTIVATE = "#31#*272";
+
     /*
      * global-phone-number = ["+"] 1*( DIGIT / written-sep )
      * written-sep         = ("-"/".")
@@ -2942,5 +2950,16 @@ public class PhoneNumberUtils {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Check if the number is for Wireless Priority Service call.
+     * @param number  The phone number used for WPS call.
+     * @return {@code true} if number matches WPS pattern and {@code false} otherwise.
+     */
+    public static boolean isWpsCallNumber(@Nullable String number) {
+        return (number != null) && (number.startsWith(PREFIX_WPS)
+                || number.startsWith(PREFIX_WPS_CLIR_ACTIVATE)
+                || number.startsWith(PREFIX_WPS_CLIR_DEACTIVATE));
     }
 }
