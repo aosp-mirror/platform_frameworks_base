@@ -1222,7 +1222,7 @@ public class Build {
         /**
          * Upside Down Cake.
          */
-        public static final int UPSIDE_DOWN_CAKE = CUR_DEVELOPMENT;
+        public static final int UPSIDE_DOWN_CAKE = 34;
     }
 
     /** The type of build, like "user" or "eng". */
