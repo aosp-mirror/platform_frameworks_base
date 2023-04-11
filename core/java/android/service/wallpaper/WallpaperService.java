@@ -168,6 +168,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_ZOOM = 10100;
     private static final int MSG_RESIZE_PREVIEW = 10110;
     private static final int MSG_REPORT_SHOWN = 10150;
+    private static final int MSG_UPDATE_SCREEN_TURNING_ON = 10170;
     private static final int MSG_UPDATE_DIMMING = 10200;
     private static final int MSG_WALLPAPER_FLAGS_CHANGED = 10210;
 
@@ -213,6 +214,16 @@ public abstract class WallpaperService extends Service {
 
         boolean mInitializing = true;
         boolean mVisible;
+        /**
+         * Whether the screen is turning on.
+         * After the display is powered on, brightness is initially off. It is turned on only after
+         * all windows have been drawn, and sysui notifies that it's ready (See
+         * {@link com.android.internal.policy.IKeyguardDrawnCallback}).
+         * As some wallpapers use visibility as a signal to start animations, this makes sure
+         * {@link Engine#onVisibilityChanged} is invoked only when the display is both on and
+         * visible (with brightness on).
+         */
+        private boolean mIsScreenTurningOn;
         boolean mReportedVisible;
         boolean mDestroyed;
         // Set to true after receiving WallpaperManager#COMMAND_FREEZE. It's reset back to false
@@ -1018,6 +1029,7 @@ public abstract class WallpaperService extends Service {
                     out.print(" mDestroyed="); out.println(mDestroyed);
             out.print(prefix); out.print("mVisible="); out.print(mVisible);
                     out.print(" mReportedVisible="); out.println(mReportedVisible);
+                    out.print(" mIsScreenTurningOn="); out.println(mIsScreenTurningOn);
             out.print(prefix); out.print("mDisplay="); out.println(mDisplay);
             out.print(prefix); out.print("mCreated="); out.print(mCreated);
                     out.print(" mSurfaceCreated="); out.print(mSurfaceCreated);
@@ -1549,6 +1561,13 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        void onScreenTurningOnChanged(boolean isScreenTurningOn) {
+            if (!mDestroyed) {
+                mIsScreenTurningOn = isScreenTurningOn;
+                reportVisibility(false);
+            }
+        }
+
         void doVisibilityChanged(boolean visible) {
             if (!mDestroyed) {
                 mVisible = visible;
@@ -1565,9 +1584,10 @@ public abstract class WallpaperService extends Service {
                 return;
             }
             if (!mDestroyed) {
-                mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN :
-                        mDisplay.getCommittedState();
-                boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
+                mDisplayState =
+                        mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getCommittedState();
+                boolean displayVisible = Display.isOnState(mDisplayState) && !mIsScreenTurningOn;
+                boolean visible = mVisible && displayVisible;
                 if (DEBUG) {
                     Log.v(
                             TAG,
@@ -2486,6 +2506,20 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        public void updateScreenTurningOn(boolean isScreenTurningOn) {
+            Message msg = mCaller.obtainMessageBO(MSG_UPDATE_SCREEN_TURNING_ON, isScreenTurningOn,
+                    null);
+            mCaller.sendMessage(msg);
+        }
+
+        public void onScreenTurningOn() throws RemoteException {
+            updateScreenTurningOn(true);
+        }
+
+        public void onScreenTurnedOn() throws RemoteException {
+            updateScreenTurningOn(false);
+        }
+
         @Override
         public void executeMessage(Message message) {
             switch (message.what) {
@@ -2529,6 +2563,13 @@ public abstract class WallpaperService extends Service {
                     if (DEBUG) Log.v(TAG, "Visibility change in " + mEngine
                             + ": " + message.arg1);
                     mEngine.doVisibilityChanged(message.arg1 != 0);
+                    break;
+                case MSG_UPDATE_SCREEN_TURNING_ON:
+                    if (DEBUG) {
+                        Log.v(TAG,
+                                message.arg1 != 0 ? "Screen turning on" : "Screen turned on");
+                    }
+                    mEngine.onScreenTurningOnChanged(/* isScreenTurningOn= */ message.arg1 != 0);
                     break;
                 case MSG_WALLPAPER_OFFSETS: {
                     mEngine.doOffsetsChanged(true);
