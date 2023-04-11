@@ -101,7 +101,7 @@ sealed class SystemState(
     permissionAllowlist: PermissionAllowlist,
     implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>,
     isSystemReady: Boolean,
-    // TODO: Get and watch the state for deviceAndProfileOwners
+    // TODO: STOPSHIP: Get and watch the state for deviceAndProfileOwners
     deviceAndProfileOwners: IntMap<String>,
     val permissionGroupsReference: PermissionGroupsReference,
     val permissionTreesReference: PermissionTreesReference,

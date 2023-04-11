@@ -182,7 +182,6 @@ class AppIdPermissionPolicy : SchemePolicy() {
         adoptPermissions(packageState, changedPermissionNames)
         addPermissionGroups(packageState)
         addPermissions(packageState, changedPermissionNames)
-        // TODO: revokeSystemAlertWindowIfUpgradedPast23()
         trimPermissions(packageState.packageName, changedPermissionNames)
         trimPermissionStates(packageState.appId)
         revokePermissionsOnPackageUpdate(packageState.appId)
@@ -196,7 +195,6 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     override fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {
-        // TODO: STOPSHIP: Remove this check or at least turn into logging.
         check(packageName !in newState.systemState.disabledSystemPackageStates) {
             "Package $packageName reported as removed before disabled system package is enabled"
         }
@@ -330,7 +328,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             val newPermissionGroup = PackageInfoUtils.generatePermissionGroupInfo(
                 parsedPermissionGroup, PackageManager.GET_META_DATA.toLong()
             )!!
-            // TODO: Clear permission state on group take-over?
+            // TODO: STOPSHIP: Clear permission state on group take-over?
             val permissionGroupName = newPermissionGroup.name
             val oldPermissionGroup = newState.systemState.permissionGroups[permissionGroupName]
             if (oldPermissionGroup != null &&
@@ -373,18 +371,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
         changedPermissionNames: MutableIndexedSet<String>
     ) {
         packageState.androidPackage!!.permissions.forEachIndexed { _, parsedPermission ->
-            // TODO:
-            // parsedPermission.flags = parsedPermission.flags andInv PermissionInfo.FLAG_INSTALLED
-            // TODO: This seems actually unused.
-            // if (packageState.androidPackage.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            //    parsedPermission.setParsedPermissionGroup(
-            //        newState.systemState.permissionGroup[parsedPermission.group]
-            //    )
-            // }
             val newPermissionInfo = PackageInfoUtils.generatePermissionInfo(
                 parsedPermission, PackageManager.GET_META_DATA.toLong()
             )!!
-            // TODO: newPermissionInfo.flags |= PermissionInfo.FLAG_INSTALLED
             val permissionName = newPermissionInfo.name
             val oldPermission = if (parsedPermission.isTree) {
                 newState.systemState.permissionTrees[permissionName]
