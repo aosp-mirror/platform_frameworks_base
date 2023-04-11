@@ -387,7 +387,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         when(mPowerManagerService.isInteractive()).thenReturn(true);
-        when(mStackScroller.getActivatedChild()).thenReturn(null);
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];

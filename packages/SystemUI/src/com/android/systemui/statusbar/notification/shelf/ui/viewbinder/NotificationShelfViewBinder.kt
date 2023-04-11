@@ -20,7 +20,6 @@ import android.view.View
 import android.view.accessibility.AccessibilityManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -28,7 +27,6 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.NotificationShelfController
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController
 import com.android.systemui.statusbar.notification.row.ExpandableOutlineViewController
 import com.android.systemui.statusbar.notification.row.ExpandableViewController
@@ -36,7 +34,6 @@ import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.NotificationTapHelper
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.util.kotlin.getValue
 import dagger.Lazy
@@ -58,10 +55,8 @@ constructor(
     private val shelf: NotificationShelf,
     private val viewModel: NotificationShelfViewModel,
     featureFlags: FeatureFlags,
-    private val notifTapHelperFactory: NotificationTapHelper.Factory,
     private val a11yManager: AccessibilityManager,
     private val falsingManager: FalsingManager,
-    private val falsingCollector: FalsingCollector,
     hostControllerLazy: Lazy<NotificationStackScrollLayoutController>,
 ) : NotificationShelfController {
 
@@ -83,11 +78,9 @@ constructor(
 
         ActivatableNotificationViewController(
                 shelf,
-                notifTapHelperFactory,
                 ExpandableOutlineViewController(shelf, ExpandableViewController(shelf)),
                 a11yManager,
                 falsingManager,
-                falsingCollector,
             )
             .init()
         hostController.setShelf(shelf)
@@ -103,10 +96,6 @@ constructor(
         get() = shelf.shelfIcons
 
     override fun canModifyColorOfNotifications(): Boolean = unsupported
-
-    override fun setOnActivatedListener(listener: ActivatableNotificationView.OnActivatedListener) {
-        shelf.setOnActivatedListener(listener)
-    }
 
     override fun bind(
         ambientState: AmbientState,

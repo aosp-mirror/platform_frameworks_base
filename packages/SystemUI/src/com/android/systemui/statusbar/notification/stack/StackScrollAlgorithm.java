@@ -126,7 +126,7 @@ public class StackScrollAlgorithm {
         updateHeadsUpStates(algorithmState, ambientState);
         updatePulsingStates(algorithmState, ambientState);
 
-        updateDimmedActivatedHideSensitive(ambientState, algorithmState);
+        updateDimmedAndHideSensitive(ambientState, algorithmState);
         updateClipping(algorithmState, ambientState);
         updateSpeedBumpState(algorithmState, speedBumpIndex);
         updateShelfState(algorithmState, ambientState);
@@ -341,25 +341,17 @@ public class StackScrollAlgorithm {
         }
     }
 
-    /**
-     * Updates the dimmed, activated and hiding sensitive states of the children.
-     */
-    private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
-                                                    StackScrollAlgorithmState algorithmState) {
+    /** Updates the dimmed and hiding sensitive states of the children. */
+    private void updateDimmedAndHideSensitive(AmbientState ambientState,
+            StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
         boolean hideSensitive = ambientState.isHideSensitive();
-        View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState childViewState = child.getViewState();
             childViewState.dimmed = dimmed;
             childViewState.hideSensitive = hideSensitive;
-            boolean isActivatedChild = activatedChild == child;
-            if (dimmed && isActivatedChild) {
-                childViewState.setZTranslation(childViewState.getZTranslation()
-                        + 2.0f * ambientState.getZDistanceBetweenElements());
-            }
         }
     }
 

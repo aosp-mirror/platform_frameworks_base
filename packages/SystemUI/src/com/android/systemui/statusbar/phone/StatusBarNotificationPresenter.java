@@ -31,7 +31,6 @@ import android.util.Slog;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
@@ -58,14 +57,12 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -84,7 +81,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotifShadeEventSource mNotifShadeEventSource;
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
-    private final LockscreenGestureLogger mLockscreenGestureLogger;
 
     private final NotificationPanelViewController mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -151,7 +147,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         mNotifShadeEventSource = notifShadeEventSource;
         mMediaManager = notificationMediaManager;
         mGutsManager = notificationGutsManager;
-        mLockscreenGestureLogger = lockscreenGestureLogger;
         mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotifPipelineFlags = notifPipelineFlags;
@@ -236,34 +231,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     @Override
     public boolean isPresenterFullyCollapsed() {
         return mNotificationPanel.isFullyCollapsed();
-    }
-
-    @Override
-    public void onActivated(ActivatableNotificationView view) {
-        onActivated();
-        if (view != null) {
-            mNotificationPanel.getShadeNotificationPresenter().setActivatedChild(view);
-        }
-    }
-
-    public void onActivated() {
-        mLockscreenGestureLogger.write(
-                MetricsEvent.ACTION_LS_NOTE,
-                0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
-        mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_NOTIFICATION_FALSE_TOUCH);
-        ActivatableNotificationView previousView =
-                mNotificationPanel.getShadeNotificationPresenter().getActivatedChild();
-        if (previousView != null) {
-            previousView.makeInactive(true /* animate */);
-        }
-    }
-
-    @Override
-    public void onActivationReset(ActivatableNotificationView view) {
-        if (view == mNotificationPanel.getShadeNotificationPresenter().getActivatedChild()) {
-            mNotificationPanel.getShadeNotificationPresenter().setActivatedChild(null);
-            mKeyguardIndicationController.hideTransientIndication();
-        }
     }
 
     @Override

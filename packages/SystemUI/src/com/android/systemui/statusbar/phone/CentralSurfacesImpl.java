@@ -1563,7 +1563,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mNotifListContainer,
                 mHeadsUpManager,
                 mJankMonitor);
-        mNotificationShelfController.setOnActivatedListener(mPresenter);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);

@@ -177,7 +177,6 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -3302,16 +3301,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         @Override
         public boolean hasPulsingNotifications() {
             return mNotificationListContainer.hasPulsingNotifications();
-        }
-
-        @Override
-        public ActivatableNotificationView getActivatedChild() {
-            return mNotificationStackScrollLayoutController.getActivatedChild();
-        }
-
-        @Override
-        public void setActivatedChild(ActivatableNotificationView o) {
-            mNotificationStackScrollLayoutController.setActivatedChild(o);
         }
     }
 

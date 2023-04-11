@@ -1370,14 +1370,6 @@ public class NotificationStackScrollLayoutController {
         mView.onUpdateRowStates();
     }
 
-    public ActivatableNotificationView getActivatedChild() {
-        return mView.getActivatedChild();
-    }
-
-    public void setActivatedChild(ActivatableNotificationView view) {
-        mView.setActivatedChild(view);
-    }
-
     public void runAfterAnimationFinished(Runnable r) {
         mView.runAfterAnimationFinished(r);
     }
