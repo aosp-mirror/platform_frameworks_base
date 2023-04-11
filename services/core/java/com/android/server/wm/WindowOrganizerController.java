@@ -291,23 +291,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     if (type < 0) {
                         throw new IllegalArgumentException("Can't create transition with no type");
                     }
+                    transition = new Transition(type, 0 /* flags */, mTransitionController,
+                            mService.mWindowManager.mSyncEngine);
                     // If there is already a collecting transition, queue up a new transition and
                     // return that. The actual start and apply will then be deferred until that
                     // transition starts collecting. This should almost never happen except during
                     // tests.
                     if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
                         Slog.w(TAG, "startTransition() while one is already collecting.");
-                        final Transition nextTransition = new Transition(type, 0 /* flags */,
-                                mTransitionController, mService.mWindowManager.mSyncEngine);
+                        final Transition nextTransition = transition;
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "Creating Pending Transition: %s", nextTransition);
-                        mService.mWindowManager.mSyncEngine.queueSyncSet(
-                                // Make sure to collect immediately to prevent another transition
-                                // from sneaking in before it. Note: moveToCollecting internally
-                                // calls startSyncSet.
-                                () -> mTransitionController.moveToCollecting(nextTransition),
+                        mTransitionController.queueCollecting(nextTransition,
                                 () -> {
                                     nextTransition.start();
+                                    nextTransition.mLogger.mStartWCT = wct;
                                     applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
                                     if (needsSetReady) {
                                         nextTransition.setAllReady();
@@ -315,7 +313,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 });
                         return nextTransition.getToken();
                     }
-                    transition = mTransitionController.createTransition(type);
+                    mTransitionController.moveToCollecting(transition);
                 }
                 if (!transition.isCollecting() && !transition.isForcePlaying()) {
                     Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
@@ -474,11 +472,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     mTransitionController, mService.mWindowManager.mSyncEngine);
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Creating Pending Transition for TaskFragment: %s", nextTransition);
-            mService.mWindowManager.mSyncEngine.queueSyncSet(
-                    // Make sure to collect immediately to prevent another transition
-                    // from sneaking in before it. Note: moveToCollecting internally
-                    // calls startSyncSet.
-                    () -> mTransitionController.moveToCollecting(nextTransition),
+            mTransitionController.queueCollecting(nextTransition,
                     () -> {
                         if (mTaskFragmentOrganizerController.isValidTransaction(wct)
                                 && (applyTransaction(wct, -1 /* syncId */, nextTransition, caller)

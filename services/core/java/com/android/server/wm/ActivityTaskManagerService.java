@@ -2874,8 +2874,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */,
                         getTransitionController(), mWindowManager.mSyncEngine);
                 if (mWindowManager.mSyncEngine.hasActiveSync()) {
-                    mWindowManager.mSyncEngine.queueSyncSet(
-                            () -> getTransitionController().moveToCollecting(transition),
+                    getTransitionController().queueCollecting(transition,
                             () -> {
                                 if (!task.getWindowConfiguration().canResizeTask()) {
                                     Slog.w(TAG, "resizeTask not allowed on task=" + task);
@@ -3629,9 +3628,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     if (transition != null && mWindowManager.mSyncEngine.hasActiveSync()) {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "Creating Pending Pip-Enter: %s", transition);
-                        mWindowManager.mSyncEngine.queueSyncSet(
-                                () -> getTransitionController().moveToCollecting(transition),
-                                enterPipRunnable);
+                        getTransitionController().queueCollecting(transition, enterPipRunnable);
                     } else {
                         // Move to collecting immediately to "claim" the sync-engine for this
                         // transition.
@@ -3647,9 +3644,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (transition != null && mWindowManager.mSyncEngine.hasActiveSync()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Creating Pending Pip-Enter: %s", transition);
-                mWindowManager.mSyncEngine.queueSyncSet(
-                        () -> getTransitionController().moveToCollecting(transition),
-                        enterPipRunnable);
+                getTransitionController().queueCollecting(transition, enterPipRunnable);
             } else {
                 if (transition != null) {
                     getTransitionController().moveToCollecting(transition);
