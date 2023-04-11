@@ -8,16 +8,16 @@
     <string name="a11y_settings_label" msgid="3977714687248445050">"Հատուկ գործառույթների կարգավորումներ"</string>
     <string name="power_label" msgid="7699720321491287839">"Սնուցման կոճակ"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Սնուցման կոճակի ընտրանքներ"</string>
-    <string name="recent_apps_label" msgid="6583276995616385847">"Վերջին օգտագործած հավելվածները"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"Վերջին հավելվածներ"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"Կողպէկրան"</string>
-    <string name="quick_settings_label" msgid="2999117381487601865">"Արագ կարգավորումներ"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"Արագ\\nկարգավորումներ"</string>
     <string name="notifications_label" msgid="6829741046963013567">"Ծանուցումներ"</string>
     <string name="screenshot_label" msgid="863978141223970162">"Սքրինշոթ"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"Ստանալ սքրինշոթը"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Բարձրացնել ձայնը"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Իջեցնել ձայնը"</string>
     <string name="brightness_up_label" msgid="8010753822854544846">"Ավելացնել պայծառությունը"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"Պակասեցնել պայծառությունը"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Նվազեցնել պայծառությունը"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Անցնել նախորդ էկրան"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Անցնել հաջորդ էկրան"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Հատուկ գործառույթների մեծ ընտրացանկը նախատեսված է ձեր սարքը կառավարելու համար: Դուք կարող եք կողպել ձեր հեռախոսը, կարգավորել պայծառությունը և ձայնի ուժգնությունը, սքրինշոթներ անել և այլն։"</string>

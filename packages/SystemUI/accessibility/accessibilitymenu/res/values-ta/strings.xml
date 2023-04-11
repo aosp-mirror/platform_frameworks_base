@@ -14,9 +14,9 @@
     <string name="notifications_label" msgid="6829741046963013567">"அறிவிப்புகள்"</string>
     <string name="screenshot_label" msgid="863978141223970162">"ஸ்கிரீன்ஷாட்"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"ஸ்கிரீன் ஷாட்டை எடுக்கும் பட்டன்"</string>
-    <string name="volume_up_label" msgid="8592766918780362870">"ஒலியளவை அதிகரிப்பதற்கான பட்டன்"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"ஒலியளவை அதிகரிக்கும்"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"ஒலியளவைக் குறைக்கும்"</string>
-    <string name="brightness_up_label" msgid="8010753822854544846">"ஒளிர்வை அதிகரிப்பதற்கான பட்டன்"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"ஒளிர்வை அதிகரிக்கும்"</string>
     <string name="brightness_down_label" msgid="7115662941913272072">"ஒளிர்வைக் குறைக்கும்"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"முந்தைய திரைக்குச் செல்வதற்கான பட்டன்"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"அடுத்த திரைக்குச் செல்வதற்கான பட்டன்"</string>

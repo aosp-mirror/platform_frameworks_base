@@ -5,7 +5,7 @@
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Saavutettavuusvalikko on suuri näyttövalikko, josta voit ohjata laitettasi. Voit esimerkiksi lukita laitteen, säätää äänenvoimakkuutta ja kirkkautta sekä ottaa kuvakaappauksia."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
-    <string name="a11y_settings_label" msgid="3977714687248445050">"Esteettömyysasetukset"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Saavutettavuusasetukset"</string>
     <string name="power_label" msgid="7699720321491287839">"Virta"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Virta-asetukset"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Viimeaikaiset sovellukset"</string>
@@ -22,9 +22,9 @@
     <string name="next_button_content_description" msgid="6810058269847364406">"Siirry seuraavalle näytölle"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Saavutettavuusvalikko on suuri näyttövalikko, josta voit ohjata laitettasi. Voit esimerkiksi lukita laitteen, säätää äänenvoimakkuutta ja kirkkautta sekä ottaa kuvakaappauksia."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Ohjaa laitetta suurella valikolla"</string>
-    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Esteettömyysvalikon asetukset"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Saavutettavuusvalikon asetukset"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Suuret painikkeet"</string>
-    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Suurenna esteettömyysvalikon painikkeita"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Suurenna saavutettavuusvalikon painikkeita"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Ohje"</string>
     <string name="brightness_percentage_label" msgid="7391554573977867369">"Kirkkaus <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
     <string name="music_volume_percentage_label" msgid="398635599662604706">"Musiikin äänenvoimakkuus <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
