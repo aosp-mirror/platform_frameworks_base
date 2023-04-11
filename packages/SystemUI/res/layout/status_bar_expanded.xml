@@ -152,10 +152,4 @@
     <include
         layout="@layout/keyguard_bottom_area"
         android:visibility="gone" />
-
-    <FrameLayout
-        android:id="@+id/preview_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
 </com.android.systemui.shade.NotificationPanelView>

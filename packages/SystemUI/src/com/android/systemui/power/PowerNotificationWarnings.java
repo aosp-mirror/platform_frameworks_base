@@ -18,6 +18,10 @@ package com.android.systemui.power;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_CONFIRMATION;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_LOW_WARNING;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SaverManualEnabledReason;
+
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -691,7 +695,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             d.setTitle(R.string.battery_saver_confirmation_title);
             d.setPositiveButton(R.string.battery_saver_confirmation_ok,
                     (dialog, which) -> {
-                        setSaverMode(true, false);
+                        setSaverMode(true, false, SAVER_ENABLED_CONFIRMATION);
                         logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_OK);
                     });
             d.setNegativeButton(android.R.string.cancel, (dialog, which) ->
@@ -790,8 +794,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         return builder;
     }
 
-    private void setSaverMode(boolean mode, boolean needFirstTimeWarning) {
-        BatterySaverUtils.setPowerSaveMode(mContext, mode, needFirstTimeWarning);
+    private void setSaverMode(boolean mode, boolean needFirstTimeWarning,
+            @SaverManualEnabledReason int reason) {
+        BatterySaverUtils.setPowerSaveMode(mContext, mode, needFirstTimeWarning, reason);
     }
 
     private void startBatterySaverSchedulePage() {
@@ -839,7 +844,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             } else if (action.equals(ACTION_START_SAVER)) {
                 logEvent(BatteryWarningEvents
                         .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_TURN_ON);
-                setSaverMode(true, true);
+                setSaverMode(true, true, SAVER_ENABLED_LOW_WARNING);
                 dismissLowBatteryNotification();
             } else if (action.equals(ACTION_SHOW_START_SAVER_CONFIRMATION)) {
                 dismissLowBatteryNotification();

@@ -96,6 +96,21 @@ interface IVoiceInteractionManagerService {
      * @RequiresPermission Manifest.permission.MANAGE_VOICE_KEYPHRASES
      */
     int deleteKeyphraseSoundModel(int keyphraseId, in String bcp47Locale);
+
+    /**
+     * Override the persistent enrolled model database with an in-memory
+     * fake for testing purposes.
+     *
+     * @param enabled - {@code true} to enable the test database. {@code false} to enable
+     * the real, persistent database.
+     * @param token - IBinder used to register a death listener to clean-up the override
+     * if tests do not clean up gracefully.
+     */
+    @EnforcePermission("MANAGE_VOICE_KEYPHRASES")
+    @JavaPassthrough(annotation= "@android.annotation.RequiresPermission(" +
+            "android.Manifest.permission.MANAGE_VOICE_KEYPHRASES)")
+    void setModelDatabaseForTestEnabled(boolean enabled, IBinder token);
+
     /**
      * Indicates if there's a keyphrase sound model available for the given keyphrase ID and the
      * user ID of the caller.
@@ -106,6 +121,7 @@ interface IVoiceInteractionManagerService {
      * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
      */
     boolean isEnrolledForKeyphrase(int keyphraseId, String bcp47Locale);
+
     /**
      * Generates KeyphraseMetadata for an enrolled sound model based on keyphrase string, locale,
      * and the user ID of the caller.

@@ -35,6 +35,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -173,10 +174,15 @@ public class SharedConnectivityManager {
                     R.string.config_sharedConnectivityServicePackage);
             String serviceIntentAction = resources.getString(
                     R.string.config_sharedConnectivityServiceIntentAction);
+            if (TextUtils.isEmpty(servicePackageName) || TextUtils.isEmpty(serviceIntentAction)) {
+                Log.e(TAG, "To support shared connectivity service on this device, the"
+                        + " service's package name and intent action strings must not be empty");
+                return null;
+            }
             return new SharedConnectivityManager(context, servicePackageName, serviceIntentAction);
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "To support shared connectivity service on this device, the service's"
-                    + " package name and intent action string must be defined");
+                    + " package name and intent action strings must be defined");
         }
         return null;
     }

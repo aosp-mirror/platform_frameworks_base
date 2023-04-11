@@ -44,6 +44,14 @@ import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BACKUP;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_BEGIN;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SHELL;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SYSTEM_INIT;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
@@ -199,6 +207,7 @@ import android.app.ActivityManagerInternal.BindServiceEventListener;
 import android.app.ActivityManagerInternal.BroadcastEventListener;
 import android.app.ActivityManagerInternal.ForegroundServiceStateListener;
 import android.app.ActivityManagerInternal.MediaProjectionTokenEvent;
+import android.app.ActivityManagerInternal.OomAdjReason;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AnrController;
@@ -368,7 +377,6 @@ import android.util.FeatureFlagUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Log;
-import android.util.LogWriter;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -1968,7 +1976,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_SYSTEM);
                 addPidLocked(app);
                 updateLruProcessLocked(app, false, null);
-                updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+                updateOomAdjLocked(OOM_ADJ_REASON_SYSTEM_INIT);
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(
@@ -2502,7 +2510,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // bind background threads to little cores
         // this is expected to fail inside of framework tests because apps can't touch cpusets directly
         // make sure we've already adjusted system_server's internal view of itself first
-        updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+        updateOomAdjLocked(OOM_ADJ_REASON_SYSTEM_INIT);
         try {
             Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
                     Process.THREAD_GROUP_SYSTEM);
@@ -3387,7 +3395,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             handleAppDiedLocked(app, pid, false, true, fromBinderDied);
 
             if (doOomAdj) {
-                updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
+                updateOomAdjLocked(OOM_ADJ_REASON_PROCESS_END);
             }
             if (doLowMem) {
                 mAppProfiler.doLowMemReportIfNeededLocked(app);
@@ -4843,7 +4851,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (!didSomething) {
-                updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
+                updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
                 checkTime(startTime, "finishAttachApplicationInner: after updateOomAdjLocked");
             }
 
@@ -5485,7 +5493,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "setProcessLimit()");
         synchronized (this) {
             mConstants.setOverrideMaxCachedProcesses(max);
-            trimApplicationsLocked(true, OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
+            trimApplicationsLocked(true, OOM_ADJ_REASON_PROCESS_END);
         }
     }
 
@@ -5513,7 +5521,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pr.mState.setForcingToImportant(null);
                 clearProcessForegroundLocked(pr);
             }
-            updateOomAdjLocked(pr, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+            updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
         }
     }
 
@@ -5560,7 +5568,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (changed) {
-                updateOomAdjLocked(pr, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+                updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
             }
         }
     }
@@ -6869,7 +6877,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     new HostingRecord(HostingRecord.HOSTING_TYPE_ADDED_APPLICATION,
                             customProcess != null ? customProcess : info.processName));
             updateLruProcessLocked(app, false, null);
-            updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
+            updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
         }
 
         // Report usage as process is persistent and being started.
@@ -6986,7 +6994,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mOomAdjProfiler.onWakefulnessChanged(wakefulness);
                 mOomAdjuster.onWakefulnessChanged(wakefulness);
 
-                updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+                updateOomAdjLocked(OOM_ADJ_REASON_UI_VISIBILITY);
             }
         }
     }
@@ -7748,7 +7756,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 if (changed) {
-                    updateOomAdjLocked(pr, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+                    updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
                 }
             }
         } finally {
@@ -9508,7 +9516,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             mAppProfiler.setMemFactorOverrideLocked(level);
             // Kick off an oom adj update since we forced a mem factor update.
-            updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+            updateOomAdjLocked(OOM_ADJ_REASON_SHELL);
         }
     }
 
@@ -13408,7 +13416,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             proc.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BACKUP);
 
             // Try not to kill the process during backup
-            updateOomAdjLocked(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
+            updateOomAdjLocked(proc, OOM_ADJ_REASON_BACKUP);
 
             // If the process is already attached, schedule the creation of the backup agent now.
             // If it is not yet live, this will be done when it attaches to the framework.
@@ -13532,7 +13540,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Not backing this app up any more; reset its OOM adjustment
                 final ProcessRecord proc = backupTarget.app;
-                updateOomAdjLocked(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
+                updateOomAdjLocked(proc, OOM_ADJ_REASON_BACKUP);
                 proc.setInFullBackup(false);
                 proc.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_BACKUP);
 
@@ -13923,7 +13931,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // If we actually concluded any broadcasts, we might now be able
                 // to trim the recipients' apps from our working set
                 if (doTrim) {
-                    trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
+                    trimApplicationsLocked(false, OOM_ADJ_REASON_FINISH_RECEIVER);
                     return;
                 }
             }
@@ -15185,7 +15193,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 queue.finishReceiverLocked(callerApp, resultCode,
                         resultData, resultExtras, resultAbort, true);
                 // updateOomAdjLocked() will be done here
-                trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
+                trimApplicationsLocked(false, OOM_ADJ_REASON_FINISH_RECEIVER);
             }
 
         } finally {
@@ -16130,7 +16138,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             item.foregroundServiceTypes = fgServiceTypes;
         }
         if (oomAdj) {
-            updateOomAdjLocked(proc, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+            updateOomAdjLocked(proc, OOM_ADJ_REASON_UI_VISIBILITY);
         }
     }
 
@@ -16196,7 +16204,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * {@link #enqueueOomAdjTargetLocked}.
      */
     @GuardedBy("this")
-    void updateOomAdjPendingTargetsLocked(@OomAdjuster.OomAdjReason int oomAdjReason) {
+    void updateOomAdjPendingTargetsLocked(@OomAdjReason int oomAdjReason) {
         mOomAdjuster.updateOomAdjPendingTargetsLocked(oomAdjReason);
     }
 
@@ -16215,7 +16223,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final void updateOomAdjLocked(@OomAdjuster.OomAdjReason int oomAdjReason) {
+    final void updateOomAdjLocked(@OomAdjReason int oomAdjReason) {
         mOomAdjuster.updateOomAdjLocked(oomAdjReason);
     }
 
@@ -16227,8 +16235,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @return whether updateOomAdjLocked(app) was successful.
      */
     @GuardedBy("this")
-    final boolean updateOomAdjLocked(
-            ProcessRecord app, @OomAdjuster.OomAdjReason int oomAdjReason) {
+    final boolean updateOomAdjLocked(ProcessRecord app, @OomAdjReason int oomAdjReason) {
         return mOomAdjuster.updateOomAdjLocked(app, oomAdjReason);
     }
 
@@ -16461,16 +16468,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOomAdjuster.setUidTempAllowlistStateLSP(uid, onAllowlist);
     }
 
-    private void trimApplications(
-            boolean forceFullOomAdj, @OomAdjuster.OomAdjReason int oomAdjReason) {
+    private void trimApplications(boolean forceFullOomAdj, @OomAdjReason int oomAdjReason) {
         synchronized (this) {
             trimApplicationsLocked(forceFullOomAdj, oomAdjReason);
         }
     }
 
     @GuardedBy("this")
-    private void trimApplicationsLocked(
-            boolean forceFullOomAdj, @OomAdjuster.OomAdjReason int oomAdjReason) {
+    private void trimApplicationsLocked(boolean forceFullOomAdj, @OomAdjReason int oomAdjReason) {
         // First remove any unused application processes whose package
         // has been removed.
         boolean didSomething = false;
@@ -17442,7 +17447,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 pr.mState.setHasOverlayUi(hasOverlayUi);
                 //Slog.i(TAG, "Setting hasOverlayUi=" + pr.hasOverlayUi + " for pid=" + pid);
-                updateOomAdjLocked(pr, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
+                updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
             }
         }
 
@@ -17577,7 +17582,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void trimApplications() {
-            ActivityManagerService.this.trimApplications(true, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+            ActivityManagerService.this.trimApplications(true, OOM_ADJ_REASON_ACTIVITY);
         }
 
         public void killProcessesForRemovedTask(ArrayList<Object> procsToKill) {
@@ -17626,9 +17631,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void updateOomAdj() {
+        public void updateOomAdj(@OomAdjReason int oomAdjReason) {
             synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+                ActivityManagerService.this.updateOomAdjLocked(oomAdjReason);
             }
         }
 
@@ -18288,8 +18293,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // sends to the activity. After this race issue between WM/ATMS and AMS is solved, this
             // workaround can be removed. (b/213288355)
             if (isNewPending) {
-                mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid,
-                        OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+                mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid, OOM_ADJ_REASON_ACTIVITY);
             }
             // We need to update the network rules for the app coming to the top state so that
             // it can access network when the device or the app is in a restricted state
