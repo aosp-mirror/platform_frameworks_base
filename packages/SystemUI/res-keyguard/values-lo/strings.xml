@@ -21,14 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"ໃສ່ລະຫັດ PIN ຂອງທ່ານ"</string>
-    <!-- no translation found for keyguard_enter_pin (8114529922480276834) -->
-    <skip />
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"ໃສ່ລະຫັດ PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ໃສ່ຮູບແບບປົດລັອກຂອງທ່ານ"</string>
-    <!-- no translation found for keyguard_enter_pattern (7616595160901084119) -->
-    <skip />
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ແຕ້ມຮູບແບບ"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ປ້ອນລະຫັດຜ່ານຂອງທ່ານ"</string>
-    <!-- no translation found for keyguard_enter_password (6483623792371009758) -->
-    <skip />
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"ໃສ່ລະຫັດຜ່ານ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ບັດບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ສາກເຕັມແລ້ວ."</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳ​ລັງ​ສາກ​ໄຟໄຮ້​ສາຍ"</string>
@@ -58,68 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"ບໍ່ສາມາດປິດການນຳໃຊ້ eSIM ໄດ້ເນື່ອງຈາກມີຂໍ້ຜິດພາດ."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"ປ້ອນເຂົ້າ"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"ຮູບແບບບໍ່ຖືກຕ້ອງ"</string>
-    <!-- no translation found for kg_wrong_pattern_try_again (3603524940234151881) -->
-    <skip />
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"ຮູບແບບບໍ່ຖືກຕ້ອງ. ກະລຸນາລອງໃໝ່."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ"</string>
-    <!-- no translation found for kg_wrong_password_try_again (6602878676125765920) -->
-    <skip />
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ. ກະລຸນາລອງໃໝ່."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ"</string>
-    <!-- no translation found for kg_wrong_pin_try_again (3129729383303430190) -->
-    <skip />
-    <!-- no translation found for kg_wrong_input_try_fp_suggestion (3143861542242024833) -->
-    <skip />
-    <!-- no translation found for kg_fp_not_recognized (5183108260932029241) -->
-    <skip />
-    <!-- no translation found for bouncer_face_not_recognized (1666128054475597485) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pin (4752168242723808390) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_password (1473132729225398039) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pattern (4867893307468801501) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pin (5850845723433047605) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_password (5551690347827728042) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pattern (736884689355181602) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pin_or_fp (5635161174698729890) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_password_or_fp (2251295907826814237) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pattern_or_fp (2391870539909135046) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_dpm_lock (6002804765868345917) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pin (5374732179740050373) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_password (9097968458291129795) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pattern (215072203613597906) -->
-    <skip />
-    <!-- no translation found for kg_prompt_unattended_update (8223448855578632202) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pin_auth_timeout (5868644725126275245) -->
-    <skip />
-    <!-- no translation found for kg_prompt_password_auth_timeout (5809110458491920871) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pattern_auth_timeout (1860605401869262178) -->
-    <skip />
-    <!-- no translation found for kg_prompt_auth_timeout (6620679830980315048) -->
-    <skip />
-    <!-- no translation found for kg_face_locked_out (2751559491287575) -->
-    <skip />
-    <!-- no translation found for kg_fp_locked_out (6228277682396768830) -->
-    <skip />
-    <!-- no translation found for kg_trust_agent_disabled (5400691179958727891) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pin (5492230176361601475) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pattern (8266214607346180952) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_password (6170245108400198659) -->
-    <skip />
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN ບໍ່ຖືກຕ້ອງ. ກະລຸນາລອງໃໝ່."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"ຫຼື ປົດລັອກດ້ວຍລາຍນິ້ວມື"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"ບໍ່ສາມາດຈຳແນກລາຍນິ້ວມືໄດ້"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"ບໍ່ສາມາດຈຳແນກໜ້າໄດ້"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"ລອງໃໝ່ ຫຼື ໃສ່ PIN"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"ລອງໃໝ່ ຫຼື ໃສ່ລະຫັດຜ່ານ"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"ລອງໃໝ່ ຫຼື ແຕ້ມຮູບແບບ"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"ຕ້ອງໃສ່ PIN ຫຼັງຈາກທີ່ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"ຕ້ອງໃສ່ລະຫັດຜ່ານຫຼັງຈາກທີ່ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"ຕ້ອງແຕ້ມຮູບແບບຫຼັງຈາກທີ່ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"ປົດລັອກດ້ວຍ PIN ຫຼື ລາຍນິ້ວມື"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"ປົດລັອກດ້ວຍລະຫັດຜ່ານ ຫຼື ລາຍນິ້ວມື"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"ປົດລັອກດ້ວຍຮູບແບບ ຫຼື ລາຍນິ້ວມື"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"ເພື່ອເພີ່ມຄວາມປອດໄພ, ອຸປະກອນໄດ້ຖືກລັອກໂດຍນະໂຍບາຍບ່ອນເຮັດວຽກ"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ຕ້ອງໃສ່ PIN ຫຼັງຈາກທີ່ລັອກໄວ້"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ຕ້ອງໃສ່ລະຫັດຜ່ານຫຼັງຈາກທີ່ລັອກໄວ້"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ຕ້ອງແຕ້ມຮູບແບບຫຼັງຈາກທີ່ລັອກໄວ້"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"ການອັບເດດຈະຕິດຕັ້ງໃນລະຫວ່າງຊົ່ວໂມງທີ່ບໍ່ມີການນຳໃຊ້"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ PIN ມາໄລຍະໜຶ່ງແລ້ວ."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ລະຫັດຜ່ານມາໄລຍະໜຶ່ງແລ້ວ."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ຮູບແບບມາໄລຍະໜຶ່ງແລ້ວ."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ປົດລັອກອຸປະກອນມາໄລຍະໜຶ່ງແລ້ວ."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"ບໍ່ສາມາດປົດລັອກດ້ວຍໃບໜ້າໄດ້. ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"ບໍ່ສາມາດປົດລັອກດ້ວຍລາຍນິ້ວມືໄດ້. ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"ຕົວແທນທີ່ເຊື່ອຖືໄດ້ບໍ່ພ້ອມໃຫ້ບໍລິການ"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປດ້ວຍ PIN ທີ່ບໍ່ຖືກຕ້ອງ"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປດ້ວຍຮູບແບບທີ່ບໍ່ຖືກຕ້ອງ"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປດ້ວຍລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງ"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{ກະລຸນາລອງໃໝ່ໃນ # ວິນາທີ.}other{ກະລຸນາລອງໃໝ່ໃນ # ວິນາທີ.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"ໃສ່ລະຫັດ PIN ຂອງຊິມ."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"ໃສ່ລະຫັດ PIN ຂອງຊິມສຳລັບ \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
@@ -142,12 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK ຂອງ SIM ເຮັດວຽກລົ້ມເຫຼວ!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ສະລັບຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"ໂໝດໃນຍົນ"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (3321211830602827742) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (2672166323886110512) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (3967993994418885887) -->
-    <skip />
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"ຕ້ອງແຕ້ມຮູບແບບຫຼັງຈາກຣີສະຕາດອຸປະກອນ"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"ຕ້ອງໃສ່ PIN ຫຼັງຈາກຣີສະຕາດອຸປະກອນ"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"ຕ້ອງໃສ່ລະຫັດຜ່ານຫຼັງຈາກຣີສະຕາດອຸປະກອນ"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ, ໃຫ້ໃຊ້ຮູບແບບແທນ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ, ໃຫ້ໃຊ້ PIN ແທນ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ, ໃຫ້ໃຊ້ລະຫັດຜ່ານແທນ"</string>
