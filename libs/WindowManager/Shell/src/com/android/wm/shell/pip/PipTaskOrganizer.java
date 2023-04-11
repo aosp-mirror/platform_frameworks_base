@@ -1002,6 +1002,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.onFixedRotationFinished();
             clearWaitForFixedRotation();
             return;
         }

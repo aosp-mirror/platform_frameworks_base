@@ -412,9 +412,31 @@ public class PipTransition extends PipTransitionController {
 
     @Override
     public void onFixedRotationStarted() {
+        fadeEnteredPipIfNeed(false /* show */);
+    }
+
+    @Override
+    public void onFixedRotationFinished() {
+        fadeEnteredPipIfNeed(true /* show */);
+    }
+
+    private void fadeEnteredPipIfNeed(boolean show) {
         // The transition with this fixed rotation may be handled by other handler before reaching
         // PipTransition, so we cannot do this in #startAnimation.
-        if (mPipTransitionState.getTransitionState() == ENTERED_PIP && !mHasFadeOut) {
+        if (!mPipTransitionState.hasEnteredPip()) {
+            return;
+        }
+        if (show && mHasFadeOut) {
+            // If there is a pending transition, then let startAnimation handle it. And if it is
+            // handled, mHasFadeOut will be set to false and this runnable will be no-op. Otherwise
+            // make sure the PiP will reshow, e.g. swipe-up with fixed rotation (fade-out) but
+            // return to the current app (only finish the recent transition).
+            mTransitions.runOnIdle(() -> {
+                if (mHasFadeOut && mPipTransitionState.hasEnteredPip()) {
+                    fadeExistingPip(true /* show */);
+                }
+            });
+        } else if (!show && !mHasFadeOut) {
             // Fade out the existing PiP to avoid jump cut during seamless rotation.
             fadeExistingPip(false /* show */);
         }
