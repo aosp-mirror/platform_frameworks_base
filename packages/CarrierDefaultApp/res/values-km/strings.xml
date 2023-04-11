@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2809080280462257271">"ទំនាក់ទំនងរបស់ក្រុមហ៊ុន​សេវាទូរសព្ទ"</string>
+    <string name="app_name" msgid="2809080280462257271">"ទំនាក់ទំនងក្រុមហ៊ុន​សេវាទូរសព្ទ"</string>
     <string name="android_system_label" msgid="2797790869522345065">"ក្រុមហ៊ុនបម្រើសេវាទូរសព្ទចល័ត"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"ទិន្នន័យ​ចល័ត​បាន​អស់​ហើយ"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"ទិន្នន័យ​ចល័ត​របស់អ្នក​ត្រូវបាន​បិទដំណើរការហើយ"</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2809080280462257271">"క్యారియర్ కమ్యూనికేషన్‌లు"</string>
+    <string name="app_name" msgid="2809080280462257271">"క్యారియర్ కమ్యూనికేషన్స్"</string>
     <string name="android_system_label" msgid="2797790869522345065">"మొబైల్ క్యారియర్"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"మొబైల్ డేటాను పూర్తిగా ఉపయోగించారు"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"మీ మొబైల్ డేటా నిష్క్రియం చేయబడింది"</string>
