@@ -27,8 +27,12 @@ import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 @Composable
-fun CredentialListSectionHeader(text: String) {
-    InternalSectionHeader(text, LocalAndroidColorScheme.current.colorOnSurfaceVariant)
+fun CredentialListSectionHeader(text: String, isFirstSection: Boolean) {
+    InternalSectionHeader(
+        text = text,
+        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+        applyTopPadding = !isFirstSection
+    )
 }
 
 @Composable
@@ -37,8 +41,10 @@ fun MoreAboutPasskeySectionHeader(text: String) {
 }
 
 @Composable
-private fun InternalSectionHeader(text: String, color: Color) {
-    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(top = 8.dp)) {
+private fun InternalSectionHeader(text: String, color: Color, applyTopPadding: Boolean = false) {
+    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(
+        top = if (applyTopPadding) 8.dp else 0.dp
+    )) {
         SectionHeaderText(
             text,
             modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
