@@ -532,14 +532,7 @@ class BackNavigationController {
             if (newFocus != null && newFocus != mNavigatingWindow
                     && (newFocus.mActivityRecord == null
                     || (newFocus.mActivityRecord == mNavigatingWindow.mActivityRecord))) {
-                EventLogTags.writeWmBackNaviCanceled("focusWindowChanged");
-                if (isMonitorForRemote()) {
-                    mObserver.sendResult(null /* result */);
-                }
-                if (isMonitorAnimationOrTransition()) {
-                    // transition won't happen, cancel internal status
-                    clearBackAnimations();
-                }
+                cancelBackNavigating("focusWindowChanged");
             }
         }
 
@@ -553,19 +546,12 @@ class BackNavigationController {
             }
             final ArrayList<WindowContainer> all = new ArrayList<>(opening);
             all.addAll(closing);
-            for (WindowContainer app : all) {
-                if (app.hasChild(mNavigatingWindow)) {
-                    EventLogTags.writeWmBackNaviCanceled("transitionHappens");
-                    if (isMonitorForRemote()) {
-                        mObserver.sendResult(null /* result */);
-                    }
-                    if (isMonitorAnimationOrTransition()) {
-                        clearBackAnimations();
-                    }
+            for (int i = all.size() - 1; i >= 0; --i) {
+                if (all.get(i).hasChild(mNavigatingWindow)) {
+                    cancelBackNavigating("transitionHappens");
                     break;
                 }
             }
-
         }
 
         private boolean atSameDisplay(WindowState newFocus) {
@@ -574,6 +560,17 @@ class BackNavigationController {
             }
             final int navigatingDisplayId = mNavigatingWindow.getDisplayId();
             return newFocus == null || newFocus.getDisplayId() == navigatingDisplayId;
+        }
+
+        private void cancelBackNavigating(String reason) {
+            EventLogTags.writeWmBackNaviCanceled(reason);
+            if (isMonitorForRemote()) {
+                mObserver.sendResult(null /* result */);
+            }
+            if (isMonitorAnimationOrTransition()) {
+                clearBackAnimations();
+            }
+            cancelPendingAnimation();
         }
     }
 
@@ -680,18 +677,25 @@ class BackNavigationController {
             Slog.w(TAG, "Finished transition didn't include the targets"
                     + " open: " + mPendingAnimationBuilder.mOpenTarget
                     + " close: " + mPendingAnimationBuilder.mCloseTarget);
-            try {
-                mPendingAnimationBuilder.mBackAnimationAdapter.getRunner().onAnimationCancelled();
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-            mPendingAnimationBuilder = null;
+            cancelPendingAnimation();
             return false;
         }
 
         scheduleAnimation(mPendingAnimationBuilder);
         mPendingAnimationBuilder = null;
         return true;
+    }
+
+    private void cancelPendingAnimation() {
+        if (mPendingAnimationBuilder == null) {
+            return;
+        }
+        try {
+            mPendingAnimationBuilder.mBackAnimationAdapter.getRunner().onAnimationCancelled();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote animation gone", e);
+        }
+        mPendingAnimationBuilder = null;
     }
 
     /**
