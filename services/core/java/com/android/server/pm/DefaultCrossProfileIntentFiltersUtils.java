@@ -25,6 +25,7 @@ import android.hardware.usb.UsbManager;
 import android.provider.AlarmClock;
 import android.provider.MediaStore;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -88,11 +89,43 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addDataType("vnd.android.cursor.item/calls")
                     .build();
 
+    /** Dial intent with mime type exclusively handled by managed profile. */
+    private static final DefaultCrossProfileIntentFilter DIAL_MIME_MANAGED_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    SKIP_CURRENT_PROFILE,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataType("vnd.android.cursor.item/phone")
+                    .addDataType("vnd.android.cursor.item/phone_v2")
+                    .addDataType("vnd.android.cursor.item/person")
+                    .addDataType("vnd.android.cursor.dir/calls")
+                    .addDataType("vnd.android.cursor.item/calls")
+                    .build();
+
     /** Dial intent with data scheme can be handled by either managed profile or its parent user. */
     private static final DefaultCrossProfileIntentFilter DIAL_DATA =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
                     ONLY_IF_NO_MATCH_FOUND,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataScheme("tel")
+                    .addDataScheme("sip")
+                    .addDataScheme("voicemail")
+                    .build();
+
+    /** Dial intent with data scheme exclusively handled by managed profile. */
+    private static final DefaultCrossProfileIntentFilter DIAL_DATA_MANAGED_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    SKIP_CURRENT_PROFILE,
                     /* letsPersonalDataIntoProfile= */ false)
                     .addAction(Intent.ACTION_DIAL)
                     .addAction(Intent.ACTION_VIEW)
@@ -117,6 +150,19 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addCategory(Intent.CATEGORY_BROWSABLE)
                     .build();
 
+    /**
+     * Dial intent with no data scheme or type exclusively handled by managed profile.
+     */
+    private static final DefaultCrossProfileIntentFilter DIAL_RAW_MANAGED_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    SKIP_CURRENT_PROFILE,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .build();
+
     /** Pressing the call button can be handled by either managed profile or its parent user. */
     private static final DefaultCrossProfileIntentFilter CALL_BUTTON =
             new DefaultCrossProfileIntentFilter.Builder(
@@ -131,6 +177,22 @@ public class DefaultCrossProfileIntentFiltersUtils {
     private static final DefaultCrossProfileIntentFilter SMS_MMS =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    SKIP_CURRENT_PROFILE,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addAction(Intent.ACTION_SENDTO)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataScheme("sms")
+                    .addDataScheme("smsto")
+                    .addDataScheme("mms")
+                    .addDataScheme("mmsto")
+                    .build();
+
+    /** SMS and MMS intent exclusively handled by the managed profile. */
+    private static final DefaultCrossProfileIntentFilter SMS_MMS_MANAGED_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
                     SKIP_CURRENT_PROFILE,
                     /* letsPersonalDataIntoProfile= */ false)
                     .addAction(Intent.ACTION_VIEW)
@@ -297,14 +359,12 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .build();
 
     public static List<DefaultCrossProfileIntentFilter> getDefaultManagedProfileFilters() {
-        return Arrays.asList(
+        List<DefaultCrossProfileIntentFilter> filters =
+                new ArrayList<DefaultCrossProfileIntentFilter>();
+        filters.addAll(Arrays.asList(
                 EMERGENCY_CALL_MIME,
                 EMERGENCY_CALL_DATA,
-                DIAL_MIME,
-                DIAL_DATA,
-                DIAL_RAW,
                 CALL_BUTTON,
-                SMS_MMS,
                 SET_ALARM,
                 MEDIA_CAPTURE,
                 RECOGNIZE_SPEECH,
@@ -317,11 +377,13 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 USB_DEVICE_ATTACHED,
                 ACTION_SEND,
                 HOME,
-                MOBILE_NETWORK_SETTINGS);
+                MOBILE_NETWORK_SETTINGS));
+        filters.addAll(getDefaultCrossProfileTelephonyIntentFilters(false));
+        return filters;
     }
 
-    /** Call intent with tel scheme */
-    private static final DefaultCrossProfileIntentFilter CALL =
+    /** Call intent with tel scheme exclusively handled my managed profile. */
+    private static final DefaultCrossProfileIntentFilter CALL_MANAGED_PROFILE =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
                     SKIP_CURRENT_PROFILE,
@@ -334,13 +396,22 @@ public class DefaultCrossProfileIntentFiltersUtils {
     /**
      * Returns default telephony related intent filters for managed profile.
      */
-    public static List<DefaultCrossProfileIntentFilter> getDefaultManagedProfileTelephonyFilters() {
-        return Arrays.asList(
-                DIAL_DATA,
-                DIAL_MIME,
-                DIAL_RAW,
-                CALL,
-                SMS_MMS);
+    public static List<DefaultCrossProfileIntentFilter>
+            getDefaultCrossProfileTelephonyIntentFilters(boolean telephonyOnlyInManagedProfile) {
+        if (telephonyOnlyInManagedProfile) {
+            return Arrays.asList(
+                    DIAL_DATA_MANAGED_PROFILE,
+                    DIAL_MIME_MANAGED_PROFILE,
+                    DIAL_RAW_MANAGED_PROFILE,
+                    CALL_MANAGED_PROFILE,
+                    SMS_MMS_MANAGED_PROFILE);
+        } else {
+            return Arrays.asList(
+                    DIAL_DATA,
+                    DIAL_MIME,
+                    DIAL_RAW,
+                    SMS_MMS);
+        }
     }
 
     /**
