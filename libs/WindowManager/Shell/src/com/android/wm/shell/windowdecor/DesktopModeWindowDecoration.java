@@ -208,11 +208,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        final int outsetLeftId = R.dimen.freeform_resize_handle;
-        final int outsetTopId = R.dimen.freeform_resize_handle;
-        final int outsetRightId = R.dimen.freeform_resize_handle;
-        final int outsetBottomId = R.dimen.freeform_resize_handle;
-
         final int windowDecorLayoutId = getDesktopModeWindowDecorLayoutId(
                 taskInfo.getWindowingMode());
         mRelayoutParams.reset();
@@ -220,9 +215,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mRelayoutParams.mLayoutResId = windowDecorLayoutId;
         mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
-        if (isDragResizeable) {
-            mRelayoutParams.setOutsets(outsetLeftId, outsetTopId, outsetRightId, outsetBottomId);
-        }
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
@@ -424,13 +416,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_controls_window_decor) {
             // Align the handle menu to the left of the caption.
-            menuX = mRelayoutParams.mCaptionX - mResult.mDecorContainerOffsetX + mMarginMenuStart;
-            menuY = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY + mMarginMenuTop;
+            menuX = mRelayoutParams.mCaptionX + mMarginMenuStart;
+            menuY = mRelayoutParams.mCaptionY + mMarginMenuTop;
         } else {
             // Position the handle menu at the center of the caption.
-            menuX = mRelayoutParams.mCaptionX + (captionWidth / 2) - (mMenuWidth / 2)
-                    - mResult.mDecorContainerOffsetX;
-            menuY = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY + mMarginMenuStart;
+            menuX = mRelayoutParams.mCaptionX + (captionWidth / 2) - (mMenuWidth / 2);
+            menuY = mRelayoutParams.mCaptionY + mMarginMenuStart;
         }
 
         // App Info pill setup.
@@ -497,23 +488,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         final boolean pointInAppInfoPill = pointInView(
                 mHandleMenuAppInfoPill.mWindowViewHost.getView(),
-                inputPoint.x - mHandleMenuAppInfoPillPosition.x - mResult.mDecorContainerOffsetX,
-                inputPoint.y - mHandleMenuAppInfoPillPosition.y
-                        - mResult.mDecorContainerOffsetY);
+                inputPoint.x - mHandleMenuAppInfoPillPosition.x,
+                inputPoint.y - mHandleMenuAppInfoPillPosition.y);
         boolean pointInWindowingPill = false;
         if (mHandleMenuWindowingPill != null) {
             pointInWindowingPill = pointInView(mHandleMenuWindowingPill.mWindowViewHost.getView(),
-                    inputPoint.x - mHandleMenuWindowingPillPosition.x
-                            - mResult.mDecorContainerOffsetX,
-                    inputPoint.y - mHandleMenuWindowingPillPosition.y
-                            - mResult.mDecorContainerOffsetY);
+                    inputPoint.x - mHandleMenuWindowingPillPosition.x,
+                    inputPoint.y - mHandleMenuWindowingPillPosition.y);
         }
         final boolean pointInMoreActionsPill = pointInView(
                 mHandleMenuMoreActionsPill.mWindowViewHost.getView(),
-                inputPoint.x - mHandleMenuMoreActionsPillPosition.x
-                        - mResult.mDecorContainerOffsetX,
-                inputPoint.y - mHandleMenuMoreActionsPillPosition.y
-                        - mResult.mDecorContainerOffsetY);
+                inputPoint.x - mHandleMenuMoreActionsPillPosition.x,
+                inputPoint.y - mHandleMenuMoreActionsPillPosition.y);
         if (!pointInAppInfoPill && !pointInWindowingPill
                 && !pointInMoreActionsPill && !pointInOpenMenuButton) {
             closeHandleMenu();
