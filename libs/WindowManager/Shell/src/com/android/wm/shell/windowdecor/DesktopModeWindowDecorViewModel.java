@@ -34,6 +34,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Handler;
@@ -557,8 +558,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mDragToDesktopAnimationStarted = false;
                         return;
                     } else if (mDragToDesktopAnimationStarted) {
-                        mDesktopTasksController.ifPresent(c ->
-                                c.moveToFullscreen(relevantDecor.mTaskInfo));
+                        Point startPosition = new Point((int) ev.getX(), (int) ev.getY());
+                        mDesktopTasksController.ifPresent(
+                                c -> c.cancelMoveToFreeform(relevantDecor.mTaskInfo,
+                                        startPosition));
                         mDragToDesktopAnimationStarted = false;
                         return;
                     }
