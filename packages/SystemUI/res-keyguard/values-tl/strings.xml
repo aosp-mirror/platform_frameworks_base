@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Ilagay ang iyong PIN"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Ilagay ang PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ilagay ang iyong pattern"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Iguhit ang pattern"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Ilagay ang iyong password"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Ilagay ang password"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Di-wasto ang Card."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Tapos nang mag-charge"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wireless na nagcha-charge"</string>
@@ -52,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Hindi ma-disable ang eSIM dahil sa isang error."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Mali ang pattern"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Maling pattern. Subukan ulit."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Mali ang password"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Mali ang password. Subukan ulit."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Mali ang PIN"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Maling PIN. Subukan ulit."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"O i-unlock gamit ang fingerprint"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Hindi nakilala ang fingerprint"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Hindi nakilala ang mukha"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Subukan ulit o ilagay ang PIN"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Subukan ulit o ilagay ang password"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Subukan ulit o iguhit ang pattern"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Kailangan ang PIN pagkasubok nang napakarami"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Kailangan ang password pagkasubok nang napakarami"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Kailangan ang pattern pagkasubok nang napakarami"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"I-unlock gamit ang PIN o fingerprint"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"I-unlock gamit ang password o fingerprint"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"I-unlock gamit ang pattern o fingerprint"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Na-lock ng work policy ang device para sa seguridad"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Kailangan ang PIN pagkatapos ng lockdown"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Kailangan ang password pagkatapos ng lockdown"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Kailangan ang pattern pagkatapos ng lockdown"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Mag-i-install ang update sa mga hindi aktibong oras"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Kailangan pa ng seguridad. Matagal na hindi ginamit ang PIN."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Kailangan pa ng seguridad. Matagal na hindi ginamit ang password."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Kailangan pa ng seguridad. Matagal na hindi ginamit ang pattern."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Kailangan pa ng seguridad. Matagal na hindi naka-unlock ang device."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Hindi ma-face unlock. Napakaraming pagsubok."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Hindi ma-fingerprint unlock. Napakaraming pagsubok."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Hindi available ang trust agent"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Napakaraming pagsubok gamit ang maling PIN"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Napakaraming pagsubok gamit ang maling pattern"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Napakaraming pagsubok gamit ang maling password"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Subukan ulit sa # segundo.}one{Subukan ulit sa # segundo.}other{Subukan ulit sa # na segundo.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Ilagay ang PIN ng SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Ilagay ang PIN ng SIM para sa \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
@@ -76,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Nabigo ang operasyon ng PUK ng SIM!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Magpalit ng pamamaraan ng pag-input"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Airplane mode"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Kailangan ng pattern pagkatapos mag-restart ng device"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Kailangan ng PIN pagkatapos mag-restart ng device"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Kailangan ng password pagkatapos mag-restart ng device"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Kailangan ang pattern pagka-restart ng device"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Kailangan ang PIN pagka-restart ng device"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Kailangan ang password pagka-restart ng device"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para sa karagdagang seguridad, gumamit na lang ng pattern"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para sa karagdagang seguridad, gumamit na lang ng PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para sa karagdagang seguridad, gumamit na lang ng password"</string>

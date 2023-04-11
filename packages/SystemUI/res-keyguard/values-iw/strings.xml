@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"צריך להזין קוד אימות"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"צריך להזין קוד אימות"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"יש להזין קו ביטול נעילה"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"צריך לצייר קו ביטול נעילה"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"יש להזין סיסמה"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"צריך להזין סיסמה"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"כרטיס לא חוקי."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"הסוללה טעונה"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה אלחוטית"</string>
@@ -52,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"‏לא ניתן להשבית את כרטיס ה-eSIM עקב שגיאה."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"קו ביטול נעילה שגוי"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"קו ביטול נעילה שגוי. יש לנסות שוב."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"סיסמה שגויה"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"סיסמה שגויה. יש לנסות שוב."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"קוד האימות שגוי"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"קוד אימות שגוי. יש לנסות שוב."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"אפשר לבטל נעילה באמצעות טביעת אצבע"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"טביעת האצבע לא זוהתה"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"הפנים לא זוהו"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"יש לנסות שוב או להזין קוד אימות"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"יש לנסות שוב או להזין סיסמה"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"יש לנסות שוב או לצייר קו ביטול נעילה"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"אחרי יותר מדי ניסיונות נדרש קוד אימות"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"אחרי יותר מדי ניסיונות נדרשת סיסמה"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"אחרי יותר מדי ניסיונות נדרש קו ביטול נעילה"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"פתיחה בקוד אימות או טביעת אצבע"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"פתיחה בסיסמה או טביעת אצבע"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"פתיחה בקו ביטול נעילה או טביעת אצבע"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"לאבטחה מוגברת, המכשיר ננעל כחלק ממדיניות מקום העבודה"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"נדרש קוד אימות לאחר הפעלת \'ללא \'ביטול נעילה בטביעת אצבע\'\'"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"נדרשת סיסמה לאחר הפעלת \'ללא \'ביטול נעילה בטביעת אצבע\'\'"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"נדרש קו ביטול נעילה לאחר הפעלת \'ללא \'ביטול נעילה בטביעת אצבע\'\'"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"העדכון יותקן במהלך השעות שבהן אתם לא משתמשים במכשיר"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"נדרשת אבטחה מוגברת. לא השתמשת בקוד אימות זמן מה."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"נדרשת אבטחה מוגברת. לא השתמשת בסיסמה זמן מה."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"נדרשת אבטחה מוגברת. לא השתמשת בקו ביטול נעילה זמן מה."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"נדרשת אבטחה מוגברת. המכשיר לא היה נעול לזמן מה."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"לא ניתן לפתוח בזיהוי פנים. בוצעו יותר מדי ניסיונות."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"לא ניתן לפתוח בטביעת אצבע. בוצעו יותר מדי ניסיונות."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"התכונה \'סביבה אמינה\' לא זמינה"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"בוצעו יותר מדי ניסיונות עם קוד אימות שגוי"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"בוצעו יותר מדי ניסיונות עם קו ביטול נעילה שגוי"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"בוצעו יותר מדי ניסיונות עם סיסמה שגויה"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{אפשר לנסות שוב בעוד שנייה אחת.}one{אפשר לנסות שוב בעוד # שניות.}two{אפשר לנסות שוב בעוד # שניות.}other{אפשר לנסות שוב בעוד # שניות.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"‏יש להזין את קוד האימות של כרטיס ה-SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"‏יש להזין את קוד האימות של כרטיס ה-SIM של <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
@@ -76,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"‏הניסיון לביטול הנעילה של כרטיס ה-SIM באמצעות קוד PUK נכשל!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"החלפת שיטת קלט"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"מצב טיסה"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"יש להזין את קו ביטול הנעילה לאחר הפעלה מחדש של המכשיר"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"צריך להזין קוד אימות לאחר הפעלה מחדש של המכשיר"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"יש להזין סיסמה לאחר הפעלה מחדש של המכשיר"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"נדרש קו ביטול נעילה אחרי שהמכשיר מופעל מחדש"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"נדרש קוד אימות אחרי שהמכשיר מופעל מחדש"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"נדרשת סיסמה אחרי שהמכשיר מופעל מחדש"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"כדי להגביר את רמת האבטחה, כדאי להשתמש בקו ביטול נעילה במקום זאת"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"כדי להגביר את רמת האבטחה, כדאי להשתמש בקוד אימות במקום זאת"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"כדי להגביר את רמת האבטחה, כדאי להשתמש בסיסמה במקום זאת"</string>

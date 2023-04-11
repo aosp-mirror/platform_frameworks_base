@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Внесете го PIN-кодот"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Внесете PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Внесете ја шемата"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Нацртај шема"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Внесете ја лозинката"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Внесете лозинка"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Неважечка картичка."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Полна"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни безжично"</string>
@@ -52,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"eSIM-картичката не може да се оневозможи поради грешка."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Внеси"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Погрешна шема"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Погрешна шема. Обидете се повторно."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Погрешна лозинка"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Погрешна лозинка. Обидете се повторно."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Погрешен PIN"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Погрешен PIN-код. Обидете се повторно."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Или отклучете со отпечаток"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Отпечатокот не е препознаен"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Ликот не е препознаен"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Обидете се повторно или внесете PIN-код"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Обидете се повторно или внесете лозинка"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Обидете се повторно или нацртајте шема"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Потребен е PIN-код по премногу обиди"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Потребна е лозинка по премногу обиди"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Потребна е шема по премногу обиди"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Отклучете со PIN-код или отпечаток"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Отклучете со лозинка или отпечаток"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Отклучете со шема или отпечаток"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"За дополнителна безбедност, уредот беше заклучен со работно правило"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Потребен е PIN-код по заклучување"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Потребна е лозинка по заклучување"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Потребна е шема по заклучување"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Ажурирањето ќе се инсталира за време на неактивни часови"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Потребна е дополнителна безбедност. PIN-кодот не бил користен некое време."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Потребна е дополнителна безбедност. Лозинката не била користена некое време."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Потребна е дополнителна безбедност. Шемата не била користена некое време."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Потребна е дополнителна безбедност. Уредот не бил отклучен некое време."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Не може да се отклучи со лик. Премногу обиди."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Не може да се отклучи со отпечаток. Премногу обиди."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Не е достапен aгент од доверба"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Премногу обиди со погрешен PIN-код"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Премногу обиди со погрешна шема"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Премногу обиди со погрешна лозинка"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Обидете се повторно по # секунда.}one{Обидете се повторно по # секунда.}other{Обидете се повторно по # секунди.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Внесете PIN на SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Внесете PIN на SIM за „<xliff:g id="CARRIER">%1$s</xliff:g>“."</string>
@@ -76,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM-картичката не се отклучи со PUK-кодот!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Префрли метод за внесување"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Авионски режим"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Потребна е шема по рестартирање на уредот"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Потребен е PIN-код по рестартирање на уредот"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Потребна е лозинка по рестартирање на уредот"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Потребна е шема по рестартирање на уредот"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Потребен е PIN-код по рестартирање на уредот"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Потребна е лозинка по рестартирање на уредот"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"За дополнителна безбедност, користете шема"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"За дополнителна безбедност, користете PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"За дополнителна безбедност, користете лозинка"</string>
