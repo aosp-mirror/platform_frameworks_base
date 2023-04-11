@@ -899,12 +899,9 @@ public class CompanionDeviceManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
-            final CompanionDeviceShellCommand cmd = new CompanionDeviceShellCommand(
-                    CompanionDeviceManagerService.this,
-                    mAssociationStore,
-                    mDevicePresenceMonitor);
-            cmd.exec(this, in, out, err, args, callback, resultReceiver);
+            new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
+                    mDevicePresenceMonitor, mTransportManager)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
