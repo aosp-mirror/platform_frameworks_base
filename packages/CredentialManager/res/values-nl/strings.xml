@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Verbeterde accountbeveiliging"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Elke sleutel is exclusief gekoppeld aan de app of website waarvoor deze is gemaakt. Je kunt dus nooit per ongeluk inloggen bij een bedrieglijke app of website. Bovendien bewaren servers alleen openbare sleutels, wat hacken een stuk lastiger maakt."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Naadloze overgang"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"We zijn op weg naar een toekomst zonder wachtwoorden, maar je kunt ze nog steeds gebruiken naast toegangssleutels."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"We zijn op weg naar een wachtwoordloze toekomst, maar naast toegangssleutels kun je nog steeds gebruikmaken van wachtwoorden."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kiezen waar je je <xliff:g id="CREATETYPES">%1$s</xliff:g> wilt opslaan"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecteer een wachtwoordmanager om je informatie op te slaan en de volgende keer sneller in te loggen"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Toegangssleutel maken voor <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Je opgeslagen toegangssleutel gebruiken voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Je opgeslagen inloggegevens voor <xliff:g id="APP_NAME">%1$s</xliff:g> gebruiken?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Opgeslagen inloggegevens kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Een optie kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Deze informatie gebruiken in <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Op een andere manier inloggen"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Opties bekijken"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Doorgaan"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opties voor inloggen"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Voor <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Vergrendelde wachtwoordmanagers"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Tik om te ontgrendelen"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Inloggegevens beheren"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Via een ander apparaat"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Een ander apparaat gebruiken"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Verzoek geannuleerd door <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

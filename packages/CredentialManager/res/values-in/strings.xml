@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Keamanan akun yang ditingkatkan"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Setiap kunci ditautkan secara eksklusif dengan aplikasi atau situs tempatnya dibuat, sehingga Anda tidak akan login ke aplikasi atau situs yang menipu secara tidak sengaja. Selain itu, peretasan lebih sulit dilakukan karena server hanya menyimpan kunci publik."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transisi yang lancar"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Seiring kita menuju masa depan tanpa sandi, sandi akan tetap tersedia bersama kunci sandi"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Sandi akan tetap tersedia bersama kunci sandi seiring perjalanan menuju era di mana sandi tidak diperlukan lagi."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat penyimpanan <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih pengelola sandi untuk menyimpan info Anda dan login lebih cepat lain kali"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Buat kunci sandi untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gunakan kunci sandi tersimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gunakan info login tersimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Pilih info login tersimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Pilih opsi untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Gunakan info ini di <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Login dengan cara lain"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Lihat opsi"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Lanjutkan"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opsi login"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Untuk <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Pengelola sandi terkunci"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Ketuk untuk membuka kunci"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Kelola login"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Dari perangkat lain"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Gunakan perangkat lain"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Permintaan dibatalkan oleh <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

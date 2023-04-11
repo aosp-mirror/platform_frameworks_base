@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Keselamatan akaun yang dipertingkatkan"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Setiap kunci dipautkan secara eksklusif dengan apl atau laman web kunci dicipta, jadi anda tidak boleh log masuk ke apl atau laman web penipuan secara tidak sengaja. Selain itu, dengan pelayan yang hanya menyimpan kunci awam, penggodaman menjadi jauh lebih sukar."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Peralihan yang lancar"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Walaupun kita semakin menghampiri masa hadapan tanpa kata laluan, kata laluan masih akan tersedia bersama dengan kunci laluan"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Semasa kita bergerak menuju ke arah masa depan tanpa kata laluan, kata laluan masih akan tersedia bersama dengan kunci laluan."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat untuk menyimpan <xliff:g id="CREATETYPES">%1$s</xliff:g> anda"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih Password Manager untuk menyimpan maklumat anda dan log masuk lebih pantas pada kali seterusnya"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Cipta kunci laluan untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gunakan kunci laluan anda yang telah disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gunakan maklumat log masuk anda yang telah disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Pilih log masuk yang telah disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Pilih satu pilihan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Gunakan maklumat ini pada <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Log masuk menggunakan cara lain"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Lihat pilihan"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Teruskan"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Pilihan log masuk"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Untuk <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Password Manager dikunci"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Ketik untuk membuka kunci"</string>

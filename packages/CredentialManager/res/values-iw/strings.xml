@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"אבטחה טובה יותר של החשבון"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"כל מפתח מקושר אך ורק לאפליקציה או לאתר שעבורם הוא נוצר, ולכן אף פעם אי אפשר להיכנס בטעות לחשבון באפליקציה או באתר שמטרתם להונות. בנוסף, כיוון שהשרתים שומרים רק מפתחות ציבוריים, קשה יותר לפרוץ לחשבון."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"מעבר חלק"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"אנחנו מתקדמים לעבר עתיד ללא סיסמאות, אבל עדיין אפשר יהיה להשתמש בסיסמאות וגם במפתחות גישה"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"אנחנו מתקדמים לעבר עתיד ללא סיסמאות, אבל עדיין אפשר יהיה להשתמש בסיסמאות וגם במפתחות גישה."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"בחירת המקום לשמירה של <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"אפשר לבחור באחד משירותי ניהול הסיסמאות כדי לשמור את הפרטים ולהיכנס לחשבון מהר יותר בפעם הבאה"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ליצור מפתח גישה ל-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"להשתמש במפתח גישה שנשמר עבור <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"להשתמש בפרטי הכניסה שנשמרו עבור <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"בחירת פרטי כניסה שמורים עבור <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"רוצה לבחור אפשרות עבור <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"להשתמש במידע הזה בשביל <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"כניסה בדרך אחרת"</string>
     <string name="snackbar_action" msgid="37373514216505085">"הצגת האפשרויות"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"המשך"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"אפשרויות כניסה לחשבון"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"עבור <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"מנהלי סיסמאות נעולים"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"יש להקיש כדי לבטל את הנעילה"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ניהול כניסות"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ממכשיר אחר"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"צריך להשתמש במכשיר אחר"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> ביטלה את הבקשה"</string>
 </resources>

@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"सुधारित खाते सुरक्षा"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"प्रत्येक की ज्यांच्यासाठी बनवली आहे फक्त त्या अ‍ॅप किंवा वेबसाइटसोबत लिंक केलेली असते, ज्यमुळे तुम्ही कधीच कपटपूर्ण अ‍ॅप किंवा वेबसाइटवर चुकूनही साइन इन करणार नाही. तसेच, सर्व्हर फक्त सार्वजनिक की स्टोअर करत असल्यामुळे, हॅक करणे खूप अवघड आहे."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"अखंड संक्रमण"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"पासवर्ड न वापरणाऱ्या भविष्यात पुढे जाताना, पासवर्ड तरीही पासकीच्या बरोबरीने उपलब्ध असतील"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"पासवर्ड न वापरणाऱ्या भविष्यात पुढे जाताना, पासवर्ड तरीही पासकीच्या बरोबरीने उपलब्ध असतील."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तुमची <xliff:g id="CREATETYPES">%1$s</xliff:g> कुठे सेव्ह करायची ते निवडा"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"तुमची माहिती सेव्ह करण्यासाठी आणि पुढच्या वेळी जलद साइन इन करण्याकरिता Password Manager निवडा"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> साठी पासकी तयार करायची का?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी तुमची सेव्ह केलेली पासकी वापरायची का?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी तुमचे सेव्ह केलेले साइन-इन वापरायचे का?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सेव्ह केलेले साइन-इन निवडा"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी पर्याय निवडा?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ही माहिती <xliff:g id="APP_NAME">%1$s</xliff:g> वर वापरायची का?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"दुसऱ्या मार्गाने साइन इन करा"</string>
     <string name="snackbar_action" msgid="37373514216505085">"पर्याय पहा"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"पुढे सुरू ठेवा"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन इन पर्याय"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> साठी"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"लॉक केलेले पासवर्ड व्यवस्थापक"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"अनलॉक करण्यासाठी टॅप करा"</string>
