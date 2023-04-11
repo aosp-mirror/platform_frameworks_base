@@ -16,8 +16,9 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.ValueDumper;
-import static com.android.server.wm.WindowManagerService.dumpSparseArray;
+import static com.android.internal.util.DumpUtils.KeyDumper;
+import static com.android.internal.util.DumpUtils.ValueDumper;
+import static com.android.internal.util.DumpUtils.dumpSparseArray;
 import static com.android.server.wm.utils.RegionUtils.forEachRect;
 
 import android.annotation.NonNull;
@@ -41,7 +42,6 @@ import android.view.WindowManager;
 import android.window.WindowInfosListener;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.wm.WindowManagerService.KeyDumper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

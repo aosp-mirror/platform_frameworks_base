@@ -25,6 +25,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFI
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
+import static com.android.internal.util.DumpUtils.dumpSparseArray;
+import static com.android.internal.util.DumpUtils.dumpSparseArrayValues;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_H;
@@ -44,8 +46,6 @@ import static com.android.server.accessibility.AccessibilityTraceProto.WHERE;
 import static com.android.server.accessibility.AccessibilityTraceProto.WINDOW_MANAGER_SERVICE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.dumpSparseArray;
-import static com.android.server.wm.WindowManagerService.dumpSparseArrayValues;
 import static com.android.server.wm.WindowTracing.WINSCOPE_EXT;
 
 import android.accessibilityservice.AccessibilityTrace;
