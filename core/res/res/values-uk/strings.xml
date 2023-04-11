@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Під час використання додатка він матиме доступ до даних датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ до показників датчиків на тілі, наприклад пульсу, у фоновому режимі"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Коли додаток працюватиме у фоновому режимі, він матиме доступ до показників датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Отримувати доступ до даних датчика на тілі про температуру в зоні зап’ястя, коли додаток використовується."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Під час використання додатка він матиме доступ до даних датчика на тілі про температуру в зоні зап’ястя."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Отримувати доступ до даних датчика на тілі про температуру в зоні зап’ястя, коли додаток працює у фоновому режимі."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Коли додаток працюватиме у фоновому режимі, він матиме доступ до даних датчика на тілі про температуру в зоні зап’ястя."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Переглядати події календаря й додаткову інформацію"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Цей додаток може переглядати всі події календаря, збережені на вашому планшеті, а також надсилати та зберігати дані календаря."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Додаток може переглядати всі події календаря, збережені на вашому пристрої Android TV, а також надсилати та зберігати дані календаря."</string>
@@ -802,10 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозволяє додатку почати перегляд інформації про функції іншого додатка."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"доступ до даних датчиків із високою частотою дикретизації"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Додаток зможе дискретизувати дані даних датчиків із частотою понад 200 Гц"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"оновлювати додаток без дій із боку користувача"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволяє власнику оновлювати раніше встановлений додаток без дій із боку користувача"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Відстежувати спроби розблокування екрана"</string>
@@ -1495,7 +1489,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ви використовуєте цей додаток у своєму робочому профілі"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Метод введення"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Синхр."</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Доступність"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
@@ -1703,8 +1697,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вмикати"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УВІМК."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ВИМК."</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу \"<xliff:g id="SERVICE">%1$s</xliff:g>\" повний доступ до вашого пристрою?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ потрібен додаткам, які підтримують функції доступності, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати контент поверх інших додатків."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
@@ -1958,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Додаток <xliff:g id="APP_NAME_0">%1$s</xliff:g> зараз недоступний. Керує додаток <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Докладніше"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Відновити доступ до додатка"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Увімкнути робочі додатки?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Отримайте доступ до своїх робочих додатків і сповіщень"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Увімкнути робочі додатки?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Увімкнути"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Екстрений виклик"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Отримайте доступ до своїх робочих додатків і дзвінків"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2011,7 +2003,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Новини та журнали"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карти й навігація"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Продуктивність"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Спеціальні можливості"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Доступність"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Пам’ять пристрою"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Налагодження USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"години"</string>

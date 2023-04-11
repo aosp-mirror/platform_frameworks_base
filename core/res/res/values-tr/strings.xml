@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Kullanımdaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Arka plandayken nabız gibi vücut sensörü verilerine erişme"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Arka plandaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Uygulama kullanımdayken bilek ısısı gibi vücut sensörü verilerine erişme."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Kullanımdaki uygulamanın bilek ısısı gibi vücut sensörü verilerine erişmesine izin verir."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Uygulama arka plandayken bilek ısısı gibi vücut sensörü verilerine erişme."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Arka plandaki uygulamanın bilek ısısı gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Takvim etkinlikleri ve ayrıntılarını okuma"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu uygulama, tabletinizde kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu uygulama, Android TV cihazınızda kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"İzin sahibinin, bir uygulamanın özellik bilgilerini görüntülemeye başlamasına izin verir."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"sensör verilerine daha yüksek örnekleme hızında eriş"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Uygulamanın, sensör verilerini 200 Hz\'den daha yüksek bir hızda örneklemesine olanak tanır"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"uygulamayı kullanıcı işlemi olmadan güncelleme"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"İzin sahibinin, daha önce yüklediği uygulamayı kullanıcı işlemi olmadan güncellemesine izin verir"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetler."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekran kilidini açma denemelerini izle"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> uygulaması şu anda kullanılamıyor. Uygulamanın kullanım durumu <xliff:g id="APP_NAME_1">%2$s</xliff:g> tarafından yönetiliyor."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Daha fazla bilgi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Uygulamanın duraklatmasını kaldır"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"İş uygulamaları açılsın mı?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"İş uygulamalarınıza ve bildirimlerinize erişin"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aç"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları devam ettirilsin mi?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Devam ettir"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Acil durum"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"İş uygulamalarınıza ve telefon aramalarınıza erişin"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Uygulama kullanılamıyor"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması şu anda kullanılamıyor."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> kullanılamıyor"</string>

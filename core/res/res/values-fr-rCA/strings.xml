@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet à l\'application d\'accéder aux données des capteurs corporels telles que la fréquence cardiaque, la température et le pourcentage d\'oxygène dans le sang pendant l\'utilisation de l\'application."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données des capteurs corporels (comme la fréq. card.) en arrière-plan"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet à l\'application d\'accéder aux données des capteurs corporels telles que la fréquence cardiaque, la température et le pourcentage d\'oxygène dans le sang pendant que l\'application s\'exécute en arrière-plan."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accéder aux données relatives à la température au poignet des capteurs corporels pendant l\'utilisation de l\'application."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permet à l\'application d\'accéder aux données relatives à la température au poignet des capteurs corporels pendant l\'utilisation de l\'application."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accéder aux données relatives à la température au poignet des capteurs corporels pendant que l\'application s\'exécute en arrière-plan."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permet à l\'application d\'accéder aux données relatives à la température au poignet des capteurs corporels pendant que l\'application s\'exécute en arrière-plan."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lire les événements d\'agenda et leurs détails"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Cette application peut lire tous les événements d\'agenda stockés sur votre tablette et partager ou enregistrer les données de votre agenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Cette application peut lire tous les événements d\'agenda stockés sur votre appareil Android TV et partager ou enregistrer les données de votre agenda."</string>
@@ -801,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet au détenteur de commencer à afficher les renseignements sur les fonctionnalités d\'une application."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accéder aux données des capteurs à un taux d’échantillonnage élevé"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permet à l’application d’échantillonner les données des capteurs à une fréquence supérieure à 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"Mettre à jour l\'application sans intervention de l\'utilisateur"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permet à une application précédemment installée de se mettre à jour sans intervention de l\'utilisateur"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les NIP de verrouillage de l\'écran."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1283,18 +1277,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Une empreinte de mémoire du processus lié à l\'application <xliff:g id="PROC">%1$s</xliff:g> peut être partagée. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="sendText" msgid="493003724401350724">"Sélectionner une action pour le texte"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volume de la sonnerie"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Volume"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Volume du contenu multimédia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Lecture via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Sonnerie silencieuse sélectionnée"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volume des appels entrants"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volume d\'appels entrants sur Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volume de l\'alarme"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volume des alarmes"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volume des notifications"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volume Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volume de la sonnerie"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume d\'appel"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume des appels"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume du contenu multimédia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1957,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"L\'application <xliff:g id="APP_NAME_0">%1$s</xliff:g> n\'est pas accessible pour le moment. Ceci est géré par <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"En savoir plus"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Réactiver l\'application"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Activer applis professionnelles?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Accédez à vos applications professionnelles et à vos notifications"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Activer"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Réactiver les applis prof.?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Réactiver"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgence"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Demandez l\'accès à vos applications professionnelles et à vos appels"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'application n\'est pas accessible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas accessible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non accessible"</string>

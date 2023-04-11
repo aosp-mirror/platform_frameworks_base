@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Omogućuje aplikaciji pristup podacima s biometrijskih senzora, kao što su puls, temperatura i postotak kisika u krvi, dok se aplikacija upotrebljava."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Pristup podacima s biometrijskih senzora, kao što je puls, dok je u pozadini"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Omogućuje aplikaciji pristup podacima s biometrijskih senzora, kao što su puls, temperatura i postotak kisika u krvi, dok je aplikacija u pozadini."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Pristupite podacima o temperaturi na zapešću s biometrijskog senzora dok se aplikacija koristi."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Omogućuje aplikaciji da pristupi podacima o temperaturi na zapešću s biometrijskog senzora dok se aplikacija koristi."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Pristupite podacima o temperaturi na zapešću s biometrijskog senzora dok je aplikacija u pozadini."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Omogućuje aplikaciji da pristupi podacima o temperaturi na zapešću s biometrijskog senzora dok je aplikacija u pozadini."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čitanje događaja i pojedinosti kalendara"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikacija može čitati sve kalendarske događaje pohranjene na tabletu i dijeliti ili spremati podatke iz vašeg kalendara."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aplikacija može čitati sve kalendarske događaje pohranjene na Android TV uređaju i dijeliti ili spremati podatke iz vašeg kalendara."</string>
@@ -801,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Dopušta nositelju pokretanje prikaza informacija o značajkama aplikacije."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pristup podacima senzora pri višoj brzini uzorkovanja"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikaciji omogućuje uzorkovanje podataka senzora pri brzini većoj od 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ažuriranje aplikacije bez radnje korisnika"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Nositelju omogućuje ažuriranje aplikacije koju je prethodno instalirao bez radnje korisnika"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadziri pokušaje otključavanja zaslona"</string>
@@ -1957,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutačno nije dostupna. Ovime upravlja aplikacija <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saznajte više"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Prekini pauzu aplikacije"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Uključiti poslovne aplikacije?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Pristupite svojim poslovnim aplikacijama i obavijestima"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Uključi"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Pokrenuti poslovne aplikacije?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Ponovno pokreni"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hitni slučaj"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Pristupite svojim poslovnim aplikacijama i pozivima"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija nije dostupna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutačno nije dostupna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – nije dostupno"</string>

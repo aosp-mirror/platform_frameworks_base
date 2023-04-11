@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Дозвољава апликацији да приступа подацима сензора за тело, као што су пулс, температура и проценат кисеоника у крви док се апликација користи."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Приступ подацима сензора за тело, као што је пулс, у позадини"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Дозвољава апликацији да приступа подацима сензора за тело, као што су пулс, температура и проценат кисеоника у крви док је апликација у позадини."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Приступајте подацима о температури са сензора за тело на ручном зглобу док се апликација користи."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Дозвољава апликацији да приступа подацима о температури са сензора за тело на ручном зглобу док се апликација користи."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Приступајте подацима о температури са сензора за тело на ручном зглобу док је апликација у позадини."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Дозвољава апликацији да приступа подацима о температури са сензора за тело на ручном зглобу док је апликација у позадини."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Читање догађаја и података из календара"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ова апликација може да чита све догађаје из календара које чувате на таблету, као и да дели или чува податке из календара."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ова апликација може да чита све догађаје из календара које чувате на Android TV уређају, као и да дели или чува податке из календара."</string>
@@ -801,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозвољава носиоцу дозволе да започне прегледање информација о функцијама апликације."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"приступ подацима сензора при великој брзини узорковања"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозвољава апликацији да узима узорак података сензора при брзини већој од 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ажурирање апликације без радњи корисника"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозвољава власнику да ажурира апликацију коју је претходно инсталирала без радњи корисника"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Подешавање правила за лозинку"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролише дужину и знакове дозвољене у лозинкама и PIN-овима за закључавање екрана."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Надгледајте покушаје откључавања екрана"</string>
@@ -1957,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликација <xliff:g id="APP_NAME_0">%1$s</xliff:g> тренутно није доступна. <xliff:g id="APP_NAME_1">%2$s</xliff:g> управља доступношћу."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Сазнајте више"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Опозови паузирање апликације"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Укључујете пословне апликације?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Приступајте пословним апликацијама и обавештењима"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Укључи"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Укључити пословне апликације?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Опозови паузу"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Хитан случај"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Приступајте пословним апликацијама и позивима"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликација није доступна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> тренутно није доступна."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – није доступно"</string>

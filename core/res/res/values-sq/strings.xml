@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Lejon aplikacionin që të ketë qasje te të dhënat e sensorit të trupit, si p.sh. rrahjet e zemrës, temperatura dhe përqindja e oksigjenit në gjak ndërkohë që aplikacioni është në përdorim."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Qasje te të dhënat e sensorit të trupit, si rrahjet e zemrës kur është në sfond"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Lejon aplikacionin që të ketë qasje te të dhënat e sensorit të trupit, si p.sh. rrahjet e zemrës, temperatura dhe përqindja e oksigjenit në gjak ndërkohë që aplikacioni është në sfond."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Qasu te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit ndërsa aplikacioni është në përdorim."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Lejon aplikacionin të ketë qasje te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit, ndërsa aplikacioni është në përdorim."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Qasu te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit ndërsa aplikacioni është në sfond."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Lejon aplikacionin të ketë qasje te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit, ndërsa aplikacioni është në sfond."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lexo ngjarjet e kalendarit dhe detajet"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në tabletin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në pajisjen tënde Android TV dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lejon që zotëruesi të fillojë të shikojë informacionin e veçorive për një aplikacion."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"qasu te të dhënat e sensorit me një shpejtësi kampionimi më të lartë"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lejon aplikacionin të mbledhë shembujt e të dhënave të sensorit me shpejtësi më të lartë se 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"përditëso aplikacionin pa veprimin e përdoruesit"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lejon zotëruesin të përditësojë aplikacionin që e ka instaluar më parë pa veprimin e përdoruesit"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitoro tentativat e shkyçjes së ekranit"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> nuk ofrohet në këtë moment. Kjo menaxhohet nga <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Mëso më shumë"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulo pauzën për aplikacionin"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Të aktivizohen aplikacionet e punës?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Merr qasje tek aplikacionet e punës dhe njoftimet e tua"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivizo"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Hiq nga pauza apl. e punës?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Hiq nga pauza"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgjenca"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Merr qasje tek aplikacionet e punës dhe telefonatat e tua"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nuk ofrohet"</string>

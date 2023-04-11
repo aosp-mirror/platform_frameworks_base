@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Иштеп жатканда колдонмо дене сенсорлорунун көрсөткүчтөрүн, мисалы, жүрөктүн согушу, температура жана кандагы кычкылтектин пайызын көрө алат."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Фондо дене сенсорлорунун көрсөткүчтөрүн, мисалы, жүрөктүн согушун көрүү"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Колдонмо фондо дене сенсорлорунун көрсөткүчтөрүн, мисалы, жүрөктүн согушу, температура жана кандагы кычкылтектин пайызын көрө алат."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Колдонмо иштеп жатканда, дене сенсорлорунун температура тууралуу маалыматын көрүү."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Колдонмо иштеп жатканда, дене сенсорлорунун температура тууралуу маалыматын көрө алат."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Колдонмо фондо иштеп жатканда, дене сенсорлорунун температура тууралуу маалыматын көрүү."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Колдонмо фондо дене сенсорлорунун температура тууралуу маалыматын көрө алат."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Жылнаамадагы иш-чараларды жана алардын чоо-жайын окуу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Бул колдонмо планшетиңизде сакталган жылнаамадагы иш-чаралардын баарын окуп жана андагы маалыматтарды бөлүшүп же сактай алат."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Бул колдонмо Android TV түзмөгүңүздө сакталган жылнаама иш-чараларынын баарын окуп, ошондой эле жылнаама дайындарын бөлүшүп же сактай алат."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Колдонуучуга функциялары тууралуу маалыматты көрүп баштоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"үлгүнү жаздыруу ылдамдыгы жогору болгон сенсор дайындарынын үлгүсүнө мүмкүнчүлүк алуу"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Колдонмолорго сенсор дайындарынын үлгүсү 200 Герцтен жогору болгон үлгүлөрдү алууга уруксат берет"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"колдонмону автоматтык түрдө жаңыртуу"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Буга чейин орнотулган колдонмону автоматтык түрдө жаңыртууга мүмкүндүк берет"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Сырсөз эрежелерин коюу"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран кулпусун ачуу аракеттерин көзөмөлдөө"</string>
@@ -1294,7 +1288,7 @@
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Коңгуроо үнүнүн деңгээли"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Чалуунун үн деңгээли"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Мультимедианын катуулугу"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Эскертме үнүнүн деңгээли"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Билдирменин үнүнүн катуулугу"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Демейки шыңгыр"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Демейки шыңгыр (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Эч бир"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> колдонмосу учурда жеткиликсиз. Анын жеткиликтүүлүгү <xliff:g id="APP_NAME_1">%2$s</xliff:g> тарабынан башкарылат."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Кеңири маалымат"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Колдонмону иштетүү"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Жумуш колдонмолору күйгүзүлсүнбү?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Жумуш колдонмолоруңузга жана билдирмелериңизге мүмкүнчүлүк алыңыз"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Күйгүзүү"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Жумуш колдонмолорун иштетесизби?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Иштетүү"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Шашылыш чалуу"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Жумуш колдонмолоруңузга жана чалууларыңызга мүмкүнчүлүк алыңыз"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> жеткиликсиз"</string>
@@ -2136,7 +2128,7 @@
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Артка"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Акыркы колдонмолор"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Билдирмелер"</string>
-    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ыкчам жөндөөлөр"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ыкчам параметрлер"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Кубат диалогу"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Кулпуланган экран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Скриншот"</string>

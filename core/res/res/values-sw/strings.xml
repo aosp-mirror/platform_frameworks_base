@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Hurushusu programu ifikie data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, halijoto na asilimia ya oksijeni kwenye damu wakati programu inatumika."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Fikia data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, wakati programu inatumika chinichini"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Hurushusu programu ifikie data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, halijoto na asilimia ya oksijeni kwenye damu wakati programu inatumika chinichini."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Fikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Huruhusu programu kufikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Fikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika chinichini."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Huruhusu programu kufikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika chinichini."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Soma matukio na maelezo ya kalenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako kibao na kushiriki au kuhifadhi data yako ya kalenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kifaa chako cha Android TV na kushiriki au kuhifadhi data ya kalenda yako."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Huruhusu mmiliki kuanza kuangalia maelezo ya vipengele vya programu."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"fikia data ya vitambuzi kwa kasi ya juu ya sampuli"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Huruhusu programu kujaribu sampuli ya data ya vitambuzi kwa kasi inayozidi Hz 200"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"sakinisha programu bila mtumiaji kuchukua hatua yoyote"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Huruhusu mmiliki kusasisha programu iliyosakinisha awali bila mtumiaji kuchukua hatua yoyote"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Kuweka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Dhibiti urefu na maandishi yanayokubalika katika nenosiri la kufunga skrini na PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Kuhesabu mara ambazo skrini inajaribu kufunguliwa"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> haipatikani kwa sasa. Inasimamiwa na <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Pata maelezo zaidi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Acha kusimamisha programu"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Iwashe programu za kazini?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Pata uwezo wa kufikia arifa na programu zako za kazini"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Washa"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Je, ungependa kuacha kusitisha programu za kazini?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Acha kusitisha"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Simu za dharura"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Pata uwezo wa kufikia simu na programu zako za kazini"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programu haipatikani"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> haipatikani hivi sasa."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> haipatikani"</string>

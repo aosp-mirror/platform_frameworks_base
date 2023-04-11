@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"इससे ऐप्लिकेशन को इस्तेमाल करने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"बैकग्राउंड में चलने के दौरान, धड़कन की दर जैसे बॉडी सेंसर डेटा का ऐक्सेस दें"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"इससे ऐप्लिकेशन के बैकग्राउंड में चलने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ऐप्लिकेशन को यह अनुमति दें कि जब उसे इस्तेमाल किया जा रहा हो, तब वह आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाए जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"इससे ऐप्लिकेशन, आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाएगा जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है. इस डेटा का ऐक्सेस उस समय मिलेगा जब ऐप्लिकेशन का इस्तेमाल किया जा रहा हो."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ऐप्लिकेशन को यह अनुमति दें कि बैकग्राउंड में चलते समय, वह आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाए जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"इससे ऐप्लिकेशन, आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाएगा जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है. इस डेटा का ऐक्सेस उस समय मिलेगा जब ऐप्लिकेशन बैकग्राउंड में चल रहा होगा."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कैलेंडर इवेंट और विवरण पढ़ें"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यह ऐप्लिकेशन आपके टैबलेट पर संग्रहित सभी कैलेंडर इवेंट पढ़ सकता है और आपका कैलेंडर डेटा शेयर कर सकता है या सहेज सकता है."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यह ऐप्लिकेशन आपके टीवी पर सेव किए गए सभी कैलेंडर इवेंट को पढ़ सकता है. इसके अलावा यह आपके कैलेंडर का डेटा शेयर कर सकता है या सेव कर सकता है."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ऐप्लिकेशन को, किसी ऐप्लिकेशन की सुविधाओं की जानकारी देखने की अनुमति देता है."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"सेंसर डेटा को, नमूने लेने की तेज़ दर पर ऐक्सेस करें"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यह अनुमति मिलने पर ऐप्लिकेशन, 200 हर्ट्ज़ से ज़्यादा की दर पर सेंसर डेटा का नमूना ले पाएगा"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ऐप्लिकेशन अपने-आप अपडेट होने की अनुमति दें"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"इससे होल्डर उस ऐप्लिकेशन को अपने-आप अपडेट कर पाएगा जो उसने पहले इंस्टॉल किया था"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"फ़िलहाल <xliff:g id="APP_NAME_0">%1$s</xliff:g> उपलब्ध नहीं है. इसे <xliff:g id="APP_NAME_1">%2$s</xliff:g> के ज़रिए प्रबंधित किया जाता है."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ज़्यादा जानें"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ऐप्लिकेशन पर लगी रोक हटाएं"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करने हैं?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"अपने ऑफ़िस के काम से जुड़े ऐप्लिकेशन और सूचनाओं का ऐक्सेस पाएं"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"चालू करें"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"वर्क ऐप्लिकेशन चालू करने हैं?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"चालू करें"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आपातकालीन कॉल"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"अपने वर्क ऐप्लिकेशन और कॉल का ऐक्सेस पाएं"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> इस समय उपलब्ध नहीं है."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नहीं है"</string>
