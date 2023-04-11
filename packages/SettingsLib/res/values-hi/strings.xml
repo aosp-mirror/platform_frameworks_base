@@ -494,7 +494,7 @@
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति देना"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात ऐप्लिकेशन इंस्टॉल करने की अनुमति देना"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
