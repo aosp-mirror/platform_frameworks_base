@@ -32,17 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ਆਕਾਰ ਬਦਲੋ"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"ਸਟੈਸ਼"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ਅਣਸਟੈਸ਼"</string>
-    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ਐਪ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ਇਹ ਐਪ ਸਿਰਫ਼ 1 ਵਿੰਡੋ ਵਿੱਚ ਖੋਲ੍ਹੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇਆਂ \'ਤੇ ਲਾਂਚ ਕਰਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
-    <!-- no translation found for accessibility_divider (6407584574218956849) -->
-    <skip />
-    <!-- no translation found for divider_title (1963391955593749442) -->
-    <skip />
+    <string name="accessibility_divider" msgid="6407584574218956849">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਵਿਭਾਜਕ"</string>
+    <string name="divider_title" msgid="1963391955593749442">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਵਿਭਾਜਕ"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ਖੱਬੇ ਪੂਰੀ ਸਕ੍ਰੀਨ"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ਖੱਬੇ 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ਖੱਬੇ 50%"</string>
@@ -89,8 +85,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ਕੀ ਇਹ ਠੀਕ ਨਹੀਂ ਹੋਈ?\nਵਾਪਸ ਉਹੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਕੋਈ ਸਮੱਸਿਆ ਨਹੀਂ ਹੈ? ਖਾਰਜ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ਦੇਖੋ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਕਰੋ"</string>
-    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
-    <skip />
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੇ ਲਈ ਕਿਸੇ ਹੋਰ ਐਪ ਵਿੱਚ ਘਸੀਟੋ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ਕਿਸੇ ਐਪ ਦੀ ਜਗ੍ਹਾ ਬਦਲਣ ਲਈ ਉਸ ਦੇ ਬਾਹਰ ਡਬਲ ਟੈਪ ਕਰੋ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ਸਮਝ ਲਿਆ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ ਵਿਸਤਾਰ ਕਰੋ।"</string>
@@ -99,8 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ਰੱਦ ਕਰੋ"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
-    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
-    <skip />
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"ਇਸ ਐਪ ਦਾ ਟਿਕਾਣਾ ਬਦਲਣ ਲਈ\nਡਬਲ ਟੈਪ ਕਰੋ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ਵੱਡਾ ਕਰੋ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ਛੋਟਾ ਕਰੋ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ਬੰਦ ਕਰੋ"</string>
@@ -116,4 +110,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
     <string name="close_text" msgid="4986518933445178928">"ਬੰਦ ਕਰੋ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ਮੀਨੂ ਬੰਦ ਕਰੋ"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"ਮੀਨੂ ਖੋਲ੍ਹੋ"</string>
 </resources>

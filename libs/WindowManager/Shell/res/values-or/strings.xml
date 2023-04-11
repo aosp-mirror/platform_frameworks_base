@@ -32,17 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ରିସାଇଜ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"ଲୁଚାନ୍ତୁ"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ଦେଖାନ୍ତୁ"</string>
-    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନରେ ଆପ କାମ କରିନପାରେ"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନକୁ ଆପ ସମର୍ଥନ କରେ ନାହିଁ"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ଏହି ଆପକୁ କେବଳ 1ଟି ୱିଣ୍ଡୋରେ ଖୋଲାଯାଇପାରିବ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ କାମ ନକରିପାରେ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ ଲଞ୍ଚ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
-    <!-- no translation found for accessibility_divider (6407584574218956849) -->
-    <skip />
-    <!-- no translation found for divider_title (1963391955593749442) -->
-    <skip />
+    <string name="accessibility_divider" msgid="6407584574218956849">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ଡିଭାଇଡର"</string>
+    <string name="divider_title" msgid="1963391955593749442">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ଡିଭାଇଡର"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ବାମ ପଟକୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ବାମ ପଟକୁ 70% କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ବାମ ପଟକୁ 50% କରନ୍ତୁ"</string>
@@ -89,8 +85,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ଏହାର ସମାଧାନ ହୋଇନାହିଁ?\nଫେରିଯିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"କ୍ୟାମେରାରେ କିଛି ସମସ୍ୟା ନାହିଁ? ଖାରଜ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ଦେଖନ୍ତୁ ଏବଂ ଆହୁରି ଅନେକ କିଛି କରନ୍ତୁ"</string>
-    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
-    <skip />
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ପାଇଁ ଅନ୍ୟ ଏକ ଆପକୁ ଡ୍ରାଗ କରନ୍ତୁ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ଏକ ଆପକୁ ରିପୋଜିସନ କରିବା ପାଇଁ ଏହାର ବାହାରେ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ବୁଝିଗଲି"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ଅଧିକ ସୂଚନା ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ।"</string>
@@ -99,8 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
-    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
-    <skip />
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"ଏହି ଆପକୁ ମୁଭ\nକରିବା ପାଇଁ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ବଡ଼ କରନ୍ତୁ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -116,4 +110,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"ସ୍କ୍ରିନସଟ"</string>
     <string name="close_text" msgid="4986518933445178928">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ମେନୁ ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"ମେନୁ ଖୋଲନ୍ତୁ"</string>
 </resources>
