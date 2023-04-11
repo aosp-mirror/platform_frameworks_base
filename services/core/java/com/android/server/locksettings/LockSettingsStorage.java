@@ -19,7 +19,7 @@ package com.android.server.locksettings;
 import static android.content.Context.USER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-import static com.android.internal.widget.LockPatternUtils.USER_FRP;
+import static com.android.internal.widget.LockPatternUtils.isSpecialUserId;
 
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
@@ -536,7 +536,8 @@ class LockSettingsStorage {
     }
 
     public void setString(String key, String value, int userId) {
-        Preconditions.checkArgument(userId != USER_FRP, "cannot store lock settings for FRP user");
+        Preconditions.checkArgument(!isSpecialUserId(userId),
+                "cannot store lock settings for special user: %d", userId);
 
         writeKeyValue(key, value, userId);
         if (ArrayUtils.contains(SETTINGS_TO_BACKUP, key)) {
@@ -561,7 +562,7 @@ class LockSettingsStorage {
     }
 
     public String getString(String key, String defaultValue, int userId) {
-        if (userId == USER_FRP) {
+        if (isSpecialUserId(userId)) {
             return null;
         }
         return readKeyValue(key, defaultValue, userId);
