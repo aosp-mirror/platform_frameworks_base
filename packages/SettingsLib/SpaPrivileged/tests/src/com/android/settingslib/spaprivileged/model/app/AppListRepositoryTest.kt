@@ -23,9 +23,13 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
+import android.content.pm.UserInfo
 import android.content.res.Resources
+import android.os.UserManager
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.R
+import com.android.settingslib.spaprivileged.framework.common.userManager
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -35,10 +39,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.verify
+import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.Mockito.`when` as whenever
@@ -49,14 +56,17 @@ class AppListRepositoryTest {
     @get:Rule
     val mockito: MockitoRule = MockitoJUnit.rule()
 
-    @Mock
-    private lateinit var context: Context
+    @Spy
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Mock
     private lateinit var resources: Resources
 
     @Mock
     private lateinit var packageManager: PackageManager
+
+    @Mock
+    private lateinit var userManager: UserManager
 
     private lateinit var repository: AppListRepository
 
@@ -66,36 +76,116 @@ class AppListRepositoryTest {
         whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
             .thenReturn(emptyArray())
         whenever(context.packageManager).thenReturn(packageManager)
+        whenever(context.userManager).thenReturn(userManager)
         whenever(packageManager.getInstalledModules(anyInt())).thenReturn(emptyList())
         whenever(
-            packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), eq(USER_ID))
+            packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), anyInt())
         ).thenReturn(emptyList())
+        whenever(userManager.getUserInfo(ADMIN_USER_ID)).thenReturn(UserInfo().apply {
+            flags = UserInfo.FLAG_ADMIN
+        })
+        whenever(userManager.getProfileIdsWithDisabled(ADMIN_USER_ID))
+            .thenReturn(intArrayOf(ADMIN_USER_ID, MANAGED_PROFILE_USER_ID))
 
         repository = AppListRepositoryImpl(context)
     }
 
-    private fun mockInstalledApplications(apps: List<ApplicationInfo>) {
+    private fun mockInstalledApplications(apps: List<ApplicationInfo>, userId: Int) {
         whenever(
-            packageManager.getInstalledApplicationsAsUser(any<ApplicationInfoFlags>(), eq(USER_ID))
+            packageManager.getInstalledApplicationsAsUser(any<ApplicationInfoFlags>(), eq(userId))
         ).thenReturn(apps)
     }
 
     @Test
     fun loadApps_notShowInstantApps() = runTest {
-        mockInstalledApplications(listOf(NORMAL_APP, INSTANT_APP))
+        mockInstalledApplications(listOf(NORMAL_APP, INSTANT_APP), ADMIN_USER_ID)
 
-        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
+        val appList = repository.loadApps(
+            userId = ADMIN_USER_ID,
+            showInstantApps = false,
+        )
 
-        assertThat(appListFlow).containsExactly(NORMAL_APP)
+        assertThat(appList).containsExactly(NORMAL_APP)
     }
 
     @Test
     fun loadApps_showInstantApps() = runTest {
-        mockInstalledApplications(listOf(NORMAL_APP, INSTANT_APP))
+        mockInstalledApplications(listOf(NORMAL_APP, INSTANT_APP), ADMIN_USER_ID)
 
-        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = true)
+        val appList = repository.loadApps(
+            userId = ADMIN_USER_ID,
+            showInstantApps = true,
+        )
 
-        assertThat(appListFlow).containsExactly(NORMAL_APP, INSTANT_APP)
+        assertThat(appList).containsExactly(NORMAL_APP, INSTANT_APP)
+    }
+
+    @Test
+    fun loadApps_notMatchAnyUserForAdmin_withRegularFlags() = runTest {
+        mockInstalledApplications(listOf(NORMAL_APP), ADMIN_USER_ID)
+
+        val appList = repository.loadApps(
+            userId = ADMIN_USER_ID,
+            matchAnyUserForAdmin = false,
+        )
+
+        assertThat(appList).containsExactly(NORMAL_APP)
+        val flags = ArgumentCaptor.forClass(ApplicationInfoFlags::class.java)
+        verify(packageManager).getInstalledApplicationsAsUser(flags.capture(), eq(ADMIN_USER_ID))
+        assertThat(flags.value.value).isEqualTo(
+            PackageManager.MATCH_DISABLED_COMPONENTS or
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+        )
+    }
+
+    @Test
+    fun loadApps_matchAnyUserForAdmin_withMatchAnyUserFlag() = runTest {
+        mockInstalledApplications(listOf(NORMAL_APP), ADMIN_USER_ID)
+
+        val appList = repository.loadApps(
+            userId = ADMIN_USER_ID,
+            matchAnyUserForAdmin = true,
+        )
+
+        assertThat(appList).containsExactly(NORMAL_APP)
+        val flags = ArgumentCaptor.forClass(ApplicationInfoFlags::class.java)
+        verify(packageManager).getInstalledApplicationsAsUser(flags.capture(), eq(ADMIN_USER_ID))
+        assertThat(flags.value.value and PackageManager.MATCH_ANY_USER.toLong()).isGreaterThan(0L)
+    }
+
+    @Test
+    fun loadApps_matchAnyUserForAdminAndInstalledOnManagedProfileOnly_notDisplayed() = runTest {
+        val managedProfileOnlyPackageName = "installed.on.managed.profile.only"
+        mockInstalledApplications(listOf(ApplicationInfo().apply {
+            packageName = managedProfileOnlyPackageName
+        }), ADMIN_USER_ID)
+        mockInstalledApplications(listOf(ApplicationInfo().apply {
+            packageName = managedProfileOnlyPackageName
+            flags = ApplicationInfo.FLAG_INSTALLED
+        }), MANAGED_PROFILE_USER_ID)
+
+        val appList = repository.loadApps(
+            userId = ADMIN_USER_ID,
+            matchAnyUserForAdmin = true,
+        )
+
+        assertThat(appList).isEmpty()
+    }
+
+    @Test
+    fun loadApps_matchAnyUserForAdminAndInstalledOnSecondaryUserOnly_displayed() = runTest {
+        val secondaryUserOnlyApp = ApplicationInfo().apply {
+            packageName = "installed.on.secondary.user.only"
+        }
+        mockInstalledApplications(listOf(secondaryUserOnlyApp), ADMIN_USER_ID)
+        mockInstalledApplications(emptyList(), MANAGED_PROFILE_USER_ID)
+
+        val appList = repository.loadApps(
+            userId = ADMIN_USER_ID,
+            matchAnyUserForAdmin = true,
+        )
+
+        assertThat(appList).containsExactly(secondaryUserOnlyApp)
     }
 
     @Test
@@ -106,11 +196,11 @@ class AppListRepositoryTest {
         }
         whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
             .thenReturn(arrayOf(app.packageName))
-        mockInstalledApplications(listOf(app))
+        mockInstalledApplications(listOf(app), ADMIN_USER_ID)
 
-        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
 
-        assertThat(appListFlow).isEmpty()
+        assertThat(appList).isEmpty()
     }
 
     @Test
@@ -122,11 +212,11 @@ class AppListRepositoryTest {
         }
         whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
             .thenReturn(arrayOf(app.packageName))
-        mockInstalledApplications(listOf(app))
+        mockInstalledApplications(listOf(app), ADMIN_USER_ID)
 
-        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
 
-        assertThat(appListFlow).isEmpty()
+        assertThat(appList).isEmpty()
     }
 
     @Test
@@ -137,11 +227,11 @@ class AppListRepositoryTest {
         }
         whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
             .thenReturn(arrayOf(app.packageName))
-        mockInstalledApplications(listOf(app))
+        mockInstalledApplications(listOf(app), ADMIN_USER_ID)
 
-        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
 
-        assertThat(appListFlow).containsExactly(app)
+        assertThat(appList).containsExactly(app)
     }
 
     @Test
@@ -151,11 +241,11 @@ class AppListRepositoryTest {
             enabled = false
             enabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
         }
-        mockInstalledApplications(listOf(app))
+        mockInstalledApplications(listOf(app), ADMIN_USER_ID)
 
-        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
 
-        assertThat(appListFlow).containsExactly(app)
+        assertThat(appList).containsExactly(app)
     }
 
     @Test
@@ -164,11 +254,11 @@ class AppListRepositoryTest {
             packageName = "disabled"
             enabled = false
         }
-        mockInstalledApplications(listOf(app))
+        mockInstalledApplications(listOf(app), ADMIN_USER_ID)
 
-        val appListFlow = repository.loadApps(userId = USER_ID, showInstantApps = false)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
 
-        assertThat(appListFlow).isEmpty()
+        assertThat(appList).isEmpty()
     }
 
     @Test
@@ -219,7 +309,11 @@ class AppListRepositoryTest {
         val app = IN_LAUNCHER_APP
 
         whenever(
-            packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), eq(USER_ID))
+            packageManager.queryIntentActivitiesAsUser(
+                any(),
+                any<ResolveInfoFlags>(),
+                eq(ADMIN_USER_ID)
+            )
         ).thenReturn(listOf(resolveInfoOf(packageName = app.packageName)))
 
         val showSystemPredicate = getShowSystemPredicate(showSystem = false)
@@ -229,12 +323,16 @@ class AppListRepositoryTest {
 
     @Test
     fun getSystemPackageNames_returnExpectedValues() = runTest {
-        mockInstalledApplications(listOf(
-                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP))
+        mockInstalledApplications(
+            apps = listOf(
+                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP
+            ),
+            userId = ADMIN_USER_ID,
+        )
 
         val systemPackageNames = AppListRepositoryUtil.getSystemPackageNames(
             context = context,
-            userId = USER_ID,
+            userId = ADMIN_USER_ID,
             showInstantApps = false,
         )
 
@@ -243,12 +341,13 @@ class AppListRepositoryTest {
 
     private suspend fun getShowSystemPredicate(showSystem: Boolean) =
         repository.showSystemPredicate(
-            userIdFlow = flowOf(USER_ID),
+            userIdFlow = flowOf(ADMIN_USER_ID),
             showSystemFlow = flowOf(showSystem),
         ).first()
 
     private companion object {
-        const val USER_ID = 0
+        const val ADMIN_USER_ID = 0
+        const val MANAGED_PROFILE_USER_ID = 11
 
         val NORMAL_APP = ApplicationInfo().apply {
             packageName = "normal"
