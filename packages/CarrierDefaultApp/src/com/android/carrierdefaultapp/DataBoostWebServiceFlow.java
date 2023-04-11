@@ -24,13 +24,13 @@ import android.webkit.JavascriptInterface;
 import com.android.phone.slice.SlicePurchaseController;
 
 /**
- * Slice purchase web interface class allowing carrier websites to send responses back to the
+ * Data boost web service flow interface allowing carrier websites to send responses back to the
  * slice purchase application using JavaScript.
  */
-public class SlicePurchaseWebInterface {
+public class DataBoostWebServiceFlow {
     @NonNull SlicePurchaseActivity mActivity;
 
-    public SlicePurchaseWebInterface(@NonNull SlicePurchaseActivity activity) {
+    public DataBoostWebServiceFlow(@NonNull SlicePurchaseActivity activity) {
         mActivity = activity;
     }
 
@@ -41,7 +41,7 @@ public class SlicePurchaseWebInterface {
      * This can be called using the JavaScript below:
      * <script type="text/javascript">
      *     function getRequestedCapability(duration) {
-     *         SlicePurchaseWebInterface.getRequestedCapability();
+     *         DataBoostWebServiceFlow.getRequestedCapability();
      *     }
      * </script>
      */
@@ -57,16 +57,14 @@ public class SlicePurchaseWebInterface {
      *
      * This can be called using the JavaScript below:
      * <script type="text/javascript">
-     *     function notifyPurchaseSuccessful(duration_ms_long = 0) {
-     *         SlicePurchaseWebInterface.notifyPurchaseSuccessful(duration_ms_long);
+     *     function notifyPurchaseSuccessful() {
+     *         DataBoostWebServiceFlow.notifyPurchaseSuccessful();
      *     }
      * </script>
-     *
-     * @param duration The duration for which the premium capability is purchased in milliseconds.
      */
     @JavascriptInterface
-    public void notifyPurchaseSuccessful(long duration) {
-        mActivity.onPurchaseSuccessful(duration);
+    public void notifyPurchaseSuccessful() {
+        mActivity.onPurchaseSuccessful();
     }
 
     /**
@@ -76,7 +74,7 @@ public class SlicePurchaseWebInterface {
      * This can be called using the JavaScript below:
      * <script type="text/javascript">
      *     function notifyPurchaseFailed(failure_code = 0, failure_reason = "unknown") {
-     *         SlicePurchaseWebInterface.notifyPurchaseFailed();
+     *         DataBoostWebServiceFlow.notifyPurchaseFailed();
      *     }
      * </script>
      *
