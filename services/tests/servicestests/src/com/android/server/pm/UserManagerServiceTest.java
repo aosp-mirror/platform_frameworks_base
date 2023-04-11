@@ -31,11 +31,11 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
-import android.support.test.uiautomator.UiDevice;
 import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.server.LocalServices;
 

@@ -50,7 +50,7 @@ android_test {
         "ShortcutManagerTestUtils",
         "truth-prebuilt",
         "testables",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "platformprotosnano",
         "framework-protos",
         "hamcrest-library",
