@@ -414,17 +414,20 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private void switchToMenuMode(@TvPipMenuMode int menuMode, boolean resetMenu) {
-        // Note: we intentionally don't return early here, because the TvPipMenuView needs to
-        // refresh the Ui even if there is no menu mode change.
-        mPrevMenuMode = mCurrentMenuMode;
-        mCurrentMenuMode = menuMode;
-
         ProtoLog.i(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: switchToMenuMode: setting mCurrentMenuMode=%s, mPrevMenuMode=%s", TAG,
-                getMenuModeString(), getMenuModeString(mPrevMenuMode));
+                "%s: switchToMenuMode: from=%s, to=%s", TAG, getMenuModeString(),
+                getMenuModeString(menuMode));
 
-        updateUiOnNewMenuModeRequest(resetMenu);
-        updateDelegateOnNewMenuModeRequest();
+        if (mCurrentMenuMode != menuMode) {
+            mPrevMenuMode = mCurrentMenuMode;
+            mCurrentMenuMode = menuMode;
+            updateUiOnNewMenuModeRequest(resetMenu);
+            updateDelegateOnNewMenuModeRequest();
+        } else if (resetMenu) {
+            // Note: we intentionally update the Ui even if the menu mode hasn't changed, because
+            // the Ui may have to be updated when resetting the menu.
+            updateUiOnNewMenuModeRequest(resetMenu);
+        }
     }
 
     private void updateUiOnNewMenuModeRequest(boolean resetMenu) {
@@ -476,32 +479,19 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     @Override
-    public void onBackPress() {
-        if (!onExitMoveMode()) {
-            closeMenu();
-        }
-    }
-
-    @Override
-    public boolean onExitMoveMode() {
+    public void onExitCurrentMenuMode() {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: onExitMoveMode - mCurrentMenuMode=%s", TAG, getMenuModeString());
-
-        final int saveMenuMode = mCurrentMenuMode;
-        if (isInMoveMode()) {
-            switchToMenuMode(mPrevMenuMode);
-        }
-        return saveMenuMode == MODE_MOVE_MENU;
+                "%s: onExitCurrentMenuMode - mCurrentMenuMode=%s", TAG, getMenuModeString());
+        switchToMenuMode(isInMoveMode() ? mPrevMenuMode : MODE_NO_MENU);
     }
 
     @Override
-    public boolean onPipMovement(int keycode) {
+    public void onPipMovement(int keycode) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipMovement - mCurrentMenuMode=%s", TAG, getMenuModeString());
         if (isInMoveMode()) {
             mDelegate.movePip(keycode);
         }
-        return isInMoveMode();
     }
 
     @Override
