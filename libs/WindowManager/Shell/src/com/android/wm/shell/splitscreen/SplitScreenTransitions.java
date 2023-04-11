@@ -289,6 +289,12 @@ class SplitScreenTransitions {
         return null;
     }
 
+    void startFullscreenTransition(WindowContainerTransaction wct,
+            @Nullable RemoteTransition handler) {
+        mTransitions.startTransition(TRANSIT_OPEN, wct,
+                new OneShotRemoteHandler(mTransitions.getMainExecutor(), handler));
+    }
+
 
     /** Starts a transition to enter split with a remote transition animator. */
     IBinder startEnterTransition(
