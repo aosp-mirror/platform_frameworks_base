@@ -1034,7 +1034,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onRemoteAnimationFinishedOrCancelled(WindowContainerTransaction evictWct) {
         mIsDividerRemoteAnimating = false;
         mShouldUpdateRecents = true;
-        mSplitRequest = null;
+        clearRequestIfPresented();
         // If any stage has no child after animation finished, it means that split will display
         // nothing, such status will happen if task and intent is same app but not support
         // multi-instance, we should exit split and expand that app as full screen.
@@ -1054,7 +1054,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onRemoteAnimationFinished(RemoteAnimationTarget[] apps) {
         mIsDividerRemoteAnimating = false;
         mShouldUpdateRecents = true;
-        mSplitRequest = null;
+        clearRequestIfPresented();
         // If any stage has no child after finished animation, that side of the split will display
         // nothing. This might happen if starting the same app on the both sides while not
         // supporting multi-instance. Exit the split screen and expand that app to full screen.
@@ -1320,6 +1320,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         });
         mShouldUpdateRecents = false;
         mIsDividerRemoteAnimating = false;
+        mSplitRequest = null;
 
         mSplitLayout.getInvisibleBounds(mTempRect1);
         if (childrenToTop == null || childrenToTop.getTopVisibleChildTaskId() == INVALID_TASK_ID) {
@@ -1409,6 +1410,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } catch (RemoteException | NullPointerException e) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                     "Unable to update focus on the chosen stage: %s", e.getMessage());
+        }
+    }
+
+    private void clearRequestIfPresented() {
+        if (mSideStageListener.mVisible && mSideStageListener.mHasChildren
+                && mMainStageListener.mVisible && mSideStageListener.mHasChildren) {
+            mSplitRequest = null;
         }
     }
 
@@ -1776,6 +1784,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     true /* setReparentLeafTaskIfRelaunch */);
             setRootForceTranslucent(true, wct);
         } else {
+            clearRequestIfPresented();
             wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                     false /* setReparentLeafTaskIfRelaunch */);
             setRootForceTranslucent(false, wct);
@@ -1926,7 +1935,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
             mShouldUpdateRecents = true;
-            mSplitRequest = null;
+            clearRequestIfPresented();
             updateRecentTasksSplitPair();
 
             if (!mLogger.hasStartedSession()) {
@@ -2565,6 +2574,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         });
         mShouldUpdateRecents = false;
+        mSplitRequest = null;
 
         // Update local states.
         setSplitsVisible(false);
