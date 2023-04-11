@@ -1609,7 +1609,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" id=" + mSyncId);
         sb.append(" type=" + transitTypeToString(mType));
-        sb.append(" flags=" + mFlags);
+        sb.append(" flags=0x" + Integer.toHexString(mFlags));
         sb.append('}');
         return sb.toString();
     }
