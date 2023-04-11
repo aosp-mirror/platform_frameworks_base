@@ -195,7 +195,7 @@ public final class Choreographer {
 
     private boolean mDebugPrintNextFrameTimeDelta;
     private int mFPSDivisor = 1;
-    private DisplayEventReceiver.VsyncEventData mLastVsyncEventData =
+    private final DisplayEventReceiver.VsyncEventData mLastVsyncEventData =
             new DisplayEventReceiver.VsyncEventData();
     private final FrameData mFrameData = new FrameData();
 
@@ -857,7 +857,7 @@ public final class Choreographer {
                 mFrameScheduled = false;
                 mLastFrameTimeNanos = frameTimeNanos;
                 mLastFrameIntervalNanos = frameIntervalNanos;
-                mLastVsyncEventData = vsyncEventData;
+                mLastVsyncEventData.copyFrom(vsyncEventData);
             }
 
             AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
@@ -1247,7 +1247,7 @@ public final class Choreographer {
         private boolean mHavePendingVsync;
         private long mTimestampNanos;
         private int mFrame;
-        private VsyncEventData mLastVsyncEventData = new VsyncEventData();
+        private final VsyncEventData mLastVsyncEventData = new VsyncEventData();
 
         FrameDisplayEventReceiver(Looper looper, int vsyncSource, long layerHandle) {
             super(looper, vsyncSource, /* eventRegistration */ 0, layerHandle);
@@ -1287,7 +1287,7 @@ public final class Choreographer {
 
                 mTimestampNanos = timestampNanos;
                 mFrame = frame;
-                mLastVsyncEventData = vsyncEventData;
+                mLastVsyncEventData.copyFrom(vsyncEventData);
                 Message msg = Message.obtain(mHandler, this);
                 msg.setAsynchronous(true);
                 mHandler.sendMessageAtTime(msg, timestampNanos / TimeUtils.NANOS_PER_MS);
