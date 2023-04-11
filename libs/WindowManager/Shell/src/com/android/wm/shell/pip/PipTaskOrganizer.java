@@ -712,15 +712,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
+        final int animationType = shouldAlwaysFadeIn()
+                ? ANIM_TYPE_ALPHA
+                : mPipAnimationController.takeOneShotEnterAnimationType();
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.setEnterAnimationType(animationType);
             // For Shell transition, we will animate the window in PipTransition#startAnimation
             // instead of #onTaskAppeared.
             return;
         }
 
-        final int animationType = shouldAlwaysFadeIn()
-                ? ANIM_TYPE_ALPHA
-                : mPipAnimationController.takeOneShotEnterAnimationType();
         if (mWaitForFixedRotation) {
             onTaskAppearedWithFixedRotation(animationType);
             return;
