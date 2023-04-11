@@ -27,6 +27,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeDiff;
 import android.util.Log;
 import android.util.Slog;
 
@@ -146,13 +147,13 @@ public class ZenLog {
 
     public static void traceConfig(String reason, ZenModeConfig oldConfig,
             ZenModeConfig newConfig) {
-        ZenModeConfig.Diff diff = ZenModeConfig.diff(oldConfig, newConfig);
-        if (diff.isEmpty()) {
+        ZenModeDiff.ConfigDiff diff = new ZenModeDiff.ConfigDiff(oldConfig, newConfig);
+        if (diff == null || !diff.hasDiff()) {
             append(TYPE_CONFIG, reason + " no changes");
         } else {
             append(TYPE_CONFIG, reason
                     + ",\n" + (newConfig != null ? newConfig.toString() : null)
-                    + ",\n" + ZenModeConfig.diff(oldConfig, newConfig));
+                    + ",\n" + diff);
         }
     }
 

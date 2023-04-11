@@ -1423,7 +1423,7 @@ public class KeyguardIndicationController {
 
     private boolean canUnlockWithFingerprint() {
         return mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                getCurrentUser());
+                getCurrentUser()) && mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed();
     }
 
     private void showErrorMessageNowOrLater(String errString, @Nullable String followUpMsg) {

@@ -59,11 +59,10 @@ import com.android.systemui.statusbar.phone.FakeKeyguardStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
+import com.android.systemui.util.mockito.captureMany
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.SystemClock
 import com.google.common.truth.Truth.assertThat
-import java.io.PrintWriter
-import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -81,6 +80,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.mock
@@ -88,6 +88,8 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
+import java.io.PrintWriter
+import java.io.StringWriter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -120,6 +122,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     private lateinit var authStatus: FlowValue<AuthenticationStatus?>
     private lateinit var detectStatus: FlowValue<DetectionStatus?>
     private lateinit var authRunning: FlowValue<Boolean?>
+    private lateinit var bypassEnabled: FlowValue<Boolean?>
     private lateinit var lockedOut: FlowValue<Boolean?>
     private lateinit var canFaceAuthRun: FlowValue<Boolean?>
     private lateinit var authenticated: FlowValue<Boolean?>
@@ -726,6 +729,23 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun isBypassEnabledReflectsBypassControllerState() =
+        testScope.runTest {
+            initCollectors()
+            runCurrent()
+            val listeners = captureMany {
+                verify(bypassController, atLeastOnce())
+                    .registerOnBypassStateChangedListener(capture())
+            }
+
+            listeners.forEach { it.onBypassStateChanged(true) }
+            assertThat(bypassEnabled()).isTrue()
+
+            listeners.forEach { it.onBypassStateChanged(false) }
+            assertThat(bypassEnabled()).isFalse()
+        }
+
+    @Test
     fun detectDoesNotRunWhenNonStrongBiometricIsAllowed() =
         testScope.runTest {
             testGatingCheckForDetect {
@@ -844,6 +864,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         lockedOut = collectLastValue(underTest.isLockedOut)
         canFaceAuthRun = collectLastValue(underTest.canRunFaceAuth)
         authenticated = collectLastValue(underTest.isAuthenticated)
+        bypassEnabled = collectLastValue(underTest.isBypassEnabled)
         fakeUserRepository.setSelectedUserInfo(primaryUser)
     }
 

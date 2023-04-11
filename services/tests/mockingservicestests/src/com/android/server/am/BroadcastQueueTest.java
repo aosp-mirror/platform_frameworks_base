@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
@@ -39,7 +41,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -961,7 +962,7 @@ public class BroadcastQueueTest {
             } else {
                 // Confirm that app was thawed
                 verify(mAms.mOomAdjuster, atLeastOnce()).unfreezeTemporarily(
-                        eq(receiverApp), eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
+                        eq(receiverApp), eq(OOM_ADJ_REASON_START_RECEIVER));
 
                 // Confirm that we added package to process
                 verify(receiverApp, atLeastOnce()).addPackage(eq(receiverApp.info.packageName),
@@ -1404,7 +1405,7 @@ public class BroadcastQueueTest {
 
         // Finally, verify that we thawed the final receiver
         verify(mAms.mOomAdjuster).unfreezeTemporarily(eq(callerApp),
-                eq(OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER));
+                eq(OOM_ADJ_REASON_FINISH_RECEIVER));
     }
 
     /**

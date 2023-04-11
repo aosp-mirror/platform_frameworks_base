@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.soundtrigger;
+package com.android.server;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,15 +29,13 @@ import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.permission.Identity;
 import android.os.IBinder;
 
-import com.android.server.voiceinteraction.VoiceInteractionManagerService;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 
 /**
  * Provides a local service for managing voice-related recoginition models. This is primarily used
- * by the {@link VoiceInteractionManagerService}.
+ * by the {@code VoiceInteractionManagerService}.
  */
 public interface SoundTriggerInternal {
     /**

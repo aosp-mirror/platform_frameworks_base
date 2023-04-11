@@ -343,7 +343,170 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
 
-    public abstract void updateOomAdj();
+    /**
+     * Oom Adj Reason: none - internal use only, do not use it.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_NONE = 0;
+
+    /**
+     * Oom Adj Reason: activity changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_ACTIVITY = 1;
+
+    /**
+     * Oom Adj Reason: finishing a broadcast receiver.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_FINISH_RECEIVER = 2;
+
+    /**
+     * Oom Adj Reason: starting a broadcast receiver.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_START_RECEIVER = 3;
+
+    /**
+     * Oom Adj Reason: binding to a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_BIND_SERVICE = 4;
+
+    /**
+     * Oom Adj Reason: unbinding from a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_UNBIND_SERVICE = 5;
+
+    /**
+     * Oom Adj Reason: starting a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_START_SERVICE = 6;
+
+    /**
+     * Oom Adj Reason: connecting to a content provider.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_GET_PROVIDER = 7;
+
+    /**
+     * Oom Adj Reason: disconnecting from a content provider.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_REMOVE_PROVIDER = 8;
+
+    /**
+     * Oom Adj Reason: UI visibility changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_UI_VISIBILITY = 9;
+
+    /**
+     * Oom Adj Reason: device power allowlist changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_ALLOWLIST = 10;
+
+    /**
+     * Oom Adj Reason: starting a process.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_PROCESS_BEGIN = 11;
+
+    /**
+     * Oom Adj Reason: ending a process.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_PROCESS_END = 12;
+
+    /**
+     * Oom Adj Reason: short FGS timeout.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SHORT_FGS_TIMEOUT = 13;
+
+    /**
+     * Oom Adj Reason: system initialization.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SYSTEM_INIT = 14;
+
+    /**
+     * Oom Adj Reason: backup/restore.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_BACKUP = 15;
+
+    /**
+     * Oom Adj Reason: instrumented by the SHELL.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SHELL = 16;
+
+    /**
+     * Oom Adj Reason: task stack is being removed.
+     */
+    public static final int OOM_ADJ_REASON_REMOVE_TASK = 17;
+
+    /**
+     * Oom Adj Reason: uid idle.
+     */
+    public static final int OOM_ADJ_REASON_UID_IDLE = 18;
+
+    /**
+     * Oom Adj Reason: stop service.
+     */
+    public static final int OOM_ADJ_REASON_STOP_SERVICE = 19;
+
+    /**
+     * Oom Adj Reason: executing service.
+     */
+    public static final int OOM_ADJ_REASON_EXECUTING_SERVICE = 20;
+
+    /**
+     * Oom Adj Reason: background restriction changes.
+     */
+    public static final int OOM_ADJ_REASON_RESTRICTION_CHANGE = 21;
+
+    /**
+     * Oom Adj Reason: A package or its component is disabled.
+     */
+    public static final int OOM_ADJ_REASON_COMPONENT_DISABLED = 22;
+
+    @IntDef(prefix = {"OOM_ADJ_REASON_"}, value = {
+        OOM_ADJ_REASON_NONE,
+        OOM_ADJ_REASON_ACTIVITY,
+        OOM_ADJ_REASON_FINISH_RECEIVER,
+        OOM_ADJ_REASON_START_RECEIVER,
+        OOM_ADJ_REASON_BIND_SERVICE,
+        OOM_ADJ_REASON_UNBIND_SERVICE,
+        OOM_ADJ_REASON_START_SERVICE,
+        OOM_ADJ_REASON_GET_PROVIDER,
+        OOM_ADJ_REASON_REMOVE_PROVIDER,
+        OOM_ADJ_REASON_UI_VISIBILITY,
+        OOM_ADJ_REASON_ALLOWLIST,
+        OOM_ADJ_REASON_PROCESS_BEGIN,
+        OOM_ADJ_REASON_PROCESS_END,
+        OOM_ADJ_REASON_SHORT_FGS_TIMEOUT,
+        OOM_ADJ_REASON_SYSTEM_INIT,
+        OOM_ADJ_REASON_BACKUP,
+        OOM_ADJ_REASON_SHELL,
+        OOM_ADJ_REASON_REMOVE_TASK,
+        OOM_ADJ_REASON_UID_IDLE,
+        OOM_ADJ_REASON_STOP_SERVICE,
+        OOM_ADJ_REASON_EXECUTING_SERVICE,
+        OOM_ADJ_REASON_RESTRICTION_CHANGE,
+        OOM_ADJ_REASON_COMPONENT_DISABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OomAdjReason {}
+
+    /**
+     * Request to update oom adj.
+     */
+    public abstract void updateOomAdj(@OomAdjReason int oomAdjReason);
     public abstract void updateCpuStats();
 
     /**

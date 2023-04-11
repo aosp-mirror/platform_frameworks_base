@@ -3006,7 +3006,8 @@ class Task extends TaskFragment {
 
     /** Checking if self or its child tasks are animated by recents animation. */
     boolean isAnimatingByRecents() {
-        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS);
+        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS)
+                || mTransitionController.isTransientHide(this);
     }
 
     WindowState getTopVisibleAppMainWindow() {
