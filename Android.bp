@@ -410,6 +410,7 @@ java_defaults {
         "spatializer-aidl-java",
         "audiopolicy-aidl-java",
         "sounddose-aidl-java",
+        "modules-utils-expresslog",
     ],
 }
 
