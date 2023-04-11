@@ -70,6 +70,15 @@
         <item name="android:fontWeight">700</item>
     </style>
 
+    <style name="Chipbar" />
+
+    <style name="Chipbar.Text" parent="@*android:style/TextAppearance.DeviceDefault.Notification.Title">
+        <!-- Text size should be kept in sync with the notification conversation header size. (The
+             conversation header doesn't have a defined style, so the size must be copied here.)
+             See notification_template_conversation_header.xml. -->
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="TextAppearance" />
 
     <style name="TextAppearance.QS">
