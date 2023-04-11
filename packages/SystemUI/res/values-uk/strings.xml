@@ -471,7 +471,7 @@
     <string name="stream_system" msgid="7663148785370565134">"Система"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Дзвінок"</string>
     <string name="stream_music" msgid="2188224742361847580">"Медіа"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Сигнал"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Будильник"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Сповіщення"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Двотональний багаточастотний аналоговий сигнал"</string>
@@ -496,7 +496,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Увімкнути демонстраційний режим"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Показати демонстраційний режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Сигнал"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Будильник"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Гаманець"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Швидше й безпечніше сплачуйте за покупки за допомогою телефона"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показати все"</string>

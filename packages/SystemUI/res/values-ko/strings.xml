@@ -878,7 +878,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"통계를 로드할 수 없음"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"오류. 다시 시도하세요."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"컨트롤 추가"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"제어 설정 수정"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"컨트롤 수정"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"앱 추가"</string>
     <string name="controls_menu_remove" msgid="3006525275966023468">"앱 삭제"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"출력 추가"</string>
