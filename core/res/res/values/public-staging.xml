@@ -102,231 +102,65 @@
 <resources>
 
   <!-- ===============================================================
-    Resources added in version U of the platform
+    Resources added in version NEXT of the platform
 
     NOTE: After this version of the platform is forked, changes cannot be made to the root
     branch's groups for that release. Only merge changes to the forked platform branch.
     =============================================================== -->
   <eat-comment/>
 
-  <staging-public-group type="attr" first-id="0x01ce0000">
-    <public name="handwritingBoundsOffsetLeft" />
-    <public name="handwritingBoundsOffsetTop" />
-    <public name="handwritingBoundsOffsetRight" />
-    <public name="handwritingBoundsOffsetBottom" />
-    <public name="accessibilityDataSensitive" />
-    <public name="enableTextStylingShortcuts" />
-    <public name="requiredDisplayCategory"/>
-    <public name="removed_maxConcurrentSessionsCount" />
-    <public name="visualQueryDetectionService" />
-    <public name="physicalKeyboardHintLanguageTag" />
-    <public name="physicalKeyboardHintLayoutType" />
-    <public name="allowSharedIsolatedProcess" />
-    <public name="keyboardLocale" />
-    <public name="keyboardLayoutType" />
-    <public name="allowUpdateOwnership" />
-    <public name="isCredential"/>
-    <public name="searchResultHighlightColor" />
-    <public name="focusedSearchResultHighlightColor" />
-    <public name="stylusHandwritingSettingsActivity" />
-    <public name="windowNoMoveAnimation" />
-    <public name="settingsSubtitle" />
-    <public name="capability" />
+  <staging-public-group type="attr" first-id="0x01bd0000">
   </staging-public-group>
 
-  <staging-public-group type="id" first-id="0x01cd0000">
-    <public name="bold" />
-    <public name="italic" />
-    <public name="underline" />
-    <public name="accessibilityActionScrollInDirection" />
+  <staging-public-group type="id" first-id="0x01bc0000">
   </staging-public-group>
 
-  <staging-public-group type="style" first-id="0x01cc0000">
+  <staging-public-group type="style" first-id="0x01bb0000">
   </staging-public-group>
 
-  <staging-public-group type="string" first-id="0x01cb0000">
-    <!-- @hide @SystemApi -->
-    <public name="config_systemWearHealthService" />
-    <!-- @hide @SystemApi -->
-    <public name="config_defaultNotes" />
-    <!-- @hide @SystemApi -->
-    <public name="config_systemFinancedDeviceController" />
-    <!-- @hide @SystemApi -->
-    <public name="config_systemCallStreaming" />
+  <staging-public-group type="string" first-id="0x01ba0000">
   </staging-public-group>
 
-  <staging-public-group type="dimen" first-id="0x01ca0000">
-    <!-- @hide @SystemApi -->
-    <public name="config_viewConfigurationHandwritingGestureLineMargin" />
+  <staging-public-group type="dimen" first-id="0x01b90000">
   </staging-public-group>
 
-  <staging-public-group type="color" first-id="0x01c90000">
-    <public name="system_primary_container_light" />
-    <public name="system_on_primary_container_light" />
-    <public name="system_primary_light" />
-    <public name="system_on_primary_light" />
-    <public name="system_secondary_container_light" />
-    <public name="system_on_secondary_container_light" />
-    <public name="system_secondary_light" />
-    <public name="system_on_secondary_light" />
-    <public name="system_tertiary_container_light" />
-    <public name="system_on_tertiary_container_light" />
-    <public name="system_tertiary_light" />
-    <public name="system_on_tertiary_light" />
-    <public name="system_background_light" />
-    <public name="system_on_background_light" />
-    <public name="system_surface_light" />
-    <public name="system_on_surface_light" />
-    <public name="system_surface_container_low_light" />
-    <public name="system_surface_container_lowest_light" />
-    <public name="system_surface_container_light" />
-    <public name="system_surface_container_high_light" />
-    <public name="system_surface_container_highest_light" />
-    <public name="system_surface_bright_light" />
-    <public name="system_surface_dim_light" />
-    <public name="system_surface_variant_light" />
-    <public name="system_on_surface_variant_light" />
-    <public name="system_outline_light" />
-    <public name="system_error_light" />
-    <public name="system_on_error_light" />
-    <public name="system_error_container_light" />
-    <public name="system_on_error_container_light" />
-    <public name="removed_system_primary_fixed_light" />
-    <public name="removed_system_primary_fixed_dim_light" />
-    <public name="removed_system_on_primary_fixed_light" />
-    <public name="removed_system_on_primary_fixed_variant_light" />
-    <public name="removed_system_secondary_fixed_light" />
-    <public name="removed_system_secondary_fixed_dim_light" />
-    <public name="removed_system_on_secondary_fixed_light" />
-    <public name="removed_system_on_secondary_fixed_variant_light" />
-    <public name="removed_system_tertiary_fixed_light" />
-    <public name="removed_system_tertiary_fixed_dim_light" />
-    <public name="removed_system_on_tertiary_fixed_light" />
-    <public name="removed_system_on_tertiary_fixed_variant_light" />
-    <public name="system_control_activated_light" />
-    <public name="system_control_normal_light" />
-    <public name="system_control_highlight_light" />
-    <public name="system_text_primary_inverse_light" />
-    <public name="system_text_secondary_and_tertiary_inverse_light" />
-    <public name="system_text_primary_inverse_disable_only_light" />
-    <public name="system_text_secondary_and_tertiary_inverse_disabled_light" />
-    <public name="system_text_hint_inverse_light" />
-    <public name="system_palette_key_color_primary_light" />
-    <public name="system_palette_key_color_secondary_light" />
-    <public name="system_palette_key_color_tertiary_light" />
-    <public name="system_palette_key_color_neutral_light" />
-    <public name="system_palette_key_color_neutral_variant_light" />
-    <public name="system_primary_container_dark"/>
-    <public name="system_on_primary_container_dark"/>
-    <public name="system_primary_dark"/>
-    <public name="system_on_primary_dark"/>
-    <public name="system_secondary_container_dark"/>
-    <public name="system_on_secondary_container_dark"/>
-    <public name="system_secondary_dark"/>
-    <public name="system_on_secondary_dark"/>
-    <public name="system_tertiary_container_dark"/>
-    <public name="system_on_tertiary_container_dark"/>
-    <public name="system_tertiary_dark"/>
-    <public name="system_on_tertiary_dark"/>
-    <public name="system_background_dark"/>
-    <public name="system_on_background_dark"/>
-    <public name="system_surface_dark"/>
-    <public name="system_on_surface_dark"/>
-    <public name="system_surface_container_low_dark"/>
-    <public name="system_surface_container_lowest_dark"/>
-    <public name="system_surface_container_dark"/>
-    <public name="system_surface_container_high_dark"/>
-    <public name="system_surface_container_highest_dark"/>
-    <public name="system_surface_bright_dark"/>
-    <public name="system_surface_dim_dark"/>
-    <public name="system_surface_variant_dark"/>
-    <public name="system_on_surface_variant_dark"/>
-    <public name="system_outline_dark"/>
-    <public name="system_error_dark"/>
-    <public name="system_on_error_dark"/>
-    <public name="system_error_container_dark"/>
-    <public name="system_on_error_container_dark"/>
-    <public name="removed_system_primary_fixed_dark"/>
-    <public name="removed_system_primary_fixed_dim_dark"/>
-    <public name="removed_system_on_primary_fixed_dark"/>
-    <public name="removed_system_on_primary_fixed_variant_dark"/>
-    <public name="removed_system_secondary_fixed_dark"/>
-    <public name="removed_system_secondary_fixed_dim_dark"/>
-    <public name="removed_system_on_secondary_fixed_dark"/>
-    <public name="removed_system_on_secondary_fixed_variant_dark"/>
-    <public name="removed_system_tertiary_fixed_dark"/>
-    <public name="removed_system_tertiary_fixed_dim_dark"/>
-    <public name="removed_system_on_tertiary_fixed_dark"/>
-    <public name="removed_system_on_tertiary_fixed_variant_dark"/>
-    <public name="system_control_activated_dark"/>
-    <public name="system_control_normal_dark"/>
-    <public name="system_control_highlight_dark"/>
-    <public name="system_text_primary_inverse_dark"/>
-    <public name="system_text_secondary_and_tertiary_inverse_dark"/>
-    <public name="system_text_primary_inverse_disable_only_dark"/>
-    <public name="system_text_secondary_and_tertiary_inverse_disabled_dark"/>
-    <public name="system_text_hint_inverse_dark"/>
-    <public name="system_palette_key_color_primary_dark"/>
-    <public name="system_palette_key_color_secondary_dark"/>
-    <public name="system_palette_key_color_tertiary_dark"/>
-    <public name="system_palette_key_color_neutral_dark"/>
-    <public name="system_palette_key_color_neutral_variant_dark"/>
-    <public name="system_primary_fixed" />
-    <public name="system_primary_fixed_dim" />
-    <public name="system_on_primary_fixed" />
-    <public name="system_on_primary_fixed_variant" />
-    <public name="system_secondary_fixed" />
-    <public name="system_secondary_fixed_dim" />
-    <public name="system_on_secondary_fixed" />
-    <public name="system_on_secondary_fixed_variant" />
-    <public name="system_tertiary_fixed" />
-    <public name="system_tertiary_fixed_dim" />
-    <public name="system_on_tertiary_fixed" />
-    <public name="system_on_tertiary_fixed_variant" />
-    <public name="system_outline_variant_light" />
-    <public name="system_outline_variant_dark" />
+  <staging-public-group type="color" first-id="0x01b80000">
   </staging-public-group>
 
-  <staging-public-group type="array" first-id="0x01c80000">
+  <staging-public-group type="array" first-id="0x01b70000">
   </staging-public-group>
 
-  <staging-public-group type="drawable" first-id="0x01c70000">
+  <staging-public-group type="drawable" first-id="0x01b60000">
   </staging-public-group>
 
-  <staging-public-group type="layout" first-id="0x01c60000">
+  <staging-public-group type="layout" first-id="0x01b50000">
   </staging-public-group>
 
-  <staging-public-group type="anim" first-id="0x01c50000">
+  <staging-public-group type="anim" first-id="0x01b40000">
   </staging-public-group>
 
-  <staging-public-group type="animator" first-id="0x01c40000">
+  <staging-public-group type="animator" first-id="0x01b30000">
   </staging-public-group>
 
-  <staging-public-group type="interpolator" first-id="0x01c30000">
+  <staging-public-group type="interpolator" first-id="0x01b20000">
   </staging-public-group>
 
-  <staging-public-group type="mipmap" first-id="0x01c20000">
+  <staging-public-group type="mipmap" first-id="0x01b10000">
   </staging-public-group>
 
-  <staging-public-group type="integer" first-id="0x01c10000">
+  <staging-public-group type="integer" first-id="0x01b00000">
   </staging-public-group>
 
-  <staging-public-group type="transition" first-id="0x01c00000">
+  <staging-public-group type="transition" first-id="0x01af0000">
   </staging-public-group>
 
-  <staging-public-group type="raw" first-id="0x01bf0000">
+  <staging-public-group type="raw" first-id="0x01ae0000">
   </staging-public-group>
 
-  <staging-public-group type="bool" first-id="0x01be0000">
-    <!-- @hide @SystemApi -->
-    <public name="config_safetyProtectionEnabled" />
-    <!-- @hide @SystemApi -->
-    <public name="config_enableDefaultNotes" />
-    <!-- @hide @SystemApi -->
-    <public name="config_enableDefaultNotesForWorkProfile" />
+  <staging-public-group type="bool" first-id="0x01ad0000">
   </staging-public-group>
 
-  <staging-public-group type="fraction" first-id="0x01bd0000">
+  <staging-public-group type="fraction" first-id="0x01ac0000">
   </staging-public-group>
 
 </resources>
