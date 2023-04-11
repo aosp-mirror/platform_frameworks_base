@@ -577,7 +577,9 @@ class ProcessRecord implements WindowProcessListener {
         processName = _processName;
         sdkSandboxClientAppPackage = _sdkSandboxClientAppPackage;
         if (isSdkSandbox) {
-            sdkSandboxClientAppVolumeUuid = getClientInfoForSdkSandbox().volumeUuid;
+            final ApplicationInfo clientInfo = getClientInfoForSdkSandbox();
+            sdkSandboxClientAppVolumeUuid = clientInfo != null
+                    ? clientInfo.volumeUuid : null;
         } else {
             sdkSandboxClientAppVolumeUuid = null;
         }
