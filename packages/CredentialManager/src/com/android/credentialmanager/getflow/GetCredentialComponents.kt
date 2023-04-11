@@ -66,6 +66,7 @@ import com.android.credentialmanager.common.ui.HeadlineIcon
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.logging.GetCredentialEvent
+import com.android.credentialmanager.userAndDisplayNameForPasskey
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 @Composable
@@ -457,6 +458,10 @@ fun CredentialEntryRow(
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
+    val (username, displayName) = if (credentialEntryInfo.credentialType == CredentialType.PASSKEY)
+        userAndDisplayNameForPasskey(
+            credentialEntryInfo.userName, credentialEntryInfo.displayName ?: "")
+    else Pair(credentialEntryInfo.userName, credentialEntryInfo.displayName)
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
         iconImageBitmap = credentialEntryInfo.icon?.toBitmap()?.asImageBitmap(),
@@ -465,13 +470,13 @@ fun CredentialEntryRow(
         iconPainter =
         if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
-        entryHeadlineText = credentialEntryInfo.userName,
+        entryHeadlineText = username,
         entrySecondLineText = if (
             credentialEntryInfo.credentialType == CredentialType.PASSWORD) {
             "••••••••••••"
         } else {
             val itemsToDisplay = listOf(
-                credentialEntryInfo.displayName,
+                displayName,
                 credentialEntryInfo.credentialTypeDisplayName,
                 credentialEntryInfo.providerDisplayName
             ).filterNot(TextUtils::isEmpty)
