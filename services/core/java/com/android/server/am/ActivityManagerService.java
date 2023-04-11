@@ -368,7 +368,6 @@ import android.util.FeatureFlagUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Log;
-import android.util.LogWriter;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -6181,8 +6180,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final ProcessServiceRecord psr = pr.mServices;
         if (psr != null && psr.hasForegroundServices()) {
-            for (int s = psr.numberOfExecutingServices() - 1; s >= 0; --s) {
-                final ServiceRecord sr = psr.getExecutingServiceAt(s);
+            for (int s = psr.numberOfRunningServices() - 1; s >= 0; --s) {
+                final ServiceRecord sr = psr.getRunningServiceAt(s);
                 if (sr.isForeground && sr.mAllowUiJobScheduling) {
                     return true;
                 }
@@ -6197,12 +6196,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
      */
     // TODO(262260570): log allow reason to an atom
-    private boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName) {
-        return canScheduleUserInitiatedJobs(uid, pid, pkgName, false);
-    }
-
-    boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName,
-            boolean skipWhileInUseCheck) {
+    boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName) {
         synchronized (this) {
             final ProcessRecord processRecord;
             synchronized (mPidsSelfLocked) {
@@ -6232,7 +6226,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // As of Android UDC, the conditions required to grant a while-in-use permission
             // covers the majority of those cases, and so we piggyback on that logic as the base.
             // Missing cases are added after.
-            if (!skipWhileInUseCheck && mServices.canAllowWhileInUsePermissionInFgsLocked(
+            if (mServices.canAllowWhileInUsePermissionInFgsLocked(
                     pid, uid, pkgName, processRecord, backgroundStartPrivileges)) {
                 return true;
             }
