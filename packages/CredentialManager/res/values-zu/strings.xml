@@ -53,12 +53,13 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Sebenzisa ukungena kwakho ngemvume okulondoloziwe <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Khetha ukungena ngemvume okulondoloziwe kwakho <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Khetha ongakhetha kukho kwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
-    <skip />
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Sebenzisa lolu lwazi ku-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Ngena ngemvume ngenye indlela"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Buka okungakhethwa kukho"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Qhubeka"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Okungakhethwa kukho kokungena ngemvume"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Okuka-<xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Abaphathi bephasiwedi abakhiyiwe"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Thepha ukuze uvule"</string>

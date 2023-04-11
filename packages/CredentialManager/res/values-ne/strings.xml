@@ -52,14 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"आफूले सेभ गरेको पासकी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"आफूले सेभ गरेको साइन इनसम्बन्धी जानकारी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि सेभ गरिएका साइन इनसम्बन्धी जानकारी छनौट गर्नुहोस्"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन गर्न प्रयोग गरिने क्रिडेन्सियल छनौट गर्ने हो?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन गर्न गर्नका निम्ति यो जानकारी प्रयोग गर्ने हो?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"अर्कै विधि प्रयोग गरी साइन इन गर्नुहोस्"</string>
     <string name="snackbar_action" msgid="37373514216505085">"विकल्पहरू हेर्नुहोस्"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"जारी राख्नुहोस्"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन‍ इनसम्बन्धी विकल्पहरू"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> का लागि"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"लक गरिएका पासवर्ड म्यानेजरहरू"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"अनलक गर्न ट्याप गर्नुहोस्"</string>

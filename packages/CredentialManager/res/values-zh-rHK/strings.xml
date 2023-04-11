@@ -53,12 +53,13 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"要使用已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資料嗎？"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"選擇已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資料"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"要選擇適用於「<xliff:g id="APP_NAME">%1$s</xliff:g>」的項目嗎？"</string>
-    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
-    <skip />
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"要在「<xliff:g id="APP_NAME">%1$s</xliff:g>」上使用這些資料嗎？"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"使用其他方式登入"</string>
     <string name="snackbar_action" msgid="37373514216505085">"查看選項"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"繼續"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"登入選項"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> 專用"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"已鎖定的密碼管理工具"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"輕按即可解鎖"</string>

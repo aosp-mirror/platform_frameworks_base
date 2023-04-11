@@ -53,12 +53,13 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Vuoi usare l\'accesso salvato per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Scegli un accesso salvato per <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Vuoi scegliere un\'opzione per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
-    <skip />
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Vuoi usare questi dati su <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Accedi in un altro modo"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Visualizza opzioni"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continua"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opzioni di accesso"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Per <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Gestori delle password bloccati"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Tocca per sbloccare"</string>
