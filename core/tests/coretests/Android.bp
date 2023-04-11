@@ -51,7 +51,7 @@ android_test {
         "junit-params",
         "kotlin-test",
         "mockito-target-minus-junit4",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "platform-test-annotations",
         "platform-compat-test-rules",
         "truth-prebuilt",
