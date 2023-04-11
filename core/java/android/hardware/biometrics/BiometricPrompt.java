@@ -142,6 +142,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         private PromptInfo mPromptInfo;
         private ButtonInfo mNegativeButtonInfo;
         private Context mContext;
+        private IAuthService mService;
 
         /**
          * Creates a builder for a {@link BiometricPrompt} dialog.
@@ -208,6 +209,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public Builder setDescription(@NonNull CharSequence description) {
             mPromptInfo.setDescription(description);
+            return this;
+        }
+
+        /**
+         * @param service
+         * @return This builder.
+         * @hide
+         */
+        @RequiresPermission(TEST_BIOMETRIC)
+        @NonNull
+        public Builder setService(@NonNull IAuthService service) {
+            mService = service;
             return this;
         }
 
@@ -472,7 +485,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 throw new IllegalArgumentException("Can't have both negative button behavior"
                         + " and device credential enabled");
             }
-            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo);
+            mService = (mService == null) ? IAuthService.Stub.asInterface(
+                    ServiceManager.getService(Context.AUTH_SERVICE)) : mService;
+            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo, mService);
         }
     }
 
@@ -521,7 +536,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         public void onAuthenticationFailed() {
             mExecutor.execute(() -> {
                 mAuthenticationCallback.onAuthenticationFailed();
-                mIsPromptShowing = false;
             });
         }
 
@@ -604,12 +618,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
     private boolean mIsPromptShowing;
 
-    private BiometricPrompt(Context context, PromptInfo promptInfo, ButtonInfo negativeButtonInfo) {
+    private BiometricPrompt(Context context, PromptInfo promptInfo, ButtonInfo negativeButtonInfo,
+            IAuthService service) {
         mContext = context;
         mPromptInfo = promptInfo;
         mNegativeButtonInfo = negativeButtonInfo;
-        mService = IAuthService.Stub.asInterface(
-                ServiceManager.getService(Context.AUTH_SERVICE));
+        mService = service;
         mIsPromptShowing = false;
     }
 
