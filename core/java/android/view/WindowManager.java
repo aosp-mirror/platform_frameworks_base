@@ -877,7 +877,7 @@ public interface WindowManager extends ViewManager {
      * &lt;application&gt;
      *   &lt;property
      *     android:name=
-     *       "android.window.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED"
+     *       "android.window.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED"
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
@@ -885,8 +885,8 @@ public interface WindowManager extends ViewManager {
      * @hide
      */
     // TODO(b/274924641): Make this public API.
-    String PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
-            "android.window.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED";
+    String PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
+            "android.window.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED";
 
     /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager
