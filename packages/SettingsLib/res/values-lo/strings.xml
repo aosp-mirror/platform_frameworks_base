@@ -490,7 +490,7 @@
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ຄວບຄຸມໂດຍການຕັ້ງຄ່າທີ່ຈຳກັດໄວ້"</string>
     <string name="disabled" msgid="8017887509554714950">"ປິດການນຳໃຊ້"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ອະນຸຍາດແລ້ວ"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"ບໍ່ອະນຸຍາດແລ້ວ"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"ບໍ່ອະນຸຍາດ"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"ຕິດຕັ້ງແອັບທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="home" msgid="973834627243661438">"ໜ້າທຳອິດຂອງການຕັ້ງຄ່າ"</string>
   <string-array name="battery_labels">
