@@ -29,18 +29,23 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMob
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
  * View model for describing the system's current mobile cellular connections. The result is a list
  * of [MobileIconViewModel]s which describe the individual icons and can be bound to
- * [ModernStatusBarMobileView]
+ * [ModernStatusBarMobileView].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
+@SysUISingleton
 class MobileIconsViewModel
 @Inject
 constructor(
-    val subscriptionIdsFlow: StateFlow<List<Int>>,
     val logger: MobileViewLogger,
     private val verboseLogger: VerboseMobileViewLogger,
     private val interactor: MobileIconsInteractor,
@@ -50,6 +55,13 @@ constructor(
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     @VisibleForTesting val mobileIconSubIdCache = mutableMapOf<Int, MobileIconViewModel>()
+
+    val subscriptionIdsFlow: StateFlow<List<Int>> =
+        interactor.filteredSubscriptions
+            .mapLatest { subscriptions ->
+                subscriptions.map { subscriptionModel -> subscriptionModel.subscriptionId }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
 
     init {
         scope.launch { subscriptionIdsFlow.collect { removeInvalidModelsFromCache(it) } }
@@ -78,31 +90,5 @@ constructor(
     private fun removeInvalidModelsFromCache(subIds: List<Int>) {
         val subIdsToRemove = mobileIconSubIdCache.keys.filter { !subIds.contains(it) }
         subIdsToRemove.forEach { mobileIconSubIdCache.remove(it) }
-    }
-
-    @SysUISingleton
-    class Factory
-    @Inject
-    constructor(
-        private val logger: MobileViewLogger,
-        private val verboseLogger: VerboseMobileViewLogger,
-        private val interactor: MobileIconsInteractor,
-        private val airplaneModeInteractor: AirplaneModeInteractor,
-        private val constants: ConnectivityConstants,
-        @Application private val scope: CoroutineScope,
-        private val statusBarPipelineFlags: StatusBarPipelineFlags,
-    ) {
-        fun create(subscriptionIdsFlow: StateFlow<List<Int>>): MobileIconsViewModel {
-            return MobileIconsViewModel(
-                subscriptionIdsFlow,
-                logger,
-                verboseLogger,
-                interactor,
-                airplaneModeInteractor,
-                constants,
-                scope,
-                statusBarPipelineFlags,
-            )
-        }
     }
 }

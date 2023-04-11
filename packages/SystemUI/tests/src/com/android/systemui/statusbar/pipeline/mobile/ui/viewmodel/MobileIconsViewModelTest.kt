@@ -32,9 +32,8 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -69,14 +68,8 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                 FakeConnectivityRepository(),
             )
 
-        val subscriptionIdsFlow =
-            interactor.filteredSubscriptions
-                .map { subs -> subs.map { it.subscriptionId } }
-                .stateIn(testScope.backgroundScope, SharingStarted.WhileSubscribed(), listOf())
-
         underTest =
             MobileIconsViewModel(
-                subscriptionIdsFlow,
                 logger,
                 verboseLogger,
                 interactor,
@@ -88,6 +81,32 @@ class MobileIconsViewModelTest : SysuiTestCase() {
 
         interactor.filteredSubscriptions.value = listOf(SUB_1, SUB_2)
     }
+
+    @Test
+    fun subscriptionIdsFlow_matchesInteractor() =
+        testScope.runTest {
+            var latest: List<Int>? = null
+            val job = underTest.subscriptionIdsFlow.onEach { latest = it }.launchIn(this)
+
+            interactor.filteredSubscriptions.value =
+                listOf(
+                    SubscriptionModel(subscriptionId = 1, isOpportunistic = false),
+                )
+            assertThat(latest).isEqualTo(listOf(1))
+
+            interactor.filteredSubscriptions.value =
+                listOf(
+                    SubscriptionModel(subscriptionId = 2, isOpportunistic = false),
+                    SubscriptionModel(subscriptionId = 5, isOpportunistic = true),
+                    SubscriptionModel(subscriptionId = 7, isOpportunistic = true),
+                )
+            assertThat(latest).isEqualTo(listOf(2, 5, 7))
+
+            interactor.filteredSubscriptions.value = emptyList()
+            assertThat(latest).isEmpty()
+
+            job.cancel()
+        }
 
     @Test
     fun `caching - mobile icon view model is reused for same sub id`() =
