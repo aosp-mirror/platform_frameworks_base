@@ -61,20 +61,20 @@ class AppOpService(
 
     @VisibleForTesting
     override fun writeState() {
-        // TODO Not yet implemented
+        // Not implemented because writes are handled automatically.
     }
 
     override fun readState() {
-        // TODO Not yet implemented
+        // Not implemented because reads are handled automatically.
     }
 
     @VisibleForTesting
     override fun shutdown() {
-        // TODO Not yet implemented
+        // Not implemented because writes are handled automatically.
     }
 
     override fun systemReady() {
-        // TODO Not yet implemented
+        // Not implemented because upgrades are handled automatically.
     }
 
     override fun getNonDefaultUidModes(uid: Int): SparseIntArray {

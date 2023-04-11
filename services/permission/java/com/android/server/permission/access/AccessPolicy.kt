@@ -173,7 +173,6 @@ class AccessPolicy private constructor(
         packageName: String
     ) {
         val packageState = packageStates[packageName]
-        // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
         checkNotNull(packageState) {
             "Added package $packageName isn't found in packageStates in onPackageAdded()"
         }
@@ -208,7 +207,6 @@ class AccessPolicy private constructor(
         packageName: String,
         appId: Int
     ) {
-        // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
         check(packageName !in packageStates) {
             "Removed package $packageName is still in packageStates in onPackageRemoved()"
         }
@@ -253,7 +251,6 @@ class AccessPolicy private constructor(
             setKnownPackages(knownPackages)
         }
         val packageState = packageStates[packageName]
-        // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
         checkNotNull(packageState) {
             "Installed package $packageName isn't found in packageStates in onPackageInstalled()"
         }
