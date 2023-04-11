@@ -441,7 +441,6 @@ import android.util.AtomicFile;
 import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -13131,19 +13130,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         int userId = caller.getUserId();
 
-        if (!UserRestrictionsUtils.isValidRestriction(key)) {
-            return;
-        }
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
 
         if (isPolicyEngineForFinanceFlagEnabled()) {
-            int affectedUserId = parent ? getProfileParentId(userId) : userId;
-            EnforcingAdmin admin = enforcePermissionForUserRestriction(
-                    who,
-                    key,
-                    caller.getPackageName(),
-                    affectedUserId);
-            if (mInjector.isChangeEnabled(ENABLE_COEXISTENCE_CHANGE, callerPackage, userId)) {
+            if (!isDeviceOwner(caller) && !isProfileOwner(caller)) {
+                if (!mInjector.isChangeEnabled(ENABLE_COEXISTENCE_CHANGE, callerPackage, userId)) {
+                    throw new IllegalStateException("Calling package is not targeting Android U.");
+                }
+                if (!UserRestrictionsUtils.isValidRestriction(key)) {
+                    throw new IllegalArgumentException("Invalid restriction key: " + key);
+                }
+                int affectedUserId = parent ? getProfileParentId(userId) : userId;
+                EnforcingAdmin admin = enforcePermissionForUserRestriction(
+                        who,
+                        key,
+                        caller.getPackageName(),
+                        affectedUserId);
                 PolicyDefinition<Boolean> policyDefinition =
                         PolicyDefinition.getPolicyDefinitionForUserRestriction(key);
                 if (enabledFromThisOwner) {
@@ -13155,7 +13157,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         setGlobalUserRestrictionInternal(admin, key, /* enabled= */ false);
                     }
                     if (!policyDefinition.isGlobalOnlyPolicy()) {
-                        setLocalUserRestrictionInternal(admin, key, /* enabled= */ false, userId);
+                        setLocalUserRestrictionInternal(admin, key, /* enabled= */ false,
+                                userId);
 
                         int parentUserId = getProfileParentId(userId);
                         if (parentUserId != userId) {
@@ -13165,49 +13168,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
             } else {
+                if (!UserRestrictionsUtils.isValidRestriction(key)) {
+                    return;
+                }
+                Objects.requireNonNull(who, "ComponentName is null");
+                EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackage);
+                checkAdminCanSetRestriction(caller, parent, key);
                 setBackwardCompatibleUserRestriction(
                         caller, admin, key, enabledFromThisOwner, parent);
             }
         } else {
+            if (!UserRestrictionsUtils.isValidRestriction(key)) {
+                return;
+            }
             Objects.requireNonNull(who, "ComponentName is null");
-            if (parent) {
-                Preconditions.checkCallAuthorization(
-                        isProfileOwnerOfOrganizationOwnedDevice(caller));
-            } else {
-                Preconditions.checkCallAuthorization(
-                        isDeviceOwner(caller) || isProfileOwner(caller));
-            }
-            synchronized (getLockObject()) {
-                if (isDefaultDeviceOwner(caller)) {
-                    if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
-                        throw new SecurityException("Device owner cannot set user restriction "
-                                + key);
-                    }
-                    Preconditions.checkArgument(!parent,
-                            "Cannot use the parent instance in Device Owner mode");
-                } else if (isFinancedDeviceOwner(caller)) {
-                    if (!UserRestrictionsUtils.canFinancedDeviceOwnerChange(key)) {
-                        throw new SecurityException("Cannot set user restriction " + key
-                                + " when managing a financed device");
-                    }
-                    Preconditions.checkArgument(!parent,
-                            "Cannot use the parent instance in Financed Device Owner"
-                                    + " mode");
-                } else {
-                    boolean profileOwnerCanChangeOnItself = !parent
-                            && UserRestrictionsUtils.canProfileOwnerChange(
-                            key, userId == getMainUserId());
-                    boolean orgOwnedProfileOwnerCanChangeGlobally = parent
-                            && isProfileOwnerOfOrganizationOwnedDevice(caller)
-                            && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
-                            key);
-
-                    if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangeGlobally) {
-                        throw new SecurityException("Profile owner cannot set user restriction "
-                                + key);
-                    }
-                }
-            }
+            checkAdminCanSetRestriction(caller, parent, key);
             synchronized (getLockObject()) {
                 final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
                         getProfileOwnerOrDeviceOwnerLocked(userId), parent);
@@ -13224,6 +13199,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         logUserRestrictionCall(key, enabledFromThisOwner, parent, caller);
     }
 
+    private void checkAdminCanSetRestriction(CallerIdentity caller, boolean parent, String key) {
+        if (parent) {
+            Preconditions.checkCallAuthorization(
+                    isProfileOwnerOfOrganizationOwnedDevice(caller));
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isDeviceOwner(caller) || isProfileOwner(caller));
+        }
+        synchronized (getLockObject()) {
+            if (isDefaultDeviceOwner(caller)) {
+                if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
+                    throw new SecurityException("Device owner cannot set user restriction "
+                            + key);
+                }
+                Preconditions.checkArgument(!parent,
+                        "Cannot use the parent instance in Device Owner mode");
+            } else if (isFinancedDeviceOwner(caller)) {
+                if (!UserRestrictionsUtils.canFinancedDeviceOwnerChange(key)) {
+                    throw new SecurityException("Cannot set user restriction " + key
+                            + " when managing a financed device");
+                }
+                Preconditions.checkArgument(!parent,
+                        "Cannot use the parent instance in Financed Device Owner"
+                                + " mode");
+            } else {
+                boolean profileOwnerCanChangeOnItself = !parent
+                        && UserRestrictionsUtils.canProfileOwnerChange(
+                        key, caller.getUserId() == getMainUserId());
+                boolean orgOwnedProfileOwnerCanChangeGlobally = parent
+                        && isProfileOwnerOfOrganizationOwnedDevice(caller)
+                        && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
+                        key);
+
+                if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangeGlobally) {
+                    throw new SecurityException("Profile owner cannot set user restriction "
+                            + key);
+                }
+            }
+        }
+    }
     private void setBackwardCompatibleUserRestriction(
             CallerIdentity caller, EnforcingAdmin admin, String key, boolean enabled,
             boolean parent) {
@@ -13252,19 +13267,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setUserRestrictionGlobally(String callerPackage, String key) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        if (!UserRestrictionsUtils.isValidRestriction(key)) {
-            return;
-        }
 
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
 
         if (!isPolicyEngineForFinanceFlagEnabled()) {
             throw new IllegalStateException("Feature flag is not enabled.");
         }
-
+        if (isDeviceOwner(caller) || isProfileOwner(caller)) {
+            throw new IllegalStateException("Admins are not allowed to call this API.");
+        }
         if (!mInjector.isChangeEnabled(
                 ENABLE_COEXISTENCE_CHANGE, callerPackage, caller.getUserId())) {
             throw new IllegalStateException("Calling package is not targeting Android U.");
+        }
+        if (!UserRestrictionsUtils.isValidRestriction(key)) {
+            throw new IllegalArgumentException("Invalid restriction key: " + key);
         }
 
         EnforcingAdmin admin = enforcePermissionForUserRestriction(
@@ -13416,14 +13433,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int targetUserId = parent
                     ? getProfileParentId(caller.getUserId()) : caller.getUserId();
             EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackage);
-            Bundle restrictions = getUserRestrictionsFromPolicyEngine(admin, targetUserId);
-            // Add global restrictions set by the admin as well if admin is not targeting Android U.
-            if (!mInjector.isChangeEnabled(
-                    ENABLE_COEXISTENCE_CHANGE, callerPackage, caller.getUserId())) {
+            if (isDeviceOwner(caller) || isProfileOwner(caller)) {
+                Objects.requireNonNull(who, "ComponentName is null");
+                Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
+                        || isFinancedDeviceOwner(caller)
+                        || isProfileOwner(caller)
+                        || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
+
+                Bundle restrictions = getUserRestrictionsFromPolicyEngine(admin, targetUserId);
+                // Add global restrictions set by the admin as well.
                 restrictions.putAll(
                         getUserRestrictionsFromPolicyEngine(admin, UserHandle.USER_ALL));
+                return restrictions;
+            } else {
+                if (!mInjector.isChangeEnabled(
+                        ENABLE_COEXISTENCE_CHANGE, callerPackage, caller.getUserId())) {
+                    throw new IllegalStateException("Calling package is not targeting Android U.");
+                }
+                return getUserRestrictionsFromPolicyEngine(admin, targetUserId);
             }
-            return restrictions;
         } else {
             Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
