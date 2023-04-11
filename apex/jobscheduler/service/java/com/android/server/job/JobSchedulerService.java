@@ -3713,26 +3713,22 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public boolean isNotificationAssociatedWithAnyUserInitiatedJobs(int notificationId,
-                int userId, String packageName) {
+                int userId, @NonNull String packageName) {
             if (packageName == null) {
                 return false;
             }
-            synchronized (mLock) {
-                return mConcurrencyManager.isNotificationAssociatedWithAnyUserInitiatedJobs(
-                        notificationId, userId, packageName);
-            }
+            return mConcurrencyManager.isNotificationAssociatedWithAnyUserInitiatedJobs(
+                    notificationId, userId, packageName);
         }
 
         @Override
         public boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
-                String notificationChannel, int userId, String packageName) {
+                @NonNull String notificationChannel, int userId, @NonNull String packageName) {
             if (packageName == null || notificationChannel == null) {
                 return false;
             }
-            synchronized (mLock) {
-                return mConcurrencyManager.isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
-                        notificationChannel, userId, packageName);
-            }
+            return mConcurrencyManager.isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+                    notificationChannel, userId, packageName);
         }
 
         @Override
