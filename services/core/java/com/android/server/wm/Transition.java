@@ -287,7 +287,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         if (restoreBelow != null) {
             final Task transientRootTask = activity.getRootTask();
-            // Collect all visible activities which can be occluded by the transient activity to
+            // Collect all visible tasks which can be occluded by the transient activity to
             // make sure they are in the participants so their visibilities can be updated when
             // finishing transition.
             ((WindowContainer<?>) restoreBelow.getParent()).forAllTasks(t -> {
@@ -297,11 +297,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         mTransientHideTasks.add(t);
                     }
                     if (t.isLeafTask()) {
-                        t.forAllActivities(r -> {
-                            if (r.isVisibleRequested()) {
-                                collect(r);
-                            }
-                        });
+                        collect(t);
                     }
                 }
                 return t == restoreBelow;
@@ -904,6 +900,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mFinishingTransition = this;
 
         if (mTransientHideTasks != null && !mTransientHideTasks.isEmpty()) {
+            // Record all the now-hiding activities so that they are committed after
+            // recalculating visibilities. We just use mParticipants because we can and it will
+            // ensure proper reporting of `isInFinishTransition`.
+            for (int i = 0; i < mTransientHideTasks.size(); ++i) {
+                mTransientHideTasks.get(i).forAllActivities(r -> {
+                    // Only check leaf-tasks that were collected
+                    if (!mParticipants.contains(r.getTask())) return;
+                    // Only concern ourselves with anything that can become invisible
+                    if (!r.isVisible()) return;
+                    mParticipants.add(r);
+                });
+            }
             // The transient hide tasks could be occluded now, e.g. returning to home. So trigger
             // the update to make the activities in the tasks invisible-requested, then the next
             // step can continue to commit the visibility.
@@ -953,7 +961,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         enterAutoPip = true;
                     }
                 }
-                if (mChanges.get(ar).mVisible != visibleAtTransitionEnd) {
+                final ChangeInfo changeInfo = mChanges.get(ar);
+                // Due to transient-hide, there may be some activities here which weren't in the
+                // transition.
+                if (changeInfo != null && changeInfo.mVisible != visibleAtTransitionEnd) {
                     // Legacy dispatch relies on this (for now).
                     ar.mEnteringAnimation = visibleAtTransitionEnd;
                 } else if (mTransientLaunches != null && mTransientLaunches.containsKey(ar)
