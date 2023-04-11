@@ -463,7 +463,8 @@ public final class BroadcastQueueModernImplTest {
         assertEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
 
         // Bumping past barrier makes us now runnable
-        airplaneRecord.terminalCount++;
+        airplaneRecord.setDeliveryState(0, BroadcastRecord.DELIVERY_DELIVERED,
+                "testRunnableAt_Ordered");
         queue.invalidateRunnableAt();
         assertTrue(queue.isRunnable());
         assertNotEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
