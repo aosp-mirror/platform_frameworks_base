@@ -162,7 +162,6 @@
 
     <!-- Window magnification colors -->
     <color name="magnification_border_color">#F29900</color>
-    <color name="magnification_switch_button_color">#7F000000</color>
     <color name="magnification_drag_corner_background">#E5FFFFFF</color>
     <color name="magnification_drag_handle_stroke">#000000</color>
     <color name="magnification_drag_handle_background_change">#111111</color>
@@ -206,6 +205,7 @@
     <color name="control_thumbnail_tint">#33000000</color>
     <color name="control_thumbnail_shadow_color">@*android:color/black</color>
     <color name="controls_task_view_bg">#CC191C1D</color>
+    <color name="control_popup_dim">#8A000000</color>
 
     <!-- Keyboard backlight indicator-->
     <color name="backlight_indicator_step_filled">#F6E388</color>

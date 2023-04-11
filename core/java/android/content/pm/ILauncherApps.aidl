@@ -38,6 +38,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.ParcelFileDescriptor;
+import android.window.IDumpCallback;
 
 import com.android.internal.infra.AndroidFuture;
 
@@ -116,4 +117,10 @@ interface ILauncherApps {
     String getShortcutIconUri(String callingPackage, String packageName, String shortcutId,
             int userId);
     Map<String, LauncherActivityInfoInternal> getActivityOverrides(String callingPackage, int userId);
+
+    /** Register a callback to be called right before the wmtrace data is moved to the bugreport. */
+    void registerDumpCallback(IDumpCallback cb);
+
+    /** Unregister a callback, so that it won't be called when LauncherApps dumps. */
+    void unRegisterDumpCallback(IDumpCallback cb);
 }

@@ -54,6 +54,19 @@ public final class Histogram {
                 /*count*/ 1, binIndex);
     }
 
+    /**
+     * Logs increment sample count for automatically calculated bin
+     *
+     * @param uid used as a dimension for the count metric
+     * @param sample value
+     * @hide
+     */
+    public void logSampleWithUid(int uid, float sample) {
+        final int binIndex = mBinOptions.getBinForSample(sample);
+        FrameworkStatsLog.write(FrameworkStatsLog.EXPRESS_UID_HISTOGRAM_SAMPLE_REPORTED,
+                mMetricIdHash, /*count*/ 1, binIndex, uid);
+    }
+
     /** Used by Histogram to map data sample to corresponding bin */
     public interface BinOptions {
         /**

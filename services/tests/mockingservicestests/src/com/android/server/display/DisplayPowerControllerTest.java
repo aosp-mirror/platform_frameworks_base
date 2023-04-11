@@ -809,7 +809,7 @@ public final class DisplayPowerControllerTest {
         when(logicalDisplayMock.getDisplayInfoLocked()).thenReturn(info);
         when(logicalDisplayMock.isEnabledLocked()).thenReturn(isEnabled);
         when(logicalDisplayMock.isInTransitionLocked()).thenReturn(false);
-        when(logicalDisplayMock.getBrightnessThrottlingDataIdLocked()).thenReturn(
+        when(logicalDisplayMock.getThermalBrightnessThrottlingDataIdLocked()).thenReturn(
                 DisplayDeviceConfig.DEFAULT_ID);
         when(displayDeviceMock.getDisplayDeviceInfoLocked()).thenReturn(deviceInfo);
         when(displayDeviceMock.getUniqueId()).thenReturn(uniqueId);

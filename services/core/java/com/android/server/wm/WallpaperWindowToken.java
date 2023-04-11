@@ -76,7 +76,7 @@ class WallpaperWindowToken extends WindowToken {
             return;
         }
         mShowWhenLocked = showWhenLocked;
-        if (mDisplayContent.mWallpaperController.mEnableSeparateLockScreenEngine) {
+        if (mDisplayContent.mWallpaperController.mIsLockscreenLiveWallpaperEnabled) {
             // Move the window token to the front (private) or back (showWhenLocked). This is
             // possible
             // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER

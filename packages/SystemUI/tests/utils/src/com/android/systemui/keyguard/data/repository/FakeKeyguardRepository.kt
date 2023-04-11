@@ -129,6 +129,10 @@ class FakeKeyguardRepository : KeyguardRepository {
         _isKeyguardShowing.value = isShowing
     }
 
+    fun setKeyguardGoingAway(isGoingAway: Boolean) {
+        _isKeyguardGoingAway.value = isGoingAway
+    }
+
     fun setKeyguardOccluded(isOccluded: Boolean) {
         _isKeyguardOccluded.value = isOccluded
     }

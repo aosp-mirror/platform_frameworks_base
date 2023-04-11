@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"ୱାଇ-ଫାଇ"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ୱାଇଫାଇ କଲିଂ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"ୱାଇଫାଇ କଲ"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ବନ୍ଦ ଅଛି"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ମୋବାଇଲ ନେଟ୍‌ୱର୍କ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
@@ -250,7 +249,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"ଜରୁରୀକାଳୀନ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ସେସନ୍‍ ଶେଷ କରନ୍ତୁ"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ୍‌"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ଇ-ମେଲ୍ ମେସେଜ୍‍ ଭାବରେ ପଠାଇବାକୁ, ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଡିଭାଇସ୍‌ ବିଷୟରେ ଏହା ସୂଚନା ସଂଗ୍ରହ କରିବ। ବଗ୍ ରିପୋର୍ଟ ଆରମ୍ଭ ହେବାପରଠାରୁ ଏହାକୁ ପଠାଇବା ପାଇଁ କିଛି ସମୟ ଲାଗିବ, ଦୟାକରି ଧୈର୍ଯ୍ୟ ରଖନ୍ତୁ।"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ଇଣ୍ଟରାକ୍ଟିଭ୍‍ ରିପୋର୍ଟ"</string>
@@ -801,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"କୌଣସି ଆପ ପାଇଁ ଫିଚରଗୁଡ଼ିକ ବିଷୟରେ ସୂଚନା ଦେଖିବା ଆରମ୍ଭ କରିବାକୁ ହୋଲଡରଙ୍କୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ଏକ ଉଚ୍ଚ ନମୁନାକରଣ ରେଟରେ ସେନ୍ସର୍ ଡାଟାକୁ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ଠାରୁ ଅଧିକ ଏକ ରେଟରେ ସେନ୍ସର୍ ଡାଟାର ନମୁନା ନେବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ପାସ୍‌ୱର୍ଡ ନିୟମାବଳୀ ସେଟ୍ କରନ୍ତୁ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ପାସ୍‌ୱର୍ଡ ଓ PINରେ ଅନୁମୋଦିତ ଦୀର୍ଘତା ଓ ବର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ସ୍କ୍ରୀନ୍-ଅନଲକ୍ କରିବା ଉଦ୍ୟମ ନୀରିକ୍ଷଣ କରନ୍ତୁ"</string>
@@ -2325,12 +2328,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ବିଷୟବସ୍ତୁ ଦେଖାଇବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଉଭୟ ଡିସପ୍ଲେକୁ ବ୍ୟବହାର କରୁଛି"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ଡିଭାଇସ ବହୁତ ଗରମ ଅଛି"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ଆପଣଙ୍କ ଫୋନ ବହୁତ ଗରମ ହେଉଥିବା ଯୋଗୁଁ ଡୁଆଲ ସ୍କ୍ରିନ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ଡୁଆଲ ସ୍କ୍ରିନ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ବେଟେରୀ ସେଭର ଚାଲୁ ଥିବା ଯୋଗୁଁ ଡୁଆଲ ସ୍କ୍ରିନ ଉପଲବ୍ଧ ନାହିଁ। ଆପଣ ସେଟିଂସରେ ଏହାକୁ ବନ୍ଦ କରିପାରିବେ।"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ସେଟିଂସକୁ ଯାଆନ୍ତୁ"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>କୁ କନଫିଗର କରାଯାଇଛି"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"କୀବୋର୍ଡ ଲେଆଉଟକୁ <xliff:g id="LAYOUT_1">%s</xliff:g>ରେ ସେଟ କରାଯାଇଛି। ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>

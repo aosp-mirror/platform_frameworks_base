@@ -98,14 +98,24 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     // region handleSystemKey
     @Test
     fun handleSystemKey_receiveValidSystemKey_shouldShowNoteTask() {
-        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL)
+        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent(KeyEvent.ACTION_DOWN,
+                KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL))
 
         verify(controller).showNoteTask(entryPoint = NoteTaskEntryPoint.TAIL_BUTTON)
     }
 
     @Test
+    fun handleSystemKey_receiveKeyboardShortcut_shouldShowNoteTask() {
+        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent(0, 0, KeyEvent.ACTION_DOWN,
+                KeyEvent.KEYCODE_N, 0, KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON))
+
+        verify(controller).showNoteTask(entryPoint = NoteTaskEntryPoint.KEYBOARD_SHORTCUT)
+    }
+    
+    @Test
     fun handleSystemKey_receiveInvalidSystemKey_shouldDoNothing() {
-        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent.KEYCODE_UNKNOWN)
+        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent(KeyEvent.ACTION_DOWN,
+                KeyEvent.KEYCODE_UNKNOWN))
 
         verifyZeroInteractions(controller)
     }

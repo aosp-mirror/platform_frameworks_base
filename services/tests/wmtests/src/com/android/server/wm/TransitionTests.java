@@ -1415,6 +1415,8 @@ public class TransitionTests extends WindowTestsBase {
         final Transition.ChangeInfo activity1ChangeInfo = closeTransition.mChanges.get(activity1);
         assertNotNull(activity1ChangeInfo);
         assertTrue(activity1ChangeInfo.hasChanged());
+        // No need to wait for the activity in transient hide task.
+        assertTrue(activity1.isSyncFinished());
 
         activity1.setVisibleRequested(false);
         activity2.setVisibleRequested(true);
@@ -1881,6 +1883,39 @@ public class TransitionTests extends WindowTestsBase {
         // ChangeInfo#mCommonAncestor should be set after reparent.
         final Transition.ChangeInfo change = transition.mChanges.get(activity);
         assertEquals(newParent.getDisplayArea(), change.mCommonAncestor);
+    }
+
+    @Test
+    public void testMoveToTopWhileVisible() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        // Start with taskB on top and taskA on bottom but both visible.
+        final Task rootTaskA = createTask(mDisplayContent);
+        final Task leafTaskA = createTaskInRootTask(rootTaskA, 0 /* userId */);
+        final Task taskB = createTask(mDisplayContent);
+        leafTaskA.setVisibleRequested(true);
+        taskB.setVisibleRequested(true);
+        // manually collect since this is a test transition and not known by transitionController.
+        transition.collect(leafTaskA);
+        rootTaskA.moveToFront("test", leafTaskA);
+
+        // All the tasks were already visible, so there shouldn't be any changes
+        ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
+                participants, changes);
+        assertTrue(targets.isEmpty());
+
+        // After collecting order changes, it should recognize that a task moved to top.
+        transition.collectOrderChanges();
+        targets = Transition.calculateTargets(participants, changes);
+        assertEquals(1, targets.size());
+
+        // Make sure the flag is set
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, mMockT);
+        assertTrue((info.getChanges().get(0).getFlags() & TransitionInfo.FLAG_MOVED_TO_TOP) != 0);
+        assertEquals(TRANSIT_CHANGE, info.getChanges().get(0).getMode());
     }
 
     private static void makeTaskOrganized(Task... tasks) {

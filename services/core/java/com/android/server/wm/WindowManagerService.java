@@ -88,7 +88,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
@@ -526,6 +525,16 @@ public class WindowManagerService extends IWindowManager.Stub
     // Indicates whether the Assistant should show on top of the Dream (respectively, above
     // everything else on screen). Otherwise, it will be put under always-on-top stacks.
     final boolean mAssistantOnTopOfDream;
+
+    /**
+     * If true, don't relaunch the activity upon receiving a configuration change to transition to
+     * or from the {@link UI_MODE_TYPE_DESK} uiMode, which is sent when docking. The configuration
+     * change will still be sent regardless, only the relaunch is skipped. Apps with desk resources
+     * are exempt from this and will behave like normal, since they may expect the relaunch upon the
+     * desk uiMode change.
+     */
+    @VisibleForTesting
+    boolean mSkipActivityRelaunchWhenDocking;
 
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
@@ -1176,6 +1185,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
+        mSkipActivityRelaunchWhenDocking = context.getResources()
+                .getBoolean(R.bool.config_skipActivityRelaunchWhenDocking);
 
         mLetterboxConfiguration = new LetterboxConfiguration(
                 // Using SysUI context to have access to Material colors extracted from Wallpaper.
@@ -7076,6 +7087,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
+        mContext.enforceCallingOrSelfPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
+                "requestAppKeyboardShortcuts");
+
         try {
             WindowState focusedWindow = getFocusedWindow();
             if (focusedWindow != null && focusedWindow.mClient != null) {
@@ -8522,13 +8536,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        // focus-transfer can re-order windows and thus potentially causes visible changes:
-        final Transition transition = mAtmService.getTransitionController()
-                .requestTransitionIfNeeded(TRANSIT_TO_FRONT, task);
         mAtmService.setFocusedTask(task.mTaskId, touchedActivity);
-        if (transition != null) {
-            transition.setReady(task, true /* ready */);
-        }
     }
 
     /**
@@ -8616,7 +8624,8 @@ public class WindowManagerService extends IWindowManager.Stub
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, window,
                             mInputToWindowMap.get(hostInputToken), callingUid, callingPid,
-                            sanitizedType, displayId, focusGrantToken, inputHandleName);
+                            sanitizedType, displayId, focusGrantToken, inputHandleName,
+                            (flags & FLAG_NOT_FOCUSABLE) == 0);
             clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
@@ -8737,6 +8746,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             name = win.toString();
             applicationHandle = win.getApplicationHandle();
+            win.setIsFocusable((flags & FLAG_NOT_FOCUSABLE) == 0);
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
@@ -9014,24 +9024,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.e(TAG, "Embedded window does not belong to the host");
                 return;
             }
-            SurfaceControl.Transaction t = mTransactionFactory.get();
             if (grantFocus) {
-                t.requestFocusTransfer(embeddedWindow.getInputChannelToken(), embeddedWindow.toString(),
-                        hostWindow.mInputChannel.getToken(),
-                        hostWindow.getName(),
-                        hostWindow.getDisplayId()).apply();
+                hostWindow.mInputWindowHandle.setFocusTransferTarget(
+                        embeddedWindow.getInputChannelToken());
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + embeddedWindow,
                         "reason=grantEmbeddedWindowFocus(true)");
             } else {
-                t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), hostWindow.getName(),
-                        embeddedWindow.getInputChannelToken(),
-                        embeddedWindow.toString(),
-                        hostWindow.getDisplayId()).apply();
+                hostWindow.mInputWindowHandle.setFocusTransferTarget(null);
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + hostWindow,
                         "reason=grantEmbeddedWindowFocus(false)");
             }
+            DisplayContent dc = mRoot.getDisplayContent(hostWindow.getDisplayId());
+            if (dc != null) {
+                dc.getInputMonitor().updateInputWindowsLw(true);
+            }
+
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
                     embeddedWindow, grantFocus);
         }
@@ -9306,7 +9315,14 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
-        ScreenCapture.captureLayers(getCaptureArgs(displayId, captureArgs), listener);
+        ScreenCapture.LayerCaptureArgs layerCaptureArgs = getCaptureArgs(displayId, captureArgs);
+        ScreenCapture.captureLayers(layerCaptureArgs, listener);
+
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            // Release the SurfaceControl objects only if the caller is not in system server as no
+            // parcelling occurs in this case.
+            layerCaptureArgs.release();
+        }
     }
 
     @VisibleForTesting

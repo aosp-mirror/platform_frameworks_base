@@ -260,7 +260,7 @@ fun FlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(component: ICompon
                     snapshotLayers
                         .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
                         .toTypedArray()
-                val snapshotRegion = RegionSubject(visibleAreas, this, timestamp)
+                val snapshotRegion = RegionSubject(visibleAreas, timestamp)
                 val appVisibleRegion = it.visibleRegion(component)
                 if (snapshotRegion.region.isNotEmpty) {
                     snapshotRegion.coversExactly(appVisibleRegion.region)
@@ -280,21 +280,28 @@ fun FlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(component: ICompon
  *
  * @param originalLayer
  * ```
+ *
  * Layer that should be visible at the start
+ *
  * @param newLayer Layer that should be visible at the end
  * @param ignoreEntriesWithRotationLayer If entries with a visible rotation layer should be ignored
+ *
  * ```
  *      when checking the transition. If true we will not fail the assertion if a rotation layer is
  *      visible to fill the gap between the [originalLayer] being visible and the [newLayer] being
  *      visible.
  * @param ignoreSnapshot
  * ```
+ *
  * If the snapshot layer should be ignored during the transition
+ *
  * ```
  *     (useful mostly for app launch)
  * @param ignoreSplashscreen
  * ```
+ *
  * If the splashscreen layer should be ignored during the transition.
+ *
  * ```
  *      If true then we will allow for a splashscreen to be shown before the layer is shown,
  *      otherwise we won't and the layer must appear immediately.
@@ -317,8 +324,7 @@ fun FlickerTest.replacesLayer(
             assertion.then().isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
         }
         if (ignoreSplashscreen) {
-            assertion.then().isSplashScreenVisibleFor(
-                    ComponentNameMatcher(newLayer.packageName, className = ""), isOptional = true)
+            assertion.then().isSplashScreenVisibleFor(newLayer, isOptional = true)
         }
 
         assertion.then().isVisible(newLayer)

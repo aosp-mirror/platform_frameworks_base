@@ -495,64 +495,64 @@ public interface WindowManager extends ViewManager {
      * Transition flag: Keyguard is going away, but keeping the notification shade open
      * @hide
      */
-    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE = 0x1;
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE = (1 << 0); // 0x1
 
     /**
      * Transition flag: Keyguard is going away, but doesn't want an animation for it
      * @hide
      */
-    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION = 0x2;
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION = (1 << 1); // 0x2
 
     /**
      * Transition flag: Keyguard is going away while it was showing the system wallpaper.
      * @hide
      */
-    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER = 0x4;
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER = (1 << 2); // 0x4
 
     /**
      * Transition flag: Keyguard is going away with subtle animation.
      * @hide
      */
-    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
-
-    /**
-     * Transition flag: Keyguard is going away to the launcher, and it needs us to clear the task
-     * snapshot of the launcher because it has changed something in the Launcher window.
-     * @hide
-     */
-    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = 0x16;
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = (1 << 3); // 0x8
 
     /**
      * Transition flag: App is crashed.
      * @hide
      */
-    int TRANSIT_FLAG_APP_CRASHED = 0x10;
+    int TRANSIT_FLAG_APP_CRASHED = (1 << 4); // 0x10
 
     /**
      * Transition flag: A window in a new task is being opened behind an existing one in another
      * activity's task.
      * @hide
      */
-    int TRANSIT_FLAG_OPEN_BEHIND = 0x20;
+    int TRANSIT_FLAG_OPEN_BEHIND = (1 << 5); // 0x20
 
     /**
      * Transition flag: The keyguard is locked throughout the whole transition.
      * @hide
      */
-    int TRANSIT_FLAG_KEYGUARD_LOCKED = 0x40;
+    int TRANSIT_FLAG_KEYGUARD_LOCKED = (1 << 6); // 0x40
 
     /**
      * Transition flag: Indicates that this transition is for recents animation.
      * TODO(b/188669821): Remove once special-case logic moves to shell.
      * @hide
      */
-    int TRANSIT_FLAG_IS_RECENTS = 0x80;
+    int TRANSIT_FLAG_IS_RECENTS = (1 << 7); // 0x80
 
     /**
      * Transition flag: Indicates that keyguard should go away with this transition.
      * @hide
      */
-    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY = 0x100;
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY = (1 << 8); // 0x100
+
+    /**
+     * Transition flag: Keyguard is going away to the launcher, and it needs us to clear the task
+     * snapshot of the launcher because it has changed something in the Launcher window.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = (1 << 9); // 0x200
 
     /**
      * @hide
@@ -562,12 +562,12 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
-            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
             TRANSIT_FLAG_KEYGUARD_LOCKED,
             TRANSIT_FLAG_IS_RECENTS,
-            TRANSIT_FLAG_KEYGUARD_GOING_AWAY
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
@@ -867,6 +867,42 @@ public interface WindowManager extends ViewManager {
     // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
+
+    /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app can be opted-out from the compatibility
+     * treatment that avoids {@link android.app.Activity#setRequestedOrientation} loops. The loop
+     * can be trigerred by ignoreRequestedOrientation display setting enabled on the device or
+     * by the landscape natural orientation of the device.
+     *
+     * <p>The system could ignore {@link android.app.Activity#setRequestedOrientation}
+     * call from an app if both of the following conditions are true:
+     * <ul>
+     *     <li>Activity has requested orientation more than 2 times within 1-second timer
+     *     <li>Activity is not letterboxed for fixed orientation
+     * </ul>
+     *
+     * <p>Setting this property to {@code false} informs the system that the app must be
+     * opted-out from the compatibility treatment even if the device manufacturer has opted the app
+     * into the treatment.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name=
+     *       "android.window.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     *
+     * @hide
+     */
+    // TODO(b/274924641): Make this public API.
+    String PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
+            "android.window.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED";
 
     /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager

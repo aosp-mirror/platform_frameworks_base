@@ -95,6 +95,7 @@
     <dimen name="num_pad_key_margin_end">12dp</dimen>
 
     <!-- additional offset for clock switch area items -->
+    <dimen name="small_clock_height">114dp</dimen>
     <dimen name="clock_padding_start">28dp</dimen>
     <dimen name="below_clock_padding_start">32dp</dimen>
     <dimen name="below_clock_padding_end">16dp</dimen>

@@ -280,4 +280,40 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             { "Split shade state changed: split shade ${if (bool1) "enabled" else "disabled"}" }
         )
     }
+
+    fun logNotificationsTopPadding(message: String, padding: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                int1 = padding
+            },
+            { "QSC NotificationsTopPadding $str1: $int1"}
+        )
+    }
+
+    fun logClippingTopBound(message: String, top: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                int1 = top
+            },
+            { "QSC ClippingTopBound $str1: $int1" }
+        )
+    }
+
+    fun logNotificationsClippingTopBound(top: Int, nsslTop: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                int1 = top
+                int2 = nsslTop
+            },
+            { "QSC NotificationsClippingTopBound set to $int1 - $int2" }
+        )
+    }
 }

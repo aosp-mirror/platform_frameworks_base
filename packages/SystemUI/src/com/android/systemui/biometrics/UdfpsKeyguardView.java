@@ -24,6 +24,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -176,7 +177,9 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
         mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
             android.R.attr.textColorPrimary);
-        mBgProtection.setImageDrawable(getContext().getDrawable(R.drawable.fingerprint_bg));
+        final int backgroundColor = Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.colorSurface);
+        mBgProtection.setImageTintList(ColorStateList.valueOf(backgroundColor));
         mLockScreenFp.invalidate(); // updated with a valueCallback
     }
 
@@ -303,7 +306,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
                 lp.width = mSensorBounds.width();
                 lp.height = mSensorBounds.height();
                 RectF relativeToView = getBoundsRelativeToView(new RectF(mSensorBounds));
-                lp.setMargins(
+                lp.setMarginsRelative(
                         (int) relativeToView.left,
                         (int) relativeToView.top,
                         (int) relativeToView.right,

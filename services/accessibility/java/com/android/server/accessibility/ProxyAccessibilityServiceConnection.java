@@ -67,6 +67,7 @@ import java.util.Set;
 public class ProxyAccessibilityServiceConnection extends AccessibilityServiceConnection {
     private static final String LOG_TAG = "ProxyAccessibilityServiceConnection";
 
+    private int mDeviceId;
     private int mDisplayId;
     private List<AccessibilityServiceInfo> mInstalledAndEnabledServices;
 
@@ -74,6 +75,9 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     private int mFocusStrokeWidth;
     /** The color of the focus rectangle */
     private int mFocusColor;
+
+    private int mInteractiveTimeout;
+    private int mNonInteractiveTimeout;
 
     ProxyAccessibilityServiceConnection(
             Context context,
@@ -83,7 +87,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
             AccessibilitySecurityPolicy securityPolicy,
             SystemSupport systemSupport, AccessibilityTrace trace,
             WindowManagerInternal windowManagerInternal,
-            AccessibilityWindowManager awm, int displayId) {
+            AccessibilityWindowManager awm, int displayId, int deviceId) {
         super(/* userState= */null, context, componentName, accessibilityServiceInfo, id,
                 mainHandler, lock, securityPolicy, systemSupport, trace, windowManagerInternal,
                 /* systemActionPerformer= */ null, awm, /* activityTaskManagerService= */ null);
@@ -93,6 +97,14 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
                 R.dimen.accessibility_focus_highlight_stroke_width);
         mFocusColor = mContext.getResources().getColor(
                 R.color.accessibility_focus_highlight_color);
+        mDeviceId = deviceId;
+    }
+
+    int getDisplayId() {
+        return mDisplayId;
+    }
+    int getDeviceId() {
+        return mDeviceId;
     }
 
     /**
@@ -155,6 +167,8 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
                 proxyInfo.setAccessibilityTool(isAccessibilityTool);
                 proxyInfo.setInteractiveUiTimeoutMillis(interactiveUiTimeout);
                 proxyInfo.setNonInteractiveUiTimeoutMillis(nonInteractiveUiTimeout);
+                mInteractiveTimeout = interactiveUiTimeout;
+                mNonInteractiveTimeout = nonInteractiveUiTimeout;
 
                 // If any one service info doesn't set package names, i.e. if it's interested in all
                 // apps, the proxy shouldn't filter by package name even if some infos specify this.
@@ -167,7 +181,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
                 // Update connection with mAccessibilityServiceInfo values.
                 setDynamicallyConfigurableProperties(proxyInfo);
                 // Notify manager service.
-                mSystemSupport.onClientChangeLocked(true);
+                mSystemSupport.onProxyChanged(mDeviceId);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -235,12 +249,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
 
             mFocusStrokeWidth = strokeWidth;
             mFocusColor = color;
-            // Sets the appearance data in the A11yUserState for now, since the A11yManagers are not
-            // separated.
-            // TODO(254545943): Separate proxy and non-proxy states so the focus appearance on the
-            // phone is not affected by the appearance of a proxy-ed app.
-            mSystemSupport.setCurrentUserFocusAppearance(mFocusStrokeWidth, mFocusColor);
-            mSystemSupport.onClientChangeLocked(false);
+            mSystemSupport.onProxyChanged(mDeviceId);
         }
     }
 
@@ -572,17 +581,51 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         throw new UnsupportedOperationException("setAnimationScale is not supported");
     }
 
+    public int getInteractiveTimeout() {
+        return mInteractiveTimeout;
+    }
+
+    public int getNonInteractiveTimeout() {
+        return mNonInteractiveTimeout;
+    }
+
+    /**
+     * Returns true if a timeout was updated.
+     */
+    public boolean updateTimeouts(int nonInteractiveUiTimeout, int interactiveUiTimeout) {
+        final int newInteractiveUiTimeout = interactiveUiTimeout != 0
+                ? interactiveUiTimeout
+                : mAccessibilityServiceInfo.getInteractiveUiTimeoutMillis();
+        final int newNonInteractiveUiTimeout = nonInteractiveUiTimeout != 0
+                ? nonInteractiveUiTimeout
+                : mAccessibilityServiceInfo.getNonInteractiveUiTimeoutMillis();
+        boolean updated = false;
+
+        if (mInteractiveTimeout != newInteractiveUiTimeout) {
+            mInteractiveTimeout =  newInteractiveUiTimeout;
+            updated = true;
+        }
+        if (mNonInteractiveTimeout != newNonInteractiveUiTimeout) {
+            mNonInteractiveTimeout = newNonInteractiveUiTimeout;
+            updated = true;
+        }
+        return updated;
+    }
+
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
         synchronized (mLock) {
             pw.append("Proxy[displayId=" + mDisplayId);
+            pw.append(", deviceId=" + mDeviceId);
             pw.append(", feedbackType"
                     + AccessibilityServiceInfo.feedbackTypeToString(mFeedbackType));
             pw.append(", capabilities=" + mAccessibilityServiceInfo.getCapabilities());
             pw.append(", eventTypes="
                     + AccessibilityEvent.eventTypeToString(mEventTypes));
             pw.append(", notificationTimeout=" + mNotificationTimeout);
+            pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveTimeout));
+            pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveTimeout));
             pw.append(", focusStrokeWidth=").append(String.valueOf(mFocusStrokeWidth));
             pw.append(", focusColor=").append(String.valueOf(mFocusColor));
             pw.append(", installedAndEnabledServiceCount=").append(String.valueOf(

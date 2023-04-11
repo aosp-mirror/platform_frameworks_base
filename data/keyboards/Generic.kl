@@ -424,6 +424,10 @@ key 580   APP_SWITCH
 key 582   VOICE_ASSIST
 # Linux KEY_ASSISTANT
 key 583   ASSIST
+key 656   MACRO_1
+key 657   MACRO_2
+key 658   MACRO_3
+key 659   MACRO_4
 
 # Keys defined by HID usages
 key usage 0x0c0067 WINDOW

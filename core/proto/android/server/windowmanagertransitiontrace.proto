@@ -23,7 +23,7 @@ import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 option java_multiple_files = true;
 
 /* Represents a file full of transition entries.
-   Encoded, it should start with 0x9 0x57 0x49 0x4e 0x54 0x52 0x41 0x43 0x45 (.TRNTRACE), such
+   Encoded, it should start with 0x09 0x54 0x52 0x4E 0x54 0x52 0x41 0x43 0x45 (TRNTRACE), such
    that it can be easily identified. */
 message TransitionTraceProto {
 

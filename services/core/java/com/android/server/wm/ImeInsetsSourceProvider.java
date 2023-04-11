@@ -48,7 +48,7 @@ import java.io.PrintWriter;
  * Controller for IME inset source on the server. It's called provider as it provides the
  * {@link InsetsSource} to the client that uses it in {@link InsetsSourceConsumer}.
  */
-final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider {
+final class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
     /** The token tracking the current IME request or {@code null} otherwise. */
     @Nullable

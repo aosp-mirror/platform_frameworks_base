@@ -40,8 +40,9 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
-import android.view.InsetsState;
+import android.view.InsetsFrameProvider;
 import android.view.SurfaceControl;
+import android.view.WindowInsets.Type.InsetsType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -666,50 +667,51 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
-     * Adds a given {@code Rect} as a rect insets provider on the {@code receiverWindowContainer}.
-     * This will trigger a change of insets for all the children in the subtree of
-     * {@code receiverWindowContainer}.
+     * Adds a given {@code Rect} as an insets source frame on the {@code receiver}.
      *
-     * @param receiverWindowContainer the window container which the insets provider need to be
-     *                                added to
-     * @param insetsProviderFrame the frame that will be added as Insets provider
-     * @param insetsTypes types of insets the rect provides
+     * @param receiver The window container that the insets source is added to.
+     * @param owner    The owner of the insets source. An insets source can only be modified by its
+     *                 owner.
+     * @param index    An owner might add multiple insets sources with the same type.
+     *                 This identifies them.
+     * @param type     The {@link InsetsType} of the insets source.
+     * @param frame    The rectangle area of the insets source.
      * @hide
      */
     @NonNull
-    public WindowContainerTransaction addRectInsetsProvider(
-            @NonNull WindowContainerToken receiverWindowContainer,
-            @NonNull Rect insetsProviderFrame,
-            @InsetsState.InternalInsetsType int[] insetsTypes) {
+    public WindowContainerTransaction addInsetsSource(
+            @NonNull WindowContainerToken receiver,
+            IBinder owner, int index, @InsetsType int type, Rect frame) {
         final HierarchyOp hierarchyOp =
-                new HierarchyOp.Builder(
-                        HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER)
-                        .setContainer(receiverWindowContainer.asBinder())
-                        .setInsetsProviderFrame(insetsProviderFrame)
-                        .setInsetsTypes(insetsTypes)
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER)
+                        .setContainer(receiver.asBinder())
+                        .setInsetsFrameProvider(new InsetsFrameProvider(owner, index, type)
+                                .setSource(InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE)
+                                .setArbitraryRectangle(frame))
                         .build();
         mHierarchyOps.add(hierarchyOp);
         return this;
     }
 
     /**
-     * Removes the insets provider for the given types from the
-     * {@code receiverWindowContainer}. This will trigger a change of insets for all the children
-     * in the subtree of {@code receiverWindowContainer}.
+     * Removes the insets source from the {@code receiver}.
      *
-     * @param receiverWindowContainer the window container which the insets-override-provider has
-     *                                to be removed from
-     * @param insetsTypes types of insets that have to be removed
+     * @param receiver The window container that the insets source was added to.
+     * @param owner    The owner of the insets source. An insets source can only be modified by its
+     *                 owner.
+     * @param index    An owner might add multiple insets sources with the same type.
+     *                 This identifies them.
+     * @param type     The {@link InsetsType} of the insets source.
      * @hide
      */
     @NonNull
-    public WindowContainerTransaction removeInsetsProvider(
-            @NonNull WindowContainerToken receiverWindowContainer,
-            @InsetsState.InternalInsetsType int[] insetsTypes) {
+    public WindowContainerTransaction removeInsetsSource(
+            @NonNull WindowContainerToken receiver,
+            IBinder owner, int index, @InsetsType int type) {
         final HierarchyOp hierarchyOp =
-                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER)
-                        .setContainer(receiverWindowContainer.asBinder())
-                        .setInsetsTypes(insetsTypes)
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER)
+                        .setContainer(receiver.asBinder())
+                        .setInsetsFrameProvider(new InsetsFrameProvider(owner, index, type))
                         .build();
         mHierarchyOps.add(hierarchyOp);
         return this;
@@ -1315,8 +1317,8 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_PENDING_INTENT = 7;
         public static final int HIERARCHY_OP_TYPE_START_SHORTCUT = 8;
         public static final int HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER = 9;
-        public static final int HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER = 10;
-        public static final int HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER = 11;
+        public static final int HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER = 10;
+        public static final int HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER = 11;
         public static final int HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP = 12;
         public static final int HIERARCHY_OP_TYPE_REMOVE_TASK = 13;
         public static final int HIERARCHY_OP_TYPE_FINISH_ACTIVITY = 14;
@@ -1342,9 +1344,7 @@ public final class WindowContainerTransaction implements Parcelable {
         @Nullable
         private IBinder mReparent;
 
-        private @InsetsState.InternalInsetsType int[] mInsetsTypes;
-
-        private Rect mInsetsProviderFrame;
+        private InsetsFrameProvider mInsetsFrameProvider;
 
         // Moves/reparents to top of parent when {@code true}, otherwise moves/reparents to bottom.
         private boolean mToTop;
@@ -1477,8 +1477,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mType = copy.mType;
             mContainer = copy.mContainer;
             mReparent = copy.mReparent;
-            mInsetsTypes = copy.mInsetsTypes;
-            mInsetsProviderFrame = copy.mInsetsProviderFrame;
+            mInsetsFrameProvider = copy.mInsetsFrameProvider;
             mToTop = copy.mToTop;
             mReparentTopOnly = copy.mReparentTopOnly;
             mWindowingModes = copy.mWindowingModes;
@@ -1496,12 +1495,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mType = in.readInt();
             mContainer = in.readStrongBinder();
             mReparent = in.readStrongBinder();
-            mInsetsTypes = in.createIntArray();
-            if (in.readInt() != 0) {
-                mInsetsProviderFrame = Rect.CREATOR.createFromParcel(in);
-            } else {
-                mInsetsProviderFrame = null;
-            }
+            mInsetsFrameProvider = in.readTypedObject(InsetsFrameProvider.CREATOR);
             mToTop = in.readBoolean();
             mReparentTopOnly = in.readBoolean();
             mWindowingModes = in.createIntArray();
@@ -1529,12 +1523,8 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         @Nullable
-        public @InsetsState.InternalInsetsType int[] getInsetsTypes() {
-            return mInsetsTypes;
-        }
-
-        public Rect getInsetsProviderFrame() {
-            return mInsetsProviderFrame;
+        public InsetsFrameProvider getInsetsFrameProvider() {
+            return mInsetsFrameProvider;
         }
 
         @NonNull
@@ -1596,62 +1586,109 @@ public final class WindowContainerTransaction implements Parcelable {
             return mShortcutInfo;
         }
 
+        /** Gets a string representation of a hierarchy-op type. */
+        public static String hopToString(int type) {
+            switch (type) {
+                case HIERARCHY_OP_TYPE_REPARENT: return "reparent";
+                case HIERARCHY_OP_TYPE_REORDER: return "reorder";
+                case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: return "ChildrenTasksReparent";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: return "SetLaunchRoot";
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "SetAdjacentRoot";
+                case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "LaunchTask";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "SetAdjacentFlagRoot";
+                case HIERARCHY_OP_TYPE_PENDING_INTENT: return "PendingIntent";
+                case HIERARCHY_OP_TYPE_START_SHORTCUT: return "StartShortcut";
+                case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: return "addInsetsFrameProvider";
+                case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER:
+                    return "removeInsetsFrameProvider";
+                case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: return "setAlwaysOnTop";
+                case HIERARCHY_OP_TYPE_REMOVE_TASK: return "RemoveTask";
+                case HIERARCHY_OP_TYPE_FINISH_ACTIVITY: return "finishActivity";
+                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "ClearAdjacentRoot";
+                case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
+                    return "setReparentLeafTaskIfRelaunch";
+                case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
+                    return "addTaskFragmentOperation";
+                default: return "HOP(" + type + ")";
+            }
+        }
+
         @Override
         public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{").append(hopToString(mType)).append(": ");
             switch (mType) {
                 case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
-                    return "{ChildrenTasksReparent: from=" + mContainer + " to=" + mReparent
-                            + " mToTop=" + mToTop + " mReparentTopOnly=" + mReparentTopOnly
-                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
-                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
+                    sb.append("from=").append(mContainer).append(" to=").append(mReparent)
+                            .append(" mToTop=").append(mToTop)
+                            .append(" mReparentTopOnly=").append(mReparentTopOnly)
+                            .append(" mWindowingMode=").append(Arrays.toString(mWindowingModes))
+                            .append(" mActivityType=").append(Arrays.toString(mActivityTypes));
+                    break;
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT:
-                    return "{SetLaunchRoot: container=" + mContainer
-                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
-                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" mWindowingMode=").append(Arrays.toString(mWindowingModes))
+                            .append(" mActivityType=").append(Arrays.toString(mActivityTypes));
+                    break;
                 case HIERARCHY_OP_TYPE_REPARENT:
-                    return "{reparent: " + mContainer + " to " + (mToTop ? "top of " : "bottom of ")
-                            + mReparent + "}";
+                    sb.append(mContainer).append(" to ").append(mToTop ? "top of " : "bottom of ")
+                            .append(mReparent);
+                    break;
                 case HIERARCHY_OP_TYPE_REORDER:
-                    return "{reorder: " + mContainer + " to " + (mToTop ? "top" : "bottom") + "}";
+                    sb.append(mContainer).append(" to ").append(mToTop ? "top" : "bottom");
+                    break;
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
-                    return "{SetAdjacentRoot: container=" + mContainer
-                            + " adjacentRoot=" + mReparent + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" adjacentRoot=").append(mReparent);
+                    break;
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK:
-                    return "{LaunchTask: " + mLaunchOptions + "}";
+                    sb.append(mLaunchOptions);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
-                    return "{SetAdjacentFlagRoot: container=" + mContainer + " clearRoot=" + mToTop
-                            + "}";
+                    sb.append("container=").append(mContainer).append(" clearRoot=").append(mToTop);
+                    break;
                 case HIERARCHY_OP_TYPE_START_SHORTCUT:
-                    return "{StartShortcut: options=" + mLaunchOptions + " info=" + mShortcutInfo
-                            + "}";
-                case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER:
-                    return "{addRectInsetsProvider: container=" + mContainer
-                            + " insetsProvidingFrame=" + mInsetsProviderFrame
-                            + " insetsType=" + Arrays.toString(mInsetsTypes) + "}";
-                case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER:
-                    return "{removeLocalInsetsProvider: container=" + mContainer
-                            + " insetsType=" + Arrays.toString(mInsetsTypes) + "}";
+                    sb.append("options=").append(mLaunchOptions)
+                            .append(" info=").append(mShortcutInfo);
+                    break;
+                case HIERARCHY_OP_TYPE_PENDING_INTENT:
+                    sb.append("options=").append(mLaunchOptions);
+                    break;
+                case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER:
+                case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER:
+                    sb.append("container=").append(mContainer)
+                            .append(" provider=").append(mInsetsFrameProvider);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP:
-                    return "{setAlwaysOnTop: container=" + mContainer
-                            + " alwaysOnTop=" + mAlwaysOnTop + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" alwaysOnTop=").append(mAlwaysOnTop);
+                    break;
                 case HIERARCHY_OP_TYPE_REMOVE_TASK:
-                    return "{RemoveTask: task=" + mContainer + "}";
+                    sb.append("task=").append(mContainer);
+                    break;
                 case HIERARCHY_OP_TYPE_FINISH_ACTIVITY:
-                    return "{finishActivity: activity=" + mContainer + "}";
+                    sb.append("activity=").append(mContainer);
+                    break;
                 case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS:
-                    return "{ClearAdjacentRoot: container=" + mContainer + "}";
+                    sb.append("container=").append(mContainer);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
-                    return "{setReparentLeafTaskIfRelaunch: container= " + mContainer
-                            + " reparentLeafTaskIfRelaunch= " + mReparentLeafTaskIfRelaunch + "}";
+                    sb.append("container= ").append(mContainer)
+                            .append(" reparentLeafTaskIfRelaunch= ")
+                            .append(mReparentLeafTaskIfRelaunch);
+                    break;
                 case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
-                    return "{addTaskFragmentOperation: fragmentToken= " + mContainer
-                            + " operation= " + mTaskFragmentOperation + "}";
+                    sb.append("fragmentToken= ").append(mContainer)
+                            .append(" operation= ").append(mTaskFragmentOperation);
+                    break;
                 default:
-                    return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
-                            + " mToTop=" + mToTop
-                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
-                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" reparent=").append(mReparent)
+                            .append(" mToTop=").append(mToTop)
+                            .append(" mWindowingMode=").append(Arrays.toString(mWindowingModes))
+                            .append(" mActivityType=").append(Arrays.toString(mActivityTypes));
             }
+            return sb.append("}").toString();
         }
 
         @Override
@@ -1659,13 +1696,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeInt(mType);
             dest.writeStrongBinder(mContainer);
             dest.writeStrongBinder(mReparent);
-            dest.writeIntArray(mInsetsTypes);
-            if (mInsetsProviderFrame != null) {
-                dest.writeInt(1);
-                mInsetsProviderFrame.writeToParcel(dest, 0);
-            } else {
-                dest.writeInt(0);
-            }
+            dest.writeTypedObject(mInsetsFrameProvider, flags);
             dest.writeBoolean(mToTop);
             dest.writeBoolean(mReparentTopOnly);
             dest.writeIntArray(mWindowingModes);
@@ -1706,9 +1737,7 @@ public final class WindowContainerTransaction implements Parcelable {
             @Nullable
             private IBinder mReparent;
 
-            private int[] mInsetsTypes;
-
-            private Rect mInsetsProviderFrame;
+            private InsetsFrameProvider mInsetsFrameProvider;
 
             private boolean mToTop;
 
@@ -1753,13 +1782,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
-            Builder setInsetsTypes(int[] insetsTypes) {
-                mInsetsTypes = insetsTypes;
-                return this;
-            }
-
-            Builder setInsetsProviderFrame(Rect insetsProviderFrame) {
-                mInsetsProviderFrame = insetsProviderFrame;
+            Builder setInsetsFrameProvider(InsetsFrameProvider providers) {
+                mInsetsFrameProvider = providers;
                 return this;
             }
 
@@ -1829,8 +1853,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mActivityTypes = mActivityTypes != null
                         ? Arrays.copyOf(mActivityTypes, mActivityTypes.length)
                         : null;
-                hierarchyOp.mInsetsTypes = mInsetsTypes;
-                hierarchyOp.mInsetsProviderFrame = mInsetsProviderFrame;
+                hierarchyOp.mInsetsFrameProvider = mInsetsFrameProvider;
                 hierarchyOp.mToTop = mToTop;
                 hierarchyOp.mReparentTopOnly = mReparentTopOnly;
                 hierarchyOp.mLaunchOptions = mLaunchOptions;

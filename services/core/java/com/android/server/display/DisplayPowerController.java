@@ -505,7 +505,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private DisplayDeviceConfig mDisplayDeviceConfig;
 
-    // Identifiers for suspend blocker acuisition requests
+    // Identifiers for suspend blocker acquisition requests
     private final String mSuspendBlockerIdUnfinishedBusiness;
     private final String mSuspendBlockerIdOnStateChanged;
     private final String mSuspendBlockerIdProxPositive;
@@ -515,7 +515,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private boolean mIsEnabled;
     private boolean mIsInTransition;
 
-    private String mBrightnessThrottlingDataId;
+    // The id of the thermal brightness throttling policy that should be used.
+    private String mThermalBrightnessThrottlingDataId;
 
     // DPCs following the brightness of this DPC. This is used in concurrent displays mode - there
     // is one lead display, the additional displays follow the brightness value of the lead display.
@@ -555,7 +556,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mLastBrightnessEvent = new BrightnessEvent(mDisplayId);
         mTempBrightnessEvent = new BrightnessEvent(mDisplayId);
-        mBrightnessThrottlingDataId = logicalDisplay.getBrightnessThrottlingDataIdLocked();
+        mThermalBrightnessThrottlingDataId =
+            logicalDisplay.getThermalBrightnessThrottlingDataIdLocked();
 
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mBatteryStats = BatteryStatsService.getService();
@@ -890,8 +892,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean isEnabled = mLogicalDisplay.isEnabledLocked();
         final boolean isInTransition = mLogicalDisplay.isInTransitionLocked();
-        final String brightnessThrottlingDataId =
-                mLogicalDisplay.getBrightnessThrottlingDataIdLocked();
+        final String thermalBrightnessThrottlingDataId =
+                mLogicalDisplay.getThermalBrightnessThrottlingDataIdLocked();
         mHandler.postAtTime(() -> {
             boolean changed = false;
             if (mDisplayDevice != device) {
@@ -900,19 +902,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mUniqueDisplayId = uniqueId;
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
-                mBrightnessThrottlingDataId = brightnessThrottlingDataId;
+                mThermalBrightnessThrottlingDataId = thermalBrightnessThrottlingDataId;
                 loadFromDisplayDeviceConfig(token, info, hbmMetadata);
                 loadNitBasedBrightnessSetting();
 
                 /// Since the underlying display-device changed, we really don't know the
-                // last command that was sent to change it's state. Lets assume it is unknown so
+                // last command that was sent to change it's state. Let's assume it is unknown so
                 // that we trigger a change immediately.
                 mPowerState.resetScreenState();
-            } else if (!mBrightnessThrottlingDataId.equals(brightnessThrottlingDataId)) {
+            } else if (
+                    !mThermalBrightnessThrottlingDataId.equals(thermalBrightnessThrottlingDataId)) {
                 changed = true;
-                mBrightnessThrottlingDataId = brightnessThrottlingDataId;
-                mBrightnessThrottler.resetThrottlingData(
-                        config.getBrightnessThrottlingData(mBrightnessThrottlingDataId),
+                mThermalBrightnessThrottlingDataId = thermalBrightnessThrottlingDataId;
+                mBrightnessThrottler.loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(
+                        config.getThermalBrightnessThrottlingDataMapByThrottlingId(),
+                        mThermalBrightnessThrottlingDataId,
                         mUniqueDisplayId);
             }
             if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {
@@ -981,9 +985,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                                 sdrBrightness, maxDesiredHdrSdrRatio);
                     }
                 });
-        mBrightnessThrottler.resetThrottlingData(
-                mDisplayDeviceConfig.getBrightnessThrottlingData(mBrightnessThrottlingDataId),
-                mUniqueDisplayId);
+        mBrightnessThrottler.loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(
+                mDisplayDeviceConfig.getThermalBrightnessThrottlingDataMapByThrottlingId(),
+                mThermalBrightnessThrottlingDataId, mUniqueDisplayId);
     }
 
     private void sendUpdatePowerState() {
@@ -1634,7 +1638,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedAutoBrightness = false;
             brightnessAdjustmentFlags = 0;
         }
-
         // Use default brightness when dozing unless overridden.
         if ((Float.isNaN(brightnessState))
                 && Display.isDozeState(state)) {
@@ -2117,11 +2120,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         final DisplayDeviceConfig ddConfig = device.getDisplayDeviceConfig();
         return new BrightnessThrottler(mHandler,
-                ddConfig.getBrightnessThrottlingData(mBrightnessThrottlingDataId),
                 () -> {
                     sendUpdatePowerState();
                     postBrightnessChangeRunnable();
-                }, mUniqueDisplayId);
+                }, mUniqueDisplayId, mLogicalDisplay.getThermalBrightnessThrottlingDataIdLocked(),
+                ddConfig.getThermalBrightnessThrottlingDataMapByThrottlingId());
     }
 
     private void blockScreenOn() {

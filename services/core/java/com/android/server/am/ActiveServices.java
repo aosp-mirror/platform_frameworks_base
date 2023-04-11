@@ -73,6 +73,7 @@ import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
 import static android.os.PowerExemptionManager.REASON_UID_VISIBLE;
+import static android.os.PowerExemptionManager.REASON_UNKNOWN;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerExemptionManager.getReasonCodeFromProcState;
 import static android.os.PowerExemptionManager.reasonCodeToString;
@@ -87,6 +88,7 @@ import static com.android.internal.messages.nano.SystemMessageProto.SystemMessag
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED;
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER;
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT;
+import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__TIMED_OUT;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
@@ -806,9 +808,9 @@ public final class ActiveServices {
         ServiceRecord r = res.record;
         // Note, when startService() or startForegroundService() is called on an already
         // running SHORT_SERVICE FGS, the call will succeed (i.e. we won't throw
-        // ForegroundServiceStartNotAllowedException), even when the service is alerady timed
-        // out. This is because these APIs will essnetially only change the "started" state
-        // of the service, and it won't afect "the foreground-ness" of the service, or the type
+        // ForegroundServiceStartNotAllowedException), even when the service is already timed
+        // out. This is because these APIs will essentially only change the "started" state
+        // of the service, and it won't affect "the foreground-ness" of the service, or the type
         // of the FGS.
         // However, this call will still _not_ extend the SHORT_SERVICE timeout either.
         // Also, if the app tries to change the type of the FGS later (using
@@ -3239,6 +3241,12 @@ public final class ActiveServices {
                 return;
             }
             Slog.e(TAG_SERVICE, "Short FGS timed out: " + sr);
+            final long now = SystemClock.uptimeMillis();
+            logFGSStateChangeLocked(sr,
+                    FOREGROUND_SERVICE_STATE_CHANGED__STATE__TIMED_OUT,
+                    now > sr.mFgsEnterTime ? (int) (now - sr.mFgsEnterTime) : 0,
+                    FGS_STOP_REASON_UNKNOWN,
+                    FGS_TYPE_POLICY_CHECK_UNKNOWN);
             try {
                 sr.app.getThread().scheduleTimeoutService(sr, sr.getShortFgsInfo().getStartId());
             } catch (RemoteException e) {
@@ -7319,9 +7327,10 @@ public final class ActiveServices {
             r.mAllowWhileInUsePermissionInFgs = true;
         }
 
+        final @ReasonCode int allowWhileInUse;
         if (!r.mAllowWhileInUsePermissionInFgs
                 || (r.mAllowStartForeground == REASON_DENIED)) {
-            final @ReasonCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
+            allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
                     callingPackage, callingPid, callingUid, r.app, backgroundStartPrivileges,
                     isBindService);
             if (!r.mAllowWhileInUsePermissionInFgs) {
@@ -7332,6 +7341,24 @@ public final class ActiveServices {
                         allowWhileInUse, callingPackage, callingPid, callingUid, intent, r,
                         backgroundStartPrivileges, isBindService);
             }
+        } else {
+            allowWhileInUse = REASON_UNKNOWN;
+        }
+        // We want to allow scheduling user-initiated jobs when the app is running a
+        // foreground service that was started in the same conditions that allows for scheduling
+        // UI jobs. More explicitly, we want to allow scheduling UI jobs when the app is running
+        // an FGS that started when the app was in the TOP or a BAL-approved state.
+        // As of Android UDC, the conditions required for the while-in-use permissions
+        // are the same conditions that we want, so we piggyback on that logic.
+        // We use that as a shortcut if possible so we don't have to recheck all the conditions.
+        final boolean isFgs = r.isForeground || r.fgRequired;
+        if (isFgs) {
+            r.updateAllowUiJobScheduling(ActivityManagerService
+                    .doesReasonCodeAllowSchedulingUserInitiatedJobs(allowWhileInUse)
+                    || mAm.canScheduleUserInitiatedJobs(
+                            callingUid, callingPid, callingPackage, true));
+        } else {
+            r.updateAllowUiJobScheduling(false);
         }
     }
 
@@ -7342,6 +7369,7 @@ public final class ActiveServices {
         r.mInfoTempFgsAllowListReason = null;
         r.mLoggedInfoAllowStartForeground = false;
         r.mLastSetFgsRestrictionTime = 0;
+        r.updateAllowUiJobScheduling(r.mAllowWhileInUsePermissionInFgs);
     }
 
     boolean canStartForegroundServiceLocked(int callingPid, int callingUid, String callingPackage) {
@@ -7876,7 +7904,8 @@ public final class ActiveServices {
         boolean allowWhileInUsePermissionInFgs;
         @PowerExemptionManager.ReasonCode int fgsStartReasonCode;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER
-                || state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT) {
+                || state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT
+                || state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__TIMED_OUT) {
             allowWhileInUsePermissionInFgs = r.mAllowWhileInUsePermissionInFgsAtEntering;
             fgsStartReasonCode = r.mAllowStartForegroundAtEntering;
         } else {
@@ -7910,9 +7939,9 @@ public final class ActiveServices {
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mClientUid : INVALID_UID,
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
                         : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
-                0,
-                null,
-                null);
+                0 /* api_sate */,
+                null /* api_type */,
+                null /* api_timestamp */);
 
         int event = 0;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {
@@ -7921,7 +7950,9 @@ public final class ActiveServices {
             event = EventLogTags.AM_FOREGROUND_SERVICE_STOP;
         } else if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED) {
             event = EventLogTags.AM_FOREGROUND_SERVICE_DENIED;
-        } else {
+        } else if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__TIMED_OUT) {
+            event = EventLogTags.AM_FOREGROUND_SERVICE_TIMED_OUT;
+        }else {
             // Unknown event.
             return;
         }

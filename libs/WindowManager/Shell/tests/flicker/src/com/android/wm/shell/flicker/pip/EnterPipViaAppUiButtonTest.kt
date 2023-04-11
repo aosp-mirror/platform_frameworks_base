@@ -35,6 +35,7 @@ import org.junit.runners.Parameterized
  *     Launch an app in full screen
  *     Press an "enter pip" button to put [pipApp] in pip mode
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

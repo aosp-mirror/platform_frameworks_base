@@ -574,7 +574,9 @@ public class ActivityStartController {
         mService.deferWindowLayout();
         try {
             final TransitionController controller = r.mTransitionController;
-            if (controller.getTransitionPlayer() != null) {
+            final Transition transition = controller.getCollectingTransition();
+            if (transition != null) {
+                transition.setRemoteAnimationApp(r.app.getThread());
                 controller.collect(task);
                 controller.setTransientLaunch(r, TaskDisplayArea.getRootTaskAbove(rootTask));
             }

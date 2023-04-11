@@ -137,7 +137,7 @@ fun FlickerTest.splitAppLayerBoundsBecomesVisible(
     portraitPosTop: Boolean
 ) {
     assertLayers {
-        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
             .then()
             .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
             .then()
@@ -217,14 +217,23 @@ fun FlickerTest.splitAppLayerBoundsChanges(
 ) {
     assertLayers {
         if (landscapePosLeft) {
-            this.splitAppLayerBoundsSnapToDivider(
-                component,
-                landscapePosLeft,
-                portraitPosTop,
-                scenario.endRotation
-            )
+            splitAppLayerBoundsSnapToDivider(
+                    component,
+                    landscapePosLeft,
+                    portraitPosTop,
+                    scenario.endRotation
+                )
+                .then()
+                .isInvisible(component)
+                .then()
+                .splitAppLayerBoundsSnapToDivider(
+                    component,
+                    landscapePosLeft,
+                    portraitPosTop,
+                    scenario.endRotation
+                )
         } else {
-            this.splitAppLayerBoundsSnapToDivider(
+            splitAppLayerBoundsSnapToDivider(
                     component,
                     landscapePosLeft,
                     portraitPosTop,

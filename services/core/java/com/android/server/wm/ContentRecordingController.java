@@ -86,7 +86,7 @@ final class ContentRecordingController {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                     "Content Recording: Ignoring session on same display %d, with an existing "
                             + "session %s",
-                    incomingSession.getDisplayId(), mSession.getDisplayId());
+                    incomingSession.getVirtualDisplayId(), mSession.getVirtualDisplayId());
             return;
         }
         DisplayContent incomingDisplayContent = null;
@@ -94,10 +94,10 @@ final class ContentRecordingController {
         if (incomingSession != null) {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                     "Content Recording: Handle incoming session on display %d, with a "
-                            + "pre-existing session %s", incomingSession.getDisplayId(),
-                    mSession == null ? null : mSession.getDisplayId());
+                            + "pre-existing session %s", incomingSession.getVirtualDisplayId(),
+                    mSession == null ? null : mSession.getVirtualDisplayId());
             incomingDisplayContent = wmService.mRoot.getDisplayContentOrCreate(
-                    incomingSession.getDisplayId());
+                    incomingSession.getVirtualDisplayId());
             incomingDisplayContent.setContentRecordingSession(incomingSession);
             // TODO(b/270118861) When user grants consent to re-use, explicitly ask ContentRecorder
             //  to update, since no config/display change arrives. Mark recording as black.

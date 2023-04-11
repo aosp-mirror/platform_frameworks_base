@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.AuthenticateOptions;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.OperationContext;
 import android.view.Surface;
 
@@ -65,6 +66,7 @@ public interface BiometricContext {
      * Current fold state from
      * {@link android.hardware.biometrics.IBiometricContextListener.FoldState}.
      */
+    @IBiometricContextListener.FoldState
     int getFoldState();
 
     /** Current device display rotation. */

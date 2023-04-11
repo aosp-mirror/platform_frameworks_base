@@ -680,6 +680,20 @@
      rotation. -->
     <bool name="config_windowManagerHalfFoldAutoRotateOverride">false</bool>
 
+    <!-- Indicates whether the window manager pauses autorotation when folding or unfolding
+     a foldable device based on hinge angle sensor events and physical display switch events. -->
+    <bool name="config_windowManagerPauseRotationWhenUnfolding">false</bool>
+
+    <!-- Amount of time during which autorotation will be disabled since last hinge angle event -->
+    <integer name="config_pauseRotationWhenUnfolding_maxHingeAngle">0</integer>
+
+    <!-- Maximum hinge angle event to be considered to disable autorotation when folding or
+     unfolding -->
+    <integer name="config_pauseRotationWhenUnfolding_hingeEventTimeout">0</integer>
+
+    <!-- Amount of time during which autorotation will be disabled since last display switch -->
+    <integer name="config_pauseRotationWhenUnfolding_displaySwitchTimeout">0</integer>
+
     <!-- When a device enters any of these states, it should be woken up. States are defined in
          device_state_configuration.xml. -->
     <integer-array name="config_deviceStatesOnWhichToWakeUp">
@@ -2895,6 +2909,9 @@
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
 
+    <!-- When true, udfps vote is ignored. This feature is disabled by default. -->
+    <bool name="config_ignoreUdfpsVote">false</bool>
+
     <!-- Controls if local secondary displays should be private or not. Value specified in the array
          represents physical port address of each display and display in this list will be marked
          as private. {@see android.view.Display#FLAG_PRIVATE} -->
@@ -3341,6 +3358,11 @@
 
     <!-- The duration in which a recent task is considered in session and should be visible. -->
     <integer name="config_activeTaskDurationHours">6</integer>
+
+    <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
+         When set true, there will create windowless starting surface for the preview target, so it
+         won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
+    <bool name="config_predictShowStartingSurface">true</bool>
 
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
@@ -4439,7 +4461,8 @@
 
      See android.credentials.CredentialManager
     -->
-    <string name="config_defaultCredentialProviderService" translatable="false"></string>
+    <string-array name="config_defaultCredentialProviderService" translatable="false">
+    </string-array>
 
     <!-- The package name for the system's smartspace service.
      This service returns smartspace results.
@@ -5215,6 +5238,11 @@
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
 
+    <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
+    <string-array name="config_forceSlowJpegModeList" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
+
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
@@ -5582,9 +5610,19 @@
         split screen. -->
     <bool name="config_isWindowManagerCameraCompatTreatmentEnabled">false</bool>
 
+    <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
+        is enabled and activity is connected to the camera in fullscreen. -->
+    <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
+
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
+
+    <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
+         handled. If true, the configuration change will be sent but activities will not be
+         relaunched upon docking. Apps with desk resources will behave like normal, since they may
+         expect the relaunch upon the desk uiMode change. -->
+    <bool name="config_skipActivityRelaunchWhenDocking">false</bool>
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
@@ -6029,6 +6067,12 @@
     <!-- Wear OS: the name of the main activity of the device's sysui. -->
     <string name="config_wearSysUiMainActivity" translatable="false"/>
 
+    <!-- Wear OS: the name of the package containing the Media Controls Activity. -->
+    <string name="config_wearMediaControlsPackage" translatable="false"/>
+
+    <!-- Wear OS: the name of the package containing the Media Sessions APK. -->
+    <string name="config_wearMediaSessionsPackage" translatable="false"/>
+
     <bool name="config_secondaryBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
 
     <!-- The display round config for each display in a multi-display device. -->
@@ -6273,10 +6317,6 @@
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
 
-    <!-- Whether the lock screen is allowed to run its own live wallpaper,
-         different from the home screen wallpaper. -->
-    <bool name="config_independentLockscreenLiveWallpaper">false</bool>
-
     <!-- Device state that corresponds to concurrent display mode where the default display
          is the internal display. Public API for the feature is provided through Jetpack
          WindowManager.
@@ -6339,23 +6379,6 @@
     <!-- Package name of Health Connect data migrator application.  -->
     <string name="config_healthConnectMigratorPackageName"></string>
 
-    <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
-         (@see https://universalstylus.org/).
-
-         The i-th value in this array corresponds to the supported USI version of the i-th display
-         listed in config_displayUniqueIdArray. On a single-display device, the
-         config_displayUniqueIdArray may be empty, in which case the only value in this array should
-         be the USI version for the main built-in display.
-
-         If the display does not support USI, the version value should be an empty string. If the
-         display supports USI, the version must be in the following format:
-           "<major-version>.<minor-version>"
-
-         For example, "", "1.0", and "2.0" are valid values. -->
-    <string-array name="config_displayUsiVersionArray" translatable="false">
-        <item>""</item>
-    </string-array>
-
     <!-- Whether system apps should be scanned in the stopped state during initial boot.
         Packages can be added by OEMs in an allowlist, to prevent them from being scanned as
         "stopped" during initial boot of a device, or after an OTA update. Stopped state of
@@ -6373,4 +6396,6 @@
     <!-- Whether we should persist the brightness value in nits for the default display even if
          the underlying display device changes. -->
     <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
+    <!-- Whether to request the approval before commit sessions. -->
+    <bool name="config_isPreApprovalRequestAvailable">true</bool>
 </resources>

@@ -56,7 +56,8 @@ public class SensorService extends SystemService {
     private static native void unregisterProximityActiveListenerNative(long ptr);
 
     private static native int registerRuntimeSensorNative(long ptr, int deviceId, int type,
-            String name, String vendor, int flags,
+            String name, String vendor, float maximumRange, float resolution, float power,
+            int minDelay, int maxDelay, int flags,
             SensorManagerInternal.RuntimeSensorCallback callback);
     private static native void unregisterRuntimeSensorNative(long ptr, int handle);
     private static native boolean sendRuntimeSensorEventNative(long ptr, int handle, int type,
@@ -96,10 +97,11 @@ public class SensorService extends SystemService {
     class LocalService extends SensorManagerInternal {
         @Override
         public int createRuntimeSensor(int deviceId, int type, @NonNull String name,
-                @NonNull String vendor, int flags, @NonNull RuntimeSensorCallback callback) {
+                @NonNull String vendor, float maximumRange, float resolution, float power,
+                int minDelay, int maxDelay, int flags, @NonNull RuntimeSensorCallback callback) {
             synchronized (mLock) {
-                int handle = registerRuntimeSensorNative(mPtr, deviceId, type, name, vendor, flags,
-                        callback);
+                int handle = registerRuntimeSensorNative(mPtr, deviceId, type, name, vendor,
+                        maximumRange, resolution, power, minDelay, maxDelay, flags, callback);
                 mRuntimeSensorHandles.add(handle);
                 return handle;
             }

@@ -23,6 +23,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.notetask.quickaffordance.NoteTaskQuickAffordanceModule
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
+import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -35,6 +36,9 @@ interface NoteTaskModule {
 
     @[Binds IntoMap ClassKey(LaunchNoteTaskActivity::class)]
     fun LaunchNoteTaskActivity.bindNoteTaskLauncherActivity(): Activity
+
+    @[Binds IntoMap ClassKey(LaunchNoteTaskManagedProfileProxyActivity::class)]
+    fun LaunchNoteTaskManagedProfileProxyActivity.bindNoteTaskLauncherProxyActivity(): Activity
 
     @[Binds IntoMap ClassKey(CreateNoteTaskShortcutActivity::class)]
     fun CreateNoteTaskShortcutActivity.bindNoteTaskShortcutActivity(): Activity

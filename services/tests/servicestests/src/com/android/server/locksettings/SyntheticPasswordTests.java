@@ -23,6 +23,7 @@ import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
+import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -579,12 +580,13 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         data.scryptLogN = 11;
         data.scryptLogR = 3;
         data.scryptLogP = 1;
+        data.pinLength = 5;
         data.salt = "abcdefghijklmnop".getBytes();
         return data;
     }
 
     @Test
-    public void testPasswordData_serializeDeserialize() {
+    public void testPasswordDataLatestVersion_serializeDeserialize() {
         PasswordData data = new PasswordData();
         data.scryptLogN = 11;
         data.scryptLogR = 22;
@@ -592,19 +594,97 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         data.credentialType = CREDENTIAL_TYPE_PASSWORD;
         data.salt = PAYLOAD;
         data.passwordHandle = PAYLOAD2;
+        data.pinLength = 5;
 
         PasswordData deserialized = PasswordData.fromBytes(data.toBytes());
-
         assertEquals(11, deserialized.scryptLogN);
         assertEquals(22, deserialized.scryptLogR);
         assertEquals(33, deserialized.scryptLogP);
+        assertEquals(5, deserialized.pinLength);
         assertEquals(CREDENTIAL_TYPE_PASSWORD, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
     }
 
     @Test
-    public void testPasswordData_deserialize() {
+    public void testPasswordDataV2VersionCredentialTypePin_deserialize() {
+        // Test that we can deserialize existing PasswordData and don't inadvertently change the
+        // wire format.
+        byte[] serialized = new byte[] {
+                0, 2, 0, 2, /* CREDENTIAL_TYPE_PASSWORD_OR_PIN */
+                11, /* scryptLogN */
+                22, /* scryptLogR */
+                33, /* scryptLogP */
+                0, 0, 0, 5, /* salt.length */
+                1, 2, -1, -2, 55, /* salt */
+                0, 0, 0, 6, /* passwordHandle.length */
+                2, 3, -2, -3, 44, 1, /* passwordHandle */
+                0, 0, 0, 5, /* pinLength */
+        };
+        PasswordData deserialized = PasswordData.fromBytes(serialized);
+
+        assertEquals(11, deserialized.scryptLogN);
+        assertEquals(22, deserialized.scryptLogR);
+        assertEquals(33, deserialized.scryptLogP);
+        assertEquals(5, deserialized.pinLength);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD_OR_PIN, deserialized.credentialType);
+        assertArrayEquals(PAYLOAD, deserialized.salt);
+        assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+    }
+
+    @Test
+    public void testPasswordDataV2VersionNegativePinLengthNoCredential_deserialize() {
+        // Test that we can deserialize existing PasswordData and don't inadvertently change the
+        // wire format.
+        byte[] serialized = new byte[] {
+                0, 2, -1, -1, /* CREDENTIAL_TYPE_NONE */
+                11, /* scryptLogN */
+                22, /* scryptLogR */
+                33, /* scryptLogP */
+                0, 0, 0, 5, /* salt.length */
+                1, 2, -1, -2, 55, /* salt */
+                0, 0, 0, 6, /* passwordHandle.length */
+                2, 3, -2, -3, 44, 1, /* passwordHandle */
+                -1, -1, -1, -2, /* pinLength */
+        };
+        PasswordData deserialized = PasswordData.fromBytes(serialized);
+
+        assertEquals(11, deserialized.scryptLogN);
+        assertEquals(22, deserialized.scryptLogR);
+        assertEquals(33, deserialized.scryptLogP);
+        assertEquals(-2, deserialized.pinLength);
+        assertEquals(CREDENTIAL_TYPE_NONE, deserialized.credentialType);
+        assertArrayEquals(PAYLOAD, deserialized.salt);
+        assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+    }
+
+    @Test
+    public void testPasswordDataV1VersionNoCredential_deserialize() {
+        // Test that we can deserialize existing PasswordData and don't inadvertently change the
+        // wire format.
+        byte[] serialized = new byte[] {
+                -1, -1, -1, -1, /* CREDENTIAL_TYPE_NONE */
+                11, /* scryptLogN */
+                22, /* scryptLogR */
+                33, /* scryptLogP */
+                0, 0, 0, 5, /* salt.length */
+                1, 2, -1, -2, 55, /* salt */
+                0, 0, 0, 6, /* passwordHandle.length */
+                2, 3, -2, -3, 44, 1, /* passwordHandle */
+        };
+        PasswordData deserialized = PasswordData.fromBytes(serialized);
+
+        assertEquals(11, deserialized.scryptLogN);
+        assertEquals(22, deserialized.scryptLogR);
+        assertEquals(33, deserialized.scryptLogP);
+        assertEquals(PIN_LENGTH_UNAVAILABLE, deserialized.pinLength);
+        assertEquals(CREDENTIAL_TYPE_NONE, deserialized.credentialType);
+        assertArrayEquals(PAYLOAD, deserialized.salt);
+        assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
+    }
+
+    @Test
+    public void testPasswordDataV1VersionCredentialTypePin_deserialize() {
         // Test that we can deserialize existing PasswordData and don't inadvertently change the
         // wire format.
         byte[] serialized = new byte[] {
@@ -622,6 +702,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(11, deserialized.scryptLogN);
         assertEquals(22, deserialized.scryptLogR);
         assertEquals(33, deserialized.scryptLogP);
+        assertEquals(PIN_LENGTH_UNAVAILABLE, deserialized.pinLength);
         assertEquals(CREDENTIAL_TYPE_PASSWORD_OR_PIN, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);

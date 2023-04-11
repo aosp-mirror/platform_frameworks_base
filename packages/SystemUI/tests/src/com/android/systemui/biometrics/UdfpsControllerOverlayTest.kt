@@ -21,6 +21,7 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
@@ -29,6 +30,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.Surface
+import android.view.Surface.ROTATION_0
 import android.view.Surface.Rotation
 import android.view.View
 import android.view.WindowManager
@@ -42,6 +44,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -159,9 +162,10 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     private fun withRotation(@Rotation rotation: Int, block: () -> Unit) {
         // Sensor that's in the top left corner of the display in natural orientation.
         val sensorBounds = Rect(0, 0, SENSOR_WIDTH, SENSOR_HEIGHT)
+        val overlayBounds = Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
         overlayParams = UdfpsOverlayParams(
             sensorBounds,
-            sensorBounds,
+            overlayBounds,
             DISPLAY_WIDTH,
             DISPLAY_HEIGHT,
             scaleFactor = 1f,
@@ -313,5 +317,25 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun matchesRequestIds() = withReason(REASON_AUTH_BP) {
         assertThat(controllerOverlay.matchesRequestId(REQUEST_ID)).isTrue()
         assertThat(controllerOverlay.matchesRequestId(REQUEST_ID + 1)).isFalse()
+    }
+
+    @Test
+    fun smallOverlayOnEnrollmentWithA11y() = withRotation(ROTATION_0) {
+        withReason(REASON_ENROLL_ENROLLING) {
+            // When a11y enabled during enrollment
+            whenever(accessibilityManager.isTouchExplorationEnabled).thenReturn(true)
+            whenever(featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)).thenReturn(true)
+
+            controllerOverlay.show(udfpsController, overlayParams)
+            verify(windowManager).addView(
+                eq(controllerOverlay.overlayView),
+                layoutParamsCaptor.capture()
+            )
+
+            // Layout params should use sensor bounds
+            val lp = layoutParamsCaptor.value
+            assertThat(lp.width).isEqualTo(overlayParams.sensorBounds.width())
+            assertThat(lp.height).isEqualTo(overlayParams.sensorBounds.height())
+        }
     }
 }

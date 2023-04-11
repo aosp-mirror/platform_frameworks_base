@@ -43,7 +43,6 @@ import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SwipeHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FeatureFlags;
@@ -101,7 +100,6 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
                 ViewConfiguration.get(mContext),
                 new FalsingManagerFake(),
                 mFeatureFlags,
-                SwipeHelper.X,
                 mCallback,
                 mListener,
                 mNotificationRoundnessManager));

@@ -63,7 +63,8 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_magnification_menu_small"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_small" />
 
         <ImageButton
             android:id="@+id/magnifier_medium_button"
@@ -74,7 +75,8 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_magnification_menu_medium"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_medium" />
 
         <ImageButton
             android:id="@+id/magnifier_large_button"
@@ -85,7 +87,8 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_magnification_menu_large"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_large" />
 
         <ImageButton
             android:id="@+id/magnifier_full_button"
@@ -96,15 +99,16 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_open_in_full"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_fullscreen" />
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/magnifier_horizontal_lock_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="@dimen/magnification_setting_view_margin"
-        android:layout_marginBottom="@dimen/magnification_setting_view_margin"
         android:focusable="true">
 
         <TextView
@@ -132,6 +136,7 @@
         android:layout_height="wrap_content"
         android:text="@string/accessibility_magnification_zoom"
         android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
+        android:layout_marginTop="@dimen/magnification_setting_view_margin"
         android:focusable="true" />
 
     <com.android.systemui.common.ui.view.SeekBarWithIconButtonsView

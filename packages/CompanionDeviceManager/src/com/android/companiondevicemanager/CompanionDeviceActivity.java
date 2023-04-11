@@ -551,8 +551,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             summary = getHtmlFromResources(this, SUMMARIES.get(null), deviceName);
             mConstraintList.setVisibility(View.GONE);
         } else {
-            summary = getHtmlFromResources(this, SUMMARIES.get(deviceProfile),
-                    getString(PROFILES_NAME.get(deviceProfile)), appLabel);
+            summary = getHtmlFromResources(
+                    this, SUMMARIES.get(deviceProfile), getString(R.string.device_type));
             mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
             setupPermissionList();
         }

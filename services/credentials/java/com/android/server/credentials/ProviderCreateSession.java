@@ -29,6 +29,7 @@ import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.Bundle;
+import android.os.ICancellationSignal;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.CallingAppInfo;
@@ -39,8 +40,6 @@ import android.service.credentials.RemoteEntry;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
-
-import com.android.server.credentials.metrics.EntryEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -158,19 +157,26 @@ public final class ProviderCreateSession extends ProviderSession<
             // Store query phase exception for aggregation with final response
             mProviderException = (CreateCredentialException) exception;
         }
-        captureCandidateFailureInMetrics();
-        updateStatusAndInvokeCallback(toStatus(errorCode));
+        mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
+        updateStatusAndInvokeCallback(toStatus(errorCode),
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when provider service dies. */
     @Override
     public void onProviderServiceDied(RemoteCredentialService service) {
         if (service.getComponentName().equals(mComponentName)) {
-            updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
+            updateStatusAndInvokeCallback(Status.SERVICE_DEAD,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "
                     + "this should not happen");
         }
+    }
+
+    @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        mProviderCancellationSignal = cancellation;
     }
 
     private void onSetInitialRemoteResponse(BeginCreateCredentialResponse response) {
@@ -179,34 +185,13 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            gatherCandidateEntryMetrics(response);
-            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            gatherCandidateEntryMetrics(response);
-            updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
-        }
-    }
-
-    private void gatherCandidateEntryMetrics(BeginCreateCredentialResponse response) {
-        try {
-            var createEntries = response.getCreateEntries();
-            int numRemoteEntry = MetricUtilities.ZERO;
-            if (response.getRemoteCreateEntry() != null) {
-                numRemoteEntry = MetricUtilities.UNIT;
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
-            }
-            int numCreateEntries =
-                    createEntries == null ? MetricUtilities.ZERO : createEntries.size();
-            if (numCreateEntries > MetricUtilities.ZERO) {
-                createEntries.forEach(c ->
-                        mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
-            }
-            mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCreateEntries + numRemoteEntry);
-            mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
-            mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCreateEntries);
-            mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(MetricUtilities.UNIT);
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         }
     }
 
@@ -257,7 +242,7 @@ public final class ProviderCreateSession extends ProviderSession<
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
+            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest, this);
         }
     }
 

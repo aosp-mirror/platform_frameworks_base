@@ -40,11 +40,8 @@ constructor(
     /** Can the user interact with the view? */
     val isInteractable: Flow<Boolean> = interactor.isInteractable
 
-    /** Observe whether bouncer is showing. */
-    val show: Flow<Unit> = interactor.show
-
-    /** Observe whether bouncer is hiding. */
-    val hide: Flow<Unit> = interactor.hide
+    /** Observe whether bouncer is showing or not. */
+    val isShowing: Flow<Boolean> = interactor.isShowing
 
     /** Observe whether bouncer is starting to hide. */
     val startingToHide: Flow<Unit> = interactor.startingToHide
@@ -70,8 +67,8 @@ constructor(
     /** Observe whether we should update fps is showing. */
     val shouldUpdateSideFps: Flow<Unit> =
         merge(
-            interactor.hide,
-            interactor.show,
+            interactor.isShowing.map {},
+            interactor.startingToHide,
             interactor.startingDisappearAnimation.filterNotNull().map {}
         )
 

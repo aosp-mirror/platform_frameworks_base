@@ -4233,6 +4233,13 @@ public class Intent implements Parcelable, Cloneable {
             "com.android.intent.action.SHOW_BRIGHTNESS_DIALOG";
 
     /**
+     * Activity Action: Shows the contrast setting dialog.
+     * @hide
+     */
+    public static final String ACTION_SHOW_CONTRAST_DIALOG =
+            "com.android.intent.action.SHOW_CONTRAST_DIALOG";
+
+    /**
      * Broadcast Action:  A global button was pressed.  Includes a single
      * extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
      * caused the broadcast.
@@ -11356,12 +11363,15 @@ public class Intent implements Parcelable, Cloneable {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
+        toString(b);
+        return b.toString();
+    }
 
+    /** @hide */
+    public void toString(@NonNull StringBuilder b) {
         b.append("Intent { ");
         toShortString(b, true, true, true, false);
         b.append(" }");
-
-        return b.toString();
     }
 
     /** @hide */

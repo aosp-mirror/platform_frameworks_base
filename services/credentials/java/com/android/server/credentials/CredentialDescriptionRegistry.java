@@ -25,19 +25,16 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 /** Contains information on what CredentialProvider has what provisioned Credential. */
 public class CredentialDescriptionRegistry {
 
-    private static final String FLAT_STRING_SPLIT_REGEX = ";";
     private static final int MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS = 128;
     private static final int MAX_ALLOWED_ENTRIES_PER_PROVIDER = 16;
     @GuardedBy("sLock")
@@ -53,15 +50,15 @@ public class CredentialDescriptionRegistry {
     /** Represents the results of a given query into the registry. */
     public static final class FilterResult {
         final String mPackageName;
-        final String mFlattenedRequest;
+        final Set<String> mElementKeys;
         final List<CredentialEntry> mCredentialEntries;
 
         @VisibleForTesting
         FilterResult(String packageName,
-                String flattenedRequest,
+                Set<String> elementKeys,
                 List<CredentialEntry> credentialEntries) {
             mPackageName = packageName;
-            mFlattenedRequest = flattenedRequest;
+            mElementKeys = elementKeys;
             mCredentialEntries = credentialEntries;
         }
     }
@@ -166,18 +163,17 @@ public class CredentialDescriptionRegistry {
     /** Returns package names and entries of a CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
     public Set<FilterResult> getFilteredResultForProvider(String packageName,
-            String flatRequestString) {
+            Set<String> requestedKeyElements) {
         Set<FilterResult> result = new HashSet<>();
         if (!mCredentialDescriptions.containsKey(packageName)) {
             return result;
         }
         Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
-        Set<String> unflattenedRequestString = flatStringToSet(flatRequestString);
         for (CredentialDescription containedDescription: currentSet) {
-            if (checkForMatch(flatStringToSet(containedDescription.getFlattenedRequestString()),
-                    unflattenedRequestString)) {
+            if (checkForMatch(containedDescription.getSupportedElementKeys(),
+                    requestedKeyElements)) {
                 result.add(new FilterResult(packageName,
-                        containedDescription.getFlattenedRequestString(), containedDescription
+                        containedDescription.getSupportedElementKeys(), containedDescription
                         .getCredentialEntries()));
             }
         }
@@ -186,18 +182,15 @@ public class CredentialDescriptionRegistry {
 
     /** Returns package names of CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
-    public Set<FilterResult> getMatchingProviders(Set<String> flatRequestStrings) {
+    public Set<FilterResult> getMatchingProviders(Set<Set<String>> supportedElementKeys) {
         Set<FilterResult> result = new HashSet<>();
-        Set<Set<String>> unflattenedRequestStrings = flatRequestStrings.stream().map(
-                CredentialDescriptionRegistry::flatStringToSet).collect(Collectors.toSet());
         for (String packageName: mCredentialDescriptions.keySet()) {
             Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
             for (CredentialDescription containedDescription : currentSet) {
-                if (canProviderSatisfyAny(flatStringToSet(containedDescription
-                                .getFlattenedRequestString()),
-                        unflattenedRequestStrings)) {
+                if (canProviderSatisfyAny(containedDescription.getSupportedElementKeys(),
+                        supportedElementKeys)) {
                     result.add(new FilterResult(packageName,
-                            containedDescription.getFlattenedRequestString(), containedDescription
+                            containedDescription.getSupportedElementKeys(), containedDescription
                             .getCredentialEntries()));
                 }
             }
@@ -211,24 +204,19 @@ public class CredentialDescriptionRegistry {
         }
     }
 
-    private static boolean canProviderSatisfyAny(Set<String> registeredUnflattenedStrings,
-            Set<Set<String>> requestedUnflattenedStrings) {
-        for (Set<String> requestedUnflattenedString : requestedUnflattenedStrings) {
-            if (registeredUnflattenedStrings.containsAll(requestedUnflattenedString)) {
+    private static boolean canProviderSatisfyAny(Set<String> registeredElementKeys,
+            Set<Set<String>> requestedElementKeys) {
+        for (Set<String> requestedUnflattenedString : requestedElementKeys) {
+            if (registeredElementKeys.containsAll(requestedUnflattenedString)) {
                 return true;
             }
         }
         return false;
     }
 
-    static boolean checkForMatch(Set<String> registeredUnflattenedStrings,
-            Set<String> requestedUnflattenedString) {
-        return registeredUnflattenedStrings.containsAll(requestedUnflattenedString);
-    }
-
-    static Set<String> flatStringToSet(String flatString) {
-        return new HashSet<>(Arrays
-                .asList(flatString.split(FLAT_STRING_SPLIT_REGEX)));
+    static boolean checkForMatch(Set<String> registeredElementKeys,
+            Set<String> requestedElementKeys) {
+        return registeredElementKeys.containsAll(requestedElementKeys);
     }
 
 }

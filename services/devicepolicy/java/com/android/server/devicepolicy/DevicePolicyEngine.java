@@ -23,7 +23,6 @@ import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_HARDWARE_LIMIT
 import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
 import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_SET;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
-import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -47,7 +46,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.DeviceConfig;
 import android.telephony.TelephonyManager;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -85,9 +83,6 @@ final class DevicePolicyEngine {
     private static final String CELLULAR_2G_USER_RESTRICTION_ID =
             DevicePolicyIdentifiers.getIdentifierForUserRestriction(
                     UserManager.DISALLOW_CELLULAR_2G);
-
-    private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
-    private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = true;
 
     private final Context mContext;
     private final UserManager mUserManager;
@@ -771,28 +766,31 @@ final class DevicePolicyEngine {
         Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
         intent.setPackage(admin.getPackageName());
 
-        List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
-                intent,
-                PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
-                admin.getUserId());
-        if (receivers.isEmpty()) {
-            Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_SET_RESULT"
-                    + "in package " + admin.getPackageName());
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            List<ResolveInfo> receivers =
+                    mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                            intent,
+                            PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
+                            admin.getUserId());
+            if (receivers.isEmpty()) {
+                Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_SET_RESULT"
+                        + "in package " + admin.getPackageName());
+                return;
+            }
 
-        Bundle extras = new Bundle();
-        policyDefinition.getPolicyKey().writeToBundle(extras);
-        extras.putInt(
-                EXTRA_POLICY_TARGET_USER_ID,
-                getTargetUser(admin.getUserId(), userId));
-        extras.putInt(
-                EXTRA_POLICY_UPDATE_RESULT_KEY,
-                result);
+            Bundle extras = new Bundle();
+            policyDefinition.getPolicyKey().writeToBundle(extras);
+            extras.putInt(
+                    EXTRA_POLICY_TARGET_USER_ID,
+                    getTargetUser(admin.getUserId(), userId));
+            extras.putInt(
+                    EXTRA_POLICY_UPDATE_RESULT_KEY,
+                    result);
 
-        intent.putExtras(extras);
+            intent.putExtras(extras);
 
-        maybeSendIntentToAdminReceivers(intent, UserHandle.of(admin.getUserId()), receivers);
+            maybeSendIntentToAdminReceivers(intent, UserHandle.of(admin.getUserId()), receivers);
+        });
     }
 
     // TODO(b/261430877): Finalise the decision on which admins to send the updates to.
@@ -821,27 +819,30 @@ final class DevicePolicyEngine {
         Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_CHANGED);
         intent.setPackage(admin.getPackageName());
 
-        List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
-                intent,
-                PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
-                admin.getUserId());
-        if (receivers.isEmpty()) {
-            Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_CHANGED"
-                    + "in package " + admin.getPackageName());
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            List<ResolveInfo> receivers =
+                    mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                            intent,
+                            PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
+                            admin.getUserId());
+            if (receivers.isEmpty()) {
+                Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_CHANGED"
+                        + "in package " + admin.getPackageName());
+                return;
+            }
 
-        Bundle extras = new Bundle();
-        policyDefinition.getPolicyKey().writeToBundle(extras);
-        extras.putInt(
-                EXTRA_POLICY_TARGET_USER_ID,
-                getTargetUser(admin.getUserId(), userId));
-        extras.putInt(EXTRA_POLICY_UPDATE_RESULT_KEY, reason);
-        intent.putExtras(extras);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            Bundle extras = new Bundle();
+            policyDefinition.getPolicyKey().writeToBundle(extras);
+            extras.putInt(
+                    EXTRA_POLICY_TARGET_USER_ID,
+                    getTargetUser(admin.getUserId(), userId));
+            extras.putInt(EXTRA_POLICY_UPDATE_RESULT_KEY, reason);
+            intent.putExtras(extras);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-        maybeSendIntentToAdminReceivers(
-                intent, UserHandle.of(admin.getUserId()), receivers);
+            maybeSendIntentToAdminReceivers(
+                    intent, UserHandle.of(admin.getUserId()), receivers);
+        });
     }
 
     private void maybeSendIntentToAdminReceivers(
@@ -1146,38 +1147,6 @@ final class DevicePolicyEngine {
         return mEnforcingAdmins.size() > 0;
     }
 
-    /**
-     * Returns {@code true} if the coexistence flag is enabled or:
-     * <ul>
-     * <li>If the provided package is an admin with existing policies
-     * <li>A new admin and no other admin have policies set
-     * <li>More than one admin have policies set
-     */
-    boolean canAdminAddPolicies(String packageName, int userId) {
-        if (isCoexistenceFlagEnabled()) {
-            return true;
-        }
-
-        if (mEnforcingAdmins.contains(userId)
-                && mEnforcingAdmins.get(userId).stream().anyMatch(admin ->
-                admin.getPackageName().equals(packageName))) {
-            return true;
-        }
-
-        int numOfEnforcingAdmins = 0;
-        for (int i = 0; i < mEnforcingAdmins.size(); i++) {
-            numOfEnforcingAdmins += mEnforcingAdmins.get(i).size();
-        }
-        return numOfEnforcingAdmins == 0 || numOfEnforcingAdmins > 1;
-    }
-
-    private boolean isCoexistenceFlagEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE_DEVICE_POLICY_MANAGER,
-                ENABLE_COEXISTENCE_FLAG,
-                DEFAULT_ENABLE_COEXISTENCE_FLAG);
-    }
-
     private <V> boolean checkFor2gFailure(@NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin) {
         if (!policyDefinition.getPolicyKey().getIdentifier().equals(
@@ -1212,7 +1181,8 @@ final class DevicePolicyEngine {
         private static final String DEVICE_POLICIES_XML = "device_policy_state.xml";
         private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
         private static final String TAG_GLOBAL_POLICY_ENTRY = "global-policy-entry";
-        private static final String TAG_ADMINS_POLICY_ENTRY = "admins-policy-entry";
+        private static final String TAG_POLICY_STATE_ENTRY = "policy-state-entry";
+        private static final String TAG_POLICY_KEY_ENTRY = "policy-key-entry";
         private static final String TAG_ENFORCING_ADMINS_ENTRY = "enforcing-admins-entry";
         private static final String ATTR_USER_ID = "user-id";
 
@@ -1267,11 +1237,14 @@ final class DevicePolicyEngine {
                         serializer.startTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
 
                         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, userId);
-                        policy.getKey().saveToXml(serializer);
 
-                        serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                        serializer.startTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
+                        policy.getKey().saveToXml(serializer);
+                        serializer.endTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
+
+                        serializer.startTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
                         policy.getValue().saveToXml(serializer);
-                        serializer.endTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                        serializer.endTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
 
                         serializer.endTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
                     }
@@ -1284,11 +1257,13 @@ final class DevicePolicyEngine {
                 for (Map.Entry<PolicyKey, PolicyState<?>> policy : mGlobalPolicies.entrySet()) {
                     serializer.startTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
 
+                    serializer.startTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
                     policy.getKey().saveToXml(serializer);
+                    serializer.endTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
 
-                    serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                    serializer.startTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
                     policy.getValue().saveToXml(serializer);
-                    serializer.endTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                    serializer.endTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
 
                     serializer.endTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
                 }
@@ -1354,28 +1329,56 @@ final class DevicePolicyEngine {
         private void readLocalPoliciesInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
             int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
-            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
-            if (!mLocalPolicies.contains(userId)) {
-                mLocalPolicies.put(userId, new HashMap<>());
+            PolicyKey policyKey = null;
+            PolicyState<?> policyState = null;
+            int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                String tag = parser.getName();
+                switch (tag) {
+                    case TAG_POLICY_KEY_ENTRY:
+                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        break;
+                    case TAG_POLICY_STATE_ENTRY:
+                        policyState = PolicyState.readFromXml(parser);
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                }
             }
-            PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
-            if (adminsPolicy != null) {
-                mLocalPolicies.get(userId).put(policyKey, adminsPolicy);
+
+            if (policyKey != null && policyState != null) {
+                if (!mLocalPolicies.contains(userId)) {
+                    mLocalPolicies.put(userId, new HashMap<>());
+                }
+                mLocalPolicies.get(userId).put(policyKey, policyState);
             } else {
-                Log.e(TAG,
-                        "Error parsing file, " + policyKey + "doesn't have an " + "AdminsPolicy.");
+                Log.e(TAG, "Error parsing local policy");
             }
         }
 
         private void readGlobalPoliciesInner(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
-            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
-            PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
-            if (adminsPolicy != null) {
-                mGlobalPolicies.put(policyKey, adminsPolicy);
+            PolicyKey policyKey = null;
+            PolicyState<?> policyState = null;
+            int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                String tag = parser.getName();
+                switch (tag) {
+                    case TAG_POLICY_KEY_ENTRY:
+                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        break;
+                    case TAG_POLICY_STATE_ENTRY:
+                        policyState = PolicyState.readFromXml(parser);
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                }
+            }
+
+            if (policyKey != null && policyState != null) {
+                mGlobalPolicies.put(policyKey, policyState);
             } else {
-                Log.e(TAG,
-                        "Error parsing file, " + policyKey + "doesn't have an " + "AdminsPolicy.");
+                Log.e(TAG, "Error parsing global policy");
             }
         }
 
@@ -1386,21 +1389,6 @@ final class DevicePolicyEngine {
                 mEnforcingAdmins.put(admin.getUserId(), new HashSet<>());
             }
             mEnforcingAdmins.get(admin.getUserId()).add(admin);
-        }
-
-        @Nullable
-        private PolicyState<?> parseAdminsPolicy(TypedXmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            int outerDepth = parser.getDepth();
-            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                String tag = parser.getName();
-                if (tag.equals(TAG_ADMINS_POLICY_ENTRY)) {
-                    return PolicyState.readFromXml(parser);
-                }
-                Log.e(TAG, "Unknown tag " + tag);
-            }
-            Log.e(TAG, "Error parsing file, AdminsPolicy not found");
-            return null;
         }
     }
 }

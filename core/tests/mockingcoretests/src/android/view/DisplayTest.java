@@ -142,6 +142,31 @@ public class DisplayTest {
     }
 
     @Test
+    public void testGetHdrCapabilities_getSupportedHdrTypes_returns_mode_specific_hdr_types() {
+        setDisplayInfoPortrait(mDisplayInfo);
+        float[] alternativeRefreshRates = new float[0];
+        int[] hdrTypesWithDv = new int[] {1, 2, 3, 4};
+        Display.Mode modeWithDv = new Display.Mode(/* modeId= */ 0, 0, 0, 0f,
+                alternativeRefreshRates, hdrTypesWithDv);
+
+        int[] hdrTypesWithoutDv = new int[]{2, 3, 4};
+        Display.Mode modeWithoutDv = new Display.Mode(/* modeId= */ 1, 0, 0, 0f,
+                alternativeRefreshRates, hdrTypesWithoutDv);
+
+        mDisplayInfo.supportedModes = new Display.Mode[] {modeWithoutDv, modeWithDv};
+        mDisplayInfo.hdrCapabilities = new Display.HdrCapabilities(hdrTypesWithDv, 0, 0, 0);
+
+        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+
+        mDisplayInfo.modeId = 0;
+        assertArrayEquals(hdrTypesWithDv, display.getHdrCapabilities().getSupportedHdrTypes());
+
+        mDisplayInfo.modeId = 1;
+        assertArrayEquals(hdrTypesWithoutDv, display.getHdrCapabilities().getSupportedHdrTypes());
+    }
+
+    @Test
     public void testConstructor_defaultDisplayAdjustments_matchesDisplayInfo() {
         setDisplayInfoPortrait(mDisplayInfo);
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,

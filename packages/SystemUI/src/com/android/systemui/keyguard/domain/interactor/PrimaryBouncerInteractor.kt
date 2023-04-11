@@ -21,15 +21,12 @@ import android.content.res.ColorStateList
 import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
-import android.os.UserHandle
-import android.os.UserManager
 import android.util.Log
 import android.view.View
 import com.android.keyguard.KeyguardConstants
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
-import com.android.settingslib.Utils
 import com.android.systemui.DejankUtils
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
@@ -44,12 +41,12 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /**
  * Encapsulates business logic for interacting with the lock-screen primary (pin/pattern/password)
@@ -84,19 +81,12 @@ constructor(
     /** Runnable to show the primary bouncer. */
     val showRunnable = Runnable {
         repository.setPrimaryShow(true)
-        primaryBouncerView.delegate?.showPromptReason(repository.bouncerPromptReason)
-        (repository.bouncerErrorMessage as? String)?.let {
-            repository.setShowMessage(
-                BouncerShowMessageModel(message = it, Utils.getColorError(context))
-            )
-        }
         repository.setPrimaryShowingSoon(false)
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.VISIBLE)
     }
 
     val keyguardAuthenticated: Flow<Boolean> = repository.keyguardAuthenticated.filterNotNull()
-    val show: Flow<Unit> = repository.primaryBouncerShow.filter { it }.map {}
-    val hide: Flow<Unit> = repository.primaryBouncerShow.filter { !it }.map {}
+    val isShowing: Flow<Boolean> = repository.primaryBouncerShow
     val startingToHide: Flow<Unit> = repository.primaryBouncerStartingToHide.filter { it }.map {}
     val isBackButtonEnabled: Flow<Boolean> = repository.isBackButtonEnabled.filterNotNull()
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
@@ -107,10 +97,9 @@ constructor(
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
     /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
     val bouncerExpansion: Flow<Float> =
-        combine(
-            repository.panelExpansionAmount,
-            repository.primaryBouncerShow
-        ) { panelExpansion, primaryBouncerIsShowing ->
+        combine(repository.panelExpansionAmount, repository.primaryBouncerShow) {
+            panelExpansion,
+            primaryBouncerIsShowing ->
             if (primaryBouncerIsShowing) {
                 1f - panelExpansion
             } else {
@@ -153,22 +142,18 @@ constructor(
             (isBouncerShowing() || repository.primaryBouncerShowingSoon.value) &&
                 needsFullscreenBouncer()
 
-        if (!resumeBouncer && isBouncerShowing()) {
-            // If bouncer is visible, the bouncer is already showing.
-            return
-        }
-
         Trace.beginSection("KeyguardBouncer#show")
         repository.setPrimaryScrimmed(isScrimmed)
         if (isScrimmed) {
             setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
         }
 
+        // In this special case, we want to hide the bouncer and show it again. We want to emit
+        // show(true) again so that we can reinflate the new view.
         if (resumeBouncer) {
-            primaryBouncerView.delegate?.resume()
-            // Bouncer is showing the next security screen and we just need to prompt a resume.
-            return
+            repository.setPrimaryShow(false)
         }
+
         if (primaryBouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
             // Keyguard is done.
             return
@@ -196,6 +181,7 @@ constructor(
             dismissCallbackRegistry.notifyDismissCancelled()
         }
 
+        repository.setPrimaryStartDisappearAnimation(null)
         falsingCollector.onBouncerHidden()
         keyguardStateController.notifyPrimaryBouncerShowing(false /* showing */)
         cancelShowRunnable()
@@ -307,11 +293,8 @@ constructor(
             runnable.run()
             return
         }
-        val finishRunnable = Runnable {
-            runnable.run()
-            repository.setPrimaryStartDisappearAnimation(null)
-        }
-        repository.setPrimaryStartDisappearAnimation(finishRunnable)
+
+        repository.setPrimaryStartDisappearAnimation(runnable)
     }
 
     /** Determine whether to show the side fps animation. */

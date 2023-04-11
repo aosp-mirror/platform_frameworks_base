@@ -125,6 +125,8 @@ public class ImageWallpaper extends WallpaperService {
         private int mBitmapUsages = 0;
         private final Object mLock = new Object();
 
+        private boolean mIsLockscreenLiveWallpaperEnabled;
+
         CanvasEngine() {
             super();
             setFixedSizeAllowed(true);
@@ -167,8 +169,10 @@ public class ImageWallpaper extends WallpaperService {
                 Log.d(TAG, "onCreate");
             }
             mWallpaperManager = getDisplayContext().getSystemService(WallpaperManager.class);
+            mIsLockscreenLiveWallpaperEnabled = mWallpaperManager
+                    .isLockscreenLiveWallpaperEnabled();
             mSurfaceHolder = surfaceHolder;
-            Rect dimensions = mWallpaperManager.isLockscreenLiveWallpaperEnabled()
+            Rect dimensions = mIsLockscreenLiveWallpaperEnabled
                     ? mWallpaperManager.peekBitmapDimensions(getSourceFlag())
                     : mWallpaperManager.peekBitmapDimensions();
             int width = Math.max(MIN_SURFACE_WIDTH, dimensions.width());
@@ -319,7 +323,7 @@ public class ImageWallpaper extends WallpaperService {
             boolean loadSuccess = false;
             Bitmap bitmap;
             try {
-                bitmap = mWallpaperManager.isLockscreenLiveWallpaperEnabled()
+                bitmap = mIsLockscreenLiveWallpaperEnabled
                         ? mWallpaperManager.getBitmapAsUser(
                                 mUserTracker.getUserId(), false, getSourceFlag())
                         : mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
@@ -333,7 +337,7 @@ public class ImageWallpaper extends WallpaperService {
                 // be loaded, we will go into a cycle. Don't do a build where the
                 // default wallpaper can't be loaded.
                 Log.w(TAG, "Unable to load wallpaper!", exception);
-                if (mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
+                if (mIsLockscreenLiveWallpaperEnabled) {
                     mWallpaperManager.clearWallpaper(getWallpaperFlags(), mUserTracker.getUserId());
                 } else {
                     mWallpaperManager.clearWallpaper(
@@ -341,7 +345,7 @@ public class ImageWallpaper extends WallpaperService {
                 }
 
                 try {
-                    bitmap = mWallpaperManager.isLockscreenLiveWallpaperEnabled()
+                    bitmap = mIsLockscreenLiveWallpaperEnabled
                             ? mWallpaperManager.getBitmapAsUser(
                                     mUserTracker.getUserId(), false, getSourceFlag())
                             : mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
@@ -365,7 +369,7 @@ public class ImageWallpaper extends WallpaperService {
                     mBitmap.recycle();
                 }
                 mBitmap = bitmap;
-                mWideColorGamut = mWallpaperManager.isLockscreenLiveWallpaperEnabled()
+                mWideColorGamut = mIsLockscreenLiveWallpaperEnabled
                         ? mWallpaperManager.wallpaperSupportsWcg(getSourceFlag())
                         : mWallpaperManager.wallpaperSupportsWcg(WallpaperManager.FLAG_SYSTEM);
 

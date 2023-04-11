@@ -19,6 +19,10 @@ package com.android.internal.app;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_PERSONAL;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_USE_PERSONAL_BROWSER;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_USE_WORK_BROWSER;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_WORK;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CROSS_PROFILE_BLOCKED_TITLE;
@@ -46,6 +50,7 @@ import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -1713,14 +1718,29 @@ public class ResolverActivity extends Activity implements
             }
         }.execute();
 
-        ((TextView) findViewById(R.id.open_cross_profile)).setText(
-                getResources().getString(
-                        inWorkProfile ? R.string.miniresolver_open_in_personal
-                                : R.string.miniresolver_open_in_work,
-                        otherProfileResolveInfo.getDisplayLabel()));
-        ((Button) findViewById(R.id.use_same_profile_browser)).setText(
-                inWorkProfile ? R.string.miniresolver_use_work_browser
-                        : R.string.miniresolver_use_personal_browser);
+        CharSequence targetDisplayLabel = otherProfileResolveInfo.getDisplayLabel();
+
+        DevicePolicyResourcesManager devicePolicyResourcesManager = getSystemService(
+                DevicePolicyManager.class).getResources();
+
+        if (inWorkProfile) {
+            ((TextView) findViewById(R.id.open_cross_profile)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_WORK,
+                            () -> getString(R.string.miniresolver_open_in_work, targetDisplayLabel),
+                            targetDisplayLabel));
+            ((Button) findViewById(R.id.use_same_profile_browser)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_USE_WORK_BROWSER,
+                            () -> getString(R.string.miniresolver_use_work_browser)));
+        } else {
+            ((TextView) findViewById(R.id.open_cross_profile)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_PERSONAL,
+                            () -> getString(R.string.miniresolver_open_in_personal,
+                                    targetDisplayLabel),
+                            targetDisplayLabel));
+            ((Button) findViewById(R.id.use_same_profile_browser)).setText(
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_USE_PERSONAL_BROWSER,
+                            () -> getString(R.string.miniresolver_use_personal_browser)));
+        }
 
         findViewById(R.id.use_same_profile_browser).setOnClickListener(
                 v -> {

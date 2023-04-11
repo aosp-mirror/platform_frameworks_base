@@ -156,14 +156,6 @@ public abstract class CredentialProviderService extends Service {
 
     private static final String TAG = "CredProviderService";
 
-    /**
-     * The list of capabilities exposed by a credential provider.
-     *
-     * @deprecated Replaced with {@link android.service.credentials#SERVICE_META_DATA}
-     */
-    @Deprecated
-    public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
-
      /**
       * Name under which a Credential Provider service component publishes information
       * about itself.  This meta-data must reference an XML resource containing
@@ -239,12 +231,18 @@ public abstract class CredentialProviderService extends Service {
     }
 
     private final ICredentialProviderService mInterface = new ICredentialProviderService.Stub() {
-        public ICancellationSignal onBeginGetCredential(BeginGetCredentialRequest request,
+        @Override
+        public void onBeginGetCredential(BeginGetCredentialRequest request,
                 IBeginGetCredentialCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onBeginGetCredential,
@@ -275,7 +273,6 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
         }
         private void enforceRemoteEntryPermission() {
             String permission =
@@ -288,12 +285,17 @@ public abstract class CredentialProviderService extends Service {
         }
 
         @Override
-        public ICancellationSignal onBeginCreateCredential(BeginCreateCredentialRequest request,
+        public void onBeginCreateCredential(BeginCreateCredentialRequest request,
                 IBeginCreateCredentialCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onBeginCreateCredential,
@@ -324,16 +326,20 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
         }
 
         @Override
-        public ICancellationSignal onClearCredentialState(ClearCredentialStateRequest request,
+        public void onClearCredentialState(ClearCredentialStateRequest request,
                 IClearCredentialStateCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onClearCredentialState,
@@ -358,7 +364,6 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
         }
     };
 

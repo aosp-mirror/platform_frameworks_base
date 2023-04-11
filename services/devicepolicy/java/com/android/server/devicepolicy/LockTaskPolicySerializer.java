@@ -32,12 +32,14 @@ import java.util.Set;
 
 final class LockTaskPolicySerializer extends PolicySerializer<LockTaskPolicy> {
 
-    private static final String ATTR_PACKAGES = ":packages";
+    private static final String TAG = "LockTaskPolicySerializer";
+
+    private static final String ATTR_PACKAGES = "packages";
     private static final String ATTR_PACKAGES_SEPARATOR = ";";
-    private static final String ATTR_FLAGS = ":flags";
+    private static final String ATTR_FLAGS = "flags";
 
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, String attributeNamePrefix,
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
             @NonNull LockTaskPolicy value) throws IOException {
         Objects.requireNonNull(value);
         if (value.getPackages() == null || value.getPackages().isEmpty()) {
@@ -46,31 +48,31 @@ final class LockTaskPolicySerializer extends PolicySerializer<LockTaskPolicy> {
         }
         serializer.attribute(
                 /* namespace= */ null,
-                attributeNamePrefix + ATTR_PACKAGES,
+                ATTR_PACKAGES,
                 String.join(ATTR_PACKAGES_SEPARATOR, value.getPackages()));
         serializer.attributeInt(
                 /* namespace= */ null,
-                attributeNamePrefix + ATTR_FLAGS,
+                ATTR_FLAGS,
                 value.getFlags());
     }
 
     @Override
-    LockTaskPolicy readFromXml(TypedXmlPullParser parser, String attributeNamePrefix) {
+    LockTaskPolicy readFromXml(TypedXmlPullParser parser) {
         String packagesStr = parser.getAttributeValue(
                 /* namespace= */ null,
-                attributeNamePrefix + ATTR_PACKAGES);
+                ATTR_PACKAGES);
         if (packagesStr == null) {
-            Log.e(DevicePolicyEngine.TAG, "Error parsing LockTask policy value.");
+            Log.e(TAG, "Error parsing LockTask policy value.");
             return null;
         }
         Set<String> packages = Set.of(packagesStr.split(ATTR_PACKAGES_SEPARATOR));
         try {
             int flags = parser.getAttributeInt(
                     /* namespace= */ null,
-                    attributeNamePrefix + ATTR_FLAGS);
+                    ATTR_FLAGS);
             return new LockTaskPolicy(packages, flags);
         } catch (XmlPullParserException e) {
-            Log.e(DevicePolicyEngine.TAG, "Error parsing LockTask policy value", e);
+            Log.e(TAG, "Error parsing LockTask policy value", e);
             return null;
         }
     }

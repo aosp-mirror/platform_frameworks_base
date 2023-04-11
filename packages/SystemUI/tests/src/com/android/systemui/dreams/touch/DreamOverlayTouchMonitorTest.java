@@ -399,7 +399,21 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPause() {
+    public void testPauseWithNoActiveSessions() {
+        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)));
+
+        environment.updateLifecycle(observerOwnerPair -> {
+            observerOwnerPair.first.onPause(observerOwnerPair.second);
+        });
+
+        environment.verifyInputSessionDispose();
+    }
+
+    @Test
+    public void testDeferredPauseWithActiveSessions() {
         final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
 
         final Environment environment = new Environment(Stream.of(touchHandler)
@@ -417,12 +431,57 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
         environment.publishInputEvent(event);
         verify(eventListener).onInputEvent(eq(event));
 
+        final ArgumentCaptor<DreamTouchHandler.TouchSession> touchSessionArgumentCaptor =
+                ArgumentCaptor.forClass(DreamTouchHandler.TouchSession.class);
+
+        verify(touchHandler).onSessionStart(touchSessionArgumentCaptor.capture());
+
         environment.updateLifecycle(observerOwnerPair -> {
             observerOwnerPair.first.onPause(observerOwnerPair.second);
         });
 
+        verify(environment.mInputSession, never()).dispose();
+
+        // End session
+        touchSessionArgumentCaptor.getValue().pop();
+        environment.executeAll();
+
+        // Check to make sure the input session is now disposed.
         environment.verifyInputSessionDispose();
     }
+
+    @Test
+    public void testDestroyWithActiveSessions() {
+        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)));
+
+        final InputEvent initialEvent = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(initialEvent);
+
+        // Ensure session started
+        final InputChannelCompat.InputEventListener eventListener =
+                registerInputEventListener(touchHandler);
+
+        // First event will be missed since we register after the execution loop,
+        final InputEvent event = Mockito.mock(InputEvent.class);
+        environment.publishInputEvent(event);
+        verify(eventListener).onInputEvent(eq(event));
+
+        final ArgumentCaptor<DreamTouchHandler.TouchSession> touchSessionArgumentCaptor =
+                ArgumentCaptor.forClass(DreamTouchHandler.TouchSession.class);
+
+        verify(touchHandler).onSessionStart(touchSessionArgumentCaptor.capture());
+
+        environment.updateLifecycle(observerOwnerPair -> {
+            observerOwnerPair.first.onDestroy(observerOwnerPair.second);
+        });
+
+        // Check to make sure the input session is now disposed.
+        environment.verifyInputSessionDispose();
+    }
+
 
     @Test
     public void testPilfering() {
@@ -476,7 +535,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
         environment.executeAll();
 
         environment.updateLifecycle(observerOwnerPair -> {
-            observerOwnerPair.first.onPause(observerOwnerPair.second);
+            observerOwnerPair.first.onDestroy(observerOwnerPair.second);
         });
 
         environment.executeAll();

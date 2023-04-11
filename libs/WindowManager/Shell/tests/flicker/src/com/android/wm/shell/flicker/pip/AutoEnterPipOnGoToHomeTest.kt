@@ -40,6 +40,7 @@ import org.junit.runners.Parameterized
  *     Select "Auto-enter PiP" radio button
  *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
  * ```
+ *
  * Notes:
  * ```
  *     1. All assertions are inherited from [EnterPipTest]

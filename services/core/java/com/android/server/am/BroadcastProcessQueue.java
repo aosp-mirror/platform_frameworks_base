@@ -188,7 +188,7 @@ class BroadcastProcessQueue {
     private @Reason int mRunnableAtReason = REASON_EMPTY;
     private boolean mRunnableAtInvalidated;
 
-    private boolean mProcessCached;
+    private boolean mUidCached;
     private boolean mProcessInstrumented;
     private boolean mProcessPersistent;
 
@@ -382,27 +382,30 @@ class BroadcastProcessQueue {
     /**
      * Update the actively running "warm" process for this process.
      */
-    public void setProcess(@Nullable ProcessRecord app) {
+    public void setProcessAndUidCached(@Nullable ProcessRecord app, boolean uidCached) {
         this.app = app;
         if (app != null) {
-            setProcessCached(app.isCached());
+            setUidCached(uidCached);
             setProcessInstrumented(app.getActiveInstrumentation() != null);
             setProcessPersistent(app.isPersistent());
         } else {
-            setProcessCached(false);
+            setUidCached(uidCached);
             setProcessInstrumented(false);
             setProcessPersistent(false);
         }
+
+        // Since we may have just changed our PID, invalidate cached strings
+        mCachedToString = null;
+        mCachedToShortString = null;
     }
 
     /**
      * Update if this process is in the "cached" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
-    @VisibleForTesting
-    void setProcessCached(boolean cached) {
-        if (mProcessCached != cached) {
-            mProcessCached = cached;
+    private void setUidCached(boolean uidCached) {
+        if (mUidCached != uidCached) {
+            mUidCached = uidCached;
             invalidateRunnableAt();
         }
     }
@@ -412,7 +415,7 @@ class BroadcastProcessQueue {
      * signaling that broadcast dispatch should bypass all pauses or delays, to
      * avoid holding up test suites.
      */
-    public void setProcessInstrumented(boolean instrumented) {
+    private void setProcessInstrumented(boolean instrumented) {
         if (mProcessInstrumented != instrumented) {
             mProcessInstrumented = instrumented;
             invalidateRunnableAt();
@@ -423,7 +426,7 @@ class BroadcastProcessQueue {
      * Update if this process is in the "persistent" state, which signals broadcast dispatch should
      * bypass all pauses or delays to prevent the system from becoming out of sync with itself.
      */
-    public void setProcessPersistent(boolean persistent) {
+    private void setProcessPersistent(boolean persistent) {
         if (mProcessPersistent != persistent) {
             mProcessPersistent = persistent;
             invalidateRunnableAt();
@@ -438,17 +441,17 @@ class BroadcastProcessQueue {
     }
 
     public int getPreferredSchedulingGroupLocked() {
-        if (mCountForeground > mCountForegroundDeferred) {
+        if (!isActive()) {
+            return ProcessList.SCHED_GROUP_UNDEFINED;
+        } else if (mCountForeground > mCountForegroundDeferred) {
             // We have a foreground broadcast somewhere down the queue, so
             // boost priority until we drain them all
             return ProcessList.SCHED_GROUP_DEFAULT;
         } else if ((mActive != null) && mActive.isForeground()) {
             // We have a foreground broadcast right now, so boost priority
             return ProcessList.SCHED_GROUP_DEFAULT;
-        } else if (!isIdle()) {
-            return ProcessList.SCHED_GROUP_BACKGROUND;
         } else {
-            return ProcessList.SCHED_GROUP_UNDEFINED;
+            return ProcessList.SCHED_GROUP_BACKGROUND;
         }
     }
 
@@ -860,6 +863,7 @@ class BroadcastProcessQueue {
     static final int REASON_CONTAINS_RESULT_TO = 15;
     static final int REASON_CONTAINS_INSTRUMENTED = 16;
     static final int REASON_CONTAINS_MANIFEST = 17;
+    static final int REASON_FOREGROUND_ACTIVITIES = 18;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
@@ -879,6 +883,7 @@ class BroadcastProcessQueue {
             REASON_CONTAINS_RESULT_TO,
             REASON_CONTAINS_INSTRUMENTED,
             REASON_CONTAINS_MANIFEST,
+            REASON_FOREGROUND_ACTIVITIES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -902,6 +907,7 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_RESULT_TO: return "CONTAINS_RESULT_TO";
             case REASON_CONTAINS_INSTRUMENTED: return "CONTAINS_INSTRUMENTED";
             case REASON_CONTAINS_MANIFEST: return "CONTAINS_MANIFEST";
+            case REASON_FOREGROUND_ACTIVITIES: return "FOREGROUND_ACTIVITIES";
             default: return Integer.toString(reason);
         }
     }
@@ -959,6 +965,11 @@ class BroadcastProcessQueue {
             } else if (mProcessInstrumented) {
                 mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
                 mRunnableAtReason = REASON_INSTRUMENTED;
+            } else if (app != null && app.hasForegroundActivities()) {
+                // TODO: Listen for uid state changes to check when an uid goes in and out of
+                // the TOP state.
+                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
+                mRunnableAtReason = REASON_FOREGROUND_ACTIVITIES;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
@@ -974,7 +985,7 @@ class BroadcastProcessQueue {
             } else if (mProcessPersistent) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_PERSISTENT;
-            } else if (mProcessCached) {
+            } else if (mUidCached) {
                 if (r.deferUntilActive) {
                     // All enqueued broadcasts are deferrable, defer
                     if (mCountDeferred == mCountEnqueued) {
@@ -1039,13 +1050,13 @@ class BroadcastProcessQueue {
      * Check overall health, confirming things are in a reasonable state and
      * that we're not wedged.
      */
-    public void checkHealthLocked() {
-        checkHealthLocked(mPending);
-        checkHealthLocked(mPendingUrgent);
-        checkHealthLocked(mPendingOffload);
+    public void assertHealthLocked() {
+        assertHealthLocked(mPending);
+        assertHealthLocked(mPendingUrgent);
+        assertHealthLocked(mPendingOffload);
     }
 
-    private void checkHealthLocked(@NonNull ArrayDeque<SomeArgs> queue) {
+    private void assertHealthLocked(@NonNull ArrayDeque<SomeArgs> queue) {
         if (queue.isEmpty()) return;
 
         final Iterator<SomeArgs> it = queue.descendingIterator();
@@ -1128,16 +1139,16 @@ class BroadcastProcessQueue {
     @Override
     public String toString() {
         if (mCachedToString == null) {
-            mCachedToString = "BroadcastProcessQueue{"
-                    + Integer.toHexString(System.identityHashCode(this))
-                    + " " + processName + "/" + UserHandle.formatUid(uid) + "}";
+            mCachedToString = "BroadcastProcessQueue{" + toShortString() + "}";
         }
         return mCachedToString;
     }
 
     public String toShortString() {
         if (mCachedToShortString == null) {
-            mCachedToShortString = processName + "/" + UserHandle.formatUid(uid);
+            mCachedToShortString = Integer.toHexString(System.identityHashCode(this))
+                    + " " + ((app != null) ? app.getPid() : "?") + ":" + processName + "/"
+                    + UserHandle.formatUid(uid);
         }
         return mCachedToShortString;
     }
@@ -1183,7 +1194,7 @@ class BroadcastProcessQueue {
     @NeverCompile
     private void dumpProcessState(@NonNull IndentingPrintWriter pw) {
         final StringBuilder sb = new StringBuilder();
-        if (mProcessCached) {
+        if (mUidCached) {
             sb.append("CACHED");
         }
         if (mProcessInstrumented) {

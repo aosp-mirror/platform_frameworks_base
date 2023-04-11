@@ -53,6 +53,7 @@ import org.junit.runners.Parameterized
  *     Launch [pipApp] on a fixed landscape orientation
  *     Broadcast action [ACTION_ENTER_PIP] to enter pip mode
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

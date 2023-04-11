@@ -39,6 +39,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -80,6 +81,11 @@ public interface Bubbles {
     int DISMISS_NO_BUBBLE_UP = 14;
     int DISMISS_RELOAD_FROM_DISK = 15;
     int DISMISS_USER_REMOVED = 16;
+
+    /** Returns a binder that can be passed to an external process to manipulate Bubbles. */
+    default IBubbles createExternalInterface() {
+        return null;
+    }
 
     /**
      * @return {@code true} if there is a bubble associated with the provided key and if its
@@ -276,6 +282,17 @@ public interface Bubbles {
      * @param removedUserId the id of the removed user.
      */
     void onUserRemoved(int removedUserId);
+
+    /**
+     * A listener to be notified of bubble state changes, used by launcher to render bubbles in
+     * its process.
+     */
+    interface BubbleStateListener {
+        /**
+         * Called when the bubbles state changes.
+         */
+        void onBubbleStateChange(BubbleBarUpdate update);
+    }
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {

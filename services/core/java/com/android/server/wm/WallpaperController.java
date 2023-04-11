@@ -46,6 +46,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -56,7 +57,6 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.window.ScreenCapture;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
@@ -122,7 +122,7 @@ class WallpaperController {
 
     private boolean mShouldOffsetWallpaperCenter;
 
-    final boolean mEnableSeparateLockScreenEngine;
+    final boolean mIsLockscreenLiveWallpaperEnabled;
 
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         if ((w.mAttrs.type == TYPE_WALLPAPER)) {
@@ -259,8 +259,8 @@ class WallpaperController {
         mShouldOffsetWallpaperCenter =
                 resources.getBoolean(
                         com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
-        mEnableSeparateLockScreenEngine =
-                resources.getBoolean(R.bool.config_independentLockscreenLiveWallpaper);
+        mIsLockscreenLiveWallpaperEnabled =
+                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", false);
     }
 
     void resetLargestDisplay(Display display) {

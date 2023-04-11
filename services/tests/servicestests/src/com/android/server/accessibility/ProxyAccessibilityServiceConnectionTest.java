@@ -50,6 +50,7 @@ import java.util.List;
 
 public class ProxyAccessibilityServiceConnectionTest {
     private static final int DISPLAY_ID = 1000;
+    private static final int DEVICE_ID = 2000;
     private static final int CONNECTION_ID = 1000;
     private static final ComponentName COMPONENT_NAME = new ComponentName(
             "com.android.server.accessibility", ".ProxyAccessibilityServiceConnectionTest");
@@ -90,7 +91,7 @@ public class ProxyAccessibilityServiceConnectionTest {
                 mAccessibilityServiceInfo, CONNECTION_ID , new Handler(
                         getInstrumentation().getContext().getMainLooper()),
                 mMockLock, mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
-                mMockWindowManagerInternal, mMockA11yWindowManager, DISPLAY_ID);
+                mMockWindowManagerInternal, mMockA11yWindowManager, DISPLAY_ID, DEVICE_ID);
     }
 
     @Test
@@ -101,7 +102,7 @@ public class ProxyAccessibilityServiceConnectionTest {
 
         mProxyConnection.setInstalledAndEnabledServices(infos);
 
-        verify(mMockSystemSupport).onClientChangeLocked(true);
+        verify(mMockSystemSupport).onProxyChanged(DEVICE_ID);
     }
 
     @Test

@@ -19,7 +19,7 @@ package android.telephony.satellite;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 
-import com.android.internal.telephony.ILongConsumer;
+import java.util.function.Consumer;
 
 /**
  * A callback class for listening to satellite datagrams.
@@ -33,11 +33,11 @@ public interface SatelliteDatagramCallback {
      * @param datagramId An id that uniquely identifies incoming datagram.
      * @param datagram Datagram to be received over satellite.
      * @param pendingCount Number of datagrams yet to be received by the app.
-     * @param callback This callback will be used by datagram receiver app to send received
-     *                 datagramId to Telephony. If the callback is not received within five minutes,
-     *                 Telephony will resend the datagram.
+     * @param callback This callback will be used by datagram receiver app to inform Telephony
+     *                 that they received the datagram. If the callback is not received within
+     *                 five minutes, Telephony will resend the datagram.
      */
     @UnsupportedAppUsage
     void onSatelliteDatagramReceived(long datagramId, @NonNull SatelliteDatagram datagram,
-            int pendingCount, @NonNull ILongConsumer callback);
+            int pendingCount, @NonNull Consumer<Void> callback);
 }

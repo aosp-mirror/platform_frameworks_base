@@ -191,18 +191,11 @@ class LogContextInteractorImplTest : SysuiTestCase() {
             foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_CLOSED)
             keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
 
-            var aod: Boolean? = null
-            var awake: Boolean? = null
             var folded: Int? = null
             var displayState: Int? = null
             val job =
                 interactor.addBiometricContextListener(
                     object : IBiometricContextListener.Stub() {
-                        override fun onDozeChanged(isAod: Boolean, isAwake: Boolean) {
-                            aod = isAod
-                            awake = isAwake
-                        }
-
                         override fun onFoldChanged(foldState: Int) {
                             folded = foldState
                         }
@@ -214,8 +207,6 @@ class LogContextInteractorImplTest : SysuiTestCase() {
                 )
             runCurrent()
 
-            assertThat(aod).isTrue()
-            assertThat(awake).isFalse()
             assertThat(folded).isEqualTo(FoldState.FULLY_CLOSED)
             assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_AOD)
 
@@ -224,8 +215,6 @@ class LogContextInteractorImplTest : SysuiTestCase() {
             keyguardTransitionRepository.startTransitionTo(KeyguardState.LOCKSCREEN)
             runCurrent()
 
-            assertThat(aod).isFalse()
-            assertThat(awake).isTrue()
             assertThat(folded).isEqualTo(FoldState.HALF_OPENED)
             assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
 
@@ -236,8 +225,6 @@ class LogContextInteractorImplTest : SysuiTestCase() {
             keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
             runCurrent()
 
-            assertThat(aod).isFalse()
-            assertThat(awake).isTrue()
             assertThat(folded).isEqualTo(FoldState.HALF_OPENED)
             assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
         }

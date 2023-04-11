@@ -46,6 +46,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -111,6 +112,7 @@ public final class UiAutomation {
     private static final String LOG_TAG = UiAutomation.class.getSimpleName();
 
     private static final boolean DEBUG = false;
+    private static final boolean VERBOSE = false;
 
     private static final int CONNECTION_ID_UNDEFINED = -1;
 
@@ -321,11 +323,18 @@ public final class UiAutomation {
      * @hide
      */
     public void connectWithTimeout(int flags, long timeoutMillis) throws TimeoutException {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "connectWithTimeout: user=" + Process.myUserHandle().getIdentifier()
+                    + ", flags=" + DebugUtils.flagsToString(UiAutomation.class, "FLAG_", flags)
+                    + ", timeout=" + timeoutMillis + "ms");
+        }
         synchronized (mLock) {
             throwIfConnectedLocked();
             if (mConnectionState == ConnectionState.CONNECTING) {
+                if (DEBUG) Log.d(LOG_TAG, "already connecting");
                 return;
             }
+            if (DEBUG) Log.d(LOG_TAG, "setting state to CONNECTING");
             mConnectionState = ConnectionState.CONNECTING;
             mRemoteCallbackThread = new HandlerThread("UiAutomation");
             mRemoteCallbackThread.start();
@@ -341,6 +350,7 @@ public final class UiAutomation {
             // If UiAutomation is not allowed to use the accessibility subsystem, the
             // connection state should keep disconnected and not to start the client connection.
             if (!useAccessibility()) {
+                if (DEBUG) Log.d(LOG_TAG, "setting state to DISCONNECTED");
                 mConnectionState = ConnectionState.DISCONNECTED;
                 return;
             }
@@ -357,6 +367,7 @@ public final class UiAutomation {
                 final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                 final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
                 if (remainingTimeMillis <= 0) {
+                    if (DEBUG) Log.d(LOG_TAG, "setting state to FAILED");
                     mConnectionState = ConnectionState.FAILED;
                     throw new TimeoutException("Timeout while connecting " + this);
                 }
@@ -1367,7 +1378,8 @@ public final class UiAutomation {
             UserHandle userHandle) {
         try {
             if (DEBUG) {
-                Log.i(LOG_TAG, "Granting runtime permission");
+                Log.i(LOG_TAG, "Granting runtime permission (" + permission + ") to package "
+                        + packageName + " on user " + userHandle);
             }
             // Calling out without a lock held.
             mUiAutomationConnection.grantRuntimePermission(packageName,
@@ -1592,7 +1604,7 @@ public final class UiAutomation {
     private class IAccessibilityServiceClientImpl extends IAccessibilityServiceClientWrapper {
 
         public IAccessibilityServiceClientImpl(Looper looper, int generationId) {
-            super(null, looper, new Callbacks() {
+            super(/* context= */ null, looper, new Callbacks() {
                 private final int mGenerationId = generationId;
 
                 /**
@@ -1606,10 +1618,21 @@ public final class UiAutomation {
 
                 @Override
                 public void init(int connectionId, IBinder windowToken) {
+                    if (DEBUG) {
+                        Log.d(LOG_TAG, "init(): connectionId=" + connectionId + ", windowToken="
+                                + windowToken + ", user=" + Process.myUserHandle()
+                                + ", mGenerationId=" + mGenerationId
+                                + ", UiAutomation.mGenerationId="
+                                + UiAutomation.this.mGenerationId);
+                    }
                     synchronized (mLock) {
                         if (isGenerationChangedLocked()) {
+                            if (DEBUG) {
+                                Log.d(LOG_TAG, "init(): returning because generation id changed");
+                            }
                             return;
                         }
+                        if (DEBUG) Log.d(LOG_TAG, "setting state to CONNECTED");
                         mConnectionState = ConnectionState.CONNECTED;
                         mConnectionId = connectionId;
                         mLock.notifyAll();
@@ -1662,9 +1685,20 @@ public final class UiAutomation {
 
                 @Override
                 public void onAccessibilityEvent(AccessibilityEvent event) {
+                    if (VERBOSE) {
+                        Log.v(LOG_TAG, "onAccessibilityEvent(" + Process.myUserHandle() + "): "
+                                + event);
+                    }
+
                     final OnAccessibilityEventListener listener;
                     synchronized (mLock) {
                         if (isGenerationChangedLocked()) {
+                            if (VERBOSE) {
+                                Log.v(LOG_TAG, "onAccessibilityEvent(): returning because "
+                                        + "generation id changed (from "
+                                        + UiAutomation.this.mGenerationId + " to "
+                                        + mGenerationId + ")");
+                            }
                             return;
                         }
                         // It is not guaranteed that the accessibility framework sends events by the

@@ -26,6 +26,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.util.leak.GarbageMonitor;
 
@@ -34,19 +35,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public interface QSHost extends PanelInteractor {
+public interface QSHost extends PanelInteractor, CustomTileAddedRepository {
     String TILES_SETTING = Settings.Secure.QS_TILES;
     int POSITION_AT_END = -1;
 
     /**
      * Returns the default QS tiles for the context.
-     * @param context the context to obtain the resources from
+     * @param res the resources to use to determine the default tiles
      * @return a list of specs of the default tiles
      */
-    static List<String> getDefaultSpecs(Context context) {
+    static List<String> getDefaultSpecs(Resources res) {
         final ArrayList<String> tiles = new ArrayList();
 
-        final Resources res = context.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
 
         tiles.addAll(Arrays.asList(defaultTileList.split(",")));
@@ -102,9 +102,6 @@ public interface QSHost extends PanelInteractor {
     void addTile(ComponentName tile, boolean end);
     void removeTileByUser(ComponentName tile);
     void changeTilesByUser(List<String> previousTiles, List<String> newTiles);
-
-    boolean isTileAdded(ComponentName componentName, int userId);
-    void setTileAdded(ComponentName componentName, int userId, boolean added);
 
     int indexOf(String tileSpec);
 

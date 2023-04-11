@@ -57,6 +57,41 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         obj.click()
     }
 
+    /** Drags the PIP window to the provided final coordinates without releasing the pointer. */
+    fun dragPipWindowAwayFromEdgeWithoutRelease(wmHelper: WindowManagerStateHelper, steps: Int) {
+        val initWindowRect = getWindowRect(wmHelper).clone()
+
+        // initial pointer at the center of the window
+        val initialCoord =
+            GestureHelper.Tuple(
+                initWindowRect.centerX().toFloat(),
+                initWindowRect.centerY().toFloat()
+            )
+
+        // the offset to the right (or left) of the window center to drag the window to
+        val offset = 50
+
+        // the actual final x coordinate with the offset included;
+        // if the pip window is closer to the right edge of the display the offset is negative
+        // otherwise the offset is positive
+        val endX =
+            initWindowRect.centerX() + offset * (if (isCloserToRightEdge(wmHelper)) -1 else 1)
+        val finalCoord = GestureHelper.Tuple(endX.toFloat(), initWindowRect.centerY().toFloat())
+
+        // drag to the final coordinate
+        gestureHelper.dragWithoutRelease(initialCoord, finalCoord, steps)
+    }
+
+    /**
+     * Releases the primary pointer.
+     *
+     * Injects the release of the primary pointer if the primary pointer info was cached after
+     * another gesture was injected without pointer release.
+     */
+    fun releasePipAfterDragging() {
+        gestureHelper.releasePrimaryPointer()
+    }
+
     /**
      * Drags the PIP window away from the screen edge while not crossing the display center.
      *
@@ -69,13 +104,14 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         val startX = initWindowRect.centerX()
         val y = initWindowRect.centerY()
 
-        val displayRect = wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
+        val displayRect =
+            wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
                 ?: throw IllegalStateException("Default display is null")
 
-        // the offset to the right of the display center to drag the window to
+        // the offset to the right (or left) of the display center to drag the window to
         val offset = 20
 
-        // the actual final x coordinate with the offset included
+        // the actual final x coordinate with the offset included;
         // if the pip window is closer to the right edge of the display the offset is positive
         // otherwise the offset is negative
         val endX = displayRect.centerX() + offset * (if (isCloserToRightEdge(wmHelper)) 1 else -1)
@@ -92,7 +128,8 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     fun isCloserToRightEdge(wmHelper: WindowManagerStateHelper): Boolean {
         val windowRect = getWindowRect(wmHelper)
 
-        val displayRect = wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
+        val displayRect =
+            wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
                 ?: throw IllegalStateException("Default display is null")
 
         return windowRect.centerX() > displayRect.centerX()
@@ -264,9 +301,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         closePipWindow(WindowManagerStateHelper(mInstrumentation))
     }
 
-    /**
-     * Returns the pip window bounds.
-     */
+    /** Returns the pip window bounds. */
     fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
         val windowRegion = wmHelper.getWindowRegion(this)
         require(!windowRegion.isEmpty) { "Unable to find a PIP window in the current state" }

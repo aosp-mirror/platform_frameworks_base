@@ -133,18 +133,6 @@ public class SystemDataTransferProcessor {
             @UserIdInt int userId, int associationId) {
         final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
 
-        // Check if the request's data type has been requested before.
-        List<SystemDataTransferRequest> storedRequests =
-                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
-                        associationId);
-        for (SystemDataTransferRequest storedRequest : storedRequests) {
-            if (storedRequest instanceof PermissionSyncRequest) {
-                Slog.e(LOG_TAG, "The request has been sent before, you can not send "
-                        + "the same request type again.");
-                return null;
-            }
-        }
-
         Slog.i(LOG_TAG, "Creating permission sync intent for userId [" + userId
                 + "] associationId [" + associationId + "]");
 

@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,10 +53,12 @@ public class CredentialDescriptionRegistryTest {
     private static final String CALLING_PACKAGE_NAME_2 = "com.credman.app2";
     private static final String MDOC_CREDENTIAL_TYPE = "MDOC";
     private static final String PASSKEY_CREDENTIAL_TYPE = "PASSKEY";
-    private static final String FLATTENED_REGISTRY =
-            "FLATTENED_REQ;FLATTENED_REQ123;FLATTENED_REQa";
-    private static final String FLATTENED_REGISTRY_2 = "FLATTENED_REQ_2";
-    private static final String FLATTENED_REQUEST = "FLATTENED_REQ;FLATTENED_REQ123";
+    private static final HashSet<String> FLATTENED_REGISTRY = new HashSet<>(List.of(
+            "FLATTENED_REQ", "FLATTENED_REQ123", "FLATTENED_REQa"));
+    private static final HashSet<String> FLATTENED_REGISTRY_2 =
+            new HashSet<>(List.of("FLATTENED_REQ_2"));
+    private static final HashSet<String> FLATTENED_REQUEST =
+            new HashSet<>(List.of("FLATTENED_REQ;FLATTENED_REQ123"));
 
     private CredentialDescriptionRegistry mCredentialDescriptionRegistry;
     private CredentialEntry mEntry;

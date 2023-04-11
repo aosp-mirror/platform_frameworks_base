@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"വൈഫൈ"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"വൈഫൈ കോളിംഗ്"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"Voവൈഫൈ"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"വൈഫൈ കോൾ"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ഓഫ്"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"വൈഫൈ മുഖേനയുള്ള കോൾ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"മൊബൈൽ നെറ്റ്‌വർക്ക് മുഖേനയുള്ള കോൾ"</string>
@@ -801,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ആപ്പിനുള്ള ഫീച്ചറുകളുടെ വിവരങ്ങൾ കാണാൻ ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ഉയർന്ന സാം‍പ്ലിംഗ് റേറ്റിൽ സെൻസർ ഡാറ്റ ആക്സസ് ചെയ്യുക"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-നേക്കാൾ ഉയർന്ന റേറ്റിൽ സെൻസർ ഡാറ്റ സാമ്പിൾ ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ഉപയോക്താവിന്റെ പ്രവർത്തനമില്ലാതെ തന്നെ ആപ്പ് അപ്ഡേറ്റ് ചെയ്യുക"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"മുമ്പ് ഹോൾഡർ ഇൻസ്റ്റാൾ ചെയ്ത ആപ്പ്, ഉപയോക്താവിന്റെ പ്രവർത്തനമില്ലാതെ തന്നെ അപ്ഡേറ്റ് ചെയ്യാൻ ആ ഹോൾഡറെ അനുവദിക്കുന്നു"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -2325,12 +2326,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ഉള്ളടക്കം കാണിക്കാൻ <xliff:g id="APP_NAME">%1$s</xliff:g> രണ്ട് ഡിസ്പ്ലേകളും ഉപയോഗിക്കുന്നു"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ഉപകരണത്തിന് ചൂട് കൂടുതലാണ്"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"നിങ്ങളുടെ ഫോൺ വളരെയധികം ചൂടാകുന്നതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി ലാഭിക്കൽ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ക്രമീകരണത്തിലേക്ക് പോകുക"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ഓഫാക്കുക"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്‌തു"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"കീബോർഡ് ലേഔട്ട് ആയി <xliff:g id="LAYOUT_1">%s</xliff:g> സജ്ജീകരിച്ചു. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>

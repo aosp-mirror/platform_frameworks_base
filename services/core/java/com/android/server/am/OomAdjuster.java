@@ -24,6 +24,7 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -348,6 +349,7 @@ public class OomAdjuster {
     private final ArrayList<UidRecord> mTmpBecameIdle = new ArrayList<UidRecord>();
     private final ActiveUids mTmpUidRecords;
     private final ArrayDeque<ProcessRecord> mTmpQueue;
+    private final ArraySet<ProcessRecord> mTmpProcessSet = new ArraySet<>();
     private final ArraySet<ProcessRecord> mPendingProcessSet = new ArraySet<>();
     private final ArraySet<ProcessRecord> mProcessesInCycle = new ArraySet<>();
 
@@ -2273,6 +2275,15 @@ public class OomAdjuster {
                                 capability |= PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
                             }
                         }
+                        if ((cstate.getCurCapability()
+                                & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0) {
+                            if (clientProcState <= PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                                // This is used to grant network access to User Initiated Jobs.
+                                if (cr.hasFlag(Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS)) {
+                                    capability |= PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
+                                }
+                            }
+                        }
 
                         if (shouldSkipDueToCycle(app, cstate, procState, adj, cycleReEval)) {
                             continue;
@@ -2926,30 +2937,8 @@ public class OomAdjuster {
 
         int changes = 0;
 
-        // don't compact during bootup
-        if (mCachedAppOptimizer.useCompaction() && mService.mBooted) {
-            // Cached and prev/home compaction
-            // reminder: here, setAdj is previous state, curAdj is upcoming state
-            if (state.getCurAdj() != state.getSetAdj()) {
-                mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
-            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE) {
-                // See if we can compact persistent and bfgs services now that screen is off
-                if (state.getSetAdj() < FOREGROUND_APP_ADJ
-                        && !state.isRunningRemoteAnimation()
-                        // Because these can fire independent of oom_adj/procstate changes, we need
-                        // to throttle the actual dispatch of these requests in addition to the
-                        // processing of the requests. As a result, there is throttling both here
-                        // and in CachedAppOptimizer.
-                        && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
-                    mCachedAppOptimizer.compactApp(app, CachedAppOptimizer.CompactProfile.FULL,
-                            CachedAppOptimizer.CompactSource.PERSISTENT, false);
-                } else if (state.getCurProcState()
-                                == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-                        && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
-                    mCachedAppOptimizer.compactApp(app, CachedAppOptimizer.CompactProfile.FULL,
-                            CachedAppOptimizer.CompactSource.BFGS, false);
-                }
-            }
+        if (state.getCurAdj() != state.getSetAdj()) {
+            mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
         }
 
         if (state.getCurAdj() != state.getSetAdj()) {
@@ -3447,7 +3436,8 @@ public class OomAdjuster {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         // if an app is already frozen and shouldNotFreeze becomes true, immediately unfreeze
         if (opt.isFrozen() && opt.shouldNotFreeze()) {
-            mCachedAppOptimizer.unfreezeAppLSP(app, oomAdjReason);
+            mCachedAppOptimizer.unfreezeAppLSP(app,
+                    CachedAppOptimizer.getUnfreezeReasonCodeFromOomAdjReason(oomAdjReason));
             return;
         }
 
@@ -3457,7 +3447,33 @@ public class OomAdjuster {
                 && !opt.shouldNotFreeze()) {
             mCachedAppOptimizer.freezeAppAsyncLSP(app);
         } else if (state.getSetAdj() < CACHED_APP_MIN_ADJ) {
-            mCachedAppOptimizer.unfreezeAppLSP(app, oomAdjReason);
+            mCachedAppOptimizer.unfreezeAppLSP(app,
+                    CachedAppOptimizer.getUnfreezeReasonCodeFromOomAdjReason(oomAdjReason));
         }
+    }
+
+    @GuardedBy("mService")
+    void unfreezeTemporarily(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
+        if (!mCachedAppOptimizer.useFreezer()) {
+            return;
+        }
+
+        final ProcessCachedOptimizerRecord opt = app.mOptRecord;
+        if (!opt.isFrozen() && !opt.isPendingFreeze()) {
+            return;
+        }
+
+        final ArrayList<ProcessRecord> processes = mTmpProcessList;
+        final ActiveUids uids = mTmpUidRecords;
+        mTmpProcessSet.add(app);
+        collectReachableProcessesLocked(mTmpProcessSet, processes, uids);
+        mTmpProcessSet.clear();
+        // Now processes contains app's downstream and app
+        final int size = processes.size();
+        for (int i = 0; i < size; i++) {
+            ProcessRecord proc = processes.get(i);
+            mCachedAppOptimizer.unfreezeTemporarily(proc, reason);
+        }
+        processes.clear();
     }
 }

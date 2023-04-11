@@ -59,8 +59,8 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.wm.shell.TaskView
-import com.android.wm.shell.TaskViewFactory
+import com.android.wm.shell.taskview.TaskView
+import com.android.wm.shell.taskview.TaskViewFactory
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import java.util.function.Consumer
@@ -234,7 +234,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         val serviceInfo2 = setUpPanel(panel2)
 
         `when`(authorizedPanelsRepository.getAuthorizedPanels())
-                .thenReturn(setOf(packageName1, packageName2))
+            .thenReturn(setOf(packageName1, packageName2))
 
         underTest.show(parent, {}, context)
 
@@ -245,7 +245,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         captor.value.onServicesUpdated(listOf(serviceInfo1, serviceInfo2))
         FakeExecutor.exhaustExecutors(uiExecutor, bgExecutor)
 
-        val header: View = parent.requireViewById(R.id.controls_header)
+        val header: View = parent.requireViewById(R.id.app_or_structure_spinner)
         assertThat(header.isClickable).isTrue()
         assertThat(header.hasOnClickListeners()).isTrue()
     }
@@ -470,7 +470,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
 
         taskViewConsumerCaptor.value.accept(taskView)
 
-        underTest.onOrientationChange()
+        underTest.onSizeChange()
         verify(taskView).onLocationChanged()
     }
 

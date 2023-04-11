@@ -45,6 +45,7 @@ import org.junit.runners.Parameterized
  *      90 -> 0 degrees
  *      90 -> 0 degrees (with starved UI thread)
  * ```
+ *
  * Actions:
  * ```
  *     Launch an app in fullscreen and supporting seamless rotation (via intent)
@@ -53,22 +54,29 @@ import org.junit.runners.Parameterized
  *     Change device orientation
  *     Stop tracing
  * ```
+ *
  * To run this test: `atest FlickerTests:SeamlessAppRotationTest`
  *
  * To run only the presubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
  * ```
+ *
  * To run only the postsubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
  * ```
+ *
  * To run only the flaky assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

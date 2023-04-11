@@ -93,7 +93,8 @@ class InputController {
 
     /* Token -> file descriptor associations. */
     @GuardedBy("mLock")
-    private final Map<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors = new ArrayMap<>();
+    private final ArrayMap<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors =
+            new ArrayMap<>();
 
     private final Handler mHandler;
     private final NativeWrapper mNativeWrapper;
@@ -244,7 +245,7 @@ class InputController {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
         mNativeWrapper.closeUinput(inputDeviceDescriptor.getNativePointer());
         String phys = inputDeviceDescriptor.getPhys();
-        InputManager.getInstance().removeUniqueIdAssociation(phys);
+        InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
         // Type associations are added in the case of navigation touchpads. Those should be removed
         // once the input device gets closed.
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
@@ -303,7 +304,8 @@ class InputController {
     @GuardedBy("mLock")
     private void updateActivePointerDisplayIdLocked() {
         InputDeviceDescriptor mostRecentlyCreatedMouse = null;
-        for (InputDeviceDescriptor otherInputDeviceDescriptor : mInputDeviceDescriptors.values()) {
+        for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+            InputDeviceDescriptor otherInputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
             if (otherInputDeviceDescriptor.isMouse()) {
                 if (mostRecentlyCreatedMouse == null
                         || (otherInputDeviceDescriptor.getCreationOrderNumber()
@@ -338,10 +340,8 @@ class InputController {
         }
 
         synchronized (mLock) {
-            InputDeviceDescriptor[] values = mInputDeviceDescriptors.values().toArray(
-                    new InputDeviceDescriptor[0]);
-            for (InputDeviceDescriptor value : values) {
-                if (value.mName.equals(deviceName)) {
+            for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+                if (mInputDeviceDescriptors.valueAt(i).mName.equals(deviceName)) {
                     throw new DeviceCreationException(
                             "Input device name already in use: " + deviceName);
                 }
@@ -355,7 +355,7 @@ class InputController {
 
     private void setUniqueIdAssociation(int displayId, String phys) {
         final String displayUniqueId = mDisplayManagerInternal.getDisplayInfo(displayId).uniqueId;
-        InputManager.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
+        InputManagerGlobal.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
     }
 
     boolean sendDpadKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
@@ -473,7 +473,8 @@ class InputController {
         fout.println("    InputController: ");
         synchronized (mLock) {
             fout.println("      Active descriptors: ");
-            for (InputDeviceDescriptor inputDeviceDescriptor : mInputDeviceDescriptors.values()) {
+            for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+                InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
                 fout.println("        ptr: " + inputDeviceDescriptor.getNativePointer());
                 fout.println("          displayId: " + inputDeviceDescriptor.getDisplayId());
                 fout.println("          creationOrder: "
@@ -711,7 +712,7 @@ class InputController {
 
                 }
             };
-            InputManager.getInstance().registerInputDeviceListener(mListener, mHandler);
+            InputManagerGlobal.getInstance().registerInputDeviceListener(mListener, mHandler);
         }
 
         /**
@@ -740,7 +741,7 @@ class InputController {
 
         @Override
         public void close() {
-            InputManager.getInstance().unregisterInputDeviceListener(mListener);
+            InputManagerGlobal.getInstance().unregisterInputDeviceListener(mListener);
         }
     }
 
@@ -809,7 +810,7 @@ class InputController {
                 throw e;
             }
         } catch (DeviceCreationException e) {
-            InputManager.getInstance().removeUniqueIdAssociation(phys);
+            InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
             throw e;
         }
 

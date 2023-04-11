@@ -649,9 +649,9 @@ public class LogicalDisplayMapperTest {
         assertEquals(0, mLogicalDisplayMapper.getDisplayLocked(device2)
                 .getLeadDisplayIdLocked());
         assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device1)
-                .getBrightnessThrottlingDataIdLocked());
+                .getThermalBrightnessThrottlingDataIdLocked());
         assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device2)
-                .getBrightnessThrottlingDataIdLocked());
+                .getThermalBrightnessThrottlingDataIdLocked());
 
         mLogicalDisplayMapper.setDeviceStateLocked(1, false);
         advanceTime(1000);
@@ -661,10 +661,10 @@ public class LogicalDisplayMapperTest {
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device1)
-                        .getBrightnessThrottlingDataIdLocked());
+                        .getThermalBrightnessThrottlingDataIdLocked());
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device2)
-                        .getBrightnessThrottlingDataIdLocked());
+                        .getThermalBrightnessThrottlingDataIdLocked());
 
         mLogicalDisplayMapper.setDeviceStateLocked(2, false);
         advanceTime(1000);
@@ -674,10 +674,10 @@ public class LogicalDisplayMapperTest {
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device1)
-                        .getBrightnessThrottlingDataIdLocked());
+                        .getThermalBrightnessThrottlingDataIdLocked());
         assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device2)
-                        .getBrightnessThrottlingDataIdLocked());
+                        .getThermalBrightnessThrottlingDataIdLocked());
     }
 
     @Test
@@ -863,7 +863,7 @@ public class LogicalDisplayMapperTest {
         layout.createDisplayLocked(address, /* isDefault= */ false, enabled, group, mIdProducer,
                 Layout.Display.POSITION_UNKNOWN, Display.DEFAULT_DISPLAY,
                 /* brightnessThrottlingMapId= */ null, /* refreshRateZoneId= */ null,
-                /* refreshRateThrottlingMapId= */ null);
+                /* refreshRateThermalThrottlingMapId= */ null);
     }
 
     private void advanceTime(long timeMs) {

@@ -51,6 +51,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
@@ -486,8 +487,22 @@ public class Camera {
 
         boolean overrideToPortrait = CameraManager.shouldOverrideToPortrait(
                 ActivityThread.currentApplication().getApplicationContext());
+        boolean forceSlowJpegMode = shouldForceSlowJpegMode();
         return native_setup(new WeakReference<Camera>(this), cameraId,
-                ActivityThread.currentOpPackageName(), overrideToPortrait);
+                ActivityThread.currentOpPackageName(), overrideToPortrait, forceSlowJpegMode);
+    }
+
+    private boolean shouldForceSlowJpegMode() {
+        Context applicationContext = ActivityThread.currentApplication().getApplicationContext();
+        String[] slowJpegPackageNames = applicationContext.getResources().getStringArray(
+                R.array.config_forceSlowJpegModeList);
+        String callingPackageName = applicationContext.getPackageName();
+        for (String packageName : slowJpegPackageNames) {
+            if (TextUtils.equals(packageName, callingPackageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** used by Camera#open, Camera#open(int) */
@@ -558,7 +573,7 @@ public class Camera {
 
     @UnsupportedAppUsage
     private native int native_setup(Object cameraThis, int cameraId, String packageName,
-            boolean overrideToPortrait);
+            boolean overrideToPortrait, boolean forceSlowJpegMode);
 
     private native final void native_release();
 

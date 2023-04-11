@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Iespējot USB portu"</string>
     <string name="learn_more" msgid="4690632085667273811">"Uzzināt vairāk"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Ekrānuzņēmums"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Paildzinātā atbloķēšana ir atspējota"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"nosūtīts attēls"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Notiek ekrānuzņēmuma saglabāšana..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Notiek ekrānuzņēmuma saglabāšana darba profilā…"</string>
@@ -459,6 +458,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"atspējot"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Skaņa un vibrācija"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Iestatījumi"</string>
+    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
+    <skip />
+    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"Lietotne ir piesprausta"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Šādi tas būs redzams līdz brīdim, kad to atspraudīsiet. Lai atspraustu, pieskarieties pogām Atpakaļ un Pārskats un turiet tās."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Šādi tas būs redzams līdz brīdim, kad to atspraudīsiet. Lai atspraustu, pieskarieties pogām “Atpakaļ” un “Sākums” un turiet tās."</string>
@@ -833,7 +836,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Palielinājuma slēdzis"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Palielināt visu ekrānu"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Palielināt ekrāna daļu"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Pārslēgt"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Atvērt palielinājuma iestatījumus"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Velciet stūri, lai mainītu izmērus"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Atļaut ritināšanu pa diagonāli"</string>
@@ -850,6 +852,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Vidējs"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Mazs"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Liels"</string>
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Pilnekrāna režīms"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Gatavs"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Rediģēt"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Lupas loga iestatījumi"</string>
@@ -871,8 +874,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Pievienota # vadīkla.}zero{Pievienotas # vadīklas.}one{Pievienota # vadīkla.}other{Pievienotas # vadīklas.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Noņemta"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vai pievienot lietotni <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> var izvēlēties, kuras vadīklas un saturu šeit rādīt."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vai noņemt vadīklas lietotnei <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Pievienota izlasei"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Pievienota izlasei, <xliff:g id="NUMBER">%d</xliff:g>. pozīcija"</string>
@@ -886,6 +888,12 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Visas vadīklas ir noņemtas"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Izmaiņas nav saglabātas."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Skatīt citas lietotnes"</string>
+    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
+    <skip />
+    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
+    <skip />
+    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nevarēja ielādēt vadīklas. Lietotnē <xliff:g id="APP">%s</xliff:g> pārbaudiet, vai nav mainīti lietotnes iestatījumi."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Nav pieejamas saderīgas vadīklas"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Cita"</string>
@@ -1067,7 +1075,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"rediģētu"</string>
     <string name="add" msgid="81036585205287996">"Pievienot"</string>
     <string name="manage_users" msgid="1823875311934643849">"Pārvaldīt lietotājus"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Šis paziņojums neatbalsta vilkšanu uz dalīto ekrānu."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Šis paziņojums neatbalsta vilkšanu uz sadalīto ekrānu."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nav pieejams"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritātes režīms"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Signāls ir iestatīts"</string>

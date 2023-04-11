@@ -51,6 +51,7 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 
 import android.Manifest;
 import android.annotation.AnyThread;
@@ -744,6 +745,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private int mValidatedTargetSdk = INVALID_TARGET_SDK_VERSION;
 
+    @GuardedBy("mLock")
+    private boolean mAllowsUpdateOwnership = true;
+
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
@@ -865,13 +869,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private static final int USER_ACTION_NOT_NEEDED = 0;
     private static final int USER_ACTION_REQUIRED = 1;
-    private static final int USER_ACTION_PENDING_APK_PARSING = 2;
     private static final int USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER = 3;
 
     @IntDef({
             USER_ACTION_NOT_NEEDED,
             USER_ACTION_REQUIRED,
-            USER_ACTION_PENDING_APK_PARSING,
             USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER,
     })
     @interface UserActionRequirement {}
@@ -962,11 +964,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && !isApexSession()
                 && !isUpdateOwner
                 && !isInstallerShell
+                && mAllowsUpdateOwnership
                 // We don't enforce the update ownership for the managed user and profile.
                 && !isFromManagedUserOrProfile) {
             return USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER;
         }
-
         if (isPermissionGranted) {
             return USER_ACTION_NOT_NEEDED;
         }
@@ -981,7 +983,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && isUpdateWithoutUserActionPermissionGranted
                 && ((isUpdateOwnershipEnforcementEnabled ? isUpdateOwner
                 : isInstallerOfRecord) || isSelfUpdate)) {
-            return USER_ACTION_PENDING_APK_PARSING;
+            if (!isApexSession()) {
+                if (!isTargetSdkConditionSatisfied(this)) {
+                    return USER_ACTION_REQUIRED;
+                }
+
+                if (!mSilentUpdatePolicy.isSilentUpdateAllowed(
+                        getInstallerPackageName(), getPackageName())) {
+                    // Fall back to the non-silent update if a repeated installation is invoked
+                    // within the throttle time.
+                    return USER_ACTION_REQUIRED;
+                }
+                mSilentUpdatePolicy.track(getInstallerPackageName(), getPackageName());
+                return USER_ACTION_NOT_NEEDED;
+            }
         }
 
         return USER_ACTION_REQUIRED;
@@ -1395,9 +1410,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
+        final String initiatingPackageName = getInstallSource().mInitiatingPackageName;
         final String installerPackageName;
-        if (!TextUtils.isEmpty(getInstallSource().mInitiatingPackageName)) {
-            installerPackageName = getInstallSource().mInitiatingPackageName;
+        if (!isInstalledByAdb(initiatingPackageName)) {
+            installerPackageName = initiatingPackageName;
         } else {
             installerPackageName = getInstallSource().mInstallerPackageName;
         }
@@ -1440,7 +1456,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener) {
         assertCallerIsOwnerRootOrVerifier();
         final File file = new File(stageDir, name);
-        final String installerPackageName = getInstallSource().mInitiatingPackageName;
+        final String installerPackageName = PackageManagerServiceUtils.isInstalledByAdb(
+                getInstallSource().mInitiatingPackageName)
+                ? getInstallSource().mInstallerPackageName
+                : getInstallSource().mInitiatingPackageName;
         try {
             mPm.requestFileChecksums(file, installerPackageName, optional, required,
                     trustedInstallers, onChecksumsReadyListener);
@@ -2361,26 +2380,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             session.sendPendingUserActionIntent(target);
             return true;
         }
-
-        if (!session.isApexSession() && userActionRequirement == USER_ACTION_PENDING_APK_PARSING) {
-            if (!isTargetSdkConditionSatisfied(session)) {
-                session.sendPendingUserActionIntent(target);
-                return true;
-            }
-
-            if (session.params.requireUserAction == SessionParams.USER_ACTION_NOT_REQUIRED) {
-                if (!session.mSilentUpdatePolicy.isSilentUpdateAllowed(
-                        session.getInstallerPackageName(), session.getPackageName())) {
-                    // Fall back to the non-silent update if a repeated installation is invoked
-                    // within the throttle time.
-                    session.sendPendingUserActionIntent(target);
-                    return true;
-                }
-                session.mSilentUpdatePolicy.track(session.getInstallerPackageName(),
-                        session.getPackageName());
-            }
-        }
-
         return false;
     }
 
@@ -3390,6 +3389,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // {@link #sendPendingUserActionIntentIfNeeded} needs to use
         // {@link PackageLite#getTargetSdk()}
         mValidatedTargetSdk = packageLite.getTargetSdk();
+
+        mAllowsUpdateOwnership = packageLite.isAllowUpdateOwnership();
 
         return packageLite;
     }

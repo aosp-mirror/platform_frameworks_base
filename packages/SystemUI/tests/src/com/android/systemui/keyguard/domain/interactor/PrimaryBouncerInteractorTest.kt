@@ -48,6 +48,7 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -124,6 +125,17 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testShow_isResumed() {
+        whenever(repository.primaryBouncerShow.value).thenReturn(true)
+        whenever(keyguardSecurityModel.getSecurityMode(anyInt()))
+            .thenReturn(KeyguardSecurityModel.SecurityMode.SimPuk)
+
+        underTest.show(true)
+        verify(repository).setPrimaryShow(false)
+        verify(repository).setPrimaryShow(true)
+    }
+
+    @Test
     fun testHide() {
         underTest.hide()
         verify(falsingCollector).onBouncerHidden()
@@ -131,6 +143,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setPrimaryShowingSoon(false)
         verify(repository).setPrimaryShow(false)
         verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.INVISIBLE)
+        verify(repository).setPrimaryStartDisappearAnimation(null)
     }
 
     @Test

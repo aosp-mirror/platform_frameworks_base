@@ -19,6 +19,8 @@ package com.android.server.pm;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
 import static android.os.Process.INVALID_UID;
 
+import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -675,11 +677,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 ? params.installerPackageName : installerPackageName;
 
         if (PackageManagerServiceUtils.isRootOrShell(callingUid)
-                || PackageInstallerSession.isSystemDataLoaderInstallation(params)) {
+                || PackageInstallerSession.isSystemDataLoaderInstallation(params)
+                || PackageManagerServiceUtils.isAdoptedShell(callingUid, mContext)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
             // adb installs can override the installingPackageName, but not the
             // initiatingPackageName
-            installerPackageName = null;
+            installerPackageName = SHELL_PACKAGE_NAME;
         } else {
             if (callingUid != Process.SYSTEM_UID) {
                 // The supplied installerPackageName must always belong to the calling app.

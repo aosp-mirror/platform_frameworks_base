@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Мени Приступачност"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Мени Приступачност пружа велики мени на екрану за контролу уређаја. Можете да закључате уређај, контролишете јачину звука и осветљеност, правите снимке екрана и друго."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Помоћник"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Помоћник"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Подешавања приступачности"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Јачина звука"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Контроле јачине звука"</string>
     <string name="power_label" msgid="7699720321491287839">"Напајање"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Опције напајања"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Недавне апликације"</string>
@@ -30,5 +27,5 @@
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Повећајте величину дугмади у менију за приступачност"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Помоћ"</string>
     <string name="brightness_percentage_label" msgid="7391554573977867369">"Осветљеност: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
-    <string name="music_volume_percentage_label" msgid="398635599662604706">"Јачина звука музике: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"Јачина музике: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
 </resources>

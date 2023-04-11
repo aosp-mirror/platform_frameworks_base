@@ -27,6 +27,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.IUriGrantsManager;
+import android.app.UidObserver;
 import android.app.UriGrantsManager;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -590,7 +591,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+    final private IUidObserver mUidObserver = new UidObserver() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             injectPostToHandler(() -> handleOnUidStateChanged(uid, procState));
@@ -600,20 +601,6 @@ public class ShortcutService extends IShortcutService.Stub {
         public void onUidGone(int uid, boolean disabled) {
             injectPostToHandler(() ->
                     handleOnUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT));
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 

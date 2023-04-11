@@ -42,6 +42,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
@@ -54,6 +55,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -95,6 +97,10 @@ public class TileServicesTest extends SysuiTestCase {
     private QSHost mQSHost;
     @Mock
     private PanelInteractor mPanelInteractor;
+    @Captor
+    private ArgumentCaptor<CommandQueue.Callbacks> mCallbacksArgumentCaptor;
+    @Mock
+    private CustomTileAddedRepository mCustomTileAddedRepository;
 
     @Before
     public void setUp() throws Exception {
@@ -112,7 +118,7 @@ public class TileServicesTest extends SysuiTestCase {
 
         mTileService = new TestTileServices(mQSHost, provider, mBroadcastDispatcher,
                 mUserTracker, mKeyguardStateController, mCommandQueue, mStatusBarIconController,
-                mPanelInteractor);
+                mPanelInteractor, mCustomTileAddedRepository);
     }
 
     @After
@@ -251,13 +257,50 @@ public class TileServicesTest extends SysuiTestCase {
         verify(mPanelInteractor).forceCollapsePanels();
     }
 
+    @Test
+    public void tileFreedForCorrectUser() throws RemoteException {
+        verify(mCommandQueue).addCallback(mCallbacksArgumentCaptor.capture());
+
+        ComponentName componentName = new ComponentName("pkg", "cls");
+        CustomTile tileUser0 = mock(CustomTile.class);
+        CustomTile tileUser1 = mock(CustomTile.class);
+
+        when(tileUser0.getComponent()).thenReturn(componentName);
+        when(tileUser1.getComponent()).thenReturn(componentName);
+        when(tileUser0.getUser()).thenReturn(0);
+        when(tileUser1.getUser()).thenReturn(1);
+
+        // Create a tile for user 0
+        TileServiceManager manager0 = mTileService.getTileWrapper(tileUser0);
+        when(manager0.isActiveTile()).thenReturn(true);
+        // Then create a tile for user 1
+        TileServiceManager manager1 = mTileService.getTileWrapper(tileUser1);
+        when(manager1.isActiveTile()).thenReturn(true);
+
+        // When the tile for user 0 gets freed
+        mTileService.freeService(tileUser0, manager0);
+        // and the user is 1
+        when(mUserTracker.getUserId()).thenReturn(1);
+
+        // a call to requestListeningState
+        mCallbacksArgumentCaptor.getValue().requestTileServiceListeningState(componentName);
+        mTestableLooper.processAllMessages();
+
+        // will call in the correct tile
+        verify(manager1).setBindRequested(true);
+        // and set it to listening
+        verify(manager1.getTileService()).onStartListening();
+    }
+
     private class TestTileServices extends TileServices {
         TestTileServices(QSHost host, Provider<Handler> handlerProvider,
                 BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
                 KeyguardStateController keyguardStateController, CommandQueue commandQueue,
-                StatusBarIconController statusBarIconController, PanelInteractor panelInteractor) {
+                StatusBarIconController statusBarIconController, PanelInteractor panelInteractor,
+                CustomTileAddedRepository customTileAddedRepository) {
             super(host, handlerProvider, broadcastDispatcher, userTracker, keyguardStateController,
-                    commandQueue, statusBarIconController, panelInteractor);
+                    commandQueue, statusBarIconController, panelInteractor,
+                    customTileAddedRepository);
         }
 
         @Override
@@ -268,6 +311,8 @@ public class TileServicesTest extends SysuiTestCase {
             when(manager.isLifecycleStarted()).thenReturn(true);
             Binder b = new Binder();
             when(manager.getToken()).thenReturn(b);
+            IQSTileService service = mock(IQSTileService.class);
+            when(manager.getTileService()).thenReturn(service);
             return manager;
         }
     }

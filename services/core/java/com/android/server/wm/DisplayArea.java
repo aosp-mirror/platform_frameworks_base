@@ -148,7 +148,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @ScreenOrientation
     int getOrientation(int candidate) {
         final int orientation = super.getOrientation(candidate);
-        if (getIgnoreOrientationRequest(orientation)) {
+        if (shouldIgnoreOrientationRequest(orientation)) {
             // In all the other case, mLastOrientationSource will be reassigned to a new value
             mLastOrientationSource = null;
             return SCREEN_ORIENTATION_UNSET;
@@ -158,7 +158,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
-        return !getIgnoreOrientationRequest(orientation)
+        return !shouldIgnoreOrientationRequest(orientation)
                 && super.handlesOrientationChangeFromDescendant(orientation);
     }
 
@@ -169,7 +169,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         final int orientation = requestingContainer != null
                 ? requestingContainer.getOverrideOrientation()
                 : SCREEN_ORIENTATION_UNSET;
-        return !getIgnoreOrientationRequest(orientation)
+        return !shouldIgnoreOrientationRequest(orientation)
                 && super.onDescendantOrientationChanged(requestingContainer);
     }
 
@@ -236,8 +236,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     /**
      * @return {@value true} if we need to ignore the orientation in input.
      */
-    // TODO(b/262366204): Rename getIgnoreOrientationRequest to shouldIgnoreOrientationRequest
-    boolean getIgnoreOrientationRequest(@ScreenOrientation int orientation) {
+    boolean shouldIgnoreOrientationRequest(@ScreenOrientation int orientation) {
         // We always respect orientation request for ActivityInfo.SCREEN_ORIENTATION_LOCKED
         // ActivityInfo.SCREEN_ORIENTATION_NOSENSOR.
         // Main use case why this is important is Camera apps that rely on those
@@ -768,7 +767,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      */
     static class Dimmable extends DisplayArea<DisplayArea> {
         private final Dimmer mDimmer = new Dimmer(this);
-        private final Rect mTmpDimBoundsRect = new Rect();
 
         Dimmable(WindowManagerService wms, Type type, String name, int featureId) {
             super(wms, type, name, featureId);
@@ -781,11 +779,13 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
         @Override
         void prepareSurfaces() {
-            mDimmer.resetDimStates();
+            final Rect dimBounds = mDimmer.resetDimStates();
             super.prepareSurfaces();
-            // Bounds need to be relative, as the dim layer is a child.
-            getBounds(mTmpDimBoundsRect);
-            mTmpDimBoundsRect.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            if (dimBounds != null) {
+                // Bounds need to be relative, as the dim layer is a child.
+                getBounds(dimBounds);
+                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            }
 
             // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
             // on the display level fades out.
@@ -793,8 +793,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 mDimmer.resetDimStates();
             }
 
-            if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
-                scheduleAnimation();
+            if (dimBounds != null) {
+                if (mDimmer.updateDims(getSyncTransaction())) {
+                    scheduleAnimation();
+                }
             }
         }
     }

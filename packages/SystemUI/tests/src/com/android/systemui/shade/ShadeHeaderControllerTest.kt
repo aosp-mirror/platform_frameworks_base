@@ -42,11 +42,11 @@ import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
-import com.android.systemui.qs.carrier.QSCarrierGroup
-import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
+import com.android.systemui.shade.carrier.ShadeCarrierGroup
+import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
@@ -88,11 +88,12 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var statusBarIconController: StatusBarIconController
     @Mock private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
     @Mock private lateinit var iconManager: StatusBarIconController.TintedIconManager
-    @Mock private lateinit var qsCarrierGroupController: QSCarrierGroupController
-    @Mock private lateinit var qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
+    @Mock private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
+    @Mock
+    private lateinit var mShadeCarrierGroupControllerBuilder: ShadeCarrierGroupController.Builder
     @Mock private lateinit var clock: Clock
     @Mock private lateinit var date: VariableDateView
-    @Mock private lateinit var carrierGroup: QSCarrierGroup
+    @Mock private lateinit var carrierGroup: ShadeCarrierGroup
     @Mock private lateinit var batteryMeterView: BatteryMeterView
     @Mock private lateinit var batteryMeterViewController: BatteryMeterViewController
     @Mock private lateinit var privacyIconsController: HeaderPrivacyIconsController
@@ -131,7 +132,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
 
-        whenever<QSCarrierGroup>(view.findViewById(R.id.carrier_group)).thenReturn(carrierGroup)
+        whenever<ShadeCarrierGroup>(view.findViewById(R.id.carrier_group)).thenReturn(carrierGroup)
 
         whenever<BatteryMeterView>(view.findViewById(R.id.batteryRemainingIcon))
             .thenReturn(batteryMeterView)
@@ -142,9 +143,10 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever(view.context).thenReturn(viewContext)
         whenever(view.resources).thenReturn(context.resources)
         whenever(statusIcons.context).thenReturn(context)
-        whenever(qsCarrierGroupControllerBuilder.setQSCarrierGroup(any()))
-            .thenReturn(qsCarrierGroupControllerBuilder)
-        whenever(qsCarrierGroupControllerBuilder.build()).thenReturn(qsCarrierGroupController)
+        whenever(mShadeCarrierGroupControllerBuilder.setShadeCarrierGroup(any()))
+            .thenReturn(mShadeCarrierGroupControllerBuilder)
+        whenever(mShadeCarrierGroupControllerBuilder.build())
+            .thenReturn(mShadeCarrierGroupController)
         whenever(view.setVisibility(anyInt())).then {
             viewVisibility = it.arguments[0] as Int
             null
@@ -175,7 +177,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
                 variableDateViewControllerFactory,
                 batteryMeterViewController,
                 dumpManager,
-                qsCarrierGroupControllerBuilder,
+                mShadeCarrierGroupControllerBuilder,
                 combinedShadeHeadersConstraintManager,
                 demoModeController,
                 qsBatteryModeController,
@@ -189,7 +191,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Test
     fun updateListeners_registersWhenVisible() {
         makeShadeVisible()
-        verify(qsCarrierGroupController).setListening(true)
+        verify(mShadeCarrierGroupController).setListening(true)
         verify(statusBarIconController).addIconGroup(any())
     }
 
@@ -213,7 +215,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun singleCarrier_enablesCarrierIconsInStatusIcons() {
-        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(true)
+        whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(true)
 
         makeShadeVisible()
 
@@ -222,7 +224,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun dualCarrier_disablesCarrierIconsInStatusIcons() {
-        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(false)
+        whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(false)
 
         makeShadeVisible()
 
@@ -349,9 +351,9 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         verify(batteryMeterViewController).init()
         verify(batteryMeterViewController).ignoreTunerUpdates()
 
-        val inOrder = Mockito.inOrder(qsCarrierGroupControllerBuilder)
-        inOrder.verify(qsCarrierGroupControllerBuilder).setQSCarrierGroup(carrierGroup)
-        inOrder.verify(qsCarrierGroupControllerBuilder).build()
+        val inOrder = Mockito.inOrder(mShadeCarrierGroupControllerBuilder)
+        inOrder.verify(mShadeCarrierGroupControllerBuilder).setShadeCarrierGroup(carrierGroup)
+        inOrder.verify(mShadeCarrierGroupControllerBuilder).build()
     }
 
     @Test

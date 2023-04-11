@@ -21,6 +21,8 @@ import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
@@ -35,6 +37,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
@@ -69,7 +72,6 @@ import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.MessageQueue;
@@ -111,6 +113,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -237,6 +240,8 @@ public class DisplayManagerServiceTest {
     @Mock IBinder mMockDisplayToken;
     @Mock SensorManagerInternal mMockSensorManagerInternal;
 
+    @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -285,7 +290,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testCreateVirtualDisplay_sentToInputManager() {
+    public void testCreateVirtualDisplay_sentToInputManager() throws RemoteException {
         // This is to update the display device config such that DisplayManagerService can ignore
         // the usage of SensorManager, which is available only after the PowerManagerService
         // is ready.
@@ -312,7 +317,8 @@ public class DisplayManagerServiceTest {
         builder.setFlags(flags);
         int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
                 null /* projection */, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -438,7 +444,8 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId(uniqueId);
         int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
                 null /* projection */, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -451,7 +458,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testCreateVirtualDisplayOwnFocus() {
+    public void testCreateVirtualDisplayOwnFocus() throws RemoteException {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -475,7 +482,8 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId(uniqueId);
         int displayId = bs.createVirtualDisplay(builder.build(), /* callback= */ mMockAppToken,
                 /* projection= */ null, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -488,7 +496,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testCreateVirtualDisplayOwnFocus_nonTrustedDisplay() {
+    public void testCreateVirtualDisplayOwnFocus_nonTrustedDisplay() throws RemoteException {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -509,7 +517,8 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId(uniqueId);
         int displayId = bs.createVirtualDisplay(builder.build(), /* callback= */ mMockAppToken,
                 /* projection= */ null, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -751,7 +760,8 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId(uniqueId);
         final int firstDisplayId = binderService.createVirtualDisplay(builder.build(),
                 mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         // The second virtual display requests to mirror the first virtual display.
         final String uniqueId2 = "uniqueId --- displayIdToMirrorTest #2";
@@ -763,7 +773,8 @@ public class DisplayManagerServiceTest {
         final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
                 mMockAppToken2 /* callback */, null /* projection */,
                 PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
         // flush the handler
@@ -801,7 +812,8 @@ public class DisplayManagerServiceTest {
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         int displayGroupId1 = localService.getDisplayInfo(displayId1).displayGroupId;
 
         // Create a second virtual display. This should be added to the previously created display
@@ -817,7 +829,8 @@ public class DisplayManagerServiceTest {
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         int displayGroupId2 = localService.getDisplayInfo(displayId2).displayGroupId;
 
         assertEquals(
@@ -855,7 +868,8 @@ public class DisplayManagerServiceTest {
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         int displayGroupId1 = localService.getDisplayInfo(displayId1).displayGroupId;
 
         // Create a second virtual display. With the flag VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
@@ -874,7 +888,8 @@ public class DisplayManagerServiceTest {
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         int displayGroupId2 = localService.getDisplayInfo(displayId2).displayGroupId;
 
         assertNotEquals(
@@ -918,7 +933,8 @@ public class DisplayManagerServiceTest {
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         // Check that FLAG_ALWAYS_UNLOCKED is set.
         assertNotEquals(
@@ -944,7 +960,8 @@ public class DisplayManagerServiceTest {
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         // Check that FLAG_ALWAYS_UNLOCKED is set.
         assertNotEquals(
@@ -968,7 +985,8 @@ public class DisplayManagerServiceTest {
                         null /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         // Check that FLAG_ALWAYS_UNLOCKED is not set.
         assertEquals(
@@ -1000,7 +1018,8 @@ public class DisplayManagerServiceTest {
                 .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
         final int firstDisplayId = binderService.createVirtualDisplay(builder.build(),
                 mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         // The second virtual display requests to mirror the first virtual display.
         final String uniqueId2 = "uniqueId --- displayIdToMirrorTest #2";
@@ -1012,7 +1031,8 @@ public class DisplayManagerServiceTest {
         final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
                 mMockAppToken2 /* callback */, null /* projection */,
                 PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
         // flush the handler
@@ -1028,20 +1048,56 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testCreateVirtualDisplay_setContentRecordingSessionSuccess()
+    public void testCreateVirtualDisplay_isValidProjection_notValid()
             throws RemoteException {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
-        when(mMockWindowManagerInternal
-                .setContentRecordingSession(any(ContentRecordingSession.class)))
-                .thenReturn(true);
         IMediaProjection projection = mock(IMediaProjection.class);
+        doReturn(false).when(projection).isValid();
+        when(mMockProjectionService
+                .setContentRecordingSession(any(ContentRecordingSession.class), eq(projection)))
+                .thenReturn(true);
+        doReturn(true).when(mMockProjectionService).isCurrentProjection(eq(projection));
+
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, 600, 800, 320);
+        builder.setUniqueId("uniqueId --- isValid false");
+
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.windowManagerAndInputReady();
+
+        // Pass in a non-null projection.
+        DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+        final int displayId = binderService.createVirtualDisplay(builder.build(),
+                mMockAppToken /* callback */, projection, PACKAGE_NAME);
+
+        // VirtualDisplay is created for mirroring.
+        assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
+        verify(mMockProjectionService, atLeastOnce()).setContentRecordingSession(
+                any(ContentRecordingSession.class), nullable(IMediaProjection.class));
+        // But mirroring doesn't begin.
+        verify(mMockProjectionService, atLeastOnce()).setContentRecordingSession(
+                mContentRecordingSessionCaptor.capture(), nullable(IMediaProjection.class));
+        ContentRecordingSession session = mContentRecordingSessionCaptor.getValue();
+        assertThat(session.isWaitingToRecord()).isTrue();
+    }
+
+    @Test
+    public void testCreateVirtualDisplay_setContentRecordingSessionSuccess()
+            throws RemoteException {
+        final int displayToRecord = 50;
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IMediaProjection projection = mock(IMediaProjection.class);
+        doReturn(true).when(projection).isValid();
+        when(mMockProjectionService
+                .setContentRecordingSession(any(ContentRecordingSession.class), eq(projection)))
+                .thenReturn(true);
         doReturn(true).when(mMockProjectionService).isCurrentProjection(eq(projection));
 
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession true");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
+        builder.setDisplayIdToMirror(displayToRecord);
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1052,22 +1108,28 @@ public class DisplayManagerServiceTest {
                 mMockAppToken /* callback */, projection, PACKAGE_NAME);
 
         assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
+        verify(mMockProjectionService, atLeastOnce()).setContentRecordingSession(
+                mContentRecordingSessionCaptor.capture(), nullable(IMediaProjection.class));
+        ContentRecordingSession session = mContentRecordingSessionCaptor.getValue();
+        assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_DISPLAY);
+        assertThat(session.getVirtualDisplayId()).isEqualTo(displayId);
+        assertThat(session.getDisplayToRecord()).isEqualTo(displayToRecord);
+        assertThat(session.isWaitingToRecord()).isFalse();
     }
 
     @Test
     public void testCreateVirtualDisplay_setContentRecordingSessionFail() throws RemoteException {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
-        when(mMockWindowManagerInternal
-                .setContentRecordingSession(any(ContentRecordingSession.class)))
-                .thenReturn(false);
         IMediaProjection projection = mock(IMediaProjection.class);
+        doReturn(true).when(projection).isValid();
+        when(mMockProjectionService
+                .setContentRecordingSession(any(ContentRecordingSession.class), eq(projection)))
+                .thenReturn(false);
         doReturn(true).when(mMockProjectionService).isCurrentProjection(eq(projection));
 
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1081,15 +1143,49 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testCreateVirtualDisplay_setContentRecordingSession_noProjection_noFlags() {
+    public void testCreateVirtualDisplay_setContentRecordingSession_taskSession()
+            throws RemoteException {
+        final int displayToRecord = 50;
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IMediaProjection projection = mock(IMediaProjection.class);
+        doReturn(true).when(projection).isValid();
+        when(mMockProjectionService
+                .setContentRecordingSession(any(ContentRecordingSession.class), eq(projection)))
+                .thenReturn(true);
+        doReturn(mock(IBinder.class)).when(projection).getLaunchCookie();
+        doReturn(true).when(mMockProjectionService).isCurrentProjection(eq(projection));
+
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, 600, 800, 320);
+        builder.setUniqueId("uniqueId --- setContentRecordingSession false");
+        builder.setDisplayIdToMirror(displayToRecord);
+
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.windowManagerAndInputReady();
+
+        DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+        final int displayId = binderService.createVirtualDisplay(builder.build(),
+                mMockAppToken /* callback */, projection, PACKAGE_NAME);
+
+        assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
+        verify(mMockProjectionService, atLeastOnce()).setContentRecordingSession(
+                mContentRecordingSessionCaptor.capture(), nullable(IMediaProjection.class));
+        ContentRecordingSession session = mContentRecordingSessionCaptor.getValue();
+        assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_TASK);
+        assertThat(session.getVirtualDisplayId()).isEqualTo(displayId);
+        assertThat(session.getTokenToRecord()).isNotNull();
+    }
+
+    @Test
+    public void testCreateVirtualDisplay_setContentRecordingSession_noProjection_noFlags()
+            throws RemoteException {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
         // Set no flags for the VirtualDisplay.
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1102,12 +1198,13 @@ public class DisplayManagerServiceTest {
 
         // VirtualDisplay is created but not for mirroring.
         assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(
-                any(ContentRecordingSession.class));
+        verify(mMockProjectionService, never()).setContentRecordingSession(
+                any(ContentRecordingSession.class), nullable(IMediaProjection.class));
     }
 
     @Test
-    public void testCreateVirtualDisplay_setContentRecordingSession_noProjection_noMirroringFlag() {
+    public void testCreateVirtualDisplay_setContentRecordingSession_noProjection_noMirroringFlag()
+            throws RemoteException {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
         // Set a non-mirroring flag for the VirtualDisplay.
@@ -1115,8 +1212,6 @@ public class DisplayManagerServiceTest {
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
         builder.setFlags(VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1129,26 +1224,25 @@ public class DisplayManagerServiceTest {
 
         // VirtualDisplay is created but not for mirroring.
         assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(
-                any(ContentRecordingSession.class));
+        verify(mMockProjectionService, never()).setContentRecordingSession(
+                any(ContentRecordingSession.class), nullable(IMediaProjection.class));
     }
 
     @Test
     public void testCreateVirtualDisplay_setContentRecordingSession_projection_noMirroringFlag()
             throws RemoteException {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
-        when(mMockWindowManagerInternal
-                .setContentRecordingSession(any(ContentRecordingSession.class)))
-                .thenReturn(true);
         IMediaProjection projection = mock(IMediaProjection.class);
+        doReturn(true).when(projection).isValid();
+        when(mMockProjectionService
+                .setContentRecordingSession(any(ContentRecordingSession.class), eq(projection)))
+                .thenReturn(true);
         doReturn(true).when(mMockProjectionService).isCurrentProjection(eq(projection));
 
         // Set no flags for the VirtualDisplay.
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1161,8 +1255,8 @@ public class DisplayManagerServiceTest {
 
         // VirtualDisplay is created for mirroring.
         assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
-        verify(mMockWindowManagerInternal, atLeastOnce()).setContentRecordingSession(
-                any(ContentRecordingSession.class));
+        verify(mMockProjectionService, atLeastOnce()).setContentRecordingSession(
+                any(ContentRecordingSession.class), nullable(IMediaProjection.class));
     }
 
     /**
@@ -1191,7 +1285,8 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId(uniqueId);
         final int displayId = binderService.createVirtualDisplay(builder.build(),
                 mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -1206,7 +1301,8 @@ public class DisplayManagerServiceTest {
      * ADD_TRUSTED_DISPLAY is granted.
      */
     @Test
-    public void testOwnDisplayGroup_allowCreationWithAddTrustedDisplayPermission() {
+    public void testOwnDisplayGroup_allowCreationWithAddTrustedDisplayPermission()
+            throws RemoteException {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1224,7 +1320,8 @@ public class DisplayManagerServiceTest {
 
         int displayId = bs.createVirtualDisplay(builder.build(), mMockAppToken /* callback */,
                 null /* projection */, PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
         DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
@@ -1292,7 +1389,8 @@ public class DisplayManagerServiceTest {
         int displayId = localService.createVirtualDisplay(builder.build(),
                 mMockAppToken /* callback */, virtualDevice /* virtualDeviceToken */,
                 mock(DisplayWindowPolicyController.class), PACKAGE_NAME);
-        verify(mMockWindowManagerInternal, never()).setContentRecordingSession(Mockito.any());
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
         DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);

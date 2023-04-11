@@ -1420,7 +1420,7 @@ public final class TvInteractiveAppManager {
                 return;
             }
             try {
-                mService.notifyRecordingScheduled(mToken, recordingId, recordingId, mUserId);
+                mService.notifyRecordingScheduled(mToken, recordingId, requestId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

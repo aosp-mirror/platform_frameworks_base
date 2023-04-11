@@ -67,6 +67,15 @@ oneway interface ISatellite {
             in IIntegerConsumer resultCallback);
 
     /**
+     * Allow cellular modem scanning while satellite mode is on.
+     * @param enabled  {@code true} to enable cellular modem while satellite mode is on
+     * and {@code false} to disable
+     * @param errorCallback The callback to receive the error code result of the operation.
+     */
+    void enableCellularModemWhileSatelliteModeIsOn(in boolean enabled,
+        in IIntegerConsumer errorCallback);
+
+    /**
      * Request to enable or disable the satellite modem and demo mode. If the satellite modem
      * is enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
      * this may also re-enable the cellular modem.
@@ -194,7 +203,7 @@ oneway interface ISatellite {
      *
      * @param token The token to be used as a unique identifier for provisioning with satellite
      *              gateway.
-     * @param regionId The region ID for the device's current location.
+     * @param provisionData Data from the provisioning app that can be used by provisioning server
      * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -210,7 +219,7 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_ABORTED
      *   SatelliteError:NETWORK_TIMEOUT
      */
-    void provisionSatelliteService(in String token, in String regionId,
+    void provisionSatelliteService(in String token, in byte[] provisionData,
             in IIntegerConsumer resultCallback);
 
     /**

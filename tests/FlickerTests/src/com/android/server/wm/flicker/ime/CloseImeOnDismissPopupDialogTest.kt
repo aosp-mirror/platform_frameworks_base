@@ -66,7 +66,7 @@ open class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(fli
         flicker.assertLayers {
             this.isVisible(ComponentNameMatcher.IME)
                 .then()
-                .isVisible(ComponentNameMatcher.IME_SNAPSHOT)
+                .isVisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .then()
                 .isInvisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .isInvisible(ComponentNameMatcher.IME)
@@ -88,7 +88,7 @@ open class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(fli
                         imeSnapshotLayers
                             .mapNotNull { imeSnapshotLayer -> imeSnapshotLayer.layer.visibleRegion }
                             .toTypedArray()
-                    val imeVisibleRegion = RegionSubject(visibleAreas, this, timestamp)
+                    val imeVisibleRegion = RegionSubject(visibleAreas, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
                         imeVisibleRegion.coversAtMost(appVisibleRegion.region)

@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -1130,7 +1131,7 @@ public class Instrumentation {
         newEvent.setFlags(event.getFlags() | KeyEvent.FLAG_FROM_SYSTEM);
         setDisplayIfNeeded(newEvent);
 
-        InputManager.getInstance().injectInputEvent(newEvent,
+        InputManagerGlobal.getInstance().injectInputEvent(newEvent,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
@@ -1229,7 +1230,7 @@ public class Instrumentation {
             }
 
             // Direct the injected event into windows owned by the instrumentation target.
-            InputManager.getInstance().injectInputEvent(
+            InputManagerGlobal.getInstance().injectInputEvent(
                     event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH, Process.myUid());
 
             if (syncAfter) {
@@ -1259,7 +1260,7 @@ public class Instrumentation {
         if (!event.isFromSource(InputDevice.SOURCE_CLASS_TRACKBALL)) {
             event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
-        InputManager.getInstance().injectInputEvent(event,
+        InputManagerGlobal.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 

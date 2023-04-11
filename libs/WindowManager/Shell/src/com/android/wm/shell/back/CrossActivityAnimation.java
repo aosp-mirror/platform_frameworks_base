@@ -19,6 +19,7 @@ package com.android.wm.shell.back;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
+import static com.android.wm.shell.back.BackAnimationConstants.PROGRESS_COMMIT_THRESHOLD;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
 import android.animation.Animator;
@@ -89,7 +90,6 @@ class CrossActivityAnimation {
     private static final float WINDOW_X_SHIFT_DP = 96;
     private static final int SCALE_FACTOR = 100;
     // TODO(b/264710590): Use the progress commit threshold from ViewConfiguration once it exists.
-    private static final float PROGRESS_COMMIT_THRESHOLD = 0.1f;
     private static final float TARGET_COMMIT_PROGRESS = 0.5f;
     private static final float ENTER_ALPHA_THRESHOLD = 0.22f;
 
@@ -184,7 +184,7 @@ class CrossActivityAnimation {
         mStartTaskRect.offsetTo(0, 0);
 
         // Draw background with task background color.
-        mBackground.ensureBackground(
+        mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
                 mEnteringTarget.taskInfo.taskDescription.getBackgroundColor(), mTransaction);
     }
 
@@ -244,6 +244,7 @@ class CrossActivityAnimation {
                 : mapLinear(progress, 0, 1f, 0, TARGET_COMMIT_PROGRESS)) * SCALE_FACTOR;
         mLeavingProgressSpring.animateToFinalPosition(springProgress);
         mEnteringProgressSpring.animateToFinalPosition(springProgress);
+        mBackground.onBackProgressed(progress);
     }
 
     private void onGestureCommitted() {

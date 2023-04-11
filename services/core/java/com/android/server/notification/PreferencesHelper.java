@@ -2045,9 +2045,10 @@ public class PreferencesHelper implements RankingConfig {
                 // before the migration is enabled, this will simply default to false in all cases.
                 boolean importanceIsUserSet = false;
                 // Even if this package's data is not present, we need to write something;
-                // so default to IMPORTANCE_NONE, since if PM doesn't know about the package
-                // for some reason, notifications are not allowed.
-                int importance = IMPORTANCE_NONE;
+                // default to IMPORTANCE_UNSPECIFIED. If PM doesn't know about the package
+                // for some reason, notifications are not allowed, but in logged output we want
+                // to distinguish this case from the actually-banned packages.
+                int importance = IMPORTANCE_UNSPECIFIED;
                 Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
                 if (pkgPermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
                     Pair<Boolean, Boolean> permissionPair = pkgPermissions.get(key);

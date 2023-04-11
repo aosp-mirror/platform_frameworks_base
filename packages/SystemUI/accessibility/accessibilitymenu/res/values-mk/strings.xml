@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Мени за пристапност"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"„Менито за пристапност“ ви овозможува да го контролирате уредот преку големо мени на екранот. Може да го заклучите уредот, да ги контролирате јачината на звукот и осветленоста, да правите слики од екранот и друго."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Помошник"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Помошник"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Пристапност"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Јачина на звук"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Контроли за јачина на звук"</string>
     <string name="power_label" msgid="7699720321491287839">"Напојување"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Опции за напојување"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Неодамнешни апликации"</string>
@@ -19,8 +16,8 @@
     <string name="screenshot_utterance" msgid="1430760563401895074">"Направи слика од екранот"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Зголеми звук"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Намали звук"</string>
-    <string name="brightness_up_label" msgid="8010753822854544846">"Осветлете"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"Затемнете"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"Осветли"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Затемни"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Оди на претходниот екран"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Оди на следниот екран"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"„Менито за пристапност“ ви овозможува да го контролирате уредот преку големо мени на екранот. Може да го заклучите уредот, да ги контролирате јачината на звукот и осветленоста, да правите слики од екранот и друго."</string>

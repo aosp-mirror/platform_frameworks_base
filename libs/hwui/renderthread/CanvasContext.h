@@ -200,6 +200,9 @@ public:
 
     SkISize getNextFrameSize() const;
 
+    // Returns the matrix to use to nudge non-AA'd points/lines towards the fragment center
+    const SkM44& getPixelSnapMatrix() const;
+
     // Called when SurfaceStats are available.
     static void onSurfaceStatsAvailable(void* context, int32_t surfaceControlId,
                                         ASurfaceControlStats* stats);
@@ -263,6 +266,8 @@ private:
     };
 
     FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId);
+
+    Frame getFrame();
 
     // The same type as Frame.mWidth and Frame.mHeight
     int32_t mLastFrameWidth = 0;

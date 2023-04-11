@@ -1339,7 +1339,7 @@ public class DataManager {
     /** Adds {@code listener} to be notified on conversation changes. */
     public void addConversationsListener(
             @NonNull PeopleService.ConversationsListener listener) {
-        synchronized (mConversationsListeners) {
+        synchronized (mLock) {
             mConversationsListeners.add(Objects.requireNonNull(listener));
         }
     }

@@ -44,7 +44,7 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -694,7 +694,7 @@ class DragState {
     void overridePointerIconLocked(int touchSource) {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
+            InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
         }
     }
 

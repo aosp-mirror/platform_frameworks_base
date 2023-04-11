@@ -2553,13 +2553,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return task != null && !task.isDragResizing() && super.canStartChangeTransition();
     }
 
-    /** Records the starting bounds of the closing organized TaskFragment. */
-    void setClosingChangingStartBoundsIfNeeded() {
+    /**
+     * Returns {@code true} if the starting bounds of the closing organized TaskFragment is
+     * recorded. Otherwise, return {@code false}.
+     */
+    boolean setClosingChangingStartBoundsIfNeeded() {
         if (isOrganizedTaskFragment() && mDisplayContent != null
                 && mDisplayContent.mChangingContainers.remove(this)) {
             mDisplayContent.mClosingChangingContainers.put(
                     this, new Rect(mSurfaceFreezer.mFreezeBounds));
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -2918,14 +2923,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
 
-        mDimmer.resetDimStates();
+        final Rect dimBounds = mDimmer.resetDimStates();
         super.prepareSurfaces();
 
-        // Bounds need to be relative, as the dim layer is a child.
-        final Rect dimBounds = getBounds();
-        dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
-        if (mDimmer.updateDims(getSyncTransaction(), dimBounds)) {
-            scheduleAnimation();
+        if (dimBounds != null) {
+            // Bounds need to be relative, as the dim layer is a child.
+            dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            if (mDimmer.updateDims(getSyncTransaction())) {
+                scheduleAnimation();
+            }
         }
     }
 

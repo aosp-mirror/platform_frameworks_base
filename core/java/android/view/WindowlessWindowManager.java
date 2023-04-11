@@ -57,18 +57,16 @@ public class WindowlessWindowManager implements IWindowSession {
         SurfaceControl mLeash;
         Rect mFrame;
         Rect mAttachedFrame;
+        IBinder mFocusGrantToken;
 
-        State(SurfaceControl sc, WindowManager.LayoutParams p,
-                int displayId, IBinder inputChannelToken, IWindow client, SurfaceControl leash,
-                Rect frame, Rect attachedFrame) {
+        State(SurfaceControl sc, WindowManager.LayoutParams p, int displayId, IWindow client,
+                SurfaceControl leash, Rect frame) {
             mSurfaceControl = sc;
             mParams.copyFrom(p);
             mDisplayId = displayId;
-            mInputChannelToken = inputChannelToken;
             mClient = client;
             mLeash = leash;
             mFrame = frame;
-            mAttachedFrame = attachedFrame;
         }
     };
 
@@ -182,44 +180,52 @@ public class WindowlessWindowManager implements IWindowSession {
                 .setParent(leash)
                 .build();
 
+        final State state = new State(sc, attrs, displayId, window, leash, /* frame= */ new Rect());
+        synchronized (this) {
+            State parentState = mStateForWindow.get(attrs.token);
+            if (parentState != null) {
+                state.mAttachedFrame = parentState.mFrame;
+            }
+
+            // Give the first window the mFocusGrantToken since that's the token the host can use
+            // to give focus to the embedded.
+            if (mStateForWindow.isEmpty()) {
+                state.mFocusGrantToken = mFocusGrantToken;
+            } else {
+                state.mFocusGrantToken = new Binder();
+            }
+
+            mStateForWindow.put(window.asBinder(), state);
+        }
+
+        if (state.mAttachedFrame == null) {
+            outAttachedFrame.set(0, 0, -1, -1);
+        } else {
+            outAttachedFrame.set(state.mAttachedFrame);
+        }
+        outSizeCompatScale[0] = 1f;
+
         if (((attrs.inputFeatures &
                 WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0)) {
             try {
                 if (mRealWm instanceof IWindowSession.Stub) {
                     mRealWm.grantInputChannel(displayId,
                             new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
-                            window, mHostInputToken,
-                            attrs.flags, attrs.privateFlags, attrs.inputFeatures, attrs.type,
-                            attrs.token, mFocusGrantToken, attrs.getTitle().toString(),
+                            window, mHostInputToken, attrs.flags, attrs.privateFlags,
+                            attrs.inputFeatures, attrs.type,
+                            attrs.token, state.mFocusGrantToken, attrs.getTitle().toString(),
                             outInputChannel);
                 } else {
                     mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
                             attrs.privateFlags, attrs.inputFeatures, attrs.type, attrs.token,
-                            mFocusGrantToken, attrs.getTitle().toString(), outInputChannel);
+                            state.mFocusGrantToken, attrs.getTitle().toString(), outInputChannel);
                 }
+                state.mInputChannelToken =
+                        outInputChannel != null ? outInputChannel.getToken() : null;
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to grant input to surface: ", e);
             }
         }
-
-        final State state = new State(sc, attrs, displayId,
-                outInputChannel != null ? outInputChannel.getToken() : null, window,
-                leash, /* frame= */ new Rect(), /* attachedFrame= */ null);
-        Rect parentFrame = null;
-        synchronized (this) {
-            State parentState = mStateForWindow.get(attrs.token);
-            if (parentState != null) {
-                parentFrame = parentState.mFrame;
-            }
-            mStateForWindow.put(window.asBinder(), state);
-        }
-        state.mAttachedFrame = parentFrame;
-        if (parentFrame == null) {
-            outAttachedFrame.set(0, 0, -1, -1);
-        } else {
-            outAttachedFrame.set(parentFrame);
-        }
-        outSizeCompatScale[0] = 1f;
 
         final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
                         WindowManagerGlobal.ADD_FLAG_USE_BLAST;

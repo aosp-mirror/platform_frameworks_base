@@ -122,7 +122,7 @@ class ClockRegistryTest : SysuiTestCase() {
             isEnabled = true,
             handleAllUsers = true,
             defaultClockProvider = fakeDefaultProvider,
-            keepAllLoaded = true,
+            keepAllLoaded = false,
             subTag = "Test",
         ) {
             override fun querySettings() { }
@@ -154,8 +154,8 @@ class ClockRegistryTest : SysuiTestCase() {
         pluginListener.onPluginLoaded(plugin2, mockContext, mockPluginLifecycle)
         val list = registry.getClocks()
         assertEquals(
-            list,
-            listOf(
+            list.toSet(),
+            setOf(
                 ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
                 ClockMetadata("clock_1", "clock 1"),
                 ClockMetadata("clock_2", "clock 2"),
@@ -187,8 +187,8 @@ class ClockRegistryTest : SysuiTestCase() {
         pluginListener.onPluginLoaded(plugin2, mockContext, mockPluginLifecycle2)
         val list = registry.getClocks()
         assertEquals(
-            list,
-            listOf(
+            list.toSet(),
+            setOf(
                 ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
                 ClockMetadata("clock_1", "clock 1"),
                 ClockMetadata("clock_2", "clock 2")
@@ -293,6 +293,53 @@ class ClockRegistryTest : SysuiTestCase() {
         assertEquals(4, listChangeCallCount)
     }
 
+    @Test
+    fun pluginAddRemove_concurrentModification() {
+        val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        val mockPluginLifecycle2 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        val mockPluginLifecycle3 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        val mockPluginLifecycle4 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
+        val plugin1 = FakeClockPlugin().addClock("clock_1", "clock 1")
+        val plugin2 = FakeClockPlugin().addClock("clock_2", "clock 2")
+        val plugin3 = FakeClockPlugin().addClock("clock_3", "clock 3")
+        val plugin4 = FakeClockPlugin().addClock("clock_4", "clock 4")
+        whenever(mockPluginLifecycle1.isLoaded).thenReturn(true)
+        whenever(mockPluginLifecycle2.isLoaded).thenReturn(true)
+        whenever(mockPluginLifecycle3.isLoaded).thenReturn(true)
+        whenever(mockPluginLifecycle4.isLoaded).thenReturn(true)
+
+        // Set the current clock to the final clock to load
+        registry.applySettings(ClockSettings("clock_4", null))
+        scheduler.runCurrent()
+
+        // When ClockRegistry attempts to unload a plugin, we at that point decide to load and
+        // unload other plugins. This causes ClockRegistry to modify the list of available clock
+        // plugins while it is being iterated over. In production this happens as a result of a
+        // thread race, instead of synchronously like it does here.
+        whenever(mockPluginLifecycle2.unloadPlugin()).then {
+            pluginListener.onPluginDetached(mockPluginLifecycle1)
+            pluginListener.onPluginLoaded(plugin4, mockContext, mockPluginLifecycle4)
+        }
+
+        // Load initial plugins
+        pluginListener.onPluginLoaded(plugin1, mockContext, mockPluginLifecycle1)
+        pluginListener.onPluginLoaded(plugin2, mockContext, mockPluginLifecycle2)
+        pluginListener.onPluginLoaded(plugin3, mockContext, mockPluginLifecycle3)
+
+        // Repeatedly verify the loaded providers to get final state
+        registry.verifyLoadedProviders()
+        scheduler.runCurrent()
+        registry.verifyLoadedProviders()
+        scheduler.runCurrent()
+
+        // Verify all plugins were correctly loaded into the registry
+        assertEquals(registry.getClocks().toSet(), setOf(
+            ClockMetadata("DEFAULT", "Default Clock"),
+            ClockMetadata("clock_2", "clock 2"),
+            ClockMetadata("clock_3", "clock 3"),
+            ClockMetadata("clock_4", "clock 4")
+        ))
+    }
 
     @Test
     fun jsonDeserialization_gotExpectedObject() {

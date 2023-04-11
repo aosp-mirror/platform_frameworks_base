@@ -28,7 +28,6 @@ import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
-import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.hardware.lights.LightsManager;
 import android.icu.util.ULocale;
@@ -776,7 +775,7 @@ public final class InputDevice implements Parcelable {
      * Each gamepad or joystick is given a unique, positive controller number when initially
      * configured by the system. This number may change due to events such as device disconnects /
      * reconnects or user initiated reassignment. Any change in number will trigger an event that
-     * can be observed by registering an {@link InputManager.InputDeviceListener}.
+     * can be observed by registering an {@link InputManagerGlobal.InputDeviceListener}.
      * </p>
      * <p>
      * All input devices which are not gamepads or joysticks will be assigned a controller number
@@ -981,7 +980,7 @@ public final class InputDevice implements Parcelable {
      * generating the keycode given by the corresponding value at the same index in the keys array.
      */
     public boolean[] hasKeys(int... keys) {
-        return InputManager.getInstance().deviceHasKeys(mId, keys);
+        return InputManagerGlobal.getInstance().deviceHasKeys(mId, keys);
     }
 
     /**
@@ -1028,7 +1027,8 @@ public final class InputDevice implements Parcelable {
      * {@link InputDevice#SOURCE_KEYBOARD} or the requested mapping cannot be determined.
      */
     public int getKeyCodeForKeyLocation(int locationKeyCode) {
-        return InputManager.getInstance().getKeyCodeForKeyLocation(mId, locationKeyCode);
+        return InputManagerGlobal.getInstance()
+                .getKeyCodeForKeyLocation(mId, locationKeyCode);
     }
 
     /**
@@ -1109,9 +1109,11 @@ public final class InputDevice implements Parcelable {
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @Nullable
     public String getBluetoothAddress() {
-        // We query the address via a separate InputManager API instead of pre-populating it in
-        // this class to avoid leaking it to apps that do not have sufficient permissions.
-        return InputManager.getInstance().getInputDeviceBluetoothAddress(mId);
+        // We query the address via a separate InputManagerGlobal API
+        // instead of pre-populating it in this class to avoid
+        // leaking it to apps that do not have sufficient permissions.
+        return InputManagerGlobal.getInstance()
+                .getInputDeviceBluetoothAddress(mId);
     }
 
     /**
@@ -1132,7 +1134,8 @@ public final class InputDevice implements Parcelable {
         synchronized (mMotionRanges) {
             if (mVibrator == null) {
                 if (mHasVibrator) {
-                    mVibrator = InputManager.getInstance().getInputDeviceVibrator(mId,
+                    mVibrator = InputManagerGlobal.getInstance()
+                            .getInputDeviceVibrator(mId,
                             VIBRATOR_ID_ALL);
                 } else {
                     mVibrator = NullVibrator.getInstance();
@@ -1154,7 +1157,8 @@ public final class InputDevice implements Parcelable {
     public VibratorManager getVibratorManager() {
         synchronized (mMotionRanges) {
             if (mVibratorManager == null) {
-                mVibratorManager = InputManager.getInstance().getInputDeviceVibratorManager(mId);
+                mVibratorManager = InputManagerGlobal.getInstance()
+                        .getInputDeviceVibratorManager(mId);
             }
         }
         return mVibratorManager;
@@ -1170,7 +1174,8 @@ public final class InputDevice implements Parcelable {
      */
     @NonNull
     public BatteryState getBatteryState() {
-        return InputManager.getInstance().getInputDeviceBatteryState(mId, mHasBattery);
+        return InputManagerGlobal.getInstance()
+                .getInputDeviceBatteryState(mId, mHasBattery);
     }
 
     /**
@@ -1185,7 +1190,8 @@ public final class InputDevice implements Parcelable {
     public LightsManager getLightsManager() {
         synchronized (mMotionRanges) {
             if (mLightsManager == null) {
-                mLightsManager = InputManager.getInstance().getInputDeviceLightsManager(mId);
+                mLightsManager = InputManagerGlobal.getInstance()
+                        .getInputDeviceLightsManager(mId);
             }
         }
         return mLightsManager;
@@ -1206,7 +1212,8 @@ public final class InputDevice implements Parcelable {
     public SensorManager getSensorManager() {
         synchronized (mMotionRanges) {
             if (mSensorManager == null) {
-                mSensorManager = InputManager.getInstance().getInputDeviceSensorManager(mId);
+                mSensorManager = InputManagerGlobal.getInstance()
+                        .getInputDeviceSensorManager(mId);
             }
         }
         return mSensorManager;
@@ -1217,7 +1224,7 @@ public final class InputDevice implements Parcelable {
      * @return Whether the input device is enabled.
      */
     public boolean isEnabled() {
-        return InputManager.getInstance().isInputDeviceEnabled(mId);
+        return InputManagerGlobal.getInstance().isInputDeviceEnabled(mId);
     }
 
     /**
@@ -1228,7 +1235,7 @@ public final class InputDevice implements Parcelable {
     @RequiresPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE)
     @TestApi
     public void enable() {
-        InputManager.getInstance().enableInputDevice(mId);
+        InputManagerGlobal.getInstance().enableInputDevice(mId);
     }
 
     /**
@@ -1239,7 +1246,7 @@ public final class InputDevice implements Parcelable {
     @RequiresPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE)
     @TestApi
     public void disable() {
-        InputManager.getInstance().disableInputDevice(mId);
+        InputManagerGlobal.getInstance().disableInputDevice(mId);
     }
 
     /**
@@ -1274,7 +1281,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     public void setPointerType(int pointerType) {
-        InputManager.getInstance().setPointerIconType(pointerType);
+        InputManagerGlobal.getInstance().setPointerIconType(pointerType);
     }
 
     /**
@@ -1283,7 +1290,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     public void setCustomPointerIcon(PointerIcon icon) {
-        InputManager.getInstance().setCustomPointerIcon(icon);
+        InputManagerGlobal.getInstance().setCustomPointerIcon(icon);
     }
 
     /**
@@ -1301,7 +1308,7 @@ public final class InputDevice implements Parcelable {
      *
      * @return the supported USI version, or null if the device does not support USI
      * @see <a href="https://universalstylus.org">Universal Stylus Initiative</a>
-     * @see InputManager#getHostUsiVersion(int)
+     * @see InputManagerGlobal#getHostUsiVersion(int)
      * @hide
      */
     @Nullable

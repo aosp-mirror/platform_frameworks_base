@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -81,7 +82,8 @@ public class SensorControllerTest {
     @Test
     public void createSensor_invalidHandle_throwsException() {
         doReturn(/* handle= */0).when(mSensorManagerInternalMock).createRuntimeSensor(
-                anyInt(), anyInt(), anyString(), anyString(), anyInt(), any());
+                anyInt(), anyInt(), anyString(), anyString(), anyFloat(), anyFloat(), anyFloat(),
+                anyInt(), anyInt(), anyInt(), any());
 
         Throwable thrown = assertThrows(
                 RuntimeException.class,
@@ -138,7 +140,8 @@ public class SensorControllerTest {
 
     private void doCreateSensorSuccessfully() {
         doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
-                anyInt(), anyInt(), anyString(), anyString(), anyInt(), any());
+                anyInt(), anyInt(), anyString(), anyString(), anyFloat(), anyFloat(), anyFloat(),
+                anyInt(), anyInt(), anyInt(), any());
         assertThat(mSensorController.createSensor(mSensorToken, mVirtualSensorConfig))
                 .isEqualTo(SENSOR_HANDLE);
     }

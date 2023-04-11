@@ -530,10 +530,10 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         PrintWriter pw = getOutPrintWriter();
         final int mainUserId = mService.getMainUserId();
         if (mainUserId == UserHandle.USER_NULL) {
-            pw.println("Couldn't get main user.");
+            pw.println("None");
             return 1;
         }
-        pw.println("Main user id: " + mainUserId);
+        pw.println(mainUserId);
         return 0;
     }
 

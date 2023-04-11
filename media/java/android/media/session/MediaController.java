@@ -29,6 +29,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.RoutingSessionInfo;
 import android.media.VolumeProvider;
 import android.media.VolumeProvider.ControlType;
 import android.media.session.MediaSession.QueueItem;
@@ -1001,8 +1002,11 @@ public final class MediaController {
          * @param maxVolume The max volume. Should be equal or greater than zero.
          * @param currentVolume The current volume. Should be in the interval [0, maxVolume].
          * @param audioAttrs The audio attributes for this playback. Should not be null.
-         * @param volumeControlId The volume control ID. This is used for matching
-         *                        {@link RoutingSessionInfo} and {@link MediaSession}.
+         * @param volumeControlId The {@link RoutingSessionInfo#getId() routing session id} of the
+         *     {@link RoutingSessionInfo} associated with this controller, or null if not
+         *     applicable. This id allows mapping this controller to a routing session which, when
+         *     applicable, provides information about the remote device, and support for volume
+         *     adjustment.
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)

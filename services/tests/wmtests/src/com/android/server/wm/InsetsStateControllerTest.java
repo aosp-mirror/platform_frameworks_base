@@ -287,7 +287,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // IME cannot be the IME target.
         ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
 
-        WindowContainerInsetsSourceProvider statusBarProvider =
+        InsetsSourceProvider statusBarProvider =
                 getController().getOrCreateSourceProvider(ID_STATUS_BAR, statusBars());
         final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>> imeOverrideProviders =
                 new SparseArray<>();
@@ -353,7 +353,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     public void testTransientVisibilityOfFixedRotationState() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final WindowContainerInsetsSourceProvider provider = getController()
+        final InsetsSourceProvider provider = getController()
                 .getOrCreateSourceProvider(ID_STATUS_BAR, statusBars());
         provider.setWindowContainer(statusBar, null, null);
 

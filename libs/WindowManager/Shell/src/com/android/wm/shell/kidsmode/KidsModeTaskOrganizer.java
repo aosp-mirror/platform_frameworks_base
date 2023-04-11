@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
@@ -310,8 +311,11 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once possible.
         if (mReverseDefaultRotationEnabled) {
             setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ true,
-                    /* fromOrientations */ new int[]{SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
-                    /* toOrientations */ new int[]{SCREEN_ORIENTATION_LANDSCAPE});
+                    /* fromOrientations */
+                    new int[]{SCREEN_ORIENTATION_LANDSCAPE, SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
+                    /* toOrientations */
+                    new int[]{SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
+                            SCREEN_ORIENTATION_SENSOR_LANDSCAPE});
         } else {
             setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ true,
                     /* fromOrientations */ null, /* toOrientations */ null);

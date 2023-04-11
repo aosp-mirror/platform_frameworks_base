@@ -618,9 +618,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         if ((flags & Notification.FLAG_AUTO_CANCEL) != Notification.FLAG_AUTO_CANCEL) {
             return false;
         }
-        if ((flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-            return false;
-        }
         return true;
     }
 

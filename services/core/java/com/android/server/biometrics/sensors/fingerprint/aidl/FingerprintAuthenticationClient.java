@@ -262,6 +262,14 @@ class FingerprintAuthenticationClient
         final AidlSession session = getFreshDaemon();
 
         final OperationContextExt opContext = getOperationContext();
+        final ICancellationSignal cancel;
+        if (session.hasContextMethods()) {
+            cancel = session.getSession().authenticateWithContext(
+                    mOperationId, opContext.toAidlContext(getOptions()));
+        } else {
+            cancel = session.getSession().authenticate(mOperationId);
+        }
+
         getBiometricContext().subscribe(opContext, ctx -> {
             if (session.hasContextMethods()) {
                 try {
@@ -283,12 +291,7 @@ class FingerprintAuthenticationClient
             mALSProbeCallback.getProbe().enable();
         }
 
-        if (session.hasContextMethods()) {
-            return session.getSession().authenticateWithContext(
-                    mOperationId, opContext.toAidlContext(getOptions()));
-        } else {
-            return session.getSession().authenticate(mOperationId);
-        }
+        return cancel;
     }
 
     @Override

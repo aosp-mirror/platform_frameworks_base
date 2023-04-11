@@ -363,13 +363,17 @@ public abstract class BrightnessMappingStrategy {
     public abstract void recalculateSplines(boolean applyAdjustment, float[] adjustment);
 
     /**
-     * Returns the timeout for the short term model
+     * Returns the timeout, in milliseconds for the short term model
      *
      * Timeout after which we remove the effects any user interactions might've had on the
      * brightness mapping. This timeout doesn't start until we transition to a non-interactive
      * display policy so that we don't reset while users are using their devices, but also so that
      * we don't erroneously keep the short-term model if the device is dozing but the
      * display is fully on.
+     *
+     * This timeout is also used when the device switches from interactive screen brightness mode
+     * to idle screen brightness mode, to preserve the user's preference when they resume usage of
+     * the device, within the specified timeframe.
      */
     public abstract long getShortTermModelTimeout();
 

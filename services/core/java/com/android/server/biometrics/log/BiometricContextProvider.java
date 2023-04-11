@@ -84,8 +84,6 @@ public final class BiometricContextProvider implements BiometricContext {
     private final AuthSessionCoordinator mAuthSessionCoordinator;
     private final WindowManager mWindowManager;
     @Nullable private final Handler mHandler;
-    private boolean mIsAod = false;
-    private boolean mIsAwake = false;
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mFoldState = IBiometricContextListener.FoldState.UNKNOWN;
 
@@ -116,16 +114,6 @@ public final class BiometricContextProvider implements BiometricContext {
     private void subscribeBiometricContextListener(@NonNull IStatusBarService service) {
         try {
             service.setBiometicContextListener(new IBiometricContextListener.Stub() {
-                @Override
-                public void onDozeChanged(boolean isAod, boolean isAwake) {
-                    final boolean changed = (mIsAod != isAod) || (mIsAwake != isAwake);
-                    if (changed) {
-                        mIsAod = isAod;
-                        mIsAwake = isAwake;
-                        notifyChanged();
-                    }
-                }
-
                 @Override
                 public void onFoldChanged(int foldState) {
                     mFoldState = foldState;
@@ -185,12 +173,18 @@ public final class BiometricContextProvider implements BiometricContext {
 
     @Override
     public boolean isAod() {
-        return mIsAod;
+        return mDisplayState == AuthenticateOptions.DISPLAY_STATE_AOD;
     }
 
     @Override
     public boolean isAwake() {
-        return mIsAwake;
+        switch (mDisplayState) {
+            case AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN:
+            case AuthenticateOptions.DISPLAY_STATE_SCREENSAVER:
+            case AuthenticateOptions.DISPLAY_STATE_UNKNOWN:
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -252,7 +246,7 @@ public final class BiometricContextProvider implements BiometricContext {
     public String toString() {
         return "[keyguard session: " + getKeyguardEntrySessionInfo() + ", "
                 + "bp session: " + getBiometricPromptSessionInfo() + ", "
-                + "isAod: " + isAod() + ", "
+                + "displayState: " + getDisplayState() + ", "
                 + "isAwake: " + isAwake() +  ", "
                 + "isDisplayOn: " + isDisplayOn() +  ", "
                 + "dock: " + getDockedState() + ", "

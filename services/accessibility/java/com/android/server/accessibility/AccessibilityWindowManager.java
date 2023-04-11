@@ -201,7 +201,8 @@ public class AccessibilityWindowManager {
         private List<AccessibilityWindowInfo> mWindows;
         private boolean mTrackingWindows = false;
         private boolean mHasWatchOutsideTouchWindow;
-        private int mProxyDisplayAccessibilityFocusedWindow;
+        private int mProxyDisplayAccessibilityFocusedWindow =
+                AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         private boolean mIsProxy;
 
         /**

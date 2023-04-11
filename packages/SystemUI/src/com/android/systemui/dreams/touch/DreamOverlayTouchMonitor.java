@@ -101,6 +101,10 @@ public class DreamOverlayTouchMonitor {
 
                     completer.set(predecessor);
                 }
+
+                if (mActiveTouchSessions.isEmpty() && mStopMonitoringPending) {
+                    stopMonitoring(false);
+                }
             });
 
             return "DreamOverlayTouchMonitor::pop";
@@ -214,7 +218,12 @@ public class DreamOverlayTouchMonitor {
 
         @Override
         public void onPause(@NonNull LifecycleOwner owner) {
-            stopMonitoring();
+            stopMonitoring(false);
+        }
+
+        @Override
+        public void onDestroy(LifecycleOwner owner) {
+            stopMonitoring(true);
         }
     };
 
@@ -222,7 +231,7 @@ public class DreamOverlayTouchMonitor {
      * When invoked, instantiates a new {@link InputSession} to monitor touch events.
      */
     private void startMonitoring() {
-        stopMonitoring();
+        stopMonitoring(true);
         mCurrentInputSession = mInputSessionFactory.create(
                 "dreamOverlay",
                 mInputEventListener,
@@ -234,8 +243,13 @@ public class DreamOverlayTouchMonitor {
     /**
      * Destroys any active {@link InputSession}.
      */
-    private void stopMonitoring() {
+    private void stopMonitoring(boolean force) {
         if (mCurrentInputSession == null) {
+            return;
+        }
+
+        if (!mActiveTouchSessions.isEmpty() && !force) {
+            mStopMonitoringPending = true;
             return;
         }
 
@@ -250,12 +264,15 @@ public class DreamOverlayTouchMonitor {
 
         mCurrentInputSession.dispose();
         mCurrentInputSession = null;
+        mStopMonitoringPending = false;
     }
 
 
     private final HashSet<TouchSessionImpl> mActiveTouchSessions = new HashSet<>();
     private final Collection<DreamTouchHandler> mHandlers;
     private final DisplayHelper mDisplayHelper;
+
+    private boolean mStopMonitoringPending;
 
     private InputChannelCompat.InputEventListener mInputEventListener =
             new InputChannelCompat.InputEventListener() {

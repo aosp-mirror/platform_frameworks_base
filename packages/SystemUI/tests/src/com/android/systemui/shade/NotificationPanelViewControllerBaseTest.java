@@ -103,6 +103,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
@@ -162,6 +163,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import dagger.Lazy;
+
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -173,7 +176,6 @@ import org.mockito.stubbing.Answer;
 import java.util.List;
 import java.util.Optional;
 
-import dagger.Lazy;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
@@ -207,7 +209,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected DozeLog mDozeLog;
     @Mock protected ShadeLogger mShadeLog;
-    @Mock protected ShadeHeightLogger mShadeHeightLogger;
     @Mock protected CommandQueue mCommandQueue;
     @Mock protected VibratorHelper mVibratorHelper;
     @Mock protected LatencyTracker mLatencyTracker;
@@ -286,6 +287,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
 
     @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock protected MultiShadeInteractor mMultiShadeInteractor;
     @Mock protected KeyguardLongPressViewModel mKeyuardLongPressViewModel;
     @Mock protected AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock protected MotionEvent mDownMotionEvent;
@@ -519,7 +521,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger,
                 mShadeLog,
-                mShadeHeightLogger,
                 mConfigurationController,
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHierarchyManager,
@@ -571,6 +572,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mLockscreenToOccludedTransitionViewModel,
                 mMainDispatcher,
                 mKeyguardTransitionInteractor,
+                () -> mMultiShadeInteractor,
                 mDumpManager,
                 mKeyuardLongPressViewModel,
                 mKeyguardInteractor);
@@ -578,7 +580,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mCentralSurfaces,
                 null,
                 () -> {},
-                mNotificationShelfController);
+                mNotificationShelfController,
+                mHeadsUpManager);
         mNotificationPanelViewController.setTrackingStartedListener(() -> {});
         mNotificationPanelViewController.setOpenCloseListener(
                 new NotificationPanelViewController.OpenCloseListener() {
@@ -588,7 +591,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                     @Override
                     public void onOpenStarted() {}
                 });
-        mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
         verify(mView, atLeast(1)).addOnAttachStateChangeListener(
@@ -601,7 +603,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mAccessibilityDelegate = accessibilityDelegateArgumentCaptor.getValue();
         mNotificationPanelViewController.getStatusBarStateController()
                 .addCallback(mNotificationPanelViewController.getStatusBarStateListener());
-        mNotificationPanelViewController
+        mNotificationPanelViewController.getShadeHeadsUpTracker()
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
         verify(mNotificationStackScrollLayoutController)
                 .setOnEmptySpaceClickListener(mEmptySpaceClickListenerCaptor.capture());

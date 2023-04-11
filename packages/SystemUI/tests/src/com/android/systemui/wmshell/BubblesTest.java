@@ -57,6 +57,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -84,6 +85,9 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.launcher3.icons.BubbleBadgeIconFactory;
+import com.android.launcher3.icons.BubbleIconFactory;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -100,6 +104,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -123,18 +128,16 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
-import com.android.wm.shell.bubbles.BubbleBadgeIconFactory;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
-import com.android.wm.shell.bubbles.BubbleIconFactory;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.bubbles.StackEducationViewKt;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -145,6 +148,7 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.taskview.TaskViewTransitions;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1222,8 +1226,13 @@ public class BubblesTest extends SysuiTestCase {
         BubbleViewInfoTask.BubbleViewInfo info = BubbleViewInfoTask.BubbleViewInfo.populate(context,
                 mBubbleController,
                 mBubbleController.getStackView(),
-                new BubbleIconFactory(mContext),
-                new BubbleBadgeIconFactory(mContext),
+                new BubbleIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size)),
+                new BubbleBadgeIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                        mContext.getResources().getColor(R.color.important_conversation),
+                        mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.importance_ring_stroke_width)),
                 bubble,
                 true /* skipInflation */);
         verify(userContext, times(1)).getPackageManager();
@@ -1669,6 +1678,60 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShowStackEdu_isNotConversationBubble() {
+        // Setup
+        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
+        BubbleEntry bubbleEntry = createBubbleEntry(false /* isConversation */);
+        mBubbleController.updateBubble(bubbleEntry);
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Click on bubble
+        Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
+        assertFalse(bubble.isConversation());
+        bubble.getIconView().callOnClick();
+
+        // Check education is not shown
+        BubbleStackView stackView = mBubbleController.getStackView();
+        assertFalse(stackView.isStackEduVisible());
+    }
+
+    @Test
+    public void testShowStackEdu_isConversationBubble() {
+        // Setup
+        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
+        BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
+        mBubbleController.updateBubble(bubbleEntry);
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Click on bubble
+        Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
+        assertTrue(bubble.isConversation());
+        bubble.getIconView().callOnClick();
+
+        // Check education is shown
+        BubbleStackView stackView = mBubbleController.getStackView();
+        assertTrue(stackView.isStackEduVisible());
+    }
+
+    @Test
+    public void testShowStackEdu_isSeenConversationBubble() {
+        // Setup
+        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, true);
+        BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
+        mBubbleController.updateBubble(bubbleEntry);
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Click on bubble
+        Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
+        assertTrue(bubble.isConversation());
+        bubble.getIconView().callOnClick();
+
+        // Check education is not shown
+        BubbleStackView stackView = mBubbleController.getStackView();
+        assertFalse(stackView.isStackEduVisible());
+    }
+
+    @Test
     public void testShowOrHideAppBubble_addsAndExpand() {
         assertThat(mBubbleController.isStackExpanded()).isFalse();
         assertThat(mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE)).isNull();
@@ -1816,6 +1879,20 @@ public class BubblesTest extends SysuiTestCase {
                 mock(Bubbles.PendingIntentCanceledListener.class), new SyncExecutor());
     }
 
+    private BubbleEntry createBubbleEntry(boolean isConversation) {
+        NotificationEntry notificationEntry = mNotificationTestHelper.createBubble(mDeleteIntent);
+        if (isConversation) {
+            ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext)
+                    .setId("shortcutId")
+                    .build();
+            NotificationEntryHelper.modifyRanking(notificationEntry)
+                    .setIsConversation(true)
+                    .setShortcutInfo(shortcutInfo)
+                    .build();
+        }
+        return mBubblesManager.notifToBubbleEntry(notificationEntry);
+    }
+
     /** Creates a context that will return a PackageManager with specific AppInfo. */
     private Context setUpContextWithPackageManager(String pkg, ApplicationInfo info)
             throws Exception {
@@ -1850,6 +1927,15 @@ public class BubblesTest extends SysuiTestCase {
             flags &= ~flag;
         }
         bubbleMetadata.setFlags(flags);
+    }
+
+    /**
+     * Set preferences boolean value for key
+     * Used to setup global state for stack view education tests
+     */
+    private void setPrefBoolean(String key, boolean enabled) {
+        mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE)
+                .edit().putBoolean(key, enabled).apply();
     }
 
     private Notification.BubbleMetadata getMetadata() {

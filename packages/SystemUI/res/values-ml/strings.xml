@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="learn_more" msgid="4690632085667273811">"കൂടുതലറിയുക"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"സ്ക്രീൻഷോട്ട്"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ചിത്രം അയച്ചു"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു…"</string>
@@ -459,6 +458,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ശബ്‌ദവും വൈബ്രേഷനും"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ക്രമീകരണം"</string>
+    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
+    <skip />
+    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"ആപ്പ് പിൻ ചെയ്തു"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ\', \'ചുരുക്കവിവരണം\' എന്നിവ സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ പോവുക\', \'ഹോം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക."</string>
@@ -833,7 +836,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"മാഗ്നിഫിക്കേഷൻ മോഡ് മാറുക"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"സ്ക്രീൻ പൂർണ്ണമായും മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"സ്‌ക്രീനിന്റെ ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"മാറുക"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"മാഗ്നിഫിക്കേഷൻ ക്രമീകരണം തുറക്കുക"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"വലുപ്പം മാറ്റാൻ മൂല വലിച്ചിടുക"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ഡയഗണൽ സ്‌ക്രോളിംഗ് അനുവദിക്കുക"</string>
@@ -850,6 +852,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"ഇടത്തരം"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"ചെറുത്"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"വലുത്"</string>
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"പൂർണ്ണ സ്ക്രീൻ"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"പൂർത്തിയായി"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"മാഗ്നിഫയർ വിൻഡോ ക്രമീകരണം"</string>
@@ -871,8 +874,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# നിയന്ത്രണം ചേർത്തു.}other{# നിയന്ത്രണങ്ങൾ ചേർത്തു.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"നീക്കം ചെയ്‌തു"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ചേർക്കണോ?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"ഏതൊക്കെ നിയന്ത്രണങ്ങളും ഉള്ളടക്കവും ഇവിടെ ദൃശ്യമാകണമെന്ന് <xliff:g id="APPNAME">%s</xliff:g> എന്നതിന് തിരഞ്ഞെടുക്കാനാകും."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> എന്നതിനുള്ള നിയന്ത്രണങ്ങൾ നീക്കം ചെയ്യണോ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"പ്രിയപ്പെട്ടതാക്കി"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"പ്രിയപ്പെട്ടതാക്കി, സ്ഥാനം <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -886,6 +888,12 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"എല്ലാ നിയന്ത്രണങ്ങളും നീക്കം ചെയ്തു"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"മാറ്റങ്ങൾ സംരക്ഷിച്ചിട്ടില്ല"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"മറ്റ് ആപ്പുകൾ കാണുക"</string>
+    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
+    <skip />
+    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
+    <skip />
+    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"നിയന്ത്രണങ്ങൾ ലോഡ് ചെയ്യാനായില്ല. ആപ്പ് ക്രമീകരണം മാറ്റിയിട്ടില്ലെന്ന് ഉറപ്പാക്കാൻ <xliff:g id="APP">%s</xliff:g> ആപ്പ് പരിശോധിക്കുക."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"അനുയോജ്യമായ നിയന്ത്രണങ്ങൾ ലഭ്യമല്ല"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>
@@ -1067,7 +1075,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="add" msgid="81036585205287996">"ചേർക്കുക"</string>
     <string name="manage_users" msgid="1823875311934643849">"ഉപയോക്താക്കളെ മാനേജ് ചെയ്യുക"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"വൈഫൈ ലഭ്യമല്ല"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"മുൻഗണനാ മോഡ്"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"അലാറം സജ്ജീകരിച്ചു"</string>

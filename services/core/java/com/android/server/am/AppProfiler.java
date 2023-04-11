@@ -45,7 +45,6 @@ import static com.android.server.am.ActivityManagerService.appendMemInfo;
 import static com.android.server.am.ActivityManagerService.getKsmInfo;
 import static com.android.server.am.ActivityManagerService.stringifyKBSize;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
 
@@ -1006,6 +1005,37 @@ public class AppProfiler {
             mBgHandler.obtainMessage(BgHandler.MEMORY_PRESSURE_CHANGED, mLastMemoryLevel, memFactor)
                     .sendToTarget();
         }
+
+        if (mService.mConstants.USE_MODERN_TRIM) {
+            // Modern trim is not sent based on lowmem state
+            // Dispatch UI_HIDDEN to processes that need it
+            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
+                final ProcessProfileRecord profile = app.mProfile;
+                final IApplicationThread thread;
+                final ProcessStateRecord state = app.mState;
+                if (state.hasProcStateChanged()) {
+                    state.setProcStateChanged(false);
+                }
+                int procState = app.mState.getCurProcState();
+                if (((procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                        && procState < ActivityManager.PROCESS_STATE_CACHED_ACTIVITY)
+                        || app.mState.isSystemNoUi()) && app.mProfile.hasPendingUiClean()) {
+                    // If this application is now in the background and it
+                    // had done UI, then give it the special trim level to
+                    // have it free UI resources.
+                    if ((thread = app.getThread()) != null) {
+                        try {
+                            thread.scheduleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                            app.mProfile.setPendingUiClean(false);
+                        } catch (RemoteException e) {
+
+                        }
+                    }
+                }
+            });
+            return false;
+        }
+
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         boolean allChanged;
@@ -1119,7 +1149,7 @@ public class AppProfiler {
                     Slog.v(TAG_OOM_ADJ, msg + app.processName + " to " + level);
                 }
                 mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
-                        OOM_ADJ_REASON_NONE);
+                        CachedAppOptimizer.UNFREEZE_REASON_TRIM_MEMORY);
                 thread.scheduleTrimMemory(level);
             } catch (RemoteException e) {
             }

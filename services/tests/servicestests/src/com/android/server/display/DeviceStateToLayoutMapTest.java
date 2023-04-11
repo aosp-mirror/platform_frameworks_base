@@ -84,11 +84,11 @@ public class DeviceStateToLayoutMapTest {
     }
 
     @Test
-    public void testBrightnessThrottlingMapId() {
+    public void testThermalBrightnessThrottlingMapId() {
         Layout configLayout = mDeviceStateToLayoutMap.get(2);
 
-        assertEquals("concurrent1", configLayout.getAt(0).getBrightnessThrottlingMapId());
-        assertEquals("concurrent2", configLayout.getAt(1).getBrightnessThrottlingMapId());
+        assertEquals("concurrent1", configLayout.getAt(0).getThermalBrightnessThrottlingMapId());
+        assertEquals("concurrent2", configLayout.getAt(1).getThermalBrightnessThrottlingMapId());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class DeviceStateToLayoutMapTest {
     }
 
     @Test
-    public void testRefreshRateThermalThrottlingMapId() {
+    public void testThermalRefreshRateThrottlingMapId() {
         Layout configLayout = mDeviceStateToLayoutMap.get(4);
 
         assertEquals("test2", configLayout.getAt(0).getRefreshRateThermalThrottlingMapId());
@@ -124,12 +124,14 @@ public class DeviceStateToLayoutMapTest {
                 /* isDefault= */ true, /* isEnabled= */ true, /* displayGroupName= */ null,
                 mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT, Display.DEFAULT_DISPLAY,
                 /* brightnessThrottlingMapId= */ "brightness1",
-                /* refreshRateZoneId= */ "zone1", /* refreshRateThermalThrottlingMapId= */ "rr1");
+                /* refreshRateZoneId= */ "zone1",
+                /* refreshRateThermalThrottlingMapId= */ "rr1");
         testLayout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(678L),
                 /* isDefault= */ false, /* isEnabled= */ false, /* displayGroupName= */ "group1",
                 mDisplayIdProducerMock, Layout.Display.POSITION_REAR, Display.DEFAULT_DISPLAY,
                 /* brightnessThrottlingMapId= */ "brightness2",
-                /* refreshRateZoneId= */ "zone2", /* refreshRateThermalThrottlingMapId= */ "rr2");
+                /* refreshRateZoneId= */ "zone2",
+                /* refreshRateThermalThrottlingMapId= */ "rr2");
 
         assertEquals(testLayout, configLayout);
     }
@@ -147,7 +149,8 @@ public class DeviceStateToLayoutMapTest {
         layout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(id), /* isDefault= */ false,
                 enabled, group, mDisplayIdProducerMock, Layout.Display.POSITION_UNKNOWN,
                 Display.DEFAULT_DISPLAY, /* brightnessThrottlingMapId= */ null,
-                /* refreshRateZoneId= */ null, /* refreshRateThermalThrottlingMapId= */ null);
+                /* refreshRateZoneId= */ null,
+                /* refreshRateThermalThrottlingMapId= */ null);
     }
 
     private void setupDeviceStateToLayoutMap() throws IOException {

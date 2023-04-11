@@ -59,8 +59,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -90,7 +88,6 @@ constructor(
     @Main private val handler: Handler,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     @Application private val scope: CoroutineScope,
-    private val featureFlags: FeatureFlags,
     dumpManager: DumpManager
 ) : Dumpable {
     private val requests: HashSet<SideFpsUiRequestSource> = HashSet()
@@ -191,14 +188,12 @@ constructor(
 
     private fun listenForAlternateBouncerVisibility() {
         alternateBouncerInteractor.setAlternateBouncerUIAvailable(true)
-        if (featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER)) {
-            scope.launch {
-                alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
-                    if (isVisible) {
-                        show(SideFpsUiRequestSource.ALTERNATE_BOUNCER, REASON_AUTH_KEYGUARD)
-                    } else {
-                        hide(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
-                    }
+        scope.launch {
+            alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
+                if (isVisible) {
+                    show(SideFpsUiRequestSource.ALTERNATE_BOUNCER, REASON_AUTH_KEYGUARD)
+                } else {
+                    hide(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
                 }
             }
         }

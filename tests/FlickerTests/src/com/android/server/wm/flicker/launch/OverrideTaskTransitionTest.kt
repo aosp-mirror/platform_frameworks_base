@@ -27,13 +27,13 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
-import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.R
-import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.device.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

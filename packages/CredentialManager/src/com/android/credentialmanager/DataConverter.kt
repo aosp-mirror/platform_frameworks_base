@@ -29,7 +29,6 @@ import android.credentials.ui.Entry
 import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.RequestInfo
 import android.graphics.drawable.Drawable
-import android.service.credentials.CredentialEntry
 import android.text.TextUtils
 import android.util.Log
 import com.android.credentialmanager.common.Constants
@@ -57,6 +56,7 @@ import androidx.credentials.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDEN
 import androidx.credentials.provider.Action
 import androidx.credentials.provider.AuthenticationAction
 import androidx.credentials.provider.CreateEntry
+import androidx.credentials.provider.CredentialEntry
 import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
@@ -64,7 +64,7 @@ import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 
 // TODO: remove all !! checks
-private fun getAppLabel(
+fun getAppLabel(
     pm: PackageManager,
     appPackageName: String
 ): String? {
@@ -102,7 +102,7 @@ private fun getServiceLabelAndIcon(
                 ).toString()
             providerIcon = pkgInfo.applicationInfo.loadIcon(pm)
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(Constants.LOG_TAG, "Provider info not found", e)
+            Log.e(Constants.LOG_TAG, "Provider package info not found", e)
         }
     } else {
         try {
@@ -113,7 +113,23 @@ private fun getServiceLabelAndIcon(
             ).toString()
             providerIcon = si.loadIcon(pm)
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(Constants.LOG_TAG, "Provider info not found", e)
+            Log.e(Constants.LOG_TAG, "Provider service info not found", e)
+            // Added for mdoc use case where the provider may not need to register a service and
+            // instead only relies on the registration api.
+            try {
+                val pkgInfo = pm.getPackageInfo(
+                    component.packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+                providerLabel =
+                    pkgInfo.applicationInfo.loadSafeLabel(
+                        pm, 0f,
+                        TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
+                    ).toString()
+                providerIcon = pkgInfo.applicationInfo.loadIcon(pm)
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(Constants.LOG_TAG, "Provider package info not found", e)
+            }
         }
     }
     return if (providerLabel == null || providerIcon == null) {
@@ -172,11 +188,11 @@ class GetFlowUtils {
         }
 
         fun toRequestDisplayInfo(
-            requestInfo: RequestInfo,
+            requestInfo: RequestInfo?,
             context: Context,
             originName: String?,
         ): com.android.credentialmanager.getflow.RequestDisplayInfo? {
-            val getCredentialRequest = requestInfo.getCredentialRequest ?: return null
+            val getCredentialRequest = requestInfo?.getCredentialRequest ?: return null
             val preferImmediatelyAvailableCredentials = getCredentialRequest.credentialOptions.any {
                 val credentialOptionJetpack = CredentialOption.createFrom(
                     it.type,
@@ -194,7 +210,11 @@ class GetFlowUtils {
                 appName = originName
                     ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                     ?: return null,
-                preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials
+                preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials,
+                preferIdentityDocUi = getCredentialRequest.data.getBoolean(
+                    // TODO(b/276777444): replace with direct library constant reference once
+                    // exposed.
+                    "androidx.credentials.BUNDLE_KEY_PREFER_IDENTITY_DOC_UI"),
             )
         }
 
@@ -232,6 +252,13 @@ class GetFlowUtils {
                         ))
                     }
                     is PublicKeyCredentialEntry -> {
+                        val passkeyUsername = credentialEntry.username.toString()
+                        val passkeyDisplayName = credentialEntry.displayName?.toString() ?: ""
+                        val (username, displayName) = userAndDisplayNameForPasskey(
+                            passkeyUsername = passkeyUsername,
+                            passkeyDisplayName = passkeyDisplayName,
+                        )
+
                         result.add(CredentialEntryInfo(
                             providerId = providerId,
                             providerDisplayName = providerLabel,
@@ -241,8 +268,8 @@ class GetFlowUtils {
                             fillInIntent = it.frameworkExtrasIntent,
                             credentialType = CredentialType.PASSKEY,
                             credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
-                            userName = credentialEntry.username.toString(),
-                            displayName = credentialEntry.displayName?.toString(),
+                            userName = username,
+                            displayName = displayName,
                             icon = credentialEntry.icon.loadDrawable(context),
                             shouldTintIcon = credentialEntry.isDefaultIcon,
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
@@ -427,10 +454,13 @@ class CreateFlowUtils {
         }
 
         fun toRequestDisplayInfo(
-            requestInfo: RequestInfo,
+            requestInfo: RequestInfo?,
             context: Context,
             originName: String?,
         ): RequestDisplayInfo? {
+            if (requestInfo == null) {
+                return null
+            }
             val appLabel = originName
                 ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                 ?: return null
@@ -646,21 +676,52 @@ class CreateFlowUtils {
             preferImmediatelyAvailableCredentials: Boolean,
         ): RequestDisplayInfo? {
             val json = JSONObject(requestJson)
-            var name = ""
-            var displayName = ""
+            var passkeyUsername = ""
+            var passkeyDisplayName = ""
             if (json.has("user")) {
                 val user: JSONObject = json.getJSONObject("user")
-                name = user.getString("name")
-                displayName = user.getString("displayName")
+                passkeyUsername = user.getString("name")
+                passkeyDisplayName = user.getString("displayName")
             }
+            val (username, displayname) = userAndDisplayNameForPasskey(
+                passkeyUsername = passkeyUsername,
+                passkeyDisplayName = passkeyDisplayName,
+            )
             return RequestDisplayInfo(
-                name,
-                displayName,
+                username,
+                displayname,
                 CredentialType.PASSKEY,
                 appLabel,
                 context.getDrawable(R.drawable.ic_passkey_24) ?: return null,
                 preferImmediatelyAvailableCredentials,
             )
         }
+    }
+}
+
+/**
+ * Returns the actual username and display name for the UI display purpose for the passkey use case.
+ *
+ * Passkey has some special requirements:
+ * 1) display-name on top (turned into UI username) if one is available, username on second line.
+ * 2) username on top if display-name is not available.
+ * 3) don't show username on second line if username == display-name
+ */
+private fun userAndDisplayNameForPasskey(
+    passkeyUsername: String,
+    passkeyDisplayName: String,
+): Pair<String, String> {
+    if (!TextUtils.isEmpty(passkeyUsername) && !TextUtils.isEmpty(passkeyDisplayName)) {
+        if (passkeyUsername == passkeyDisplayName) {
+            return Pair(passkeyUsername, "")
+        } else {
+            return Pair(passkeyDisplayName, passkeyUsername)
+        }
+    } else if (!TextUtils.isEmpty(passkeyUsername)) {
+        return Pair(passkeyUsername, passkeyDisplayName)
+    } else if (!TextUtils.isEmpty(passkeyDisplayName)) {
+        return Pair(passkeyDisplayName, passkeyUsername)
+    } else {
+        return Pair(passkeyDisplayName, passkeyUsername)
     }
 }

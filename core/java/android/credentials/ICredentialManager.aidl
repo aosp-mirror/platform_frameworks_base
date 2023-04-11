@@ -58,5 +58,7 @@ interface ICredentialManager {
     List<CredentialProviderInfo> getCredentialProviderServices(in int userId, in int providerFilter);
 
     List<CredentialProviderInfo> getCredentialProviderServicesForTesting(in int providerFilter);
+
+    boolean isServiceEnabled();
 }
 

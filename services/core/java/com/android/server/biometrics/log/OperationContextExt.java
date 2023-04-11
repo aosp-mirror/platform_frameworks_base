@@ -19,8 +19,10 @@ package com.android.server.biometrics.log;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.AuthenticateReason;
+import android.hardware.biometrics.common.DisplayState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.common.WakeReason;
@@ -204,9 +206,15 @@ public class OperationContextExt {
         return mIsDisplayOn;
     }
 
-    /** {@link OperationContext#isAod}. */
+    /** @deprecated prefer {@link #getDisplayState()} to {@link OperationContext#isAod}. */
     public boolean isAod() {
         return mAidlContext.isAod;
+    }
+
+    /** {@link OperationContext#displayState}. */
+    @DisplayState
+    public int getDisplayState() {
+        return mAidlContext.displayState;
     }
 
     /** {@link OperationContext#isCrypto}. */
@@ -233,6 +241,7 @@ public class OperationContextExt {
     /** Update this object with the latest values from the given context. */
     OperationContextExt update(@NonNull BiometricContext biometricContext) {
         mAidlContext.isAod = biometricContext.isAod();
+        mAidlContext.displayState = toAidlDisplayState(biometricContext.getDisplayState());
         setFirstSessionId(biometricContext);
 
         mIsDisplayOn = biometricContext.isDisplayOn();
@@ -241,6 +250,21 @@ public class OperationContextExt {
         mOrientation = biometricContext.getCurrentRotation();
 
         return this;
+    }
+
+    @DisplayState
+    private static int toAidlDisplayState(@AuthenticateOptions.DisplayState int state) {
+        switch (state) {
+            case AuthenticateOptions.DISPLAY_STATE_AOD:
+                return DisplayState.AOD;
+            case AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN:
+                return DisplayState.LOCKSCREEN;
+            case AuthenticateOptions.DISPLAY_STATE_NO_UI:
+                return DisplayState.NO_UI;
+            case AuthenticateOptions.DISPLAY_STATE_SCREENSAVER:
+                return DisplayState.SCREENSAVER;
+        }
+        return DisplayState.UNKNOWN;
     }
 
     private void setFirstSessionId(@NonNull BiometricContext biometricContext) {

@@ -66,6 +66,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
@@ -140,6 +141,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         BatteryStatsImpl.EnergyStatsRetriever,
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
+    static final String TRACE_TRACK_WAKEUP_REASON = "wakeup_reason";
     static final boolean DBG = false;
     private static final boolean BATTERY_USAGE_STORE_ENABLED = true;
 
@@ -652,6 +654,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             mHandler.post(() -> {
+                mCpuWakeupStats.onUidRemoved(uid);
                 synchronized (mStats) {
                     mStats.removeUidStatsLocked(uid, elapsedRealtime);
                 }
@@ -762,6 +765,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
+                mCpuWakeupStats.noteUidProcessState(uid, state);
                 synchronized (mStats) {
                     mStats.noteUidProcessStateLocked(uid, state, elapsedRealtime, uptime);
                 }
@@ -2482,6 +2486,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 while ((reason = waitWakeup()) != null) {
                     final long nowElapsed = SystemClock.elapsedRealtime();
                     final long nowUptime = SystemClock.uptimeMillis();
+
+                    Trace.instantForTrack(Trace.TRACE_TAG_POWER, TRACE_TRACK_WAKEUP_REASON,
+                            nowElapsed + " " + reason);
+
                     // Wait for the completion of pending works if there is any
                     awaitCompletion();
                     mCpuWakeupStats.noteWakeupTimeAndReason(nowElapsed, nowUptime, reason);

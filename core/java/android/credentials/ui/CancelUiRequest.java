@@ -40,24 +40,50 @@ public final class CancelUiRequest implements Parcelable {
     @NonNull
     private final IBinder mToken;
 
+    private final boolean mShouldShowCancellationUi;
+
+    @NonNull
+    private final String mAppPackageName;
+
     /** Returns the request token matching the user request that should be cancelled. */
     @NonNull
     public IBinder getToken() {
         return mToken;
     }
 
-    public CancelUiRequest(@NonNull IBinder token) {
+    @NonNull
+    public String getAppPackageName() {
+        return mAppPackageName;
+    }
+
+    /**
+     * Returns whether the UI should render a cancellation UI upon the request. If false, the UI
+     * will be silently cancelled.
+     */
+    public boolean shouldShowCancellationUi() {
+        return mShouldShowCancellationUi;
+    }
+
+    public CancelUiRequest(@NonNull IBinder token, boolean shouldShowCancellationUi,
+            @NonNull String appPackageName) {
         mToken = token;
+        mShouldShowCancellationUi = shouldShowCancellationUi;
+        mAppPackageName = appPackageName;
     }
 
     private CancelUiRequest(@NonNull Parcel in) {
         mToken = in.readStrongBinder();
         AnnotationValidations.validate(NonNull.class, null, mToken);
+        mShouldShowCancellationUi = in.readBoolean();
+        mAppPackageName = in.readString8();
+        AnnotationValidations.validate(NonNull.class, null, mAppPackageName);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mToken);
+        dest.writeBoolean(mShouldShowCancellationUi);
+        dest.writeString8(mAppPackageName);
     }
 
     @Override

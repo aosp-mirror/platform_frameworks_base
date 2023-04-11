@@ -69,15 +69,9 @@ MakeCurrentResult SkiaOpenGLPipeline::makeCurrent() {
 }
 
 Frame SkiaOpenGLPipeline::getFrame() {
-    if (mHardwareBuffer) {
-        AHardwareBuffer_Desc description;
-        AHardwareBuffer_describe(mHardwareBuffer, &description);
-        return Frame(description.width, description.height, 0);
-    } else {
-        LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
-                            "drawRenderNode called on a context with no surface!");
-        return mEglManager.beginFrame(mEglSurface);
-    }
+    LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
+                        "drawRenderNode called on a context with no surface!");
+    return mEglManager.beginFrame(mEglSurface);
 }
 
 IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(

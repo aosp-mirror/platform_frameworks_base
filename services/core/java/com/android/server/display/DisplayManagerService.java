@@ -1418,16 +1418,32 @@ public final class DisplayManagerService extends SystemService {
             flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
         }
 
-        if (projection != null) {
-            try {
+        // Check if the host app is attempting to reuse the token or capture again on the same
+        // MediaProjection instance. Don't start recording if so; MediaProjectionManagerService
+        // decides how to respond based on the target SDK.
+        boolean waitForPermissionConsent = false;
+        final long firstToken = Binder.clearCallingIdentity();
+        try {
+            if (projection != null) {
                 if (!getProjectionService().isCurrentProjection(projection)) {
                     throw new SecurityException("Cannot create VirtualDisplay with "
                             + "non-current MediaProjection");
                 }
+                if (!projection.isValid()) {
+                    // Just log; MediaProjectionManagerService throws an exception.
+                    Slog.w(TAG, "Reusing token: create virtual display for app reusing token");
+                    // If the exception wasn't thrown, we continue and re-show the permission dialog
+                    getProjectionService().requestConsentForInvalidProjection(projection);
+                    // Declare that mirroring shouldn't begin until user reviews the permission
+                    // dialog.
+                    waitForPermissionConsent = true;
+                }
                 flags = projection.applyVirtualDisplayFlags(flags);
-            } catch (RemoteException e) {
-                throw new SecurityException("unable to validate media projection or flags");
             }
+        } catch (RemoteException e) {
+            throw new SecurityException("Unable to validate media projection or flags", e);
+        } finally {
+            Binder.restoreCallingIdentity(firstToken);
         }
 
         if (callingUid != Process.SYSTEM_UID
@@ -1494,7 +1510,7 @@ public final class DisplayManagerService extends SystemService {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
 
-        final long token = Binder.clearCallingIdentity();
+        final long secondToken = Binder.clearCallingIdentity();
         try {
             final int displayId;
             synchronized (mSyncRoot) {
@@ -1514,42 +1530,65 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
-            // When calling WindowManagerService#setContentRecordingSession, WindowManagerService
-            // attempts to acquire a lock before executing its main body. Due to this, we need
-            // to be sure that it isn't called while the DisplayManagerService is also holding
-            // a lock, to avoid a deadlock scenario.
-            final ContentRecordingSession session =
-                    virtualDisplayConfig.getContentRecordingSession();
+            // Build a session describing the MediaProjection instance, if there is one. A session
+            // for a VirtualDisplay or physical display mirroring is handled in DisplayContent.
+            ContentRecordingSession session = null;
+            try {
+                if (projection != null) {
+                    IBinder launchCookie = projection.getLaunchCookie();
+                    if (launchCookie == null) {
+                        // Record a particular display.
+                        session = ContentRecordingSession.createDisplaySession(
+                                virtualDisplayConfig.getDisplayIdToMirror());
+                    } else {
+                        // Record a single task indicated by the launch cookie.
+                        session = ContentRecordingSession.createTaskSession(launchCookie);
+                    }
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to retrieve the projection's launch cookie", e);
+            }
+
             // Ensure session details are only set when mirroring (through VirtualDisplay flags or
             // MediaProjection).
             final boolean shouldMirror =
                     projection != null || (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0;
+            // When calling WindowManagerService#setContentRecordingSession, WindowManagerService
+            // attempts to acquire a lock before executing its main body. Due to this, we need
+            // to be sure that it isn't called while the DisplayManagerService is also holding
+            // a lock, to avoid a deadlock scenario.
             if (shouldMirror && displayId != Display.INVALID_DISPLAY && session != null) {
                 // Only attempt to set content recording session if there are details to set and a
                 // VirtualDisplay has been successfully constructed.
-                session.setDisplayId(displayId);
+                session.setVirtualDisplayId(displayId);
+                // Don't start mirroring until user re-grants consent.
+                session.setWaitingToRecord(waitForPermissionConsent);
 
                 // We set the content recording session here on the server side instead of using
                 // a second AIDL call in MediaProjection. By ensuring that a virtual display has
                 // been constructed before calling setContentRecordingSession, we avoid a race
                 // condition between the DisplayManagerService & WindowManagerService which could
                 // lead to the MediaProjection being pre-emptively torn down.
-                if (!mWindowManagerInternal.setContentRecordingSession(session)) {
-                    // Unable to start mirroring, so tear down projection & release VirtualDisplay.
-                    try {
-                        getProjectionService().stopActiveProjection();
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Unable to tell MediaProjectionManagerService to stop the "
-                                + "active projection", e);
+                try {
+                    if (!getProjectionService().setContentRecordingSession(session, projection)) {
+                        // Unable to start mirroring, so release VirtualDisplay. Projection service
+                        // handles stopping the projection.
+                        releaseVirtualDisplayInternal(callback.asBinder());
+                        return Display.INVALID_DISPLAY;
+                    } else if (projection != null) {
+                        // Indicate that this projection has been used to record, and can't be used
+                        // again.
+                        projection.notifyVirtualDisplayCreated(displayId);
                     }
-                    releaseVirtualDisplayInternal(callback.asBinder());
-                    return Display.INVALID_DISPLAY;
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to tell MediaProjectionManagerService to set the "
+                            + "content recording session", e);
                 }
             }
 
             return displayId;
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Binder.restoreCallingIdentity(secondToken);
         }
     }
 
@@ -4583,7 +4622,8 @@ public final class DisplayManagerService extends SystemService {
         public void onDesiredDisplayModeSpecsChanged() {
             synchronized (mSyncRoot) {
                 mChanged = false;
-                mLogicalDisplayMapper.forEachLocked(mSpecsChangedConsumer);
+                mLogicalDisplayMapper.forEachLocked(mSpecsChangedConsumer,
+                        /* includeDisabled= */ false);
                 if (mChanged) {
                     scheduleTraversalLocked(false);
                     mChanged = false;

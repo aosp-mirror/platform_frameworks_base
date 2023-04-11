@@ -3706,17 +3706,24 @@ public class UserManager {
      * {@link android.Manifest.permission#CREATE_USERS} suffices if flags are in
      * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION.
      *
+     *
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
      * @return the {@link UserInfo} object for the created user.
      *
      * @throws UserOperationException if the user could not be created.
+     *
+     * @deprecated Pre-created users are deprecated. This method should no longer be used, and will
+     *             be removed once all the callers are removed.
+     *
      * @hide
      */
+    @Deprecated
     @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
     public @NonNull UserInfo preCreateUser(@NonNull String userType)
             throws UserOperationException {
+        Log.w(TAG, "preCreateUser(): Pre-created user is deprecated.");
         try {
             return mService.preCreateUserWithThrow(userType);
         } catch (ServiceSpecificException e) {
@@ -4296,8 +4303,12 @@ public class UserManager {
     /**
      * Returns information for all users on this device, based on the filtering parameters.
      *
+     * @deprecated Pre-created users are deprecated and no longer supported.
+     *             Use {@link #getUsers()}, {@link #getUsers(boolean)}, or {@link #getAliveUsers()}
+     *             instead.
      * @hide
      */
+    @Deprecated
     @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,

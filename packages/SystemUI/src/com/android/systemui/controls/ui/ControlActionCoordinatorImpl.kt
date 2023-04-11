@@ -44,7 +44,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.wm.shell.TaskViewFactory
+import com.android.wm.shell.taskview.TaskViewFactory
 import java.util.Optional
 import javax.inject.Inject
 

@@ -378,10 +378,7 @@ final class DisplayRotationCompatPolicy {
             // Checking whether an activity in fullscreen rather than the task as this camera
             // compat treatment doesn't cover activity embedding.
             if (topActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                if (topActivity.mLetterboxUiController
-                        .isOverrideOrientationOnlyForCameraEnabled()) {
-                    topActivity.recomputeConfiguration();
-                }
+                topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
                 mDisplayContent.updateOrientation();
                 return;
             }
@@ -447,9 +444,7 @@ final class DisplayRotationCompatPolicy {
                     || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
                 return;
             }
-            if (topActivity.mLetterboxUiController.isOverrideOrientationOnlyForCameraEnabled()) {
-                topActivity.recomputeConfiguration();
-            }
+            topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
             mDisplayContent.updateOrientation();
         }
     }

@@ -188,6 +188,11 @@ public class PipAnimationController {
         return mCurrentAnimator;
     }
 
+    /** Reset animator state to prevent it from being used after its lifetime. */
+    public void resetAnimatorState() {
+        mCurrentAnimator = null;
+    }
+
     private PipTransitionAnimator setupPipTransitionAnimator(PipTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
@@ -210,7 +215,7 @@ public class PipAnimationController {
     /**
      * Quietly cancel the animator by removing the listeners first.
      */
-    public static void quietCancel(@NonNull ValueAnimator animator) {
+    static void quietCancel(@NonNull ValueAnimator animator) {
         animator.removeAllUpdateListeners();
         animator.removeAllListeners();
         animator.cancel();

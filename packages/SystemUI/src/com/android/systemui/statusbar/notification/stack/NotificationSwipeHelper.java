@@ -76,11 +76,10 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             ViewConfiguration viewConfiguration,
             FalsingManager falsingManager,
             FeatureFlags featureFlags,
-            int swipeDirection,
             NotificationCallback callback,
             NotificationMenuRowPlugin.OnMenuEventListener menuListener,
             NotificationRoundnessManager notificationRoundnessManager) {
-        super(swipeDirection, callback, resources, viewConfiguration, falsingManager, featureFlags);
+        super(callback, resources, viewConfiguration, falsingManager, featureFlags);
         mNotificationRoundnessManager = notificationRoundnessManager;
         mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mMenuListener = menuListener;
@@ -416,19 +415,9 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     }
 
     @Override
-    public boolean swipedFastEnough(float translation, float viewSize) {
-        return swipedFastEnough();
-    }
-
-    @Override
     @VisibleForTesting
     protected boolean swipedFastEnough() {
         return super.swipedFastEnough();
-    }
-
-    @Override
-    public boolean swipedFarEnough(float translation, float viewSize) {
-        return swipedFarEnough();
     }
 
     @Override
@@ -554,7 +543,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         private final ViewConfiguration mViewConfiguration;
         private final FalsingManager mFalsingManager;
         private final FeatureFlags mFeatureFlags;
-        private int mSwipeDirection;
         private NotificationCallback mNotificationCallback;
         private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
         private NotificationRoundnessManager mNotificationRoundnessManager;
@@ -570,11 +558,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             mNotificationRoundnessManager = notificationRoundnessManager;
         }
 
-        Builder setSwipeDirection(int swipeDirection) {
-            mSwipeDirection = swipeDirection;
-            return this;
-        }
-
         Builder setNotificationCallback(NotificationCallback notificationCallback) {
             mNotificationCallback = notificationCallback;
             return this;
@@ -588,7 +571,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
         NotificationSwipeHelper build() {
             return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
-                    mFeatureFlags, mSwipeDirection, mNotificationCallback, mOnMenuEventListener,
+                    mFeatureFlags, mNotificationCallback, mOnMenuEventListener,
                     mNotificationRoundnessManager);
         }
     }

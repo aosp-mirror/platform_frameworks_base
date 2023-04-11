@@ -153,7 +153,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private Resources mResources;
     private TestableLooper mTestableLooper;
     private ZenModeHelper mZenModeHelperSpy;
-    private Context mContext;
     private ContentResolver mContentResolver;
     @Mock AppOpsManager mAppOps;
     private WrappedSysUiStatsEvent.WrappedBuilderFactory mStatsEventBuilderFactory;
@@ -163,9 +162,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
-        mContext = spy(getContext());
         mContentResolver = mContext.getContentResolver();
         mResources = spy(mContext.getResources());
+        String pkg = mContext.getPackageName();
         try {
             when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
                     getDefaultConfigParser());
@@ -190,7 +189,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         when(mPackageManager.getPackageUidAsUser(eq(CUSTOM_PKG_NAME), anyInt()))
                 .thenReturn(CUSTOM_PKG_UID);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
-                new String[] {getContext().getPackageName()});
+                new String[] {pkg});
         mZenModeHelperSpy.mPm = mPackageManager;
     }
 
@@ -884,18 +883,21 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testProto() {
         mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        // existence of manual rule means it should be in output
         mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelperSpy.mConfig.manualRule.pkg = "android";  // system
 
         int n = mZenModeHelperSpy.mConfig.automaticRules.size();
         List<String> ids = new ArrayList<>(n);
         for (ZenModeConfig.ZenRule rule : mZenModeHelperSpy.mConfig.automaticRules.values()) {
             ids.add(rule.id);
         }
-        ids.add("");
+        ids.add(ZenModeConfig.MANUAL_RULE_ID);
+        ids.add(""); // for ROOT_CONFIG, logged with empty string as id
 
         List<StatsEvent> events = new LinkedList<>();
         mZenModeHelperSpy.pullRules(events);
-        assertEquals(n + 1, events.size());
+        assertEquals(n + 2, events.size());  // automatic rules + manual rule + root config
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
             if (builder.getAtomId() == DND_MODE_RULE) {
                 if (builder.getInt(ZEN_MODE_FIELD_NUMBER) == ROOT_CONFIG) {
@@ -1002,7 +1004,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
         mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
         mZenModeHelperSpy.mConfig.manualRule.enabled = true;
-        mZenModeHelperSpy.mConfig.manualRule.enabler = "com.enabler";
 
         List<StatsEvent> events = new LinkedList<>();
         mZenModeHelperSpy.pullRules(events);

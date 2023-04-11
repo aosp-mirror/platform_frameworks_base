@@ -51,13 +51,10 @@ import android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
 import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.MODERN_ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
@@ -113,7 +110,6 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
-    private val featureFlags = FakeFeatureFlags()
     private val executor = FakeExecutor(FakeSystemClock())
     private lateinit var overlayController: ISidefpsController
     private lateinit var sideFpsController: SideFpsController
@@ -134,7 +130,6 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        featureFlags.set(MODERN_ALTERNATE_BOUNCER, true)
         keyguardBouncerRepository = FakeKeyguardBouncerRepository()
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
@@ -144,8 +139,6 @@ class SideFpsControllerTest : SysuiTestCase() {
                 FakeBiometricSettingsRepository(),
                 FakeDeviceEntryFingerprintAuthRepository(),
                 FakeSystemClock(),
-                mock(KeyguardUpdateMonitor::class.java),
-                featureFlags,
             )
 
         context.addMockSystemService(DisplayManager::class.java, displayManager)
@@ -246,7 +239,6 @@ class SideFpsControllerTest : SysuiTestCase() {
                 handler,
                 alternateBouncerInteractor,
                 TestCoroutineScope(),
-                featureFlags,
                 dumpManager,
             )
 

@@ -272,6 +272,8 @@ public class PipTransition extends PipTransitionController {
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
         if (requestHasPipEnter(request)) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: handle PiP enter request", TAG);
             WindowContainerTransaction wct = new WindowContainerTransaction();
             augmentRequest(transition, request, wct);
             return wct;
@@ -731,6 +733,11 @@ public class PipTransition extends PipTransitionController {
 
         setBoundsStateForEntry(taskInfo.topActivity, taskInfo.pictureInPictureParams,
                 taskInfo.topActivityInfo);
+
+        if (mPipOrganizer.shouldAttachMenuEarly()) {
+            mPipMenuController.attach(leash);
+        }
+
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         final Rect currentBounds = taskInfo.configuration.windowConfiguration.getBounds();
         int rotationDelta = deltaRotation(startRotation, endRotation);
@@ -745,7 +752,10 @@ public class PipTransition extends PipTransitionController {
         mSurfaceTransactionHelper
                 .crop(finishTransaction, leash, destinationBounds)
                 .round(finishTransaction, leash, true /* applyCornerRadius */);
-        mTransitions.getMainExecutor().executeDelayed(() -> mPipMenuController.attach(leash), 0);
+        if (!mPipOrganizer.shouldAttachMenuEarly()) {
+            mTransitions.getMainExecutor().executeDelayed(
+                    () -> mPipMenuController.attach(leash), 0);
+        }
 
         if (taskInfo.pictureInPictureParams != null
                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()
@@ -785,6 +795,11 @@ public class PipTransition extends PipTransitionController {
             tmpTransform.postRotate(rotationDelta);
             startTransaction.setMatrix(leash, tmpTransform, new float[9]);
         }
+
+        if (mPipOrganizer.shouldAlwaysFadeIn()) {
+            mOneShotAnimationType = ANIM_TYPE_ALPHA;
+        }
+
         if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
         }

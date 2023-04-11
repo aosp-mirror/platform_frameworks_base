@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Intent;
@@ -620,12 +621,15 @@ public final class SuspendPackageHelper {
         extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
         extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
         final int flags = Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND;
+        final Bundle options = new BroadcastOptions()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .toBundle();
         handler.post(() -> mBroadcastHelper.sendPackageBroadcast(intent, null /* pkg */,
                 extras, flags, null /* targetPkg */, null /* finishedReceiver */,
                 new int[]{userId}, null /* instantUserIds */, null /* broadcastAllowList */,
                 (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
                         mPm.snapshotComputer(), callingUid, intentExtras),
-                null /* bOptions */));
+                options));
     }
 
     /**

@@ -110,13 +110,26 @@ public abstract class Transport {
         return mFd;
     }
 
+    /**
+     * Start listening to messages.
+     */
     public abstract void start();
+
+    /**
+     * Soft stop listening to the incoming data without closing the streams.
+     */
     public abstract void stop();
+
+    /**
+     * Stop listening to the incoming data and close the streams.
+     */
+    public abstract void close();
+
     protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException;
 
     /**
-     * Send a message
+     * Send a message.
      */
     public void sendMessage(int message, @NonNull byte[] data) throws IOException {
         sendMessage(message, mNextSequence.incrementAndGet(), data);
@@ -170,7 +183,11 @@ public abstract class Transport {
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
                 break;
             }
-            case MESSAGE_REQUEST_PLATFORM_INFO:
+            case MESSAGE_REQUEST_PLATFORM_INFO: {
+                callback(message, data);
+                // DO NOT SEND A RESPONSE!
+                break;
+            }
             case MESSAGE_REQUEST_CONTEXT_SYNC: {
                 callback(message, data);
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);

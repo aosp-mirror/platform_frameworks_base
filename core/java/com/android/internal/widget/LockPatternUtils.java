@@ -116,6 +116,12 @@ public class LockPatternUtils {
     public static final int CREDENTIAL_TYPE_PIN = 3;
     public static final int CREDENTIAL_TYPE_PASSWORD = 4;
 
+    // This is the value of pin length whenever pin length is not available
+    public static final int PIN_LENGTH_UNAVAILABLE = -1;
+
+    // This is the minimum pin length at which auto confirmation is supported
+    public static final int MIN_AUTO_PIN_REQUIREMENT_LENGTH = 6;
+
     /**
      * Header used for the encryption and decryption of the device credential for
      * remote device lockscreen validation.
@@ -177,8 +183,6 @@ public class LockPatternUtils {
     @Deprecated
     public final static String LOCKSCREEN_WIDGETS_ENABLED = "lockscreen.widgets_enabled";
 
-    public static final String PIN_LENGTH = "lockscreen.pin_length";
-
     public final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
     private static final String LOCK_SCREEN_OWNER_INFO = Settings.Secure.LOCK_SCREEN_OWNER_INFO;
@@ -193,7 +197,7 @@ public class LockPatternUtils {
     private static final String KNOWN_TRUST_AGENTS = "lockscreen.knowntrustagents";
     private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
 
-    private static final String AUTO_PIN_CONFIRM = "lockscreen.auto_pin_confirm";
+    public static final String AUTO_PIN_CONFIRM = "lockscreen.auto_pin_confirm";
 
     public static final String CURRENT_LSKF_BASED_PROTECTOR_ID_KEY = "sp-handle";
     public static final String PASSWORD_HISTORY_DELIMITER = ",";
@@ -604,23 +608,20 @@ public class LockPatternUtils {
     }
 
     /**
-     * Used for setting the length of the PIN set by a particular user.
-     * @param userId user id of the user whose pin length we save
-     * @param val value of length of pin
-     */
-    public void setPinLength(int userId, long val) {
-        setLong(PIN_LENGTH, val, userId);
-    }
-
-    /**
      * Returns the length of the PIN set by a particular user.
      * @param userId user id of the user whose pin length we have to return
-     * @return the length of the pin set by user and -1 if nothing
+     * @return
+     *       A. the length of the pin set by user if it is currently available
+     *       B. PIN_LENGTH_UNAVAILABLE if it is not available or if an exception occurs
      */
-    public long getPinLength(int userId) {
-        return getLong(PIN_LENGTH, -1, userId);
+    public int getPinLength(int userId) {
+        try {
+            return getLockSettings().getPinLength(userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not fetch PIN length " + e);
+            return PIN_LENGTH_UNAVAILABLE;
+        }
     }
-
     /**
      * Records that the user has chosen a pattern at some time, even if the pattern is
      * currently cleared.

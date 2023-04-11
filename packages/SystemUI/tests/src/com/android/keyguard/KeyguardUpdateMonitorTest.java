@@ -84,9 +84,11 @@ import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
@@ -194,8 +196,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private FaceManager mFaceManager;
     @Mock
-    private List<FaceSensorPropertiesInternal> mFaceSensorProperties;
-    @Mock
     private BiometricManager mBiometricManager;
     @Mock
     private PackageManager mPackageManager;
@@ -254,6 +254,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private Uri mURI;
 
+    private List<FaceSensorPropertiesInternal> mFaceSensorProperties;
     private List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
     private final int mCurrentUserId = 100;
     private final UserInfo mCurrentUserInfo = new UserInfo(mCurrentUserId, "Test user", 0);
@@ -274,20 +275,21 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private IBiometricEnabledOnKeyguardCallback mBiometricEnabledOnKeyguardCallback;
     private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
+    private IFingerprintAuthenticatorsRegisteredCallback
+            mFingerprintAuthenticatorsRegisteredCallback;
+    private IFaceAuthenticatorsRegisteredCallback mFaceAuthenticatorsRegisteredCallback;
     private final InstanceId mKeyguardInstanceId = InstanceId.fakeInstanceId(999);
 
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+
+        mFaceSensorProperties =
+                List.of(createFaceSensorProperties(/* supportsFaceDetection = */ false));
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
         when(mAuthController.isFaceAuthEnrolled(anyInt())).thenReturn(true);
         when(mFaceManager.getSensorPropertiesInternal()).thenReturn(mFaceSensorProperties);
         when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
-
-        // IBiometricsFace@1.0 does not support detection, only authentication.
-        when(mFaceSensorProperties.isEmpty()).thenReturn(false);
-        when(mFaceSensorProperties.get(anyInt())).thenReturn(
-                createFaceSensorProperties(/* supportsFaceDetection = */ false));
 
         mFingerprintSensorProperties = List.of(
                 new FingerprintSensorPropertiesInternal(1 /* sensorId */,
@@ -344,6 +346,20 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                         anyInt());
 
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext);
+
+        ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback> faceCaptor =
+                ArgumentCaptor.forClass(IFaceAuthenticatorsRegisteredCallback.class);
+        verify(mFaceManager).addAuthenticatorsRegisteredCallback(faceCaptor.capture());
+        mFaceAuthenticatorsRegisteredCallback = faceCaptor.getValue();
+        mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(mFaceSensorProperties);
+
+        ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> fingerprintCaptor =
+                ArgumentCaptor.forClass(IFingerprintAuthenticatorsRegisteredCallback.class);
+        verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
+                fingerprintCaptor.capture());
+        mFingerprintAuthenticatorsRegisteredCallback = fingerprintCaptor.getValue();
+        mFingerprintAuthenticatorsRegisteredCallback
+                .onAllAuthenticatorsRegistered(mFingerprintSensorProperties);
 
         verify(mBiometricManager)
                 .registerEnabledOnKeyguardCallback(mBiometricEnabledCallbackArgCaptor.capture());
@@ -651,7 +667,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void whenDetectFace_biometricDetectCallback() {
+    public void whenDetectFace_biometricDetectCallback() throws RemoteException {
         ArgumentCaptor<FaceManager.FaceDetectionCallback> faceDetectCallbackCaptor =
                 ArgumentCaptor.forClass(FaceManager.FaceDetectionCallback.class);
 
@@ -801,7 +817,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void nofaceDetect_whenStrongAuthRequiredAndBypassUdfpsSupportedAndFpRunning() {
+    public void nofaceDetect_whenStrongAuthRequiredAndBypassUdfpsSupportedAndFpRunning()
+            throws RemoteException {
         // GIVEN bypass is enabled, face detection is supported
         lockscreenBypassIsAllowed();
         supportsFaceDetection();
@@ -825,7 +842,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void faceDetect_whenStrongAuthRequiredAndBypass() {
+    public void faceDetect_whenStrongAuthRequiredAndBypass() throws RemoteException {
         givenDetectFace();
 
         // FACE detect is triggered, not authenticate
@@ -1360,9 +1377,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void startsListeningForSfps_whenKeyguardIsVisible_ifRequireInteractiveToAuthEnabled()
             throws RemoteException {
         // SFPS supported and enrolled
-        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
-        props.add(newFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON));
-        when(mAuthController.getSfpsProps()).thenReturn(props);
+        when(mAuthController.isSfpsSupported()).thenReturn(true);
         when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
 
         // WHEN require interactive to auth is disabled, and keyguard is not awake
@@ -1401,9 +1416,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void notListeningForSfps_whenGoingToSleep_ifRequireInteractiveToAuthEnabled()
             throws RemoteException {
         // GIVEN SFPS supported and enrolled
-        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
-        props.add(newFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON));
-        when(mAuthController.getSfpsProps()).thenReturn(props);
+        when(mAuthController.isSfpsSupported()).thenReturn(true);
         when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
 
         // GIVEN Preconditions for sfps auth to run
@@ -2618,6 +2631,37 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(captor.getValue().getWakeReason())
                 .isEqualTo(PowerManager.WAKE_REASON_POWER_BUTTON);
     }
+    @Test
+    public void testFingerprintSensorProperties() throws RemoteException {
+        mFingerprintAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(
+                new ArrayList<>());
+
+        assertThat(mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(
+                KeyguardUpdateMonitor.getCurrentUser())).isFalse();
+
+        mFingerprintAuthenticatorsRegisteredCallback
+                .onAllAuthenticatorsRegistered(mFingerprintSensorProperties);
+
+        verifyFingerprintAuthenticateCall();
+        assertThat(mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(
+                KeyguardUpdateMonitor.getCurrentUser())).isTrue();
+    }
+    @Test
+    public void testFaceSensorProperties() throws RemoteException {
+        mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(new ArrayList<>());
+
+        assertThat(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(
+                KeyguardUpdateMonitor.getCurrentUser())).isFalse();
+
+        mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(mFaceSensorProperties);
+        biometricsEnabledForCurrentUser();
+
+        verifyFaceAuthenticateNeverCalled();
+        verifyFaceDetectNeverCalled();
+        assertThat(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(
+                KeyguardUpdateMonitor.getCurrentUser())).isTrue();
+    }
+
 
     private void verifyFingerprintAuthenticateNeverCalled() {
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), any());
@@ -2660,10 +2704,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .thenReturn(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
     }
 
-    private void supportsFaceDetection() {
-        when(mFaceSensorProperties.get(anyInt()))
-                .thenReturn(createFaceSensorProperties(
-                        /* supportsFaceDetection = */ true));
+    private void supportsFaceDetection() throws RemoteException {
+        mFaceSensorProperties =
+                List.of(createFaceSensorProperties(/* supportsFaceDetection = */ true));
+        mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(mFaceSensorProperties);
     }
 
     private void lockscreenBypassIsAllowed() {
@@ -2843,8 +2887,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void givenUdfpsSupported() {
-        Assert.assertFalse(mFingerprintSensorProperties.isEmpty());
-        when(mAuthController.getUdfpsProps()).thenReturn(mFingerprintSensorProperties);
+        when(mAuthController.isUdfpsSupported()).thenReturn(true);
         Assert.assertTrue(mKeyguardUpdateMonitor.isUdfpsSupported());
     }
 
@@ -2873,7 +2916,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
-    private void givenDetectFace() {
+    private void givenDetectFace() throws RemoteException {
         // GIVEN bypass is enabled, face detection is supported and strong auth is required
         lockscreenBypassIsAllowed();
         supportsFaceDetection();

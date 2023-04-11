@@ -594,7 +594,7 @@ public class ITvInteractiveAppSessionWrapper
     @Override
     public void notifyRecordingScheduled(String recordingId, String requestId) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(
-                DO_NOTIFY_RECORDING_SCHEDULED, recordingId, recordingId));
+                DO_NOTIFY_RECORDING_SCHEDULED, recordingId, requestId));
     }
 
     @Override

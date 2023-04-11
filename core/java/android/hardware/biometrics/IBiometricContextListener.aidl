@@ -23,11 +23,6 @@ package android.hardware.biometrics;
  * @hide
  */
 oneway interface IBiometricContextListener {
-    // Called when aod or awake (screen on) status changes.
-    // These may be called while the device is still transitioning to the new state
-    // (i.e. about to become awake or enter doze)
-    void onDozeChanged(boolean isAod, boolean isAwake);
-
     @VintfStability
     @Backing(type="int")
     enum FoldState {

@@ -253,8 +253,6 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
         triggerBackGesture();
 
-        verify(mAppCallback, never()).onBackStarted(any());
-        verify(mAppCallback, never()).onBackProgressed(backEventCaptor.capture());
         verify(mAppCallback, times(1)).onBackInvoked();
 
         verify(mAnimatorCallback, never()).onBackStarted(any());

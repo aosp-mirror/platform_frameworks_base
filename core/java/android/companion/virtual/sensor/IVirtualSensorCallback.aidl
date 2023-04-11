@@ -33,7 +33,7 @@ oneway interface IVirtualSensorCallback {
      * @param enabled Whether the sensor is enabled.
      * @param samplingPeriodMicros The requested sensor's sampling period in microseconds.
      * @param batchReportingLatencyMicros The requested maximum time interval in microseconds
-     * between the delivery of two batches of sensor events.
+     *   between the delivery of two batches of sensor events.
      */
     void onConfigurationChanged(in VirtualSensor sensor, boolean enabled, int samplingPeriodMicros,
             int batchReportLatencyMicros);
@@ -60,7 +60,7 @@ oneway interface IVirtualSensorCallback {
      * @param sensor The sensor, for which the channel was configured.
      * @param rateLevel The rate level used to configure the direct sensor channel.
      * @param reportToken A positive sensor report token, used to differentiate between events from
-     * different sensors within the same channel.
+     *   different sensors within the same channel.
      */
     void onDirectChannelConfigured(int channelHandle, in VirtualSensor sensor, int rateLevel,
             int reportToken);

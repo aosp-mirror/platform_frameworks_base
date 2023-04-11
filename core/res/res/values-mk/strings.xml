@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Повикување преку Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"Глас преку Wi-Fi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Повик преку WiFi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Исклучено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Повикувај преку Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Повикувај преку мобилна мрежа"</string>
@@ -801,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"му дозволува на сопственикот да почне со прегледување на податоците за функциите за некоја апликација"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"пристапува до податоците со висока фреквенција на семпл"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозволува апликацијата да пристапува до податоците од сензорите со фреквенција на семпл поголема од 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Постави правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Следи ги обидите за отклучување на екранот"</string>
@@ -1702,7 +1705,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење на дејствата"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење дејства"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или хардверскиот сензор и да врши интеракција со апликациите во ваше име."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
@@ -2325,12 +2328,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ги користи двата екрани за да прикажува содржини"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Уредот е претопол"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Двојниот екран е недостапен бидејќи вашиот телефон станува претопол"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"„Двојниот екран“ е недостапен"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Двојниот екран е недостапен бидејќи е вклучен „Штедач на батерија“. Ова може да се исклучи во „Поставки“."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Одете во „Поставките“"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Исклучи"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> е конфигуриран"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Распоредот на тастатурата е поставен на <xliff:g id="LAYOUT_1">%s</xliff:g>. Допрете за да промените."</string>

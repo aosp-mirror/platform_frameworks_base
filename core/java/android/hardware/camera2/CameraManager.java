@@ -152,20 +152,7 @@ public final class CameraManager {
                     mContext.checkSelfPermission(CAMERA_OPEN_CLOSE_LISTENER_PERMISSION) ==
                     PackageManager.PERMISSION_GRANTED;
         }
-
-        mFoldStateListener = new FoldStateListener(context);
-        try {
-            context.getSystemService(DeviceStateManager.class).registerCallback(
-                    new HandlerExecutor(CameraManagerGlobal.get().getDeviceStateHandler()),
-                    mFoldStateListener);
-        } catch (IllegalStateException e) {
-            Log.v(TAG, "Failed to register device state listener!");
-            Log.v(TAG, "Device state dependent characteristics updates will not be functional!");
-            mFoldStateListener = null;
-        }
     }
-
-    private FoldStateListener mFoldStateListener;
 
     /**
      * @hide
@@ -228,12 +215,7 @@ public final class CameraManager {
      * @hide
      */
     public void registerDeviceStateListener(@NonNull CameraCharacteristics chars) {
-        synchronized (mLock) {
-            DeviceStateListener listener = chars.getDeviceStateListener();
-            if (mFoldStateListener != null) {
-                mFoldStateListener.addDeviceStateListener(listener);
-            }
-        }
+        CameraManagerGlobal.get().registerDeviceStateListener(chars, mContext);
     }
 
     /**
@@ -627,6 +609,21 @@ public final class CameraManager {
     }
 
     /**
+     * <p>Query the capabilities of a camera device. These capabilities are
+     * immutable for a given camera.</p>
+     *
+     * <p>The value of {@link CameraCharacteristics.SENSOR_ORIENTATION} will change for landscape
+     * cameras depending on whether overrideToPortrait is enabled. If enabled, these cameras will
+     * appear to be portrait orientation instead, provided that the override is supported by the
+     * camera device. Only devices that can be opened by {@link #openCamera} will report a changed
+     * {@link CameraCharacteristics.SENSOR_ORIENTATION}.</p>
+     *
+     * @param cameraId The id of the camera device to query. This could be either a standalone
+     * camera ID which can be directly opened by {@link #openCamera}, or a physical camera ID that
+     * can only used as part of a logical multi-camera.
+     * @param overrideToPortrait Whether to apply the landscape to portrait override.
+     * @return The properties of the given camera
+     *
      * @hide
      */
     @TestApi
@@ -1781,6 +1778,7 @@ public final class CameraManager {
 
         private HandlerThread mDeviceStateHandlerThread;
         private Handler mDeviceStateHandler;
+        private FoldStateListener mFoldStateListener;
 
         // Singleton, don't allow construction
         private CameraManagerGlobal() { }
@@ -1795,7 +1793,8 @@ public final class CameraManager {
             return gCameraManager;
         }
 
-        public Handler getDeviceStateHandler() {
+        public void registerDeviceStateListener(@NonNull CameraCharacteristics chars,
+                @NonNull Context ctx) {
             synchronized(mLock) {
                 if (mDeviceStateHandlerThread == null) {
                     mDeviceStateHandlerThread = new HandlerThread(TAG);
@@ -1803,7 +1802,20 @@ public final class CameraManager {
                     mDeviceStateHandler = new Handler(mDeviceStateHandlerThread.getLooper());
                 }
 
-                return mDeviceStateHandler;
+                if (mFoldStateListener == null) {
+                    mFoldStateListener = new FoldStateListener(ctx);
+                    try {
+                        ctx.getSystemService(DeviceStateManager.class).registerCallback(
+                                new HandlerExecutor(mDeviceStateHandler), mFoldStateListener);
+                    } catch (IllegalStateException e) {
+                        Log.v(TAG, "Failed to register device state listener!");
+                        Log.v(TAG, "Device state dependent characteristics updates will not be" +
+                                "functional!");
+                        return;
+                    }
+                }
+
+                mFoldStateListener.addDeviceStateListener(chars.getDeviceStateListener());
             }
         }
 

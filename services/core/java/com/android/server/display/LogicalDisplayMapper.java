@@ -302,9 +302,16 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     public void forEachLocked(Consumer<LogicalDisplay> consumer) {
+        forEachLocked(consumer, /* includeDisabled= */ true);
+    }
+
+    public void forEachLocked(Consumer<LogicalDisplay> consumer, boolean includeDisabled) {
         final int count = mLogicalDisplays.size();
         for (int i = 0; i < count; i++) {
-            consumer.accept(mLogicalDisplays.valueAt(i));
+            LogicalDisplay display = mLogicalDisplays.valueAt(i);
+            if (display.isEnabledLocked() || includeDisabled) {
+                consumer.accept(display);
+            }
         }
     }
 
@@ -1015,17 +1022,17 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             newDisplay.updateLayoutLimitedRefreshRateLocked(
                     config.getRefreshRange(displayLayout.getRefreshRateZoneId())
             );
-            newDisplay.updateRefreshRateThermalThrottling(
-                    config.getRefreshRateThrottlingData(
+            newDisplay.updateThermalRefreshRateThrottling(
+                    config.getThermalRefreshRateThrottlingData(
                             displayLayout.getRefreshRateThermalThrottlingMapId()
                     )
             );
 
             setEnabledLocked(newDisplay, displayLayout.isEnabled());
-            newDisplay.setBrightnessThrottlingDataIdLocked(
-                    displayLayout.getBrightnessThrottlingMapId() == null
+            newDisplay.setThermalBrightnessThrottlingDataIdLocked(
+                    displayLayout.getThermalBrightnessThrottlingMapId() == null
                             ? DisplayDeviceConfig.DEFAULT_ID
-                            : displayLayout.getBrightnessThrottlingMapId());
+                            : displayLayout.getThermalBrightnessThrottlingMapId());
 
             newDisplay.setDisplayGroupNameLocked(displayLayout.getDisplayGroupName());
         }

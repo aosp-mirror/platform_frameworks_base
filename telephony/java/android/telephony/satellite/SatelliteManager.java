@@ -37,7 +37,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 
 import com.android.internal.telephony.IIntegerConsumer;
-import com.android.internal.telephony.ILongConsumer;
+import com.android.internal.telephony.IVoidConsumer;
 import com.android.internal.telephony.ITelephony;
 import com.android.telephony.Rlog;
 
@@ -862,7 +862,7 @@ public class SatelliteManager {
      *
      * @param token The token to be used as a unique identifier for provisioning with satellite
      *              gateway.
-     * @param regionId The region ID for the device's current location.
+     * @param provisionData Data from the provisioning app that can be used by provisioning server
      * @param cancellationSignal The optional signal used by the caller to cancel the provision
      *                           request. Even when the cancellation is signaled, Telephony will
      *                           still trigger the callback to return the result of this request.
@@ -874,13 +874,14 @@ public class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @UnsupportedAppUsage
-    public void provisionSatelliteService(@NonNull String token, @NonNull String regionId,
+    public void provisionSatelliteService(@NonNull String token, @NonNull byte[] provisionData,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteError @NonNull Consumer<Integer> resultListener) {
         Objects.requireNonNull(token);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(resultListener);
+        Objects.requireNonNull(provisionData);
 
         ICancellationSignal cancelRemote = null;
         try {
@@ -893,7 +894,7 @@ public class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                cancelRemote = telephony.provisionSatelliteService(mSubId, token, regionId,
+                cancelRemote = telephony.provisionSatelliteService(mSubId, token, provisionData,
                         errorCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
@@ -1186,10 +1187,22 @@ public class SatelliteManager {
                             @Override
                             public void onSatelliteDatagramReceived(long datagramId,
                                     @NonNull SatelliteDatagram datagram, int pendingCount,
-                                    @NonNull ILongConsumer ack) {
+                                    @NonNull IVoidConsumer internalAck) {
+                                Consumer<Void> externalAck = new Consumer<Void>() {
+                                    @Override
+                                    public void accept(Void result) {
+                                        try {
+                                            internalAck.accept();
+                                        }  catch (RemoteException e) {
+                                              logd("onSatelliteDatagramReceived "
+                                                      + "RemoteException: " + e);
+                                        }
+                                    }
+                                };
+
                                 executor.execute(() -> Binder.withCleanCallingIdentity(
                                         () -> callback.onSatelliteDatagramReceived(
-                                                datagramId, datagram, pendingCount, ack)));
+                                                datagramId, datagram, pendingCount, externalAck)));
                             }
                         };
                 sSatelliteDatagramCallbackMap.put(callback, internalCallback);
@@ -1244,7 +1257,7 @@ public class SatelliteManager {
      * This method requests modem to check if there are any pending datagrams to be received over
      * satellite. If there are any incoming datagrams, they will be received via
      * {@link SatelliteDatagramCallback#onSatelliteDatagramReceived(long, SatelliteDatagram, int,
-     *        ILongConsumer)}
+     * Consumer)} )}
      *
      * @param executor The executor on which the result listener will be called.
      * @param resultListener Listener for the {@link SatelliteError} result of the operation.

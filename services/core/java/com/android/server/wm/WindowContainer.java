@@ -90,6 +90,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.MagnificationSpec;
@@ -156,15 +157,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     boolean mReparenting;
 
     /**
-     * Map of {@link InsetsState.InternalInsetsType} to the {@link InsetsSourceProvider} that
-     * provides local insets for all children of the current {@link WindowContainer}.
-     *
-     * Note that these InsetsSourceProviders are not part of the {@link InsetsStateController} and
-     * live here. These are supposed to provide insets only to the subtree of the current
+     * Map of the source ID to the {@link InsetsSource} for all children of the current
      * {@link WindowContainer}.
+     *
+     * Note that these sources are not part of the {@link InsetsStateController} and live here.
+     * These are supposed to provide insets only to the subtree of this {@link WindowContainer}.
      */
     @Nullable
-    SparseArray<InsetsSourceProvider> mLocalInsetsSourceProviders = null;
+    SparseArray<InsetsSource> mLocalInsetsSources = null;
 
     @Nullable
     protected InsetsSourceProvider mControllableInsetProvider;
@@ -373,115 +373,100 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * {@link WindowState}s below it.
      *
      * {@link WindowState#mMergedLocalInsetsSources} is updated by considering
-     * {@link WindowContainer#mLocalInsetsSourceProviders} provided by all the parents of the
-     * window.
-     * A given insetsType can be provided as a LocalInsetsSourceProvider only once in a
-     * Parent-to-leaf path.
+     * {@link WindowContainer#mLocalInsetsSources} provided by all the parents of the window.
      *
      * Examples: Please take a look at
      * {@link WindowContainerTests#testAddLocalInsetsSourceProvider()}
-     * {@link
-     * WindowContainerTests#testAddLocalInsetsSourceProvider_windowSkippedIfProvidingOnParent()}
      * {@link WindowContainerTests#testRemoveLocalInsetsSourceProvider()}.
      *
-     * @param aboveInsetsState The InsetsState of all the Windows above the current container.
-     * @param localInsetsSourceProvidersFromParent The local InsetsSourceProviders provided by all
-     *                                             the parents in the hierarchy of the current
-     *                                             container.
-     * @param insetsChangedWindows The windows which the insets changed have changed for.
+     * @param aboveInsetsState             The InsetsState of all the Windows above the current
+     *                                     container.
+     * @param localInsetsSourcesFromParent The local InsetsSourceProviders provided by all
+     *                                     the parents in the hierarchy of the current
+     *                                     container.
+     * @param insetsChangedWindows         The windows which the insets changed have changed for.
      */
     void updateAboveInsetsState(InsetsState aboveInsetsState,
-            SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+            SparseArray<InsetsSource> localInsetsSourcesFromParent,
             ArraySet<WindowState> insetsChangedWindows) {
-        SparseArray<InsetsSourceProvider> mergedLocalInsetsSourceProviders =
-                localInsetsSourceProvidersFromParent;
-        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
-            mergedLocalInsetsSourceProviders = createShallowCopy(mergedLocalInsetsSourceProviders);
-            for (int i = 0; i < mLocalInsetsSourceProviders.size(); i++) {
-                mergedLocalInsetsSourceProviders.put(
-                        mLocalInsetsSourceProviders.keyAt(i),
-                        mLocalInsetsSourceProviders.valueAt(i));
-            }
-        }
+        final SparseArray<InsetsSource> mergedLocalInsetsSources =
+                createMergedSparseArray(localInsetsSourcesFromParent, mLocalInsetsSources);
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).updateAboveInsetsState(aboveInsetsState,
-                    mergedLocalInsetsSourceProviders, insetsChangedWindows);
+            mChildren.get(i).updateAboveInsetsState(aboveInsetsState, mergedLocalInsetsSources,
+                    insetsChangedWindows);
         }
     }
 
-    static <T> SparseArray<T> createShallowCopy(SparseArray<T> inputArray) {
-        SparseArray<T> copyOfInput = new SparseArray<>(inputArray.size());
-        for (int i = 0; i < inputArray.size(); i++) {
-            copyOfInput.append(inputArray.keyAt(i), inputArray.valueAt(i));
+    static <T> SparseArray<T> createMergedSparseArray(SparseArray<T> sa1, SparseArray<T> sa2) {
+        final int size1 = sa1 != null ? sa1.size() : 0;
+        final int size2 = sa2 != null ? sa2.size() : 0;
+        final SparseArray<T> mergedArray = new SparseArray<>(size1 + size2);
+        if (size1 > 0) {
+            for (int i = 0; i < size1; i++) {
+                mergedArray.append(sa1.keyAt(i), sa1.valueAt(i));
+            }
         }
-        return copyOfInput;
+        if (size2 > 0) {
+            for (int i = 0; i < size2; i++) {
+                mergedArray.put(sa2.keyAt(i), sa2.valueAt(i));
+            }
+        }
+        return mergedArray;
     }
 
     /**
-     * Sets the given {@code providerFrame} as one of the insets provider for this window
-     * container. These insets are only passed to the subtree of the current WindowContainer.
-     * For a given WindowContainer-to-Leaf path, one insetsType can't be overridden more than once.
-     * If that happens, only the latest one will be chosen.
+     * Adds an {@link InsetsFrameProvider} which describes what insets should be provided to
+     * this {@link WindowContainer} and its children.
      *
-     * @param providerFrame the frame that will act as one of the insets providers for this window
-     *                      container
-     * @param insetsTypes the insets type which the providerFrame provides
+     * @param provider describes the insets types and the frames.
      */
-    void addLocalRectInsetsSourceProvider(Rect providerFrame,
-            @InsetsState.InternalInsetsType int[] insetsTypes) {
-        if (insetsTypes == null || insetsTypes.length == 0) {
+    void addLocalInsetsFrameProvider(InsetsFrameProvider provider) {
+        if (provider == null) {
             throw new IllegalArgumentException("Insets type not specified.");
         }
         if (mDisplayContent == null) {
             // This is possible this container is detached when WM shell is responding to a previous
             // request. WM shell will be updated when this container is attached again and the
             // insets need to be updated.
-            Slog.w(TAG, "Can't add local rect insets source provider when detached. " + this);
+            Slog.w(TAG, "Can't add insets frame provider when detached. " + this);
             return;
         }
-        if (mLocalInsetsSourceProviders == null) {
-            mLocalInsetsSourceProviders = new SparseArray<>();
+        if (mLocalInsetsSources == null) {
+            mLocalInsetsSources = new SparseArray<>();
         }
-        for (int i = 0; i < insetsTypes.length; i++) {
-            final @InsetsState.InternalInsetsType int type = insetsTypes[i];
-            InsetsSourceProvider insetsSourceProvider =
-                    mLocalInsetsSourceProviders.get(type);
-            if (insetsSourceProvider != null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "The local insets provider for this type " + type
-                            + " already exists. Overwriting");
-                }
+        final int id = InsetsSource.createId(
+                provider.getOwner(), provider.getIndex(), provider.getType());
+        if (mLocalInsetsSources.get(id) != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "The local insets source for this " + provider
+                        + " already exists. Overwriting.");
             }
-            insetsSourceProvider = new RectInsetsSourceProvider(
-                    new InsetsSource(type, InsetsState.toPublicType(type)),
-                    mDisplayContent.getInsetsStateController(), mDisplayContent);
-            mLocalInsetsSourceProviders.put(insetsTypes[i], insetsSourceProvider);
-            ((RectInsetsSourceProvider) insetsSourceProvider).setRect(providerFrame);
         }
+        final InsetsSource source = new InsetsSource(id, provider.getType());
+        source.setFrame(provider.getArbitraryRectangle());
+        mLocalInsetsSources.put(id, source);
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
 
-    void removeLocalInsetsSourceProvider(@InsetsState.InternalInsetsType int[] insetsTypes) {
-        if (insetsTypes == null || insetsTypes.length == 0) {
+    void removeLocalInsetsFrameProvider(InsetsFrameProvider provider) {
+        if (provider == null) {
             throw new IllegalArgumentException("Insets type not specified.");
         }
-        if (mLocalInsetsSourceProviders == null) {
+        if (mLocalInsetsSources == null) {
             return;
         }
 
-        for (int i = 0; i < insetsTypes.length; i++) {
-            InsetsSourceProvider insetsSourceProvider =
-                    mLocalInsetsSourceProviders.get(insetsTypes[i]);
-            if (insetsSourceProvider == null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Given insets type " + insetsTypes[i] + " doesn't have a "
-                            + "local insetsSourceProvider.");
-                }
-                continue;
+        final int id = InsetsSource.createId(
+                provider.getOwner(), provider.getIndex(), provider.getType());
+        if (mLocalInsetsSources.get(id) == null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Given " + provider + " doesn't have a local insets source.");
             }
-            mLocalInsetsSourceProviders.remove(insetsTypes[i]);
+            return;
         }
+        mLocalInsetsSources.remove(id);
+
         // Update insets if this window is attached.
         if (mDisplayContent != null) {
             mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
@@ -1022,8 +1007,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (dc != null && dc != this) {
             dc.getPendingTransaction().merge(mPendingTransaction);
         }
-        if (dc != this && mLocalInsetsSourceProviders != null) {
-            mLocalInsetsSourceProviders.clear();
+        if (dc != this && mLocalInsetsSources != null) {
+            mLocalInsetsSources.clear();
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
@@ -1336,14 +1321,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // If we are losing visibility, then a snapshot isn't necessary and we are no-longer
         // part of a change transition.
         if (!visible) {
+            boolean skipUnfreeze = false;
             if (asTaskFragment() != null) {
                 // If the organized TaskFragment is closing while resizing, we want to keep track of
                 // its starting bounds to make sure the animation starts at the correct position.
                 // This should be called before unfreeze() because we record the starting bounds
                 // in SurfaceFreezer.
-                asTaskFragment().setClosingChangingStartBoundsIfNeeded();
+                skipUnfreeze = asTaskFragment().setClosingChangingStartBoundsIfNeeded();
             }
-            mSurfaceFreezer.unfreeze(getSyncTransaction());
+
+            if (!skipUnfreeze) {
+                mSurfaceFreezer.unfreeze(getSyncTransaction());
+            }
         }
         WindowContainer parent = getParent();
         if (parent != null) {
@@ -3559,11 +3548,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             pw.println(prefix + "mLastOrientationSource=" + mLastOrientationSource);
             pw.println(prefix + "deepestLastOrientationSource=" + getLastOrientationSource());
         }
-        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
-            pw.println(prefix + mLocalInsetsSourceProviders.size() + " LocalInsetsSourceProviders");
+        if (mLocalInsetsSources != null && mLocalInsetsSources.size() != 0) {
+            pw.println(prefix + mLocalInsetsSources.size() + " LocalInsetsSources");
             final String childPrefix = prefix + "  ";
-            for (int i = 0; i < mLocalInsetsSourceProviders.size(); ++i) {
-                mLocalInsetsSourceProviders.valueAt(i).dump(pw, childPrefix);
+            for (int i = 0; i < mLocalInsetsSources.size(); ++i) {
+                mLocalInsetsSources.valueAt(i).dump(childPrefix, pw);
             }
         }
     }
@@ -4058,7 +4047,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 final Configuration mergedConfiguration =
                         configurationMerger != null
                                 ? configurationMerger.merge(mergedOverrideConfig,
-                                receiver.getConfiguration())
+                                        receiver.getRequestedOverrideConfiguration())
                                 : supplier.getConfiguration();
                 receiver.onRequestedOverrideConfigurationChanged(mergedConfiguration);
             }
@@ -4133,7 +4122,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         private void hideInsetSourceViewOverflows() {
-            final SparseArray<WindowContainerInsetsSourceProvider> providers =
+            final SparseArray<InsetsSourceProvider> providers =
                     getDisplayContent().getInsetsStateController().getSourceProviders();
             for (int i = providers.size(); i >= 0; i--) {
                 final InsetsSourceProvider insetProvider = providers.valueAt(i);

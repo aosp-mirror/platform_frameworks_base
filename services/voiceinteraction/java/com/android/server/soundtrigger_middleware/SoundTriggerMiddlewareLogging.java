@@ -35,7 +35,7 @@ import android.os.BatteryStatsInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -463,7 +463,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 printObject(originatorIdentity),
                 printArgs(args),
                 printObject(retVal));
-        Log.i(TAG, message);
+        Slog.i(TAG, message);
         appendMessage(message);
     }
 
@@ -474,7 +474,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 object,
                 printObject(originatorIdentity),
                 printArgs(args));
-        Log.i(TAG, message);
+        Slog.i(TAG, message);
         appendMessage(message);
     }
 
@@ -486,7 +486,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 object,
                 printObject(originatorIdentity),
                 printArgs(args));
-        Log.e(TAG, message, ex);
+        Slog.e(TAG, message, ex);
         appendMessage(message + " " + ex.toString());
     }
 

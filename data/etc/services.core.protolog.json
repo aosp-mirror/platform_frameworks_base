@@ -565,12 +565,6 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
-    "-1549923951": {
-      "message": "Content Recording: Unable to retrieve window container to start recording for display %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONTENT_RECORDING",
-      "at": "com\/android\/server\/wm\/ContentRecorder.java"
-    },
     "-1545962566": {
       "message": "View server did not start",
       "level": "WARN",
@@ -888,6 +882,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
+    },
+    "-1258739769": {
+      "message": "onTransactionReady, opening: %s, closing: %s, animating: %s, match: %b",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-1257821162": {
       "message": "OUT SURFACE %s: copied",
@@ -1476,6 +1476,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-732715767": {
+      "message": "Unable to retrieve window container to start recording for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "-729530161": {
       "message": "Moving to DESTROYED: %s (no app)",

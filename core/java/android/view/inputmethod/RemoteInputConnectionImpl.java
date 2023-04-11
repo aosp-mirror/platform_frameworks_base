@@ -405,31 +405,28 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     }
                     if (handler.getLooper().isCurrentThread()) {
                         servedView.onInputConnectionClosedInternal();
-                        final ViewRootImpl viewRoot = servedView.getViewRootImpl();
-                        if (viewRoot != null) {
-                            viewRoot.getHandwritingInitiator().onInputConnectionClosed(servedView);
-                        }
                     } else {
                         handler.post(servedView::onInputConnectionClosedInternal);
-                        handler.post(() -> {
-                            final ViewRootImpl viewRoot = servedView.getViewRootImpl();
-                            if (viewRoot != null) {
-                                viewRoot.getHandwritingInitiator()
-                                        .onInputConnectionClosed(servedView);
-                            }
-                        });
                     }
+                }
+
+                final ViewRootImpl viewRoot = servedView.getViewRootImpl();
+                if (viewRoot != null) {
+                    viewRoot.getHandwritingInitiator().onInputConnectionClosed(servedView);
                 }
             }
         });
     }
 
+    @Dispatching(cancellable = false)
     @Override
     public void cancelCancellationSignal(IBinder token) {
         if (mBeamer == null) {
             return;
         }
-        mBeamer.cancel(token);
+        dispatch(() -> {
+            mBeamer.cancel(token);
+        });
     }
 
     @Override

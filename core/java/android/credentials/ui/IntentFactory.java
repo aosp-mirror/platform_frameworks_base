@@ -72,7 +72,8 @@ public class IntentFactory {
      * @hide
      */
     @NonNull
-    public static Intent createCancelUiIntent(@NonNull IBinder requestToken) {
+    public static Intent createCancelUiIntent(@NonNull IBinder requestToken,
+            boolean shouldShowCancellationUi, @NonNull String appPackageName) {
         Intent intent = new Intent();
         ComponentName componentName =
                 ComponentName.unflattenFromString(
@@ -81,7 +82,8 @@ public class IntentFactory {
                                         com.android.internal.R.string
                                                 .config_credentialManagerDialogComponent));
         intent.setComponent(componentName);
-        intent.putExtra(CancelUiRequest.EXTRA_CANCEL_UI_REQUEST, new CancelUiRequest(requestToken));
+        intent.putExtra(CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
+                new CancelUiRequest(requestToken, shouldShowCancellationUi, appPackageName));
         return intent;
     }
 

@@ -1096,8 +1096,7 @@ public final class DisplayManager {
             @NonNull VirtualDisplayConfig config,
             @Nullable Handler handler,
             @Nullable VirtualDisplay.Callback callback) {
-        return createVirtualDisplay(null /* projection */, config, callback, handler,
-                null /* windowContext */);
+        return createVirtualDisplay(null /* projection */, config, callback, handler);
     }
 
     // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
@@ -1122,15 +1121,13 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(projection, builder.build(), callback, handler,
-                null /* windowContext */);
+        return createVirtualDisplay(projection, builder.build(), callback, handler);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
-            @Nullable Context windowContext) {
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         Executor executor = null;
         // If callback is null, the executor will not be used. Avoid creating the handler and the
         // handler executor.
@@ -1139,7 +1136,7 @@ public final class DisplayManager {
                     Handler.createAsync(handler != null ? handler.getLooper() : Looper.myLooper()));
         }
         return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
-                executor, windowContext);
+                executor);
     }
 
     /**
@@ -1610,7 +1607,7 @@ public final class DisplayManager {
             throw ex.rethrowFromSystemServer();
         }
         return DisplayManagerGlobal.getInstance().createVirtualDisplayWrapper(virtualDisplayConfig,
-                null, callbackWrapper, displayId);
+                callbackWrapper, displayId);
     }
 
     /**
@@ -1761,10 +1758,12 @@ public final class DisplayManager {
         /**
          * Key for the brightness throttling data as a String formatted:
          * <displayId>,<no of throttling levels>,[<severity as string>,<brightness cap>]
-         * Where the latter part is repeated for each throttling level, and the entirety is repeated
-         * for each display, separated by a semicolon.
+         * [,<throttlingId>]?
+         * Where [<severity as string>,<brightness cap>] is repeated for each throttling level.
+         * The entirety is repeated for each display and throttling id, separated by a semicolon.
          * For example:
          * 123,1,critical,0.8;456,2,moderate,0.9,critical,0.7
+         * 123,1,critical,0.8,default;123,1,moderate,0.6,id_2;456,2,moderate,0.9,critical,0.7
          */
         String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
     }

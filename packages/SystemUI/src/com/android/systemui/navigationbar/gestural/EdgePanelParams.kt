@@ -35,7 +35,7 @@ data class EdgePanelParams(private var resources: Resources) {
     data class BackIndicatorDimens(
             val horizontalTranslation: Float? = 0f,
             val scale: Float = 0f,
-            val scalePivotX: Float = 0f,
+            val scalePivotX: Float? = null,
             val arrowDimens: ArrowDimens,
             val backgroundDimens: BackgroundDimens,
             val verticalTranslationSpring: SpringForce? = null,
@@ -203,7 +203,8 @@ data class EdgePanelParams(private var resources: Resources) {
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_active_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_active_scale),
                 horizontalTranslationSpring = entryActiveHorizontalTranslationSpring,
-                scaleSpring = createSpring(450f, 0.415f),
+                scaleSpring = createSpring(450f, 0.39f),
+                scalePivotX = getDimen(R.dimen.navigation_edge_active_background_width),
                 arrowDimens = ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_active_arrow_length),
                         height = getDimen(R.dimen.navigation_edge_active_arrow_height),
@@ -219,7 +220,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         height = getDimen(R.dimen.navigation_edge_active_background_height),
                         edgeCornerRadius = getDimen(R.dimen.navigation_edge_active_edge_corners),
                         farCornerRadius = getDimen(R.dimen.navigation_edge_active_far_corners),
-                        widthSpring = createSpring(650f, 0.75f),
+                        widthSpring = createSpring(850f, 0.75f),
                         heightSpring = createSpring(10000f, 1f),
                         edgeCornerRadiusSpring = createSpring(600f, 0.36f),
                         farCornerRadiusSpring = createSpring(2500f, 0.855f),
@@ -258,6 +259,7 @@ data class EdgePanelParams(private var resources: Resources) {
 
         committedIndicator = activeIndicator.copy(
                 horizontalTranslation = null,
+                scalePivotX = null,
                 arrowDimens = activeIndicator.arrowDimens.copy(
                         lengthSpring = activeCommittedArrowLengthSpring,
                         heightSpring = activeCommittedArrowHeightSpring,
@@ -274,8 +276,8 @@ data class EdgePanelParams(private var resources: Resources) {
                         farCornerRadiusSpring = flungCommittedFarCornerSpring,
                         alphaSpring = createSpring(1400f, 1f),
                 ),
-                scale = 0.85f,
-                scaleSpring = createSpring(6000f, 1f),
+                scale = 0.86f,
+                scaleSpring = createSpring(5700f, 1f),
         )
 
         flungIndicator = committedIndicator.copy(

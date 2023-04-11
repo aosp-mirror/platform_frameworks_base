@@ -51,6 +51,11 @@ data class UiState(
     // True if the UI has one and only one auto selectable entry. Its provider activity will be
     // launched immediately, and canceling it will cancel the whole UI flow.
     val isAutoSelectFlow: Boolean = false,
+    val cancelRequestState: CancelUiRequestState?,
+)
+
+data class CancelUiRequestState(
+    val appDisplayName: String?,
 )
 
 class CredentialSelectorViewModel(
@@ -64,7 +69,7 @@ class CredentialSelectorViewModel(
 
     init{
         uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
-                credManRepo.requestInfo.appPackageName)
+                credManRepo.requestInfo?.appPackageName)
     }
 
     /**************************************************************************/
@@ -74,6 +79,10 @@ class CredentialSelectorViewModel(
         Log.d(Constants.LOG_TAG, "User cancelled, finishing the ui")
         credManRepo.onUserCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+    }
+
+    fun onCancellationUiRequested(appDisplayName: String?) {
+        uiState = uiState.copy(cancelRequestState = CancelUiRequestState(appDisplayName))
     }
 
     /** Close the activity and don't report anything to the backend.
@@ -88,10 +97,10 @@ class CredentialSelectorViewModel(
         this.credManRepo = credManRepo
         uiState = credManRepo.initState()
 
-        if (this.credManRepo.requestInfo.token != credManRepo.requestInfo.token) {
+        if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
             this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
-                    credManRepo.requestInfo.appPackageName)
+                    credManRepo.requestInfo?.appPackageName)
         }
     }
 
@@ -165,14 +174,14 @@ class CredentialSelectorViewModel(
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
-                credManRepo.requestInfo.appPackageName)
+                credManRepo.requestInfo?.appPackageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
 
     /** Return true if the current UI's request token matches the UI cancellation request token. */
     fun shouldCancelCurrentUi(cancelRequestToken: IBinder): Boolean {
-        return credManRepo.requestInfo.token.equals(cancelRequestToken)
+        return credManRepo.requestInfo?.token?.equals(cancelRequestToken) ?: false
     }
 
     /**************************************************************************/
@@ -396,6 +405,6 @@ class CredentialSelectorViewModel(
 
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {
-        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo.appPackageName)
+        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.appPackageName)
     }
 }

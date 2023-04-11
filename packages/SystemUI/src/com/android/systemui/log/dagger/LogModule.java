@@ -119,15 +119,6 @@ public class LogModule {
         return factory.create("ShadeLog", 500, false);
     }
 
-    /** Provides a logging buffer for Shade height messages. */
-    @Provides
-    @SysUISingleton
-    @ShadeHeightLog
-    public static LogBuffer provideShadeHeightLogBuffer(LogBufferFactory factory) {
-        return factory.create("ShadeHeightLog", 500 /* maxSize */);
-    }
-
-
     /** Provides a logging buffer for all logs related to managing notification sections. */
     @Provides
     @SysUISingleton
@@ -376,13 +367,13 @@ public class LogModule {
 
     /**
      * Provides a {@link LogBuffer} for use by
-     *  {@link com.android.keyguard.faceauth.KeyguardFaceAuthManagerImpl}.
+     *  {@link com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepositoryImpl}.
      */
     @Provides
     @SysUISingleton
     @FaceAuthLog
     public static LogBuffer provideFaceAuthLog(LogBufferFactory factory) {
-        return factory.create("KeyguardFaceAuthManagerLog", 300);
+        return factory.create("DeviceEntryFaceAuthRepositoryLog", 300);
     }
 
     /**

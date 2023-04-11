@@ -635,7 +635,7 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig, VirtualDisplay.Callback callback,
-            @Nullable Executor executor, @Nullable Context windowContext) {
+            @Nullable Executor executor) {
         VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, executor);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
@@ -645,7 +645,7 @@ public final class DisplayManagerGlobal {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
-        return createVirtualDisplayWrapper(virtualDisplayConfig, windowContext, callbackWrapper,
+        return createVirtualDisplayWrapper(virtualDisplayConfig, callbackWrapper,
                 displayId);
     }
 
@@ -655,7 +655,7 @@ public final class DisplayManagerGlobal {
      */
     @Nullable
     public VirtualDisplay createVirtualDisplayWrapper(VirtualDisplayConfig virtualDisplayConfig,
-            Context windowContext, IVirtualDisplayCallback callbackWrapper, int displayId) {
+            IVirtualDisplayCallback callbackWrapper, int displayId) {
         if (displayId < 0) {
             Log.e(TAG, "Could not create virtual display: " + virtualDisplayConfig.getName());
             return null;
@@ -672,7 +672,7 @@ public final class DisplayManagerGlobal {
             return null;
         }
         return new VirtualDisplay(this, display, callbackWrapper,
-                virtualDisplayConfig.getSurface(), windowContext);
+                virtualDisplayConfig.getSurface());
     }
 
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {

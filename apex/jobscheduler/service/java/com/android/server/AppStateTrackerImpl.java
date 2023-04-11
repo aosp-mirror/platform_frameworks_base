@@ -22,7 +22,7 @@ import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -716,11 +716,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         return true;
     }
 
-    private final class UidObserver extends IUidObserver.Stub {
-        @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
-        }
-
+    private final class UidObserver extends android.app.UidObserver {
         @Override
         public void onUidActive(int uid) {
             mHandler.onUidActive(uid);
@@ -739,10 +735,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
             mHandler.onUidCachedChanged(uid, cached);
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     }
 

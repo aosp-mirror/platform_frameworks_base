@@ -35,6 +35,8 @@ public interface NotificationManagerInternal {
 
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
 
+    void removeUserInitiatedJobFlagFromNotification(String pkg, int notificationId, int userId);
+
     void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
 
     /** Get the number of notification channels for a given package */

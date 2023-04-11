@@ -22,7 +22,6 @@ import android.tools.common.NavBar
 import android.tools.common.Rotation
 import android.tools.common.datatypes.Rect
 import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -30,7 +29,6 @@ import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -262,17 +260,9 @@ open class QuickSwitchFromLauncherTest(flicker: FlickerTest) : BaseTest(flicker)
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
     @FlakyTest(bugId = 246285528)
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 

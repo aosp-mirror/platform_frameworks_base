@@ -30,7 +30,7 @@ import static android.os.VibrationAttributes.USAGE_UNKNOWN;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -157,7 +157,7 @@ final class VibrationSettings {
     @VisibleForTesting
     final SettingsContentObserver mSettingObserver;
     @VisibleForTesting
-    final UidObserver mUidObserver;
+    final MyUidObserver mUidObserver;
     @VisibleForTesting
     final SettingsBroadcastReceiver mSettingChangeReceiver;
     final VirtualDeviceListener mVirtualDeviceListener;
@@ -195,7 +195,7 @@ final class VibrationSettings {
         mContext = context;
         mVibrationConfig = config;
         mSettingObserver = new SettingsContentObserver(handler);
-        mUidObserver = new UidObserver();
+        mUidObserver = new MyUidObserver();
         mSettingChangeReceiver = new SettingsBroadcastReceiver();
         mVirtualDeviceListener = new VirtualDeviceListener();
 
@@ -726,7 +726,7 @@ final class VibrationSettings {
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
     @VisibleForTesting
-    final class UidObserver extends IUidObserver.Stub {
+    final class MyUidObserver extends UidObserver {
         private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
 
         public boolean isUidForeground(int uid) {
@@ -740,24 +740,8 @@ final class VibrationSettings {
         }
 
         @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mProcStatesCache.put(uid, procState);
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     }
 

@@ -757,6 +757,15 @@
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
 
+    <!-- QuickSettings: Contrast tile [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_label">Contrast</string>
+    <!-- QuickSettings: Contrast tile description: standard [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_standard">Standard</string>
+    <!-- QuickSettings: Contrast tile description: medium [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_medium">Medium</string>
+    <!-- QuickSettings: Contrast tile description: high [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_high">High</string>
+
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
     <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
@@ -1269,6 +1278,11 @@
     <string name="sound_settings">Sound &amp; vibration</string>
     <!-- Label for button to go to sound settings screen [CHAR_LIMIT=30] -->
     <string name="volume_panel_dialog_settings_button">Settings</string>
+
+    <!-- Title for notification after audio lowers -->
+    <string name="csd_lowered_title" product="default">Lowered to safer volume</string>
+    <!-- Message shown in notification after system lowers audio -->
+    <string name="csd_system_lowered_text" product="default">The volume has been high for longer than recommended</string>
 
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
 
@@ -2335,8 +2349,6 @@
     <string name="magnification_mode_switch_state_full_screen">Magnify full screen</string>
     <!-- A11y state description for magnification mode switch that device is in window mode. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_state_window">Magnify part of screen</string>
-    <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
-    <string name="magnification_mode_switch_click_label">Switch</string>
     <!-- Click action label for magnification settings panel. [CHAR LIMIT=NONE] -->
     <string name="magnification_open_settings_click_label">Open magnification settings</string>
     <!-- Label of the corner of a rectangle that you can tap and drag to resize the magnification area. [CHAR LIMIT=NONE] -->
@@ -2372,6 +2384,8 @@
     <string name="accessibility_magnification_small">Small</string>
     <!-- Click action label for magnification panel large size [CHAR LIMIT=NONE]-->
     <string name="accessibility_magnification_large">Large</string>
+    <!-- Click action label for magnification panel full screen size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_fullscreen">Full screen</string>
     <!-- Click action label for magnification panel Done [CHAR LIMIT=20]-->
     <string name="accessibility_magnification_done">Done</string>
     <!-- Click action label for edit magnification size [CHAR LIMIT=20]-->
@@ -2465,6 +2479,15 @@
 
     <!-- Controls management favorites screen. See other apps button [CHAR LIMIT=30] -->
     <string name="controls_favorite_see_other_apps">See other apps</string>
+
+    <!-- Controls management favorites screen. Rearrange controls button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_rearrange_button">Rearrange</string>
+
+    <!-- Controls management edit screen. Add controls button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_add_controls">Add controls</string>
+
+    <!-- Controls management edit screen. Return to editing button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_back_to_editing">Back to editing</string>
 
     <!-- Controls management controls screen error on load message [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_load_error">Controls could not be loaded. Check the <xliff:g id="app" example="System UI">%s</xliff:g> app to make sure that the app settings haven\u2019t changed.</string>

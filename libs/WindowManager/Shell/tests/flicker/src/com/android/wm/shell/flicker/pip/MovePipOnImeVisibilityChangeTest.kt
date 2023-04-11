@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -28,8 +27,6 @@ import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import org.junit.Assume.assumeFalse
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,11 +40,6 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class MovePipOnImeVisibilityChangeTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val imeApp = ImeAppHelper(instrumentation)
-
-    @Before
-    open fun before() {
-        assumeFalse(isShellTransitionsEnabled)
-    }
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit

@@ -150,6 +150,15 @@ public class AutofillFeatureFlags {
             "package_deny_list_for_unimportant_view";
 
     /**
+     * Sets the list of activities and packages allowed for autofill. The format is same with
+     * {@link #DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW}
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST =
+            "package_and_activity_allowlist_for_triggering_fill_request";
+
+    /**
      * Whether the heuristics check for view is enabled
      */
     public static final String DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW =
@@ -183,6 +192,33 @@ public class AutofillFeatureFlags {
      */
     public static final String DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES =
             "should_enable_autofill_on_all_view_types";
+
+    /**
+     * Whether to enable multi-line filter when checking if view is autofillable
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_MULTILINE_FILTER_ENABLED =
+            "multiline_filter_enabled";
+
+    /**
+     * Whether include all autofill type not none views in assist structure
+     *
+     * @hide
+     */
+    public static final String
+        DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE =
+            "include_all_autofill_type_not_none_views_in_assist_structure";
+
+    /**
+     * Whether include all views in assist structure
+     *
+     * @hide
+     */
+    public static final String
+        DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE =
+            "include_all_views_in_assist_structure";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -378,6 +414,49 @@ public class AutofillFeatureFlags {
             DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW, "");
     }
 
+    /**
+     * Get autofill allowlist from flag
+     *
+     * @hide
+     */
+    public static String getAllowlistStringFromFlag() {
+        return DeviceConfig.getString(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST, "");
+    }
+    /**
+     * Whether include all views that have autofill type not none in assist structure.
+     *
+     * @hide
+     */
+    public static boolean shouldIncludeAllViewsAutofillTypeNotNoneInAssistStructrue() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE, false);
+    }
+
+    /**
+     * Whether include all views in assist structure.
+     *
+     * @hide
+     */
+    public static boolean shouldIncludeAllChildrenViewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE, false);
+    }
+
+
+    /**
+     * Whether should enable multi-line filter
+     *
+     * @hide
+     */
+    public static boolean shouldEnableMultilineFilter() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_MULTILINE_FILTER_ENABLED, false);
+    }
 
     // START AUTOFILL PCC CLASSIFICATION FUNCTIONS
 

@@ -29,28 +29,27 @@ import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.util.Log;
 
-import com.android.server.credentials.metrics.ApiName;
-import com.android.server.credentials.metrics.ApiStatus;
-import com.android.server.credentials.metrics.ProviderStatusForMetrics;
-
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Central session for a single clearCredentialState request. This class listens to the
  * responses from providers, and updates the provider(S) state.
  */
 public final class ClearRequestSession extends RequestSession<ClearCredentialStateRequest,
-        IClearCredentialStateCallback>
+        IClearCredentialStateCallback, Void>
         implements ProviderSession.ProviderInternalCallback<Void> {
     private static final String TAG = "GetRequestSession";
 
-    public ClearRequestSession(Context context, int userId, int callingUid,
+    public ClearRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
+            Object lock, int userId, int callingUid,
             IClearCredentialStateCallback callback, ClearCredentialStateRequest request,
-            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
+            CallingAppInfo callingAppInfo, Set<ComponentName> enabledProviders,
+            CancellationSignal cancellationSignal,
             long startedTimestamp) {
-        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_UNDEFINED,
-                callingAppInfo, cancellationSignal, startedTimestamp);
-        setupInitialPhaseMetric(ApiName.CLEAR_CREDENTIAL.getMetricCode(), MetricUtilities.ZERO);
+        super(context, sessionCallback, lock, userId, callingUid, request, callback,
+                RequestInfo.TYPE_UNDEFINED,
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
     }
 
     /**
@@ -77,7 +76,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
 
     @Override // from provider session
     public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
+            ComponentName componentName, ProviderSession.CredentialsSource source) {
         Log.i(TAG, "in onStatusChanged with status: " + status);
         if (ProviderSession.isTerminatingStatus(status)) {
             Log.i(TAG, "in onStatusChanged terminating status");
@@ -92,8 +91,10 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     public void onFinalResponseReceived(
             ComponentName componentName,
             Void response) {
-        setChosenMetric(componentName);
-        respondToClientWithResponseAndFinish();
+        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
+                mProviders.get(componentName.flattenToString()).mProviderSessionMetric
+                        .getCandidatePhasePerProviderMetric());
+        respondToClientWithResponseAndFinish(null);
     }
 
     protected void onProviderResponseComplete(ComponentName componentName) {
@@ -114,55 +115,20 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     }
 
     @Override
+    protected void invokeClientCallbackSuccess(Void response) throws RemoteException {
+        mClientCallback.onSuccess();
+    }
+
+    @Override
+    protected void invokeClientCallbackError(String errorType, String errorMsg)
+            throws RemoteException {
+        mClientCallback.onError(errorType, errorMsg);
+    }
+
+    @Override
     public void onFinalErrorReceived(ComponentName componentName, String errorType,
             String message) {
         //Not applicable for clearCredential as response is not picked by the user
-    }
-
-    private void respondToClientWithResponseAndFinish() {
-        Log.i(TAG, "respondToClientWithResponseAndFinish");
-        collectFinalPhaseMetricStatus(false, ProviderStatusForMetrics.FINAL_SUCCESS);
-        if (isSessionCancelled()) {
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.CLIENT_CANCELED.getMetricCode());
-            finishSession(/*propagateCancellation=*/true);
-            return;
-        }
-        try {
-            mClientCallback.onSuccess();
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.SUCCESS.getMetricCode());
-        } catch (RemoteException e) {
-            collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
-            Log.i(TAG, "Issue while propagating the response to the client");
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.FAILURE.getMetricCode());
-        }
-        finishSession(/*propagateCancellation=*/false);
-    }
-
-    private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
-        Log.i(TAG, "respondToClientWithErrorAndFinish");
-        collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
-        if (isSessionCancelled()) {
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.CLIENT_CANCELED.getMetricCode());
-            finishSession(/*propagateCancellation=*/true);
-            return;
-        }
-        try {
-            mClientCallback.onError(errorType, errorMsg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-        logApiCall(mChosenProviderFinalPhaseMetric,
-                mCandidateBrowsingPhaseMetric,
-                /* apiStatus */ ApiStatus.FAILURE.getMetricCode());
-        finishSession(/*propagateCancellation=*/false);
     }
 
     private void processResponses() {
@@ -170,7 +136,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             if (session.isProviderResponseSet()) {
                 // If even one provider responded successfully, send back the response
                 // TODO: Aggregate other exceptions
-                respondToClientWithResponseAndFinish();
+                respondToClientWithResponseAndFinish(null);
                 return;
             }
         }

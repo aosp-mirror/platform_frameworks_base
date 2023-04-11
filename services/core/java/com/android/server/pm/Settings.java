@@ -2217,10 +2217,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         }
                         if (ustate.getEnabledState() != COMPONENT_ENABLED_STATE_DEFAULT) {
                             serializer.attributeInt(null, ATTR_ENABLED, ustate.getEnabledState());
-                            if (ustate.getLastDisableAppCaller() != null) {
-                                serializer.attribute(null, ATTR_ENABLED_CALLER,
-                                        ustate.getLastDisableAppCaller());
-                            }
+                        }
+                        if (ustate.getLastDisableAppCaller() != null) {
+                            serializer.attribute(null, ATTR_ENABLED_CALLER,
+                                    ustate.getLastDisableAppCaller());
                         }
                         if (ustate.getInstallReason() != PackageManager.INSTALL_REASON_UNKNOWN) {
                             serializer.attributeInt(null, ATTR_INSTALL_REASON,
@@ -3947,14 +3947,15 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
                 try {
-                    packageSetting.setEnabled(Integer.parseInt(enabledStr), 0 /* userId */, null);
+                    packageSetting.setEnabled(Integer.parseInt(enabledStr), 0 /* userId */,
+                            "settings");
                 } catch (NumberFormatException e) {
                     if (enabledStr.equalsIgnoreCase("true")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 0, null);
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 0, "settings");
                     } else if (enabledStr.equalsIgnoreCase("false")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, "settings");
                     } else if (enabledStr.equalsIgnoreCase("default")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, "settings");
                     } else {
                         PackageManagerService.reportSettingsProblem(Log.WARN,
                                 "Error in package manager settings: package " + name
@@ -3963,7 +3964,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     }
                 }
             } else {
-                packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
+                packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, "settings");
             }
 
             addInstallerPackageNames(installSource);

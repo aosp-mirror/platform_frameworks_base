@@ -127,6 +127,11 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
+        // It's possible to reach a state here where mPasswordEntry believes it is focused
+        // but it is not actually focused. This state will prevent the view from gaining focus,
+        // as requestFocus will no-op since the focus flag is already set. By clearing focus first,
+        // it's guaranteed that the view has focus.
+        mPasswordEntry.clearFocus();
         mPasswordEntry.requestFocus();
     }
 
