@@ -22,10 +22,13 @@ import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.accessibility.data.repository.FakeAccessibilityRepository
+import com.android.systemui.accessibility.domain.interactor.AccessibilityInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModel
 import com.android.systemui.statusbar.notification.shelf.domain.interactor.NotificationShelfInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.util.mockito.any
@@ -58,8 +61,11 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
     private val keyguardRepository = FakeKeyguardRepository()
     private val deviceEntryFaceAuthRepository = FakeDeviceEntryFaceAuthRepository()
     private val systemClock = FakeSystemClock()
+    private val a11yRepo = FakeAccessibilityRepository()
 
     // real impls
+    private val a11yInteractor = AccessibilityInteractor(a11yRepo)
+    private val activatableViewModel = ActivatableNotificationViewModel(a11yInteractor)
     private val interactor by lazy {
         NotificationShelfInteractor(
             keyguardRepository,
@@ -69,7 +75,7 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
             keyguardTransitionController,
         )
     }
-    private val underTest by lazy { NotificationShelfViewModel(interactor) }
+    private val underTest by lazy { NotificationShelfViewModel(interactor, activatableViewModel) }
 
     @Test
     fun canModifyColorOfNotifications_whenKeyguardNotShowing() = runTest {

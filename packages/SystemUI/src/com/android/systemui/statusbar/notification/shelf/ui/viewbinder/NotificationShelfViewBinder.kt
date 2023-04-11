@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 
 import android.view.View
-import android.view.accessibility.AccessibilityManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.flags.FeatureFlags
@@ -27,9 +26,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.NotificationShelfController
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController
-import com.android.systemui.statusbar.notification.row.ExpandableOutlineViewController
-import com.android.systemui.statusbar.notification.row.ExpandableViewController
+import com.android.systemui.statusbar.notification.row.ui.viewbinder.ActivatableNotificationViewBinder
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -56,7 +53,6 @@ constructor(
     private val shelf: NotificationShelf,
     private val viewModel: NotificationShelfViewModel,
     featureFlags: FeatureFlags,
-    private val a11yManager: AccessibilityManager,
     private val falsingManager: FalsingManager,
     hostControllerLazy: Lazy<NotificationStackScrollLayoutController>,
     private val notificationIconAreaController: NotificationIconAreaController,
@@ -76,15 +72,7 @@ constructor(
     }
 
     fun init() {
-        NotificationShelfViewBinder.bind(viewModel, shelf)
-
-        ActivatableNotificationViewController(
-                shelf,
-                ExpandableOutlineViewController(shelf, ExpandableViewController(shelf)),
-                a11yManager,
-                falsingManager,
-            )
-            .init()
+        NotificationShelfViewBinder.bind(viewModel, shelf, falsingManager)
         hostController.setShelf(shelf)
         hostController.setOnNotificationRemovedListener { child, _ ->
             view.requestRoundnessResetFor(child)
@@ -113,7 +101,12 @@ constructor(
 
 /** Binds a [NotificationShelf] to its backend. */
 object NotificationShelfViewBinder {
-    fun bind(viewModel: NotificationShelfViewModel, shelf: NotificationShelf) {
+    fun bind(
+        viewModel: NotificationShelfViewModel,
+        shelf: NotificationShelf,
+        falsingManager: FalsingManager,
+    ) {
+        ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.canModifyColorOfNotifications

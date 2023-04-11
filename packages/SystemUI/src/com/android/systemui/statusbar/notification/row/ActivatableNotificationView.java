@@ -196,7 +196,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void onTap() {}
 
     /** Sets the last action up time this view was touched. */
-    void setLastActionUpTime(long eventTime) {
+    public void setLastActionUpTime(long eventTime) {
         mLastActionUpTime = eventTime;
     }
 
@@ -705,7 +705,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return mRefocusOnDismiss || isAccessibilityFocused();
     }
 
-    void setTouchHandler(Gefingerpoken touchHandler) {
+    public void setTouchHandler(Gefingerpoken touchHandler) {
         mTouchHandler = touchHandler;
     }
 

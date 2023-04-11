@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.shelf.ui.viewmodel
 
 import com.android.systemui.statusbar.NotificationShelf
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModel
 import com.android.systemui.statusbar.notification.shelf.domain.interactor.NotificationShelfInteractor
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import javax.inject.Inject
@@ -29,7 +30,8 @@ class NotificationShelfViewModel
 @Inject
 constructor(
     private val interactor: NotificationShelfInteractor,
-) {
+    activatableViewModel: ActivatableNotificationViewModel,
+) : ActivatableNotificationViewModel by activatableViewModel {
     /** Is the shelf allowed to be clickable when it has content? */
     val isClickable: Flow<Boolean>
         get() = interactor.isShowingOnKeyguard
