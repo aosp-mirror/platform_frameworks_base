@@ -1900,7 +1900,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS zahtjev je promijenjen u USSD zahtjev"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Promijenjeno u novi SS zahtjev"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Upozorenje o krađi identiteta"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil za posao"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Radni profil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Upozoreni"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Potvrđeno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Proširi"</string>
