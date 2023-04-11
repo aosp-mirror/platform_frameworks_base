@@ -489,13 +489,14 @@ public class RescueParty {
         switch(rescueLevel) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
             case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
-                return PackageHealthObserverImpact.USER_IMPACT_LOW;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_10;
             case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
             case LEVEL_WARM_REBOOT:
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_50;
             case LEVEL_FACTORY_RESET:
-                return PackageHealthObserverImpact.USER_IMPACT_HIGH;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_100;
             default:
-                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
         }
     }
 
@@ -633,7 +634,7 @@ public class RescueParty {
                 return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount,
                         mayPerformReboot(failedPackage)));
             } else {
-                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
             }
         }
 
@@ -677,7 +678,7 @@ public class RescueParty {
         @Override
         public int onBootLoop(int mitigationCount) {
             if (isDisabled()) {
-                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
             }
             return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount, true));
         }
