@@ -435,7 +435,7 @@ fun MoreOptionsRowIntroCard(
     }
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.NewReleases) }
-        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item {
             HeadlineText(
                 text = stringResource(
