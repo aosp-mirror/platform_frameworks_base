@@ -474,9 +474,12 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
     private void doMotionEvent(int actionDown, int coordinate) {
         mController.onMotionEvent(
-                coordinate, coordinate,
-                actionDown,
-                BackEvent.EDGE_LEFT);
+                /* touchX */ coordinate,
+                /* touchY */ coordinate,
+                /* velocityX = */ 0,
+                /* velocityY = */ 0,
+                /* keyAction */ actionDown,
+                /* swipeEdge */ BackEvent.EDGE_LEFT);
     }
 
     private void simulateRemoteAnimationStart(int type) throws RemoteException {

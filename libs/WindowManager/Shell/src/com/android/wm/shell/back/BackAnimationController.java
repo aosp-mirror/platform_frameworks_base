@@ -256,8 +256,20 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private class BackAnimationImpl implements BackAnimation {
         @Override
         public void onBackMotion(
-                float touchX, float touchY, int keyAction, @BackEvent.SwipeEdge int swipeEdge) {
-            mShellExecutor.execute(() -> onMotionEvent(touchX, touchY, keyAction, swipeEdge));
+                float touchX,
+                float touchY,
+                float velocityX,
+                float velocityY,
+                int keyAction,
+                @BackEvent.SwipeEdge int swipeEdge
+        ) {
+            mShellExecutor.execute(() -> onMotionEvent(
+                    /* touchX = */ touchX,
+                    /* touchY = */ touchY,
+                    /* velocityX = */ velocityX,
+                    /* velocityY = */ velocityY,
+                    /* keyAction = */ keyAction,
+                    /* swipeEdge = */ swipeEdge));
         }
 
         @Override
@@ -332,13 +344,18 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * Called when a new motion event needs to be transferred to this
      * {@link BackAnimationController}
      */
-    public void onMotionEvent(float touchX, float touchY, int keyAction,
+    public void onMotionEvent(
+            float touchX,
+            float touchY,
+            float velocityX,
+            float velocityY,
+            int keyAction,
             @BackEvent.SwipeEdge int swipeEdge) {
         if (mPostCommitAnimationInProgress) {
             return;
         }
 
-        mTouchTracker.update(touchX, touchY);
+        mTouchTracker.update(touchX, touchY, velocityX, velocityY);
         if (keyAction == MotionEvent.ACTION_DOWN) {
             if (!mBackGestureStarted) {
                 mShouldStartOnNextMoveEvent = true;

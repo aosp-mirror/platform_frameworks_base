@@ -70,7 +70,13 @@ public class WindowOnBackInvokedDispatcherTest {
     private ApplicationInfo mApplicationInfo;
 
     private final BackMotionEvent mBackEvent = new BackMotionEvent(
-            0, 0, 0, BackEvent.EDGE_LEFT, null);
+            /* touchX = */ 0,
+            /* touchY = */ 0,
+            /* progress = */ 0,
+            /* velocityX = */ 0,
+            /* velocityY = */ 0,
+            /* swipeEdge = */ BackEvent.EDGE_LEFT,
+            /* departingAnimationTarget = */ null);
 
     @Before
     public void setUp() throws Exception {
