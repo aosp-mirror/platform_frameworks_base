@@ -2328,17 +2328,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // this as a signal to the transition-player.
                 final Transition transition = new Transition(TRANSIT_SLEEP, 0 /* flags */,
                         display.mTransitionController, mWmService.mSyncEngine);
-                final Runnable sendSleepTransition = () -> {
+                final TransitionController.OnStartCollect sendSleepTransition = (deferred) -> {
                     display.mTransitionController.requestStartTransition(transition,
                             null /* trigger */, null /* remote */, null /* display */);
                     // Force playing immediately so that unrelated ops can't be collected.
                     transition.playNow();
                 };
-                if (display.mTransitionController.isCollecting()) {
-                    display.mTransitionController.queueCollecting(transition, sendSleepTransition);
-                } else {
+                if (!display.mTransitionController.isCollecting()) {
+                    // Since this bypasses sync, submit directly ignoring whether sync-engine
+                    // is active.
+                    if (mWindowManager.mSyncEngine.hasActiveSync()) {
+                        Slog.w(TAG, "Ongoing sync outside of a transition.");
+                    }
                     display.mTransitionController.moveToCollecting(transition);
-                    sendSleepTransition.run();
+                    sendSleepTransition.onCollectStarted(false /* deferred */);
+                } else {
+                    display.mTransitionController.startCollectOrQueue(transition,
+                            sendSleepTransition);
                 }
             }
 

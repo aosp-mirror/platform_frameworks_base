@@ -97,7 +97,6 @@ import android.window.TransitionInfo;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
@@ -1142,18 +1141,11 @@ class ActivityClientController extends IActivityClientController.Stub {
         // Initiate the transition.
         final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */, controller,
                 mService.mWindowManager.mSyncEngine);
-        if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    "Creating Pending Multiwindow Fullscreen Request: %s", transition);
-            r.mTransitionController.queueCollecting(transition,
-                    () -> {
-                        executeFullscreenRequestTransition(fullscreenRequest, callback, r,
-                                transition, true /* queued */);
-                    });
-        } else {
-            executeFullscreenRequestTransition(fullscreenRequest, callback, r, transition,
-                    false /* queued */);
-        }
+        r.mTransitionController.startCollectOrQueue(transition,
+                (deferred) -> {
+                    executeFullscreenRequestTransition(fullscreenRequest, callback, r,
+                            transition, deferred);
+                });
     }
 
     private void executeFullscreenRequestTransition(int fullscreenRequest, IRemoteCallback callback,
