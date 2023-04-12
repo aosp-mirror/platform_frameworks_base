@@ -400,11 +400,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                     profileUserId, /* isLockTiedToParent= */ true);
             return;
         }
+        final long parentSid;
         // Do not tie when the parent has no SID (but does have a screen lock).
         // This can only happen during an upgrade path where SID is yet to be
         // generated when the user unlocks for the first time.
         try {
-            if (getGateKeeperService().getSecureUserId(parentId) == 0) {
+            parentSid = getGateKeeperService().getSecureUserId(parentId);
+            if (parentSid == 0) {
                 return;
             }
         } catch (RemoteException e) {
@@ -415,7 +417,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             setLockCredentialInternal(unifiedProfilePassword, profileUserPassword, profileUserId,
                     /* isLockTiedToParent= */ true);
             tieProfileLockToParent(profileUserId, parentId, unifiedProfilePassword);
-            mManagedProfilePasswordCache.storePassword(profileUserId, unifiedProfilePassword);
+            mManagedProfilePasswordCache.storePassword(profileUserId, unifiedProfilePassword,
+                    parentSid);
         }
     }
 
@@ -574,7 +577,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         public @NonNull ManagedProfilePasswordCache getManagedProfilePasswordCache(
                 java.security.KeyStore ks) {
-            return new ManagedProfilePasswordCache(ks, getUserManager());
+            return new ManagedProfilePasswordCache(ks);
         }
 
         public boolean isHeadlessSystemUserMode() {
@@ -1325,7 +1328,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         LockscreenCredential credential = LockscreenCredential.createManagedPassword(
                 decryptionResult);
         Arrays.fill(decryptionResult, (byte) 0);
-        mManagedProfilePasswordCache.storePassword(userId, credential);
+        try {
+            long parentSid = getGateKeeperService().getSecureUserId(
+                    mUserManager.getProfileParent(userId).id);
+            mManagedProfilePasswordCache.storePassword(userId, credential, parentSid);
+        } catch (RemoteException e) {
+            Slogf.w(TAG, "Failed to talk to GateKeeper service", e);
+        }
         return credential;
     }
 
@@ -2208,6 +2217,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     public VerifyCredentialResponse verifyTiedProfileChallenge(LockscreenCredential credential,
             int userId, @LockPatternUtils.VerifyFlag int flags) {
         checkPasswordReadPermission();
+        Slogf.i(TAG, "Verifying tied profile challenge for user %d", userId);
+
         if (!isProfileWithUnifiedLock(userId)) {
             throw new IllegalArgumentException(
                     "User id must be managed/clone profile with unified lock");
