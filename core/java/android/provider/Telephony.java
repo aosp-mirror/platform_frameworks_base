@@ -2051,6 +2051,14 @@ public final class Telephony {
          * <P>Type: TEXT</P>
          */
         public static final String ADDRESS = "address";
+
+        /**
+         * The subscription to which the message belongs to. Its value will be less than 0
+         * if the sub id cannot be determined.
+         * <p>Type: INTEGER (long) </p>
+         * @hide
+         */
+        public static final String SUBSCRIPTION_ID = "sub_id";
     }
 
     /**
@@ -2119,6 +2127,14 @@ public final class Telephony {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String ARCHIVED = "archived";
+
+        /**
+         * The subscription to which the message belongs to. Its value will be less than 0
+         * if the sub id cannot be determined.
+         * <p>Type: INTEGER (long) </p>
+         * @hide
+         */
+        public static final String SUBSCRIPTION_ID = "sub_id";
     }
 
     /**
@@ -2477,6 +2493,14 @@ public final class Telephony {
             public static final String CHARSET = "charset";
 
             /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
+
+            /**
              * Generates a Addr {@link Uri} for message, used to perform Addr table operation
              * for mms.
              *
@@ -2597,6 +2621,14 @@ public final class Telephony {
             public static final String TEXT = "text";
 
             /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
+
+            /**
              * Generates a Part {@link Uri} for message, used to perform Part table operation
              * for mms.
              *
@@ -2635,6 +2667,14 @@ public final class Telephony {
              * <P>Type: INTEGER (long)</P>
              */
             public static final String SENT_TIME = "sent_time";
+
+            /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
         }
 
         /**
@@ -2868,6 +2908,14 @@ public final class Telephony {
              * <P>Type: TEXT</P>
              */
             public static final String INDEXED_TEXT = "index_text";
+
+            /**
+             * The subscription to which the message belongs to. Its value will be less than 0
+             * if the sub id cannot be determined.
+             * <p>Type: INTEGER (long) </p>
+             * @hide
+             */
+            public static final String SUBSCRIPTION_ID = "sub_id";
         }
     }
 
