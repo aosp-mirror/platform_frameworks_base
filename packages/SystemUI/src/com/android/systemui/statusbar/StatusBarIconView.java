@@ -26,6 +26,7 @@ import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -75,9 +76,9 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      */
     private static final float DARK_ALPHA_BOOST = 0.67f;
     /**
-     * Status icons are currently drawn with the intention of being 17dp tall, but we
-     * want to scale them (in a way that doesn't require an asset dump) down 2dp. So
-     * 17dp * (15 / 17) = 15dp, the new height. After the first call to {@link #reloadDimens} all
+     * Status icons are currently drawn with the intention of being 17sp tall, but we
+     * want to scale them (in a way that doesn't require an asset dump) down 2sp. So
+     * 17sp * (15 / 17) = 15sp, the new height. After the first call to {@link #reloadDimens} all
      * values will be in px.
      */
     private float mSystemIconDesiredHeight = 15f;
@@ -144,7 +145,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private String mNumberText;
     private StatusBarNotification mNotification;
     private final boolean mBlocked;
-    private int mDensity;
+    private Configuration mConfiguration;
     private boolean mNightMode;
     private float mIconScale = 1.0f;
     private final Paint mDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -198,9 +199,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mNumberPain.setAntiAlias(true);
         setNotification(sbn);
         setScaleType(ScaleType.CENTER);
-        mDensity = context.getResources().getDisplayMetrics().densityDpi;
-        Configuration configuration = context.getResources().getConfiguration();
-        mNightMode = (configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+        mConfiguration = new Configuration(context.getResources().getConfiguration());
+        mNightMode = (mConfiguration.uiMode & Configuration.UI_MODE_NIGHT_MASK)
                 == Configuration.UI_MODE_NIGHT_YES;
         initializeDecorColor();
         reloadDimens();
@@ -214,7 +214,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mAlwaysScaleIcon = true;
         reloadDimens();
         maybeUpdateIconScaleDimens();
-        mDensity = context.getResources().getDisplayMetrics().densityDpi;
+        mConfiguration = new Configuration(context.getResources().getConfiguration());
     }
 
     /** Should always be preceded by {@link #reloadDimens()} */
@@ -231,12 +231,17 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private void updateIconScaleForNotifications() {
         final float imageBounds = mIncreasedSize ?
                 mStatusBarIconDrawingSizeIncreased : mStatusBarIconDrawingSize;
-        final int outerBounds = mStatusBarIconSize;
-        mIconScale = imageBounds / (float)outerBounds;
+        float iconHeight = getIconHeight();
+        if (iconHeight != 0) {
+            mIconScale = imageBounds / iconHeight;
+        } else {
+            final int outerBounds = mStatusBarIconSize;
+            mIconScale = imageBounds / (float) outerBounds;
+        }
         updatePivot();
     }
 
-    // Makes sure that all icons are scaled to the same height (15dp). If we cannot get a height
+    // Makes sure that all icons are scaled to the same height (15sp). If we cannot get a height
     // for the icon, it uses the default SCALE (15f / 17f) which is the old behavior
     private void updateIconScaleForSystemIcons() {
         float iconHeight = getIconHeight();
@@ -267,12 +272,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        int density = newConfig.densityDpi;
-        if (density != mDensity) {
-            mDensity = density;
-            reloadDimens();
-            updateDrawable();
-            maybeUpdateIconScaleDimens();
+        final int configDiff = newConfig.diff(mConfiguration);
+        mConfiguration.setTo(newConfig);
+        if ((configDiff & (ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_FONT_SCALE)) != 0) {
+            updateIconDimens();
         }
         boolean nightMode = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
                 == Configuration.UI_MODE_NIGHT_YES;
@@ -280,6 +283,15 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             mNightMode = nightMode;
             initializeDecorColor();
         }
+    }
+
+    /**
+     * Update the icon dimens and drawable with current resources
+     */
+    public void updateIconDimens() {
+        reloadDimens();
+        updateDrawable();
+        maybeUpdateIconScaleDimens();
     }
 
     private void reloadDimens() {
