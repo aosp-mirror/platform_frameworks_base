@@ -3335,7 +3335,7 @@ public class NotificationManagerService extends SystemService {
             }
 
             checkCallerIsSameApp(pkg);
-            final boolean isSystemToast = isCallerSystemOrPhone()
+            final boolean isSystemToast = isCallerIsSystemOrSystemUi()
                     || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
             boolean isAppRenderedToast = (callback != null);
             if (!checkCanEnqueueToast(pkg, callingUid, displayId, isAppRenderedToast,
