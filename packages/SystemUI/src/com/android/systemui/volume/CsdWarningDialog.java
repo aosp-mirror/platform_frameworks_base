@@ -199,6 +199,7 @@ public class CsdWarningDialog extends SystemUIDialog
 
     @Override
     protected void onStop() {
+        super.onStop();
         synchronized (mTimerLock) {
             if (mCancelScheduledNoUserActionRunnable != null) {
                 mCancelScheduledNoUserActionRunnable.run();
