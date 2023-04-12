@@ -128,6 +128,12 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_ENABLE_SPA_PHASE2 = "settings_enable_spa_phase2";
 
+    /**
+     * Enable the SPA metrics writing.
+     * @hide
+     */
+    public static final String SETTINGS_ENABLE_SPA_METRICS = "settings_enable_spa_metrics";
+
     /** Flag to enable/disable adb log metrics
      *  @hide
      */
@@ -226,6 +232,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_PHASE2, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_METRICS, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
