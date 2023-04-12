@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
 
-    <application android:debuggable="true">
+    <application android:debuggable="true" android:testOnly="true">
         <uses-library android:name="android.test.runner" />
     </application>
 
