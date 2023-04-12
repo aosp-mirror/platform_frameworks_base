@@ -271,6 +271,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private long mStartedChangedElapsedRealtime;
     private int mFixInterval = 1000;
 
+    // True if handleInitialize() has finished;
+    @GuardedBy("mLock")
+    private boolean mInitialized;
+
     private ProviderRequest mProviderRequest;
 
     private int mPositionMode;
@@ -569,6 +573,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         updateEnabled();
+        synchronized (mLock) {
+            mInitialized = true;
+        }
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -1714,8 +1721,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         // Re-register network callbacks to get an update of available networks right away.
-        mNetworkConnectivityHandler.unregisterNetworkCallbacks();
-        mNetworkConnectivityHandler.registerNetworkCallbacks();
+        synchronized (mLock) {
+            if (mInitialized) {
+                mNetworkConnectivityHandler.unregisterNetworkCallbacks();
+                mNetworkConnectivityHandler.registerNetworkCallbacks();
+            }
+        }
     }
 
     @Override

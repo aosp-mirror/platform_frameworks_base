@@ -303,6 +303,7 @@ class GnssNetworkConnectivityHandler {
 
     void unregisterNetworkCallbacks() {
         mConnMgr.unregisterNetworkCallback(mNetworkConnectivityCallback);
+        mNetworkConnectivityCallback = null;
     }
 
     /**
