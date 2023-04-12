@@ -299,6 +299,14 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Beenden"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Einhandmodus"</string>
+    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Blockierung des Gerätemikrofons aufheben?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Blockierung der Gerätekamera aufheben?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Blockierung von Gerätekamera und Gerätemikrofon aufheben?"</string>
@@ -458,10 +466,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivieren"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Ton &amp; Vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Einstellungen"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Lautstärke zur Sicherheit verringert"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Die Lautstärke war länger als empfohlen hoch eingestellt"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App ist auf dem Bildschirm fixiert"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
@@ -1123,7 +1129,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Gemäß den Arbeitsrichtlinien darfst du nur über dein Arbeitsprofil telefonieren"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Zum Arbeitsprofil wechseln"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Schließen"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Sperrbildschirm-Einstellungen"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Kein WLAN verfügbar"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera blockiert"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera und Mikrofon blockiert"</string>

@@ -299,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo para uma mão"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contraste"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Padrão"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Médio"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Alto"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Desbloquear o microfone do dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Desbloquear a câmara do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Pretende desbloquear a câmara e o microfone?"</string>
@@ -886,12 +890,9 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controlos foram removidos."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Alterações não guardadas."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outras apps"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Reorganizar"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Adicionar controlos"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Regressar à edição"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Não foi possível carregar os controlos. Verifique a app <xliff:g id="APP">%s</xliff:g> para se certificar de que as definições da mesma não foram alteradas."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Controlos compatíveis indisponíveis"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
@@ -1121,7 +1122,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"A sua Política de Trabalho só lhe permite fazer chamadas telefónicas a partir do perfil de trabalho"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Mudar para perfil de trabalho"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fechar"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Definições do ecrã de bloqueio"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi indisponível"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Câmara bloqueada"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Câmara e microfone bloqueados"</string>
