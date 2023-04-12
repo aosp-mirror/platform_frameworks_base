@@ -897,7 +897,7 @@ public class PipTransition extends PipTransitionController {
                         .setWindowCrop(leash, endBounds.width(), endBounds.height());
             }
         }
-        mSplitScreenOptional.get().finishEnterSplitScreen(startTransaction);
+        mSplitScreenOptional.get().finishEnterSplitScreen(finishTransaction);
         startTransaction.apply();
 
         mPipOrganizer.onExitPipFinished(taskInfo);
