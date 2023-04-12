@@ -48,6 +48,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
@@ -83,6 +84,8 @@ public class DreamTileTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
 
@@ -258,6 +261,7 @@ public class DreamTileTest extends SysuiTestCase {
             boolean dreamOnlyEnabledForSystemUser) {
         return new DreamTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

@@ -37,6 +37,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
@@ -62,6 +63,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
     @Inject
     public QRCodeScannerTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -70,7 +72,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             QRCodeScannerController qrCodeScannerController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mQRCodeScannerController = qrCodeScannerController;
         mQRCodeScannerController.observe(getLifecycle(), mCallback);

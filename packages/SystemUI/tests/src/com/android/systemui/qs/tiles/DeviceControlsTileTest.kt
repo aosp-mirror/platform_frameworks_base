@@ -27,7 +27,6 @@ import android.testing.TestableLooper
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -44,6 +43,7 @@ import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.util.mockito.any
@@ -52,6 +52,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,15 +60,14 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 import java.util.Optional
-import org.junit.After
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -95,7 +95,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
     @Mock
     private lateinit var serviceInfo: ControlsServiceInfo
     @Mock
-    private lateinit var uiEventLogger: UiEventLogger
+    private lateinit var uiEventLogger: QsEventLogger
     @Captor
     private lateinit var listingCallbackCaptor:
             ArgumentCaptor<ControlsListingController.ControlsListingCallback>
@@ -118,7 +118,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
         spiedContext = spy(mContext)
         doNothing().`when`(spiedContext).startActivity(any(Intent::class.java))
         `when`(qsHost.context).thenReturn(spiedContext)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
         `when`(controlsController.getPreferredSelection())
                 .thenReturn(SelectedItem.StructureItem(
@@ -399,6 +398,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
     private fun createTile(): DeviceControlsTile {
         return DeviceControlsTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 FalsingManagerFake(),

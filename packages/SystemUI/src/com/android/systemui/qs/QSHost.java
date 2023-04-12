@@ -20,8 +20,6 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.provider.Settings;
 
-import com.android.internal.logging.InstanceId;
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -55,11 +53,9 @@ public interface QSHost {
         return tiles;
     }
 
-    void warn(String message, Throwable t);
     Context getContext();
     Context getUserContext();
     int getUserId();
-    UiEventLogger getUiEventLogger();
     Collection<QSTile> getTiles();
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
@@ -106,8 +102,6 @@ public interface QSHost {
     void changeTilesByUser(List<String> previousTiles, List<String> newTiles);
 
     int indexOf(String tileSpec);
-
-    InstanceId getNewInstanceId();
 
     interface Callback {
         void onTilesChanged();
