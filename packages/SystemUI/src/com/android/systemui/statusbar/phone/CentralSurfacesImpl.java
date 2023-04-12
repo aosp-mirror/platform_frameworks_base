@@ -283,6 +283,9 @@ import javax.inject.Provider;
  * <b>If at all possible, please avoid adding additional code to this monstrous class! Our goal is
  * to break up this class into many small classes, and any code added here will slow down that goal.
  * </b>
+ *
+ * Note that ActivityStarter logic here is deprecated and should be added here as well as
+ * {@link ActivityStarterImpl}
  */
 @SysUISingleton
 public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
@@ -1800,23 +1803,27 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return (mDisabled1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
             int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, flags);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
         startActivityDismissingKeyguard(intent, false /* onlyProvisioned */, dismissShade);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivity(Intent intent, boolean dismissShade,
             @androidx.annotation.Nullable ActivityLaunchAnimator.Controller animationController) {
         startActivity(intent, dismissShade, animationController, false);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
@@ -1825,6 +1832,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 getActivityUserHandle(intent));
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
@@ -2422,6 +2430,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mDisplayId;
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             boolean dismissShade, int flags) {
@@ -2430,12 +2439,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 flags, null /* animationController */, getActivityUserHandle(intent));
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             boolean dismissShade) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, 0);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
             boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
@@ -2447,6 +2458,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 userHandle, null /* customMessage */);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             final boolean dismissShade, final boolean disallowEnterPictureInPictureWhileLaunching,
@@ -2557,6 +2569,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      *                     animation. This is ignored if {@code animationController} is not
      *                     animating in the shade window.
      * @param isLaunchForActivity whether the launch is for an activity.
+     *
+     * Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too.
      */
     @Nullable
     private ActivityLaunchAnimator.Controller wrapAnimationController(
@@ -2586,6 +2600,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStatusBarKeyguardViewManager.readyForKeyguardDone();
     }
 
+
+     /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void executeRunnableDismissingKeyguard(final Runnable runnable,
             final Runnable cancelAction,
@@ -2596,6 +2612,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 deferred, false /* willAnimateOnKeyguard */, null /* customMessage */);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void executeRunnableDismissingKeyguard(final Runnable runnable,
             final Runnable cancelAction,
@@ -2706,16 +2723,19 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 afterKeyguardGone /* afterKeyguardGone */);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     protected void dismissKeyguardThenExecute(OnDismissAction action, boolean afterKeyguardGone) {
         dismissKeyguardThenExecute(action, null /* cancelRunnable */, afterKeyguardGone);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone) {
         dismissKeyguardThenExecute(action, cancelAction, afterKeyguardGone, null);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone, String customMessage) {
@@ -2917,6 +2937,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 | ((currentlyInsecure ? 1 : 0) << 12);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void postQSRunnableDismissingKeyguard(final Runnable runnable) {
         mMainExecutor.execute(() -> {
@@ -2926,11 +2947,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         });
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void postStartActivityDismissingKeyguard(PendingIntent intent) {
         postStartActivityDismissingKeyguard(intent, null /* animationController */);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void postStartActivityDismissingKeyguard(final PendingIntent intent,
             @Nullable ActivityLaunchAnimator.Controller animationController) {
@@ -2938,11 +2961,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 null /* intentSentUiThreadCallback */, animationController));
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void postStartActivityDismissingKeyguard(final Intent intent, int delay) {
         postStartActivityDismissingKeyguard(intent, delay, null /* animationController */);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void postStartActivityDismissingKeyguard(Intent intent, int delay,
             @Nullable ActivityLaunchAnimator.Controller animationController) {
@@ -2950,6 +2975,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 null /* customMessage */);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void postStartActivityDismissingKeyguard(Intent intent, int delay,
             @Nullable ActivityLaunchAnimator.Controller animationController,
@@ -4100,11 +4126,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         dismissKeyguardThenExecute(onDismissAction, afterKeyguardGone);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
         startPendingIntentDismissingKeyguard(intent, null);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startPendingIntentDismissingKeyguard(
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
@@ -4112,6 +4140,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 (ActivityLaunchAnimator.Controller) null);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback, View associatedView) {
@@ -4125,6 +4154,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 animationController);
     }
 
+    /** Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too. */
     @Override
     public void startPendingIntentDismissingKeyguard(
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback,
@@ -4548,6 +4578,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      *  launched as user of the current process.
      * @param intent
      * @return UserHandle
+     *
+     * Logic is duplicated in {@link ActivityStarterImpl}. Please add it there too.
      */
     private UserHandle getActivityUserHandle(Intent intent) {
         String[] packages = mContext.getResources().getStringArray(R.array.system_ui_packages);
@@ -4569,5 +4601,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mDozeServiceHost.shouldAnimateWakeup()
                 && mBiometricUnlockController.getMode()
                 != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+    }
+
+    @Override
+    public void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
+        mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen;
+    }
+
+    @Override
+    public ActivityLaunchAnimator.Controller getAnimatorControllerFromNotification(
+            ExpandableNotificationRow associatedView) {
+        return mNotificationAnimationProvider.getAnimatorController(associatedView);
     }
 }

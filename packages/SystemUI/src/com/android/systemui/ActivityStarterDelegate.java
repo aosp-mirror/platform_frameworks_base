@@ -35,6 +35,8 @@ import javax.inject.Inject;
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
  * delegates to an actual implementation (CentralSurfaces).
+ *
+ * @deprecated Migrating to ActivityStarterImpl
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @SysUISingleton
@@ -205,5 +207,15 @@ public class ActivityStarterDelegate implements ActivityStarter {
         mActualStarterOptionalLazy.get().ifPresent(
                 starter -> starter.executeRunnableDismissingKeyguard(runnable, cancelAction,
                         dismissShade, afterKeyguardGone, deferred));
+    }
+
+    @Override
+    public void executeRunnableDismissingKeyguard(Runnable runnable, Runnable cancelAction,
+            boolean dismissShade, boolean afterKeyguardGone, boolean deferred,
+            boolean willAnimateOnKeyguard, @Nullable String customMessage) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.executeRunnableDismissingKeyguard(runnable, cancelAction,
+                        dismissShade, afterKeyguardGone, deferred, willAnimateOnKeyguard,
+                        customMessage));
     }
 }
