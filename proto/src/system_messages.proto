@@ -402,5 +402,7 @@ message SystemMessage {
     // Package: android
     NOTE_ALL_MANAGED_SUBSCRIPTIONS_AND_MANAGED_PROFILE_OFF = 1006;
 
+    // Notify the user that audio was lowered based on Calculated Sound Dose (CSD)
+    NOTE_CSD_LOWER_AUDIO = 1007;
   }
 }
