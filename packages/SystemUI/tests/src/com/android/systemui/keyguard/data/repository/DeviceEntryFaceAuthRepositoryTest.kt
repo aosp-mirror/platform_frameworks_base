@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.captureMany
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
@@ -191,8 +192,24 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         bypassControllerOverride: KeyguardBypassController? = bypassController
     ): DeviceEntryFaceAuthRepositoryImpl {
         val systemClock = FakeSystemClock()
-        val faceAuthBuffer = TableLogBuffer(10, "face auth", systemClock)
-        val faceDetectBuffer = TableLogBuffer(10, "face detect", systemClock)
+        val faceAuthBuffer =
+            TableLogBuffer(
+                10,
+                "face auth",
+                systemClock,
+                mock(),
+                testDispatcher,
+                testScope.backgroundScope
+            )
+        val faceDetectBuffer =
+            TableLogBuffer(
+                10,
+                "face detect",
+                systemClock,
+                mock(),
+                testDispatcher,
+                testScope.backgroundScope
+            )
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         val keyguardTransitionInteractor =
             KeyguardTransitionInteractor(keyguardTransitionRepository)

@@ -19,10 +19,17 @@ package com.android.systemui.log.table
 import android.os.Trace
 import com.android.systemui.Dumpable
 import com.android.systemui.common.buffer.RingBuffer
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogcatEchoTracker
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 
 /**
  * A logger that logs changes in table format.
@@ -73,12 +80,18 @@ class TableLogBuffer(
     maxSize: Int,
     private val name: String,
     private val systemClock: SystemClock,
+    private val logcatEchoTracker: LogcatEchoTracker,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val coroutineScope: CoroutineScope,
+    private val localLogcat: LogProxy = LogProxyDefault(),
 ) : Dumpable {
     init {
         if (maxSize <= 0) {
             throw IllegalArgumentException("maxSize must be > 0")
         }
     }
+    // For local logcat, send messages across this channel so the background job can process them
+    private val logMessageChannel = Channel<TableChange>(capacity = 10)
 
     private val buffer = RingBuffer(maxSize) { TableChange() }
 
@@ -104,6 +117,16 @@ class TableLogBuffer(
             isInitial = false,
             tableLogBuffer = this,
         )
+
+    /** Start this log buffer logging in the background */
+    internal fun init() {
+        coroutineScope.launch(bgDispatcher) {
+            while (!logMessageChannel.isClosedForReceive) {
+                val log = logMessageChannel.receive()
+                echoToDesiredEndpoints(log)
+            }
+        }
+    }
 
     /**
      * Log the differences between [prevVal] and [newVal].
@@ -189,6 +212,7 @@ class TableLogBuffer(
         Trace.beginSection("TableLogBuffer#logChange(string)")
         val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        tryAddMessage(change)
         Trace.endSection()
     }
 
@@ -202,6 +226,7 @@ class TableLogBuffer(
         Trace.beginSection("TableLogBuffer#logChange(boolean)")
         val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        tryAddMessage(change)
         Trace.endSection()
     }
 
@@ -215,7 +240,12 @@ class TableLogBuffer(
         Trace.beginSection("TableLogBuffer#logChange(int)")
         val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        tryAddMessage(change)
         Trace.endSection()
+    }
+
+    private fun tryAddMessage(change: TableChange) {
+        logMessageChannel.trySend(change)
     }
 
     // TODO(b/259454430): Add additional change types here.
@@ -258,6 +288,17 @@ class TableLogBuffer(
         Trace.endSection()
     }
 
+    private fun echoToDesiredEndpoints(change: TableChange) {
+        if (
+            logcatEchoTracker.isBufferLoggable(bufferName = name, LogLevel.DEBUG) ||
+                logcatEchoTracker.isTagLoggable(change.columnName, LogLevel.DEBUG)
+        ) {
+            if (change.hasData()) {
+                localLogcat.d(name, change.logcatRepresentation())
+            }
+        }
+    }
+
     @Synchronized
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println(HEADER_PREFIX + name)
@@ -282,6 +323,12 @@ class TableLogBuffer(
         pw.print(SEPARATOR)
         pw.print(this.getVal())
         pw.println()
+    }
+
+    /** Transforms an individual [TableChange] into a String for logcat */
+    private fun TableChange.logcatRepresentation(): String {
+        val formattedTimestamp = TABLE_LOG_DATE_FORMAT.format(timestamp)
+        return "$formattedTimestamp$SEPARATOR${getName()}$SEPARATOR${getVal()}"
     }
 
     /**
