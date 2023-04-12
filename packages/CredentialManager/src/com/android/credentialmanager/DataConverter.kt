@@ -198,7 +198,8 @@ class GetFlowUtils {
                     it.type,
                     it.credentialRetrievalData,
                     it.credentialRetrievalData,
-                    it.isSystemProviderRequired
+                    it.isSystemProviderRequired,
+                    it.allowedProviders,
                 )
                 if (credentialOptionJetpack is GetPublicKeyCredentialOption) {
                     credentialOptionJetpack.preferImmediatelyAvailableCredentials
@@ -462,7 +463,8 @@ class CreateFlowUtils {
                 createCredentialRequest.type,
                 createCredentialRequest.credentialData,
                 createCredentialRequest.candidateQueryData,
-                createCredentialRequest.isSystemProviderRequired
+                createCredentialRequest.isSystemProviderRequired,
+                createCredentialRequest.origin,
             )
             val appPreferredDefaultProviderId: String? =
                 if (!requestInfo.hasPermissionToOverrideDefault()) null
