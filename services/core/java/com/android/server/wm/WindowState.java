@@ -166,6 +166,7 @@ import static com.android.server.wm.WindowStateProto.IS_ON_SCREEN;
 import static com.android.server.wm.WindowStateProto.IS_READY_FOR_DISPLAY;
 import static com.android.server.wm.WindowStateProto.IS_VISIBLE;
 import static com.android.server.wm.WindowStateProto.KEEP_CLEAR_AREAS;
+import static com.android.server.wm.WindowStateProto.MERGED_LOCAL_INSETS_SOURCES;
 import static com.android.server.wm.WindowStateProto.PENDING_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.REMOVED;
 import static com.android.server.wm.WindowStateProto.REMOVE_ON_EXIT;
@@ -4026,6 +4027,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         for (Rect r : mUnrestrictedKeepClearAreas) {
             r.dumpDebug(proto, UNRESTRICTED_KEEP_CLEAR_AREAS);
+        }
+        if (mMergedLocalInsetsSources != null) {
+            for (int i = 0; i < mMergedLocalInsetsSources.size(); ++i) {
+                mMergedLocalInsetsSources.valueAt(i).dumpDebug(proto, MERGED_LOCAL_INSETS_SOURCES);
+            }
         }
         proto.end(token);
     }
