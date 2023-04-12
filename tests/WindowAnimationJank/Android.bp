@@ -25,7 +25,7 @@ android_test {
     name: "WindowAnimationJank",
     srcs: ["src/**/*.java"],
     static_libs: [
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "androidx.test.janktesthelper",
         "junit",
     ],
