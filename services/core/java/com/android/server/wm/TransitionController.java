@@ -884,6 +884,15 @@ class TransitionController {
         proto.end(token);
     }
 
+    void queueCollecting(Transition transit, Runnable onCollectStart) {
+        mAtm.mWindowManager.mSyncEngine.queueSyncSet(
+                // Make sure to collect immediately to prevent another transition
+                // from sneaking in before it. Note: moveToCollecting internally
+                // calls startSyncSet.
+                () -> moveToCollecting(transit),
+                onCollectStart);
+    }
+
     /**
      * This manages the animating state of processes that are running remote animations for
      * {@link #mTransitionPlayerProc}.
