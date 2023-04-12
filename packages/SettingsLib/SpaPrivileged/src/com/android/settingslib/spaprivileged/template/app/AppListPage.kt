@@ -38,6 +38,7 @@ fun <T : AppRecord> AppListPage(
     title: String,
     listModel: AppListModel<T>,
     showInstantApps: Boolean = false,
+    matchAnyUserForAdmin: Boolean = false,
     primaryUserOnly: Boolean = false,
     noItemMessage: String? = null,
     moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
@@ -59,6 +60,7 @@ fun <T : AppRecord> AppListPage(
                 config = AppListConfig(
                     userIds = userGroup.userInfos.map { it.id },
                     showInstantApps = showInstantApps,
+                    matchAnyUserForAdmin = matchAnyUserForAdmin,
                 ),
                 listModel = listModel,
                 state = AppListState(
