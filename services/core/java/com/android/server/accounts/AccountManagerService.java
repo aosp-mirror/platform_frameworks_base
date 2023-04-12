@@ -2311,6 +2311,7 @@ public class AccountManagerService
                 response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
                         "User cannot modify accounts of this type (policy).");
             } catch (RemoteException re) {
+                Log.w(TAG, "RemoteException while removing account", re);
             }
             return;
         }
@@ -5053,7 +5054,7 @@ public class AccountManagerService
                 Log.v(TAG, "initiating bind to authenticator type " + mAccountType);
             }
             if (!bindToAuthenticator(mAccountType)) {
-                Log.d(TAG, "bind attempt failed for " + toDebugString());
+                Log.w(TAG, "bind attempt failed for " + toDebugString());
                 onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION, "bind failure");
             }
         }
@@ -5248,10 +5249,9 @@ public class AccountManagerService
             authenticatorInfo = mAuthenticatorCache.getServiceInfo(
                     AuthenticatorDescription.newKey(authenticatorType), mAccounts.userId);
             if (authenticatorInfo == null) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "there is no authenticator for " + authenticatorType
-                            + ", bailing out");
-                }
+                Log.w(TAG, "there is no authenticator for " + authenticatorType
+                        + ", bailing out");
+
                 return false;
             }
 
@@ -5273,9 +5273,9 @@ public class AccountManagerService
                 flags |= Context.BIND_ALLOW_INSTANT;
             }
             if (!mContext.bindServiceAsUser(intent, this, flags, UserHandle.of(mAccounts.userId))) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
-                }
+                Log.w(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
+                // Perform unbind as per documentation at Context.bindServiceAsUser
+                mContext.unbindService(this);
                 return false;
             }
 
