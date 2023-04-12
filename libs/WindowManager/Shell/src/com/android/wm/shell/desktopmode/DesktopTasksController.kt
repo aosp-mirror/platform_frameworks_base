@@ -25,6 +25,7 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
+import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
 import android.os.SystemProperties
@@ -188,6 +189,21 @@ class DesktopTasksController(
         addMoveToFullscreenChanges(wct, task.token)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+
+    /**
+     * Move a task to fullscreen after being dragged from fullscreen and released back into
+     * status bar area
+     */
+    fun cancelMoveToFreeform(task: RunningTaskInfo, startPosition: Point) {
+        val wct = WindowContainerTransaction()
+        addMoveToFullscreenChanges(wct, task.token)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(wct, startPosition)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
