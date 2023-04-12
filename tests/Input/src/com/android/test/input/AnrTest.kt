@@ -27,13 +27,14 @@ import android.os.IInputConstants.UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLI
 import android.os.SystemClock
 import android.provider.Settings
 import android.provider.Settings.Global.HIDE_ERROR_DIALOGS
-import android.support.test.uiautomator.By
-import android.support.test.uiautomator.UiDevice
-import android.support.test.uiautomator.UiObject2
-import android.support.test.uiautomator.Until
 import android.testing.PollingCheck
 import android.view.InputDevice
 import android.view.MotionEvent
+
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
+import androidx.test.uiautomator.Until
 
 import org.junit.After
 import org.junit.Assert.assertEquals
