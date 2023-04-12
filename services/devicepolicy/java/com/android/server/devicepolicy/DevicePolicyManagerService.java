@@ -13318,7 +13318,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 /* who= */ null,
                 key,
                 caller.getPackageName(),
-                caller.getUserId()
+                UserHandle.USER_ALL
         );
 
         setGlobalUserRestrictionInternal(admin, key, /* enabled= */ true);
@@ -22561,7 +22561,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     );
 
     /**
-     * All the permisisons granted to a profile owner.
+     * All the permissions granted to a profile owner.
      */
     private static final List<String> PROFILE_OWNER_PERMISSIONS  =
             List.of(
@@ -22571,6 +22571,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
                     MANAGE_DEVICE_POLICY_AUDIO_OUTPUT,
                     MANAGE_DEVICE_POLICY_AUTOFILL,
+                    MANAGE_DEVICE_POLICY_BLUETOOTH,
                     MANAGE_DEVICE_POLICY_CALLS,
                     MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES,
                     MANAGE_DEVICE_POLICY_DISPLAY,
@@ -22607,7 +22608,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_ACROSS_USERS,
                     MANAGE_DEVICE_POLICY_AIRPLANE_MODE,
                     MANAGE_DEVICE_POLICY_APPS_CONTROL,
-                    MANAGE_DEVICE_POLICY_BLUETOOTH,
                     MANAGE_DEVICE_POLICY_CAMERA,
                     MANAGE_DEVICE_POLICY_CERTIFICATES,
                     MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE,
@@ -22634,7 +22634,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final List<String> ADDITIONAL_PROFILE_OWNER_ON_USER_0_PERMISSIONS =
             List.of(
                     MANAGE_DEVICE_POLICY_AIRPLANE_MODE,
-                    MANAGE_DEVICE_POLICY_BLUETOOTH,
                     MANAGE_DEVICE_POLICY_CAMERA,
                     MANAGE_DEVICE_POLICY_DISPLAY,
                     MANAGE_DEVICE_POLICY_FUN,
