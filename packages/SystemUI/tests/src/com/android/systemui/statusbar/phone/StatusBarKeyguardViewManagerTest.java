@@ -20,6 +20,7 @@ import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerCons
 import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -73,6 +74,7 @@ import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
@@ -192,7 +194,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mPrimaryBouncerInteractor,
                         mBouncerView,
                         mAlternateBouncerInteractor,
-                        mUdfpsOverlayInteractor) {
+                        mUdfpsOverlayInteractor,
+                        mock(UserTracker.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -216,14 +219,34 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void dismissWithAction_AfterKeyguardGoneSetToFalse() {
+    public void dismissWithAction_AfterKeyguardGoneSetToFalse_DismissAction_Set() {
         OnDismissAction action = () -> false;
         Runnable cancelAction = () -> {
         };
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+
         mStatusBarKeyguardViewManager.dismissWithAction(
                 action, cancelAction, false /* afterKeyguardGone */);
+
         verify(mPrimaryBouncerInteractor).setDismissAction(eq(action), eq(cancelAction));
         verify(mPrimaryBouncerInteractor).show(eq(true));
+        assertNull(mStatusBarKeyguardViewManager.mAfterKeyguardGoneAction);
+        assertNull(mStatusBarKeyguardViewManager.mKeyguardGoneCancelAction);
+    }
+
+    @Test
+    public void dismissWithAction_AfterKeyguardGoneSetToFalse_DismissAction_Called() {
+        OnDismissAction action = mock(OnDismissAction.class);
+        Runnable cancelAction = () -> {
+        };
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
+
+        mStatusBarKeyguardViewManager.dismissWithAction(
+                action, cancelAction, false /* afterKeyguardGone */);
+
+        verify(action).onDismiss();
+        assertNull(mStatusBarKeyguardViewManager.mAfterKeyguardGoneAction);
+        assertNull(mStatusBarKeyguardViewManager.mKeyguardGoneCancelAction);
     }
 
     @Test
@@ -680,7 +703,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mPrimaryBouncerInteractor,
                         mBouncerView,
                         mAlternateBouncerInteractor,
-                        mUdfpsOverlayInteractor) {
+                        mUdfpsOverlayInteractor,
+                        mock(UserTracker.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

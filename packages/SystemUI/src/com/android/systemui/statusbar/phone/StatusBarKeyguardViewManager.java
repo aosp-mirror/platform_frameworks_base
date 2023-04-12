@@ -69,6 +69,7 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
@@ -285,8 +286,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final boolean mUdfpsNewTouchDetectionEnabled;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
 
-    private OnDismissAction mAfterKeyguardGoneAction;
-    private Runnable mKeyguardGoneCancelAction;
+    @VisibleForTesting
+    OnDismissAction mAfterKeyguardGoneAction;
+
+    @VisibleForTesting
+    Runnable mKeyguardGoneCancelAction;
     private boolean mDismissActionWillAnimateOnKeyguard;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
 
@@ -301,6 +305,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final KeyguardSecurityModel mKeyguardSecurityModel;
     @Nullable private KeyguardBypassController mBypassController;
     @Nullable private OccludingAppBiometricUI mOccludingAppBiometricUI;
+
+    private UserTracker mUserTracker;
 
     @Nullable private TaskbarDelegate mTaskbarDelegate;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
@@ -339,7 +345,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             PrimaryBouncerInteractor primaryBouncerInteractor,
             BouncerView primaryBouncerView,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            UdfpsOverlayInteractor udfpsOverlayInteractor
+            UdfpsOverlayInteractor udfpsOverlayInteractor,
+            UserTracker userTracker
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -367,6 +374,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM);
         mUdfpsNewTouchDetectionEnabled = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION);
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
+        mUserTracker = userTracker;
     }
 
     @Override
@@ -662,14 +670,21 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 if (afterKeyguardGone) {
                     // we'll handle the dismiss action after keyguard is gone, so just show the
                     // bouncer
-                    mPrimaryBouncerInteractor.show(/* isScrimmed= */true);
+                    if (mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
+                        mPrimaryBouncerInteractor.show(true);
+                    }
                 } else {
-                    // after authentication success, run dismiss action with the option to defer
-                    // hiding the keyguard based on the return value of the OnDismissAction
-                    mPrimaryBouncerInteractor.setDismissAction(
-                            mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
-                    mPrimaryBouncerInteractor.show(/* isScrimmed= */true);
-                    // bouncer will handle the dismiss action, so we no longer need to track it here
+                    if (mLockPatternUtils.isSecure(mUserTracker.getUserId())) {
+                        // after authentication success, run dismiss action with the option to defer
+                        // hiding the keyguard based on the return value of the OnDismissAction
+                        mPrimaryBouncerInteractor.setDismissAction(
+                                mAfterKeyguardGoneAction, mKeyguardGoneCancelAction);
+                        mPrimaryBouncerInteractor.show(true);
+                    } else {
+                        if (mAfterKeyguardGoneAction != null) {
+                            mAfterKeyguardGoneAction.onDismiss();
+                        }
+                    }
                     mAfterKeyguardGoneAction = null;
                     mKeyguardGoneCancelAction = null;
                 }
