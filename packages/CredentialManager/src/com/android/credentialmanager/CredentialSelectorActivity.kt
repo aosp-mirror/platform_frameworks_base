@@ -19,9 +19,9 @@ package com.android.credentialmanager
 import android.content.Intent
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.RequestInfo
+import android.net.Uri
 import android.os.Bundle
 import android.os.ResultReceiver
-import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -192,7 +192,9 @@ class CredentialSelectorActivity : ComponentActivity() {
             this@CredentialSelectorActivity.finish()
         } else if (dialogState == DialogState.CANCELED_FOR_SETTINGS) {
             Log.d(Constants.LOG_TAG, "Received signal to finish the activity and launch settings.")
-            this@CredentialSelectorActivity.startActivity(Intent(Settings.ACTION_SYNC_SETTINGS))
+            val settingsIntent = Intent(ACTION_CREDENTIAL_PROVIDER)
+            settingsIntent.data = Uri.parse("package:" + this.getPackageName())
+            this@CredentialSelectorActivity.startActivity(settingsIntent)
             this@CredentialSelectorActivity.finish()
         }
     }
@@ -221,5 +223,9 @@ class CredentialSelectorActivity : ComponentActivity() {
             onDismiss = { this@CredentialSelectorActivity.finish() },
             dismissOnTimeout = true,
         )
+    }
+
+    companion object {
+        const val ACTION_CREDENTIAL_PROVIDER = "android.settings.CREDENTIAL_PROVIDER"
     }
 }
