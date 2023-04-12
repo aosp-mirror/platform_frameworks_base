@@ -55,10 +55,9 @@ public interface BackAnimation {
 
     /**
      * Sets the threshold values that defining edge swipe behavior.
-     * @param triggerThreshold the min threshold to trigger back.
-     * @param progressThreshold the max threshold to keep progressing back animation.
+     * @param progressThreshold the max threshold to keep linear progressing back animation.
      */
-    void setSwipeThresholds(float triggerThreshold, float progressThreshold);
+    void setSwipeThresholds(float progressThreshold);
 
     /**
      * Sets the system bar listener to control the system bar color.

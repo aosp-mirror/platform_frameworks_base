@@ -301,9 +301,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         @Override
-        public void setSwipeThresholds(float triggerThreshold, float progressThreshold) {
+        public void setSwipeThresholds(float progressThreshold) {
             mShellExecutor.execute(() -> BackAnimationController.this.setSwipeThresholds(
-                    triggerThreshold, progressThreshold));
+                    progressThreshold));
         }
 
         @Override
@@ -605,7 +605,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mTouchTracker.setTriggerBack(triggerBack);
     }
 
-    private void setSwipeThresholds(float triggerThreshold, float progressThreshold) {
+    private void setSwipeThresholds(float progressThreshold) {
         mTouchTracker.setProgressThreshold(progressThreshold);
     }
 
