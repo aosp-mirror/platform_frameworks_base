@@ -59,10 +59,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -71,6 +67,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ServiceTestRule;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.UiObjectNotFoundException;
 
 import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMultipleListener;
 
