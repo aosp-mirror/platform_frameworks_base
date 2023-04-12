@@ -33,7 +33,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.service.credentials.CredentialProviderInfoFactory;
-import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -124,7 +123,6 @@ public class CredentialManagerUi {
 
     public CredentialManagerUi(Context context, int userId,
             CredentialManagerUiCallback callbacks, Set<ComponentName> enabledProviders) {
-        Log.i(TAG, "In CredentialManagerUi constructor");
         mContext = context;
         mUserId = userId;
         mCallbacks = callbacks;
@@ -151,8 +149,6 @@ public class CredentialManagerUi {
      */
     public PendingIntent createPendingIntent(
             RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
-        Log.i(TAG, "In createPendingIntent");
-
         List<CredentialProviderInfo> allProviders =
                 CredentialProviderInfoFactory.getCredentialProviderServices(
                         mContext,
