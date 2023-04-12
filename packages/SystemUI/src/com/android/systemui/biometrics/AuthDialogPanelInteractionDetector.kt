@@ -39,7 +39,7 @@ constructor(
     private fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) =
         mainExecutor.execute {
             action?.let {
-                if (event.tracking || event.expanded) {
+                if (event.tracking || (event.expanded && event.fraction > 0)) {
                     Log.v(TAG, "Detected panel interaction, event: $event")
                     it.onPanelInteraction.run()
                     disable()
