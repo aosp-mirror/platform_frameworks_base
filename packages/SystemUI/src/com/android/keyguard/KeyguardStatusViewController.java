@@ -73,7 +73,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      */
     private static final int KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION = 1000;
 
-    private static final AnimationProperties CLOCK_ANIMATION_PROPERTIES =
+    public static final AnimationProperties CLOCK_ANIMATION_PROPERTIES =
             new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
     private final KeyguardSliceViewController mKeyguardSliceViewController;
@@ -221,16 +221,32 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mView.setImportantForAccessibility(mode);
     }
 
+    @VisibleForTesting
+    void setProperty(AnimatableProperty property, float value, boolean animate) {
+        PropertyAnimator.setProperty(mView, property, value, CLOCK_ANIMATION_PROPERTIES, animate);
+    }
+
     /**
      * Update position of the view with an optional animation
      */
     public void updatePosition(int x, int y, float scale, boolean animate) {
         float oldY = mView.getY();
-        PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, CLOCK_ANIMATION_PROPERTIES,
-                animate);
+        setProperty(AnimatableProperty.Y, y, animate);
 
-        mKeyguardClockSwitchController.updatePosition(x, scale, CLOCK_ANIMATION_PROPERTIES,
-                animate);
+        ClockController clock = mKeyguardClockSwitchController.getClock();
+        if (clock != null && clock.getConfig().getUseAlternateSmartspaceAODTransition()) {
+            // If requested, scale the entire view instead of just the clock view
+            mKeyguardClockSwitchController.updatePosition(x, 1f /* scale */,
+                    CLOCK_ANIMATION_PROPERTIES, animate);
+            setProperty(AnimatableProperty.SCALE_X, scale, animate);
+            setProperty(AnimatableProperty.SCALE_Y, scale, animate);
+        } else {
+            mKeyguardClockSwitchController.updatePosition(x, scale,
+                    CLOCK_ANIMATION_PROPERTIES, animate);
+            setProperty(AnimatableProperty.SCALE_X, 1f, animate);
+            setProperty(AnimatableProperty.SCALE_Y, 1f, animate);
+        }
+
         if (oldY != y) {
             mKeyguardClockSwitchController.updateKeyguardStatusViewOffset();
         }
