@@ -280,41 +280,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     applyTransaction(t, -1 /* syncId */, null, caller);
                     return null;
                 }
-                // In cases where transition is already provided, the "readiness lifecycle" of the
-                // transition is determined outside of this transaction. However, if this is a
-                // direct call from shell, the entire transition lifecycle is contained in the
-                // provided transaction and thus we can setReady immediately after apply.
-                final boolean needsSetReady = transition == null && t != null;
                 final WindowContainerTransaction wct =
                         t != null ? t : new WindowContainerTransaction();
                 if (transition == null) {
                     if (type < 0) {
                         throw new IllegalArgumentException("Can't create transition with no type");
                     }
-                    transition = new Transition(type, 0 /* flags */, mTransitionController,
-                            mService.mWindowManager.mSyncEngine);
-                    // If there is already a collecting transition, queue up a new transition and
-                    // return that. The actual start and apply will then be deferred until that
-                    // transition starts collecting. This should almost never happen except during
-                    // tests.
-                    if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-                        Slog.w(TAG, "startTransition() while one is already collecting.");
-                        final Transition nextTransition = transition;
-                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                                "Creating Pending Transition: %s", nextTransition);
-                        mTransitionController.queueCollecting(nextTransition,
-                                () -> {
-                                    nextTransition.start();
-                                    nextTransition.mLogger.mStartWCT = wct;
-                                    applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
-                                    if (needsSetReady) {
-                                        nextTransition.setAllReady();
-                                    }
-                                });
-                        return nextTransition.getToken();
-                    }
-                    mTransitionController.moveToCollecting(transition);
+                    // This is a direct call from shell, so the entire transition lifecycle is
+                    // contained in the provided transaction if provided. Thus, we can setReady
+                    // immediately after apply.
+                    final boolean needsSetReady = t != null;
+                    final Transition nextTransition = new Transition(type, 0 /* flags */,
+                            mTransitionController, mService.mWindowManager.mSyncEngine);
+                    mTransitionController.startCollectOrQueue(nextTransition,
+                            (deferred) -> {
+                                nextTransition.start();
+                                nextTransition.mLogger.mStartWCT = wct;
+                                applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                                if (needsSetReady) {
+                                    nextTransition.setAllReady();
+                                }
+                            });
+                    return nextTransition.getToken();
                 }
+                // The transition already started collecting before sending a request to shell,
+                // so just start here.
                 if (!transition.isCollecting() && !transition.isForcePlaying()) {
                     Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
                             + " means Shell took too long to respond to a request. WM State may be"
@@ -325,9 +315,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 transition.start();
                 transition.mLogger.mStartWCT = wct;
                 applyTransaction(wct, -1 /*syncId*/, transition, caller);
-                if (needsSetReady) {
-                    transition.setAllReady();
-                }
+                // Since the transition is already provided, it means WMCore is determining the
+                // "readiness lifecycle" outside the provided transaction, so don't set ready here.
                 return transition.getToken();
             }
         } finally {
@@ -432,23 +421,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 return;
             }
 
-            if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-                // Sync is for either transition or applySyncTransaction(). We don't support
-                // multiple sync at the same time because it may cause conflict.
-                // Create a new transition when there is no active sync to collect the changes.
-                final Transition transition = mTransitionController.createTransition(type);
-                if (applyTransaction(wct, -1 /* syncId */, transition, caller)
-                        == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()) {
-                    transition.abort();
-                    return;
-                }
-                mTransitionController.requestStartTransition(transition, null /* startTask */,
-                        null /* remoteTransition */, null /* displayChange */);
-                transition.setAllReady();
-                return;
-            }
-
-            if (!shouldApplyIndependently) {
+            if (mService.mWindowManager.mSyncEngine.hasActiveSync()
+                    && !shouldApplyIndependently) {
                 // Although there is an active sync, we want to apply the transaction now.
                 // TODO(b/232042367) Redesign the organizer update on activity callback so that we
                 // we will know about the transition explicitly.
@@ -467,25 +441,23 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 return;
             }
 
-            // It is ok to queue the WCT until the sync engine is free.
-            final Transition nextTransition = new Transition(type, 0 /* flags */,
+            final Transition transition = new Transition(type, 0 /* flags */,
                     mTransitionController, mService.mWindowManager.mSyncEngine);
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    "Creating Pending Transition for TaskFragment: %s", nextTransition);
-            mTransitionController.queueCollecting(nextTransition,
-                    () -> {
-                        if (mTaskFragmentOrganizerController.isValidTransaction(wct)
-                                && (applyTransaction(wct, -1 /* syncId */, nextTransition, caller)
-                                        != TRANSACT_EFFECTS_NONE
-                                || !nextTransition.mParticipants.isEmpty())) {
-                            mTransitionController.requestStartTransition(nextTransition,
-                                    null /* startTask */, null /* remoteTransition */,
-                                    null /* displayChange */);
-                            nextTransition.setAllReady();
-                            return;
-                        }
-                        nextTransition.abort();
-                    });
+            TransitionController.OnStartCollect doApply = (deferred) -> {
+                if (deferred && !mTaskFragmentOrganizerController.isValidTransaction(wct)) {
+                    transition.abort();
+                    return;
+                }
+                if (applyTransaction(wct, -1 /* syncId */, transition, caller)
+                        == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()) {
+                    transition.abort();
+                    return;
+                }
+                mTransitionController.requestStartTransition(transition, null /* startTask */,
+                        null /* remoteTransition */, null /* displayChange */);
+                transition.setAllReady();
+            };
+            mTransitionController.startCollectOrQueue(transition, doApply);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
