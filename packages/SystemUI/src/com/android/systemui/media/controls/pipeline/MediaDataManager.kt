@@ -49,6 +49,7 @@ import android.service.notification.StatusBarNotification
 import android.support.v4.media.MediaMetadataCompat
 import android.text.TextUtils
 import android.util.Log
+import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -216,6 +217,13 @@ class MediaDataManager(
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var smartspaceSession: SmartspaceSession? = null
     private var allowMediaRecommendations = allowMediaRecommendations(context)
+
+    private val artworkWidth =
+        context.resources.getDimensionPixelSize(
+            com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize
+        )
+    private val artworkHeight =
+        context.resources.getDimensionPixelSize(R.dimen.qs_media_session_height_expanded)
 
     /** Check whether this notification is an RCN */
     private fun isRemoteCastNotification(sbn: StatusBarNotification): Boolean {
@@ -1250,9 +1258,21 @@ class MediaDataManager(
             return null
         }
 
-        val source = ImageDecoder.createSource(context.getContentResolver(), uri)
+        val source = ImageDecoder.createSource(context.contentResolver, uri)
         return try {
-            ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+            ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                val width = info.size.width
+                val height = info.size.height
+                val scale =
+                    MediaDataUtils.getScaleFactor(
+                        APair(width, height),
+                        APair(artworkWidth, artworkHeight)
+                    )
+
+                // Downscale if needed
+                if (scale != 0f && scale < 1) {
+                    decoder.setTargetSize((scale * width).toInt(), (scale * height).toInt())
+                }
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }
         } catch (e: IOException) {
