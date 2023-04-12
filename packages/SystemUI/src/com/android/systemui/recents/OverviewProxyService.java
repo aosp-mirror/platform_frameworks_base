@@ -644,6 +644,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private void dispatchNavigationBarSurface() {
         try {
             if (mOverviewProxy != null) {
+                // Catch all for cases where the surface is no longer valid
+                if (mNavigationBarSurface != null && !mNavigationBarSurface.isValid()) {
+                    mNavigationBarSurface = null;
+                }
                 mOverviewProxy.onNavigationBarSurface(mNavigationBarSurface);
             }
         } catch (RemoteException e) {
