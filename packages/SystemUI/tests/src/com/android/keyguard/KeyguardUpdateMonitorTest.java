@@ -290,7 +290,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
 
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
-        when(mUserManager.isPrimaryUser()).thenReturn(true);
+        currentUserIsSystem();
         when(mStrongAuthTracker.getStub()).thenReturn(mock(IStrongAuthTracker.Stub.class));
         when(mStrongAuthTracker
                 .isUnlockingWithBiometricAllowed(anyBoolean() /* isClass3Biometric */))
@@ -958,7 +958,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void requestFaceAuth_whenFaceAuthWasStarted_returnsTrue() throws RemoteException {
         // This satisfies all the preconditions to run face auth.
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1465,7 +1465,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // Preconditions for sfps auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1501,7 +1501,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN Preconditions for sfps auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1530,7 +1530,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN Preconditions for sfps auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1682,7 +1682,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
         occludingAppRequestsFaceAuth();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         primaryAuthNotRequiredByStrongAuthTracker();
         biometricsEnabledForCurrentUser();
         currentUserDoesNotHaveTrust();
@@ -1703,7 +1703,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Face auth should run when the following is true.
         bouncerFullyVisibleAndNotGoingToSleep();
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         primaryAuthNotRequiredByStrongAuthTracker();
         biometricsEnabledForCurrentUser();
         currentUserDoesNotHaveTrust();
@@ -1726,7 +1726,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Face auth should run when the following is true.
         bouncerFullyVisibleAndNotGoingToSleep();
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         primaryAuthNotRequiredByStrongAuthTracker();
         biometricsEnabledForCurrentUser();
         currentUserDoesNotHaveTrust();
@@ -1747,7 +1747,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenUserIsNotPrimary_returnsFalse() throws RemoteException {
         cleanupKeyguardUpdateMonitor();
         // This disables face auth
-        when(mUserManager.isPrimaryUser()).thenReturn(false);
+        when(mUserManager.isSystemUser()).thenReturn(false);
         mKeyguardUpdateMonitor =
                 new TestableKeyguardUpdateMonitor(mContext);
 
@@ -1771,7 +1771,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         biometricsEnabledForCurrentUser();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
@@ -1789,7 +1789,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1811,7 +1811,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1831,7 +1831,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1852,7 +1852,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1874,7 +1874,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1894,7 +1894,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1913,7 +1913,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenKeyguardIsAwake_returnsTrue() throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1938,7 +1938,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testShouldListenForFace_whenUdfpsFingerDown_returnsTrue() throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1957,7 +1957,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -1975,7 +1975,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -2000,7 +2000,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -2322,7 +2322,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             throws RemoteException {
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -2453,7 +2453,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.mConfigFaceAuthSupportedPosture = DEVICE_POSTURE_CLOSED;
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -2477,7 +2477,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.mConfigFaceAuthSupportedPosture = DEVICE_POSTURE_UNKNOWN;
         keyguardNotGoingAway();
         bouncerFullyVisibleAndNotGoingToSleep();
-        currentUserIsPrimary();
+        currentUserIsSystem();
         currentUserDoesNotHaveTrust();
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
@@ -2888,8 +2888,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                         new FaceManager.AuthenticationResult(null, null, mCurrentUserId, false));
     }
 
-    private void currentUserIsPrimary() {
-        when(mUserManager.isPrimaryUser()).thenReturn(true);
+    private void currentUserIsSystem() {
+        when(mUserManager.isSystemUser()).thenReturn(true);
     }
 
     private void biometricsNotDisabledThroughDevicePolicyManager() {
