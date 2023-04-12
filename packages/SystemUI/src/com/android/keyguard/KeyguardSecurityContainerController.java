@@ -531,6 +531,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     public void setOnDismissAction(ActivityStarter.OnDismissAction action, Runnable cancelAction) {
         if (mCancelAction != null) {
             mCancelAction.run();
+            mCancelAction = null;
         }
         mDismissAction = action;
         mCancelAction = cancelAction;
