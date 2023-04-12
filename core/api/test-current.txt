@@ -3429,8 +3429,14 @@ package android.view {
     method @NonNull public android.hardware.input.InputDeviceIdentifier getIdentifier();
   }
 
+  public abstract class InputEvent implements android.os.Parcelable {
+    method public abstract int getDisplayId();
+    method public abstract void setDisplayId(int);
+  }
+
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public static String actionToString(int);
+    method public final int getDisplayId();
     method public final void setDisplayId(int);
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
     field public static final int LAST_KEYCODE = 316; // 0x13c
