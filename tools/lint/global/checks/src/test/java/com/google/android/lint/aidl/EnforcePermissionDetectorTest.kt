@@ -316,20 +316,55 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
                 overrides the method Stub.testMethod which is annotated with @EnforcePermission. The same annotation must be used on Default.testMethod [MissingEnforcePermissionAnnotation]
                     public void testMethod() {}
                                 ~~~~~~~~~~
-                1 errors, 0 warnings 
+                1 errors, 0 warnings
                 """.addLineContinuation()
             )
     }
 
-    fun testDoesDetectIssuesShortStringsNotAllowed() {
+    fun testDoesNotDetectIssuesShortStringsAllowedInChildAndParent() {
         lint().files(java(
             """
             package test.pkg;
             import android.annotation.EnforcePermission;
             public class TestClass121 extends IFooMethod.Stub {
                 @Override
+                @EnforcePermission("READ_PHONE_STATE")
+                public void testMethod() {}
+                @Override
+                @EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
+                public void testMethodParentShortPermission() {}
+                @Override
                 @EnforcePermission(anyOf={"INTERNET", "READ_PHONE_STATE"})
                 public void testMethodAnyLiteral() {}
+                @Override
+                @EnforcePermission(anyOf={android.Manifest.permission.INTERNET, android.Manifest.permission.READ_PHONE_STATE})
+                public void testMethodAnyLiteralParentsShortPermission() {}
+            }
+            """).indented(),
+            *stubs
+        )
+            .run()
+            .expectClean()
+    }
+
+    fun testDoesDetectIssuesWrongShortStringsInChildAndParent() {
+        lint().files(java(
+            """
+            package test.pkg;
+            import android.annotation.EnforcePermission;
+            public class TestClass121 extends IFooMethod.Stub {
+                @Override
+                @EnforcePermission("READ_WRONG_PHONE_STATE")
+                public void testMethod() {}
+                @Override
+                @EnforcePermission(android.Manifest.permission.READ_WRONG_PHONE_STATE)
+                public void testMethodParentShortPermission() {}
+                @Override
+                @EnforcePermission(anyOf={"WRONG_INTERNET", "READ_PHONE_STATE"})
+                public void testMethodAnyLiteral() {}
+                @Override
+                @EnforcePermission(anyOf={android.Manifest.permission.INTERNET, android.Manifest.permission.READ_WRONG_PHONE_STATE})
+                public void testMethodAnyLiteralParentsShortPermission() {}
             }
             """).indented(),
             *stubs
@@ -337,14 +372,19 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass121.java:6: Error: The method \
-                TestClass121.testMethodAnyLiteral is annotated with @EnforcePermission(anyOf={"INTERNET", "READ_PHONE_STATE"}) \
-                which differs from the overridden method Stub.testMethodAnyLiteral: \
-                @android.annotation.EnforcePermission(anyOf={android.Manifest.permission.INTERNET, "android.permission.READ_PHONE_STATE"}). \
-                The same annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
-                    public void testMethodAnyLiteral() {}
-                                ~~~~~~~~~~~~~~~~~~~~
-                1 errors, 0 warnings
+            src/test/pkg/TestClass121.java:6: Error: The method TestClass121.testMethod is annotated with @EnforcePermission("READ_WRONG_PHONE_STATE") which differs from the overridden method Stub.testMethod: @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE). The same annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
+                public void testMethod() {}
+                            ~~~~~~~~~~
+            src/test/pkg/TestClass121.java:9: Error: The method TestClass121.testMethodParentShortPermission is annotated with @EnforcePermission(android.Manifest.permission.READ_WRONG_PHONE_STATE) which differs from the overridden method Stub.testMethodParentShortPermission: @android.annotation.EnforcePermission("READ_PHONE_STATE"). The same annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
+                public void testMethodParentShortPermission() {}
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            src/test/pkg/TestClass121.java:12: Error: The method TestClass121.testMethodAnyLiteral is annotated with @EnforcePermission(anyOf={"WRONG_INTERNET", "READ_PHONE_STATE"}) which differs from the overridden method Stub.testMethodAnyLiteral: @android.annotation.EnforcePermission(anyOf={android.Manifest.permission.INTERNET, "android.permission.READ_PHONE_STATE"}). The same annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
+                public void testMethodAnyLiteral() {}
+                            ~~~~~~~~~~~~~~~~~~~~
+            src/test/pkg/TestClass121.java:15: Error: The method TestClass121.testMethodAnyLiteralParentsShortPermission is annotated with @EnforcePermission(anyOf={android.Manifest.permission.INTERNET, android.Manifest.permission.READ_WRONG_PHONE_STATE}) which differs from the overridden method Stub.testMethodAnyLiteralParentsShortPermission: @android.annotation.EnforcePermission(anyOf={"INTERNET", "READ_PHONE_STATE"}). The same annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
+                public void testMethodAnyLiteralParentsShortPermission() {}
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            4 errors, 0 warnings
                 """.addLineContinuation()
             )
     }
@@ -360,11 +400,17 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
             @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
             public void testMethod() {}
             @Override
+            @android.annotation.EnforcePermission("READ_PHONE_STATE")
+            public void testMethodParentShortPermission() {}
+            @Override
             @android.annotation.EnforcePermission(anyOf={android.Manifest.permission.INTERNET, android.Manifest.permission.READ_PHONE_STATE})
             public void testMethodAny() {}
             @Override
             @android.annotation.EnforcePermission(anyOf={android.Manifest.permission.INTERNET, "android.permission.READ_PHONE_STATE"})
             public void testMethodAnyLiteral() {}
+            @Override
+            @android.annotation.EnforcePermission(anyOf={"INTERNET", "READ_PHONE_STATE"})
+            public void testMethodAnyLiteralParentsShortPermission() {}
             @Override
             @android.annotation.EnforcePermission(allOf={android.Manifest.permission.INTERNET, android.Manifest.permission.READ_PHONE_STATE})
             public void testMethodAll() {}
@@ -374,10 +420,14 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
           }
           @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
           public void testMethod();
+          @android.annotation.EnforcePermission("READ_PHONE_STATE")
+          public void testMethodParentShortPermission();
           @android.annotation.EnforcePermission(anyOf={android.Manifest.permission.INTERNET, android.Manifest.permission.READ_PHONE_STATE})
           public void testMethodAny() {}
           @android.annotation.EnforcePermission(anyOf={android.Manifest.permission.INTERNET, "android.permission.READ_PHONE_STATE"})
           public void testMethodAnyLiteral() {}
+          @android.annotation.EnforcePermission(anyOf={"INTERNET", "READ_PHONE_STATE"})
+          public void testMethodAnyLiteralParentsShortPermission() {}
           @android.annotation.EnforcePermission(allOf={android.Manifest.permission.INTERNET, android.Manifest.permission.READ_PHONE_STATE})
           public void testMethodAll() {}
           @android.annotation.EnforcePermission(allOf={android.Manifest.permission.INTERNET, "android.permission.READ_PHONE_STATE"})
@@ -404,6 +454,7 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
         package android.Manifest;
         class permission {
           public static final String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
+          public static final String READ_WRONG_PHONE_STATE = "android.permission.READ_WRONG_PHONE_STATE";
           public static final String NFC = "android.permission.NFC";
           public static final String INTERNET = "android.permission.INTERNET";
         }
