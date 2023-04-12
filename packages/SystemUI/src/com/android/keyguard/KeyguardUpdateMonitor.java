@@ -1824,7 +1824,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED,
-                        getSendingUserId()));
+                        getSendingUserId(), 0));
             } else if (ACTION_USER_UNLOCKED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_UNLOCKED,
                         getSendingUserId(), 0));
