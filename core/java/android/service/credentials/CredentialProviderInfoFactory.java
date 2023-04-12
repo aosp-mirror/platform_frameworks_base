@@ -42,7 +42,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -180,7 +179,8 @@ public final class CredentialProviderInfoFactory {
         if (disableSystemAppVerificationForTests) {
             Bundle metadata = serviceInfo.metaData;
             if (metadata == null) {
-                Slog.e(TAG, "isValidSystemProvider - metadata is null: " + serviceInfo);
+                Slog.w(TAG, "metadata is null while reading "
+                        + "TEST_SYSTEM_PROVIDER_META_DATA_KEY: " + serviceInfo);
                 return false;
             }
             return metadata.getBoolean(
@@ -199,7 +199,7 @@ public final class CredentialProviderInfoFactory {
         // 1. Get the metadata for the service.
         final Bundle metadata = serviceInfo.metaData;
         if (metadata == null) {
-            Log.i(TAG, "populateMetadata - metadata is null");
+            Slog.w(TAG, "Metadata is null for provider: " + serviceInfo.getComponentName());
             return builder;
         }
 
@@ -208,12 +208,13 @@ public final class CredentialProviderInfoFactory {
         try {
             resources = pm.getResourcesForApplication(serviceInfo.applicationInfo);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Failed to get app resources", e);
+            Slog.e(TAG, "Failed to get app resources", e);
         }
 
         // 3. Stop if we are missing data.
-        if (metadata == null || resources == null) {
-            Log.i(TAG, "populateMetadata - resources is null");
+        if (resources == null) {
+            Slog.w(TAG, "Resources are null for the serviceInfo being processed: "
+                    + serviceInfo.getComponentName());
             return builder;
         }
 
@@ -221,7 +222,7 @@ public final class CredentialProviderInfoFactory {
         try {
             builder = extractXmlMetadata(context, builder, serviceInfo, pm, resources);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to get XML metadata", e);
+            Slog.e(TAG, "Failed to get XML metadata", e);
         }
 
         return builder;
@@ -258,7 +259,7 @@ public final class CredentialProviderInfoFactory {
                             afsAttributes.getString(
                                     R.styleable.CredentialProvider_settingsSubtitle));
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to get XML attr", e);
+                    Slog.e(TAG, "Failed to get XML attr", e);
                 } finally {
                     if (afsAttributes != null) {
                         afsAttributes.recycle();
@@ -266,10 +267,10 @@ public final class CredentialProviderInfoFactory {
                 }
                 builder.addCapabilities(parseXmlProviderOuterCapabilities(parser, resources));
             } else {
-                Log.e(TAG, "Meta-data does not start with credential-provider-service tag");
+                Slog.w(TAG, "Meta-data does not start with credential-provider-service tag");
             }
         } catch (IOException | XmlPullParserException e) {
-            Log.e(TAG, "Error parsing credential provider service meta-data", e);
+            Slog.e(TAG, "Error parsing credential provider service meta-data", e);
         }
 
         return builder;
@@ -328,7 +329,7 @@ public final class CredentialProviderInfoFactory {
                 return si;
             }
         } catch (RemoteException e) {
-            Slog.v(TAG, e.getMessage());
+            Slog.e(TAG, "Unable to get serviceInfo", e);
         }
         throw new PackageManager.NameNotFoundException(serviceComponent.toString());
     }
@@ -376,10 +377,8 @@ public final class CredentialProviderInfoFactory {
                 }
 
                 services.add(serviceInfo);
-            } catch (SecurityException e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
+            } catch (SecurityException | PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Error getting info for " + serviceInfo, e);
             }
         }
         return services;
@@ -431,7 +430,7 @@ public final class CredentialProviderInfoFactory {
             return pp;
         } catch (SecurityException e) {
             // If the current user is not enrolled in DPM then this can throw a security error.
-            Log.e(TAG, "Failed to get device policy: " + e);
+            Slog.e(TAG, "Failed to get device policy: " + e);
         }
 
         return null;
@@ -592,7 +591,7 @@ public final class CredentialProviderInfoFactory {
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo == null) {
-                Log.i(TAG, "No serviceInfo found for resolveInfo so skipping this provider");
+                Slog.d(TAG, "No serviceInfo found for resolveInfo, so skipping provider");
                 continue;
             }
 
@@ -607,10 +606,8 @@ public final class CredentialProviderInfoFactory {
                 if (!cpi.isSystemProvider()) {
                     services.add(cpi);
                 }
-            } catch (SecurityException e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
             } catch (Exception e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
+                Slog.e(TAG, "Error getting info for " + serviceInfo, e);
             }
         }
         return services;
