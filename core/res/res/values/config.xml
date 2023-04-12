@@ -534,8 +534,10 @@
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
 
-    <!-- If this is true, then keep dreaming when undocking. -->
-    <bool name="config_keepDreamingWhenUndocking">false</bool>
+    <!-- If this is true, then keep dreaming when unplugging.
+         This config was formerly known as config_keepDreamingWhenUndocking.
+         It has been updated to affect other plug types. -->
+    <bool name="config_keepDreamingWhenUnplugging">false</bool>
 
     <!-- The timeout (in ms) to wait before attempting to reconnect to the dream overlay service if
          it becomes disconnected -->
