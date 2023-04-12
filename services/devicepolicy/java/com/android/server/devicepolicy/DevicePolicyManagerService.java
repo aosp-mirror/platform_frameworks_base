@@ -16111,6 +16111,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             long ident = mInjector.binderClearCallingIdentity();
             try {
+                // TODO(b/277908283): check in the policy engine instead of calling user manager.
                 List<UserManager.EnforcingUser> sources = mUserManager
                         .getUserRestrictionSources(restriction, UserHandle.of(userId));
                 if (sources == null) {
@@ -16142,27 +16143,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 final UserManager.EnforcingUser enforcingUser = sources.get(0);
                 final int sourceType = enforcingUser.getUserRestrictionSource();
-                final int enforcingUserId = enforcingUser.getUserHandle().getIdentifier();
-                if (sourceType == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
-                    // Restriction was enforced by PO
-                    final ComponentName profileOwner = mOwners.getProfileOwnerComponent(
-                            enforcingUserId);
-                    if (profileOwner != null) {
+                if (sourceType == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER
+                        || sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER ) {
+                    ActiveAdmin admin = getMostProbableDPCAdminForLocalPolicy(userId);
+                    if (admin != null) {
                         result = new Bundle();
-                        result.putInt(Intent.EXTRA_USER_ID, enforcingUserId);
+                        result.putInt(Intent.EXTRA_USER_ID, admin.getUserHandle().getIdentifier());
                         result.putParcelable(DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-                                profileOwner);
-                        return result;
-                    }
-                } else if (sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
-                    // Restriction was enforced by DO
-                    final Pair<Integer, ComponentName> deviceOwner =
-                            mOwners.getDeviceOwnerUserIdAndComponent();
-                    if (deviceOwner != null) {
-                        result = new Bundle();
-                        result.putInt(Intent.EXTRA_USER_ID, deviceOwner.first);
-                        result.putParcelable(DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-                                deviceOwner.second);
+                                admin.info.getComponent());
                         return result;
                     }
                 } else if (sourceType == UserManager.RESTRICTION_SOURCE_SYSTEM) {
