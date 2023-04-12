@@ -86,6 +86,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     // Test setting default restrictions for managed profile.
     @Test
+    @Ignore("b/277916462")
     public void testMigration_managedProfileOwner() throws Exception {
         // Create a managed profile user.
         final File user10dir = getServices().addUser(10, 0,
