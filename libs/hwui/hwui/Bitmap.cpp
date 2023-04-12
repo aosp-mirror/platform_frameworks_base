@@ -41,12 +41,13 @@
 #include <SkHighContrastFilter.h>
 #include <SkImage.h>
 #include <SkImageAndroid.h>
-#include <SkImageEncoder.h>
 #include <SkImagePriv.h>
 #include <SkJpegGainmapEncoder.h>
 #include <SkPixmap.h>
 #include <SkRect.h>
 #include <SkStream.h>
+#include <SkJpegEncoder.h>
+#include <SkPngEncoder.h>
 #include <SkWebpEncoder.h>
 
 #include <limits>
@@ -499,17 +500,25 @@ bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
         return false;
     }
 
-    SkEncodedImageFormat fm;
     switch (format) {
-        case JavaCompressFormat::Jpeg:
-            fm = SkEncodedImageFormat::kJPEG;
-            break;
+        case JavaCompressFormat::Jpeg: {
+            SkJpegEncoder::Options options;
+            options.fQuality = quality;
+            return SkJpegEncoder::Encode(stream, bitmap.pixmap(), options);
+        }
         case JavaCompressFormat::Png:
-            fm = SkEncodedImageFormat::kPNG;
-            break;
-        case JavaCompressFormat::Webp:
-            fm = SkEncodedImageFormat::kWEBP;
-            break;
+            return SkPngEncoder::Encode(stream, bitmap.pixmap(), {});
+        case JavaCompressFormat::Webp: {
+            SkWebpEncoder::Options options;
+            if (quality >= 100) {
+                options.fCompression = SkWebpEncoder::Compression::kLossless;
+                options.fQuality = 75; // This is effort to compress
+            } else {
+                options.fCompression = SkWebpEncoder::Compression::kLossy;
+                options.fQuality = quality;
+            }
+            return SkWebpEncoder::Encode(stream, bitmap.pixmap(), options);
+        }
         case JavaCompressFormat::WebpLossy:
         case JavaCompressFormat::WebpLossless: {
             SkWebpEncoder::Options options;
@@ -519,8 +528,6 @@ bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
             return SkWebpEncoder::Encode(stream, bitmap.pixmap(), options);
         }
     }
-
-    return SkEncodeImage(stream, bitmap, fm, quality);
 }
 
 sp<uirenderer::Gainmap> Bitmap::gainmap() const {
