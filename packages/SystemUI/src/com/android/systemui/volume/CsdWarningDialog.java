@@ -186,8 +186,7 @@ public class CsdWarningDialog extends SystemUIDialog
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void start() {
         mShowTime = System.currentTimeMillis();
         synchronized (mTimerLock) {
             if (mNoUserActionRunnable != null) {
@@ -198,8 +197,7 @@ public class CsdWarningDialog extends SystemUIDialog
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void stop() {
         synchronized (mTimerLock) {
             if (mCancelScheduledNoUserActionRunnable != null) {
                 mCancelScheduledNoUserActionRunnable.run();
