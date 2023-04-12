@@ -493,7 +493,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (mDateWeatherView != null) {
             mUiExecutor.execute(() -> {
                 mDateWeatherView.setVisibility(
-                        clockHasCustomWeatherDataDisplay() ? View.GONE : View.VISIBLE);
+                        clockHasCustomWeatherDataDisplay() ? View.INVISIBLE : View.VISIBLE);
             });
         }
     }
