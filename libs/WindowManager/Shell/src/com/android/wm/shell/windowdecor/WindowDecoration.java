@@ -238,30 +238,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         startT.setWindowCrop(mCaptionContainerSurface, captionWidth, captionHeight)
                 .show(mCaptionContainerSurface);
 
-        if (mCaptionWindowManager == null) {
-            // Put caption under a container surface because ViewRootImpl sets the destination frame
-            // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
-            mCaptionWindowManager = new WindowlessWindowManager(
-                    mTaskInfo.getConfiguration(), mCaptionContainerSurface,
-                    null /* hostInputToken */);
-        }
-
-        // Caption view
-        mCaptionWindowManager.setConfiguration(taskConfig);
-        final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(captionWidth, captionHeight,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
-        lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
-        lp.setTrustedOverlay();
-        if (mViewHost == null) {
-            mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
-                    mCaptionWindowManager);
-            mViewHost.setView(outResult.mRootView, lp);
-        } else {
-            mViewHost.relayout(lp);
-        }
-
         if (ViewRootImpl.CAPTION_ON_SHELL) {
             outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
 
@@ -287,6 +263,36 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
                 .setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
+
+        if (mCaptionWindowManager == null) {
+            // Put caption under a container surface because ViewRootImpl sets the destination frame
+            // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
+            mCaptionWindowManager = new WindowlessWindowManager(
+                    mTaskInfo.getConfiguration(), mCaptionContainerSurface,
+                    null /* hostInputToken */);
+        }
+
+        // Caption view
+        mCaptionWindowManager.setConfiguration(taskConfig);
+        final WindowManager.LayoutParams lp =
+                new WindowManager.LayoutParams(captionWidth, captionHeight,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
+        lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
+        lp.setTrustedOverlay();
+        if (mViewHost == null) {
+            mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
+                    mCaptionWindowManager);
+            if (params.mApplyStartTransactionOnDraw) {
+                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
+            }
+            mViewHost.setView(outResult.mRootView, lp);
+        } else {
+            if (params.mApplyStartTransactionOnDraw) {
+                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
+            }
+            mViewHost.relayout(lp);
+        }
     }
 
     /**
@@ -411,6 +417,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionX;
         int mCaptionY;
 
+        boolean mApplyStartTransactionOnDraw;
+
         void reset() {
             mLayoutResId = Resources.ID_NULL;
             mCaptionHeightId = Resources.ID_NULL;
@@ -419,6 +427,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             mCaptionX = 0;
             mCaptionY = 0;
+
+            mApplyStartTransactionOnDraw = false;
         }
     }
 

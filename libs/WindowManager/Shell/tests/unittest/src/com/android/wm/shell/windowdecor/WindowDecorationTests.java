@@ -33,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -42,6 +43,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
+import android.view.AttachedSurfaceControl;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -97,6 +99,8 @@ public class WindowDecorationTests extends ShellTestCase {
     @Mock
     private SurfaceControlViewHost mMockSurfaceControlViewHost;
     @Mock
+    private AttachedSurfaceControl mMockRootSurfaceControl;
+    @Mock
     private TestView mMockView;
     @Mock
     private WindowContainerTransaction mMockWindowContainerTransaction;
@@ -129,6 +133,8 @@ public class WindowDecorationTests extends ShellTestCase {
 
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory)
                 .create(any(), any(), any());
+        when(mMockSurfaceControlViewHost.getRootSurfaceControl())
+                .thenReturn(mMockRootSurfaceControl);
     }
 
     @Test
@@ -461,6 +467,43 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlStartT).show(captionContainerSurface);
     }
 
+    @Test
+    public void testRelayout_applyTransactionInSyncWithDraw() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final SurfaceControl decorContainerSurface = mock(SurfaceControl.class);
+        final SurfaceControl.Builder decorContainerSurfaceBuilder =
+                createMockSurfaceControlBuilder(decorContainerSurface);
+        mMockSurfaceControlBuilders.add(decorContainerSurfaceBuilder);
+        final SurfaceControl captionContainerSurface = mock(SurfaceControl.class);
+        final SurfaceControl.Builder captionContainerSurfaceBuilder =
+                createMockSurfaceControlBuilder(captionContainerSurface);
+        mMockSurfaceControlBuilders.add(captionContainerSurfaceBuilder);
+
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        mMockSurfaceControlTransactions.add(t);
+        final ActivityManager.TaskDescription.Builder taskDescriptionBuilder =
+                new ActivityManager.TaskDescription.Builder()
+                        .setBackgroundColor(Color.YELLOW);
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setTaskDescriptionBuilder(taskDescriptionBuilder)
+                .setBounds(TASK_BOUNDS)
+                .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
+                .setVisible(true)
+                .build();
+        taskInfo.isFocused = true;
+        taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
+        final SurfaceControl taskSurface = mock(SurfaceControl.class);
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
+
+        windowDecor.relayout(taskInfo, true /* applyStartTransactionOnDraw */);
+
+        verify(mMockRootSurfaceControl).applyTransactionOnDraw(mMockSurfaceControlStartT);
+    }
+
     private TestWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl testSurface) {
         return new TestWindowDecoration(InstrumentationRegistry.getInstrumentation().getContext(),
@@ -516,6 +559,12 @@ public class WindowDecorationTests extends ShellTestCase {
 
         @Override
         void relayout(ActivityManager.RunningTaskInfo taskInfo) {
+            relayout(taskInfo, false /* applyStartTransactionOnDraw */);
+        }
+
+        void relayout(ActivityManager.RunningTaskInfo taskInfo,
+                boolean applyStartTransactionOnDraw) {
+            mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
             relayout(mRelayoutParams, mMockSurfaceControlStartT, mMockSurfaceControlFinishT,
                     mMockWindowContainerTransaction, mMockView, mRelayoutResult);
         }
