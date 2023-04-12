@@ -50,6 +50,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -98,12 +99,12 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         val viewModelCommon =
             WifiViewModel(
                 airplaneModeViewModel,
+                shouldShowSignalSpacerProvider = { MutableStateFlow(false) },
                 connectivityConstants,
                 context,
                 tableLogBuffer,
                 interactor,
                 scope,
-                statusBarPipelineFlags,
                 wifiConstants,
             )
         viewModel =
