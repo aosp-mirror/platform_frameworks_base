@@ -829,7 +829,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ନିୟନ୍ତ୍ରଣ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>କୁ ଆକ୍ସେସ୍ କରିହେଲା ନାହିଁ। ନିୟନ୍ତ୍ରଣ ଏବେ ବି ଉପଲବ୍ଧ ଅଛି ଏବଂ ଆପ୍ ସେଟିଂସ୍ ବଦଳାଯାଇ ନାହିଁ ବୋଲି ସୁନିଶ୍ଚିତ କରିବାକୁ <xliff:g id="APPLICATION">%2$s</xliff:g> ଆପକୁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
-    <string name="controls_open_app" msgid="483650971094300141">"ଆପ୍ ଖୋଲନ୍ତୁ"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ଆପ ଖୋଲନ୍ତୁ"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ସ୍ଥିତି ଲୋଡ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ତ୍ରୁଟି ହୋଇଛି, ପୁଣି ଚେଷ୍ଟା କର"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ"</string>
