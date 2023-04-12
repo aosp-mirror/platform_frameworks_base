@@ -3,9 +3,8 @@ dsandler@android.com
 edgarwang@google.com
 evanlaird@google.com
 juliacr@google.com
-lijun@google.com
-songchenxi@google.com
 yantingyang@google.com
+ykhung@google.com
 
 # Exempt resource files (because they are in a flat directory and too hard to manage via OWNERS)
 per-file *.xml=*
