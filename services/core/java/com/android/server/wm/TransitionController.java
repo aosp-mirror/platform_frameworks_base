@@ -884,13 +884,30 @@ class TransitionController {
         proto.end(token);
     }
 
-    void queueCollecting(Transition transit, Runnable onCollectStart) {
-        mAtm.mWindowManager.mSyncEngine.queueSyncSet(
-                // Make sure to collect immediately to prevent another transition
-                // from sneaking in before it. Note: moveToCollecting internally
-                // calls startSyncSet.
-                () -> moveToCollecting(transit),
-                onCollectStart);
+    /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
+    boolean startCollectOrQueue(Transition transit, OnStartCollect onStartCollect) {
+        if (mAtm.mWindowManager.mSyncEngine.hasActiveSync()) {
+            if (!isCollecting()) {
+                Slog.w(TAG, "Ongoing Sync outside of transition.");
+            }
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
+                    "Queueing transition: %s", transit);
+            mAtm.mWindowManager.mSyncEngine.queueSyncSet(
+                    // Make sure to collect immediately to prevent another transition
+                    // from sneaking in before it. Note: moveToCollecting internally
+                    // calls startSyncSet.
+                    () -> moveToCollecting(transit),
+                    () -> onStartCollect.onCollectStarted(true /* deferred */));
+            return false;
+        } else {
+            moveToCollecting(transit);
+            onStartCollect.onCollectStarted(false /* deferred */);
+            return true;
+        }
+    }
+
+    interface OnStartCollect {
+        void onCollectStarted(boolean deferred);
     }
 
     /**
