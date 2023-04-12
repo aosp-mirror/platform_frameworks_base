@@ -21,4 +21,5 @@ package android.app.tare;
   * {@hide}
   */
 interface IEconomyManager {
+    int getEnabledMode();
 }
