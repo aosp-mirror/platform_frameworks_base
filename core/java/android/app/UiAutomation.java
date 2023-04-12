@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityService.Callbacks;
@@ -30,6 +32,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -45,6 +48,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -69,8 +73,10 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
 import com.android.internal.inputmethod.RemoteAccessibilityInputConnection;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import libcore.io.IoUtils;
@@ -202,6 +208,8 @@ public final class UiAutomation {
 
     private final IUiAutomationConnection mUiAutomationConnection;
 
+    private final int mDisplayId;
+
     private HandlerThread mRemoteCallbackThread;
 
     private IAccessibilityServiceClient mClient;
@@ -261,24 +269,49 @@ public final class UiAutomation {
 
     /**
      * Creates a new instance that will handle callbacks from the accessibility
+     * layer on the thread of the provided context main looper and perform requests for privileged
+     * operations on the provided connection, and filtering display-related features to the display
+     * associated with the context (or the user running the test, on devices that
+     * {@link UserManager#isVisibleBackgroundUsersSupported() support visible background users}).
+     *
+     * @param context the context associated with the automation
+     * @param connection The connection for performing privileged operations.
+     *
+     * @hide
+     */
+    public UiAutomation(Context context, IUiAutomationConnection connection) {
+        this(getDisplayId(context), context.getMainLooper(), connection);
+    }
+
+    /**
+     * Creates a new instance that will handle callbacks from the accessibility
      * layer on the thread of the provided looper and perform requests for privileged
      * operations on the provided connection.
      *
      * @param looper The looper on which to execute accessibility callbacks.
      * @param connection The connection for performing privileged operations.
      *
+     * @deprecated use {@link #UiAutomation(Context, IUiAutomationConnection)} instead
+     *
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UiAutomation(Looper looper, IUiAutomationConnection connection) {
-        if (looper == null) {
-            throw new IllegalArgumentException("Looper cannot be null!");
-        }
-        if (connection == null) {
-            throw new IllegalArgumentException("Connection cannot be null!");
-        }
+        this(DEFAULT_DISPLAY, looper, connection);
+        Log.w(LOG_TAG, "Created with deprecatead constructor, assumes DEFAULT_DISPLAY");
+    }
+
+    private UiAutomation(int displayId, Looper looper, IUiAutomationConnection connection) {
+        Preconditions.checkArgument(looper != null, "Looper cannot be null!");
+        Preconditions.checkArgument(connection != null, "Connection cannot be null!");
+
         mLocalCallbackHandler = new Handler(looper);
         mUiAutomationConnection = connection;
+        mDisplayId = displayId;
+
+        Log.i(LOG_TAG, "Initialized for user " + Process.myUserHandle().getIdentifier()
+                + " on display " + mDisplayId);
     }
 
     /**
@@ -719,8 +752,14 @@ public final class UiAutomation {
     }
 
     /**
-     * Gets the windows on the screen of the default display. This method returns only the windows
-     * that a sighted user can interact with, as opposed to all windows.
+     * Gets the windows on the screen associated with the {@link UiAutomation} context (usually the
+     * {@link android.view.Display#DEFAULT_DISPLAY default display).
+     *
+     * <p>
+     * This method returns only the windows that a sighted user can interact with, as opposed to
+     * all windows.
+
+     * <p>
      * For example, if there is a modal dialog shown and the user cannot touch
      * anything behind it, then only the modal window will be reported
      * (assuming it is the top one). For convenience the returned windows
@@ -730,21 +769,23 @@ public final class UiAutomation {
      * <strong>Note:</strong> In order to access the windows you have to opt-in
      * to retrieve the interactive windows by setting the
      * {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} flag.
-     * </p>
      *
      * @return The windows if there are windows such, otherwise an empty list.
      * @throws IllegalStateException If the connection to the accessibility subsystem is not
      *            established.
      */
     public List<AccessibilityWindowInfo> getWindows() {
+        if (DEBUG) {
+            Log.d(LOG_TAG, "getWindows(): returning windows for display " + mDisplayId);
+        }
         final int connectionId;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
             connectionId = mConnectionId;
         }
         // Calling out without a lock held.
-        return AccessibilityInteractionClient.getInstance()
-                .getWindows(connectionId);
+        return AccessibilityInteractionClient.getInstance().getWindowsOnDisplay(connectionId,
+                mDisplayId);
     }
 
     /**
@@ -1112,8 +1153,10 @@ public final class UiAutomation {
      * @return The screenshot bitmap on success, null otherwise.
      */
     public Bitmap takeScreenshot() {
-        Display display = DisplayManagerGlobal.getInstance()
-                .getRealDisplay(Display.DEFAULT_DISPLAY);
+        if (DEBUG) {
+            Log.d(LOG_TAG, "Taking screenshot of display " + mDisplayId);
+        }
+        Display display = DisplayManagerGlobal.getInstance().getRealDisplay(mDisplayId);
         Point displaySize = new Point();
         display.getRealSize(displaySize);
 
@@ -1126,10 +1169,12 @@ public final class UiAutomation {
             screenShot = mUiAutomationConnection.takeScreenshot(
                     new Rect(0, 0, displaySize.x, displaySize.y));
             if (screenShot == null) {
+                Log.e(LOG_TAG, "mUiAutomationConnection.takeScreenshot() returned null for display "
+                        + mDisplayId);
                 return null;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while taking screenshot!", re);
+            Log.e(LOG_TAG, "Error while taking screenshot of display " + mDisplayId, re);
             return null;
         }
 
@@ -1509,6 +1554,14 @@ public final class UiAutomation {
         return executeShellCommandInternal(command, true /* includeStderr */);
     }
 
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public int getDisplayId() {
+        return mDisplayId;
+    }
+
     private ParcelFileDescriptor[] executeShellCommandInternal(
             String command, boolean includeStderr) {
         warnIfBetterCommand(command);
@@ -1564,6 +1617,7 @@ public final class UiAutomation {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UiAutomation@").append(Integer.toHexString(hashCode()));
         stringBuilder.append("[id=").append(mConnectionId);
+        stringBuilder.append(", displayId=").append(mDisplayId);
         stringBuilder.append(", flags=").append(mFlags);
         stringBuilder.append("]");
         return stringBuilder.toString();
@@ -1601,6 +1655,55 @@ public final class UiAutomation {
         return (mFlags & UiAutomation.FLAG_DONT_USE_ACCESSIBILITY) == 0;
     }
 
+    /**
+     * Gets the display id associated with the UiAutomation context.
+     *
+     * <p><b>NOTE: </b> must be a static method because it's called from a constructor to call
+     * another one.
+     */
+    private static int getDisplayId(Context context) {
+        Preconditions.checkArgument(context != null, "Context cannot be null!");
+
+        UserManager userManager = context.getSystemService(UserManager.class);
+        // TODO(b/255426725): given that this is a temporary solution until a11y supports multiple
+        // users, the display is only set on devices that support that
+        if (!userManager.isVisibleBackgroundUsersSupported()) {
+            return DEFAULT_DISPLAY;
+        }
+
+        int displayId = context.getDisplayId();
+        if (displayId == Display.INVALID_DISPLAY) {
+            // Shouldn't happen, but we better handle it
+            Log.e(LOG_TAG, "UiAutomation created UI context with invalid display id, assuming it's"
+                    + " running in the display assigned to the user");
+            return getMainDisplayIdAssignedToUser(context, userManager);
+        }
+
+        if (displayId != DEFAULT_DISPLAY) {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "getDisplayId(): returning context's display (" + displayId + ")");
+            }
+            // Context is explicitly setting the display, so we respect that...
+            return displayId;
+        }
+        // ...otherwise, we need to get the display the test's user is running on
+        int userDisplayId = getMainDisplayIdAssignedToUser(context, userManager);
+        if (DEBUG) {
+            Log.d(LOG_TAG, "getDisplayId(): returning user's display (" + userDisplayId + ")");
+        }
+        return userDisplayId;
+    }
+
+    private static int getMainDisplayIdAssignedToUser(Context context, UserManager userManager) {
+        if (!userManager.isUserVisible()) {
+            // Should also not happen, but ...
+            Log.e(LOG_TAG, "User (" + context.getUserId() + ") is not visible, using "
+                    + "DEFAULT_DISPLAY");
+            return DEFAULT_DISPLAY;
+        }
+        return userManager.getMainDisplayIdAssignedToUser();
+    }
+
     private class IAccessibilityServiceClientImpl extends IAccessibilityServiceClientWrapper {
 
         public IAccessibilityServiceClientImpl(Looper looper, int generationId) {
@@ -1621,6 +1724,7 @@ public final class UiAutomation {
                     if (DEBUG) {
                         Log.d(LOG_TAG, "init(): connectionId=" + connectionId + ", windowToken="
                                 + windowToken + ", user=" + Process.myUserHandle()
+                                + ", UiAutomation.mDisplay=" + UiAutomation.this.mDisplayId
                                 + ", mGenerationId=" + mGenerationId
                                 + ", UiAutomation.mGenerationId="
                                 + UiAutomation.this.mGenerationId);
