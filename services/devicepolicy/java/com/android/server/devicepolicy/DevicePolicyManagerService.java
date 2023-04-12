@@ -17324,6 +17324,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     caller.getUserId());
             admin = enforcingAdmin.getActiveAdmin();
         } else {
+            Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
         }
 
@@ -17355,6 +17356,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     caller.getUserId());
             admin = enforcingAdmin.getActiveAdmin();
         } else {
+            Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallingUser(isManagedProfile(caller.getUserId()));
             Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
