@@ -5684,6 +5684,7 @@ class Task extends TaskFragment {
             // Usually resuming a top activity triggers the next app transition, but nothing's got
             // resumed in this case, so we need to execute it explicitly.
             mDisplayContent.executeAppTransition();
+            mDisplayContent.setFocusedApp(topActivity);
         } else {
             mRootWindowContainer.resumeFocusedTasksTopActivities();
         }

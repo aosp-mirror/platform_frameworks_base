@@ -30,16 +30,17 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.volume.CsdWarningDialog;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
 import com.android.systemui.volume.VolumePanelFactory;
 
-import java.util.concurrent.Executor;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.concurrent.Executor;
 
 
 /** Dagger Module for code in the volume package. */
@@ -63,6 +64,7 @@ public interface VolumeModule {
             InteractionJankMonitor interactionJankMonitor,
             DeviceConfigProxy deviceConfigProxy,
             @Main Executor executor,
+            CsdWarningDialog.Factory csdFactory,
             DumpManager dumpManager) {
         VolumeDialogImpl impl = new VolumeDialogImpl(
                 context,
@@ -76,6 +78,7 @@ public interface VolumeModule {
                 interactionJankMonitor,
                 deviceConfigProxy,
                 executor,
+                csdFactory,
                 dumpManager);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);

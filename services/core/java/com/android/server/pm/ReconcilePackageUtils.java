@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY;
@@ -23,19 +24,24 @@ import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRI
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.os.SystemProperties;
+import android.permission.PermissionManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedLongSparseArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +60,7 @@ final class ReconcilePackageUtils {
             Map<String, AndroidPackage> allPackages,
             Map<String, Settings.VersionInfo> versionInfos,
             SharedLibrariesImpl sharedLibraries,
-            KeySetManagerService ksms, Settings settings)
+            KeySetManagerService ksms, Settings settings, Context context)
             throws ReconcileFailure {
         final List<ReconciledPackage> result = new ArrayList<>(installRequests.size());
 
@@ -143,11 +149,11 @@ final class ReconcilePackageUtils {
                 } else {
                     if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
                         throw new ReconcileFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                                "Package " + parsedPackage.getPackageName()
+                                "Package " + installPackageName
                                         + " upgrade keys do not match the previously installed"
                                         + " version");
                     } else {
-                        String msg = "System package " + parsedPackage.getPackageName()
+                        String msg = "System package " + installPackageName
                                 + " signature changed; retaining data.";
                         PackageManagerService.reportSettingsProblem(Log.WARN, msg);
                     }
@@ -168,11 +174,42 @@ final class ReconcilePackageUtils {
                         removeAppKeySetData = true;
                     }
 
-                    // if this is is a sharedUser, check to see if the new package is signed by a
-                    // newer
-                    // signing certificate than the existing one, and if so, copy over the new
+                    // if this is a sharedUser, check to see if the new package is signed by a
+                    // newer signing certificate than the existing one, and if so, copy over the new
                     // details
                     if (sharedUserSetting != null) {
+                        if (!parsedPackage.isTestOnly() && sharedUserSetting.isPrivileged()
+                                && !signatureCheckPs.isSystem()) {
+                            final List<ParsedUsesPermission> usesPermissions =
+                                    parsedPackage.getUsesPermissions();
+                            final List<String> usesPrivilegedPermissions = new ArrayList<>();
+                            final PermissionManager permissionManager = context.getSystemService(
+                                    PermissionManager.class);
+                            // Check if the app requests any privileged permissions because that
+                            // violates the privapp-permissions allowlist check during boot.
+                            if (permissionManager != null) {
+                                for (int i = 0; i < usesPermissions.size(); i++) {
+                                    final String permissionName = usesPermissions.get(i).getName();
+                                    final PermissionInfo permissionInfo =
+                                            permissionManager.getPermissionInfo(permissionName, 0);
+                                    if (permissionInfo != null
+                                            && (permissionInfo.getProtectionFlags()
+                                            & PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
+                                        usesPrivilegedPermissions.add(permissionName);
+                                    }
+                                }
+                            }
+
+                            if (!usesPrivilegedPermissions.isEmpty()) {
+                                throw new ReconcileFailure(INSTALL_FAILED_INVALID_APK,
+                                        "Non-system package: " + installPackageName
+                                                + " shares signature and sharedUserId with"
+                                                + " a privileged package but requests"
+                                                + " privileged permissions that are not"
+                                                + " allowed: " + Arrays.toString(
+                                                        usesPrivilegedPermissions.toArray()));
+                            }
+                        }
                         // Attempt to merge the existing lineage for the shared SigningDetails with
                         // the lineage of the new package; if the shared SigningDetails are not
                         // returned this indicates the new package added new signers to the lineage
@@ -189,7 +226,7 @@ final class ReconcilePackageUtils {
                             for (AndroidPackage androidPackage : sharedUserSetting.getPackages()) {
                                 if (androidPackage.getPackageName() != null
                                         && !androidPackage.getPackageName().equals(
-                                        parsedPackage.getPackageName())) {
+                                                installPackageName)) {
                                     mergedDetails = mergedDetails.mergeLineageWith(
                                             androidPackage.getSigningDetails(),
                                             MERGE_RESTRICTED_CAPABILITY);
@@ -219,7 +256,7 @@ final class ReconcilePackageUtils {
                     if (sharedUserSetting != null) {
                         if (sharedUserSetting.signaturesChanged != null
                                 && !PackageManagerServiceUtils.canJoinSharedUserId(
-                                parsedPackage.getPackageName(), parsedPackage.getSigningDetails(),
+                                installPackageName, parsedPackage.getSigningDetails(),
                                 sharedUserSetting,
                                 PackageManagerServiceUtils.SHARED_USER_ID_JOIN_TYPE_SYSTEM)) {
                             if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 29) {
@@ -240,7 +277,7 @@ final class ReconcilePackageUtils {
                                 // whichever package happened to be scanned later.
                                 throw new IllegalStateException(
                                         "Signature mismatch on system package "
-                                                + parsedPackage.getPackageName()
+                                                + installPackageName
                                                 + " for shared user "
                                                 + sharedUserSetting);
                             }
@@ -252,7 +289,7 @@ final class ReconcilePackageUtils {
                         sharedUserSetting.signaturesChanged = Boolean.TRUE;
                     }
                     // File a report about this.
-                    String msg = "System package " + parsedPackage.getPackageName()
+                    String msg = "System package " + installPackageName
                             + " signature changed; retaining data.";
                     PackageManagerService.reportSettingsProblem(Log.WARN, msg);
                 } catch (IllegalArgumentException e) {

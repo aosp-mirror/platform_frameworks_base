@@ -25,6 +25,7 @@ import android.graphics.Rect
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
+import android.view.View.OnAttachStateChangeListener
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
@@ -105,6 +106,24 @@ constructor(
                 }
                 updateFontSizes()
                 updateTimeListeners()
+                value.smallClock.view.addOnAttachStateChangeListener(
+                    object : OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(p0: View?) {
+                            value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                        }
+
+                        override fun onViewDetachedFromWindow(p0: View?) {
+                        }
+                })
+                value.largeClock.view.addOnAttachStateChangeListener(
+                    object : OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(p0: View?) {
+                            value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                        }
+
+                        override fun onViewDetachedFromWindow(p0: View?) {
+                        }
+                })
             }
         }
 

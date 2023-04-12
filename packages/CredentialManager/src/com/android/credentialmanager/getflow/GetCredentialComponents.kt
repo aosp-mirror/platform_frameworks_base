@@ -66,6 +66,7 @@ import com.android.credentialmanager.common.ui.HeadlineIcon
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.logging.GetCredentialEvent
+import com.android.credentialmanager.userAndDisplayNameForPasskey
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 @Composable
@@ -322,12 +323,15 @@ fun AllSignInOptionCard(
             bottomPadding = 0.dp,
         )
     }) {
+        var isFirstSection = true
         // For username
         items(sortedUserNameToCredentialEntryList) { item ->
             PerUserNameCredentials(
                 perUserNameCredentialEntryList = item,
                 onEntrySelected = onEntrySelected,
+                isFirstSection = isFirstSection,
             )
+            isFirstSection = false
         }
         // Locked password manager
         if (authenticationEntryList.isNotEmpty()) {
@@ -335,7 +339,9 @@ fun AllSignInOptionCard(
                 LockedCredentials(
                     authenticationEntryList = authenticationEntryList,
                     onEntrySelected = onEntrySelected,
+                    isFirstSection = isFirstSection,
                 )
+                isFirstSection = false
             }
         }
         // From another device
@@ -345,15 +351,19 @@ fun AllSignInOptionCard(
                 RemoteEntryCard(
                     remoteEntry = remoteEntry,
                     onEntrySelected = onEntrySelected,
+                    isFirstSection = isFirstSection,
                 )
+                isFirstSection = false
             }
         }
         // Manage sign-ins (action chips)
         item {
             ActionChips(
                 providerInfoList = providerInfoList,
-                onEntrySelected = onEntrySelected
+                onEntrySelected = onEntrySelected,
+                isFirstSection = isFirstSection,
             )
+            isFirstSection = false
         }
     }
     onLog(GetCredentialEvent.CREDMAN_GET_CRED_ALL_SIGN_IN_OPTION_CARD)
@@ -366,6 +376,7 @@ fun AllSignInOptionCard(
 fun ActionChips(
     providerInfoList: List<ProviderInfo>,
     onEntrySelected: (BaseEntry) -> Unit,
+    isFirstSection: Boolean,
 ) {
     val actionChips = providerInfoList.flatMap { it.actionEntryList }
     if (actionChips.isEmpty()) {
@@ -373,7 +384,8 @@ fun ActionChips(
     }
 
     CredentialListSectionHeader(
-        text = stringResource(R.string.get_dialog_heading_manage_sign_ins)
+        text = stringResource(R.string.get_dialog_heading_manage_sign_ins),
+        isFirstSection = isFirstSection,
     )
     CredentialContainerCard {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -388,9 +400,11 @@ fun ActionChips(
 fun RemoteEntryCard(
     remoteEntry: RemoteEntryInfo,
     onEntrySelected: (BaseEntry) -> Unit,
+    isFirstSection: Boolean,
 ) {
     CredentialListSectionHeader(
-        text = stringResource(R.string.get_dialog_heading_from_another_device)
+        text = stringResource(R.string.get_dialog_heading_from_another_device),
+        isFirstSection = isFirstSection,
     )
     CredentialContainerCard {
         Column(
@@ -412,9 +426,11 @@ fun RemoteEntryCard(
 fun LockedCredentials(
     authenticationEntryList: List<AuthenticationEntryInfo>,
     onEntrySelected: (BaseEntry) -> Unit,
+    isFirstSection: Boolean,
 ) {
     CredentialListSectionHeader(
-        text = stringResource(R.string.get_dialog_heading_locked_password_managers)
+        text = stringResource(R.string.get_dialog_heading_locked_password_managers),
+        isFirstSection = isFirstSection,
     )
     CredentialContainerCard {
         Column(
@@ -432,11 +448,13 @@ fun LockedCredentials(
 fun PerUserNameCredentials(
     perUserNameCredentialEntryList: PerUserNameCredentialEntryList,
     onEntrySelected: (BaseEntry) -> Unit,
+    isFirstSection: Boolean,
 ) {
     CredentialListSectionHeader(
         text = stringResource(
             R.string.get_dialog_heading_for_username, perUserNameCredentialEntryList.userName
-        )
+        ),
+        isFirstSection = isFirstSection,
     )
     CredentialContainerCard {
         Column(
@@ -457,6 +475,10 @@ fun CredentialEntryRow(
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
+    val (username, displayName) = if (credentialEntryInfo.credentialType == CredentialType.PASSKEY)
+        userAndDisplayNameForPasskey(
+            credentialEntryInfo.userName, credentialEntryInfo.displayName ?: "")
+    else Pair(credentialEntryInfo.userName, credentialEntryInfo.displayName)
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
         iconImageBitmap = credentialEntryInfo.icon?.toBitmap()?.asImageBitmap(),
@@ -465,13 +487,13 @@ fun CredentialEntryRow(
         iconPainter =
         if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
-        entryHeadlineText = credentialEntryInfo.userName,
+        entryHeadlineText = username,
         entrySecondLineText = if (
             credentialEntryInfo.credentialType == CredentialType.PASSWORD) {
             "••••••••••••"
         } else {
             val itemsToDisplay = listOf(
-                credentialEntryInfo.displayName,
+                displayName,
                 credentialEntryInfo.credentialTypeDisplayName,
                 credentialEntryInfo.providerDisplayName
             ).filterNot(TextUtils::isEmpty)

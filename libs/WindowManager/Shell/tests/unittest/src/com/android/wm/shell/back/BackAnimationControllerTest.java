@@ -166,6 +166,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
         doMotionEvent(MotionEvent.ACTION_MOVE, 0);
         mController.setTriggerBack(true);
+    }
+
+    private void releaseBackGesture() {
         doMotionEvent(MotionEvent.ACTION_UP, 0);
     }
 
@@ -201,6 +204,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                     .setOnBackNavigationDone(new RemoteCallback(result)));
             triggerBackGesture();
             simulateRemoteAnimationStart(type);
+            mShellExecutor.flushAll();
+            releaseBackGesture();
             simulateRemoteAnimationFinished();
             mShellExecutor.flushAll();
 
@@ -252,6 +257,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME, false);
 
         triggerBackGesture();
+        releaseBackGesture();
 
         verify(mAppCallback, times(1)).onBackInvoked();
 
@@ -269,6 +275,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
         triggerBackGesture();
         simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        releaseBackGesture();
+
         // Check that back invocation is dispatched.
         verify(mAnimatorCallback).onBackInvoked();
         verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
@@ -308,6 +316,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
         triggerBackGesture();
         simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        mShellExecutor.flushAll();
+
+        releaseBackGesture();
 
         // Simulate transition timeout.
         mShellExecutor.flushAll();
@@ -369,6 +380,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
             simulateRemoteAnimationStart(type);
             mShellExecutor.flushAll();
 
+            releaseBackGesture();
+            mShellExecutor.flushAll();
+
             assertTrue("Navigation Done callback not called for "
                     + BackNavigationInfo.typeToString(type), result.mBackNavigationDone);
             assertTrue("TriggerBack should have been true", result.mTriggerBack);
@@ -394,6 +408,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 .setOnBackInvokedCallback(mAppCallback)
                 .setOnBackNavigationDone(new RemoteCallback(result)));
         triggerBackGesture();
+        mShellExecutor.flushAll();
+        releaseBackGesture();
         mShellExecutor.flushAll();
 
         assertTrue("Navigation Done callback not called for "
@@ -458,9 +474,12 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
     private void doMotionEvent(int actionDown, int coordinate) {
         mController.onMotionEvent(
-                coordinate, coordinate,
-                actionDown,
-                BackEvent.EDGE_LEFT);
+                /* touchX */ coordinate,
+                /* touchY */ coordinate,
+                /* velocityX = */ 0,
+                /* velocityY = */ 0,
+                /* keyAction */ actionDown,
+                /* swipeEdge */ BackEvent.EDGE_LEFT);
     }
 
     private void simulateRemoteAnimationStart(int type) throws RemoteException {

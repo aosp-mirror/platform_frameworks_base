@@ -500,13 +500,16 @@ public class ZOrderingTests extends WindowTestsBase {
         RecentsAnimationController controller = new RecentsAnimationController(
                 mWm, mockRunner, null, displayId);
         spyOn(controller);
-        controller.mShouldAttachNavBarToAppDuringTransition = true;
         doReturn(mNavBarWindow).when(controller).getNavigationBarWindow();
         mWm.setRecentsAnimationController(controller);
 
         // set ime visible
         spyOn(mDisplayContent.mInputMethodWindow);
         doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
+
+        DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        spyOn(policy);
+        doReturn(true).when(policy).shouldAttachNavBarToAppDuringTransition();
 
         // create home activity
         Task rootHomeTask = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();

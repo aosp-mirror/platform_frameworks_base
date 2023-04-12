@@ -291,6 +291,11 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
             long duration) {
     }
 
+    public int getHeightWithoutLockscreenConstraints() {
+        // ExpandableNotificationRow overrides this.
+        return getHeight();
+    }
+
     /**
      * @return The desired notification height.
      */

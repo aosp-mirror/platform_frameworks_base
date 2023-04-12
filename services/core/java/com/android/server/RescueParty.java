@@ -107,7 +107,7 @@ public class RescueParty {
     static final String NAMESPACE_TO_PACKAGE_MAPPING_FLAG =
             "namespace_to_package_mapping";
     @VisibleForTesting
-    static final long FACTORY_RESET_THROTTLE_DURATION_MS = TimeUnit.MINUTES.toMillis(10);
+    static final long DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN = 10;
 
     private static final String NAME = "rescue-party-observer";
 
@@ -117,6 +117,8 @@ public class RescueParty {
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
             "persist.device_config.configuration.disable_rescue_party_factory_reset";
+    private static final String PROP_THROTTLE_DURATION_MIN_FLAG =
+            "persist.device_config.configuration.rescue_party_throttle_duration_min";
 
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
@@ -489,13 +491,14 @@ public class RescueParty {
         switch(rescueLevel) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
             case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
-                return PackageHealthObserverImpact.USER_IMPACT_LOW;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_10;
             case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
             case LEVEL_WARM_REBOOT:
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_50;
             case LEVEL_FACTORY_RESET:
-                return PackageHealthObserverImpact.USER_IMPACT_HIGH;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_100;
             default:
-                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
         }
     }
 
@@ -633,7 +636,7 @@ public class RescueParty {
                 return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount,
                         mayPerformReboot(failedPackage)));
             } else {
-                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
             }
         }
 
@@ -677,7 +680,7 @@ public class RescueParty {
         @Override
         public int onBootLoop(int mitigationCount) {
             if (isDisabled()) {
-                return PackageHealthObserverImpact.USER_IMPACT_NONE;
+                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
             }
             return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount, true));
         }
@@ -721,7 +724,9 @@ public class RescueParty {
         private boolean shouldThrottleReboot() {
             Long lastResetTime = SystemProperties.getLong(PROP_LAST_FACTORY_RESET_TIME_MS, 0);
             long now = System.currentTimeMillis();
-            return now < lastResetTime + FACTORY_RESET_THROTTLE_DURATION_MS;
+            long throttleDurationMin = SystemProperties.getLong(PROP_THROTTLE_DURATION_MIN_FLAG,
+                    DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN);
+            return now < lastResetTime + TimeUnit.MINUTES.toMillis(throttleDurationMin);
         }
 
         private boolean isPersistentSystemApp(@NonNull String packageName) {

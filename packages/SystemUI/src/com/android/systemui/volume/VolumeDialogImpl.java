@@ -263,6 +263,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final ConfigurationController mConfigurationController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
     private final VolumePanelFactory mVolumePanelFactory;
+    private final CsdWarningDialog.Factory mCsdWarningDialogFactory;
     private final ActivityStarter mActivityStarter;
 
     private boolean mShowing;
@@ -311,6 +312,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             InteractionJankMonitor interactionJankMonitor,
             DeviceConfigProxy deviceConfigProxy,
             Executor executor,
+            CsdWarningDialog.Factory csdWarningDialogFactory,
             DumpManager dumpManager) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
@@ -322,6 +324,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mConfigurationController = configurationController;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
         mVolumePanelFactory = volumePanelFactory;
+        mCsdWarningDialogFactory = csdWarningDialogFactory;
         mActivityStarter = activityStarter;
         mShowActiveStreamOnly = showActiveStreamOnly();
         mHasSeenODICaptionsTooltip =
@@ -2084,21 +2087,21 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         rescheduleTimeoutH();
     }
 
-    private void showCsdWarningH(int csdWarning, int durationMs) {
+    @VisibleForTesting void showCsdWarningH(int csdWarning, int durationMs) {
         synchronized (mSafetyWarningLock) {
+
             if (mCsdDialog != null) {
                 return;
             }
-            mCsdDialog = new CsdWarningDialog(csdWarning,
-                    mContext, mController.getAudioManager()) {
-                @Override
-                protected void cleanUp() {
-                    synchronized (mSafetyWarningLock) {
-                        mCsdDialog = null;
-                    }
-                    recheckH(null);
+
+            final Runnable cleanUp = () -> {
+                synchronized (mSafetyWarningLock) {
+                    mCsdDialog = null;
                 }
+                recheckH(null);
             };
+
+            mCsdDialog = mCsdWarningDialogFactory.create(csdWarning, cleanUp);
             mCsdDialog.show();
         }
         recheckH(null);

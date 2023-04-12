@@ -8,8 +8,6 @@ package android {
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
-    field public static final String BODY_SENSORS_WRIST_TEMPERATURE = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE";
-    field public static final String BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
@@ -3429,8 +3427,14 @@ package android.view {
     method @NonNull public android.hardware.input.InputDeviceIdentifier getIdentifier();
   }
 
+  public abstract class InputEvent implements android.os.Parcelable {
+    method public abstract int getDisplayId();
+    method public abstract void setDisplayId(int);
+  }
+
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public static String actionToString(int);
+    method public final int getDisplayId();
     method public final void setDisplayId(int);
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
     field public static final int LAST_KEYCODE = 316; // 0x13c

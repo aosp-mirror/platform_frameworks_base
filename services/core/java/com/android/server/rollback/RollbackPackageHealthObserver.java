@@ -105,36 +105,46 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     @Override
     public int onHealthCheckFailed(@Nullable VersionedPackage failedPackage,
             @FailureReasons int failureReason, int mitigationCount) {
-        // For native crashes, we will roll back any available rollbacks
+        boolean anyRollbackAvailable = !mContext.getSystemService(RollbackManager.class)
+                .getAvailableRollbacks().isEmpty();
+        int impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
+
         if (failureReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH
-                && !mContext.getSystemService(RollbackManager.class)
-                .getAvailableRollbacks().isEmpty()) {
-            return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
-        }
-        if (getAvailableRollback(failedPackage) == null) {
-            // Don't handle the notification, no rollbacks available for the package
-            return PackageHealthObserverImpact.USER_IMPACT_NONE;
-        } else {
+                && anyRollbackAvailable) {
+            // For native crashes, we will directly roll back any available rollbacks
+            // Note: For non-native crashes the rollback-all step has higher impact
+            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
+        } else if (mitigationCount == 1 && getAvailableRollback(failedPackage) != null) {
             // Rollback is available, we may get a callback into #execute
-            return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
+            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
+        } else if (mitigationCount > 1 && anyRollbackAvailable) {
+            // If any rollbacks are available, we will commit them
+            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_70;
         }
+
+        return impact;
     }
 
     @Override
     public boolean execute(@Nullable VersionedPackage failedPackage,
             @FailureReasons int rollbackReason, int mitigationCount) {
         if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
-            mHandler.post(() -> rollbackAll());
+            mHandler.post(() -> rollbackAll(rollbackReason));
             return true;
         }
 
-        RollbackInfo rollback = getAvailableRollback(failedPackage);
-        if (rollback == null) {
-            Slog.w(TAG, "Expected rollback but no valid rollback found for " + failedPackage);
-            return false;
+        if (mitigationCount == 1) {
+            RollbackInfo rollback = getAvailableRollback(failedPackage);
+            if (rollback == null) {
+                Slog.w(TAG, "Expected rollback but no valid rollback found for " + failedPackage);
+                return false;
+            }
+            mHandler.post(() -> rollbackPackage(rollback, failedPackage, rollbackReason));
+        } else if (mitigationCount > 1) {
+            mHandler.post(() -> rollbackAll(rollbackReason));
         }
-        mHandler.post(() -> rollbackPackage(rollback, failedPackage, rollbackReason));
-        // Assume rollback executed successfully
+
+        // Assume rollbacks executed successfully
         return true;
     }
 
@@ -468,7 +478,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     }
 
     @WorkerThread
-    private void rollbackAll() {
+    private void rollbackAll(@FailureReasons int rollbackReason) {
         assertInWorkerThread();
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         List<RollbackInfo> rollbacks = rollbackManager.getAvailableRollbacks();
@@ -487,7 +497,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         for (RollbackInfo rollback : rollbacks) {
             VersionedPackage sample = rollback.getPackages().get(0).getVersionRolledBackFrom();
-            rollbackPackage(rollback, sample, PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+            rollbackPackage(rollback, sample, rollbackReason);
         }
     }
 }

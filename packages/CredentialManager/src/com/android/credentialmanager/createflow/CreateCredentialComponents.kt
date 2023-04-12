@@ -435,7 +435,7 @@ fun MoreOptionsRowIntroCard(
     }
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.NewReleases) }
-        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item {
             HeadlineText(
                 text = stringResource(
@@ -633,6 +633,7 @@ fun MoreAboutPasskeysIntroCard(
             }
         }
         item {
+            Divider(thickness = 8.dp, color = Color.Transparent)
             MoreAboutPasskeySectionHeader(
                 text = stringResource(R.string.public_key_cryptography_title)
             )
@@ -641,6 +642,7 @@ fun MoreAboutPasskeysIntroCard(
             }
         }
         item {
+            Divider(thickness = 8.dp, color = Color.Transparent)
             MoreAboutPasskeySectionHeader(
                 text = stringResource(R.string.improved_account_security_title)
             )
@@ -649,6 +651,7 @@ fun MoreAboutPasskeysIntroCard(
             }
         }
         item {
+            Divider(thickness = 8.dp, color = Color.Transparent)
             MoreAboutPasskeySectionHeader(
                 text = stringResource(R.string.seamless_transition_title)
             )
