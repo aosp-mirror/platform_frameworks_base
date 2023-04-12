@@ -247,6 +247,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSendBroadcast(pw);
                 case "compact":
                     return runCompact(pw);
+                case "freeze":
+                    return runFreeze(pw);
+                case "unfreeze":
+                    return runUnfreeze(pw);
                 case "instrument":
                     getOutPrintWriter().println("Error: must be invoked through 'am instrument'.");
                     return -1;
@@ -1074,20 +1078,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
         boolean isFullCompact = op.equals("full");
         boolean isSomeCompact = op.equals("some");
         if (isFullCompact || isSomeCompact) {
-            String processName = getNextArgRequired();
-            synchronized (mInternal.mProcLock) {
-                // Default to current user
-                int userId = mInterface.getCurrentUserId();
-                String userOpt = getNextOption();
-                if (userOpt != null && "--user".equals(userOpt)) {
-                    int inputUserId = UserHandle.parseUserArg(getNextArgRequired());
-                    if (inputUserId != UserHandle.USER_CURRENT) {
-                        userId = inputUserId;
-                    }
-                }
-                final int uid =
-                        mInternal.getPackageManagerInternal().getPackageUid(processName, 0, userId);
-                app = mInternal.getProcessRecordLocked(processName, uid);
+            app = getProcessFromShell();
+            if (app == null) {
+                getErrPrintWriter().println("Error: could not find process");
+                return -1;
             }
             pw.println("Process record found pid: " + app.mPid);
             if (isFullCompact) {
@@ -1141,6 +1135,93 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         return 0;
+    }
+
+    @NeverCompile
+    int runFreeze(PrintWriter pw) throws RemoteException {
+        String freezerOpt = getNextOption();
+        boolean isSticky = false;
+        if (freezerOpt != null) {
+            isSticky = freezerOpt.equals("--sticky");
+        }
+        ProcessRecord app = getProcessFromShell();
+        if (app == null) {
+            getErrPrintWriter().println("Error: could not find process");
+            return -1;
+        }
+        pw.println("Freezing pid: " + app.mPid + " sticky=" + isSticky);
+        synchronized (mInternal) {
+            synchronized (mInternal.mProcLock) {
+                app.mOptRecord.setFreezeSticky(isSticky);
+                mInternal.mOomAdjuster.mCachedAppOptimizer.freezeAppAsyncInternalLSP(app, 0, true);
+            }
+        }
+        return 0;
+    }
+
+    @NeverCompile
+    int runUnfreeze(PrintWriter pw) throws RemoteException {
+        String freezerOpt = getNextOption();
+        boolean isSticky = false;
+        if (freezerOpt != null) {
+            isSticky = freezerOpt.equals("--sticky");
+        }
+        ProcessRecord app = getProcessFromShell();
+        if (app == null) {
+            getErrPrintWriter().println("Error: could not find process");
+            return -1;
+        }
+        pw.println("Unfreezing pid: " + app.mPid);
+        synchronized (mInternal) {
+            synchronized (mInternal.mProcLock) {
+                synchronized (mInternal.mOomAdjuster.mCachedAppOptimizer.mFreezerLock) {
+                    app.mOptRecord.setFreezeSticky(isSticky);
+                    mInternal.mOomAdjuster.mCachedAppOptimizer.unfreezeAppInternalLSP(app, 0,
+                            false);
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Parses from the shell the process name and user id if provided and provides the corresponding
+     * {@link ProcessRecord)} If no user is provided, it will fallback to current user.
+     * Example usage: {@code <processname> --user current} or {@code <processname>}
+     * @return process record of process, null if none found.
+     * @throws RemoteException
+     */
+    @NeverCompile
+    ProcessRecord getProcessFromShell() throws RemoteException {
+        ProcessRecord app;
+        String processName = getNextArgRequired();
+        synchronized (mInternal.mProcLock) {
+            // Default to current user
+            int userId = getUserIdFromShellOrFallback();
+            final int uid =
+                    mInternal.getPackageManagerInternal().getPackageUid(processName, 0, userId);
+            app = mInternal.getProcessRecordLocked(processName, uid);
+        }
+        return app;
+    }
+
+    /**
+     * @return User id from command line provided in the form of
+     *  {@code --user <userid|current|all>} and if the argument is not found it will fallback
+     *  to current user.
+     * @throws RemoteException
+     */
+    @NeverCompile
+    int getUserIdFromShellOrFallback() throws RemoteException {
+        int userId = mInterface.getCurrentUserId();
+        String userOpt = getNextOption();
+        if (userOpt != null && "--user".equals(userOpt)) {
+            int inputUserId = UserHandle.parseUserArg(getNextArgRequired());
+            if (inputUserId != UserHandle.USER_CURRENT) {
+                userId = inputUserId;
+            }
+        }
+        return userId;
     }
 
     int runDumpHeap(PrintWriter pw) throws RemoteException {
@@ -4061,6 +4142,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Perform a native compaction for process with <pid>.");
             pw.println("      some: execute file compaction.");
             pw.println("      full: execute anon + file compaction.");
+            pw.println("  freeze [--sticky] <processname> [--user <USER_ID>]");
+            pw.println("      Freeze a process.");
+            pw.println("        --sticky: persists the frozen state for the process lifetime or");
+            pw.println("                  until an unfreeze is triggered via shell");
+            pw.println("  unfreeze [--sticky] <processname> [--user <USER_ID>]");
+            pw.println("      Unfreeze a process.");
+            pw.println("        --sticky: persists the unfrozen state for the process lifetime or");
+            pw.println("                  until a freeze is triggered via shell");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
