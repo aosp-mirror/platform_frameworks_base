@@ -103,11 +103,35 @@ public class ShutdownCheckPointsTest {
     }
 
     @Test
-    public void testCallerProcessBinderEntry() throws RemoteException {
+    public void testCallerProcessBinderEntries() throws RemoteException {
         List<ActivityManager.RunningAppProcessInfo> runningAppProcessInfos = new ArrayList<>();
         runningAppProcessInfos.add(
                 new ActivityManager.RunningAppProcessInfo("process_name", 1, new String[0]));
         when(mActivityManager.getRunningAppProcesses()).thenReturn(runningAppProcessInfos);
+
+        mTestInjector.setCurrentTime(1000);
+        // Matching pid in getRunningAppProcesses
+        mInstance.recordCheckPointInternal(1, "reason1");
+        // Missing pid in getRunningAppProcesses
+        mInstance.recordCheckPointInternal(2, "reason2");
+
+        assertEquals(
+                "Shutdown request from BINDER for reason reason1 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                        + "com.android.server.power.ShutdownCheckPointsTest"
+                        + ".testCallerProcessBinderEntries\n"
+                        + "From process process_name (pid=1)\n\n"
+                        + "Shutdown request from BINDER for reason reason2 "
+                        + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
+                        + "com.android.server.power.ShutdownCheckPointsTest"
+                        + ".testCallerProcessBinderEntries\n"
+                        + "From process ? (pid=2)\n\n",
+                dumpToString());
+    }
+
+    @Test
+    public void testNullCallerProcessBinderEntries() throws RemoteException {
+        when(mActivityManager.getRunningAppProcesses()).thenReturn(null);
 
         mTestInjector.setCurrentTime(1000);
         mInstance.recordCheckPointInternal(1, "reason1");
@@ -116,8 +140,8 @@ public class ShutdownCheckPointsTest {
                 "Shutdown request from BINDER for reason reason1 "
                         + "at 1970-01-01 00:00:01.000 UTC (epoch=1000)\n"
                         + "com.android.server.power.ShutdownCheckPointsTest"
-                        + ".testCallerProcessBinderEntry\n"
-                        + "From process process_name (pid=1)\n\n",
+                        + ".testNullCallerProcessBinderEntries\n"
+                        + "From process ? (pid=1)\n\n",
                 dumpToString());
     }
 
