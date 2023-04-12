@@ -1019,6 +1019,24 @@ public final class ActiveServices {
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
                 service, neededGrants, callingUid, callingProcessName, callingPackage));
 
+        // We want to allow scheduling user-initiated jobs when the app is running a
+        // foreground service that was started in the same conditions that allows for scheduling
+        // UI jobs. More explicitly, we want to allow scheduling UI jobs when the app is running
+        // an FGS that started when the app was in the TOP or a BAL-approved state.
+        final boolean isFgs = r.isForeground || r.fgRequired;
+        if (isFgs) {
+            // As of Android UDC, the conditions required for the while-in-use permissions
+            // are the same conditions that we want, so we piggyback on that logic.
+            // Use that as a shortcut if possible to avoid having to recheck all the conditions.
+            final boolean whileInUseAllowsUiJobScheduling =
+                    ActivityManagerService.doesReasonCodeAllowSchedulingUserInitiatedJobs(
+                            r.mAllowWhileInUsePermissionInFgsReason);
+            r.updateAllowUiJobScheduling(whileInUseAllowsUiJobScheduling
+                    || mAm.canScheduleUserInitiatedJobs(callingUid, callingPid, callingPackage));
+        } else {
+            r.updateAllowUiJobScheduling(false);
+        }
+
         if (fgRequired) {
             // We are now effectively running a foreground service.
             synchronized (mAm.mProcessStats.mLock) {
@@ -7362,26 +7380,12 @@ public final class ActiveServices {
         } else {
             allowWhileInUse = REASON_UNKNOWN;
         }
-        // We want to allow scheduling user-initiated jobs when the app is running a
-        // foreground service that was started in the same conditions that allows for scheduling
-        // UI jobs. More explicitly, we want to allow scheduling UI jobs when the app is running
-        // an FGS that started when the app was in the TOP or a BAL-approved state.
-        // As of Android UDC, the conditions required for the while-in-use permissions
-        // are the same conditions that we want, so we piggyback on that logic.
-        // We use that as a shortcut if possible so we don't have to recheck all the conditions.
-        final boolean isFgs = r.isForeground || r.fgRequired;
-        if (isFgs) {
-            r.updateAllowUiJobScheduling(ActivityManagerService
-                    .doesReasonCodeAllowSchedulingUserInitiatedJobs(allowWhileInUse)
-                    || mAm.canScheduleUserInitiatedJobs(
-                            callingUid, callingPid, callingPackage, true));
-        } else {
-            r.updateAllowUiJobScheduling(false);
-        }
+        r.mAllowWhileInUsePermissionInFgsReason = allowWhileInUse;
     }
 
     void resetFgsRestrictionLocked(ServiceRecord r) {
         r.mAllowWhileInUsePermissionInFgs = false;
+        r.mAllowWhileInUsePermissionInFgsReason = REASON_DENIED;
         r.mAllowStartForeground = REASON_DENIED;
         r.mInfoAllowStartForeground = null;
         r.mInfoTempFgsAllowListReason = null;
