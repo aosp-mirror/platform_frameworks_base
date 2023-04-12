@@ -2192,6 +2192,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 any(), anyString(), anyInt(), anyString(), anyInt()))
                 .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -2218,6 +2219,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 any(), anyString(), anyInt(), anyString(), anyInt()))
                 .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -2241,6 +2243,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCancelNotificationWithTag_fromApp_canCancelOngoingNoClearChild()
             throws Exception {
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -2264,6 +2267,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCancelNotificationWithTag_fromApp_canCancelOngoingNoClearParent()
             throws Exception {
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_ONGOING_EVENT | FLAG_NO_CLEAR;
@@ -2290,6 +2294,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 any(), anyString(), anyInt(), anyString(), anyInt()))
                 .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -2318,6 +2323,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 any(), anyString(), anyInt(), anyString(), anyInt()))
                 .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -2343,6 +2349,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCancelAllNotifications_fromApp_canCancelOngoingNoClearChild()
             throws Exception {
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -2368,6 +2375,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCancelAllNotifications_fromApp_canCancelOngoingNoClearParent()
             throws Exception {
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_ONGOING_EVENT | FLAG_NO_CLEAR;
@@ -3207,7 +3215,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(channel2.getId()), anyBoolean()))
                 .thenReturn(channel2);
         when(mPreferencesHelper.createNotificationChannel(eq(PKG), anyInt(),
-                eq(channel2), anyBoolean(), anyBoolean()))
+                eq(channel2), anyBoolean(), anyBoolean(), anyInt(), anyBoolean()))
                 .thenReturn(true);
 
         reset(mListeners);
@@ -3266,7 +3274,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
         when(mPreferencesHelper.deleteNotificationChannel(eq(PKG), anyInt(),
-                eq(mTestNotificationChannel.getId()))).thenReturn(true);
+                eq(mTestNotificationChannel.getId()),  anyInt(), anyBoolean())).thenReturn(true);
         reset(mListeners);
         mBinderService.deleteNotificationChannel(PKG, mTestNotificationChannel.getId());
         verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
@@ -3365,7 +3373,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 null, PKG, Process.myUserHandle(), mTestNotificationChannel);
 
         verify(mPreferencesHelper, times(1)).updateNotificationChannel(
-                anyString(), anyInt(), any(), anyBoolean());
+                anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
 
         verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
@@ -3387,7 +3395,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         verify(mPreferencesHelper, never()).updateNotificationChannel(
-                anyString(), anyInt(), any(), anyBoolean());
+                anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
 
         verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
@@ -3413,7 +3421,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         verify(mPreferencesHelper, never()).updateNotificationChannel(
-                anyString(), anyInt(), any(), anyBoolean());
+                anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
 
         verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
@@ -4893,7 +4901,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mLocaleChangeReceiver.onReceive(mContext,
                 new Intent(Intent.ACTION_LOCALE_CHANGED));
 
-        verify(mZenModeHelper, times(1)).updateDefaultZenRules();
+        verify(mZenModeHelper, times(1)).updateDefaultZenRules(
+                anyInt(), anyBoolean());
     }
 
     @Test
@@ -6710,6 +6719,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6732,6 +6742,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6751,6 +6762,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6780,6 +6792,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(false); // rate limit reached
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6803,6 +6816,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6837,6 +6851,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6856,6 +6871,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6875,6 +6891,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -6905,6 +6922,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(false); // rate limit reached
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
         setAppInForegroundForToasts(mUid, false);
@@ -6927,6 +6945,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(false); // rate limit reached
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
         setAppInForegroundForToasts(mUid, true);
@@ -6948,6 +6967,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(false); // rate limit reached
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, true);
         setAppInForegroundForToasts(mUid, false);
@@ -6969,6 +6989,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(false); // rate limit reached
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
         setAppInForegroundForToasts(mUid, false);
@@ -7027,6 +7048,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -7048,6 +7070,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -7151,6 +7174,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
         mockIsUserVisible(DEFAULT_DISPLAY, false);
@@ -7171,6 +7195,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -7193,6 +7218,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -7237,6 +7263,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
 
@@ -8128,7 +8155,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(rule, "com.android.settings");
 
         // verify that zen mode helper gets passed in a package name of "android"
-        verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString());
+        verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString(),
+                anyInt(), eq(true)); // system call counts as "is system or system ui"
     }
 
     @Test
@@ -8149,7 +8177,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(rule, "com.android.settings");
 
         // verify that zen mode helper gets passed in a package name of "android"
-        verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString());
+        verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString(),
+                anyInt(),  eq(true));  // system call counts as "system or system ui"
     }
 
     @Test
@@ -8169,7 +8198,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in the package name from the arg, not the owner
         verify(mockZenModeHelper).addAutomaticZenRule(
-                eq("another.package"), eq(rule), anyString());
+                eq("another.package"), eq(rule), anyString(), anyInt(),
+                eq(false));  // doesn't count as a system/systemui call
     }
 
     @Test
@@ -9988,8 +10018,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMatchesCallFilter_noPermissionShouldThrow() throws Exception {
-        // set the testable NMS to not system uid
+        // set the testable NMS to not system uid/appid
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
 
         // make sure a caller without listener access or read_contacts permission can't call
         // matchesCallFilter.
@@ -10028,6 +10059,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testMatchesCallFilter_hasListenerPermission() throws Exception {
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
 
         // make sure a caller with only listener access and not read_contacts permission can call
         // matchesCallFilter.
@@ -10046,6 +10078,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testMatchesCallFilter_hasContactsPermission() throws Exception {
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
 
         // make sure a caller with only read_contacts permission and not listener access can call
         // matchesCallFilter.
@@ -11176,6 +11209,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
                 .thenReturn(true);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -11200,6 +11234,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
                 .thenReturn(true);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_USER_INITIATED_JOB;
@@ -11224,6 +11259,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
                 .thenReturn(true);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -11250,6 +11286,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
                 .thenReturn(true);
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_USER_INITIATED_JOB;
@@ -11673,6 +11710,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private void allowTestPackageToToast() throws Exception {
         assertWithMessage("toast queue").that(mService.mToastQueue).isEmpty();
         mService.isSystemUid = false;
+        mService.isSystemAppId = false;
         setToastRateIsWithinQuota(true);
         setIfPackageHasPermissionToAvoidToastRateLimiting(TEST_PACKAGE, false);
         // package is not suspended
