@@ -36,6 +36,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -47,6 +48,7 @@ class FontScalingTile
 @Inject
 constructor(
     host: QSHost,
+    uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,
@@ -61,6 +63,7 @@ constructor(
 ) :
     QSTileImpl<QSTile.State?>(
         host,
+        uiEventLogger,
         backgroundLooper,
         mainHandler,
         falsingManager,

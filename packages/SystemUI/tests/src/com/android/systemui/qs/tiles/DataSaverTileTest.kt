@@ -21,7 +21,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
@@ -30,6 +29,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.DataSaverController
@@ -57,8 +57,8 @@ class DataSaverTileTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var dataSaverController: DataSaverController
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var uiEventLogger: QsEventLogger
 
-    private val uiEventLogger = UiEventLoggerFake()
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: DataSaverTile
 
@@ -68,11 +68,11 @@ class DataSaverTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         Mockito.`when`(mHost.context).thenReturn(mContext)
-        Mockito.`when`(mHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile =
             DataSaverTile(
                 mHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 falsingManager,

@@ -44,6 +44,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -86,6 +87,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private DialogLaunchAnimator mDialogLaunchAnimator;
     @Mock
     private PanelInteractor mPanelInteractor;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -100,6 +103,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile = new ScreenRecordTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
