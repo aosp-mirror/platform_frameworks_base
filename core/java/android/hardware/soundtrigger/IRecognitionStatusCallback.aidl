@@ -42,12 +42,6 @@ oneway interface IRecognitionStatusCallback {
     void onGenericSoundTriggerDetected(in SoundTrigger.GenericRecognitionEvent recognitionEvent);
 
     /**
-     * Called when the detection fails due to an error.
-     *
-     * @param status The error code that was seen.
-     */
-    void onError(int status);
-    /**
      * Called when the recognition is paused temporarily for some reason.
      */
     void onRecognitionPaused();
@@ -55,4 +49,28 @@ oneway interface IRecognitionStatusCallback {
      * Called when the recognition is resumed after it was temporarily paused.
      */
     void onRecognitionResumed();
+
+    // Error callbacks to follow
+    /**
+     * Called when this recognition has been preempted by another.
+     */
+    void onPreempted();
+
+    /**
+     * Called when the underlying ST module service has died.
+     */
+    void onModuleDied();
+
+    /**
+     * Called when the service failed to gracefully resume recognition following a pause.
+     * @param status - The received error code.
+     */
+    void onResumeFailed(int status);
+
+    /**
+     * Called when the service failed to pause recognition when required.
+     * TODO(b/276507281) Remove. This should never happen, so we should abort instead.
+     * @param status - The received error code.
+     */
+    void onPauseFailed(int status);
 }
