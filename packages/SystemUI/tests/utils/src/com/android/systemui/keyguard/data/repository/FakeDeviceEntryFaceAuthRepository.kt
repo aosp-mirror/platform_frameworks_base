@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 
 class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
 
@@ -46,14 +45,19 @@ class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
     private val _runningAuthRequest = MutableStateFlow<Pair<FaceAuthUiEvent, Boolean>?>(null)
     val runningAuthRequest: StateFlow<Pair<FaceAuthUiEvent, Boolean>?> =
         _runningAuthRequest.asStateFlow()
-    override val isAuthRunning = _runningAuthRequest.map { it != null }
+
+    private val _isAuthRunning = MutableStateFlow(false)
+    override val isAuthRunning: StateFlow<Boolean> = _isAuthRunning
+
     override val isBypassEnabled = MutableStateFlow(false)
 
     override suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
         _runningAuthRequest.value = uiEvent to fallbackToDetection
+        _isAuthRunning.value = true
     }
 
     override fun cancel() {
+        _isAuthRunning.value = false
         _runningAuthRequest.value = null
     }
 }
