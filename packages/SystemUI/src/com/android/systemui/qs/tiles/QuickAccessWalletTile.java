@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.provider.Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT;
 
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
@@ -223,7 +224,12 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 return;
             }
             mSelectedCard = cards.get(selectedIndex);
-            mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
+            android.graphics.drawable.Icon cardImageIcon = mSelectedCard.getCardImage();
+            if (cardImageIcon.getType() == TYPE_URI) {
+                mCardViewDrawable = null;
+            } else {
+                mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
+            }
             refreshState();
         }
 
