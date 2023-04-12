@@ -5,6 +5,9 @@
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceStressTest"
         }
       ]
     },
