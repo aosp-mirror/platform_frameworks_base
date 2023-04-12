@@ -5205,6 +5205,17 @@ public final class ProcessList {
     }
 
     /**
+     * Called by ActivityManagerService when a recoverable native crash occurs.
+     */
+    @GuardedBy("mService")
+    void noteAppRecoverableCrash(final ProcessRecord app) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + app + " has a recoverable native crash");
+        }
+        mAppExitInfoTracker.scheduleNoteAppRecoverableCrash(app);
+    }
+
+    /**
      * Called by ActivityManagerService when it decides to kill an application process.
      */
     @GuardedBy("mService")
