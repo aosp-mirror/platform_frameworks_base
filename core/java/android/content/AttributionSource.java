@@ -150,6 +150,7 @@ public final class AttributionSource implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public AttributionSource(int uid, int pid, @Nullable String packageName,
             @Nullable String attributionTag, @NonNull IBinder token,
             @Nullable String[] renouncedPermissions,
