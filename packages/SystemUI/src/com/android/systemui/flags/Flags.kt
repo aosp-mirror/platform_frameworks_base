@@ -607,9 +607,6 @@ object Flags {
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
 
-    // TODO(b/266983432) Tracking Bug
-    val SHARESHEET_CUSTOM_ACTIONS = releasedFlag(1501, "sharesheet_custom_actions")
-
     // TODO(b/266982749) Tracking Bug
     val SHARESHEET_RESELECTION_ACTION = releasedFlag(1502, "sharesheet_reselection_action")
 
