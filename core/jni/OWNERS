@@ -104,6 +104,3 @@ per-file com_android_internal_os_*MultiStateCounter* = file:/BATTERY_STATS_OWNER
 
 # PM
 per-file com_android_internal_content_* = file:/PACKAGE_MANAGER_OWNERS
-
-# Stats/expresslog
-per-file *expresslog* = file:/services/core/java/com/android/server/stats/OWNERS
