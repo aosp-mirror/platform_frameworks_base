@@ -77,4 +77,19 @@ public class BackupAndRestoreFeatureFlags {
                 /* name= */ "full_backup_utils_route_buffer_size_bytes",
                 /* defaultValue= */ 32 * 1024); // 32 KB
     }
+
+    /**
+     * Retrieves the value of the flag
+     * "unified_restore_continue_after_transport_failure_in_kv_restore".
+     * If true, Unified restore task will continue to next package if key-value restore of a
+     * package fails due to Transport-level failure. See b/128499560 for more context.
+     */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    public static boolean getUnifiedRestoreContinueAfterTransportFailureInKvRestore() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE,
+                /* name= */
+                "unified_restore_continue_after_transport_failure_in_kv_restore",
+                /* defaultValue= */ true);
+    }
 }
