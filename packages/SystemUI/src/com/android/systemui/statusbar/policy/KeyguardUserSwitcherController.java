@@ -61,6 +61,7 @@ import javax.inject.Inject;
  * Manages the user switcher on the Keyguard.
  */
 @KeyguardUserSwitcherScope
+@Deprecated
 public class KeyguardUserSwitcherController extends ViewController<KeyguardUserSwitcherView> {
 
     private static final String TAG = "KeyguardUserSwitcherController";
