@@ -682,6 +682,46 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setEnterInstanceId(instanceId);
     }
 
+    void startIntents(PendingIntent pendingIntent1, Intent fillInIntent1,
+            @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
+            PendingIntent pendingIntent2, Intent fillInIntent2,
+            @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
+            @SplitPosition int splitPosition, float splitRatio,
+            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (!mMainStage.isActive()) {
+            // Build a request WCT that will launch both apps such that task 0 is on the main stage
+            // while task 1 is on the side stage.
+            mMainStage.activate(wct, false /* reparent */);
+        }
+
+        prepareEvictChildTasksIfSplitActive(wct);
+        mSplitLayout.setDivideRatio(splitRatio);
+        updateWindowBounds(mSplitLayout, wct);
+        wct.reorder(mRootTaskInfo.token, true);
+        setRootForceTranslucent(false, wct);
+
+        setSideStagePosition(splitPosition, wct);
+        options1 = options1 != null ? options1 : new Bundle();
+        addActivityOptions(options1, mSideStage);
+        if (shortcutInfo1 != null) {
+            wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
+        } else {
+            wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+        }
+        options2 = options2 != null ? options2 : new Bundle();
+        addActivityOptions(options2, mMainStage);
+        if (shortcutInfo2 != null) {
+            wct.startShortcut(mContext.getPackageName(), shortcutInfo2, options2);
+        } else {
+            wct.sendPendingIntent(pendingIntent2, fillInIntent2, options2);
+        }
+
+        mSplitTransitions.startEnterTransition(
+                TRANSIT_SPLIT_SCREEN_PAIR_OPEN, wct, remoteTransition, this, null, null);
+        setEnterInstanceId(instanceId);
+    }
+
     /** Starts a pair of tasks using legacy transition. */
     void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
             int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
