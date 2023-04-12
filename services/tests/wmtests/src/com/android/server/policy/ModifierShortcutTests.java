@@ -18,6 +18,7 @@ package com.android.server.policy;
 
 import static android.view.KeyEvent.KEYCODE_ALT_LEFT;
 import static android.view.KeyEvent.KEYCODE_B;
+import static android.view.KeyEvent.KEYCODE_BRIGHTNESS_DOWN;
 import static android.view.KeyEvent.KEYCODE_C;
 import static android.view.KeyEvent.KEYCODE_CTRL_LEFT;
 import static android.view.KeyEvent.KEYCODE_E;
@@ -185,5 +186,20 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideLaunchHome();
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_ENTER}, 0);
         mPhoneWindowManager.assertGoToHomescreen();
+    }
+
+    /**
+     * Sends a KEYCODE_BRIGHTNESS_DOWN event and validates the brightness is decreased as expected;
+     */
+    @Test
+    public void testKeyCodeBrightnessDown() {
+        float[] currentBrightness = new float[]{0.1f, 0.05f, 0.0f};
+        float[] newBrightness = new float[]{0.065738f, 0.0275134f, 0.0f};
+
+        for (int i = 0; i < currentBrightness.length; i++) {
+            mPhoneWindowManager.prepareBrightnessDecrease(currentBrightness[i]);
+            sendKey(KEYCODE_BRIGHTNESS_DOWN);
+            mPhoneWindowManager.verifyNewBrightness(newBrightness[i]);
+        }
     }
 }
