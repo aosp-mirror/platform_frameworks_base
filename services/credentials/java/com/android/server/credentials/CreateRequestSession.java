@@ -89,14 +89,16 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
         mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
+        cancelExistingPendingIntent();
         try {
-            mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
+            mPendingIntent = mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
                             mRequestId, mClientRequest,
                             mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
-                    providerDataList));
+                    providerDataList);
+            mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {
             mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
             mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.TERMINATED);
