@@ -72,7 +72,11 @@ public class TestableSettingsProvider extends MockContentProvider {
 
     public Bundle call(String method, String arg, Bundle extras) {
         // Methods are "GET_system", "GET_global", "PUT_secure", etc.
-        final int userId = extras.getInt(Settings.CALL_METHOD_USER_KEY, UserHandle.myUserId());
+        int userId = extras.getInt(Settings.CALL_METHOD_USER_KEY, UserHandle.USER_CURRENT);
+        if (userId == UserHandle.USER_CURRENT || userId == UserHandle.USER_CURRENT_OR_SELF) {
+            userId = UserHandle.myUserId();
+        }
+
         final String[] commands = method.split("_", 2);
         final String op = commands[0];
         final String table = commands[1];
