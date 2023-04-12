@@ -25,20 +25,33 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import android.app.backup.BackupDataInput;
+import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupTransport;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.os.Message;
+import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import android.app.backup.BackupDataInput;
-import android.app.backup.BackupDataOutput;
-import android.platform.test.annotations.Presubmit;
-
+import com.android.modules.utils.testing.TestableDeviceConfig;
 import com.android.server.backup.UserBackupManagerService;
+import com.android.server.backup.internal.BackupHandler;
+import com.android.server.backup.transport.BackupTransportClient;
+import com.android.server.backup.transport.TransportConnection;
+import com.android.server.backup.transport.TransportNotAvailableException;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -62,9 +75,14 @@ public class PerformUnifiedRestoreTaskTest {
     private static final String SYSTEM_PACKAGE_NAME = "android";
     private static final String NON_SYSTEM_PACKAGE_NAME = "package";
 
-    @Mock private BackupDataInput mBackupDataInput;
-    @Mock private BackupDataOutput mBackupDataOutput;
-    @Mock private UserBackupManagerService mBackupManagerService;
+    @Mock
+    private BackupDataInput mBackupDataInput;
+    @Mock
+    private BackupDataOutput mBackupDataOutput;
+    @Mock
+    private UserBackupManagerService mBackupManagerService;
+    @Mock
+    private TransportConnection mTransportConnection;
 
     private Set<String> mExcludedkeys = new HashSet<>();
     private Map<String, String> mBackupData = new HashMap<>();
@@ -74,11 +92,19 @@ public class PerformUnifiedRestoreTaskTest {
     private Set<String> mBackupDataDump;
     private PerformUnifiedRestoreTask mRestoreTask;
 
+    @Rule
+    public TestableDeviceConfig.TestableDeviceConfigRule
+            mDeviceConfigRule = new TestableDeviceConfig.TestableDeviceConfigRule();
+
+    private Context mContext;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         populateTestData();
+
+        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         mBackupDataSource = new ArrayDeque<>(mBackupData.keySet());
         when(mBackupDataInput.readNextHeader()).then(new Answer<Boolean>() {
@@ -106,7 +132,7 @@ public class PerformUnifiedRestoreTaskTest {
                     }
                 });
 
-        mRestoreTask = new PerformUnifiedRestoreTask(mBackupManagerService);
+        mRestoreTask = new PerformUnifiedRestoreTask(mBackupManagerService, mTransportConnection);
     }
 
     private void populateTestData() {
@@ -178,5 +204,65 @@ public class PerformUnifiedRestoreTaskTest {
                 mExcludedkeys);
 
         assertTrue(mRestoreTask.shouldStageBackupData(SYSTEM_PACKAGE_NAME));
+    }
+
+    @Test
+    public void testFailedKeyValueRestore_continueAfterFeatureEnabled_nextStateIsRunningQueue()
+            throws TransportNotAvailableException, RemoteException {
+        DeviceConfig.setProperty(
+                "backup_and_restore",
+                "unified_restore_continue_after_transport_failure_in_kv_restore",
+                "true",
+                false);
+
+        setupForRestoreKeyValueState(BackupTransport.TRANSPORT_ERROR);
+
+        mRestoreTask.setCurrentUnifiedRestoreStateForTesting(UnifiedRestoreState.RESTORE_KEYVALUE);
+        mRestoreTask.setStateDirForTesting(mContext.getCacheDir());
+
+        PackageInfo testPackageInfo = new PackageInfo();
+        testPackageInfo.packageName = "test.package.name";
+        mRestoreTask.initiateOneRestoreForTesting(testPackageInfo, 0L);
+        assertTrue(
+                mRestoreTask.getCurrentUnifiedRestoreStateForTesting()
+                        == UnifiedRestoreState.RUNNING_QUEUE);
+    }
+
+    @Test
+    public void testFailedKeyValueRestore_continueAfterFeatureDisabled_nextStateIsFinal()
+            throws RemoteException, TransportNotAvailableException {
+        DeviceConfig.setProperty(
+                "backup_and_restore",
+                "unified_restore_continue_after_transport_failure_in_kv_restore",
+                "false",
+                false);
+
+        setupForRestoreKeyValueState(BackupTransport.TRANSPORT_ERROR);
+
+        mRestoreTask.setCurrentUnifiedRestoreStateForTesting(UnifiedRestoreState.RESTORE_KEYVALUE);
+        mRestoreTask.setStateDirForTesting(mContext.getCacheDir());
+
+        PackageInfo testPackageInfo = new PackageInfo();
+        testPackageInfo.packageName = "test.package.name";
+        mRestoreTask.initiateOneRestoreForTesting(testPackageInfo, 0L);
+        assertTrue(
+                mRestoreTask.getCurrentUnifiedRestoreStateForTesting()
+                        == UnifiedRestoreState.FINAL);
+    }
+
+    private void setupForRestoreKeyValueState(int transportStatus)
+            throws RemoteException, TransportNotAvailableException {
+        // Mock BackupHandler to do nothing when executeNextState() is called
+        BackupHandler backupHandler = Mockito.mock(BackupHandler.class);
+        when(backupHandler.obtainMessage(anyInt(), any())).thenReturn(new Message());
+        when(backupHandler.sendMessage(any())).thenReturn(true);
+
+        // Return cache directory for any bookkeeping or maintaining persistent state.
+        when(mBackupManagerService.getDataDir()).thenReturn(mContext.getCacheDir());
+        when(mBackupManagerService.getBackupHandler()).thenReturn(backupHandler);
+
+        BackupTransportClient transport = Mockito.mock(BackupTransportClient.class);
+        when(transport.getRestoreData(any())).thenReturn(transportStatus);
+        when(mTransportConnection.connectOrThrow(any())).thenReturn(transport);
     }
 }
