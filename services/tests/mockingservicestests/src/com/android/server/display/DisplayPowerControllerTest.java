@@ -49,7 +49,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.testing.TestableContext;
@@ -141,9 +140,9 @@ public final class DisplayPowerControllerTest {
 
         // Put the system into manual brightness by default, just to minimize unexpected events and
         // have a consistent starting state
-        Settings.System.putIntForUser(mContext.getContentResolver(),
+        Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
 
 
         addLocalServiceMock(WindowManagerPolicy.class, mWindowManagerPolicyMock);
@@ -426,9 +425,9 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testDisplayBrightnessFollowers_AutomaticBrightness() {
-        Settings.System.putIntForUser(mContext.getContentResolver(),
+        Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, UserHandle.USER_CURRENT);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         final float brightness = 0.4f;
         final float nits = 300;
         final float ambientLux = 3000;
@@ -546,9 +545,9 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testSetScreenOffBrightnessSensorEnabled_DisplayIsOff() {
-        Settings.System.putIntForUser(mContext.getContentResolver(),
+        Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, UserHandle.USER_CURRENT);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_OFF;
@@ -579,9 +578,9 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testSetScreenOffBrightnessSensorEnabled_DisplayIsInDoze() {
-        Settings.System.putIntForUser(mContext.getContentResolver(),
+        Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, UserHandle.USER_CURRENT);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_DOZE;
@@ -626,9 +625,9 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testSetScreenOffBrightnessSensorDisabled_DisplayIsDisabled() {
-        Settings.System.putIntForUser(mContext.getContentResolver(),
+        Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, UserHandle.USER_CURRENT);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID, /* isEnabled= */ false);
 
