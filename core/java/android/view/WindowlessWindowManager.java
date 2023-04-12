@@ -106,8 +106,22 @@ public class WindowlessWindowManager implements IWindowSession {
         mConfiguration.setTo(configuration);
     }
 
-    IBinder getFocusGrantToken() {
-        return mFocusGrantToken;
+    IBinder getFocusGrantToken(IBinder window) {
+        synchronized (this) {
+            // This can only happen if someone requested the focusGrantToken before setView was
+            // called for the SCVH. In that case, use the root focusGrantToken since this will be
+            // the same token sent to WMS for the root window once setView is called.
+            if (mStateForWindow.isEmpty()) {
+                return mFocusGrantToken;
+            }
+            State state = mStateForWindow.get(window);
+            if (state != null) {
+                return state.mFocusGrantToken;
+            }
+        }
+
+        Log.w(TAG, "Failed to get focusGrantToken. Returning null token");
+        return null;
     }
 
     /**
