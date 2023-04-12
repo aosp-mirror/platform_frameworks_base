@@ -174,6 +174,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
     boolean mAllowWhileInUsePermissionInFgs;
+    @PowerExemptionManager.ReasonCode
+    int mAllowWhileInUsePermissionInFgsReason;
     // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
     boolean mAllowWhileInUsePermissionInFgsAtEntering;
     /** Allow scheduling user-initiated jobs from the background. */
@@ -609,6 +611,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
                 pw.println(mAllowWhileInUsePermissionInFgs);
+        pw.print(prefix); pw.print("mAllowWhileInUsePermissionInFgsReason=");
+        pw.println(mAllowWhileInUsePermissionInFgsReason);
         pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
