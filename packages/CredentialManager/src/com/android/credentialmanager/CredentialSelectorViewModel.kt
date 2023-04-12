@@ -250,9 +250,15 @@ class CredentialSelectorViewModel(
             return
         }
         val newUiState = CreateFlowUtils.toCreateCredentialUiState(
-            prevUiState.enabledProviders, prevUiState.disabledProviders,
-            userConfigRepo.getDefaultProviderId(), prevUiState.requestDisplayInfo, true,
-            userConfigRepo.getIsPasskeyFirstUse())
+            enabledProviders = prevUiState.enabledProviders,
+            disabledProviders = prevUiState.disabledProviders,
+            defaultProviderIdPreferredByApp =
+            prevUiState.requestDisplayInfo.appPreferredDefaultProviderId,
+            defaultProviderIdSetByUser = userConfigRepo.getDefaultProviderId(),
+            requestDisplayInfo = prevUiState.requestDisplayInfo,
+            isOnPasskeyIntroStateAlready = true,
+            isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
+        )
         if (newUiState == null) {
             Log.d(Constants.LOG_TAG, "Unable to update create ui state")
             onInternalError()

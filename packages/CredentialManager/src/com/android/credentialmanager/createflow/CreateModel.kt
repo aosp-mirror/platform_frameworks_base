@@ -107,6 +107,7 @@ data class RequestDisplayInfo(
   val appName: String,
   val typeIcon: Drawable,
   val preferImmediatelyAvailableCredentials: Boolean,
+  val appPreferredDefaultProviderId: String?,
 )
 
 /**
