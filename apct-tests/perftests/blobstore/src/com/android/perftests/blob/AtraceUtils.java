@@ -21,10 +21,10 @@ import android.app.UiAutomation;
 import android.os.ParcelFileDescriptor;
 import android.perftests.utils.TraceMarkParser;
 import android.perftests.utils.TraceMarkParser.TraceMarkSlice;
-import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import java.io.BufferedReader;
 import java.io.IOException;
