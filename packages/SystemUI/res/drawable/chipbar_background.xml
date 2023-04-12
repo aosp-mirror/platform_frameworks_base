@@ -17,6 +17,6 @@
 <shape
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <solid android:color="?androidprv:attr/colorAccentSecondary" />
+    <solid android:color="?androidprv:attr/materialColorSecondaryFixed" />
     <corners android:radius="32dp" />
 </shape>

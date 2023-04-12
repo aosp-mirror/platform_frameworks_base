@@ -17,6 +17,7 @@
 package com.android.systemui.common.ui.binder
 
 import android.widget.ImageView
+import com.android.settingslib.Utils
 import com.android.systemui.common.shared.model.TintedIcon
 
 object TintedIconViewBinder {
@@ -33,7 +34,7 @@ object TintedIconViewBinder {
         IconViewBinder.bind(tintedIcon.icon, view)
         view.imageTintList =
             if (tintedIcon.tint != null) {
-                view.resources.getColorStateList(tintedIcon.tint, view.context.theme)
+                Utils.getColorAttr(view.context, tintedIcon.tint)
             } else {
                 null
             }
