@@ -984,7 +984,13 @@
             android:exported="true"
             android:excludeFromRecents="true"
             android:resizeableActivity="false"
-            android:theme="@android:style/Theme.NoDisplay" />
+            android:theme="@android:style/Theme.NoDisplay" >
+
+            <intent-filter>
+                <action android:name="com.android.systemui.action.LAUNCH_NOTE_TASK"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- LaunchNoteTaskManagedProfileProxyActivity MUST NOT be exported because it allows caller
              to specify an Android user when launching the default notes app. -->
