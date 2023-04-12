@@ -62,7 +62,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
 
-    private lateinit var underTest: KeyguardFaceAuthInteractor
+    private lateinit var underTest: SystemUIKeyguardFaceAuthInteractor
     private lateinit var testScope: TestScope
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
@@ -85,7 +85,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         keyguardTransitionInteractor = KeyguardTransitionInteractor(keyguardTransitionRepository)
 
         underTest =
-            KeyguardFaceAuthInteractor(
+            SystemUIKeyguardFaceAuthInteractor(
                 testScope.backgroundScope,
                 dispatcher,
                 faceAuthRepository,
