@@ -22,7 +22,6 @@ import android.os.UserHandle
 import android.os.UserManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.RestrictedLockUtils
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
@@ -86,7 +85,6 @@ internal class RestrictionsProviderImpl(
         emit(getRestrictedMode())
     }.flowOn(Dispatchers.IO)
 
-    @OptIn(ExperimentalLifecycleComposeApi::class)
     @Composable
     override fun restrictedModeState() =
         restrictedMode.collectAsStateWithLifecycle(initialValue = null)
