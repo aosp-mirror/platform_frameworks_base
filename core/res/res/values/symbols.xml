@@ -1944,7 +1944,7 @@
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromLidSwitch" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromDock" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromWindowLayout" />
-  <java-symbol type="bool" name="config_keepDreamingWhenUndocking" />
+  <java-symbol type="bool" name="config_keepDreamingWhenUnplugging" />
   <java-symbol type="integer" name="config_keyguardDrawnTimeout" />
   <java-symbol type="bool" name="config_goToSleepOnButtonPressTheaterMode" />
   <java-symbol type="bool" name="config_supportLongPressPowerWhenNonInteractive" />
