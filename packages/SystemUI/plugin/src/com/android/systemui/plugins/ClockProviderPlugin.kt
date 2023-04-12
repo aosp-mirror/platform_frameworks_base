@@ -199,6 +199,9 @@ data class ClockConfig(
      */
     val hasCustomPositionUpdatedAnimation: Boolean = false,
 
+    /** Transition to AOD should move smartspace like large clock instead of small clock */
+    val useAlternateSmartspaceAODTransition: Boolean = false,
+
     /** True if the clock will react to tone changes in the seed color. */
     val isReactiveToTone: Boolean = true,
 )
