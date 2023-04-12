@@ -108,11 +108,6 @@ object Flags {
     val NOTIFICATION_SHELF_REFACTOR =
         unreleasedFlag(271161129, "notification_shelf_refactor")
 
-    // TODO(b/263414400): Tracking Bug
-    @JvmField
-    val NOTIFICATION_ANIMATE_BIG_PICTURE =
-        releasedFlag(120, "notification_animate_big_picture")
-
     @JvmField
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
         releasedFlag(270682168, "animated_notification_shade_insets")
