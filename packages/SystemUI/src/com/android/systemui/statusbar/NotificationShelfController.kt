@@ -16,8 +16,11 @@
 
 package com.android.systemui.statusbar
 
+import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView.OnActivatedListener
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -51,4 +54,29 @@ interface NotificationShelfController {
 
     /** @see View.setOnClickListener */
     fun setOnClickListener(listener: OnClickListener)
+
+    companion object {
+        @JvmStatic
+        fun assertRefactorFlagDisabled(featureFlags: FeatureFlags) {
+            if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+                throwIllegalFlagStateError(expected = false)
+            }
+        }
+
+        @JvmStatic
+        fun checkRefactorFlagEnabled(featureFlags: FeatureFlags): Boolean =
+            featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR).also { enabled ->
+                if (!enabled) {
+                    Log.wtf("NotifShelf", getErrorMessage(expected = true))
+                }
+            }
+
+        @JvmStatic
+        fun throwIllegalFlagStateError(expected: Boolean): Nothing =
+            error(getErrorMessage(expected))
+
+        private fun getErrorMessage(expected: Boolean): String =
+            "Code path not supported when Flags.NOTIFICATION_SHELF_REFACTOR is " +
+                if (expected) "disabled" else "enabled"
+    }
 }
