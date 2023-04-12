@@ -37,7 +37,13 @@ class OnBackAnimationCallbackExtensionTest : SysuiTestCase() {
 
     @Test
     fun onBackProgressed_shouldInvoke_onBackProgress() {
-        val backEvent = BackEvent(0f, 0f, 0f, BackEvent.EDGE_LEFT)
+        val backEvent =
+            BackEvent(
+                /* touchX = */ 0f,
+                /* touchY = */ 0f,
+                /* progress = */ 0f,
+                /* swipeEdge = */ BackEvent.EDGE_LEFT
+            )
         onBackAnimationCallback.onBackStarted(backEvent)
 
         onBackAnimationCallback.onBackProgressed(backEvent)
@@ -47,7 +53,13 @@ class OnBackAnimationCallbackExtensionTest : SysuiTestCase() {
 
     @Test
     fun onBackStarted_shouldInvoke_onBackStart() {
-        val backEvent = BackEvent(0f, 0f, 0f, BackEvent.EDGE_LEFT)
+        val backEvent =
+            BackEvent(
+                /* touchX = */ 0f,
+                /* touchY = */ 0f,
+                /* progress = */ 0f,
+                /* swipeEdge = */ BackEvent.EDGE_LEFT
+            )
 
         onBackAnimationCallback.onBackStarted(backEvent)
 
