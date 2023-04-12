@@ -319,6 +319,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.powerstats.StatsPullAtomCallbackImpl;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.Slogf;
@@ -902,11 +903,11 @@ public class NotificationManagerService extends SystemService {
      * has the same flag. It will delete the flag otherwise
      * @param userId user id of the autogroup summary
      * @param pkg package of the autogroup summary
-     * @param needsOngoingFlag true if the group has at least one ongoing notification
+     * @param flags the new flags for this summary
      * @param isAppForeground true if the app is currently in the foreground.
      */
     @GuardedBy("mNotificationLock")
-    protected void updateAutobundledSummaryFlags(int userId, String pkg, boolean needsOngoingFlag,
+    protected void updateAutobundledSummaryFlags(int userId, String pkg, int flags,
             boolean isAppForeground) {
         ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
         if (summaries == null) {
@@ -921,13 +922,8 @@ public class NotificationManagerService extends SystemService {
             return;
         }
         int oldFlags = summary.getSbn().getNotification().flags;
-        if (needsOngoingFlag) {
-            summary.getSbn().getNotification().flags |= FLAG_ONGOING_EVENT;
-        } else {
-            summary.getSbn().getNotification().flags &= ~FLAG_ONGOING_EVENT;
-        }
-
-        if (summary.getSbn().getNotification().flags != oldFlags) {
+        if (oldFlags != flags) {
+            summary.getSbn().getNotification().flags = flags;
             mHandler.post(new EnqueueNotificationRunnable(userId, summary, isAppForeground,
                     SystemClock.elapsedRealtime()));
         }
@@ -2684,9 +2680,14 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             public void addAutoGroupSummary(int userId, String pkg, String triggeringKey,
-                    boolean needsOngoingFlag) {
-                NotificationManagerService.this.addAutoGroupSummary(
-                        userId, pkg, triggeringKey, needsOngoingFlag);
+                    int flags) {
+                NotificationRecord r = createAutoGroupSummary(userId, pkg, triggeringKey, flags);
+                if (r != null) {
+                    final boolean isAppForeground =
+                            mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+                    mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
+                            SystemClock.elapsedRealtime()));
+                }
             }
 
             @Override
@@ -2697,11 +2698,11 @@ public class NotificationManagerService extends SystemService {
             }
 
             @Override
-            public void updateAutogroupSummary(int userId, String pkg, boolean needsOngoingFlag) {
+            public void updateAutogroupSummary(int userId, String pkg, int flags) {
                 boolean isAppForeground = pkg != null
                         && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
                 synchronized (mNotificationLock) {
-                    updateAutobundledSummaryFlags(userId, pkg, needsOngoingFlag, isAppForeground);
+                    updateAutobundledSummaryFlags(userId, pkg, flags, isAppForeground);
                 }
             }
         });
@@ -5958,19 +5959,6 @@ public class NotificationManagerService extends SystemService {
         r.addAdjustment(adjustment);
     }
 
-    @VisibleForTesting
-    void addAutoGroupSummary(int userId, String pkg, String triggeringKey,
-            boolean needsOngoingFlag) {
-        NotificationRecord r = createAutoGroupSummary(
-                userId, pkg, triggeringKey, needsOngoingFlag);
-        if (r != null) {
-            final boolean isAppForeground =
-                    mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
-            mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
-                    SystemClock.elapsedRealtime()));
-        }
-    }
-
     // Clears the 'fake' auto-group summary.
     @VisibleForTesting
     @GuardedBy("mNotificationLock")
@@ -5994,7 +5982,7 @@ public class NotificationManagerService extends SystemService {
 
     // Creates a 'fake' summary for a package that has exceeded the solo-notification limit.
     NotificationRecord createAutoGroupSummary(int userId, String pkg, String triggeringKey,
-            boolean needsOngoingFlag) {
+            int flagsToSet) {
         NotificationRecord summaryRecord = null;
         boolean isPermissionFixed = mPermissionHelper.isPermissionFixed(pkg, userId);
         synchronized (mNotificationLock) {
@@ -6004,7 +5992,6 @@ public class NotificationManagerService extends SystemService {
                 // adjustment will post a summary if needed.
                 return null;
             }
-            NotificationChannel channel = notificationRecord.getChannel();
             final StatusBarNotification adjustedSbn = notificationRecord.getSbn();
             userId = adjustedSbn.getUser().getIdentifier();
             int uid =  adjustedSbn.getUid();
@@ -6027,11 +6014,8 @@ public class NotificationManagerService extends SystemService {
                                 .setGroupSummary(true)
                                 .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
                                 .setGroup(GroupHelper.AUTOGROUP_KEY)
-                                .setFlag(FLAG_AUTOGROUP_SUMMARY, true)
-                                .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
-                                .setFlag(FLAG_ONGOING_EVENT, needsOngoingFlag)
+                                .setFlag(flagsToSet, true)
                                 .setColor(adjustedSbn.getNotification().color)
-                                .setLocalOnly(true)
                                 .build();
                 summaryNotification.extras.putAll(extras);
                 Intent appIntent = getContext().getPackageManager().getLaunchIntentForPackage(pkg);
@@ -6369,6 +6353,7 @@ public class NotificationManagerService extends SystemService {
      * The private API only accessible to the system process.
      */
     private final NotificationManagerInternal mInternalService = new NotificationManagerInternal() {
+
         @Override
         public NotificationChannel getNotificationChannel(String pkg, int uid, String
                 channelId) {
@@ -7824,18 +7809,17 @@ public class NotificationManagerService extends SystemService {
                     if (notification.getSmallIcon() != null) {
                         StatusBarNotification oldSbn = (old != null) ? old.getSbn() : null;
                         mListeners.notifyPostedLocked(r, old);
-                        if ((oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup()))
-                                && !isCritical(r)) {
-                            mHandler.post(() -> {
-                                synchronized (mNotificationLock) {
-                                    mGroupHelper.onNotificationPosted(
-                                            n, hasAutoGroupSummaryLocked(n));
-                                }
-                            });
-                        } else if (oldSbn != null) {
-                            final NotificationRecord finalRecord = r;
-                            mHandler.post(() ->
-                                    mGroupHelper.onNotificationUpdated(finalRecord.getSbn()));
+                        if (oldSbn == null
+                                || !Objects.equals(oldSbn.getGroup(), n.getGroup())
+                                || oldSbn.getNotification().flags != n.getNotification().flags) {
+                            if (!isCritical(r)) {
+                                mHandler.post(() -> {
+                                    synchronized (mNotificationLock) {
+                                        mGroupHelper.onNotificationPosted(
+                                                n, hasAutoGroupSummaryLocked(n));
+                                    }
+                                });
+                            }
                         }
                     } else {
                         Slog.e(TAG, "Not posting notification without small icon: " + notification);
