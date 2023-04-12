@@ -648,31 +648,28 @@ class BackNavigationController {
         if (finishedTransition == mWaitTransitionFinish) {
             clearBackAnimations();
         }
+
         if (!mBackAnimationInProgress || mPendingAnimationBuilder == null) {
             return false;
         }
-
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Handling the deferred animation after transition finished");
 
-        // Show the target surface and its parents to prevent it or its parents hidden when
-        // the transition finished.
-        // The target could be affected by transition when :
-        // Open transition -> the open target in back navigation
-        // Close transition -> the close target in back navigation.
+        // Find the participated container collected by transition when :
+        // Open transition -> the open target in back navigation, the close target in transition.
+        // Close transition -> the close target in back navigation, the open target in transition.
         boolean hasTarget = false;
-        final SurfaceControl.Transaction t =
-                mPendingAnimationBuilder.mCloseTarget.getPendingTransaction();
-        for (int i = 0; i < targets.size(); i++) {
-            final WindowContainer wc = targets.get(i).mContainer;
-            if (wc.asActivityRecord() == null && wc.asTask() == null) {
-                continue;
-            } else if (!mPendingAnimationBuilder.containTarget(wc)) {
+        for (int i = 0; i < finishedTransition.mParticipants.size(); i++) {
+            final WindowContainer wc = finishedTransition.mParticipants.valueAt(i);
+            if (wc.asActivityRecord() == null && wc.asTask() == null
+                    && wc.asTaskFragment() == null) {
                 continue;
             }
 
-            hasTarget = true;
-            t.show(wc.getSurfaceControl());
+            if (mPendingAnimationBuilder.containTarget(wc)) {
+                hasTarget = true;
+                break;
+            }
         }
 
         if (!hasTarget) {
@@ -687,6 +684,12 @@ class BackNavigationController {
             }
             mPendingAnimationBuilder = null;
             return false;
+        }
+
+        // Ensure the final animation targets which hidden by transition could be visible.
+        for (int i = 0; i < targets.size(); i++) {
+            final WindowContainer wc = targets.get(i).mContainer;
+            wc.prepareSurfaces();
         }
 
         scheduleAnimation(mPendingAnimationBuilder);
@@ -1076,7 +1079,7 @@ class BackNavigationController {
 
             boolean containTarget(@NonNull WindowContainer wc) {
                 return wc == mOpenTarget || wc == mCloseTarget
-                        || wc.hasChild(mOpenTarget) || wc.hasChild(mCloseTarget);
+                        || mOpenTarget.hasChild(wc) || mCloseTarget.hasChild(wc);
             }
 
             /**
@@ -1151,6 +1154,11 @@ class BackNavigationController {
     private static void setLaunchBehind(@NonNull ActivityRecord activity) {
         if (!activity.isVisibleRequested()) {
             activity.setVisibility(true);
+            // The transition could commit the visibility and in the finishing state, that could
+            // skip commitVisibility call in setVisibility cause the activity won't visible here.
+            // Call it again to make sure the activity could be visible while handling the pending
+            // animation.
+            activity.commitVisibility(true, true);
         }
         activity.mLaunchTaskBehind = true;
 
