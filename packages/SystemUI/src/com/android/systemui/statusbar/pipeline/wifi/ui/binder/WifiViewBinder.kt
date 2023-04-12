@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -64,6 +63,7 @@ object WifiViewBinder {
         val activityOutView = view.requireViewById<ImageView>(R.id.wifi_out)
         val activityContainerView = view.requireViewById<View>(R.id.inout_container)
         val airplaneSpacer = view.requireViewById<View>(R.id.wifi_airplane_spacer)
+        val signalSpacer = view.requireViewById<View>(R.id.wifi_signal_spacer)
 
         view.isVisible = true
         iconView.isVisible = true
@@ -130,6 +130,12 @@ object WifiViewBinder {
                 launch {
                     viewModel.isAirplaneSpacerVisible.distinctUntilChanged().collect { visible ->
                         airplaneSpacer.isVisible = visible
+                    }
+                }
+
+                launch {
+                    viewModel.isSignalSpacerVisible.distinctUntilChanged().collect { visible ->
+                        signalSpacer.isVisible = visible
                     }
                 }
 
