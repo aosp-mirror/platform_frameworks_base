@@ -1178,6 +1178,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         // Resume logging if all remaining users are affiliated.
                         maybeResumeDeviceWideLoggingLocked();
                     }
+                    if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
+                        mDevicePolicyEngine.handleUserRemoved(userHandle);
+                    }
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STARTED, userHandle);
@@ -3664,6 +3667,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         for (Integer userId : deletedUsers) {
             removeUserData(userId);
+            if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
+                mDevicePolicyEngine.handleUserRemoved(userId);
+            }
         }
     }
 
@@ -4153,6 +4159,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mInjector.binderWithCleanCallingIdentity(() ->
                     removeActiveAdminLocked(adminReceiver, userHandle));
+            if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
+                mDevicePolicyEngine.removePoliciesForAdmin(
+                        EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                                adminReceiver, userHandle, admin));
+            }
         }
     }
 
@@ -9992,6 +10003,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
         pushUserControlDisabledPackagesLocked(userId);
         setGlobalSettingDeviceOwnerType(DEVICE_OWNER_TYPE_DEFAULT);
+
+        if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
+            mDevicePolicyEngine.removePoliciesForAdmin(
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            admin.info.getComponent(), userId, admin));
+        }
     }
 
     private void clearApplicationRestrictions(int userId) {
@@ -10139,6 +10156,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         toggleBackupServiceActive(userId, true);
         applyProfileRestrictionsIfDeviceOwnerLocked();
         setNetworkLoggingActiveInternal(false);
+
+        if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
+            mDevicePolicyEngine.removePoliciesForAdmin(
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            admin.info.getComponent(), userId, admin));
+        }
     }
 
     @Override
