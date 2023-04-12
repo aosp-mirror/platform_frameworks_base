@@ -27,6 +27,7 @@ import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PAREN
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.BroadcastOptions;
 import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyState;
@@ -353,6 +354,7 @@ final class DevicePolicyEngine {
                     policyDefinition,
                     userId);
         }
+        sendDevicePolicyChangedToSystem(userId);
     }
 
     /**
@@ -478,6 +480,8 @@ final class DevicePolicyEngine {
                 enforcingAdmin,
                 policyDefinition,
                 UserHandle.USER_ALL);
+
+        sendDevicePolicyChangedToSystem(UserHandle.USER_ALL);
     }
 
     /**
@@ -699,7 +703,7 @@ final class DevicePolicyEngine {
 
         if (policyDefinition.isGlobalOnlyPolicy()) {
             throw new IllegalArgumentException(policyDefinition.getPolicyKey() + " is a global only"
-                    + "policy.");
+                    + " policy.");
         }
 
         if (!mLocalPolicies.contains(userId)) {
@@ -724,7 +728,7 @@ final class DevicePolicyEngine {
     private <V> PolicyState<V> getGlobalPolicyStateLocked(PolicyDefinition<V> policyDefinition) {
         if (policyDefinition.isLocalOnlyPolicy()) {
             throw new IllegalArgumentException(policyDefinition.getPolicyKey() + " is a local only"
-                    + "policy.");
+                    + " policy.");
         }
 
         if (!mGlobalPolicies.containsKey(policyDefinition.getPolicyKey())) {
@@ -759,6 +763,20 @@ final class DevicePolicyEngine {
         // properly
         policyDefinition.enforcePolicy(
                 policyValue == null ? null : policyValue.getValue(), mContext, userId);
+    }
+
+    private void sendDevicePolicyChangedToSystem(int userId) {
+        Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        Bundle options = new BroadcastOptions()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .toBundle();
+        Binder.withCleanCallingIdentity(() -> mContext.sendBroadcastAsUser(
+                intent,
+                new UserHandle(userId),
+                /* receiverPermissions= */ null,
+                options));
     }
 
     private <V> void sendPolicyResultToAdmin(

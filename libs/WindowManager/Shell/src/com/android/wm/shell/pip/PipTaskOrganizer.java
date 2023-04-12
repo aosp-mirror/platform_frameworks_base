@@ -62,7 +62,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.view.Choreographer;
@@ -111,12 +110,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         DisplayController.OnDisplaysChangedListener, ShellTaskOrganizer.FocusListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
     private static final boolean DEBUG = false;
-    /**
-     * The alpha type is set for swiping to home. But the swiped task may not enter PiP. And if
-     * another task enters PiP by non-swipe ways, e.g. call API in foreground or switch to 3-button
-     * navigation, then the alpha type is unexpected.
-     */
-    private static final int ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS = 1000;
 
     /**
      * The fixed start delay in ms when fading out the content overlay from bounds animation.
@@ -301,8 +294,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private WindowContainerToken mToken;
     private SurfaceControl mLeash;
     protected PipTransitionState mPipTransitionState;
-    private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
-    private long mLastOneShotAlphaAnimationTime;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
     protected PictureInPictureParams mPictureInPictureParams;
@@ -419,18 +410,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void registerOnDisplayIdChangeCallback(IntConsumer onDisplayIdChangeCallback) {
         mOnDisplayIdChangeCallback = onDisplayIdChangeCallback;
-    }
-
-    /**
-     * Sets the preferred animation type for one time.
-     * This is typically used to set the animation type to
-     * {@link PipAnimationController#ANIM_TYPE_ALPHA}.
-     */
-    public void setOneShotAnimationType(@PipAnimationController.AnimationType int animationType) {
-        mOneShotAnimationType = animationType;
-        if (animationType == ANIM_TYPE_ALPHA) {
-            mLastOneShotAlphaAnimationTime = SystemClock.uptimeMillis();
-        }
     }
 
     /**
@@ -733,26 +712,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        if (mOneShotAnimationType == ANIM_TYPE_ALPHA
-                && SystemClock.uptimeMillis() - mLastOneShotAlphaAnimationTime
-                > ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Alpha animation is expired. Use bounds animation.", TAG);
-            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
-        }
-
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             // For Shell transition, we will animate the window in PipTransition#startAnimation
             // instead of #onTaskAppeared.
             return;
         }
 
-        if (shouldAlwaysFadeIn()) {
-            mOneShotAnimationType = ANIM_TYPE_ALPHA;
-        }
-
+        final int animationType = shouldAlwaysFadeIn()
+                ? ANIM_TYPE_ALPHA
+                : mPipAnimationController.takeOneShotEnterAnimationType();
         if (mWaitForFixedRotation) {
-            onTaskAppearedWithFixedRotation();
+            onTaskAppearedWithFixedRotation(animationType);
             return;
         }
 
@@ -763,7 +733,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
-        if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
+        if (animationType == ANIM_TYPE_BOUNDS) {
             if (!shouldAttachMenuEarly()) {
                 mPipMenuController.attach(mLeash);
             }
@@ -773,16 +743,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     sourceHintRect, TRANSITION_DIRECTION_TO_PIP, mEnterAnimationDuration,
                     null /* updateBoundsCallback */);
             mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
-        } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+        } else if (animationType == ANIM_TYPE_ALPHA) {
             enterPipWithAlphaAnimation(destinationBounds, mEnterAnimationDuration);
-            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         } else {
-            throw new RuntimeException("Unrecognized animation type: " + mOneShotAnimationType);
+            throw new RuntimeException("Unrecognized animation type: " + animationType);
         }
     }
 
-    private void onTaskAppearedWithFixedRotation() {
-        if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+    private void onTaskAppearedWithFixedRotation(int animationType) {
+        if (animationType == ANIM_TYPE_ALPHA) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Defer entering PiP alpha animation, fixed rotation is ongoing", TAG);
             // If deferred, hside the surface till fixed rotation is completed.
@@ -791,7 +760,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             tx.setAlpha(mLeash, 0f);
             tx.show(mLeash);
             tx.apply();
-            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
             return;
         }
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
@@ -1895,7 +1863,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 + " binder=" + (mToken != null ? mToken.asBinder() : null));
         pw.println(innerPrefix + "mLeash=" + mLeash);
         pw.println(innerPrefix + "mState=" + mPipTransitionState.getTransitionState());
-        pw.println(innerPrefix + "mOneShotAnimationType=" + mOneShotAnimationType);
         pw.println(innerPrefix + "mPictureInPictureParams=" + mPictureInPictureParams);
     }
 

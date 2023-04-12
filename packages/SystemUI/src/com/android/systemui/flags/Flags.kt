@@ -108,11 +108,6 @@ object Flags {
     val NOTIFICATION_SHELF_REFACTOR =
         unreleasedFlag(271161129, "notification_shelf_refactor")
 
-    // TODO(b/263414400): Tracking Bug
-    @JvmField
-    val NOTIFICATION_ANIMATE_BIG_PICTURE =
-        releasedFlag(120, "notification_animate_big_picture")
-
     @JvmField
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
         releasedFlag(270682168, "animated_notification_shade_insets")
@@ -604,9 +599,6 @@ object Flags {
     // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
-
-    // TODO(b/266983432) Tracking Bug
-    val SHARESHEET_CUSTOM_ACTIONS = releasedFlag(1501, "sharesheet_custom_actions")
 
     // TODO(b/266982749) Tracking Bug
     val SHARESHEET_RESELECTION_ACTION = releasedFlag(1502, "sharesheet_reselection_action")

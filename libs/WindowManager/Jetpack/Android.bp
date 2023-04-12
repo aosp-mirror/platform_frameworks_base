@@ -55,20 +55,6 @@ prebuilt_etc {
 }
 
 // Extensions
-// NOTE: This module is still under active development and must not
-// be used in production. Use 'androidx.window.sidecar' instead.
-android_library_import {
-    name: "window-extensions",
-    aars: ["window-extensions-release.aar"],
-    sdk_version: "current",
-}
-
-android_library_import {
-    name: "window-extensions-core",
-    aars: ["window-extensions-core-release.aar"],
-    sdk_version: "current",
-}
-
 java_library {
     name: "androidx.window.extensions",
     srcs: [
@@ -77,8 +63,8 @@ java_library {
         "src/androidx/window/common/**/*.java",
     ],
     static_libs: [
-        "window-extensions",
-        "window-extensions-core",
+        "androidx.window.extensions_extensions-nodeps",
+        "androidx.window.extensions.core_core-nodeps",
     ],
     installable: true,
     sdk_version: "core_platform",

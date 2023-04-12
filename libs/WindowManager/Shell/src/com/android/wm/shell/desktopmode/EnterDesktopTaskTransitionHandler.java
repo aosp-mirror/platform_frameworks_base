@@ -17,11 +17,13 @@
 package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -55,6 +57,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     public static final int FREEFORM_ANIMATION_DURATION = 336;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
+    private Point mStartPosition;
 
     public EnterDesktopTaskTransitionHandler(
             Transitions transitions) {
@@ -77,6 +80,17 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                 @NonNull WindowContainerTransaction wct) {
         final IBinder token = mTransitions.startTransition(type, wct, this);
         mPendingTransitionTokens.add(token);
+    }
+
+    /**
+     * Starts Transition of type TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
+     * @param wct WindowContainerTransaction for transition
+     * @param startPosition Position of task when transition is triggered
+     */
+    public void startCancelMoveToDesktopMode(@NonNull WindowContainerTransaction wct,
+            Point startPosition) {
+        mStartPosition = startPosition;
+        startTransition(Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE, wct);
     }
 
     @Override
@@ -169,6 +183,37 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                 }
             });
 
+            animator.start();
+            return true;
+        }
+
+        if (type == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
+                && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && mStartPosition != null) {
+            // This Transition animates a task to fullscreen after being dragged from the status
+            // bar and then released back into the status bar area
+            final SurfaceControl sc = change.getLeash();
+            startT.setWindowCrop(sc, null);
+            startT.apply();
+
+            final ValueAnimator animator = new ValueAnimator();
+            animator.setFloatValues(DRAG_FREEFORM_SCALE, 1f);
+            animator.setDuration(FREEFORM_ANIMATION_DURATION);
+            final SurfaceControl.Transaction t = mTransactionSupplier.get();
+            animator.addUpdateListener(animation -> {
+                final float scale = animation.getAnimatedFraction();
+                t.setPosition(sc, mStartPosition.x * (1 - scale),
+                        mStartPosition.y * (1 - scale));
+                t.setScale(sc, scale, scale);
+                t.apply();
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mTransitions.getMainExecutor().execute(
+                            () -> finishCallback.onTransitionFinished(null, null));
+                }
+            });
             animator.start();
             return true;
         }
