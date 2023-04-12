@@ -699,7 +699,7 @@ final class DevicePolicyEngine {
 
         if (policyDefinition.isGlobalOnlyPolicy()) {
             throw new IllegalArgumentException(policyDefinition.getPolicyKey() + " is a global only"
-                    + "policy.");
+                    + " policy.");
         }
 
         if (!mLocalPolicies.contains(userId)) {
@@ -724,7 +724,7 @@ final class DevicePolicyEngine {
     private <V> PolicyState<V> getGlobalPolicyStateLocked(PolicyDefinition<V> policyDefinition) {
         if (policyDefinition.isLocalOnlyPolicy()) {
             throw new IllegalArgumentException(policyDefinition.getPolicyKey() + " is a local only"
-                    + "policy.");
+                    + " policy.");
         }
 
         if (!mGlobalPolicies.containsKey(policyDefinition.getPolicyKey())) {
