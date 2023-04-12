@@ -18,6 +18,7 @@ package com.android.systemui.accessibility;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.Choreographer.FrameCallback;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
@@ -172,6 +173,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 returnsSecondArg());
 
         mResources = getContext().getOrCreateTestableResources().getResources();
+        // prevent the config orientation from undefined, which may cause config.diff method
+        // neglecting the orientation update.
+        if (mResources.getConfiguration().orientation == ORIENTATION_UNDEFINED) {
+            mResources.getConfiguration().orientation = ORIENTATION_PORTRAIT;
+        }
+
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, mValueAnimator);
         mWindowMagnificationController =
@@ -688,7 +695,11 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Test
     public void enableWindowMagnification_rotationIsChanged_updateRotationValue() {
-        final Configuration config = mContext.getResources().getConfiguration();
+        // the config orientation should not be undefined, since it would cause config.diff
+        // returning 0 and thus the orientation changed would not be detected
+        assertNotEquals(ORIENTATION_UNDEFINED, mResources.getConfiguration().orientation);
+
+        final Configuration config = mResources.getConfiguration();
         config.orientation = config.orientation == ORIENTATION_LANDSCAPE ? ORIENTATION_PORTRAIT
                 : ORIENTATION_LANDSCAPE;
         final int newRotation = simulateRotateTheDevice();
