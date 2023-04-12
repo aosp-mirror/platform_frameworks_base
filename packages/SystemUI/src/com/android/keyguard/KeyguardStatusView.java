@@ -19,10 +19,12 @@ package com.android.keyguard;
 import static java.util.Collections.emptySet;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.GridLayout;
 
 import com.android.systemui.R;
@@ -115,6 +117,16 @@ public class KeyguardStatusView extends GridLayout {
         if (mKeyguardSlice != null) {
             mKeyguardSlice.dump(pw, args);
         }
+    }
+
+    @Override
+    public ViewPropertyAnimator animate() {
+        if (Build.IS_DEBUGGABLE) {
+            throw new IllegalArgumentException(
+                    "KeyguardStatusView does not support ViewPropertyAnimator. "
+                            + "Use PropertyAnimator instead.");
+        }
+        return super.animate();
     }
 
     @Override

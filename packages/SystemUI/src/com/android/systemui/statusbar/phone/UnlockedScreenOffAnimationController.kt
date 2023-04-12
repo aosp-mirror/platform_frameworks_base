@@ -175,15 +175,19 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We animate the Y properly separately using the PropertyAnimator, as the panel
         // view also needs to update the end position.
         PropertyAnimator.cancelAnimation(keyguardView, AnimatableProperty.Y)
-        PropertyAnimator.setProperty<View>(keyguardView, AnimatableProperty.Y, currentY,
+        PropertyAnimator.setProperty(keyguardView, AnimatableProperty.Y, currentY,
                 AnimationProperties().setDuration(duration.toLong()),
                 true /* animate */)
 
-        keyguardView.animate()
+        // Cancel any existing CUJs before starting the animation
+        interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
+
+        PropertyAnimator.setProperty(
+            keyguardView, AnimatableProperty.ALPHA, 1f,
+            AnimationProperties()
+                .setDelay(0)
                 .setDuration(duration.toLong())
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .alpha(1f)
-                .withEndAction {
+                .setAnimationEndAction {
                     aodUiAnimationPlaying = false
 
                     // Lock the keyguard if it was waiting for the screen off animation to end.
@@ -199,30 +203,23 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                     // Done going to sleep, reset this flag.
                     decidedToAnimateGoingToSleep = null
 
-                    // We need to unset the listener. These are persistent for future animators
-                    keyguardView.animate().setListener(null)
                     interactionJankMonitor.end(CUJ_SCREEN_OFF_SHOW_AOD)
                 }
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationCancel(animation: Animator?) {
-                        // If we're cancelled, reset state flags/listeners. The end action above
-                        // will not be called, which is what we want since that will finish the
-                        // screen off animation and show the lockscreen, which we don't want if we
-                        // were cancelled.
-                        aodUiAnimationPlaying = false
-                        decidedToAnimateGoingToSleep = null
-                        keyguardView.animate().setListener(null)
-
-                        interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
-                    }
-
-                    override fun onAnimationStart(animation: Animator?) {
-                        interactionJankMonitor.begin(
-                                mCentralSurfaces.notificationShadeWindowView,
-                                CUJ_SCREEN_OFF_SHOW_AOD)
-                    }
-                })
-                .start()
+                .setAnimationCancelAction {
+                    // If we're cancelled, reset state flags/listeners. The end action above
+                    // will not be called, which is what we want since that will finish the
+                    // screen off animation and show the lockscreen, which we don't want if we
+                    // were cancelled.
+                    aodUiAnimationPlaying = false
+                    decidedToAnimateGoingToSleep = null
+                    interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
+                }
+                .setCustomInterpolator(View.ALPHA, Interpolators.FAST_OUT_SLOW_IN),
+            true /* animate */)
+        interactionJankMonitor.begin(
+            mCentralSurfaces.notificationShadeWindowView,
+            CUJ_SCREEN_OFF_SHOW_AOD
+        )
     }
 
     override fun onStartedWakingUp() {
