@@ -140,8 +140,10 @@ constructor(
     private var authCancellationSignal: CancellationSignal? = null
     private var detectCancellationSignal: CancellationSignal? = null
     private var faceAcquiredInfoIgnoreList: Set<Int>
+    private var retryCount = 0
 
     private var cancelNotReceivedHandlerJob: Job? = null
+    private var halErrorRetryJob: Job? = null
 
     private val _authenticationStatus: MutableStateFlow<AuthenticationStatus?> =
         MutableStateFlow(null)
@@ -228,6 +230,8 @@ constructor(
             .onEach { goingAwayOrUserSwitchingInProgress ->
                 if (goingAwayOrUserSwitchingInProgress) {
                     _isAuthenticated.value = false
+                    retryCount = 0
+                    halErrorRetryJob?.cancel()
                 }
             }
             .launchIn(applicationScope)
@@ -385,14 +389,11 @@ constructor(
                 _authenticationStatus.value = errorStatus
                 _isAuthenticated.value = false
                 if (errorStatus.isCancellationError()) {
-                    cancelNotReceivedHandlerJob?.cancel()
-                    applicationScope.launch {
-                        faceAuthLogger.launchingQueuedFaceAuthRequest(
-                            faceAuthRequestedWhileCancellation
-                        )
-                        faceAuthRequestedWhileCancellation?.let { authenticate(it) }
-                        faceAuthRequestedWhileCancellation = null
-                    }
+                    handleFaceCancellationError()
+                }
+                if (errorStatus.isHardwareError()) {
+                    faceAuthLogger.hardwareError(errorStatus)
+                    handleFaceHardwareError()
                 }
                 faceAuthLogger.authenticationError(
                     errorCode,
@@ -417,6 +418,35 @@ constructor(
                 onFaceAuthRequestCompleted()
             }
         }
+
+    private fun handleFaceCancellationError() {
+        cancelNotReceivedHandlerJob?.cancel()
+        applicationScope.launch {
+            faceAuthRequestedWhileCancellation?.let {
+                faceAuthLogger.launchingQueuedFaceAuthRequest(it)
+                authenticate(it)
+            }
+            faceAuthRequestedWhileCancellation = null
+        }
+    }
+
+    private fun handleFaceHardwareError() {
+        if (retryCount < HAL_ERROR_RETRY_MAX) {
+            retryCount++
+            halErrorRetryJob?.cancel()
+            halErrorRetryJob =
+                applicationScope.launch {
+                    delay(HAL_ERROR_RETRY_TIMEOUT)
+                    if (retryCount < HAL_ERROR_RETRY_MAX) {
+                        faceAuthLogger.attemptingRetryAfterHardwareError(retryCount)
+                        authenticate(
+                            FaceAuthUiEvent.FACE_AUTH_TRIGGERED_RETRY_AFTER_HW_UNAVAILABLE,
+                            fallbackToDetection = false
+                        )
+                    }
+                }
+        }
+    }
 
     private fun onFaceAuthRequestCompleted() {
         cancellationInProgress = false
@@ -558,6 +588,12 @@ constructor(
          * cancelled.
          */
         const val DEFAULT_CANCEL_SIGNAL_TIMEOUT = 3000L
+
+        /** Number of allowed retries whenever there is a face hardware error */
+        const val HAL_ERROR_RETRY_MAX = 20
+
+        /** Timeout before retries whenever there is a HAL error. */
+        const val HAL_ERROR_RETRY_TIMEOUT = 500L // ms
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

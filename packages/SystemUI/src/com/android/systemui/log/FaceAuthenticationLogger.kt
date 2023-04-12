@@ -4,6 +4,7 @@ import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorPropertiesInternal
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.dagger.FaceAuthLog
 import com.android.systemui.plugins.log.LogBuffer
@@ -237,6 +238,27 @@ constructor(
             DEBUG,
             { str1 = "$uiEvent" },
             { "Requesting face auth for trigger: $str1" }
+        )
+    }
+
+    fun hardwareError(errorStatus: ErrorAuthenticationStatus) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = "${errorStatus.msg}"
+                int1 = errorStatus.msgId
+            },
+            { "Received face hardware error: $str1 , code: $int1" }
+        )
+    }
+
+    fun attemptingRetryAfterHardwareError(retryCount: Int) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { int1 = retryCount },
+            { "Attempting face auth again because of HW error: retry attempt $int1" }
         )
     }
 }

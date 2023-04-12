@@ -21,6 +21,7 @@ import android.app.StatusBarManager.SESSION_KEYGUARD
 import android.content.pm.UserInfo
 import android.content.pm.UserInfo.FLAG_PRIMARY
 import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_CANCELED
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE
 import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT
 import android.hardware.biometrics.ComponentInfoInternal
 import android.hardware.face.FaceAuthenticateOptions
@@ -822,6 +823,26 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             runCurrent()
             verify(faceManager).scheduleWatchdog()
+        }
+
+    @Test
+    fun retryFaceIfThereIsAHardwareError() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+
+            triggerFaceAuth(fallbackToDetect = false)
+            clearInvocations(faceManager)
+
+            authenticationCallback.value.onAuthenticationError(
+                FACE_ERROR_HW_UNAVAILABLE,
+                "HW unavailable"
+            )
+
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.HAL_ERROR_RETRY_TIMEOUT)
+            runCurrent()
+
+            faceAuthenticateIsCalled()
         }
 
     private suspend fun TestScope.testGatingCheckForFaceAuth(gatingCheckModifier: () -> Unit) {
