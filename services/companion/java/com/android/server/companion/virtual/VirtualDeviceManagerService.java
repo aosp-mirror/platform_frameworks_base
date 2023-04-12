@@ -151,15 +151,14 @@ public class VirtualDeviceManagerService extends SystemService {
     }
 
     void onCameraAccessBlocked(int appUid) {
-        synchronized (mVirtualDeviceManagerLock) {
-            for (int i = 0; i < mVirtualDevices.size(); i++) {
-                CharSequence deviceName = mVirtualDevices.valueAt(i).getDisplayName();
-                mVirtualDevices.valueAt(i).showToastWhereUidIsRunning(appUid,
-                        getContext().getString(
-                                com.android.internal.R.string.vdm_camera_access_denied,
-                                deviceName),
-                        Toast.LENGTH_LONG, Looper.myLooper());
-            }
+        ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
+        for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+            VirtualDeviceImpl virtualDevice = virtualDevicesSnapshot.get(i);
+            virtualDevice.showToastWhereUidIsRunning(appUid,
+                    getContext().getString(
+                            com.android.internal.R.string.vdm_camera_access_denied,
+                            virtualDevice.getDisplayName()),
+                    Toast.LENGTH_LONG, Looper.myLooper());
         }
     }
 
@@ -265,6 +264,16 @@ public class VirtualDeviceManagerService extends SystemService {
         cdm.removeOnAssociationsChangedListener(mCdmAssociationListener);
     }
 
+    private ArrayList<VirtualDeviceImpl> getVirtualDevicesSnapshot() {
+        synchronized (mVirtualDeviceManagerLock) {
+            ArrayList<VirtualDeviceImpl> virtualDevices = new ArrayList<>(mVirtualDevices.size());
+            for (int i = 0; i < mVirtualDevices.size(); i++) {
+                virtualDevices.add(mVirtualDevices.valueAt(i));
+            }
+            return virtualDevices;
+        }
+    }
+
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
 
         private final VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback =
@@ -313,6 +322,17 @@ public class VirtualDeviceManagerService extends SystemService {
             Objects.requireNonNull(activityListener);
             Objects.requireNonNull(soundEffectListener);
 
+            final UserHandle userHandle = getCallingUserHandle();
+            final CameraAccessController cameraAccessController =
+                    getCameraAccessController(userHandle);
+            final int deviceId = sNextUniqueIndex.getAndIncrement();
+            final Consumer<ArraySet<Integer>> runningAppsChangedCallback =
+                    runningUids -> notifyRunningAppsChanged(deviceId, runningUids);
+            VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
+                    associationInfo, VirtualDeviceManagerService.this, token, callingUid,
+                    deviceId, cameraAccessController,
+                    mPendingTrampolineCallback, activityListener,
+                    soundEffectListener, runningAppsChangedCallback, params);
             synchronized (mVirtualDeviceManagerLock) {
                 if (mVirtualDevices.size() == 0) {
                     final long callindId = Binder.clearCallingIdentity();
@@ -322,21 +342,9 @@ public class VirtualDeviceManagerService extends SystemService {
                         Binder.restoreCallingIdentity(callindId);
                     }
                 }
-
-                final UserHandle userHandle = getCallingUserHandle();
-                final CameraAccessController cameraAccessController =
-                        getCameraAccessController(userHandle);
-                final int deviceId = sNextUniqueIndex.getAndIncrement();
-                final Consumer<ArraySet<Integer>> runningAppsChangedCallback =
-                        runningUids -> notifyRunningAppsChanged(deviceId, runningUids);
-                VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
-                        associationInfo, VirtualDeviceManagerService.this, token, callingUid,
-                        deviceId, cameraAccessController,
-                        mPendingTrampolineCallback, activityListener,
-                        soundEffectListener, runningAppsChangedCallback, params);
                 mVirtualDevices.put(deviceId, virtualDevice);
-                return virtualDevice;
             }
+            return virtualDevice;
         }
 
         @Override // Binder call
@@ -398,12 +406,11 @@ public class VirtualDeviceManagerService extends SystemService {
             if (displayId == Display.INVALID_DISPLAY || displayId == Display.DEFAULT_DISPLAY) {
                 return Context.DEVICE_ID_DEFAULT;
             }
-            synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    VirtualDeviceImpl virtualDevice = mVirtualDevices.valueAt(i);
-                    if (virtualDevice.isDisplayOwnedByVirtualDevice(displayId)) {
-                        return virtualDevice.getDeviceId();
-                    }
+            ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
+            for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+                VirtualDeviceImpl virtualDevice = virtualDevicesSnapshot.get(i);
+                if (virtualDevice.isDisplayOwnedByVirtualDevice(displayId)) {
+                    return virtualDevice.getDeviceId();
                 }
             }
             return Context.DEVICE_ID_DEFAULT;
@@ -495,10 +502,9 @@ public class VirtualDeviceManagerService extends SystemService {
                 return;
             }
             fout.println("Created virtual devices: ");
-            synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    mVirtualDevices.valueAt(i).dump(fd, fout, args);
-                }
+            ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
+            for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+                virtualDevicesSnapshot.get(i).dump(fd, fout, args);
             }
         }
     }
@@ -515,33 +521,30 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public int getDeviceOwnerUid(int deviceId) {
+            VirtualDeviceImpl virtualDevice;
             synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice != null ? virtualDevice.getOwnerUid() : Process.INVALID_UID;
+                virtualDevice = mVirtualDevices.get(deviceId);
             }
+            return virtualDevice != null ? virtualDevice.getOwnerUid() : Process.INVALID_UID;
         }
 
         @Override
         public @Nullable VirtualSensor getVirtualSensor(int deviceId, int handle) {
+            VirtualDeviceImpl virtualDevice;
             synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                if (virtualDevice != null) {
-                    return virtualDevice.getVirtualSensorByHandle(handle);
-                }
+                virtualDevice = mVirtualDevices.get(deviceId);
             }
-            return null;
+            return virtualDevice != null ? virtualDevice.getVirtualSensorByHandle(handle) : null;
         }
 
         @Override
         public @NonNull ArraySet<Integer> getDeviceIdsForUid(int uid) {
+            ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
             ArraySet<Integer> result = new ArraySet<>();
-            synchronized (mVirtualDeviceManagerLock) {
-                int size = mVirtualDevices.size();
-                for (int i = 0; i < size; i++) {
-                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    if (device.isAppRunningOnVirtualDevice(uid)) {
-                        result.add(device.getDeviceId());
-                    }
+            for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+                VirtualDeviceImpl device = virtualDevicesSnapshot.get(i);
+                if (device.isAppRunningOnVirtualDevice(uid)) {
+                    result.add(device.getDeviceId());
                 }
             }
             return result;
@@ -629,12 +632,10 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public boolean isAppRunningOnAnyVirtualDevice(int uid) {
-            synchronized (mVirtualDeviceManagerLock) {
-                int size = mVirtualDevices.size();
-                for (int i = 0; i < size; i++) {
-                    if (mVirtualDevices.valueAt(i).isAppRunningOnVirtualDevice(uid)) {
-                        return true;
-                    }
+            ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
+            for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+                if (virtualDevicesSnapshot.get(i).isAppRunningOnVirtualDevice(uid)) {
+                    return true;
                 }
             }
             return false;
@@ -642,12 +643,10 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public boolean isDisplayOwnedByAnyVirtualDevice(int displayId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                int size = mVirtualDevices.size();
-                for (int i = 0; i < size; i++) {
-                    if (mVirtualDevices.valueAt(i).isDisplayOwnedByVirtualDevice(displayId)) {
-                        return true;
-                    }
+            ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
+            for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+                if (virtualDevicesSnapshot.get(i).isDisplayOwnedByVirtualDevice(displayId)) {
+                    return true;
                 }
             }
             return false;
