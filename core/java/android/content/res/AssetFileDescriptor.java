@@ -280,6 +280,12 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
         public FileChannel getChannel() {
             return mDelegateInputStream.getChannel();
         }
+        @Override
+        public void close() throws IOException {
+            // Make the mDelegateInputStream own file descriptor and super.close()
+            // is not needed here to avoid double close the file descriptor.
+            mDelegateInputStream.close();
+        }
     }
 
     /**
