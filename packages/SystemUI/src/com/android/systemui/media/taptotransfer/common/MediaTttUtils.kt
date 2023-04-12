@@ -19,7 +19,7 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import androidx.annotation.ColorRes
+import androidx.annotation.AttrRes
 import androidx.annotation.DrawableRes
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
@@ -108,7 +108,7 @@ class MediaTttUtils {
 data class IconInfo(
     val contentDescription: ContentDescription,
     val icon: MediaTttIcon,
-    @ColorRes val tint: Int?,
+    @AttrRes val tint: Int?,
     /**
      * True if [drawable] is the app's icon, and false if [drawable] is some generic default icon.
      */

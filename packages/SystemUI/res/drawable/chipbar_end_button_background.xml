@@ -20,7 +20,7 @@
     android:color="?android:textColorPrimary">
     <item android:id="@android:id/background">
         <shape>
-            <solid android:color="@android:color/system_accent1_200"/>
+            <solid android:color="?androidprv:attr/materialColorPrimaryFixedDim"/>
             <corners android:radius="24dp" />
         </shape>
     </item>
