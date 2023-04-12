@@ -81,7 +81,8 @@ public final class UsbAlsaJackDetector implements Runnable {
             if (mStopJackDetect) {
                 return false;
             }
-            mAlsaDevice.updateWiredDeviceConnectionState(true);
+            mAlsaDevice.updateOutputWiredDeviceConnectionState(true);
+            mAlsaDevice.updateInputWiredDeviceConnectionState(true);
         }
         return true;
     }
