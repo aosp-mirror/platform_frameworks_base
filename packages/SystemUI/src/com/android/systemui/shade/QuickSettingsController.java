@@ -64,6 +64,7 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -132,6 +133,7 @@ public class QuickSettingsController {
     private final FalsingCollector mFalsingCollector;
     private final LockscreenGestureLogger mLockscreenGestureLogger;
     private final ShadeLogger mShadeLog;
+    private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final FalsingManager mFalsingManager;
@@ -318,7 +320,8 @@ public class QuickSettingsController {
             MetricsLogger metricsLogger,
             FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
-            ShadeLogger shadeLog
+            ShadeLogger shadeLog,
+            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor
     ) {
         mPanelViewControllerLazy = panelViewControllerLazy;
         mPanelView = panelView;
@@ -357,6 +360,7 @@ public class QuickSettingsController {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mMetricsLogger = metricsLogger;
         mShadeLog = shadeLog;
+        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
         mFeatureFlags = featureFlags;
         mInteractionJankMonitor = interactionJankMonitor;
 
@@ -937,6 +941,7 @@ public class QuickSettingsController {
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
         if (height == 0 && !mKeyguardStateController.canDismissLockScreen()) {
+            mKeyguardFaceAuthInteractor.onQsExpansionStared();
             mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.QS_EXPANDED);
         }
     }

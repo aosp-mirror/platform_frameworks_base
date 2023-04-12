@@ -83,6 +83,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
@@ -151,6 +152,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @NonNull private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     @NonNull private final VibratorHelper mVibrator;
     @NonNull private final FeatureFlags mFeatureFlags;
     @NonNull private final FalsingManager mFalsingManager;
@@ -818,7 +820,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull AlternateBouncerInteractor alternateBouncerInteractor,
             @NonNull SecureSettings secureSettings,
             @NonNull InputManager inputManager,
-            @NonNull UdfpsUtils udfpsUtils) {
+            @NonNull UdfpsUtils udfpsUtils,
+            @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -882,6 +885,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     }
                     return Unit.INSTANCE;
                 });
+        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
 
         final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
         mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);
@@ -1141,6 +1145,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOnFingerDown) {
             playStartHaptic();
 
+            mKeyguardFaceAuthInteractor.onUdfpsSensorTouched();
             if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
                 mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
             }

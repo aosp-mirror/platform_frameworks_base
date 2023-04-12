@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.data.repository
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.keyguard.domain.interactor.SystemUIKeyguardFaceAuthInteractor
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import dagger.Binds
@@ -37,8 +38,13 @@ interface KeyguardFaceAuthModule {
 
     @Binds
     @IntoMap
-    @ClassKey(KeyguardFaceAuthInteractor::class)
-    fun bind(impl: KeyguardFaceAuthInteractor): CoreStartable
+    @ClassKey(SystemUIKeyguardFaceAuthInteractor::class)
+    fun bind(impl: SystemUIKeyguardFaceAuthInteractor): CoreStartable
+
+    @Binds
+    fun keyguardFaceAuthInteractor(
+        impl: SystemUIKeyguardFaceAuthInteractor
+    ): KeyguardFaceAuthInteractor
 
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
 
