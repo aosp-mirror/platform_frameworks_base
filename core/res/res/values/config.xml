@@ -6071,6 +6071,12 @@
     <!-- Wear OS: the name of the main activity of the device's sysui. -->
     <string name="config_wearSysUiMainActivity" translatable="false"/>
 
+    <!-- Wear OS: the name of the package containing the Media Controls Activity. -->
+    <string name="config_wearMediaControlsPackage" translatable="false"/>
+
+    <!-- Wear OS: the name of the package containing the Media Sessions APK. -->
+    <string name="config_wearMediaSessionsPackage" translatable="false"/>
+
     <bool name="config_secondaryBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
 
     <!-- The display round config for each display in a multi-display device. -->
