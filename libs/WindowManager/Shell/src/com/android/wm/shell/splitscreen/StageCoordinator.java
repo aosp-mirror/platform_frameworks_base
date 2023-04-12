@@ -612,6 +612,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (taskId2 == INVALID_TASK_ID) {
+            if (mMainStage.containsTask(taskId1) || mSideStage.containsTask(taskId1)) {
+                prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
+            }
+            if (mRecentTasks.isPresent()) {
+                mRecentTasks.get().removeSplitPair(taskId1);
+            }
+            options1 = options1 != null ? options1 : new Bundle();
+            wct.startTask(taskId1, options1);
+            mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
+            return;
+        }
+
         prepareEvictChildTasksIfSplitActive(wct);
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
@@ -627,6 +640,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @SplitPosition int splitPosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (taskId == INVALID_TASK_ID) {
+            options1 = options1 != null ? options1 : new Bundle();
+            wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
+            mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
+            return;
+        }
+
         prepareEvictChildTasksIfSplitActive(wct);
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
@@ -641,6 +661,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
             float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (taskId == INVALID_TASK_ID) {
+            options1 = options1 != null ? options1 : new Bundle();
+            wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
+            mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
+            return;
+        }
+
         prepareEvictChildTasksIfSplitActive(wct);
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
@@ -689,6 +716,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @SplitPosition int splitPosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (pendingIntent2 == null) {
+            options1 = options1 != null ? options1 : new Bundle();
+            if (shortcutInfo1 != null) {
+                wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
+            } else {
+                wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+            }
+            mSplitTransitions.startFullscreenTransition(wct, remoteTransition);
+            return;
+        }
+
         if (!mMainStage.isActive()) {
             // Build a request WCT that will launch both apps such that task 0 is on the main stage
             // while task 1 is on the side stage.
