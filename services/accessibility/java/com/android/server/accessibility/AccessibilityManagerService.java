@@ -112,6 +112,7 @@ import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.InputDevice;
@@ -160,6 +161,7 @@ import com.android.server.accessibility.magnification.WindowMagnificationManager
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.settingslib.RestrictedLockUtils;
@@ -301,7 +303,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final List<SendWindowStateChangedEventRunnable> mSendWindowStateChangedEventRunnables =
             new ArrayList<>();
 
-    private int mCurrentUserId = UserHandle.USER_SYSTEM;
+    @GuardedBy("mLock")
+    private @UserIdInt int mCurrentUserId = UserHandle.USER_SYSTEM;
+
+    // TODO(b/255426725): temporary workaround to support visible background users for UiAutomation:
+    // when the UiAutomation is set in a visible background user, mCurrentUserId points to that user
+    // and mRealCurrentUserId points to the "real" current user; otherwise, mRealCurrentUserId
+    // is set as UserHandle.USER_CURRENT.
+    @GuardedBy("mLock")
+    private @UserIdInt int mRealCurrentUserId = UserHandle.USER_CURRENT;
+
+    // TODO(b/255426725): temporary workaround to support visible background users for UiAutomation
+    // purposes - in the long term, the whole service should be refactored so it handles "visible"
+    // users, not current user. Notice that because this is temporary, it's not trying to optimize
+    // performance / utilization (for example, it's not using an IntArray)
+    @GuardedBy("mLock")
+    @Nullable // only set when device supports visible background users
+    private final SparseBooleanArray mVisibleBgUserIds;
 
     //TODO: Remove this hack
     private boolean mInitialized;
@@ -316,6 +334,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private SparseArray<SurfaceControl> mA11yOverlayLayers = new SparseArray<>();
 
     private final FlashNotificationsController mFlashNotificationsController;
+    private final UserManagerInternal mUmi;
 
     private AccessibilityUserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
@@ -445,6 +464,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mHasInputFilter = true;
         }
         mFlashNotificationsController = new FlashNotificationsController(mContext);
+        mUmi = LocalServices.getService(UserManagerInternal.class);
+        // TODO(b/255426725): not used on tests
+        mVisibleBgUserIds = null;
+
         init();
     }
 
@@ -477,6 +500,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mProxyManager = new ProxyManager(mLock, mA11yWindowManager, mContext, mMainHandler,
                 mUiAutomationManager, this);
         mFlashNotificationsController = new FlashNotificationsController(mContext);
+        mUmi = LocalServices.getService(UserManagerInternal.class);
+
+        if (UserManager.isVisibleBackgroundUsersEnabled()) {
+            mVisibleBgUserIds = new SparseBooleanArray();
+            mUmi.addUserVisibilityListener((u, v) -> onUserVisibilityChanged(u, v));
+        } else {
+            mVisibleBgUserIds = null;
+        }
+
         init();
     }
 
@@ -491,6 +523,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public int getCurrentUserIdLocked() {
         return mCurrentUserId;
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public SparseBooleanArray getVisibleUserIdsLocked() {
+        return mVisibleBgUserIds;
     }
 
     @Override
@@ -1362,6 +1400,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void registerUiTestAutomationService(IBinder owner,
             IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo,
+            int userId,
             int flags) {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".registerUiTestAutomationService",
@@ -1374,6 +1413,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
 
         synchronized (mLock) {
+            changeCurrentUserForTestAutomationIfNeededLocked(userId);
             mUiAutomationManager.registerUiTestAutomationServiceLocked(owner, serviceClient,
                     mContext, accessibilityServiceInfo, sIdCounter++, mMainHandler,
                     mSecurityPolicy, this, getTraceManager(), mWindowManagerService,
@@ -1390,7 +1430,47 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         synchronized (mLock) {
             mUiAutomationManager.unregisterUiTestAutomationServiceLocked(serviceClient);
+            restoreCurrentUserAfterTestAutomationIfNeededLocked();
         }
+    }
+
+    // TODO(b/255426725): temporary workaround to support visible background users for UiAutomation
+    @GuardedBy("mLock")
+    private void changeCurrentUserForTestAutomationIfNeededLocked(@UserIdInt int userId) {
+        if (mVisibleBgUserIds == null) {
+            Slogf.d(LOG_TAG, "changeCurrentUserForTestAutomationIfNeededLocked(%d): ignoring "
+                    + "because device doesn't support visible background users", userId);
+            return;
+        }
+        if (!mVisibleBgUserIds.get(userId)) {
+            Slogf.wtf(LOG_TAG, "Cannot change current user to %d as it's not visible "
+                    + "(mVisibleUsers=%s)", userId, mVisibleBgUserIds);
+            return;
+        }
+        if (mCurrentUserId == userId) {
+            Slogf.w(LOG_TAG, "NOT changing current user for test automation purposes as it is "
+                    + "already %d", mCurrentUserId);
+            return;
+        }
+        Slogf.i(LOG_TAG, "Changing current user from %d to %d for test automation purposes",
+                mCurrentUserId, userId);
+        mRealCurrentUserId = mCurrentUserId;
+        switchUser(userId);
+    }
+
+    // TODO(b/255426725): temporary workaround to support visible background users for UiAutomation
+    @GuardedBy("mLock")
+    private void restoreCurrentUserAfterTestAutomationIfNeededLocked() {
+        if (mVisibleBgUserIds == null) {
+            Slogf.d(LOG_TAG, "restoreCurrentUserForTestAutomationIfNeededLocked(): ignoring "
+                    + "because device doesn't support visible background users");
+            return;
+        }
+        Slogf.i(LOG_TAG, "Restoring current user to %d after using %d for test automation purposes",
+                mRealCurrentUserId, mCurrentUserId);
+        int currentUserId = mRealCurrentUserId;
+        mRealCurrentUserId = UserHandle.USER_CURRENT;
+        switchUser(currentUserId);
     }
 
     @Override
@@ -2291,8 +2371,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void updateServicesLocked(AccessibilityUserState userState) {
         Map<ComponentName, AccessibilityServiceConnection> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
-        boolean isUnlockingOrUnlocked = LocalServices.getService(UserManagerInternal.class)
-                    .isUserUnlockingOrUnlocked(userState.mUserId);
+        boolean isUnlockingOrUnlocked = mUmi.isUserUnlockingOrUnlocked(userState.mUserId);
 
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = userState.mInstalledServices.get(i);
@@ -2590,6 +2669,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                      |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
              mEnableTouchExplorationDialog.setCanceledOnTouchOutside(true);
              mEnableTouchExplorationDialog.show();
+        }
+    }
+
+    private void onUserVisibilityChanged(@UserIdInt int userId, boolean visible) {
+        if (DEBUG) {
+            Slogf.d(LOG_TAG, "onUserVisibilityChanged(): %d => %b", userId, visible);
+        }
+        synchronized (mLock) {
+            if (visible) {
+                mVisibleBgUserIds.put(userId, visible);
+            } else {
+                mVisibleBgUserIds.delete(userId);
+            }
         }
     }
 
@@ -4025,7 +4117,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             pw.println("ACCESSIBILITY MANAGER (dumpsys accessibility)");
             pw.println();
             pw.append("currentUserId=").append(String.valueOf(mCurrentUserId));
+            if (mRealCurrentUserId != UserHandle.USER_CURRENT
+                    && mCurrentUserId != mRealCurrentUserId) {
+                pw.append(" (set for UiAutomation purposes; \"real\" current user is ")
+                        .append(String.valueOf(mRealCurrentUserId)).append(")");
+            }
             pw.println();
+            if (mVisibleBgUserIds != null) {
+                pw.append("visibleBgUserIds=").append(mVisibleBgUserIds.toString());
+                pw.println();
+            }
             pw.append("hasWindowMagnificationConnection=").append(
                     String.valueOf(getWindowMagnificationMgr().isConnected()));
             pw.println();
@@ -4052,6 +4153,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             pw.println();
             mProxyManager.dump(fd, pw, args);
+            mA11yDisplayListener.dump(fd, pw, args);
         }
     }
 
@@ -4435,6 +4537,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         @Override
         public void onDisplayChanged(int displayId) {
             /* do nothing */
+        }
+
+        void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            pw.println("Accessibility Display Listener:");
+            pw.println("    SystemUI uid: " + mSystemUiUid);
+            int size = mDisplaysList.size();
+            pw.printf("    %d valid display%s: ", size, (size == 1 ? "" : "s"));
+            for (int i = 0; i < size; i++) {
+                pw.print(mDisplaysList.get(i).getDisplayId());
+                if (i < size - 1) {
+                    pw.print(", ");
+                }
+            }
+            pw.println();
         }
 
         private boolean isValidDisplay(@Nullable Display display) {
