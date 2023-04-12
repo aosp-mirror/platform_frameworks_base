@@ -47,43 +47,45 @@ public class TouchTrackerTest {
     public void generatesProgress_leftEdge() {
         mTouchTracker.setGestureStartLocation(INITIAL_X_LEFT_EDGE, 0, BackEvent.EDGE_LEFT);
         float touchX = 10;
+        float velocityX = 0;
+        float velocityY = 0;
 
         // Pre-commit
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (touchX - INITIAL_X_LEFT_EDGE) / FAKE_THRESHOLD, 0f);
 
         // Post-commit
         touchX += 100;
         mTouchTracker.setTriggerBack(true);
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (touchX - INITIAL_X_LEFT_EDGE) / FAKE_THRESHOLD, 0f);
 
         // Cancel
         touchX -= 10;
         mTouchTracker.setTriggerBack(false);
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), 0, 0f);
 
         // Cancel more
         touchX -= 10;
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), 0, 0f);
 
         // Restart
         touchX += 10;
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), 0, 0f);
 
         // Restarted, but pre-commit
         float restartX = touchX;
         touchX += 10;
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (touchX - restartX) / FAKE_THRESHOLD, 0f);
 
         // Restarted, post-commit
         touchX += 10;
         mTouchTracker.setTriggerBack(true);
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (touchX - INITIAL_X_LEFT_EDGE) / FAKE_THRESHOLD, 0f);
     }
 
@@ -91,43 +93,45 @@ public class TouchTrackerTest {
     public void generatesProgress_rightEdge() {
         mTouchTracker.setGestureStartLocation(INITIAL_X_RIGHT_EDGE, 0, BackEvent.EDGE_RIGHT);
         float touchX = INITIAL_X_RIGHT_EDGE - 10; // Fake right edge
+        float velocityX = 0f;
+        float velocityY = 0f;
 
         // Pre-commit
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (INITIAL_X_RIGHT_EDGE - touchX) / FAKE_THRESHOLD, 0f);
 
         // Post-commit
         touchX -= 100;
         mTouchTracker.setTriggerBack(true);
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (INITIAL_X_RIGHT_EDGE - touchX) / FAKE_THRESHOLD, 0f);
 
         // Cancel
         touchX += 10;
         mTouchTracker.setTriggerBack(false);
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), 0, 0f);
 
         // Cancel more
         touchX += 10;
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), 0, 0f);
 
         // Restart
         touchX -= 10;
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), 0, 0f);
 
         // Restarted, but pre-commit
         float restartX = touchX;
         touchX -= 10;
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (restartX - touchX) / FAKE_THRESHOLD, 0f);
 
         // Restarted, post-commit
         touchX -= 10;
         mTouchTracker.setTriggerBack(true);
-        mTouchTracker.update(touchX, 0);
+        mTouchTracker.update(touchX, 0, velocityX, velocityY);
         assertEquals(getProgress(), (INITIAL_X_RIGHT_EDGE - touchX) / FAKE_THRESHOLD, 0f);
     }
 
