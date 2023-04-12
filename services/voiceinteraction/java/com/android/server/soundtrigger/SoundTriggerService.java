@@ -25,6 +25,7 @@ import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_BAD_VALUE;
+import static android.hardware.soundtrigger.SoundTrigger.STATUS_DEAD_OBJECT;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_OK;
 import static android.provider.Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY;
@@ -1388,8 +1389,7 @@ public class SoundTriggerService extends SystemService {
                         }));
             }
 
-            @Override
-            public void onError(int status) {
+            private void onError(int status) {
                 if (DEBUG) Slog.v(TAG, mPuuid + ": onError: " + status);
 
                 sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
@@ -1409,6 +1409,30 @@ public class SoundTriggerService extends SystemService {
                                 (opId, service) -> service.onError(mPuuid, opId, status),
                                 // nothing to do if throttled
                                 null));
+            }
+
+            @Override
+            public void onPreempted() {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onPreempted");
+                onError(STATUS_ERROR);
+            }
+
+            @Override
+            public void onModuleDied() {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onModuleDied");
+                onError(STATUS_DEAD_OBJECT);
+            }
+
+            @Override
+            public void onResumeFailed(int status) {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onResumeFailed: " + status);
+                onError(status);
+            }
+
+            @Override
+            public void onPauseFailed(int status) {
+                if (DEBUG) Slog.v(TAG, mPuuid + ": onPauseFailed: " + status);
+                onError(status);
             }
 
             @Override

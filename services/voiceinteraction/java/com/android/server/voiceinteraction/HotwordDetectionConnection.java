@@ -56,6 +56,7 @@ import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
+import android.service.voice.SoundTriggerFailure;
 import android.service.voice.VisualQueryDetectionService;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
@@ -576,8 +577,31 @@ final class HotwordDetectionConnection {
         }
 
         @Override
-        public void onError(int status) throws RemoteException {
-            mExternalCallback.onError(status);
+        public void onPreempted() throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_UNEXPECTED_PREEMPTION,
+                        "Unexpected startRecognition on already started ST session"));
+        }
+
+        @Override
+        public void onModuleDied() throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_MODULE_DIED,
+                        "STHAL died"));
+        }
+
+        @Override
+        public void onResumeFailed(int status) throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_RECOGNITION_RESUME_FAILED,
+                        "STService recognition resume failed with: " + status));
+        }
+
+        @Override
+        public void onPauseFailed(int status) throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_RECOGNITION_RESUME_FAILED,
+                        "STService recognition pause failed with: " + status));
         }
 
         @Override

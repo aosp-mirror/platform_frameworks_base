@@ -1573,16 +1573,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
 
         @Override
-        public void onError(int status) {
-            Slog.i(TAG, "onError: " + status);
-            // TODO(b/271534248): This is a workaround before the sound trigger uses the new error
-            // method.
-            Message.obtain(mHandler, MSG_DETECTION_SOUND_TRIGGER_FAILURE,
-                    new SoundTriggerFailure(SoundTriggerFailure.ERROR_CODE_UNKNOWN,
-                            "Sound trigger error")).sendToTarget();
-        }
-
-        @Override
         public void onHotwordDetectionServiceFailure(
                 HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
             Slog.v(TAG, "onHotwordDetectionServiceFailure: " + hotwordDetectionServiceFailure);
@@ -1602,6 +1592,12 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             // It should never be called here.
             Slog.w(TAG,
                     "onVisualQueryDetectionServiceFailure: " + visualQueryDetectionServiceFailure);
+        }
+
+        @Override
+        public void onSoundTriggerFailure(SoundTriggerFailure soundTriggerFailure) {
+            Message.obtain(mHandler, MSG_DETECTION_SOUND_TRIGGER_FAILURE,
+                    Objects.requireNonNull(soundTriggerFailure)).sendToTarget();
         }
 
         @Override
