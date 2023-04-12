@@ -466,7 +466,7 @@ class TestUtil {
         assertEquals(43, event.phraseExtras[0].levels[0].levelPercent);
     }
 
-    private static ParcelFileDescriptor byteArrayToParcelFileDescriptor(byte[] data) {
+    static ParcelFileDescriptor byteArrayToParcelFileDescriptor(byte[] data) {
         try (SharedMemory shmem = SharedMemory.create("", data.length)) {
             ByteBuffer buffer = shmem.mapReadWrite();
             buffer.put(data);
