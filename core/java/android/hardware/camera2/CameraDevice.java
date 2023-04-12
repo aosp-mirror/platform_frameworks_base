@@ -1310,6 +1310,10 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link Surface}, submitting a reprocess {@link CaptureRequest} with multiple
      * output targets will result in a {@link CaptureFailure}.
      *
+     * From Android 14 onward, {@link CaptureRequest#CONTROL_CAPTURE_INTENT} will be set to
+     * {@link CameraMetadata#CONTROL_CAPTURE_INTENT_STILL_CAPTURE} by default. Prior to Android 14,
+     * apps will need to explicitly set this key themselves.
+     *
      * @param inputResult The capture result of the output image or one of the output images used
      *                       to generate the reprocess input image for this capture request.
      *

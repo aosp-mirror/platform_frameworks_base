@@ -26,6 +26,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
@@ -861,8 +862,13 @@ public class CameraDeviceImpl extends CameraDevice
             CameraMetadataNative resultMetadata = new
                     CameraMetadataNative(inputResult.getNativeCopy());
 
-            return new CaptureRequest.Builder(resultMetadata, /*reprocess*/true,
-                    inputResult.getSessionId(), getId(), /*physicalCameraIdSet*/ null);
+            CaptureRequest.Builder builder = new CaptureRequest.Builder(resultMetadata,
+                    /*reprocess*/true, inputResult.getSessionId(), getId(),
+                    /*physicalCameraIdSet*/ null);
+            builder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
+                    CameraMetadata.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+
+            return builder;
         }
     }
 
