@@ -21,7 +21,9 @@ import android.content.ContentResolver;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.ViewStub;
+
 import androidx.constraintlayout.motion.widget.MotionLayout;
+
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
@@ -42,6 +44,7 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationsQuickSettingsContainer;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -74,11 +77,14 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+
 import java.util.concurrent.Executor;
+
 import javax.inject.Named;
 import javax.inject.Provider;
 
@@ -158,6 +164,12 @@ public abstract class StatusBarViewModule {
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.getNotificationPanelView();
     }
+
+    /** */
+    @Binds
+    @CentralSurfacesComponent.CentralSurfacesScope
+    abstract ShadeViewController bindsShadeViewController(
+            NotificationPanelViewController notificationPanelViewController);
 
     /** */
     @Provides
@@ -298,7 +310,7 @@ public abstract class StatusBarViewModule {
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
             CarrierConfigTracker carrierConfigTracker,
@@ -321,7 +333,7 @@ public abstract class StatusBarViewModule {
                 darkIconManagerFactory,
                 statusBarHideIconsForBouncerManager,
                 keyguardStateController,
-                notificationPanelViewController,
+                shadeViewController,
                 statusBarStateController,
                 commandQueue,
                 carrierConfigTracker,

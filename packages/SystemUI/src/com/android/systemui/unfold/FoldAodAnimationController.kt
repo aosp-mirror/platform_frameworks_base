@@ -39,11 +39,11 @@ import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationSt
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.GlobalSettings
 import dagger.Lazy
-import java.util.function.Consumer
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.function.Consumer
+import javax.inject.Inject
 
 /**
  * Controls folding to AOD animation: when AOD is enabled and foldable device is folded we play a
@@ -128,7 +128,7 @@ constructor(
     }
 
     private fun getShadeFoldAnimator(): ShadeFoldAnimator =
-        centralSurfaces.notificationPanelViewController.shadeFoldAnimator
+        centralSurfaces.shadeViewController.shadeFoldAnimator
 
     private fun setAnimationState(playing: Boolean) {
         shouldPlayAnimation = playing

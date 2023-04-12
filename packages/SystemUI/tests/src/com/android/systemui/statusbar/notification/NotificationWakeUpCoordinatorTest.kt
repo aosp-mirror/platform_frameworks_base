@@ -23,7 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.NotificationPanelViewController.WAKEUP_ANIMATION_DELAY_MS
+import com.android.systemui.shade.ShadeViewController.Companion.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_WAKEUP

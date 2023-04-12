@@ -6,7 +6,7 @@ import android.util.MathUtils
 import com.android.systemui.R
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -17,7 +17,7 @@ class LockscreenShadeKeyguardTransitionController
 @AssistedInject
 constructor(
     private val mediaHierarchyManager: MediaHierarchyManager,
-    @Assisted private val notificationPanelController: NotificationPanelViewController,
+    @Assisted private val notificationPanelController: ShadeViewController,
     context: Context,
     configurationController: ConfigurationController,
     dumpManager: DumpManager
@@ -114,7 +114,7 @@ constructor(
     @AssistedFactory
     fun interface Factory {
         fun create(
-            notificationPanelController: NotificationPanelViewController
+            notificationPanelController: ShadeViewController
         ): LockscreenShadeKeyguardTransitionController
     }
 }

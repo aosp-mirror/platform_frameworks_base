@@ -23,8 +23,8 @@ import android.view.ViewRootImpl;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -178,7 +178,7 @@ public interface KeyguardViewController {
      * Registers the CentralSurfaces to which this Keyguard View is mounted.
      */
     void registerCentralSurfaces(CentralSurfaces centralSurfaces,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
