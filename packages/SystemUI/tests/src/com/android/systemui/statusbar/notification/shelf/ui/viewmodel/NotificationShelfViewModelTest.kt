@@ -69,4 +69,22 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
 
         assertThat(canModifyNotifColor).isFalse()
     }
+
+    @Test
+    fun isClickable_whenKeyguardShowing() = runTest {
+        val isClickable by collectLastValue(underTest.isClickable)
+
+        keyguardRepository.setKeyguardShowing(true)
+
+        assertThat(isClickable).isTrue()
+    }
+
+    @Test
+    fun isNotClickable_whenKeyguardNotShowing() = runTest {
+        val isClickable by collectLastValue(underTest.isClickable)
+
+        keyguardRepository.setKeyguardShowing(false)
+
+        assertThat(isClickable).isFalse()
+    }
 }
