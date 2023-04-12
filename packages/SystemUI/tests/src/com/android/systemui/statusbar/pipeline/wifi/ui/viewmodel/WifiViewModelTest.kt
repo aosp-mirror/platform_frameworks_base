@@ -39,8 +39,8 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -53,7 +53,6 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class WifiViewModelTest : SysuiTestCase() {
 
@@ -68,6 +67,7 @@ class WifiViewModelTest : SysuiTestCase() {
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
     private lateinit var airplaneModeViewModel: AirplaneModeViewModel
+    private val shouldShowSignalSpacerProviderFlow = MutableStateFlow(false)
     private lateinit var scope: CoroutineScope
 
     @Before
@@ -473,6 +473,34 @@ class WifiViewModelTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun signalSpacer_firstSubNotShowingNetworkTypeIcon_outputsFalse() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isSignalSpacerVisible.onEach { latest = it }.launchIn(this)
+
+            shouldShowSignalSpacerProviderFlow.value = false
+            yield()
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun signalSpacer_firstSubIsShowingNetworkTypeIcon_outputsTrue() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isSignalSpacerVisible.onEach { latest = it }.launchIn(this)
+
+            shouldShowSignalSpacerProviderFlow.value = true
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
     private fun createAndSetViewModel() {
         // [WifiViewModel] creates its flows as soon as it's instantiated, and some of those flow
         // creations rely on certain config values that we mock out in individual tests. This method
@@ -480,12 +508,12 @@ class WifiViewModelTest : SysuiTestCase() {
         underTest =
             WifiViewModel(
                 airplaneModeViewModel,
+                { shouldShowSignalSpacerProviderFlow },
                 connectivityConstants,
                 context,
                 tableLogBuffer,
                 interactor,
                 scope,
-                statusBarPipelineFlags,
                 wifiConstants,
             )
     }
