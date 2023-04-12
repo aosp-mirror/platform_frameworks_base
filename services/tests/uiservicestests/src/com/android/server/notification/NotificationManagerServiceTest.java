@@ -754,13 +754,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
             String groupKey, boolean isSummary) {
+        return generateNotificationRecord(channel, id, "tag" + System.currentTimeMillis(), groupKey,
+                isSummary);
+    }
+
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
+            String tag, String groupKey, boolean isSummary) {
         Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setGroup(groupKey)
                 .setGroupSummary(isSummary);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id,
-                "tag" + System.currentTimeMillis(), mUid, 0,
+                tag, mUid, 0,
                 nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
@@ -1899,7 +1905,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mSummaryByGroupKey.put("pkg", summary);
         mService.mAutobundledSummaries.put(0, new ArrayMap<>());
         mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
-        mService.updateAutobundledSummaryFlags(0, "pkg", true, false);
+        mService.updateAutobundledSummaryFlags(
+                0, "pkg", GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT, false);
 
         assertTrue(summary.getSbn().isOngoing());
     }
@@ -1915,7 +1922,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
         mService.mSummaryByGroupKey.put("pkg", summary);
 
-        mService.updateAutobundledSummaryFlags(0, "pkg", false, false);
+        mService.updateAutobundledSummaryFlags(0, "pkg", GroupHelper.BASE_FLAGS, false);
 
         assertFalse(summary.getSbn().isOngoing());
     }
@@ -2897,7 +2904,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPermissionHelper.isPermissionFixed(PKG, temp.getUserId())).thenReturn(true);
 
         NotificationRecord r = mService.createAutoGroupSummary(
-                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey(), false);
+                temp.getUserId(), temp.getSbn().getPackageName(), temp.getKey(), 0);
 
         assertThat(r.isImportanceFixed()).isTrue();
     }
@@ -4213,7 +4220,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnlyAutogroupIfGroupChanged_noPriorNoti_autogroups() throws Exception {
+    public void testOnlyAutogroupIfNeeded_newNotification_ghUpdate() {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
@@ -4226,17 +4233,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnlyAutogroupIfGroupChanged_groupChanged_autogroups()
-            throws Exception {
-        NotificationRecord r =
-                generateNotificationRecord(mTestNotificationChannel, 0, "group", false);
+    public void testOnlyAutogroupIfNeeded_groupChanged_ghUpdate() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfNeeded_groupChanged_ghUpdate", "group", false);
         mService.addNotification(r);
 
-        r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
-        mService.addEnqueuedNotification(r);
+        NotificationRecord update = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfNeeded_groupChanged_ghUpdate", null, false);
+        mService.addEnqueuedNotification(update);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
+                mService.new PostNotificationRunnable(update.getKey(),
+                        update.getSbn().getPackageName(), update.getUid(),
+                        SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -4244,16 +4252,39 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnlyAutogroupIfGroupChanged_noGroupChanged_autogroups()
-            throws Exception {
-        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group",
-                false);
+    public void testOnlyAutogroupIfNeeded_flagsChanged_ghUpdate() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfNeeded_flagsChanged_ghUpdate", "group", false);
         mService.addNotification(r);
-        mService.addEnqueuedNotification(r);
+
+        NotificationRecord update = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfNeeded_flagsChanged_ghUpdate", null, false);
+        update.getNotification().flags = FLAG_AUTO_CANCEL;
+        mService.addEnqueuedNotification(update);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(update.getKey(),
+                        update.getSbn().getPackageName(), update.getUid(),
+                        SystemClock.elapsedRealtime());
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfGroupChanged_noValidChange_noGhUpdate() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfGroupChanged_noValidChange_noGhUpdate", null, false);
+        mService.addNotification(r);
+        NotificationRecord update = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfGroupChanged_noValidChange_noGhUpdate", null, false);
+        update.getNotification().color = Color.BLACK;
+        mService.addEnqueuedNotification(update);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
+                mService.new PostNotificationRunnable(update.getKey(),
+                        update.getSbn().getPackageName(),
+                        update.getUid(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -10220,10 +10251,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // grouphelper is a mock here, so make the calls it would make
 
-        // add summary; wait for it to be posted
-        mService.addAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(), nr1.getKey(),
-                true);
-        waitForIdle();
+        // add summary
+        mService.addNotification(mService.createAutoGroupSummary(nr1.getUserId(),
+                nr1.getSbn().getPackageName(), nr1.getKey(),
+                GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT));
 
         // cancel both children
         mBinderService.cancelNotificationWithTag(PKG, PKG, nr0.getSbn().getTag(),
@@ -10232,9 +10263,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nr1.getSbn().getId(), nr1.getSbn().getUserId());
         waitForIdle();
 
-        // group helper would send 'remove flag' and then 'remove summary' events
-        mService.updateAutobundledSummaryFlags(nr1.getUserId(), nr1.getSbn().getPackageName(),
-                false, false);
+        // group helper would send 'remove summary' event
         mService.clearAutogroupSummaryLocked(nr1.getUserId(), nr1.getSbn().getPackageName());
         waitForIdle();
 
