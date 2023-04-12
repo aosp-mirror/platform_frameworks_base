@@ -67,6 +67,7 @@ import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -208,7 +209,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 mConfigurationController, mFalsingCollector, mFalsingManager,
                 mUserSwitcherController, mFeatureFlags, mGlobalSettings,
                 mSessionTracker, Optional.of(mSideFpsController), mFalsingA11yDelegate,
-                mTelephonyManager, mViewMediatorCallback, mAudioManager);
+                mTelephonyManager, mViewMediatorCallback, mAudioManager,
+                mock(KeyguardFaceAuthInteractor.class));
     }
 
     @Test
