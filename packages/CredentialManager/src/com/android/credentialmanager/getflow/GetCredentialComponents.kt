@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.getflow
 
+import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -34,7 +35,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -168,26 +168,30 @@ fun PrimarySelectionCard(
         providerDisplayInfo.sortedUserNameToCredentialEntryList
     val authenticationEntryList = providerDisplayInfo.authenticationEntryList
     SheetContainerCard {
-        // When only one provider (not counting the remote-only provider) exists, display that
-        // provider's icon + name up top.
-        if (providerInfoList.size <= 2) { // It's only possible to be the single provider case
-                                          // if we are started with no more than 2 providers.
-            val nonRemoteProviderList = providerInfoList.filter(
-                { it.credentialEntryList.isNotEmpty() || it.authenticationEntryList.isNotEmpty() }
-            )
-            if (nonRemoteProviderList.size == 1) {
-                val providerInfo = nonRemoteProviderList.firstOrNull() // First should always work
-                                                                       // but just to be safe.
+        val preferTopBrandingContent = requestDisplayInfo.preferTopBrandingContent
+        if (preferTopBrandingContent != null) {
+            item {
+                HeadlineProviderIconAndName(
+                    preferTopBrandingContent.icon,
+                    preferTopBrandingContent.displayName
+                )
+            }
+        } else {
+            // When only one provider (not counting the remote-only provider) exists, display that
+            // provider's icon + name up top.
+            val providersWithActualEntries = providerInfoList.filter {
+                it.credentialEntryList.isNotEmpty() || it.authenticationEntryList.isNotEmpty()
+            }
+            if (providersWithActualEntries.size == 1) {
+                // First should always work but just to be safe.
+                val providerInfo = providersWithActualEntries.firstOrNull()
                 if (providerInfo != null) {
                     item {
-                        HeadlineIcon(
-                            bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
-                            tint = Color.Unspecified,
+                        HeadlineProviderIconAndName(
+                            providerInfo.icon,
+                            providerInfo.displayName
                         )
                     }
-                    item { Divider(thickness = 4.dp, color = Color.Transparent) }
-                    item { LargeLabelTextOnSurfaceVariant(text = providerInfo.displayName) }
-                    item { Divider(thickness = 16.dp, color = Color.Transparent) }
                 }
             }
         }
@@ -369,8 +373,19 @@ fun AllSignInOptionCard(
     onLog(GetCredentialEvent.CREDMAN_GET_CRED_ALL_SIGN_IN_OPTION_CARD)
 }
 
-// TODO: create separate rows for primary and secondary pages.
-// TODO: reuse rows and columns across types.
+@Composable
+fun HeadlineProviderIconAndName(
+    icon: Drawable,
+    name: String,
+) {
+    HeadlineIcon(
+        bitmap = icon.toBitmap().asImageBitmap(),
+        tint = Color.Unspecified,
+    )
+    Divider(thickness = 4.dp, color = Color.Transparent)
+    LargeLabelTextOnSurfaceVariant(text = name)
+    Divider(thickness = 16.dp, color = Color.Transparent)
+}
 
 @Composable
 fun ActionChips(
