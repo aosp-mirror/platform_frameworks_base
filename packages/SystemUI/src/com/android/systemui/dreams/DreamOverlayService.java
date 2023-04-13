@@ -32,7 +32,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelStore;
 
@@ -42,9 +41,9 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.complication.Complication;
+import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.touch.TouchInsetManager;
@@ -91,7 +90,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private final ComplicationComponent mComplicationComponent;
 
-    private final com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
+    private final com.android.systemui.dreams.complication.dagger.ComplicationComponent
             mDreamComplicationComponent;
 
     private final DreamOverlayComponent mDreamOverlayComponent;
@@ -145,7 +144,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             @Main DelayableExecutor executor,
             WindowManager windowManager,
             ComplicationComponent.Factory complicationComponentFactory,
-            com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
+            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
                     dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
