@@ -11263,13 +11263,19 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (syncBuffer) {
-                    mBlastBufferQueue.syncNextTransaction(new Consumer<Transaction>() {
-                        @Override
-                        public void accept(Transaction transaction) {
-                            surfaceSyncGroup.addTransaction(transaction);
-                            surfaceSyncGroup.markSyncReady();
-                        }
+                    boolean result = mBlastBufferQueue.syncNextTransaction(transaction -> {
+                        surfaceSyncGroup.addTransaction(transaction);
+                        surfaceSyncGroup.markSyncReady();
                     });
+                    if (!result) {
+                        // syncNextTransaction can only return false if something is already trying
+                        // to sync the same frame in the same BBQ. That shouldn't be possible, but
+                        // if it did happen, invoke markSyncReady so the active SSG doesn't get
+                        // stuck.
+                        Log.e(mTag, "Unable to syncNextTransaction. Possibly something else is"
+                                + " trying to sync?");
+                        surfaceSyncGroup.markSyncReady();
+                    }
                 }
 
                 return didProduceBuffer -> {
@@ -11283,7 +11289,7 @@ public final class ViewRootImpl implements ViewParent,
                     // the next draw attempt. The next transaction and transaction complete callback
                     // were only set for the current draw attempt.
                     if (!didProduceBuffer) {
-                        mBlastBufferQueue.syncNextTransaction(null);
+                        mBlastBufferQueue.clearSyncTransaction();
 
                         // Gather the transactions that were sent to mergeWithNextTransaction
                         // since the frame didn't draw on this vsync. It's possible the frame will
