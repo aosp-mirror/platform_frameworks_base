@@ -188,6 +188,17 @@ public class FakeAudioFramework {
                 boolean handlesVolumeAdjustment) {
             setVolumeBehaviorHelper(device, AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
         }
+
+        @Override
+        public void setDeviceAbsoluteVolumeAdjustOnlyBehavior(
+                @NonNull AudioDeviceAttributes device,
+                @NonNull VolumeInfo volume,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull OnAudioDeviceVolumeChangedListener vclistener,
+                boolean handlesVolumeAdjustment) {
+            setVolumeBehaviorHelper(device,
+                    AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY);
+        }
     }
 
     /**

@@ -67,4 +67,15 @@ public class DefaultAudioDeviceVolumeManagerWrapper
         mAudioDeviceVolumeManager.setDeviceAbsoluteVolumeBehavior(device, volume, executor,
                 vclistener, handlesVolumeAdjustment);
     }
+
+    @Override
+    public void setDeviceAbsoluteVolumeAdjustOnlyBehavior(
+            @NonNull AudioDeviceAttributes device,
+            @NonNull VolumeInfo volume,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener vclistener,
+            boolean handlesVolumeAdjustment) {
+        mAudioDeviceVolumeManager.setDeviceAbsoluteVolumeAdjustOnlyBehavior(device, volume,
+                executor, vclistener, handlesVolumeAdjustment);
+    }
 }

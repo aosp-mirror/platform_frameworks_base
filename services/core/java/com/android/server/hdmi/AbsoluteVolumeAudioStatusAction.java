@@ -17,10 +17,13 @@
 package com.android.server.hdmi;
 
 /**
- * Action to query and track the audio status of the System Audio device when enabling or using
- * absolute volume behavior. Must be removed when AVB is disabled. Performs two main functions:
+ * Action to query and track the audio status of the System Audio device when using
+ * absolute volume behavior, or adjust-only absolute volume behavior. Must be removed when
+ * neither behavior is used.
+ *
+ * Performs two main functions:
  * 1. When enabling AVB: queries the starting audio status of the System Audio device and
- *    enables the feature upon receiving a response.
+ *    adopts the appropriate volume behavior upon receiving a response.
  * 2. While AVB is enabled: monitors <Report Audio Status> messages from the System Audio device and
  *    notifies AudioService if the audio status changes.
  */

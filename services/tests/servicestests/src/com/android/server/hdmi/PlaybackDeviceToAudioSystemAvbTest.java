@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
-import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.platform.test.annotations.Presubmit;
 
@@ -42,27 +41,7 @@ import java.util.Arrays;
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
-public class PlaybackDeviceToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
-
-    @Override
-    protected HdmiCecLocalDevice createLocalDevice(HdmiControlService hdmiControlService) {
-        return new HdmiCecLocalDevicePlayback(hdmiControlService);
-    }
-
-    @Override
-    protected int getPhysicalAddress() {
-        return 0x1100;
-    }
-
-    @Override
-    protected int getDeviceType() {
-        return HdmiDeviceInfo.DEVICE_PLAYBACK;
-    }
-
-    @Override
-    protected AudioDeviceAttributes getAudioOutputDevice() {
-        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI;
-    }
+public class PlaybackDeviceToAudioSystemAvbTest extends BasePlaybackDeviceAvbTest {
 
     @Override
     protected int getSystemAudioDeviceLogicalAddress() {

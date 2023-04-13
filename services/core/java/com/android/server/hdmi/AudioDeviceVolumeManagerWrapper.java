@@ -61,4 +61,15 @@ public interface AudioDeviceVolumeManagerWrapper {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener vclistener,
             boolean handlesVolumeAdjustment);
+
+    /**
+     * Wrapper for {@link AudioDeviceVolumeManager#setDeviceAbsoluteVolumeAdjustOnlyBehavior(
+     * AudioDeviceAttributes, VolumeInfo, Executor, OnAudioDeviceVolumeChangedListener, boolean)}
+     */
+    void setDeviceAbsoluteVolumeAdjustOnlyBehavior(
+            @NonNull AudioDeviceAttributes device,
+            @NonNull VolumeInfo volume,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener vclistener,
+            boolean handlesVolumeAdjustment);
 }

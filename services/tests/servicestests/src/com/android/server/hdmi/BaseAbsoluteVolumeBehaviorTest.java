@@ -74,7 +74,7 @@ import java.util.Collections;
  * (TV, Audio System): {@link TvToAudioSystemAvbTest}
  */
 public abstract class BaseAbsoluteVolumeBehaviorTest {
-    private HdmiControlService mHdmiControlService;
+    protected HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDevice mHdmiCecLocalDevice;
     private FakeHdmiCecConfig mHdmiCecConfig;
@@ -282,6 +282,20 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
                 AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
     }
 
+    protected void enableAdjustOnlyAbsoluteVolumeBehavior() {
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
+        enableSystemAudioModeIfNeeded();
+        receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_NOT_SUPPORTED);
+        receiveReportAudioStatus(
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume(),
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute());
+
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY);
+    }
+
     protected void verifyGiveAudioStatusNeverSent() {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(
                 HdmiCecMessageBuilder.buildGiveAudioStatus(
@@ -462,6 +476,7 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
         assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
                 AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
     }
+
     @Test
     public void avbEnabled_receiveReportAudioStatus_notifiesVolumeOrMuteChanges() {
         // Initial <Report Audio Status> has volume=50 and mute=false
