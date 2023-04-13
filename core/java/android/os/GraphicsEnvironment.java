@@ -213,6 +213,13 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Switch the system to use ANGLE as the default GLES driver.
+     */
+    public void toggleAngleAsSystemDriver(boolean enabled) {
+        nativeToggleAngleAsSystemDriver(enabled);
+    }
+
+    /**
      * Query to determine if the Game Mode has enabled ANGLE.
      */
     private boolean isAngleEnabledByGameMode(Context context, String packageName) {
@@ -992,6 +999,7 @@ public class GraphicsEnvironment {
             String appPackage, boolean angleIsSystemDriver, String legacyDriverName);
     private static native boolean getShouldUseAngle(String packageName);
     private static native boolean setInjectLayersPrSetDumpable();
+    private static native void nativeToggleAngleAsSystemDriver(boolean enabled);
 
     /**
      * Hint for GraphicsEnvironment that an activity is launching on the process.
