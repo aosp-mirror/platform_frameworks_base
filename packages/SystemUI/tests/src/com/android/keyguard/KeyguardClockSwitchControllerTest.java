@@ -391,7 +391,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         listenerArgumentCaptor.getValue().onCurrentClockChanged();
 
         mExecutor.runAllReady();
-        assertEquals(View.GONE, mFakeDateView.getVisibility());
+        assertEquals(View.INVISIBLE, mFakeDateView.getVisibility());
     }
 
     @Test

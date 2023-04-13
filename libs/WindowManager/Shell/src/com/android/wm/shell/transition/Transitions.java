@@ -143,6 +143,10 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type to fullscreen from desktop mode. */
     public static final int TRANSIT_EXIT_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 12;
 
+    /** Transition type to animate back to fullscreen when drag to freeform is cancelled. */
+    public static final int TRANSIT_CANCEL_ENTERING_DESKTOP_MODE =
+            WindowManager.TRANSIT_FIRST_CUSTOM + 13;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;

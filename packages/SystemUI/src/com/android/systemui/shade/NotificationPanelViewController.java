@@ -3333,7 +3333,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mGestureRecorder = recorder;
         mHideExpandedRunnable = hideExpandedRunnable;
-        mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);
+        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            mNotificationStackScrollLayoutController.setShelfController(
+                    notificationShelfController);
+        }
         mNotificationShelfController = notificationShelfController;
         mLockscreenShadeTransitionController.bindController(notificationShelfController);
         updateMaxDisplayedNotifications(true);

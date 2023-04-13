@@ -3142,10 +3142,10 @@ public class SubscriptionManager {
      *
      * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
      * true). To check for permissions for non-embedded subscription as well,
+     * see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}.
      *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
-     *
      * @see android.telephony.TelephonyManager#hasCarrierPrivileges
      */
     public boolean canManageSubscription(SubscriptionInfo info) {
@@ -3159,12 +3159,12 @@ public class SubscriptionManager {
      *
      * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
      * true). To check for permissions for non-embedded subscription as well,
+     * see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}.
      *
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
      *
      * @return whether the app is authorized to manage this subscription per its access rules.
-     *
      * @see android.telephony.TelephonyManager#hasCarrierPrivileges
      * @hide
      */

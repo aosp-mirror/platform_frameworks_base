@@ -256,8 +256,20 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private class BackAnimationImpl implements BackAnimation {
         @Override
         public void onBackMotion(
-                float touchX, float touchY, int keyAction, @BackEvent.SwipeEdge int swipeEdge) {
-            mShellExecutor.execute(() -> onMotionEvent(touchX, touchY, keyAction, swipeEdge));
+                float touchX,
+                float touchY,
+                float velocityX,
+                float velocityY,
+                int keyAction,
+                @BackEvent.SwipeEdge int swipeEdge
+        ) {
+            mShellExecutor.execute(() -> onMotionEvent(
+                    /* touchX = */ touchX,
+                    /* touchY = */ touchY,
+                    /* velocityX = */ velocityX,
+                    /* velocityY = */ velocityY,
+                    /* keyAction = */ keyAction,
+                    /* swipeEdge = */ swipeEdge));
         }
 
         @Override
@@ -332,13 +344,18 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * Called when a new motion event needs to be transferred to this
      * {@link BackAnimationController}
      */
-    public void onMotionEvent(float touchX, float touchY, int keyAction,
+    public void onMotionEvent(
+            float touchX,
+            float touchY,
+            float velocityX,
+            float velocityY,
+            int keyAction,
             @BackEvent.SwipeEdge int swipeEdge) {
         if (mPostCommitAnimationInProgress) {
             return;
         }
 
-        mTouchTracker.update(touchX, touchY);
+        mTouchTracker.update(touchX, touchY, velocityX, velocityY);
         if (keyAction == MotionEvent.ACTION_DOWN) {
             if (!mBackGestureStarted) {
                 mShouldStartOnNextMoveEvent = true;
@@ -561,6 +578,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
         if (runner.isWaitingAnimation()) {
             ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Gesture released, but animation didn't ready.");
+            // Supposed it is in post commit animation state, and start the timeout to watch
+            // if the animation is ready.
+            mShellExecutor.executeDelayed(mAnimationTimeoutRunnable, MAX_ANIMATION_DURATION);
             return;
         } else if (runner.isAnimationCancelled()) {
             invokeOrCancelBack();
@@ -577,6 +597,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (mPostCommitAnimationInProgress) {
             return;
         }
+
+        mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: startPostCommitAnimation()");
         mPostCommitAnimationInProgress = true;
         mShellExecutor.executeDelayed(mAnimationTimeoutRunnable, MAX_ANIMATION_DURATION);
@@ -595,9 +617,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     @VisibleForTesting
     void onBackAnimationFinished() {
-        if (!mPostCommitAnimationInProgress) {
-            return;
-        }
         // Stop timeout runner.
         mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
         mPostCommitAnimationInProgress = false;

@@ -284,6 +284,7 @@ final class PolicyDefinition<V> {
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
+    // TODO(b/277218360): Revisit policies that should be marked as global-only.
     static {
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
@@ -312,8 +313,9 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_WIFI_TETHERING, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_GRANT_ADMIN, /* flags= */ 0);
+        // TODO: set as global only once we get rid of the mapping
         USER_RESTRICTION_FLAGS.put(
-                UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+                UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_WIFI_DIRECT, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(
@@ -333,8 +335,10 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_BLUETOOTH, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BLUETOOTH, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BLUETOOTH_SHARING, /* flags= */ 0);
+        // This effectively always applies globally, but it can be set on the profile
+        // parent, check the javadocs on the restriction for more info.
         USER_RESTRICTION_FLAGS.put(
-                UserManager.DISALLOW_USB_FILE_TRANSFER, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+                UserManager.DISALLOW_USB_FILE_TRANSFER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_CREDENTIALS, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_REMOVE_USER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, /* flags= */ 0);
@@ -344,8 +348,10 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_DATE_TIME, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_CONFIG_TETHERING, /* flags= */ 0);
+        // This effectively always applies globally, but it can be set on the profile
+        // parent, check the javadocs on the restriction for more info.
         USER_RESTRICTION_FLAGS.put(
-                UserManager.DISALLOW_NETWORK_RESET, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+                UserManager.DISALLOW_NETWORK_RESET, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_FACTORY_RESET, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_USER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_MANAGED_PROFILE, /* flags= */ 0);
@@ -376,8 +382,7 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNMUTE_DEVICE, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_DATA_ROAMING, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SET_USER_ICON, /* flags= */ 0);
-            // TODO: double check flags
-        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_OEM_UNLOCK, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_OEM_UNLOCK, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNIFIED_PASSWORD, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.ALLOW_PARENT_PROFILE_APP_LINKING, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_AUTOFILL, /* flags= */ 0);
@@ -390,6 +395,7 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_CONFIG_PRIVATE_DNS, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MICROPHONE_TOGGLE, /* flags= */ 0);
+        // TODO: According the UserRestrictionsUtils, this is global only, need to confirm.
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CAMERA_TOGGLE, /* flags= */ 0);
         // TODO: check if its global only
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BIOMETRIC, /* flags= */ 0);

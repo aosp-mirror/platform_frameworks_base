@@ -213,7 +213,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
 
-    private static final boolean DEFAULT_USE_MODERN_TRIM = false;
+    private static final boolean DEFAULT_USE_MODERN_TRIM = true;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}

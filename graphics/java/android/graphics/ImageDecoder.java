@@ -2083,32 +2083,29 @@ public final class ImageDecoder implements AutoCloseable {
             }
 
             sIsP010SupportedForAV1Initialized = true;
-
-            if (hasHardwareDecoder("video/av01")) {
-                sIsP010SupportedForAV1 = true;
-                return true;
-            }
-
-            sIsP010SupportedForAV1 = Build.VERSION.DEVICE_INITIAL_SDK_INT
-                    >= Build.VERSION_CODES.S;
-            return sIsP010SupportedForAV1;
+            return sIsP010SupportedForAV1 = isP010SupportedforMime("video/av01");
         }
     }
 
     /**
-     * Checks if the device has hardware decoder for the target mime type.
+     * Checks if the device supports decoding 10-bit for the given mime type.
      */
-    private static boolean hasHardwareDecoder(String mime) {
-        final MediaCodecList sMCL = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-        for (MediaCodecInfo info : sMCL.getCodecInfos()) {
-            if (info.isEncoder() == false && info.isHardwareAccelerated()) {
-                try {
-                     if (info.getCapabilitiesForType(mime) != null) {
-                         return true;
-                     }
-                } catch (IllegalArgumentException e) {
-                     // mime is not supported
-                     return false;
+    private static boolean isP010SupportedforMime(String mime) {
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+        for (MediaCodecInfo mediaCodecInfo : codecList.getCodecInfos()) {
+            if (mediaCodecInfo.isEncoder()) {
+                continue;
+            }
+            for (String mediaType : mediaCodecInfo.getSupportedTypes()) {
+                if (mediaType.equalsIgnoreCase(mime)) {
+                    MediaCodecInfo.CodecCapabilities codecCapabilities =
+                        mediaCodecInfo.getCapabilitiesForType(mediaType);
+                    for (int i = 0; i < codecCapabilities.colorFormats.length; ++i) {
+                        if (codecCapabilities.colorFormats[i]
+                            == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010) {
+                            return true;
+                        }
+                    }
                 }
             }
         }

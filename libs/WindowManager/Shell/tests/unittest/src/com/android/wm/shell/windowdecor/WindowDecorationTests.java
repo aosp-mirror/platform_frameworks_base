@@ -49,6 +49,7 @@ import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
+import android.window.SurfaceSyncGroup;
 import android.window.TaskConstants;
 import android.window.WindowContainerTransaction;
 
@@ -100,6 +101,8 @@ public class WindowDecorationTests extends ShellTestCase {
     private TestView mMockView;
     @Mock
     private WindowContainerTransaction mMockWindowContainerTransaction;
+    @Mock
+    private SurfaceSyncGroup mMockSurfaceSyncGroup;
 
     private final List<SurfaceControl.Transaction> mMockSurfaceControlTransactions =
             new ArrayList<>();
@@ -553,7 +556,7 @@ public class WindowDecorationTests extends ShellTestCase {
             String name = "Test Window";
             WindowDecoration.AdditionalWindow additionalWindow =
                     addWindow(R.layout.desktop_mode_window_decor_handle_menu_app_info_pill, name,
-                            mMockSurfaceControlAddWindowT, x, y,
+                            mMockSurfaceControlAddWindowT, mMockSurfaceSyncGroup, x, y,
                             width, height, shadowRadius, cornerRadius);
             return additionalWindow;
         }

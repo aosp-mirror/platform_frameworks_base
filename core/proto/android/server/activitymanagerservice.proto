@@ -1035,6 +1035,7 @@ message AppsExitInfoProto {
 
             optional int32 uid = 1;
             repeated .android.app.ApplicationExitInfoProto app_exit_info = 2;
+            repeated .android.app.ApplicationExitInfoProto app_recoverable_crash = 3;
         }
         repeated User users = 2;
     }

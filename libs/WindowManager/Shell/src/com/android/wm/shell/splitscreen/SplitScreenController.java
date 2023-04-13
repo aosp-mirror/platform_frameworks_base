@@ -541,6 +541,34 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 instanceId);
     }
 
+    void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
+            int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
+            float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        if (options1 == null) options1 = new Bundle();
+        final ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
+        final String packageName1 = shortcutInfo.getPackage();
+        // NOTE: This doesn't correctly pull out packageName2 if taskId is referring to a task in
+        //       recents that hasn't launched and is not being organized
+        final String packageName2 = SplitScreenUtils.getPackageName(taskId, mTaskOrganizer);
+        if (samePackage(packageName1, packageName2)) {
+            if (supportMultiInstancesSplit(packageName1)) {
+                activityOptions.setApplyMultipleTaskFlagForShortcut(true);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                if (mRecentTasksOptional.isPresent()) {
+                    mRecentTasksOptional.get().removeSplitPair(taskId);
+                }
+                taskId = INVALID_TASK_ID;
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        mStageCoordinator.startShortcutAndTask(shortcutInfo, options1, taskId, options2,
+                splitPosition, splitRatio, remoteTransition, instanceId);
+    }
+
     /**
      * See {@link #startIntent(PendingIntent, Intent, int, Bundle)}
      * @param instanceId to be used by {@link SplitscreenEventLogger}
@@ -580,6 +608,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         Intent fillInIntent = null;
         final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent);
+        // NOTE: This doesn't correctly pull out packageName2 if taskId is referring to a task in
+        //       recents that hasn't launched and is not being organized
         final String packageName2 = SplitScreenUtils.getPackageName(taskId, mTaskOrganizer);
         if (samePackage(packageName1, packageName2)) {
             if (supportMultiInstancesSplit(packageName1)) {
@@ -587,6 +617,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else {
+                if (mRecentTasksOptional.isPresent()) {
+                    mRecentTasksOptional.get().removeSplitPair(taskId);
+                }
+                taskId = INVALID_TASK_ID;
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                         "Cancel entering split as not supporting multi-instances");
                 Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
@@ -624,6 +658,35 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1,
                 shortcutInfo1, options1, pendingIntent2, fillInIntent2, shortcutInfo2, options2,
                 splitPosition, splitRatio, adapter, instanceId);
+    }
+
+    private void startIntents(PendingIntent pendingIntent1,
+            @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
+            PendingIntent pendingIntent2, @Nullable ShortcutInfo shortcutInfo2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
+            @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        Intent fillInIntent1 = null;
+        Intent fillInIntent2 = null;
+        final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent1);
+        final String packageName2 = SplitScreenUtils.getPackageName(pendingIntent2);
+        if (samePackage(packageName1, packageName2)) {
+            if (supportMultiInstancesSplit(packageName1)) {
+                fillInIntent1 = new Intent();
+                fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                fillInIntent2 = new Intent();
+                fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                pendingIntent2 = null;
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        mStageCoordinator.startIntents(pendingIntent1, fillInIntent1, shortcutInfo1, options1,
+                pendingIntent2, fillInIntent2, shortcutInfo2, options2, splitPosition, splitRatio,
+                remoteTransition, instanceId);
     }
 
     @Override
@@ -1046,9 +1109,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 float splitRatio, @Nullable RemoteTransition remoteTransition,
                 InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startShortcutAndTask",
-                    (controller) -> controller.mStageCoordinator.startShortcutAndTask(shortcutInfo,
-                            options1, taskId, options2, splitPosition, splitRatio, remoteTransition,
-                            instanceId));
+                    (controller) -> controller.startShortcutAndTask(shortcutInfo, options1, taskId,
+                            options2, splitPosition, splitRatio, remoteTransition, instanceId));
         }
 
         @Override
@@ -1066,11 +1128,17 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public void startIntents(PendingIntent pendingIntent1, @Nullable Bundle options1,
-                PendingIntent pendingIntent2, @Nullable Bundle options2,
+        public void startIntents(PendingIntent pendingIntent1, @Nullable ShortcutInfo shortcutInfo1,
+                @Nullable Bundle options1, PendingIntent pendingIntent2,
+                @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
                 @SplitPosition int splitPosition, float splitRatio,
                 @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
-            // TODO(b/259368992): To be implemented.
+            executeRemoteCallWithTaskPermission(mController, "startIntents",
+                    (controller) ->
+                            controller.startIntents(pendingIntent1, shortcutInfo1,
+                                    options1, pendingIntent2, shortcutInfo2, options2,
+                                    splitPosition, splitRatio, remoteTransition, instanceId)
+            );
         }
 
         @Override

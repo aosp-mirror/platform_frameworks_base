@@ -299,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"មុខងារប្រើដៃម្ខាង"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"កម្រិត​រំលេចពណ៌"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ស្តង់ដារ"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"មធ្យម"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"ខ្ពស់"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ឈប់ទប់ស្កាត់​មីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ឈប់ទប់ស្កាត់​កាមេរ៉ា​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ឈប់ទប់ស្កាត់​កាមេរ៉ា និងមីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
@@ -458,10 +462,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"បិទ"</string>
     <string name="sound_settings" msgid="8874581353127418308">"សំឡេង និងការញ័រ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ការកំណត់"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"បានបន្ថយទៅកម្រិតសំឡេង​ដែលកាន់តែមានសុវត្ថិភាព"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"កម្រិតសំឡេងខ្ពស់​ក្នុងរយៈពេលយូរជាងកម្រិត​ដែលបានណែនាំ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"កម្មវិធី​ត្រូវបានខ្ទាស់"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុចប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
@@ -517,13 +519,13 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ការកំណត់អេក្រង់ចាក់សោ"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"កម្មវិធី​ស្កេនកូដ QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"កំពុងដំឡើង​កំណែ"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"ប្រវត្តិរូបការងារ"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"កម្រងព័ត៌មានការងារ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ពេលជិះយន្តហោះ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"អ្នកនឹងមិនលឺម៉ោងរោទ៍ <xliff:g id="WHEN">%1$s</xliff:g> បន្ទាប់របស់អ្នកទេ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ហតស្ប៉ត"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"ប្រវត្តិរូបការងារ"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"កម្រងព័ត៌មានការងារ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ល្អសម្រាប់អ្នកប្រើមួយចំនួន តែមិនសម្រាប់គ្រប់គ្នាទេ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"កម្មវិធីសម្រួល UI ប្រព័ន្ធផ្តល់ជូនអ្នកនូវមធ្យោបាយបន្ថែមទៀតដើម្បីកែសម្រួល និងប្តូរចំណុចប្រទាក់អ្នកប្រើ Android តាមបំណង។ លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
@@ -888,12 +890,9 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"បាន​ដកផ្ទាំងគ្រប់គ្រងទាំងអស់ហើយ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"មិនបាន​រក្សាទុក​ការផ្លាស់ប្ដូរទេ"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"មើល​កម្មវិធី​ផ្សេងទៀត"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"តម្រៀបឡើងវិញ"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"បញ្ចូល​ការគ្រប់គ្រង"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"ត្រឡប់​ទៅ​ការកែ​វិញ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"មិនអាចផ្ទុក​ការគ្រប់គ្រង​បានទេ។ សូមពិនិត្យមើល​កម្មវិធី <xliff:g id="APP">%s</xliff:g> ដើម្បីធ្វើឱ្យប្រាកដថា​ការកំណត់កម្មវិធី​មិនបានផ្លាស់ប្ដូរ។"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"មិនអាចប្រើ​ការគ្រប់គ្រង​ដែលត្រូវគ្នា​បានទេ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ផ្សេងៗ"</string>
@@ -951,7 +950,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"មិនអាច​ផ្ទុក​ស្ថានភាព​បានទេ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"មានបញ្ហា សូម​ព្យាយាម​ម្តងទៀត"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ផ្ទាំងគ្រប់គ្រង"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ការគ្រប់គ្រង"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"បញ្ចូល​កម្មវិធី"</string>
     <string name="controls_menu_remove" msgid="3006525275966023468">"ដក​កម្មវិធី​ចេញ"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"បញ្ចូល​ឧបករណ៍​មេឌៀ"</string>
@@ -1123,7 +1122,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"គោលការណ៍ការងាររបស់អ្នកអនុញ្ញាតឱ្យអ្នកធ្វើការហៅទូរសព្ទបានតែពីកម្រងព័ត៌មានការងារប៉ុណ្ណោះ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ប្ដូរ​ទៅ​កម្រង​ព័ត៌មាន​ការងារ"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"បិទ"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"ការកំណត់​អេក្រង់ចាក់សោ"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"មិនមាន Wi-Fi ទេ"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"បាន​ទប់ស្កាត់​កាមេរ៉ា"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"បានទប់ស្កាត់​កាមេរ៉ា និង​មីក្រូហ្វូន"</string>

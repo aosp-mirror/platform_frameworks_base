@@ -17,8 +17,17 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.CoreStartable
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.keyguard.domain.interactor.SystemUIKeyguardFaceAuthInteractor
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
 @Module
 interface KeyguardFaceAuthModule {
@@ -27,5 +36,31 @@ interface KeyguardFaceAuthModule {
         impl: DeviceEntryFaceAuthRepositoryImpl
     ): DeviceEntryFaceAuthRepository
 
+    @Binds
+    @IntoMap
+    @ClassKey(SystemUIKeyguardFaceAuthInteractor::class)
+    fun bind(impl: SystemUIKeyguardFaceAuthInteractor): CoreStartable
+
+    @Binds
+    fun keyguardFaceAuthInteractor(
+        impl: SystemUIKeyguardFaceAuthInteractor
+    ): KeyguardFaceAuthInteractor
+
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @FaceAuthTableLog
+        fun provideFaceAuthTableLog(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("FaceAuthTableLog", 100)
+        }
+
+        @Provides
+        @SysUISingleton
+        @FaceDetectTableLog
+        fun provideFaceDetectTableLog(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("FaceDetectTableLog", 100)
+        }
+    }
 }

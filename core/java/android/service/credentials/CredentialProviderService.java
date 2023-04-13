@@ -226,7 +226,7 @@ public abstract class CredentialProviderService extends Service {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
-        Log.i(TAG, "Failed to bind with intent: " + intent);
+        Log.d(TAG, "Failed to bind with intent: " + intent);
         return null;
     }
 

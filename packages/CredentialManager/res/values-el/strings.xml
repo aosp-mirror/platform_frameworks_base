@@ -52,13 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Να χρησιμοποιηθεί το αποθηκευμένο κλειδί πρόσβασης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Να χρησιμοποιηθούν τα αποθηκευμένα στοιχεία σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Επιλογή αποθηκευμένων στοιχείων σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Επιλογή ενέργειας για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Να χρησιμοποιηθούν αυτές οι πληροφορίες στην εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Σύνδεση με άλλον τρόπο"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Προβολή επιλογών"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Συνέχεια"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Επιλογές σύνδεσης"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Κλειδωμένοι διαχειριστές κωδικών πρόσβασης"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Πατήστε για ξεκλείδωμα"</string>

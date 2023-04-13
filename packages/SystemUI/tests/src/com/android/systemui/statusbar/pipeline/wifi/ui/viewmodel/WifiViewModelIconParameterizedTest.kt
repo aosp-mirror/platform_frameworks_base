@@ -27,7 +27,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -46,6 +45,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
@@ -66,7 +66,6 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
     private lateinit var underTest: WifiViewModel
 
-    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
@@ -121,12 +120,12 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
             underTest =
                 WifiViewModel(
                     airplaneModeViewModel,
+                    shouldShowSignalSpacerProvider = { MutableStateFlow(false) },
                     connectivityConstants,
                     context,
                     tableLogBuffer,
                     interactor,
                     scope,
-                    statusBarPipelineFlags,
                     wifiConstants,
                 )
 

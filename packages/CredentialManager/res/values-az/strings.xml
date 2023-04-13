@@ -26,13 +26,13 @@
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> üçün giriş açarı yaradılsın?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> üçün parol yadda saxlanılsın?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> üçün giriş məlumatları yadda saxlansın?"</string>
-    <string name="passkey" msgid="632353688396759522">"giriş açarı"</string>
+    <string name="passkey" msgid="632353688396759522">"açar"</string>
     <string name="password" msgid="6738570945182936667">"parol"</string>
     <string name="passkeys" msgid="5733880786866559847">"giriş açarları"</string>
     <string name="passwords" msgid="5419394230391253816">"parollar"</string>
     <string name="sign_ins" msgid="4710739369149469208">"girişlər"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"Giriş məlumatları"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> burada yadda saxlansın:"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> harada saxlanılsın?"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Başqa cihazda giriş açarı yaradılsın?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Bütün girişlər üçün <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> istifadə edilsin?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> üçün bu parol meneceri asanlıqla daxil olmağınız məqsədilə parol və giriş açarlarını saxlayacaq"</string>
@@ -52,14 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün yadda saxlanmış giriş açarı istifadə edilsin?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün yadda saxlanmış girişdən istifadə edilsin?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün yadda saxlanmış girişi seçin"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün seçim edilsin?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Məlumat <xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqində istifadə edilsin?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Başqa üsulla daxil olun"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Seçimlərə baxın"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Davam edin"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Giriş seçimləri"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> üçün"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Kilidli parol menecerləri"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Kiliddən çıxarmaq üçün toxunun"</string>

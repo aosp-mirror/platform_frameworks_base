@@ -94,7 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Цуцлах"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Дахин эхлүүлэх"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Дахиж бүү харуул"</string>
-    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"Энэ аппыг зөөхийн тулд хоёр товшино уу"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Энэ аппыг зөөхийн тулд\nхоёр товшино уу"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Томруулах"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Багасгах"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Хаах"</string>
@@ -110,6 +110,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Дэлгэцийн агшин"</string>
     <string name="close_text" msgid="4986518933445178928">"Хаах"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Цэсийг хаах"</string>
-    <!-- no translation found for expand_menu_text (3847736164494181168) -->
-    <skip />
+    <string name="expand_menu_text" msgid="3847736164494181168">"Цэс нээх"</string>
 </resources>

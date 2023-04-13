@@ -5,7 +5,7 @@
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Erabilerraztasun-menuari esker, tamaina handiko menu bat izango duzu pantailan; menu horren bidez, gailua kontrolatzeko aukera izango duzu. Besteak beste, hauek egin ahalko dituzu: gailua blokeatu; bolumena eta distira kontrolatu, eta pantaila-argazkiak egin."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Laguntzailea"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Laguntzailea"</string>
-    <string name="a11y_settings_label" msgid="3977714687248445050">"Erabilerraztasun-ezarpenak"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Erabilerraztasun-&amp;#173;ezarpenak"</string>
     <string name="power_label" msgid="7699720321491287839">"Bateria"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Bateria kontrolatzeko aukerak"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Azken aplikazioak"</string>

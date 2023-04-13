@@ -299,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Почните"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зауставите"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим једном руком"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Контраст"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандардно"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Средње"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Високо"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Желите да одблокирате микрофон уређаја?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Желите да одблокирате камеру уређаја?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Желите да одблокирате камеру и микрофон уређаја?"</string>
@@ -458,10 +462,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"онемогућите"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук и вибрирање"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Подешавања"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Звук је смањен на безбедну јачину"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Звук је био гласан дуже него што се препоручује"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Апликација је закачена"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Почетна да бисте га откачили."</string>
@@ -888,12 +890,9 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Све контроле су уклоњене"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промене нису сачуване"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Погледајте друге апликације"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Прераспореди"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Додај контроле"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Назад на измене"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Учитавање контрола није успело. Погледајте апликацију <xliff:g id="APP">%s</xliff:g> да бисте се уверили да се подешавања апликације нису променила."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Компатибилне контроле нису доступне"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
@@ -1123,7 +1122,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Смернице за посао вам омогућавају да телефонирате само са пословног профила"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Пређи на пословни профил"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Затвори"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Подешавања закључаног екрана"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi није доступан"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера је блокирана"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера и микрофон су блокирани"</string>

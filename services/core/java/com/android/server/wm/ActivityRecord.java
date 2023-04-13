@@ -9806,7 +9806,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mTransitionController.isShellTransitionsEnabled()) {
             final Transition transition = new Transition(TRANSIT_RELAUNCH, 0 /* flags */,
                     mTransitionController, mWmService.mSyncEngine);
-            final Runnable executeRestart = () -> {
+            mTransitionController.startCollectOrQueue(transition, (deferred) -> {
                 if (mState != RESTARTING_PROCESS || !attachedToProcess()) {
                     transition.abort();
                     return;
@@ -9818,14 +9818,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mTransitionController.requestStartTransition(transition, task,
                         null /* remoteTransition */, null /* displayChange */);
                 scheduleStopForRestartProcess();
-            };
-            if (mWmService.mSyncEngine.hasActiveSync()) {
-                mWmService.mSyncEngine.queueSyncSet(
-                        () -> mTransitionController.moveToCollecting(transition), executeRestart);
-            } else {
-                mTransitionController.moveToCollecting(transition);
-                executeRestart.run();
-            }
+            });
         } else {
             startFreezingScreen();
             scheduleStopForRestartProcess();

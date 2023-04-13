@@ -19,6 +19,7 @@ package android.credentials.ui;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -35,7 +36,7 @@ import java.util.List;
 @TestApi
 public final class CreateCredentialProviderData extends ProviderData implements Parcelable {
     @NonNull
-    private final List<Entry> mSaveEntries;
+    private final ParceledListSlice<Entry> mSaveEntries;
     @Nullable
     private final Entry mRemoteEntry;
 
@@ -43,13 +44,13 @@ public final class CreateCredentialProviderData extends ProviderData implements 
             @NonNull String providerFlattenedComponentName, @NonNull List<Entry> saveEntries,
             @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
-        mSaveEntries = saveEntries;
+        mSaveEntries = new ParceledListSlice<>(saveEntries);
         mRemoteEntry = remoteEntry;
     }
 
     @NonNull
     public List<Entry> getSaveEntries() {
-        return mSaveEntries;
+        return mSaveEntries.getList();
     }
 
     @Nullable
@@ -60,9 +61,7 @@ public final class CreateCredentialProviderData extends ProviderData implements 
     private CreateCredentialProviderData(@NonNull Parcel in) {
         super(in);
 
-        List<Entry> credentialEntries = new ArrayList<>();
-        in.readTypedList(credentialEntries, Entry.CREATOR);
-        mSaveEntries = credentialEntries;
+        mSaveEntries = in.readParcelable(null, android.content.pm.ParceledListSlice.class);
         AnnotationValidations.validate(NonNull.class, null, mSaveEntries);
 
         Entry remoteEntry = in.readTypedObject(Entry.CREATOR);
@@ -72,7 +71,7 @@ public final class CreateCredentialProviderData extends ProviderData implements 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeTypedList(mSaveEntries);
+        dest.writeParcelable(mSaveEntries, flags);
         dest.writeTypedObject(mRemoteEntry, flags);
     }
 

@@ -21,14 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"ನಿಮ್ಮ ಪಿನ್ ನಮೂದಿಸಿ"</string>
-    <!-- no translation found for keyguard_enter_pin (8114529922480276834) -->
-    <skip />
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"ಪಿನ್ ನಮೂದಿಸಿ"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ನಿಮ್ಮ ಪ್ಯಾಟರ್ನ್ ನಮೂದಿಸಿ"</string>
-    <!-- no translation found for keyguard_enter_pattern (7616595160901084119) -->
-    <skip />
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಬಿಡಿಸಿ"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"</string>
-    <!-- no translation found for keyguard_enter_password (6483623792371009758) -->
-    <skip />
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ಅಮಾನ್ಯ ಕಾರ್ಡ್."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ವೈರ್‌ಲೆಸ್ ಆಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
@@ -58,68 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"ದೋಷದ ಕಾರಣದಿಂದಾಗಿ eSIM ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"ನಮೂದಿಸಿ"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
-    <!-- no translation found for kg_wrong_pattern_try_again (3603524940234151881) -->
-    <skip />
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್"</string>
-    <!-- no translation found for kg_wrong_password_try_again (6602878676125765920) -->
-    <skip />
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"ಪಿನ್‌ ತಪ್ಪಾಗಿದೆ"</string>
-    <!-- no translation found for kg_wrong_pin_try_again (3129729383303430190) -->
-    <skip />
-    <!-- no translation found for kg_wrong_input_try_fp_suggestion (3143861542242024833) -->
-    <skip />
-    <!-- no translation found for kg_fp_not_recognized (5183108260932029241) -->
-    <skip />
-    <!-- no translation found for bouncer_face_not_recognized (1666128054475597485) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pin (4752168242723808390) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_password (1473132729225398039) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pattern (4867893307468801501) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pin (5850845723433047605) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_password (5551690347827728042) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pattern (736884689355181602) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pin_or_fp (5635161174698729890) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_password_or_fp (2251295907826814237) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pattern_or_fp (2391870539909135046) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_dpm_lock (6002804765868345917) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pin (5374732179740050373) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_password (9097968458291129795) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pattern (215072203613597906) -->
-    <skip />
-    <!-- no translation found for kg_prompt_unattended_update (8223448855578632202) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pin_auth_timeout (5868644725126275245) -->
-    <skip />
-    <!-- no translation found for kg_prompt_password_auth_timeout (5809110458491920871) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pattern_auth_timeout (1860605401869262178) -->
-    <skip />
-    <!-- no translation found for kg_prompt_auth_timeout (6620679830980315048) -->
-    <skip />
-    <!-- no translation found for kg_face_locked_out (2751559491287575) -->
-    <skip />
-    <!-- no translation found for kg_fp_locked_out (6228277682396768830) -->
-    <skip />
-    <!-- no translation found for kg_trust_agent_disabled (5400691179958727891) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pin (5492230176361601475) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pattern (8266214607346180952) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_password (6170245108400198659) -->
-    <skip />
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"ಪಿನ್ ತಪ್ಪಾಗಿದೆ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"ಅಥವಾ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ನೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"ಮುಖವನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಪಿನ್ ಅನ್ನು ನಮೂದಿಸಿ"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ನಮೂದಿಸಿ"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಬಿಡಿಸಿ"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳ ನಂತರ ಪಿನ್‌ನ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳ ನಂತರ ಪಾಸ್‌ವರ್ಡ್‌ನ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳ ನಂತರ ಪ್ಯಾಟರ್ನ್‌ನ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"ಪಿನ್ ಅಥವಾ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ನೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"ಪಾಸ್‌ವರ್ಡ್ ಅಥವಾ ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್‌ನೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"ಪ್ಯಾಟರ್ನ್ ಅಥವಾ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ನೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"ಹೆಚ್ಚುವರಿ ಸುರಕ್ಷತೆಗಾಗಿ, ಉದ್ಯೋಗ ನೀತಿಯ ಮೂಲಕ ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ಲಾಕ್‌ಡೌನ್ ಮಾಡಿದ ನಂತರ ಪಿನ್ ಬಳಸುವ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ಲಾಕ್‌ಡೌನ್‌ನ ನಂತರ ಪಾಸ್‌ವರ್ಡ್‌ನ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ಲಾಕ್‌ಡೌನ್ ಮಾಡಿದ ನಂತರ ಪ್ಯಾಟರ್ನ್‌ ಬಳಸುವ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"ನಿಷ್ಕ್ರಿಯ ಸಮಯದಲ್ಲಿ ಅಪ್‌ಡೇಟ್‌ ಇನ್‌ಸ್ಟಾಲ್ ಆಗುತ್ತದೆ"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ಹೆಚ್ಚುವರಿ ಸುರಕ್ಷತೆಯ ಅಗತ್ಯವಿದೆ. ಪಿನ್ ಅನ್ನು ಸ್ವಲ್ಪ ಕಾಲದಿಂದ ಬಳಸಿಲ್ಲ."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ಹೆಚ್ಚುವರಿ ಸುರಕ್ಷತೆಯ ಅಗತ್ಯವಿದೆ. ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಸ್ವಲ್ಪ ಕಾಲದಿಂದ ಬಳಸಿಲ್ಲ."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ಹೆಚ್ಚುವರಿ ಸುರಕ್ಷತೆಯ ಅಗತ್ಯವಿದೆ. ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಸ್ವಲ್ಪ ಕಾಲದಿಂದ ಬಳಸಿಲ್ಲ."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"ಹೆಚ್ಚುವರಿ ಸುರಕ್ಷತೆಯ ಅಗತ್ಯವಿದೆ. ಸ್ವಲ್ಪ ಕಾಲದಿಂದ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿಲ್ಲ."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"ಮುಖದೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್‌ನೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"ವಿಶ್ವಾಸಾರ್ಹ ಏಜೆಂಟ್ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"ತಪ್ಪಾದ ಪಿನ್‌ನೊಂದಿಗೆ ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"ತಪ್ಪಾದ ಪ್ಯಾಟರ್ನ್‌ನೊಂದಿಗೆ ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ನೊಂದಿಗೆ ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# ಸೆಕೆಂಡಿನಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}one{# ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}other{# ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"ಸಿಮ್‌ ಪಿನ್‌ ನಮೂದಿಸಿ."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" ಗಾಗಿ ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ."</string>
@@ -142,12 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"ಸಿಮ್‌ PUK ಕಾರ್ಯಾಚರಣೆ ವಿಫಲಗೊಂಡಿದೆ!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ಇನ್‌ಪುಟ್‌‌ ವಿಧಾನ ಬದಲಿಸಿ"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (3321211830602827742) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (2672166323886110512) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (3967993994418885887) -->
-    <skip />
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದ ನಂತರ ಪ್ಯಾಟರ್ನ್ ಬಳಸುವ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದ ನಂತರ ಪಿನ್‌‌ ಬಳಸುವ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿದ ನಂತರ ಪಾಸ್‌ವರ್ಡ್ ಬಳಸುವ ಅಗತ್ಯವಿದೆ"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ, ಬದಲಿಗೆ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ, ಬದಲಿಗೆ ಪಿನ್ ಬಳಸಿ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ, ಬದಲಿಗೆ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಬಳಸಿ"</string>

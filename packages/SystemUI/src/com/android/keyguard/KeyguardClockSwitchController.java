@@ -493,7 +493,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (mDateWeatherView != null) {
             mUiExecutor.execute(() -> {
                 mDateWeatherView.setVisibility(
-                        clockHasCustomWeatherDataDisplay() ? View.GONE : View.VISIBLE);
+                        clockHasCustomWeatherDataDisplay() ? View.INVISIBLE : View.VISIBLE);
             });
         }
     }
@@ -519,9 +519,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("currentClockSizeLarge=" + (mCurrentClockSize == LARGE));
-        pw.println("mCanShowDoubleLineClock=" + mCanShowDoubleLineClock);
+        pw.println("currentClockSizeLarge: " + (mCurrentClockSize == LARGE));
+        pw.println("mCanShowDoubleLineClock: " + mCanShowDoubleLineClock);
         mView.dump(pw, args);
+        mClockRegistry.dump(pw, args);
         ClockController clock = getClock();
         if (clock != null) {
             clock.dump(pw);
