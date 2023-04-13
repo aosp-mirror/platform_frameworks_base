@@ -81,9 +81,9 @@ public class InputDeviceSensorManagerTest {
     @Before
     public void setUp() throws Exception {
         final Context context = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
-        InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
-
-        when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
+        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        mInputManager = new InputManager(context);
+        when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(mInputManager);
 
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
 
@@ -98,13 +98,11 @@ public class InputDeviceSensorManagerTest {
                 .thenReturn(true);
 
         when(mIInputManagerMock.registerSensorListener(any())).thenReturn(true);
-
-        mInputManager = context.getSystemService(InputManager.class);
     }
 
     @After
     public void tearDown() {
-        InputManager.clearInstance();
+        InputManagerGlobal.clearInstance();
     }
 
     private class InputTestSensorEventListener implements SensorEventListener {

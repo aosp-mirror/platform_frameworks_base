@@ -47,6 +47,7 @@ import android.content.ContextWrapper;
 import android.content.pm.PackageManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
 import android.media.AudioAttributes;
@@ -184,11 +185,13 @@ public class VibratorManagerServiceTest {
     private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
             mRegisteredAppsOnVirtualDeviceListener;
 
+    private InputManager mInputManager;
+
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
-        InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
+        InputManagerGlobal.resetInstance(mIInputManagerMock);
         mVibrationConfig = new VibrationConfig(mContextSpy.getResources());
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
@@ -196,7 +199,10 @@ public class VibratorManagerServiceTest {
 
         mVibrator = new FakeVibrator(mContextSpy);
         when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibrator);
-        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
+
+        mInputManager = new InputManager(mContextSpy);
+        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE)))
+                .thenReturn(mInputManager);
         when(mContextSpy.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManagerMock);
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
@@ -259,6 +265,7 @@ public class VibratorManagerServiceTest {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         // Ignore potential exceptions about the looper having never dispatched any messages.
         mTestLooper.stopAutoDispatchAndIgnoreExceptions();
+        InputManagerGlobal.clearInstance();
     }
 
     private VibratorManagerService createSystemReadyService() {
