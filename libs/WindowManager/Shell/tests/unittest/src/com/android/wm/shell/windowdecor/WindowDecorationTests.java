@@ -50,7 +50,6 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
 import android.window.SurfaceSyncGroup;
-import android.window.TaskConstants;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
@@ -190,10 +189,6 @@ public class WindowDecorationTests extends ShellTestCase {
         final SurfaceControl.Builder decorContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(decorContainerSurface);
         mMockSurfaceControlBuilders.add(decorContainerSurfaceBuilder);
-        final SurfaceControl taskBackgroundSurface = mock(SurfaceControl.class);
-        final SurfaceControl.Builder taskBackgroundSurfaceBuilder =
-                createMockSurfaceControlBuilder(taskBackgroundSurface);
-        mMockSurfaceControlBuilders.add(taskBackgroundSurfaceBuilder);
         final SurfaceControl captionContainerSurface = mock(SurfaceControl.class);
         final SurfaceControl.Builder captionContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(captionContainerSurface);
@@ -221,16 +216,6 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(decorContainerSurfaceBuilder).setContainerLayer();
         verify(mMockSurfaceControlStartT).setTrustedOverlay(decorContainerSurface, true);
         verify(mMockSurfaceControlStartT).setWindowCrop(decorContainerSurface, 300, 100);
-
-        verify(taskBackgroundSurfaceBuilder).setParent(taskSurface);
-        verify(taskBackgroundSurfaceBuilder).setEffectLayer();
-        verify(mMockSurfaceControlStartT).setWindowCrop(taskBackgroundSurface, 300, 100);
-        verify(mMockSurfaceControlStartT)
-                .setColor(taskBackgroundSurface, new float[] {1.f, 1.f, 0.f});
-        verify(mMockSurfaceControlStartT).setShadowRadius(taskBackgroundSurface, 10);
-        verify(mMockSurfaceControlStartT).setLayer(taskBackgroundSurface,
-                TaskConstants.TASK_CHILD_LAYER_TASK_BACKGROUND);
-        verify(mMockSurfaceControlStartT).show(taskBackgroundSurface);
 
         verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
         verify(captionContainerSurfaceBuilder).setContainerLayer();
@@ -260,6 +245,9 @@ public class WindowDecorationTests extends ShellTestCase {
                 .setWindowCrop(taskSurface, 300, 100);
         verify(mMockSurfaceControlStartT)
                 .show(taskSurface);
+        verify(mMockSurfaceControlStartT)
+                .setColor(taskSurface, new float[] {1.f, 1.f, 0.f});
+        verify(mMockSurfaceControlStartT).setShadowRadius(taskSurface, 10);
 
         assertEquals(300, mRelayoutResult.mWidth);
         assertEquals(100, mRelayoutResult.mHeight);
@@ -275,10 +263,6 @@ public class WindowDecorationTests extends ShellTestCase {
         final SurfaceControl.Builder decorContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(decorContainerSurface);
         mMockSurfaceControlBuilders.add(decorContainerSurfaceBuilder);
-        final SurfaceControl taskBackgroundSurface = mock(SurfaceControl.class);
-        final SurfaceControl.Builder taskBackgroundSurfaceBuilder =
-                createMockSurfaceControlBuilder(taskBackgroundSurface);
-        mMockSurfaceControlBuilders.add(taskBackgroundSurfaceBuilder);
         final SurfaceControl captionContainerSurface = mock(SurfaceControl.class);
         final SurfaceControl.Builder captionContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(captionContainerSurface);
@@ -318,7 +302,6 @@ public class WindowDecorationTests extends ShellTestCase {
         releaseOrder.verify(mMockSurfaceControlViewHost).release();
         releaseOrder.verify(t).remove(captionContainerSurface);
         releaseOrder.verify(t).remove(decorContainerSurface);
-        releaseOrder.verify(t).remove(taskBackgroundSurface);
         releaseOrder.verify(t).apply();
         verify(mMockWindowContainerTransaction)
                 .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
@@ -379,10 +362,6 @@ public class WindowDecorationTests extends ShellTestCase {
         final SurfaceControl.Builder decorContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(decorContainerSurface);
         mMockSurfaceControlBuilders.add(decorContainerSurfaceBuilder);
-        final SurfaceControl taskBackgroundSurface = mock(SurfaceControl.class);
-        final SurfaceControl.Builder taskBackgroundSurfaceBuilder =
-                createMockSurfaceControlBuilder(taskBackgroundSurface);
-        mMockSurfaceControlBuilders.add(taskBackgroundSurfaceBuilder);
         final SurfaceControl captionContainerSurface = mock(SurfaceControl.class);
         final SurfaceControl.Builder captionContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(captionContainerSurface);
@@ -451,10 +430,6 @@ public class WindowDecorationTests extends ShellTestCase {
         final SurfaceControl.Builder decorContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(decorContainerSurface);
         mMockSurfaceControlBuilders.add(decorContainerSurfaceBuilder);
-        final SurfaceControl taskBackgroundSurface = mock(SurfaceControl.class);
-        final SurfaceControl.Builder taskBackgroundSurfaceBuilder =
-                createMockSurfaceControlBuilder(taskBackgroundSurface);
-        mMockSurfaceControlBuilders.add(taskBackgroundSurfaceBuilder);
         final SurfaceControl captionContainerSurface = mock(SurfaceControl.class);
         final SurfaceControl.Builder captionContainerSurfaceBuilder =
                 createMockSurfaceControlBuilder(captionContainerSurface);
