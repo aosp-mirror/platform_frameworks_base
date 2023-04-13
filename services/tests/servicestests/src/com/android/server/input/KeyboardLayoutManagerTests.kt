@@ -25,6 +25,7 @@ import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
 import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.hardware.input.KeyboardLayout
 import android.icu.util.ULocale
 import android.os.Bundle
@@ -144,7 +145,8 @@ class KeyboardLayoutManagerTests {
     }
 
     private fun setupInputDevices() {
-        val inputManager = InputManager.resetInstance(iInputManager)
+        InputManagerGlobal.resetInstance(iInputManager)
+        val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
 

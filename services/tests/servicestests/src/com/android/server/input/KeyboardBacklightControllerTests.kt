@@ -23,6 +23,7 @@ import android.hardware.input.IInputManager
 import android.hardware.input.IKeyboardBacklightListener
 import android.hardware.input.IKeyboardBacklightState
 import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.hardware.lights.Light
 import android.os.UEventObserver
 import android.os.test.TestLooper
@@ -116,7 +117,8 @@ class KeyboardBacklightControllerTests {
         testLooper = TestLooper()
         keyboardBacklightController =
             KeyboardBacklightController(context, native, dataStore, testLooper.looper)
-        val inputManager = InputManager.resetInstance(iInputManager)
+        InputManagerGlobal.resetInstance(iInputManager)
+        val inputManager = InputManager(context)
         `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
         `when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
         `when`(native.setLightColor(anyInt(), anyInt(), anyInt())).then {
@@ -131,7 +133,7 @@ class KeyboardBacklightControllerTests {
 
     @After
     fun tearDown() {
-        InputManager.clearInstance()
+        InputManagerGlobal.clearInstance()
     }
 
     @Test
