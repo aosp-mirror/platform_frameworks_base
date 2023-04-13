@@ -47,6 +47,7 @@ constructor(
             }
     }
 
+    // Values for WeatherStateIcon must stay in sync with go/g3-WeatherStateIcon
     enum class WeatherStateIcon(val id: Int) {
         UNKNOWN_ICON(0),
 

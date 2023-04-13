@@ -18,6 +18,7 @@ package com.android.server.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -89,6 +90,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     protected final SessionLifetime mSessionCallback;
 
     private final Set<ComponentName> mEnabledProviders;
+
+    protected PendingIntent mPendingIntent;
 
     @NonNull
     protected RequestSessionStatus mRequestSessionStatus =
@@ -202,9 +205,21 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         if (propagateCancellation) {
             mProviders.values().forEach(ProviderSession::cancelProviderRemoteSession);
         }
+        cancelExistingPendingIntent();
         mRequestSessionStatus = RequestSessionStatus.COMPLETE;
         mProviders.clear();
         clearRequestSessionLocked();
+    }
+
+    void cancelExistingPendingIntent() {
+        if (mPendingIntent != null) {
+            try {
+                mPendingIntent.cancel();
+                mPendingIntent = null;
+            } catch (Exception e) {
+                Slog.e(TAG, "Unable to cancel existing pending intent", e);
+            }
+        }
     }
 
     private void clearRequestSessionLocked() {

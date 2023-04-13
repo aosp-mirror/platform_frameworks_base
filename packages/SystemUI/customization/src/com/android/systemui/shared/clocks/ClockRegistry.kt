@@ -33,6 +33,7 @@ import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.Assert
+import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineDispatcher
@@ -483,6 +484,14 @@ open class ClockRegistry(
             settings = settings.copy(clockId = targetClockId)
         }
         return availableClocks[targetClockId]?.provider?.createClock(settings)
+    }
+
+    fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("ClockRegistry:")
+        pw.println("  settings = $settings")
+        for ((id, info) in availableClocks) {
+            pw.println("  availableClocks[$id] = $info")
+        }
     }
 
     private data class ClockInfo(

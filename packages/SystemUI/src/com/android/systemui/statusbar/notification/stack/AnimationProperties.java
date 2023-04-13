@@ -32,6 +32,7 @@ public class AnimationProperties {
     public long duration;
     public long delay;
     private ArrayMap<Property, Interpolator> mInterpolatorMap;
+    private Consumer<Property> mAnimationCancelAction;
     private Consumer<Property> mAnimationEndAction;
 
     /**
@@ -50,27 +51,43 @@ public class AnimationProperties {
      * @return a listener that will be added for a given property during its animation.
      */
     public AnimatorListenerAdapter getAnimationFinishListener(Property property) {
-        if (mAnimationEndAction == null) {
+        if (mAnimationEndAction == null && mAnimationCancelAction == null) {
             return null;
         }
+        Consumer<Property> cancelAction = mAnimationCancelAction;
         Consumer<Property> endAction = mAnimationEndAction;
         return new AnimatorListenerAdapter() {
             private boolean mCancelled;
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                 mCancelled = true;
+                mCancelled = true;
+                if (cancelAction != null) {
+                    cancelAction.accept(property);
+                }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (!mCancelled) {
+                if (!mCancelled && endAction != null) {
                     endAction.accept(property);
                 }
             }
         };
     }
 
+    /**
+     * Add a callback for animation cancellation.
+     */
+    public AnimationProperties setAnimationCancelAction(Consumer<Property> listener) {
+        mAnimationCancelAction = listener;
+        return this;
+    }
+
+    /**
+     * Add a callback for animation ending successfully. The callback will not be called when the
+     * animations is cancelled.
+     */
     public AnimationProperties setAnimationEndAction(Consumer<Property> listener) {
         mAnimationEndAction = listener;
         return this;

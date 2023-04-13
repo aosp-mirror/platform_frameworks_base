@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -145,6 +147,28 @@ public class FaceAuthenticationClientTest {
                 .isEqualTo(AUTH_REASON);
 
         verify(mHal, never()).authenticate(anyLong());
+    }
+
+    @Test
+    public void testLockoutEndsOperation() throws RemoteException {
+        final FaceAuthenticationClient client = createClient(2);
+        client.start(mCallback);
+        client.onLockoutPermanent();
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(FACE_ERROR_LOCKOUT_PERMANENT), anyInt());
+        verify(mCallback).onClientFinished(client, false);
+    }
+
+    @Test
+    public void testTemporaryLockoutEndsOperation() throws RemoteException {
+        final FaceAuthenticationClient client = createClient(2);
+        client.start(mCallback);
+        client.onLockoutTimed(1000);
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(FACE_ERROR_LOCKOUT), anyInt());
+        verify(mCallback).onClientFinished(client, false);
     }
 
     @Test

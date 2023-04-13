@@ -17,7 +17,6 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
 
 import java.util.function.Consumer;
 
@@ -37,7 +36,6 @@ public interface SatelliteDatagramCallback {
      *                 that they received the datagram. If the callback is not received within
      *                 five minutes, Telephony will resend the datagram.
      */
-    @UnsupportedAppUsage
     void onSatelliteDatagramReceived(long datagramId, @NonNull SatelliteDatagram datagram,
             int pendingCount, @NonNull Consumer<Void> callback);
 }

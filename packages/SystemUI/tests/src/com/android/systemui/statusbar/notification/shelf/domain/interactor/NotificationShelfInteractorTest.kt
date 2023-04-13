@@ -24,7 +24,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.statusbar.notification.shelf.domain.interactor.NotificationShelfInteractor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -67,5 +66,23 @@ class NotificationShelfInteractorTest : SysuiTestCase() {
         deviceEntryFaceAuthRepository.isBypassEnabled.value = true
 
         assertThat(shelfStatic).isTrue()
+    }
+
+    @Test
+    fun shelfOnKeyguard_whenKeyguardShowing() = runTest {
+        val onKeyguard by collectLastValue(underTest.isShowingOnKeyguard)
+
+        keyguardRepository.setKeyguardShowing(true)
+
+        assertThat(onKeyguard).isTrue()
+    }
+
+    @Test
+    fun shelfNotOnKeyguard_whenKeyguardNotShowing() = runTest {
+        val onKeyguard by collectLastValue(underTest.isShowingOnKeyguard)
+
+        keyguardRepository.setKeyguardShowing(false)
+
+        assertThat(onKeyguard).isFalse()
     }
 }

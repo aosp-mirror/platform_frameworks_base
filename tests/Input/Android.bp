@@ -25,7 +25,7 @@ android_test {
         "services.core.unboosted",
         "testables",
         "truth-prebuilt",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
     ],
     test_suites: ["device-tests"],
 }

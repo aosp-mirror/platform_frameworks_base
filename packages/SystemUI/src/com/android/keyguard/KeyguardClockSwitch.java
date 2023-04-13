@@ -294,11 +294,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardClockSwitch:");
-        pw.println("  mSmallClockFrame: " + mSmallClockFrame);
-        pw.println("  mSmallClockFrame.alpha: " + mSmallClockFrame.getAlpha());
-        pw.println("  mLargeClockFrame: " + mLargeClockFrame);
-        pw.println("  mLargeClockFrame.alpha: " + mLargeClockFrame.getAlpha());
-        pw.println("  mStatusArea: " + mStatusArea);
-        pw.println("  mDisplayedClockSize: " + mDisplayedClockSize);
+        pw.println("  mSmallClockFrame = " + mSmallClockFrame);
+        pw.println("  mSmallClockFrame.alpha = " + mSmallClockFrame.getAlpha());
+        pw.println("  mLargeClockFrame = " + mLargeClockFrame);
+        pw.println("  mLargeClockFrame.alpha = " + mLargeClockFrame.getAlpha());
+        pw.println("  mStatusArea = " + mStatusArea);
+        pw.println("  mDisplayedClockSize = " + mDisplayedClockSize);
     }
 }
