@@ -20,7 +20,6 @@ import android.service.notification.StatusBarNotification
 import com.android.systemui.ForegroundServiceNotificationListener
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.NotificationListener
@@ -117,9 +116,7 @@ class NotificationsControllerImpl @Inject constructor(
         notificationLogger.setUpWithContainer(listContainer)
         peopleSpaceWidgetManager.attach(notificationListener)
         fgsNotifListener.init()
-        if (featureFlags.isEnabled(Flags.NOTIFICATION_MEMORY_MONITOR_ENABLED)) {
-            memoryMonitor.get().init()
-        }
+        memoryMonitor.get().init()
     }
 
     // TODO: Convert all functions below this line into listeners instead of public methods
