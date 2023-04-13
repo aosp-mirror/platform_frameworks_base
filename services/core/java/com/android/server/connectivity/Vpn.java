@@ -969,15 +969,21 @@ public class Vpn {
         // Allow VpnManager app to temporarily run background services to handle this error.
         // If an app requires anything beyond this grace period, they MUST either declare
         // themselves as a foreground service, or schedule a job/workitem.
-        DeviceIdleInternal idleController = mDeps.getDeviceIdleInternal();
-        idleController.addPowerSaveTempWhitelistApp(Process.myUid(), packageName,
-                VPN_MANAGER_EVENT_ALLOWLIST_DURATION_MS, mUserId, false, REASON_VPN,
-                "VpnManager event");
+        final long token = Binder.clearCallingIdentity();
         try {
-            return mUserIdContext.startService(intent) != null;
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Service of VpnManager app " + intent + " failed to start", e);
-            return false;
+            final DeviceIdleInternal idleController = mDeps.getDeviceIdleInternal();
+            idleController.addPowerSaveTempWhitelistApp(Process.myUid(), packageName,
+                    VPN_MANAGER_EVENT_ALLOWLIST_DURATION_MS, mUserId, false, REASON_VPN,
+                    "VpnManager event");
+
+            try {
+                return mUserIdContext.startService(intent) != null;
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Service of VpnManager app " + intent + " failed to start", e);
+                return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
