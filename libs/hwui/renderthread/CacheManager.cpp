@@ -117,12 +117,8 @@ void CacheManager::trimMemory(TrimLevel mode) {
     // flush and submit all work to the gpu and wait for it to finish
     mGrContext->flushAndSubmit(/*syncCpu=*/true);
 
-    if (!Properties::isHighEndGfx && mode >= TrimLevel::MODERATE) {
-        mode = TrimLevel::COMPLETE;
-    }
-
     switch (mode) {
-        case TrimLevel::COMPLETE:
+        case TrimLevel::BACKGROUND:
             mGrContext->freeGpuResources();
             SkGraphics::PurgeAllCaches();
             mRenderThread.destroyRenderingContext();

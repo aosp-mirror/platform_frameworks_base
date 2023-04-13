@@ -303,6 +303,7 @@ public class SurfaceControlViewHost {
     /** @hide */
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm, @NonNull String callsite) {
+        mSurfaceControl = wwm.mRootSurface;
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout());
         mCloseGuard.openWithCallSite("release", callsite);
@@ -399,8 +400,7 @@ public class SurfaceControlViewHost {
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
             return new SurfacePackage(new SurfaceControl(mSurfaceControl, "getSurfacePackage"),
-                mAccessibilityEmbeddedConnection,
-                mWm.getFocusGrantToken(), mRemoteInterface);
+                mAccessibilityEmbeddedConnection, getFocusGrantToken(), mRemoteInterface);
         } else {
             return null;
         }
@@ -506,7 +506,7 @@ public class SurfaceControlViewHost {
      * @hide
      */
     public IBinder getFocusGrantToken() {
-        return mWm.getFocusGrantToken();
+        return mWm.getFocusGrantToken(getWindowToken().asBinder());
     }
 
     private void addWindowToken(WindowManager.LayoutParams attrs) {

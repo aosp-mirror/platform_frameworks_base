@@ -22,6 +22,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -117,7 +118,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 throw new IllegalStateException("Already connected.");
             }
             mOwningUid = Binder.getCallingUid();
-            registerUiTestAutomationServiceLocked(client, flags);
+            registerUiTestAutomationServiceLocked(client,
+                    Binder.getCallingUserHandle().getIdentifier(), flags);
             storeRotationStateLocked();
         }
     }
@@ -553,7 +555,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     private void registerUiTestAutomationServiceLocked(IAccessibilityServiceClient client,
-            int flags) {
+            @UserIdInt int userId, int flags) {
         IAccessibilityManager manager = IAccessibilityManager.Stub.asInterface(
                 ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
         final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
@@ -571,10 +573,11 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.
-            manager.registerUiTestAutomationService(mToken, client, info, flags);
+            manager.registerUiTestAutomationService(mToken, client, info, userId, flags);
             mClient = client;
         } catch (RemoteException re) {
-            throw new IllegalStateException("Error while registering UiTestAutomationService.", re);
+            throw new IllegalStateException("Error while registering UiTestAutomationService for "
+                    + "user " + userId + ".", re);
         }
     }
 

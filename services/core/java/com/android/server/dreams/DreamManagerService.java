@@ -124,7 +124,7 @@ public final class DreamManagerService extends SystemService {
     private final boolean mDreamsEnabledByDefaultConfig;
     private final boolean mDreamsActivatedOnChargeByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
-    private final boolean mKeepDreamingWhenUndockedDefault;
+    private final boolean mKeepDreamingWhenUnpluggingDefault;
 
     private final CopyOnWriteArrayList<DreamManagerInternal.DreamManagerStateListener>
             mDreamManagerStateListeners = new CopyOnWriteArrayList<>();
@@ -236,8 +236,8 @@ public final class DreamManagerService extends SystemService {
         mDreamsActivatedOnDockByDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
         mSettingsObserver = new SettingsObserver(mHandler);
-        mKeepDreamingWhenUndockedDefault = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
+        mKeepDreamingWhenUnpluggingDefault = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUnplugging);
     }
 
     @Override
@@ -311,7 +311,7 @@ public final class DreamManagerService extends SystemService {
             pw.println("mIsDocked=" + mIsDocked);
             pw.println("mIsCharging=" + mIsCharging);
             pw.println("mWhenToDream=" + mWhenToDream);
-            pw.println("mKeepDreamingWhenUndockedDefault=" + mKeepDreamingWhenUndockedDefault);
+            pw.println("mKeepDreamingWhenUnpluggingDefault=" + mKeepDreamingWhenUnpluggingDefault);
             pw.println("getDozeComponent()=" + getDozeComponent());
             pw.println();
 
@@ -340,11 +340,11 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private void reportKeepDreamingWhenUndockedChanged(boolean keepDreaming) {
+    private void reportKeepDreamingWhenUnpluggingChanged(boolean keepDreaming) {
         mHandler.post(() -> {
             for (DreamManagerInternal.DreamManagerStateListener listener
                     : mDreamManagerStateListeners) {
-                listener.onKeepDreamingWhenUndockedChanged(keepDreaming);
+                listener.onKeepDreamingWhenUnpluggingChanged(keepDreaming);
             }
         });
     }
@@ -600,8 +600,7 @@ public final class DreamManagerService extends SystemService {
             }
 
             mSystemDreamComponent = componentName;
-            reportKeepDreamingWhenUndockedChanged(shouldKeepDreamingWhenUndocked());
-
+            reportKeepDreamingWhenUnpluggingChanged(shouldKeepDreamingWhenUnplugging());
             // Switch dream if currently dreaming and not dozing.
             if (isDreamingInternal() && !isDozingInternal()) {
                 startDreamInternal(false /*doze*/, (mSystemDreamComponent == null ? "clear" : "set")
@@ -610,8 +609,8 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private boolean shouldKeepDreamingWhenUndocked() {
-        return mKeepDreamingWhenUndockedDefault && mSystemDreamComponent == null;
+    private boolean shouldKeepDreamingWhenUnplugging() {
+        return mKeepDreamingWhenUnpluggingDefault && mSystemDreamComponent == null;
     }
 
     private ComponentName getDefaultDreamComponentForUser(int userId) {
@@ -1057,7 +1056,7 @@ public final class DreamManagerService extends SystemService {
         public void registerDreamManagerStateListener(DreamManagerStateListener listener) {
             mDreamManagerStateListeners.add(listener);
             // Initialize the listener's state.
-            listener.onKeepDreamingWhenUndockedChanged(shouldKeepDreamingWhenUndocked());
+            listener.onKeepDreamingWhenUnpluggingChanged(shouldKeepDreamingWhenUnplugging());
         }
 
         @Override

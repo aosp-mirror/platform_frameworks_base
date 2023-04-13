@@ -75,6 +75,7 @@ import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -115,6 +116,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final SessionTracker mSessionTracker;
     private final Optional<SideFpsController> mSideFpsController;
     private final FalsingA11yDelegate mFalsingA11yDelegate;
+    private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private int mTranslationY;
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
@@ -300,6 +302,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         @Override
         public void onSwipeUp() {
             if (!mUpdateMonitor.isFaceDetectionRunning()) {
+                mKeyguardFaceAuthInteractor.onSwipeUpOnBouncer();
                 boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(
                         FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
                 mKeyguardSecurityCallback.userActivity();
@@ -389,7 +392,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FalsingA11yDelegate falsingA11yDelegate,
             TelephonyManager telephonyManager,
             ViewMediatorCallback viewMediatorCallback,
-            AudioManager audioManager
+            AudioManager audioManager,
+            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor
     ) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
@@ -414,6 +418,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
         mAudioManager = audioManager;
+        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
     }
 
     @Override

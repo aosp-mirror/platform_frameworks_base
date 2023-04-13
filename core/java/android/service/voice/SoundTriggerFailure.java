@@ -73,18 +73,28 @@ public final class SoundTriggerFailure implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SoundTriggerErrorCode {}
 
-    private int mErrorCode = ERROR_CODE_UNKNOWN;
-    private String mErrorMessage = "Unknown";
+    private final int mErrorCode;
+    private final String mErrorMessage;
 
     /**
      * @hide
      */
     @TestApi
-    public SoundTriggerFailure(int errorCode, @NonNull String errorMessage) {
+    public SoundTriggerFailure(@SoundTriggerErrorCode int errorCode,
+            @NonNull String errorMessage) {
         if (TextUtils.isEmpty(errorMessage)) {
             throw new IllegalArgumentException("errorMessage is empty or null.");
         }
-        mErrorCode = errorCode;
+        switch (errorCode) {
+            case ERROR_CODE_UNKNOWN:
+            case ERROR_CODE_MODULE_DIED:
+            case ERROR_CODE_RECOGNITION_RESUME_FAILED:
+            case ERROR_CODE_UNEXPECTED_PREEMPTION:
+                mErrorCode = errorCode;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid ErrorCode: " + errorCode);
+        }
         mErrorMessage = errorMessage;
     }
 
@@ -110,13 +120,14 @@ public final class SoundTriggerFailure implements Parcelable {
     @FailureSuggestedAction.FailureSuggestedActionDef
     public int getSuggestedAction() {
         switch (mErrorCode) {
+            case ERROR_CODE_UNKNOWN:
             case ERROR_CODE_MODULE_DIED:
             case ERROR_CODE_UNEXPECTED_PREEMPTION:
                 return FailureSuggestedAction.RECREATE_DETECTOR;
             case ERROR_CODE_RECOGNITION_RESUME_FAILED:
                 return FailureSuggestedAction.RESTART_RECOGNITION;
             default:
-                return FailureSuggestedAction.NONE;
+                throw new AssertionError("Unexpected error code");
         }
     }
 

@@ -910,7 +910,7 @@ final class DevicePolicyEngine {
             mDeviceAdminServiceController.stopServicesForUser(
                     userId, actionForLog);
         } else {
-            for (EnforcingAdmin admin : getEnforcingAdminsForUser(userId)) {
+            for (EnforcingAdmin admin : getEnforcingAdminsOnUser(userId)) {
                 // DPCs are handled separately in DPMS, no need to reestablish the connection here.
                 if (admin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
                     continue;
@@ -921,6 +921,51 @@ final class DevicePolicyEngine {
         }
     }
 
+    /**
+     * Handles internal state related to a user getting started.
+     */
+    void handleStartUser(int userId) {
+        updateDeviceAdminsServicesForUser(
+                userId, /* enable= */ true, /* actionForLog= */ "start-user");
+    }
+
+    /**
+     * Handles internal state related to a user getting started.
+     */
+    void handleUnlockUser(int userId) {
+        updateDeviceAdminsServicesForUser(
+                userId, /* enable= */ true, /* actionForLog= */ "unlock-user");
+    }
+
+    /**
+     * Handles internal state related to a user getting stopped.
+     */
+    void handleStopUser(int userId) {
+        updateDeviceAdminsServicesForUser(
+                userId, /* enable= */ false, /* actionForLog= */ "stop-user");
+    }
+
+    /**
+     * Handles internal state related to packages getting updated.
+     */
+    void handlePackageChanged(@Nullable String updatedPackage, int userId) {
+        if (updatedPackage == null) {
+            return;
+        }
+        updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+    }
+
+    /**
+     * Handles internal state related to a user getting removed.
+     */
+    void handleUserRemoved(int userId) {
+        removeLocalPoliciesForUser(userId);
+        removePoliciesForAdminsOnUser(userId);
+    }
+
+    /**
+     * Handles internal state related to a user getting created.
+     */
     void handleUserCreated(UserInfo user) {
         enforcePoliciesOnInheritableProfilesIfApplicable(user);
     }
@@ -963,40 +1008,6 @@ final class DevicePolicyEngine {
     }
 
     /**
-     * Handles internal state related to a user getting started.
-     */
-    void handleStartUser(int userId) {
-        updateDeviceAdminsServicesForUser(
-                userId, /* enable= */ true, /* actionForLog= */ "start-user");
-    }
-
-    /**
-     * Handles internal state related to a user getting started.
-     */
-    void handleUnlockUser(int userId) {
-        updateDeviceAdminsServicesForUser(
-                userId, /* enable= */ true, /* actionForLog= */ "unlock-user");
-    }
-
-    /**
-     * Handles internal state related to a user getting stopped.
-     */
-    void handleStopUser(int userId) {
-        updateDeviceAdminsServicesForUser(
-                userId, /* enable= */ false, /* actionForLog= */ "stop-user");
-    }
-
-    /**
-     * Handles internal state related to packages getting updated.
-     */
-    void handlePackageChanged(@Nullable String updatedPackage, int userId) {
-        if (updatedPackage == null) {
-            return;
-        }
-        updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
-    }
-
-    /**
      * Returns all current enforced policies set on the device, and the individual values set by
      * each admin. Global policies are returned under {@link UserHandle#ALL}.
      */
@@ -1024,6 +1035,63 @@ final class DevicePolicyEngine {
         return new DevicePolicyState(policies);
     }
 
+
+    /**
+     * Removes all local and global policies set by that admin.
+     */
+    void removePoliciesForAdmin(EnforcingAdmin admin) {
+        Set<PolicyKey> globalPolicies = new HashSet<>(mGlobalPolicies.keySet());
+        for (PolicyKey policy : globalPolicies) {
+            PolicyState<?> policyState = mGlobalPolicies.get(policy);
+            if (policyState.getPoliciesSetByAdmins().containsKey(admin)) {
+                removeGlobalPolicy(policyState.getPolicyDefinition(), admin);
+            }
+        }
+
+        for (int i = 0; i < mLocalPolicies.size(); i++) {
+            Set<PolicyKey> localPolicies = new HashSet<>(
+                    mLocalPolicies.get(mLocalPolicies.keyAt(i)).keySet());
+            for (PolicyKey policy : localPolicies) {
+                PolicyState<?> policyState = mLocalPolicies.get(
+                        mLocalPolicies.keyAt(i)).get(policy);
+                if (policyState.getPoliciesSetByAdmins().containsKey(admin)) {
+                    removeLocalPolicy(
+                            policyState.getPolicyDefinition(), admin, mLocalPolicies.keyAt(i));
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes all local policies for the provided {@code userId}.
+     */
+    private void removeLocalPoliciesForUser(int userId) {
+        Set<PolicyKey> localPolicies = new HashSet<>(mLocalPolicies.get(userId).keySet());
+        for (PolicyKey policy : localPolicies) {
+            PolicyState<?> policyState = mLocalPolicies.get(userId).get(policy);
+            Set<EnforcingAdmin> admins = new HashSet<>(
+                    policyState.getPoliciesSetByAdmins().keySet());
+            for (EnforcingAdmin admin : admins) {
+                removeLocalPolicy(
+                        policyState.getPolicyDefinition(), admin, userId);
+            }
+        }
+
+        mLocalPolicies.remove(userId);
+    }
+
+    /**
+     * Removes all local and global policies for admins installed in the provided
+     * {@code userId}.
+     */
+    private void removePoliciesForAdminsOnUser(int userId) {
+        Set<EnforcingAdmin> admins = getEnforcingAdminsOnUser(userId);
+
+        for (EnforcingAdmin admin : admins) {
+            removePoliciesForAdmin(admin);
+        }
+    }
+
     /**
      * Reestablishes the service that handles
      * {@link DevicePolicyManager#ACTION_DEVICE_ADMIN_SERVICE} in the enforcing admin if the package
@@ -1031,7 +1099,7 @@ final class DevicePolicyEngine {
      */
     private void updateDeviceAdminServiceOnPackageChanged(
             @NonNull String updatedPackage, int userId) {
-        for (EnforcingAdmin admin : getEnforcingAdminsForUser(userId)) {
+        for (EnforcingAdmin admin : getEnforcingAdminsOnUser(userId)) {
             // DPCs are handled separately in DPMS, no need to reestablish the connection here.
             if (admin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
                 continue;
@@ -1120,7 +1188,7 @@ final class DevicePolicyEngine {
     }
 
     @NonNull
-    private Set<EnforcingAdmin> getEnforcingAdminsForUser(int userId) {
+    private Set<EnforcingAdmin> getEnforcingAdminsOnUser(int userId) {
         return mEnforcingAdmins.contains(userId)
                 ? mEnforcingAdmins.get(userId) : Collections.emptySet();
     }
@@ -1157,12 +1225,6 @@ final class DevicePolicyEngine {
             mLocalPolicies.clear();
             mEnforcingAdmins.clear();
         }
-    }
-
-    // TODO: we need to listen for user removal and package removal and update out internal policy
-    //  map and enforcing admins for this is be accurate.
-    boolean hasActivePolicies() {
-        return mEnforcingAdmins.size() > 0;
     }
 
     private <V> boolean checkFor2gFailure(@NonNull PolicyDefinition<V> policyDefinition,

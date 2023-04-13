@@ -229,7 +229,7 @@ object Flags {
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/273341787): Tracking Bug
     @JvmField
-    val PREVENT_BYPASS_KEYGUARD = unreleasedFlag(230, "prevent_bypass_keyguard", teamfood = true)
+    val PREVENT_BYPASS_KEYGUARD = releasedFlag(230, "prevent_bypass_keyguard")
 
     /** Whether to use a new data source for intents to run on keyguard dismissal. */
     @JvmField
@@ -692,6 +692,11 @@ object Flags {
     @JvmField
     val KEYBOARD_BACKLIGHT_INDICATOR =
             unreleasedFlag(2601, "keyboard_backlight_indicator", teamfood = true)
+
+    // TODO(b/277192623): Tracking Bug
+    @JvmField
+    val KEYBOARD_EDUCATION =
+        unreleasedFlag(2603, "keyboard_education", teamfood = false)
 
     // TODO(b/272036292): Tracking Bug
     @JvmField

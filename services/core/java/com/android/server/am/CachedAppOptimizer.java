@@ -1326,8 +1326,7 @@ public final class CachedAppOptimizer {
         UidRecord uidRec = app.getUidRecord();
         if (uidRec != null && uidRec.isFrozen()) {
             uidRec.setFrozen(false);
-            mFreezeHandler.removeMessages(UID_FROZEN_STATE_CHANGED_MSG, app);
-            reportOneUidFrozenStateChanged(app.uid, false);
+            postUidFrozenMessage(uidRec.getUid(), false);
         }
 
         opt.setFreezerOverride(false);
@@ -1468,8 +1467,7 @@ public final class CachedAppOptimizer {
             UidRecord uidRec = app.getUidRecord();
             if (uidRec != null && uidRec.isFrozen()) {
                 uidRec.setFrozen(false);
-                mFreezeHandler.removeMessages(UID_FROZEN_STATE_CHANGED_MSG, app);
-                reportOneUidFrozenStateChanged(app.uid, false);
+                postUidFrozenMessage(uidRec.getUid(), false);
             }
 
             mFrozenProcesses.delete(app.getPid());
@@ -1998,6 +1996,15 @@ public final class CachedAppOptimizer {
         mAm.reportUidFrozenStateChanged(uids, frozenStates);
     }
 
+    private void postUidFrozenMessage(int uid, boolean frozen) {
+        final Integer uidObj = Integer.valueOf(uid);
+        mFreezeHandler.removeEqualMessages(UID_FROZEN_STATE_CHANGED_MSG, uidObj);
+
+        final int op = frozen ? 1 : 0;
+        mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(UID_FROZEN_STATE_CHANGED_MSG, op,
+                0, uidObj));
+    }
+
     private final class FreezeHandler extends Handler implements
             ProcLocksReader.ProcLocksReaderCallback {
         private FreezeHandler() {
@@ -2028,7 +2035,9 @@ public final class CachedAppOptimizer {
                     reportUnfreeze(pid, frozenDuration, processName, reason);
                     break;
                 case UID_FROZEN_STATE_CHANGED_MSG:
-                    reportOneUidFrozenStateChanged(((ProcessRecord) msg.obj).uid, true);
+                    final boolean frozen = (msg.arg1 == 1);
+                    final int uid = (int) msg.obj;
+                    reportOneUidFrozenStateChanged(uid, frozen);
                     break;
                 case DEADLOCK_WATCHDOG_MSG:
                     try {
@@ -2139,8 +2148,8 @@ public final class CachedAppOptimizer {
                 final UidRecord uidRec = proc.getUidRecord();
                 if (frozen && uidRec != null && uidRec.areAllProcessesFrozen()) {
                     uidRec.setFrozen(true);
-                    mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(
-                            UID_FROZEN_STATE_CHANGED_MSG, proc));
+
+                    postUidFrozenMessage(uidRec.getUid(), true);
                 }
             }
 

@@ -188,7 +188,6 @@ import android.window.WindowContainerToken;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -5632,30 +5631,20 @@ class Task extends TaskFragment {
             final Transition transition = new Transition(TRANSIT_TO_BACK, 0 /* flags */,
                     mTransitionController, mWmService.mSyncEngine);
             // Guarantee that this gets its own transition by queueing on SyncEngine
-            if (mWmService.mSyncEngine.hasActiveSync()) {
-                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "Creating Pending Move-to-back: %s", transition);
-                mWmService.mSyncEngine.queueSyncSet(
-                        () -> mTransitionController.moveToCollecting(transition),
-                        () -> {
-                            // Need to check again since this happens later and the system might
-                            // be in a different state.
-                            if (!canMoveTaskToBack(tr)) {
-                                Slog.e(TAG, "Failed to move task to back after saying we could: "
-                                        + tr.mTaskId);
-                                transition.abort();
-                                return;
-                            }
-                            mTransitionController.requestStartTransition(transition, tr,
-                                    null /* remoteTransition */, null /* displayChange */);
-                            moveTaskToBackInner(tr);
-                        });
-            } else {
-                mTransitionController.moveToCollecting(transition);
-                mTransitionController.requestStartTransition(transition, tr,
-                        null /* remoteTransition */, null /* displayChange */);
-                moveTaskToBackInner(tr);
-            }
+            mTransitionController.startCollectOrQueue(transition,
+                    (deferred) -> {
+                        // Need to check again if deferred since the system might
+                        // be in a different state.
+                        if (deferred && !canMoveTaskToBack(tr)) {
+                            Slog.e(TAG, "Failed to move task to back after saying we could: "
+                                    + tr.mTaskId);
+                            transition.abort();
+                            return;
+                        }
+                        mTransitionController.requestStartTransition(transition, tr,
+                                null /* remoteTransition */, null /* displayChange */);
+                        moveTaskToBackInner(tr);
+                    });
         } else {
             // Skip the transition for pinned task.
             if (!inPinnedWindowingMode()) {

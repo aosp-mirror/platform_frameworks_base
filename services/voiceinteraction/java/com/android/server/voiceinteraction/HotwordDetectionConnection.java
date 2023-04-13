@@ -56,6 +56,7 @@ import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
+import android.service.voice.SoundTriggerFailure;
 import android.service.voice.VisualQueryDetectionService;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
@@ -153,7 +154,8 @@ final class HotwordDetectionConnection {
     private int mRestartCount = 0;
     @NonNull private ServiceConnection mRemoteHotwordDetectionService;
     @NonNull private ServiceConnection mRemoteVisualQueryDetectionService;
-    private IBinder mAudioFlinger;
+    @GuardedBy("mLock")
+    @Nullable private IBinder mAudioFlinger;
     @GuardedBy("mLock")
     private boolean mDebugHotwordLogging = false;
 
@@ -193,7 +195,7 @@ final class HotwordDetectionConnection {
                 new Intent(VisualQueryDetectionService.SERVICE_INTERFACE);
         visualQueryDetectionServiceIntent.setComponent(mVisualQueryDetectionComponentName);
 
-        initAudioFlingerLocked();
+        initAudioFlinger();
 
         mHotwordDetectionServiceConnectionFactory =
                 new ServiceConnectionFactory(hotwordDetectionServiceIntent,
@@ -226,31 +228,41 @@ final class HotwordDetectionConnection {
         }
     }
 
-    private void initAudioFlingerLocked() {
+    private void initAudioFlinger() {
         if (DEBUG) {
-            Slog.d(TAG, "initAudioFlingerLocked");
+            Slog.d(TAG, "initAudioFlinger");
         }
-        mAudioFlinger = ServiceManager.waitForService("media.audio_flinger");
-        if (mAudioFlinger == null) {
+        final IBinder audioFlinger = ServiceManager.waitForService("media.audio_flinger");
+        if (audioFlinger == null) {
+            setAudioFlinger(null);
             throw new IllegalStateException("Service media.audio_flinger wasn't found.");
         }
         if (DEBUG) {
             Slog.d(TAG, "Obtained audio_flinger binder.");
         }
         try {
-            mAudioFlinger.linkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
+            audioFlinger.linkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
         } catch (RemoteException e) {
             Slog.w(TAG, "Audio server died before we registered a DeathRecipient; "
-                            + "retrying init.", e);
-            initAudioFlingerLocked();
+                    + "retrying init.", e);
+            initAudioFlinger();
+            return;
+        }
+
+        setAudioFlinger(audioFlinger);
+    }
+
+    private void setAudioFlinger(@Nullable IBinder audioFlinger) {
+        synchronized (mLock) {
+            mAudioFlinger = audioFlinger;
         }
     }
 
     private void audioServerDied() {
         Slog.w(TAG, "Audio server died; restarting the HotwordDetectionService.");
+        // TODO: Check if this needs to be scheduled on a different thread.
+        initAudioFlinger();
         synchronized (mLock) {
-            // TODO: Check if this needs to be scheduled on a different thread.
-            initAudioFlingerLocked();
             // We restart the process instead of simply sending over the new binder, to avoid race
             // conditions with audio reading in the service.
             restartProcessLocked();
@@ -576,8 +588,31 @@ final class HotwordDetectionConnection {
         }
 
         @Override
-        public void onError(int status) throws RemoteException {
-            mExternalCallback.onError(status);
+        public void onPreempted() throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_UNEXPECTED_PREEMPTION,
+                        "Unexpected startRecognition on already started ST session"));
+        }
+
+        @Override
+        public void onModuleDied() throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_MODULE_DIED,
+                        "STHAL died"));
+        }
+
+        @Override
+        public void onResumeFailed(int status) throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_RECOGNITION_RESUME_FAILED,
+                        "STService recognition resume failed with: " + status));
+        }
+
+        @Override
+        public void onPauseFailed(int status) throws RemoteException {
+            mExternalCallback.onSoundTriggerFailure(new SoundTriggerFailure(
+                        SoundTriggerFailure.ERROR_CODE_RECOGNITION_RESUME_FAILED,
+                        "STService recognition pause failed with: " + status));
         }
 
         @Override

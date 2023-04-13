@@ -5137,8 +5137,26 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         requestChildrenUpdate();
     }
 
+    public void setShelf(NotificationShelf shelf) {
+        if (!NotificationShelfController.checkRefactorFlagEnabled(
+                mAmbientState.getFeatureFlags())) {
+            return;
+        }
+        int index = -1;
+        if (mShelf != null) {
+            index = indexOfChild(mShelf);
+            removeView(mShelf);
+        }
+        mShelf = shelf;
+        addView(mShelf, index);
+        mAmbientState.setShelf(mShelf);
+        mStateAnimator.setShelf(mShelf);
+        shelf.bind(mAmbientState, this, mController.getNotificationRoundnessManager());
+    }
+
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setShelfController(NotificationShelfController notificationShelfController) {
+        NotificationShelfController.assertRefactorFlagDisabled(mAmbientState.getFeatureFlags());
         int index = -1;
         if (mShelf != null) {
             index = indexOfChild(mShelf);

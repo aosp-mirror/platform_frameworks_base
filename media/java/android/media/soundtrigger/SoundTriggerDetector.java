@@ -391,15 +391,6 @@ public final class SoundTriggerDetector {
          * @hide
          */
         @Override
-        public void onError(int status) {
-            Slog.d(TAG, "onError()" + status);
-            mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
-        }
-
-        /**
-         * @hide
-         */
-        @Override
         public void onRecognitionPaused() {
             Slog.d(TAG, "onRecognitionPaused()");
             mHandler.sendEmptyMessage(MSG_DETECTION_PAUSE);
@@ -412,6 +403,42 @@ public final class SoundTriggerDetector {
         public void onRecognitionResumed() {
             Slog.d(TAG, "onRecognitionResumed()");
             mHandler.sendEmptyMessage(MSG_DETECTION_RESUME);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void onPreempted() {
+            Slog.d(TAG, "onPreempted()");
+            mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void onModuleDied() {
+            Slog.d(TAG, "onModuleDied()");
+            mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void onResumeFailed(int status) {
+            Slog.d(TAG, "onResumeFailed()" + status);
+            mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void onPauseFailed(int status) {
+            Slog.d(TAG, "onPauseFailed()" + status);
+            mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
         }
     }
 

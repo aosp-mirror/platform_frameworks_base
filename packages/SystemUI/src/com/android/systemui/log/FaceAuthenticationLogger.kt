@@ -4,6 +4,7 @@ import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorPropertiesInternal
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.dagger.FaceAuthLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
@@ -27,15 +28,15 @@ class FaceAuthenticationLogger
 constructor(
     @FaceAuthLog private val logBuffer: LogBuffer,
 ) {
-    fun ignoredFaceAuthTrigger(uiEvent: FaceAuthUiEvent) {
+    fun ignoredFaceAuthTrigger(uiEvent: FaceAuthUiEvent, ignoredReason: String) {
         logBuffer.log(
             TAG,
             DEBUG,
-            { str1 = uiEvent.reason },
             {
-                "Ignoring trigger because face auth is currently running. " +
-                    "Trigger reason: $str1"
-            }
+                str1 = uiEvent.reason
+                str2 = ignoredReason
+            },
+            { "Ignoring trigger because $str2, Trigger reason: $str1" }
         )
     }
 
@@ -135,15 +136,6 @@ constructor(
         logBuffer.log(TAG, DEBUG, "Face authentication failed")
     }
 
-    fun authenticationAcquired(acquireInfo: Int) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            { int1 = acquireInfo },
-            { "Face acquired during face authentication: acquireInfo: $int1 " }
-        )
-    }
-
     fun authenticationError(
         errorCode: Int,
         errString: CharSequence?,
@@ -216,5 +208,35 @@ constructor(
 
     fun cancellingFaceAuth() {
         logBuffer.log(TAG, DEBUG, "cancelling face auth because a gating condition became false")
+    }
+
+    fun interactorStarted() {
+        logBuffer.log(TAG, DEBUG, "KeyguardFaceAuthInteractor started")
+    }
+
+    fun bouncerVisibilityChanged() {
+        logBuffer.log(TAG, DEBUG, "Triggering face auth because primary bouncer is visible")
+    }
+
+    fun alternateBouncerVisibilityChanged() {
+        logBuffer.log(TAG, DEBUG, "Triggering face auth because alternate bouncer is visible")
+    }
+
+    fun lockscreenBecameVisible(transitionStep: TransitionStep?) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { str1 = "$transitionStep" },
+            { "Triggering face auth because lockscreen became visible due to transition: $str1" }
+        )
+    }
+
+    fun authRequested(uiEvent: FaceAuthUiEvent) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { str1 = "$uiEvent" },
+            { "Requesting face auth for trigger: $str1" }
+        )
     }
 }

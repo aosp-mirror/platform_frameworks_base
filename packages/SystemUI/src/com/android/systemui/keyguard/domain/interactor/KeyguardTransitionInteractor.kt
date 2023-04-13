@@ -78,6 +78,14 @@ constructor(
     val primaryBouncerToGoneTransition: Flow<TransitionStep> =
         repository.transition(PRIMARY_BOUNCER, GONE)
 
+    /** OFF->LOCKSCREEN transition information. */
+    val offToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(KeyguardState.OFF, LOCKSCREEN)
+
+    /** DOZING->LOCKSCREEN transition information. */
+    val dozingToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(KeyguardState.DOZING, LOCKSCREEN)
+
     /**
      * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
      * Lockscreen (0f).

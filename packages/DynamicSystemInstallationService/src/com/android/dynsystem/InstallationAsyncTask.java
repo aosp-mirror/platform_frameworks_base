@@ -803,7 +803,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
         return mIsCompleted;
     }
 
-    boolean commit() {
-        return mDynSystem.setEnable(true, true);
+    boolean commit(boolean oneShot) {
+        return mDynSystem.setEnable(true, oneShot);
     }
 }
