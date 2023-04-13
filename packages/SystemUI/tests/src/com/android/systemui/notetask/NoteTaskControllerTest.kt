@@ -63,8 +63,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
@@ -109,6 +111,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .thenReturn(listOf(NOTE_TASK_PACKAGE_NAME))
         whenever(activityManager.getRunningTasks(anyInt())).thenReturn(emptyList())
         whenever(userManager.isManagedProfile(workUserInfo.id)).thenReturn(true)
+        whenever(context.resources).thenReturn(getContext().resources)
     }
 
     private fun createNoteTaskController(
@@ -339,14 +342,14 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showNoteTask_intentResolverReturnsNull_shouldDoNothing() {
+    fun showNoteTask_intentResolverReturnsNull_shouldShowToast() {
         whenever(resolver.resolveInfo(any(), any())).thenReturn(null)
+        val noteTaskController = spy(createNoteTaskController())
+        doNothing().whenever(noteTaskController).showNoDefaultNotesAppToast()
 
-        createNoteTaskController()
-            .showNoteTask(
-                entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-            )
+        noteTaskController.showNoteTask(entryPoint = NoteTaskEntryPoint.TAIL_BUTTON)
 
+        verify(noteTaskController).showNoDefaultNotesAppToast()
         verifyZeroInteractions(context, bubbles, eventLogger)
     }
 

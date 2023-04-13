@@ -34,7 +34,9 @@ import android.os.Build
 import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
@@ -170,7 +172,13 @@ constructor(
             return
         }
 
-        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked) ?: return
+        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked)
+
+        if (info == null) {
+            logDebug { "Default notes app isn't set" }
+            showNoDefaultNotesAppToast()
+            return
+        }
 
         infoReference.set(info)
 
@@ -205,6 +213,12 @@ constructor(
             logDebug { "onShowNoteTask - failed: $info" }
         }
         logDebug { "onShowNoteTask - completed: $info" }
+    }
+
+    @VisibleForTesting
+    fun showNoDefaultNotesAppToast() {
+        Toast.makeText(context, R.string.set_default_notes_app_toast_content, Toast.LENGTH_SHORT)
+            .show()
     }
 
     /**
