@@ -15,11 +15,14 @@
  */
 package android.hardware.input
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Resources
 import android.platform.test.annotations.Presubmit
 import android.view.Display
 import android.view.DisplayInfo
 import android.view.InputDevice
+import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertEquals
@@ -28,6 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
@@ -52,17 +56,20 @@ class InputManagerTest {
     @get:Rule
     val rule = MockitoJUnit.rule()!!
 
-    private lateinit var inputManager: InputManager
-
     private lateinit var devicesChangedListener: IInputDevicesChangedListener
     private val deviceGenerationMap = mutableMapOf<Int /*deviceId*/, Int /*generation*/>()
+    private lateinit var context: Context
+    private lateinit var inputManager: InputManager
 
     @Mock
     private lateinit var iInputManager: IInputManager
 
     @Before
     fun setUp() {
-        inputManager = InputManager.resetInstance(iInputManager)
+        context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
+        InputManagerGlobal.resetInstance(iInputManager)
+        inputManager = InputManager(context)
+        `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
         `when`(iInputManager.inputDeviceIds).then {
             deviceGenerationMap.keys.toIntArray()
         }
@@ -70,7 +77,7 @@ class InputManagerTest {
 
     @After
     fun tearDown() {
-        InputManager.clearInstance()
+        InputManagerGlobal.clearInstance()
     }
 
     private fun notifyDeviceChanged(
