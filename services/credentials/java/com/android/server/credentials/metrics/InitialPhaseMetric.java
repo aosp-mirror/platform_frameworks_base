@@ -42,6 +42,10 @@ public class InitialPhaseMetric {
     // over to the next latency object.
     private long mCredentialServiceBeginQueryTimeNanoseconds = -1;
 
+    // Indicates if the origin was specified when making this API request
+    // TODO(b/271135048) - Emit once metrics approved
+    private boolean mOriginSpecified = false;
+
 
     public InitialPhaseMetric() {
     }
@@ -114,5 +118,13 @@ public class InitialPhaseMetric {
 
     public int getCountRequestClassType() {
         return mCountRequestClassType;
+    }
+
+    public void setOriginSpecified(boolean originSpecified) {
+        mOriginSpecified = originSpecified;
+    }
+
+    public boolean isOriginSpecified() {
+        return mOriginSpecified;
     }
 }
