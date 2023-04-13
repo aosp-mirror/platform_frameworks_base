@@ -16,6 +16,8 @@
 package com.android.systemui.shade
 
 import android.animation.Animator
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.content.Context
 import android.content.res.Resources
@@ -40,8 +42,10 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
+import com.android.systemui.shade.ShadeHeaderController.Companion.DEFAULT_CLOCK_INTENT
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
@@ -52,6 +56,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.statusbar.policy.VariableDateView
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.mockito.any
@@ -114,6 +119,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var qsBatteryModeController: QsBatteryModeController
+    @Mock private lateinit var nextAlarmController: NextAlarmController
+    @Mock private lateinit var activityStarter: ActivityStarter
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
@@ -181,6 +188,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
                 combinedShadeHeadersConstraintManager,
                 demoModeController,
                 qsBatteryModeController,
+                nextAlarmController,
+                activityStarter,
             )
         whenever(view.isAttachedToWindow).thenReturn(true)
         shadeHeaderController.init()
@@ -826,6 +835,28 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         captor.value.onLayoutChange(clock, 0, 0, width, 0, 0, 0, 0, 0)
 
         verify(carrierGroup).setPaddingRelative(514, 0, 0, 0)
+    }
+
+    @Test
+    fun launchClock_launchesDefaultIntentWhenNoAlarmSet() {
+        shadeHeaderController.launchClockActivity()
+
+        verify(activityStarter).postStartActivityDismissingKeyguard(DEFAULT_CLOCK_INTENT, 0)
+    }
+
+    @Test
+    fun launchClock_launchesNextAlarmWhenExists() {
+        val pendingIntent = mock<PendingIntent>()
+        val aci = AlarmManager.AlarmClockInfo(12345, pendingIntent)
+        val captor =
+            ArgumentCaptor.forClass(NextAlarmController.NextAlarmChangeCallback::class.java)
+
+        verify(nextAlarmController).addCallback(capture(captor))
+        captor.value.onNextAlarmChanged(aci)
+
+        shadeHeaderController.launchClockActivity()
+
+        verify(activityStarter).postStartActivityDismissingKeyguard(pendingIntent)
     }
 
     private fun View.executeLayoutChange(
