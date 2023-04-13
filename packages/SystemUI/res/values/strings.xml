@@ -3086,4 +3086,7 @@
 
     <!-- Content description for when assistant attention is active [CHAR LIMIT=NONE] -->
     <string name="assistant_attention_content_description">Assistant attention on</string>
+
+    <!--- Content of toast triggered when the notes app entry point is triggered without setting a default notes app. [CHAR LIMIT=NONE] -->
+    <string name="set_default_notes_app_toast_content">Set default notes app in Settings</string>
 </resources>
