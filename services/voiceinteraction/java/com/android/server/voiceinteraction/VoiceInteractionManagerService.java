@@ -2138,8 +2138,6 @@ public class VoiceInteractionManagerService extends SystemService {
                     mImpl.dumpLocked(fd, pw, args);
                 }
             }
-
-            mSoundTriggerInternal.dump(fd, pw, args);
         }
 
         @Override
