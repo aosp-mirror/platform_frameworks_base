@@ -702,6 +702,13 @@ public class NotificationMediaManager implements Dumpable {
         mProcessArtworkTasks.remove(task);
     }
 
+    // TODO(b/273443374): remove
+    public boolean isLockscreenWallpaperOnNotificationShade() {
+        return mBackdrop != null && mLockscreenWallpaper != null
+                && !mLockscreenWallpaper.isLockscreenLiveWallpaperEnabled()
+                && (mBackdropFront.isVisibleToUser() || mBackdropBack.isVisibleToUser());
+    }
+
     /**
      * {@link AsyncTask} to prepare album art for use as backdrop on lock screen.
      */
