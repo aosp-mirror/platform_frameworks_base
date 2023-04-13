@@ -1018,7 +1018,7 @@ public final class Zygote {
      * Applies debugger system properties to the zygote arguments.
      *
      * For eng builds all apps are debuggable. On userdebug and user builds
-     * if persist.debuggable.dalvik.vm.jdwp.enabled is 1 all apps are
+     * if persist.debug.dalvik.vm.jdwp.enabled is 1 all apps are
      * debuggable. Otherwise, the debugger state is specified via the
      * "--enable-jdwp" flag in the spawn request.
      *
