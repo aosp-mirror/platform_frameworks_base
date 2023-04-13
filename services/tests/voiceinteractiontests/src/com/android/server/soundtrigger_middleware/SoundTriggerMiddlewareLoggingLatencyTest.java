@@ -37,7 +37,6 @@ import android.os.BatteryStatsInternal;
 import android.os.Process;
 import android.os.RemoteException;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.FakeLatencyTracker;
@@ -91,12 +90,10 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testSetUpAndTearDown() {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionStartsLatencyTrackerWithSuccessfulPhraseIdTrigger()
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
@@ -112,7 +109,6 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionRestartsActiveSession() throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
@@ -132,7 +128,6 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionNeverStartsLatencyTrackerWithNonSuccessEvent()
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
@@ -149,7 +144,6 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     }
 
     @Test
-    @FlakyTest(bugId = 275113847)
     public void testOnPhraseRecognitionNeverStartsLatencyTrackerWithNoKeyphraseId()
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
