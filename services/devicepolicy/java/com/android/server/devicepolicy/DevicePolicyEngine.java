@@ -1066,6 +1066,11 @@ final class DevicePolicyEngine {
      * Removes all local policies for the provided {@code userId}.
      */
     private void removeLocalPoliciesForUser(int userId) {
+        if (!mLocalPolicies.contains(userId)) {
+            // No policies on user
+            return;
+        }
+
         Set<PolicyKey> localPolicies = new HashSet<>(mLocalPolicies.get(userId).keySet());
         for (PolicyKey policy : localPolicies) {
             PolicyState<?> policyState = mLocalPolicies.get(userId).get(policy);
