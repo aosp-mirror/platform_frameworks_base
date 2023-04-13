@@ -918,7 +918,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
             new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
-                    mDevicePresenceMonitor)
+                    mDevicePresenceMonitor, mTransportManager)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 

@@ -22,6 +22,7 @@ import android.os.Binder;
 import android.os.ShellCommand;
 
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -32,13 +33,16 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private final CompanionDeviceManagerService mService;
     private final AssociationStore mAssociationStore;
     private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
+    private final CompanionTransportManager mTransportManager;
 
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
             AssociationStore associationStore,
-            CompanionDevicePresenceMonitor devicePresenceMonitor) {
+            CompanionDevicePresenceMonitor devicePresenceMonitor,
+            CompanionTransportManager transportManager) {
         mService = service;
         mAssociationStore = associationStore;
         mDevicePresenceMonitor = devicePresenceMonitor;
+        mTransportManager = transportManager;
     }
 
     @Override
@@ -107,6 +111,12 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 }
                 break;
 
+                case "create-dummy-transport":
+                    // This command creates a RawTransport in order to test Transport listeners
+                    associationId = getNextIntArgRequired();
+                    mTransportManager.createDummyTransport(associationId);
+                    break;
+
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -165,5 +175,8 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      for a long time (90 days or as configured via ");
         pw.println("      \"debug.cdm.cdmservice.removal_time_window\" system property). ");
         pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+        pw.println("  create-dummy-transport <ASSOCIATION_ID>");
+        pw.println("      Create a dummy RawTransport for testing puspose only");
     }
 }
