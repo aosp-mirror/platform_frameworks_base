@@ -565,6 +565,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         final int rootIdx = TransitionUtil.rootIndexFor(change, mInfo);
                         t.reparent(appearedTargets[i].leash, mInfo.getRoot(rootIdx).getLeash());
                         t.setLayer(appearedTargets[i].leash, layer);
+                        // Hide the animation leash, let listener show it.
+                        t.hide(appearedTargets[i].leash);
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "  opening new taskId=%d", appearedTargets[i].taskId);
                         mOpeningTasks.add(new TaskState(change, appearedTargets[i].leash));
