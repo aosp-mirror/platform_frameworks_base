@@ -238,6 +238,15 @@ public class DynamicSystemClient {
      */
     public static final String KEY_ONE_SHOT = "KEY_ONE_SHOT";
 
+    /**
+     * Intent key: Whether to use default strings when showing the dialog that prompts
+     *             user for device credentials.
+     *             False indicates using the custom strings provided by {@code DynamicSystem}.
+     * @hide
+     */
+    public static final String KEY_KEYGUARD_USE_DEFAULT_STRINGS =
+            "KEY_KEYGUARD_USE_DEFAULT_STRINGS";
+
     private static class IncomingHandler extends Handler {
         private final WeakReference<DynamicSystemClient> mWeakClient;
 
