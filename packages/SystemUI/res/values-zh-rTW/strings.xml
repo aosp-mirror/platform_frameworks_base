@@ -808,7 +808,7 @@
     <string name="controls_removed" msgid="3731789252222856959">"已移除"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"要新增「<xliff:g id="APPNAME">%s</xliff:g>」嗎？"</string>
     <string name="controls_panel_authorization" msgid="7045551688535104194">"「<xliff:g id="APPNAME">%s</xliff:g>」可選擇要顯示在這裡的控制選項和內容。"</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"要移除「<xliff:g id="APPNAME">%s</xliff:g>」的控制嗎？"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"要移除「<xliff:g id="APPNAME">%s</xliff:g>」的控制項嗎？"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"已加入收藏"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已加入收藏，位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"從收藏中移除"</string>

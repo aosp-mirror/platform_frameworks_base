@@ -878,7 +878,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Status otillgänglig"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fel, försök igen"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Lägg till snabbkontroller"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Redigera snabbkontroller"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Redigera kontroller"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Lägg till app"</string>
     <string name="controls_menu_remove" msgid="3006525275966023468">"Ta bort app"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Lägg till utgångar"</string>

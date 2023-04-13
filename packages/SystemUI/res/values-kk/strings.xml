@@ -826,7 +826,7 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару элементтеріне қосу"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
-    <string name="controls_dialog_remove" msgid="3775288002711561936">"Өшіру"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"Жою"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ұсынған"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Құрылғы құлыпталды."</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Құрылғыларды құлып экранынан көрсетуге және басқаруға рұқсат берілсін бе?"</string>
@@ -880,7 +880,7 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Басқару элементтерін қосу"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Басқару элементтерін өзгерту"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Қолданба қосу"</string>
-    <string name="controls_menu_remove" msgid="3006525275966023468">"Қолданбаны өшіру"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Қолданбаны жою"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Шығыс сигналдарды қосу"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Топ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 құрылғы таңдалды."</string>

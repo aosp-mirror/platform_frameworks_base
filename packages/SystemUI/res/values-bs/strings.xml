@@ -507,13 +507,13 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključavanja ekrana"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Skener QR koda"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ažuriranje"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Profil za posao"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Radni profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Način rada u avionu"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nećete čuti sljedeći alarm u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Pristupna tačka"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil za posao"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Radni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Podešavač za korisnički interfejs sistema vam omogućava dodatne načine da podesite i prilagodite Androidov interfejs. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
@@ -826,7 +826,7 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
-    <string name="controls_dialog_remove" msgid="3775288002711561936">"Uklanjanje"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"Ukloni"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Predlaže <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Uređaj je zaključan"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Prikazati uređaje i kontrolirati njima sa zaključanog ekrana?"</string>
