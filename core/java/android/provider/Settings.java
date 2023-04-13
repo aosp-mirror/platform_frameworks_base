@@ -1748,6 +1748,21 @@ public final class Settings {
     public static final String ACTION_DREAM_SETTINGS = "android.settings.DREAM_SETTINGS";
 
     /**
+     * Activity Action: Show Communal settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COMMUNAL_SETTING = "android.settings.COMMUNAL_SETTINGS";
+
+    /**
      * Activity Action: Show Notification assistant settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
