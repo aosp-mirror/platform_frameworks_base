@@ -21,14 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Weka PIN yako"</string>
-    <!-- no translation found for keyguard_enter_pin (8114529922480276834) -->
-    <skip />
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Weka PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Weka mchoro wako"</string>
-    <!-- no translation found for keyguard_enter_pattern (7616595160901084119) -->
-    <skip />
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Chora mchoro"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Weka nenosiri lako"</string>
-    <!-- no translation found for keyguard_enter_password (6483623792371009758) -->
-    <skip />
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Weka nenosiri"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Kadi si Sahihi."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Betri imejaa"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Inachaji bila kutumia waya"</string>
@@ -58,68 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Hitilafu imetokea wakati wa kuzima eSIM."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Weka"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Mchoro si sahihi"</string>
-    <!-- no translation found for kg_wrong_pattern_try_again (3603524940234151881) -->
-    <skip />
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Mchoro si sahihi. Jaribu tena."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Nenosiri si sahihi"</string>
-    <!-- no translation found for kg_wrong_password_try_again (6602878676125765920) -->
-    <skip />
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Nenosiri si sahihi. Jaribu tena."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Nambari ya PIN si sahihi"</string>
-    <!-- no translation found for kg_wrong_pin_try_again (3129729383303430190) -->
-    <skip />
-    <!-- no translation found for kg_wrong_input_try_fp_suggestion (3143861542242024833) -->
-    <skip />
-    <!-- no translation found for kg_fp_not_recognized (5183108260932029241) -->
-    <skip />
-    <!-- no translation found for bouncer_face_not_recognized (1666128054475597485) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pin (4752168242723808390) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_password (1473132729225398039) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pattern (4867893307468801501) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pin (5850845723433047605) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_password (5551690347827728042) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pattern (736884689355181602) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pin_or_fp (5635161174698729890) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_password_or_fp (2251295907826814237) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pattern_or_fp (2391870539909135046) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_dpm_lock (6002804765868345917) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pin (5374732179740050373) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_password (9097968458291129795) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pattern (215072203613597906) -->
-    <skip />
-    <!-- no translation found for kg_prompt_unattended_update (8223448855578632202) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pin_auth_timeout (5868644725126275245) -->
-    <skip />
-    <!-- no translation found for kg_prompt_password_auth_timeout (5809110458491920871) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pattern_auth_timeout (1860605401869262178) -->
-    <skip />
-    <!-- no translation found for kg_prompt_auth_timeout (6620679830980315048) -->
-    <skip />
-    <!-- no translation found for kg_face_locked_out (2751559491287575) -->
-    <skip />
-    <!-- no translation found for kg_fp_locked_out (6228277682396768830) -->
-    <skip />
-    <!-- no translation found for kg_trust_agent_disabled (5400691179958727891) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pin (5492230176361601475) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pattern (8266214607346180952) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_password (6170245108400198659) -->
-    <skip />
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN si sahihi. Jaribu tena."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Au fungua kwa alama ya kidole"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Alama ya kidole haijatambuliwa"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Sura haikutambulika"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Jaribu tena au uweke PIN"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Jaribu tena au uweke nenosiri"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Jaribu tena au uchore mchoro"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"PIN inahitajika baada ya majaribio mengi mno"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Nenosiri linahitajika baada ya majaribio mengi mno"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Mchoro unahitajika baada ya majaribio mengi mno"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Fungua kwa PIN au alama ya kidole"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Fungua kwa nenosiri au alama ya kidole"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Fungua kwa mchoro au alama ya kidole"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Kwa usalama zaidi, kifaa kilifungwa kwa sera ya kazi"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN inahitajika baada ya kufunga"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Nenosiri linahitajika baada ya kufunga"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mchoro unahitajika baada ya kufunga"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Sasisho litasakinishwa wakati kifaa hakitumiki"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Usalama wa ziada unahitajika. PIN haikutumika kwa muda."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Usalama wa ziada unahitajika. Nenosiri halikutumika kwa muda."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Usalama wa ziada unahitajika. Mchoro haukutumika kwa muda."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Usalama wa ziada unahitajika. Kifaa hakikufunguliwa kwa muda."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Huwezi kufungua kwa uso. Umejaribu mara nyingi mno."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Huwezi kufungua kwa alama ya kidole. Umejaribu mara nyingi mno."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Kipengele cha kutathmini hali ya kuaminika hakipatikani"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Umejaribu mara nyingi mno kwa PIN isiyo sahihi"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Umejaribu mara nyingi mno kwa mchoro usio sahihi"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Umejaribu mara nyingi mno kwa nenosiri lisilo sahihi"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Jaribu tena baada ya sekunde #.}other{Jaribu tena baada ya sekunde #.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Weka PIN ya SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Weka PIN ya SIM ya \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
@@ -142,12 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Utendakazi wa PUK ya SIM haujafanikiwa!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Kubadili mbinu ya kuingiza data"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Hali ya ndegeni"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (3321211830602827742) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (2672166323886110512) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (3967993994418885887) -->
-    <skip />
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Mchoro unahitajika kifaa kikizimwa kisha kiwashwe"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN inahitajika kifaa kikizimwa kisha kiwashwe"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Nenosiri linahitajika kifaa kikizimwa kisha kiwashwe"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Kwa usalama wa ziada, tumia mchoro badala yake"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Kwa usalama wa ziada, tumia PIN badala yake"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Kwa usalama wa ziada, tumia nenosiri badala yake"</string>
