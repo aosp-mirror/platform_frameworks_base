@@ -4144,7 +4144,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     void handleAppDied() {
         final boolean remove;
-        if ((mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
+        if (Process.isSdkSandboxUid(getUid())) {
+            // Sandbox activities are created for SDKs run in the sandbox process, when the sandbox
+            // process dies, the SDKs are unloaded and can not handle the activity, so sandbox
+            // activity records should be removed.
+            remove = true;
+        } else if ((mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
                 || mRelaunchReason == RELAUNCH_REASON_FREE_RESIZE)
                 && launchCount < 3 && !finishing) {
             // If the process crashed during a resize, always try to relaunch it, unless it has
