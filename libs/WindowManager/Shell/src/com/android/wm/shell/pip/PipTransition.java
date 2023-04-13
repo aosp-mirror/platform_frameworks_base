@@ -611,6 +611,7 @@ public class PipTransition extends PipTransitionController {
                         0 /* startingAngle */, rotationDelta);
         animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
                 .setPipAnimationCallback(mPipAnimationCallback)
+                .setPipTransactionHandler(mPipOrganizer.getPipTransactionHandler())
                 .setDuration(mEnterExitAnimationDuration)
                 .start();
     }
