@@ -55,23 +55,10 @@
           // TODO(b/204133664)
           "exclude-filter": "com.android.server.pm.test.SdCardEjectionTests"
         },
-	{
-          // TODO(b/272575212)
-          "exclude-filter": "com.android.server.pm.test.SettingsTest#testWriteCorruptDataBinaryXml"
-	},
-	{
-          "exclude-filter": "com.android.server.pm.test.SettingsTest#testWriteCorruptDataTextXml"
-	},
-	{
-          "exclude-filter": "com.android.server.pm.test.SettingsTest#testWriteCorruptHeaderBinaryXml"
-	},
-	{
-          "exclude-filter": "com.android.server.pm.test.SettingsTest#testWriteCorruptHeaderTextXml"
-	},
-	{
+        {
           // TODO(b/272714903)
           "exclude-filter": "com.android.server.pm.test.OverlayPathsUninstallSystemUpdatesTest#verify"
-	}
+        }
       ]
     }
   ],
