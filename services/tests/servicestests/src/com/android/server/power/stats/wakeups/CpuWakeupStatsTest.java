@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.power.stats;
+package com.android.server.power.stats.wakeups;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 
-import static com.android.server.power.stats.CpuWakeupStats.WAKEUP_REASON_HALF_WINDOW_MS;
+import static com.android.server.power.stats.wakeups.CpuWakeupStats.WAKEUP_REASON_HALF_WINDOW_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -34,6 +35,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
+import com.android.server.power.stats.wakeups.CpuWakeupStats.Wakeup;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,10 +48,11 @@ import java.util.concurrent.ThreadLocalRandom;
 @RunWith(AndroidJUnit4.class)
 public class CpuWakeupStatsTest {
     private static final String KERNEL_REASON_ALARM_IRQ = "120 test.alarm.device";
-    private static final String KERNEL_REASON_WIFI_IRQ = "120 test.wifi.device";
+    private static final String KERNEL_REASON_WIFI_IRQ = "130 test.wifi.device";
+    private static final String KERNEL_REASON_SOUND_TRIGGER_IRQ = "129 test.sound_trigger.device";
     private static final String KERNEL_REASON_UNKNOWN_IRQ = "140 test.unknown.device";
     private static final String KERNEL_REASON_UNKNOWN = "free-form-reason test.alarm.device";
-    private static final String KERNEL_REASON_UNSUPPORTED = "-1 test.alarm.device";
+    private static final String KERNEL_REASON_ALARM_ABNORMAL = "-1 test.alarm.device";
     private static final String KERNEL_REASON_ABORT = "Abort: due to test.alarm.device";
 
     private static final int TEST_UID_1 = 13239823;
@@ -136,6 +139,40 @@ public class CpuWakeupStatsTest {
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_4)).isLessThan(
                 0);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_5)).isEqualTo(
+                TEST_PROC_STATE_5);
+    }
+
+    @Test
+    public void soundTriggerIrqAttributionSolo() {
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
+        final long wakeupTime = 1247121;
+
+        populateDefaultProcStates(obj);
+
+        obj.noteWakeupTimeAndReason(wakeupTime, 1, KERNEL_REASON_SOUND_TRIGGER_IRQ);
+
+        // Outside the window, so should be ignored.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
+                wakeupTime - WAKEUP_REASON_HALF_WINDOW_MS - 1, TEST_UID_1);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
+                wakeupTime + WAKEUP_REASON_HALF_WINDOW_MS + 1, TEST_UID_2);
+        // Should be attributed
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER, wakeupTime + 5, TEST_UID_3,
+                TEST_UID_5);
+
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        assertThat(attribution).isNotNull();
+        assertThat(attribution.size()).isEqualTo(1);
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER)).isTrue();
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER).indexOfKey(
+                TEST_UID_1)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER).indexOfKey(
+                TEST_UID_2)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER).get(TEST_UID_3)).isEqualTo(
+                TEST_PROC_STATE_3);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER).indexOfKey(
+                TEST_UID_4)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER).get(TEST_UID_5)).isEqualTo(
                 TEST_PROC_STATE_5);
     }
 
@@ -268,22 +305,39 @@ public class CpuWakeupStatsTest {
     }
 
     @Test
-    public void unsupportedWakeupIgnored() {
+    public void abnormalAlarmAttribution() {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
+        populateDefaultProcStates(obj);
 
         long wakeupTime = 970934;
-        obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_UNSUPPORTED);
+        obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_ALARM_ABNORMAL);
 
-        // Should be ignored as this type of wakeup is unsupported.
-        assertThat(obj.mWakeupEvents.size()).isEqualTo(0);
+        assertThat(obj.mWakeupEvents.size()).isEqualTo(1);
+        assertThat(obj.mWakeupEvents.valueAt(0).mType).isEqualTo(Wakeup.TYPE_ABNORMAL);
 
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3);
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 3, TEST_UID_4);
 
-        // Any nearby activity should not end up in the attribution map.
-        assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        assertThat(attribution.size()).isEqualTo(1);
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_ALARM)).isTrue();
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_1)).isLessThan(
+                0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_2)).isLessThan(
+                0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_3)).isEqualTo(
+                TEST_PROC_STATE_3);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_4)).isEqualTo(
+                TEST_PROC_STATE_4);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_5)).isLessThan(
+                0);
+    }
 
-        wakeupTime = 883124;
+    @Test
+    public void abortIgnored() {
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
+
+        long wakeupTime = 883124;
         obj.noteWakeupTimeAndReason(wakeupTime, 3, KERNEL_REASON_ABORT);
 
         // Should be ignored as this type of wakeup is unsupported.

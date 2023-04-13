@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.power.stats;
+package com.android.server.power.stats.wakeups;
 
 import static com.google.common.truth.Truth.assertThat;
 
