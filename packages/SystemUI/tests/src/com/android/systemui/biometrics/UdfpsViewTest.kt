@@ -19,7 +19,7 @@ package com.android.systemui.biometrics
 import android.graphics.PointF
 import android.graphics.RectF
 import android.hardware.biometrics.SensorLocationInternal
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.LayoutInflater
@@ -49,7 +49,7 @@ private const val SENSOR_Y = 250
 private const val SENSOR_RADIUS = 10
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class UdfpsViewTest : SysuiTestCase() {
 
