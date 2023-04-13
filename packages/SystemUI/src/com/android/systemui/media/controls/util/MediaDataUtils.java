@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.core.math.MathUtils;
 import androidx.media.utils.MediaConstants;
@@ -86,5 +87,33 @@ public class MediaDataUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Calculate a scale factor that will allow the input to fill the target size.
+     *
+     * @param input width, height of the input view
+     * @param target width, height of the target view
+     * @return the scale factor; 0 if any given dimension is 0
+     */
+    public static float getScaleFactor(Pair<Integer, Integer> input,
+            Pair<Integer, Integer> target) {
+        float width = (float) input.first;
+        float height = (float) input.second;
+
+        float targetWidth = (float) target.first;
+        float targetHeight = (float) target.second;
+
+        if (width == 0 || height == 0 || targetWidth == 0 || targetHeight == 0) {
+            return 0f;
+        }
+
+        if ((width / height) > (targetWidth / targetHeight)) {
+            // Input is wider than target view, scale to match height
+            return targetHeight / height;
+        } else {
+            // Input is taller than target view, scale to match width
+            return targetWidth / width;
+        }
     }
 }
