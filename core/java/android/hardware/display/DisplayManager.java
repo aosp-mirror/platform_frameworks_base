@@ -51,9 +51,11 @@ import android.view.Display;
 import android.view.Surface;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -81,8 +83,10 @@ public final class DisplayManager {
     private final DisplayManagerGlobal mGlobal;
 
     private final Object mLock = new Object();
-    private final SparseArray<Display> mDisplays = new SparseArray<Display>();
+    @GuardedBy("mLock")
+    private final WeakDisplayCache mDisplayCache = new WeakDisplayCache();
 
+    @GuardedBy("mLock")
     private final ArrayList<Display> mTempDisplays = new ArrayList<Display>();
 
     /**
@@ -684,6 +688,7 @@ public final class DisplayManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void addAllDisplaysLocked(ArrayList<Display> displays, int[] displayIds) {
         for (int i = 0; i < displayIds.length; i++) {
             Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
@@ -693,6 +698,7 @@ public final class DisplayManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void addDisplaysLocked(
             ArrayList<Display> displays, int[] displayIds, int matchType, int flagMask) {
         for (int displayId : displayIds) {
@@ -709,8 +715,9 @@ public final class DisplayManager {
         }
     }
 
+    @GuardedBy("mLock")
     private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {
-        Display display = mDisplays.get(displayId);
+        Display display = mDisplayCache.get(displayId);
         if (display == null) {
             // TODO: We cannot currently provide any override configurations for metrics on displays
             // other than the display the context is associated with.
@@ -719,7 +726,7 @@ public final class DisplayManager {
 
             display = mGlobal.getCompatibleDisplay(displayId, resources);
             if (display != null) {
-                mDisplays.put(displayId, display);
+                mDisplayCache.put(display);
             }
         } else if (!assumeValid && !display.isValid()) {
             display = null;
@@ -1766,5 +1773,58 @@ public final class DisplayManager {
          * 123,1,critical,0.8,default;123,1,moderate,0.6,id_2;456,2,moderate,0.9,critical,0.7
          */
         String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
+    }
+
+    /**
+     * Helper class to maintain cache of weak references to Display instances.
+     *
+     * Note this class is not thread-safe, so external synchronization is needed if accessed
+     * concurrently.
+     */
+    private static final class WeakDisplayCache {
+        private final SparseArray<WeakReference<Display>> mDisplayCache = new SparseArray<>();
+
+        /**
+         * Return cached {@link Display} instance for the provided display id.
+         *
+         * @param displayId - display id of the requested {@link Display} instance.
+         * @return cached {@link Display} instance or null
+         */
+        Display get(int displayId) {
+            WeakReference<Display> wrDisplay = mDisplayCache.get(displayId);
+            if (wrDisplay == null) {
+                return null;
+            }
+            return wrDisplay.get();
+        }
+
+        /**
+         * Insert new {@link Display} instance in the cache. This replaced the previously cached
+         * {@link Display} instance, if there's already one with the same display id.
+         *
+         * @param display - Display instance to cache.
+         */
+        void put(Display display) {
+            removeStaleEntries();
+            mDisplayCache.put(display.getDisplayId(), new WeakReference<>(display));
+        }
+
+        /**
+         * Evict gc-ed entries from the cache.
+         */
+        private void removeStaleEntries() {
+            ArrayList<Integer> staleEntriesIndices = new ArrayList();
+            for (int i = 0; i < mDisplayCache.size(); i++) {
+                if (mDisplayCache.valueAt(i).get() == null) {
+                    staleEntriesIndices.add(i);
+                }
+            }
+
+            for (int i = 0; i < staleEntriesIndices.size(); i++) {
+                // removeAt call to SparseArray doesn't compact the underlying array
+                // so the indices stay valid even after removal.
+                mDisplayCache.removeAt(staleEntriesIndices.get(i));
+            }
+        }
     }
 }
