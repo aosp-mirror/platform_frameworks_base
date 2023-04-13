@@ -114,7 +114,7 @@ status_t InputQueue::getEvent(InputEvent** outEvent) {
 }
 
 bool InputQueue::preDispatchEvent(InputEvent* e) {
-    if (e->getType() == AINPUT_EVENT_TYPE_KEY) {
+    if (e->getType() == InputEventType::KEY) {
         KeyEvent* keyEvent = static_cast<KeyEvent*>(e);
         if (keyEvent->getFlags() & AKEY_EVENT_FLAG_PREDISPATCH) {
             finishEvent(e, false);
