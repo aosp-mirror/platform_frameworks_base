@@ -299,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Start"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stop"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"One-handed mode"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contrast"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Medium"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"High"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Unblock device microphone?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Unblock device camera?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Unblock device camera and microphone?"</string>
@@ -1118,7 +1122,7 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Your work policy allows you to make phone calls only from the work profile"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Switch to work profile"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Close"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Lock screen settings"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Customize lock screen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi not available"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Camera blocked"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Camera and microphone blocked"</string>
