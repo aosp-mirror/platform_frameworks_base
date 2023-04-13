@@ -23,4 +23,7 @@
     <device name="test.wifi.device">
         <subsystem>Wifi</subsystem>
     </device>
+    <device name="test.sound_trigger.device">
+        <subsystem>Sound_trigger</subsystem>
+    </device>
 </irq-device-map>
