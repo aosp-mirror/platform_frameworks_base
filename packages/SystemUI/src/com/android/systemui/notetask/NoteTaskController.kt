@@ -214,7 +214,7 @@ constructor(
      * If the shortcut entry `android:enabled` is set to `true`, the shortcut will be visible in the
      * Widget Picker to all users.
      */
-    fun setNoteTaskShortcutEnabled(value: Boolean) {
+    fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
         val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
 
         val enabledState =
@@ -224,7 +224,16 @@ constructor(
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED
             }
 
-        context.packageManager.setComponentEnabledSetting(
+        // If the required user matches the tracking user, the injected context is already a context
+        // of the required user. Avoid calling #createContextAsUser because creating a context for
+        // a user takes time.
+        val userContext =
+            if (user == userTracker.userHandle) {
+                context
+            } else {
+                context.createContextAsUser(user, /* flags= */ 0)
+            }
+        userContext.packageManager.setComponentEnabledSetting(
             componentName,
             enabledState,
             PackageManager.DONT_KILL_APP,
@@ -246,7 +255,7 @@ constructor(
         val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
         val hasNotesRoleHolder = isEnabled && !packageName.isNullOrEmpty()
 
-        setNoteTaskShortcutEnabled(hasNotesRoleHolder)
+        setNoteTaskShortcutEnabled(hasNotesRoleHolder, user)
 
         if (hasNotesRoleHolder) {
             shortcutManager.enableShortcuts(listOf(SHORTCUT_ID))

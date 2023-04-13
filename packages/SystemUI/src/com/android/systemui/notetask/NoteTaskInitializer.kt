@@ -20,6 +20,7 @@ import android.os.UserHandle
 import android.view.KeyEvent
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -36,6 +37,7 @@ constructor(
     private val optionalBubbles: Optional<Bubbles>,
     @Background private val backgroundExecutor: Executor,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
+    private val userTracker: UserTracker,
 ) {
 
     @VisibleForTesting
@@ -44,8 +46,9 @@ constructor(
             override fun handleSystemKey(key: KeyEvent) {
                 if (key.keyCode == KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL) {
                     controller.showNoteTask(NoteTaskEntryPoint.TAIL_BUTTON)
-                } else if (key.keyCode == KeyEvent.KEYCODE_N && key.isMetaPressed &&
-                        key.isCtrlPressed) {
+                } else if (
+                    key.keyCode == KeyEvent.KEYCODE_N && key.isMetaPressed && key.isCtrlPressed
+                ) {
                     controller.showNoteTask(NoteTaskEntryPoint.KEYBOARD_SHORTCUT)
                 }
             }
@@ -55,7 +58,7 @@ constructor(
         // Guard against feature not being enabled or mandatory dependencies aren't available.
         if (!isEnabled || optionalBubbles.isEmpty) return
 
-        controller.setNoteTaskShortcutEnabled(true)
+        controller.setNoteTaskShortcutEnabled(true, userTracker.userHandle)
         commandQueue.addCallback(callbacks)
         roleManager.addOnRoleHoldersChangedListenerAsUser(
             backgroundExecutor,
