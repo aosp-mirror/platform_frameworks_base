@@ -47,7 +47,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.test.uiautomator.UiDevice;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.KeyValueListParser;
@@ -56,6 +55,7 @@ import android.util.Log;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.frameworks.coretests.aidl.ICmdCallback;
 import com.android.frameworks.coretests.aidl.ICmdReceiver;

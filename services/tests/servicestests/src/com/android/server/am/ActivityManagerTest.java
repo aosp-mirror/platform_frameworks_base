@@ -52,7 +52,6 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.wm.settings.SettingsSession;
-import android.support.test.uiautomator.UiDevice;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
 import android.util.KeyValueListParser;
@@ -61,6 +60,7 @@ import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.Before;
 import org.junit.Ignore;

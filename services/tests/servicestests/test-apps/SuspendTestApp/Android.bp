@@ -28,7 +28,7 @@ android_test_helper_app {
 
     static_libs: [
         "androidx.test.runner",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
     ],
 
     srcs: [
