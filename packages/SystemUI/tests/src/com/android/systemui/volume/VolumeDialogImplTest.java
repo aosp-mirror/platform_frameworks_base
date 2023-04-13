@@ -58,6 +58,7 @@ import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -368,6 +369,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 CsdWarningDialog.NO_ACTION_TIMEOUT_MS);
 
         verify(mCsdWarningDialog).show();
+    }
+
+    @After
+    public void teardown() {
+        if (mDialog != null) {
+            mDialog.clearInternalHandleAfterTest();
+        }
     }
 
 /*
