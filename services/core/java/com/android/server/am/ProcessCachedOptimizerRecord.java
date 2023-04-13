@@ -75,6 +75,15 @@ final class ProcessCachedOptimizerRecord {
     private boolean mFrozen;
 
     /**
+     * If set to true it will make the (un)freeze decision sticky which means that the freezer
+     * decision will remain the same unless a freeze is forced via {@link #mForceFreezeOps}.
+     * This property is usually set to true when external user wants to maintain a (un)frozen state
+     * after being applied.
+     */
+    @GuardedBy("mProcLock")
+    private boolean mFreezeSticky;
+
+    /**
      * Set to false after the process has been frozen.
      * Set to true after we have collected PSS for the frozen process.
      */
@@ -194,6 +203,15 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     void setFrozen(boolean frozen) {
         mFrozen = frozen;
+    }
+    @GuardedBy("mProcLock")
+    void setFreezeSticky(boolean sticky) {
+        mFreezeSticky = sticky;
+    }
+
+    @GuardedBy("mProcLock")
+    boolean isFreezeSticky() {
+        return mFreezeSticky;
     }
 
     boolean skipPSSCollectionBecauseFrozen() {
