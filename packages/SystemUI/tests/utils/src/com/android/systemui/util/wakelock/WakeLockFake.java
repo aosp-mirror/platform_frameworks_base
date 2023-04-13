@@ -55,7 +55,7 @@ public class WakeLockFake implements WakeLock {
         private WakeLock mWakeLock;
 
         public Builder(Context context) {
-            super(context);
+            super(context, null);
         }
 
         public void setWakeLock(WakeLock wakeLock) {
