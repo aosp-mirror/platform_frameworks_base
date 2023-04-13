@@ -63,8 +63,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
@@ -107,6 +109,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .thenReturn(listOf(NOTE_TASK_PACKAGE_NAME))
         whenever(activityManager.getRunningTasks(anyInt())).thenReturn(emptyList())
         whenever(userManager.isManagedProfile(workUserInfo.id)).thenReturn(true)
+        whenever(context.resources).thenReturn(getContext().resources)
     }
 
     private fun createNoteTaskController(
@@ -337,14 +340,14 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showNoteTask_intentResolverReturnsNull_shouldDoNothing() {
+    fun showNoteTask_intentResolverReturnsNull_shouldShowToast() {
         whenever(resolver.resolveInfo(any(), any())).thenReturn(null)
+        val noteTaskController = spy(createNoteTaskController())
+        doNothing().whenever(noteTaskController).showNoDefaultNotesAppToast()
 
-        createNoteTaskController()
-            .showNoteTask(
-                entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-            )
+        noteTaskController.showNoteTask(entryPoint = NoteTaskEntryPoint.TAIL_BUTTON)
 
+        verify(noteTaskController).showNoDefaultNotesAppToast()
         verifyZeroInteractions(context, bubbles, eventLogger)
     }
 
@@ -373,17 +376,17 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Test
     fun showNoteTask_keyboardShortcut_shouldStartActivity() {
         val expectedInfo =
-                NOTE_TASK_INFO.copy(
-                        entryPoint = NoteTaskEntryPoint.KEYBOARD_SHORTCUT,
-                        isKeyguardLocked = true,
-                )
+            NOTE_TASK_INFO.copy(
+                entryPoint = NoteTaskEntryPoint.KEYBOARD_SHORTCUT,
+                isKeyguardLocked = true,
+            )
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
         whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
 
         createNoteTaskController()
-                .showNoteTask(
-                        entryPoint = expectedInfo.entryPoint!!,
-                )
+            .showNoteTask(
+                entryPoint = expectedInfo.entryPoint!!,
+            )
 
         val intentCaptor = argumentCaptor<Intent>()
         val userCaptor = argumentCaptor<UserHandle>()
@@ -393,9 +396,9 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             assertThat(intent.`package`).isEqualTo(NOTE_TASK_PACKAGE_NAME)
             assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
             assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
-                    .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
+                .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
             assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
-                    .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
+                .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, true)).isFalse()
         }
         assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
