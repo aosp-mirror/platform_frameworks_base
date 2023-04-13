@@ -355,7 +355,7 @@ public class DeviceIdleController extends SystemService
     @GuardedBy("this")
     private boolean mHasGps;
     @GuardedBy("this")
-    private boolean mHasNetworkLocation;
+    private boolean mHasFusedLocation;
     @GuardedBy("this")
     private Location mLastGenericLocation;
     @GuardedBy("this")
@@ -3782,12 +3782,14 @@ public class DeviceIdleController extends SystemService
                 scheduleAlarmLocked(mConstants.LOCATING_TIMEOUT);
                 LocationManager locationManager = mInjector.getLocationManager();
                 if (locationManager != null
-                        && locationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
-                    locationManager.requestLocationUpdates(mLocationRequest,
-                            mGenericLocationListener, mHandler.getLooper());
+                        && locationManager.getProvider(LocationManager.FUSED_PROVIDER) != null) {
+                    locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
+                            mLocationRequest,
+                            AppSchedulingModuleThread.getExecutor(),
+                            mGenericLocationListener);
                     mLocating = true;
                 } else {
-                    mHasNetworkLocation = false;
+                    mHasFusedLocation = false;
                 }
                 if (locationManager != null
                         && locationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
@@ -5301,9 +5303,10 @@ public class DeviceIdleController extends SystemService
                 pw.print("  "); pw.print(mStationaryListeners.size());
                 pw.println(" stationary listeners registered");
             }
-            pw.print("  mLocating="); pw.print(mLocating); pw.print(" mHasGps=");
-                    pw.print(mHasGps); pw.print(" mHasNetwork=");
-                    pw.print(mHasNetworkLocation); pw.print(" mLocated="); pw.println(mLocated);
+            pw.print("  mLocating="); pw.print(mLocating);
+            pw.print(" mHasGps="); pw.print(mHasGps);
+            pw.print(" mHasFused="); pw.print(mHasFusedLocation);
+            pw.print(" mLocated="); pw.println(mLocated);
             if (mLastGenericLocation != null) {
                 pw.print("  mLastGenericLocation="); pw.println(mLastGenericLocation);
             }
