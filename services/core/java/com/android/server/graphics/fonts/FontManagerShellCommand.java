@@ -105,8 +105,8 @@ public class FontManagerShellCommand extends ShellCommand {
         w.println("    Update font families with the new definitions.");
         w.println();
         w.println("install-debug-cert [cert file path]");
-        w.println("    Install debug certificate file. This command can be used only on userdebug");
-        w.println("    or eng device with root user.");
+        w.println("    Install debug certificate file. This command can be used only on");
+        w.println("    debuggable device with root user.");
         w.println();
         w.println("clear");
         w.println("    Remove all installed font files and reset to the initial state.");
