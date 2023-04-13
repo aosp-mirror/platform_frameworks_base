@@ -7,7 +7,7 @@ import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dreams.complication.ComplicationHostViewController
+import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.policy.ConfigurationController

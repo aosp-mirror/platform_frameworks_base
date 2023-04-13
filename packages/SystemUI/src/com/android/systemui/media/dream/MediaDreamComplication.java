@@ -16,8 +16,8 @@
 
 package com.android.systemui.media.dream;
 
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.ComplicationViewModel;
+import com.android.systemui.complication.Complication;
+import com.android.systemui.complication.ComplicationViewModel;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
 
 import javax.inject.Inject;

@@ -26,11 +26,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.dreams.complication.ComplicationHostViewController
-import com.android.systemui.dreams.complication.ComplicationLayoutParams
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP
-import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position
+import com.android.systemui.complication.ComplicationHostViewController
+import com.android.systemui.complication.ComplicationLayoutParams
+import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM
+import com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP
+import com.android.systemui.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel.Companion.DREAM_ANIMATION_DURATION

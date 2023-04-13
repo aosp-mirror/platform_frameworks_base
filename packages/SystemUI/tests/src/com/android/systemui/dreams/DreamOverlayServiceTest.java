@@ -49,10 +49,10 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.ComplicationLayoutEngine;
+import com.android.systemui.complication.ComplicationLayoutEngine;
+import com.android.systemui.dreams.complication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.dreamcomplication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -98,21 +98,20 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     WindowManagerImpl mWindowManager;
 
     @Mock
-    ComplicationComponent.Factory mComplicationComponentFactory;
+    com.android.systemui.complication.dagger.ComplicationComponent.Factory
+            mComplicationComponentFactory;
 
     @Mock
-    ComplicationComponent mComplicationComponent;
+    com.android.systemui.complication.dagger.ComplicationComponent mComplicationComponent;
 
     @Mock
     ComplicationLayoutEngine mComplicationVisibilityController;
 
     @Mock
-    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
-            mDreamComplicationComponentFactory;
+    ComplicationComponent.Factory mDreamComplicationComponentFactory;
 
     @Mock
-    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
-            mDreamComplicationComponent;
+    ComplicationComponent mDreamComplicationComponent;
 
     @Mock
     HideComplicationTouchHandler mHideComplicationTouchHandler;

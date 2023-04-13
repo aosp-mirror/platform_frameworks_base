@@ -24,8 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.CoreStartable;
+import com.android.systemui.complication.DreamMediaEntryComplication;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.complication.DreamMediaEntryComplication;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.models.player.MediaData;
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData;
