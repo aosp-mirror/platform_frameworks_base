@@ -2865,11 +2865,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        if (animate && mTransitionController.inCollectingTransition(startingWindow)
-                && startingWindow.cancelAndRedraw()) {
+        if (animate && mTransitionController.inCollectingTransition(startingWindow)) {
             // Defer remove starting window after transition start.
-            // If splash screen window was in collecting, the client side is unable to draw because
-            // of Session#cancelDraw, which will blocking the remove animation.
+            // The surface of app window could really show after the transition finish.
             startingWindow.mSyncTransaction.addTransactionCommittedListener(Runnable::run, () -> {
                 synchronized (mAtmService.mGlobalLock) {
                     surface.remove(true);
