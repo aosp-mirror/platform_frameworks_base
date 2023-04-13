@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -82,10 +83,13 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
 
     @Test
     public void testStartAnimation_containsNonActivityEmbeddingChange() {
+        final TransitionInfo.Change nonEmbeddedOpen = createChange(0 /* flags */);
+        final TransitionInfo.Change embeddedOpen = createEmbeddedChange(
+                EMBEDDED_LEFT_BOUNDS, EMBEDDED_LEFT_BOUNDS, TASK_BOUNDS);
+        nonEmbeddedOpen.setMode(TRANSIT_OPEN);
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
-                .addChange(createEmbeddedChange(
-                        EMBEDDED_LEFT_BOUNDS, EMBEDDED_LEFT_BOUNDS, TASK_BOUNDS))
-                .addChange(createChange(0 /* flags */))
+                .addChange(embeddedOpen)
+                .addChange(nonEmbeddedOpen)
                 .build();
 
         // No-op because it contains non-embedded change.
@@ -95,6 +99,22 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         verifyNoMoreInteractions(mStartTransaction);
         verifyNoMoreInteractions(mFinishTransaction);
         verifyNoMoreInteractions(mFinishCallback);
+
+        final TransitionInfo.Change nonEmbeddedClose = createChange(0 /* flags */);
+        nonEmbeddedClose.setMode(TRANSIT_CLOSE);
+        nonEmbeddedClose.setEndAbsBounds(TASK_BOUNDS);
+        final TransitionInfo.Change embeddedOpen2 = createEmbeddedChange(
+                EMBEDDED_RIGHT_BOUNDS, EMBEDDED_RIGHT_BOUNDS, TASK_BOUNDS);
+        final TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(embeddedOpen)
+                .addChange(embeddedOpen2)
+                .addChange(nonEmbeddedClose)
+                .build();
+        // Ok to animate because nonEmbeddedClose is occluded by embeddedOpen and embeddedOpen2.
+        assertTrue(mController.startAnimation(mTransition, info2, mStartTransaction,
+                mFinishTransaction, mFinishCallback));
+        // The non-embedded change is dropped to avoid affecting embedded animation.
+        assertFalse(info2.getChanges().contains(nonEmbeddedClose));
     }
 
     @Test
