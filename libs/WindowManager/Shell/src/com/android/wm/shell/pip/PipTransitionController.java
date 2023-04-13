@@ -225,6 +225,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         throw new IllegalStateException("Request isn't entering PiP");
     }
 
+    /** Sets the type of animation when a PiP task appears. */
+    public void setEnterAnimationType(@PipAnimationController.AnimationType int type) {
+    }
+
     /** Play a transition animation for entering PiP on a specific PiP change. */
     public void startEnterAnimation(@NonNull final TransitionInfo.Change pipChange,
             @NonNull final SurfaceControl.Transaction startTransaction,
