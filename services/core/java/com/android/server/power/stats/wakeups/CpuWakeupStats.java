@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.power.stats;
+package com.android.server.power.stats.wakeups;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 
@@ -55,7 +56,8 @@ public class CpuWakeupStats {
     private static final String TAG = "CpuWakeupStats";
 
     private static final String SUBSYSTEM_ALARM_STRING = "Alarm";
-    private static final String SUBSYSTEM_ALARM_WIFI = "Wifi";
+    private static final String SUBSYSTEM_WIFI_STRING = "Wifi";
+    private static final String SUBSYSTEM_SOUND_TRIGGER_STRING = "Sound_trigger";
     private static final String TRACE_TRACK_WAKEUP_ATTRIBUTION = "wakeup_attribution";
     @VisibleForTesting
     static final long WAKEUP_REASON_HALF_WINDOW_MS = 500;
@@ -91,12 +93,24 @@ public class CpuWakeupStats {
         mConfig.register(new HandlerExecutor(mHandler));
     }
 
+    private static int typeToStatsType(int wakeupType) {
+        switch (wakeupType) {
+            case Wakeup.TYPE_ABNORMAL:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__TYPE__TYPE_ABNORMAL;
+            case Wakeup.TYPE_IRQ:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__TYPE__TYPE_IRQ;
+        }
+        return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__TYPE__TYPE_UNKNOWN;
+    }
+
     private static int subsystemToStatsReason(int subsystem) {
         switch (subsystem) {
             case CPU_WAKEUP_SUBSYSTEM_ALARM:
                 return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__ALARM;
             case CPU_WAKEUP_SUBSYSTEM_WIFI:
                 return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__WIFI;
+            case CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__SOUND_TRIGGER;
         }
         return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN;
     }
@@ -144,7 +158,7 @@ public class CpuWakeupStats {
                 }
             }
             FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED,
-                    FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__TYPE__TYPE_IRQ,
+                    typeToStatsType(wakeupToLog.mType),
                     subsystemToStatsReason(subsystem),
                     uids,
                     wakeupToLog.mElapsedMillis,
@@ -524,8 +538,10 @@ public class CpuWakeupStats {
         switch (rawSubsystem) {
             case SUBSYSTEM_ALARM_STRING:
                 return CPU_WAKEUP_SUBSYSTEM_ALARM;
-            case SUBSYSTEM_ALARM_WIFI:
+            case SUBSYSTEM_WIFI_STRING:
                 return CPU_WAKEUP_SUBSYSTEM_WIFI;
+            case SUBSYSTEM_SOUND_TRIGGER_STRING:
+                return CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
         }
         return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
     }
@@ -535,25 +551,43 @@ public class CpuWakeupStats {
             case CPU_WAKEUP_SUBSYSTEM_ALARM:
                 return SUBSYSTEM_ALARM_STRING;
             case CPU_WAKEUP_SUBSYSTEM_WIFI:
-                return SUBSYSTEM_ALARM_WIFI;
+                return SUBSYSTEM_WIFI_STRING;
+            case CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER:
+                return SUBSYSTEM_SOUND_TRIGGER_STRING;
             case CPU_WAKEUP_SUBSYSTEM_UNKNOWN:
                 return "Unknown";
         }
         return "N/A";
     }
 
-    private static final class Wakeup {
+    @VisibleForTesting
+    static final class Wakeup {
         private static final String PARSER_TAG = "CpuWakeupStats.Wakeup";
         private static final String ABORT_REASON_PREFIX = "Abort";
-        private static final Pattern sIrqPattern = Pattern.compile("^(\\d+)\\s+(\\S+)");
+        private static final Pattern sIrqPattern = Pattern.compile("^(\\-?\\d+)\\s+(\\S+)");
+
+        /**
+         * Classical interrupts, which arrive on a dedicated GPIO pin into the main CPU.
+         * Sometimes, when multiple IRQs happen close to each other, they may get batched together.
+         */
+        static final int TYPE_IRQ = 1;
+
+        /**
+         * Non-IRQ wakeups. The exact mechanism for these is unknown, except that these explicitly
+         * do not use an interrupt line or a GPIO pin.
+         */
+        static final int TYPE_ABNORMAL = 2;
+
+        int mType;
         long mElapsedMillis;
         long mUptimeMillis;
         IrqDevice[] mDevices;
 
-        private Wakeup(IrqDevice[] devices, long elapsedMillis, long uptimeMillis) {
+        private Wakeup(int type, IrqDevice[] devices, long elapsedMillis, long uptimeMillis) {
+            mType = type;
+            mDevices = devices;
             mElapsedMillis = elapsedMillis;
             mUptimeMillis = uptimeMillis;
-            mDevices = devices;
         }
 
         static Wakeup parseWakeup(String rawReason, long elapsedMillis, long uptimeMillis) {
@@ -563,6 +597,7 @@ public class CpuWakeupStats {
                 return null;
             }
 
+            int type = TYPE_IRQ;
             int parsedDeviceCount = 0;
             final IrqDevice[] parsedDevices = new IrqDevice[components.length];
 
@@ -574,6 +609,10 @@ public class CpuWakeupStats {
                     try {
                         line = Integer.parseInt(matcher.group(1));
                         device = matcher.group(2);
+                        if (line < 0) {
+                            // Assuming that IRQ wakeups cannot come batched with non-IRQ wakeups.
+                            type = TYPE_ABNORMAL;
+                        }
                     } catch (NumberFormatException e) {
                         Slog.e(PARSER_TAG,
                                 "Exception while parsing device names from part: " + component, e);
@@ -585,15 +624,16 @@ public class CpuWakeupStats {
             if (parsedDeviceCount == 0) {
                 return null;
             }
-            return new Wakeup(Arrays.copyOf(parsedDevices, parsedDeviceCount), elapsedMillis,
+            return new Wakeup(type, Arrays.copyOf(parsedDevices, parsedDeviceCount), elapsedMillis,
                     uptimeMillis);
         }
 
         @Override
         public String toString() {
             return "Wakeup{"
-                    + "mElapsedMillis=" + mElapsedMillis
-                    + ", mUptimeMillis=" + TimeUtils.formatDuration(mUptimeMillis)
+                    + "mType=" + mType
+                    + ", mElapsedMillis=" + mElapsedMillis
+                    + ", mUptimeMillis=" + mUptimeMillis
                     + ", mDevices=" + Arrays.toString(mDevices)
                     + '}';
         }
