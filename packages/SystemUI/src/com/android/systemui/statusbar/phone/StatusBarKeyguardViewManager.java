@@ -656,9 +656,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     }
 
                     updateAlternateBouncerShowing(mAlternateBouncerInteractor.show());
+                    setKeyguardMessage(message, null);
                     return;
                 }
 
+                mViewMediatorCallback.setCustomMessage(message);
                 if (afterKeyguardGone) {
                     // we'll handle the dismiss action after keyguard is gone, so just show the
                     // bouncer

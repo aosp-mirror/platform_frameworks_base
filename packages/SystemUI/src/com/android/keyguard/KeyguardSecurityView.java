@@ -106,7 +106,7 @@ public interface KeyguardSecurityView {
      * @param message the message to show
      * @param colorState the color to use
      */
-    void showMessage(CharSequence message, ColorStateList colorState);
+    void showMessage(CharSequence message, ColorStateList colorState, boolean animated);
 
     /**
      * Starts the animation which should run when the security view appears.
