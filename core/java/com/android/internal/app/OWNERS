@@ -1,15 +1,16 @@
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
 per-file UnlaunchableAppActivity.java = file:/core/java/android/app/admin/WorkProfile_OWNERS
 per-file IntentForwarderActivity.java = file:/core/java/android/app/admin/WorkProfile_OWNERS
-per-file *Resolver* = file:/packages/SystemUI/OWNERS
-per-file *Chooser* = file:/packages/SystemUI/OWNERS
-per-file SimpleIconFactory.java = file:/packages/SystemUI/OWNERS
-per-file AbstractMultiProfilePagerAdapter.java = file:/packages/SystemUI/OWNERS
-per-file *EmptyStateProvider.java = file:/packages/SystemUI/OWNERS
 per-file NetInitiatedActivity.java = file:/location/java/android/location/OWNERS
 per-file *BatteryStats* = file:/BATTERY_STATS_OWNERS
 per-file *SoundTrigger* = file:/media/java/android/media/soundtrigger/OWNERS
 
+# Chooser and Resolver.
+per-file *Chooser* = file:chooser/OWNERS
+per-file *Resolver* = file:chooser/OWNERS
+per-file SimpleIconFactory.java = file:chooser/OWNERS
+per-file AbstractMultiProfilePagerAdapter.java = file:chooser/OWNERS
+per-file *EmptyStateProvider.java = file:chooser/OWNERS
 
 # Voice Interaction
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
