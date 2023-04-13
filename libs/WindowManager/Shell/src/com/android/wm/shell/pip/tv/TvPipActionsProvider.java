@@ -186,16 +186,17 @@ public class TvPipActionsProvider implements TvPipAction.SystemActionsHandler {
     }
 
     @VisibleForTesting(visibility = PACKAGE)
-    public void onPipExpansionToggled(boolean expanded) {
+    public void updatePipExpansionState(boolean expanded) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipExpansionToggled, expanded: %b", TAG, expanded);
 
-        mExpandCollapseAction.update(
+        boolean changed = mExpandCollapseAction.update(
                 expanded ? R.string.pip_collapse : R.string.pip_expand,
                 expanded ? R.drawable.pip_ic_collapse : R.drawable.pip_ic_expand);
-
-        notifyActionsChanged(/* added= */ 0, /* updated= */ 1,
-                mActionsList.indexOf(mExpandCollapseAction));
+        if (changed) {
+            notifyActionsChanged(/* added= */ 0, /* updated= */ 1,
+                    mActionsList.indexOf(mExpandCollapseAction));
+        }
     }
 
     List<TvPipAction> getActionsList() {
