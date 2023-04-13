@@ -26,10 +26,10 @@ import android.view.WindowInsetsController.Appearance
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.util.ContrastColorUtil
 import com.android.internal.view.AppearanceRegion
+import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import java.io.PrintWriter
 import java.util.Arrays
@@ -50,24 +50,20 @@ class LetterboxAppearance(
  * Responsible for calculating the [Appearance] and [AppearanceRegion] for the status bar when apps
  * are letterboxed.
  */
-@CentralSurfacesScope
+@SysUISingleton
 class LetterboxAppearanceCalculator
 @Inject
 constructor(
     private val lightBarController: LightBarController,
-    private val dumpManager: DumpManager,
+    dumpManager: DumpManager,
     private val letterboxBackgroundProvider: LetterboxBackgroundProvider,
-) : OnStatusBarViewInitializedListener, CentralSurfacesComponent.Startable {
+) : OnStatusBarViewInitializedListener, Dumpable {
+
+    init {
+        dumpManager.registerCriticalDumpable(this)
+    }
 
     private var statusBarBoundsProvider: StatusBarBoundsProvider? = null
-
-    override fun start() {
-        dumpManager.registerCriticalDumpable(javaClass.simpleName) { pw, _ -> dump(pw) }
-    }
-
-    override fun stop() {
-        dumpManager.unregisterDumpable(javaClass.simpleName)
-    }
 
     private var lastAppearance: Int? = null
     private var lastAppearanceRegions: Array<AppearanceRegion>? = null
@@ -216,8 +212,8 @@ constructor(
         return this.intersect(other)
     }
 
-    private fun dump(printWriter: PrintWriter) {
-        printWriter.println(
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println(
             """
            lastAppearance: ${lastAppearance?.toAppearanceString()}
            lastAppearanceRegion: ${Arrays.toString(lastAppearanceRegions)},
