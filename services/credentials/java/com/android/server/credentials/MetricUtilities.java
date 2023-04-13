@@ -287,6 +287,8 @@ public class MetricUtilities {
                     /* count_credential_request_classtypes */
                     initialPhaseMetric.getCountRequestClassType()
                     // TODO(b/271135048) - add total count of request options
+                    // TODO(b/271135048) - Uncomment once built past PWG review -
+                    // initialPhaseMetric.isOriginSpecified()
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
