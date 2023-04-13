@@ -233,6 +233,11 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    // TODO(b/273443374): remove
+    public boolean isLockscreenLiveWallpaperEnabled() {
+        return mWallpaperManager.isLockscreenLiveWallpaperEnabled();
+    }
+
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println(getClass().getSimpleName() + ":");
