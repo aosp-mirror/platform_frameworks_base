@@ -4373,7 +4373,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Cancels all operations in the scheduler if it is hung for 10 seconds.
      */
     public void startBiometricWatchdog() {
-        if (mFaceManager != null) {
+        if (mFaceManager != null && !isFaceAuthInteractorEnabled()) {
             mFaceManager.scheduleWatchdog();
         }
         if (mFpm != null) {
