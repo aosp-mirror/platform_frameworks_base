@@ -2414,9 +2414,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
             if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
-                // TODO(shell-transitions): Implement a fallback behavior for now.
-                throw new IllegalStateException("Somehow removed the last task in a stage"
-                        + " outside of a proper transition");
+                Log.e(TAG, "Somehow removed the last task in a stage outside of a proper "
+                        + "transition.");
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                final int dismissTop = mMainStage.getChildCount() == 0
+                        ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
+                prepareExitSplitScreen(dismissTop, wct);
+                mSplitTransitions.startDismissTransition(wct, this, dismissTop,
+                        EXIT_REASON_UNKNOWN);
                 // This can happen in some pathological cases. For example:
                 // 1. main has 2 tasks [Task A (Single-task), Task B], side has one task [Task C]
                 // 2. Task B closes itself and starts Task A in LAUNCH_ADJACENT at the same time
