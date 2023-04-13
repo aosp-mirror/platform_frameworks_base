@@ -255,10 +255,10 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = true;
 
-        mMediaOutputBaseDialogImpl.onStart();
+        mMediaOutputBaseDialogImpl.start();
         verify(mLocalBluetoothLeBroadcast).registerServiceCallBack(any(), any());
 
-        mMediaOutputBaseDialogImpl.onStop();
+        mMediaOutputBaseDialogImpl.stop();
         verify(mLocalBluetoothLeBroadcast).unregisterServiceCallBack(any());
     }
 
@@ -269,8 +269,8 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = false;
 
-        mMediaOutputBaseDialogImpl.onStart();
-        mMediaOutputBaseDialogImpl.onStop();
+        mMediaOutputBaseDialogImpl.start();
+        mMediaOutputBaseDialogImpl.stop();
 
         verify(mLocalBluetoothLeBroadcast, never()).registerServiceCallBack(any(), any());
         verify(mLocalBluetoothLeBroadcast, never()).unregisterServiceCallBack(any());
