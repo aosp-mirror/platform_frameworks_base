@@ -2384,12 +2384,8 @@ public class AccountManager {
                 } else {
                     return get(timeout, unit);
                 }
-            } catch (CancellationException e) {
-                throw new OperationCanceledException();
-            } catch (TimeoutException e) {
-                // fall through and cancel
-            } catch (InterruptedException e) {
-                // fall through and cancel
+            } catch (CancellationException | TimeoutException | InterruptedException e) {
+                throw new OperationCanceledException(e);
             } catch (ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
@@ -2408,7 +2404,6 @@ public class AccountManager {
             } finally {
                 cancel(true /* interrupt if running */);
             }
-            throw new OperationCanceledException();
         }
 
         @Override
