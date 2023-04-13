@@ -78,8 +78,6 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
     private KeyguardSecurityCallback mKeyguardSecurityCallback;
     @Mock
     private FeatureFlags mFeatureFlags;
-    @Mock
-    private ViewMediatorCallback mViewMediatorCallback;
 
     private KeyguardSecurityViewFlipperController mKeyguardSecurityViewFlipperController;
 
@@ -96,7 +94,7 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
 
         mKeyguardSecurityViewFlipperController = new KeyguardSecurityViewFlipperController(mView,
                 mLayoutInflater, mAsyncLayoutInflater, mKeyguardSecurityViewControllerFactory,
-                mEmergencyButtonControllerFactory, mFeatureFlags, mViewMediatorCallback);
+                mEmergencyButtonControllerFactory, mFeatureFlags);
     }
 
     @Test
@@ -108,14 +106,26 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
             reset(mLayoutInflater);
             when(mLayoutInflater.inflate(anyInt(), eq(mView), eq(false)))
                     .thenReturn(mInputView);
-            mKeyguardSecurityViewFlipperController.getSecurityView(mode, mKeyguardSecurityCallback);
-            if (mode == SecurityMode.Invalid || mode == SecurityMode.None) {
-                verify(mLayoutInflater, never()).inflate(
-                        anyInt(), any(ViewGroup.class), anyBoolean());
-            } else {
-                verify(mLayoutInflater).inflate(anyInt(), eq(mView), eq(false));
-            }
+            mKeyguardSecurityViewFlipperController.getSecurityView(mode, mKeyguardSecurityCallback,
+                    controller -> {
+                        if (mode == SecurityMode.Invalid || mode == SecurityMode.None) {
+                            verify(mLayoutInflater, never()).inflate(
+                                    anyInt(), any(ViewGroup.class), anyBoolean());
+                        } else {
+                            verify(mLayoutInflater).inflate(anyInt(), eq(mView), eq(false));
+                        }
+                    });
         }
+    }
+
+    @Test
+    public void getSecurityView_NotInflated() {
+        mKeyguardSecurityViewFlipperController.clearViews();
+        mKeyguardSecurityViewFlipperController.getSecurityView(SecurityMode.PIN,
+                mKeyguardSecurityCallback,
+                controller -> {});
+        verify(mAsyncLayoutInflater).inflate(anyInt(), eq(mView), any(
+                AsyncLayoutInflater.OnInflateFinishedListener.class));
     }
 
     @Test
@@ -136,7 +146,6 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
         argumentCaptor.getValue().onInflateFinished(
                 LayoutInflater.from(getContext()).inflate(R.layout.keyguard_password_view, null),
                 R.layout.keyguard_password_view, mView);
-        verify(mViewMediatorCallback).setNeedsInput(anyBoolean());
     }
 
     @Test
