@@ -632,7 +632,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
 
         if (UNLIKELY(logging_enabled)) {
           last_resolution_.steps.push_back(
-              Resolution::Step{Resolution::Step::Type::OVERLAID_INLINE, String8(), result->cookie});
+              Resolution::Step{Resolution::Step::Type::OVERLAID_INLINE, result->cookie, String8()});
           if (auto path = apk_assets_[result->cookie]->GetPath()) {
             const std::string overlay_path = path->data();
             if (IsFabricatedOverlay(overlay_path)) {
@@ -682,8 +682,8 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
 
       if (UNLIKELY(logging_enabled)) {
         last_resolution_.steps.push_back(
-            Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->config.toString(),
-                             overlay_result->cookie});
+            Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->cookie,
+                             overlay_result->config.toString()});
         last_resolution_.best_package_name =
             overlay_result->package_name->c_str();
         overlaid = true;
@@ -769,8 +769,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
       } else {
         if (UNLIKELY(logging_enabled)) {
           last_resolution_.steps.push_back(Resolution::Step{Resolution::Step::Type::SKIPPED,
-                                                      this_config.toString(),
-                                                      cookie});
+                                                            cookie, this_config.toString()});
         }
         continue;
       }
@@ -786,8 +785,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
       if (!offset.has_value()) {
         if (UNLIKELY(logging_enabled)) {
           last_resolution_.steps.push_back(Resolution::Step{Resolution::Step::Type::NO_ENTRY,
-                                                      this_config.toString(),
-                                                      cookie});
+                                                            cookie, this_config.toString()});
         }
         continue;
       }
@@ -800,8 +798,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
 
       if (UNLIKELY(logging_enabled)) {
         last_resolution_.steps.push_back(Resolution::Step{resolution_type,
-                                                          this_config.toString(),
-                                                          cookie});
+                                                          cookie, this_config.toString()});
       }
 
       // Any configuration will suffice, so break.
@@ -839,13 +836,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
 }
 
 void AssetManager2::ResetResourceResolution() const {
-  last_resolution_.cookie = kInvalidCookie;
-  last_resolution_.resid = 0;
-  last_resolution_.steps.clear();
-  last_resolution_.type_string_ref = StringPoolRef();
-  last_resolution_.entry_string_ref = StringPoolRef();
-  last_resolution_.best_config_name.clear();
-  last_resolution_.best_package_name.clear();
+  last_resolution_ = Resolution{};
 }
 
 void AssetManager2::SetResourceResolutionLoggingEnabled(bool enabled) {
@@ -885,21 +876,21 @@ std::string AssetManager2::GetLastResourceResolution() const {
                                    configuration_.toString().c_str());
 
   for (const Resolution::Step& step : last_resolution_.steps) {
-    const static std::unordered_map<Resolution::Step::Type, const char*> kStepStrings = {
-        {Resolution::Step::Type::INITIAL,         "Found initial"},
-        {Resolution::Step::Type::BETTER_MATCH,    "Found better"},
-        {Resolution::Step::Type::OVERLAID,        "Overlaid"},
-        {Resolution::Step::Type::OVERLAID_INLINE, "Overlaid inline"},
-        {Resolution::Step::Type::SKIPPED,         "Skipped"},
-        {Resolution::Step::Type::NO_ENTRY,        "No entry"}
+    constexpr static std::array kStepStrings = {
+        "Found initial",
+        "Found better",
+        "Overlaid",
+        "Overlaid inline",
+        "Skipped",
+        "No entry"
     };
 
-    const auto prefix = kStepStrings.find(step.type);
-    if (prefix == kStepStrings.end()) {
+    if (step.type < Resolution::Step::Type::INITIAL
+        || step.type > Resolution::Step::Type::NO_ENTRY) {
       continue;
     }
-
-    log_stream << "\n\t" << prefix->second << ": " << apk_assets_[step.cookie]->GetDebugName();
+    const auto prefix = kStepStrings[int(step.type) - int(Resolution::Step::Type::INITIAL)];
+    log_stream << "\n\t" << prefix << ": " << apk_assets_[step.cookie]->GetDebugName();
     if (!step.config_name.isEmpty()) {
       log_stream << " - " << step.config_name;
     }
