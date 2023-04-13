@@ -32,16 +32,19 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.Surface;
 import android.view.Surface.Rotation;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,11 +54,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class BiometricDisplayListenerTest extends SysuiTestCase {
 
