@@ -261,7 +261,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adresse og port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skann QR-koden"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Koble til enheten via wifi ved å skanne en QR-kode"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Koble til et Wifi-nettverk"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Koble til et wifi-nettverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, feilsøking, utvikler"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snarvei til feilrapport"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knapp for generering av feilrapport i batterimenyen"</string>
