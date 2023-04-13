@@ -842,7 +842,7 @@ public class BubbleStackView extends FrameLayout
     private DismissView mDismissView;
 
     private ViewGroup mManageMenu;
-    private TextView mManageDontBubbleText;
+    private ViewGroup mManageDontBubbleView;
     private ViewGroup mManageSettingsView;
     private ImageView mManageSettingsIcon;
     private TextView mManageSettingsText;
@@ -1217,8 +1217,8 @@ public class BubbleStackView extends FrameLayout
                     mUnbubbleConversationCallback.accept(mBubbleData.getSelectedBubble().getKey());
                 });
 
-        mManageDontBubbleText = mManageMenu
-                .findViewById(R.id.bubble_manage_menu_dont_bubble_text);
+        mManageDontBubbleView = mManageMenu
+                .findViewById(R.id.bubble_manage_menu_dont_bubble_container);
 
         mManageSettingsView = mManageMenu.findViewById(R.id.bubble_manage_menu_settings_container);
         mManageSettingsView.setOnClickListener(
@@ -2890,14 +2890,16 @@ public class BubbleStackView extends FrameLayout
             final Bubble bubble = mBubbleData.getBubbleInStackWithKey(mExpandedBubble.getKey());
             if (bubble != null && !bubble.isAppBubble()) {
                 // Setup options for non app bubbles
-                mManageDontBubbleText.setText(R.string.bubbles_dont_bubble_conversation);
+                mManageDontBubbleView.setVisibility(VISIBLE);
                 mManageSettingsIcon.setImageBitmap(bubble.getRawAppBadge());
                 mManageSettingsText.setText(getResources().getString(
                         R.string.bubbles_app_settings, bubble.getAppName()));
                 mManageSettingsView.setVisibility(VISIBLE);
             } else {
                 // Setup options for app bubbles
-                mManageDontBubbleText.setText(R.string.bubbles_dont_bubble);
+                // App bubbles have no conversations
+                // so we don't show the option to not bubble conversation
+                mManageDontBubbleView.setVisibility(GONE);
                 // App bubbles are not notification based
                 // so we don't show the option to go to notification settings
                 mManageSettingsView.setVisibility(GONE);
@@ -2963,6 +2965,15 @@ public class BubbleStackView extends FrameLayout
                     })
                     .start();
         }
+    }
+
+    /**
+     * Checks whether manage menu don't bubble conversation action is available and visible
+     * Used for testing
+     */
+    @VisibleForTesting
+    public boolean isManageMenuDontBubbleVisible() {
+        return mManageDontBubbleView != null && mManageDontBubbleView.getVisibility() == VISIBLE;
     }
 
     /**
