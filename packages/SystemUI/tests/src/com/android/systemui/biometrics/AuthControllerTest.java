@@ -75,7 +75,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -83,6 +82,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -117,7 +117,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class AuthControllerTest extends SysuiTestCase {
@@ -265,7 +265,7 @@ public class AuthControllerTest extends SysuiTestCase {
         mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(faceProps);
 
         // Ensures that the operations posted on the handler get executed.
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
     }
 
     // Callback tests
@@ -285,14 +285,14 @@ public class AuthControllerTest extends SysuiTestCase {
                 mFpAuthenticatorsRegisteredCaptor.capture());
         verify(mFaceManager).addAuthenticatorsRegisteredCallback(
                 mFaceAuthenticatorsRegisteredCaptor.capture());
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
         verify(mFingerprintManager, never()).registerBiometricStateListener(any());
         verify(mFaceManager, never()).registerBiometricStateListener(any());
 
         mFpAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
         mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
         verify(mFingerprintManager).registerBiometricStateListener(any());
         verify(mFaceManager).registerBiometricStateListener(any());
@@ -316,7 +316,7 @@ public class AuthControllerTest extends SysuiTestCase {
         // Emulates a device with no authenticators (empty list).
         mFpAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
         mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(List.of());
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
         verify(mFingerprintManager).registerBiometricStateListener(
                 mBiometricStateCaptor.capture());
@@ -328,7 +328,7 @@ public class AuthControllerTest extends SysuiTestCase {
             listener.onEnrollmentsChanged(0 /* userId */,
                     0xbeef /* sensorId */, true /* hasEnrollments */);
         }
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
         // Nothing should crash.
     }
@@ -692,7 +692,7 @@ public class AuthControllerTest extends SysuiTestCase {
         switchTask("other_package");
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
 
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
         assertNull(mAuthController.mCurrentDialog);
         assertNull(mAuthController.mReceiver);
@@ -709,7 +709,7 @@ public class AuthControllerTest extends SysuiTestCase {
         switchTask("other_package");
 
         mAuthController.mTaskStackListener.onTaskStackChanged();
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
         assertNull(mAuthController.mCurrentDialog);
         assertNull(mAuthController.mReceiver);
@@ -742,7 +742,7 @@ public class AuthControllerTest extends SysuiTestCase {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
         Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mAuthController.mBroadcastReceiver.onReceive(mContext, intent);
-        mTestableLooper.processAllMessages();
+        waitForIdleSync();
 
         assertNull(mAuthController.mCurrentDialog);
         assertNull(mAuthController.mReceiver);
@@ -1020,5 +1020,10 @@ public class AuthControllerTest extends SysuiTestCase {
             mBuildCount++;
             return dialog;
         }
+    }
+
+    @Override
+    protected void waitForIdleSync() {
+        mTestableLooper.processAllMessages();
     }
 }

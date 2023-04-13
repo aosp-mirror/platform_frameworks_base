@@ -17,7 +17,7 @@ package com.android.systemui.biometrics
 
 import android.hardware.biometrics.BiometricAuthenticator
 import android.os.Bundle
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
@@ -37,7 +37,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class AuthBiometricFingerprintViewTest : SysuiTestCase() {
