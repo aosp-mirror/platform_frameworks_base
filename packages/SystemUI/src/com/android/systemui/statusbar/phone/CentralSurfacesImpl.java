@@ -2614,6 +2614,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 }
                 mRemoteInputManager.closeRemoteInputs();
                 if (mLockscreenUserManager.isCurrentProfile(getSendingUserId())) {
+                    mShadeLogger.d("ACTION_CLOSE_SYSTEM_DIALOGS intent: closing shade");
                     int flags = CommandQueue.FLAG_EXCLUDE_NONE;
                     if (reason != null) {
                         if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
@@ -2628,6 +2629,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         }
                     }
                     mShadeController.animateCollapseShade(flags);
+                } else {
+                    mShadeLogger.d("ACTION_CLOSE_SYSTEM_DIALOGS intent: non-matching user ID");
                 }
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 if (mNotificationShadeWindowController != null) {
