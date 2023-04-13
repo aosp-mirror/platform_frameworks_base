@@ -72,6 +72,7 @@ import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInt
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
@@ -129,6 +130,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private UdfpsOverlayInteractor mUdfpsOverlayInteractor;
+    @Mock private ActivityStarter mActivityStarter;
     @Mock private BouncerView mBouncerView;
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
     @Mock private OnBackAnimationCallback mBouncerViewDelegateBackCallback;
@@ -192,7 +194,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mPrimaryBouncerInteractor,
                         mBouncerView,
                         mAlternateBouncerInteractor,
-                        mUdfpsOverlayInteractor) {
+                        mUdfpsOverlayInteractor,
+                        mActivityStarter) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -680,7 +683,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mPrimaryBouncerInteractor,
                         mBouncerView,
                         mAlternateBouncerInteractor,
-                        mUdfpsOverlayInteractor) {
+                        mUdfpsOverlayInteractor,
+                        mActivityStarter) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

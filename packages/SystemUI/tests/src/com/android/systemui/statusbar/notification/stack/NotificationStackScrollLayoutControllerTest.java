@@ -48,6 +48,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -143,6 +144,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;
     @Mock private NotificationIconAreaController mIconAreaController;
+    @Mock private ActivityStarter mActivityStarter;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -463,7 +465,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 mNotificationTargetsHelper,
                 mSecureSettings,
-                mock(NotificationDismissibilityProvider.class)
+                mock(NotificationDismissibilityProvider.class),
+                mActivityStarter
         );
     }
 

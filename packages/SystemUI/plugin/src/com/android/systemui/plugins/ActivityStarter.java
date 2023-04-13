@@ -102,6 +102,23 @@ public interface ActivityStarter {
     void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
             boolean afterKeyguardGone, @Nullable String customMessage);
 
+    /** Starts an activity and dismisses keyguard. */
+    void startActivityDismissingKeyguard(Intent intent,
+            boolean onlyProvisioned,
+            boolean dismissShade,
+            boolean disallowEnterPictureInPictureWhileLaunching,
+            Callback callback,
+            int flags,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            UserHandle userHandle);
+
+    /** Execute a runnable after dismissing keyguard. */
+    void executeRunnableDismissingKeyguard(Runnable runnable,
+            Runnable cancelAction,
+            boolean dismissShade,
+            boolean afterKeyguardGone,
+            boolean deferred);
+
     interface Callback {
         void onActivityStarted(int resultCode);
     }

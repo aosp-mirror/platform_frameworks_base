@@ -4089,7 +4089,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         if (!mFalsingManager.isUnlockingDisabled() && qsFullyExpanded
                 && mFalsingCollector.shouldEnforceBouncer()) {
-            mCentralSurfaces.executeRunnableDismissingKeyguard(null, null,
+            mActivityStarter.executeRunnableDismissingKeyguard(null, null,
                     false, true, false);
         }
         if (DEBUG_DRAWABLE) {
