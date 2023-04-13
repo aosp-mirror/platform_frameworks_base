@@ -25,6 +25,7 @@ import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.SystemActions
 import com.android.systemui.accessibility.WindowMagnification
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
@@ -76,6 +77,14 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(AuthController::class)
     abstract fun bindAuthController(service: AuthController): CoreStartable
+
+    /** Inject into BiometricNotificationService */
+    @Binds
+    @IntoMap
+    @ClassKey(BiometricNotificationService::class)
+    abstract fun bindBiometricNotificationService(
+        service: BiometricNotificationService
+    ): CoreStartable
 
     /** Inject into ChooserCoreStartable. */
     @Binds
