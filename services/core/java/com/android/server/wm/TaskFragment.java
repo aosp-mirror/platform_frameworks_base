@@ -2923,9 +2923,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
 
-        final Rect dimBounds = mDimmer.resetDimStates();
+        mDimmer.resetDimStates();
         super.prepareSurfaces();
 
+        final Rect dimBounds = mDimmer.getDimBounds();
         if (dimBounds != null) {
             // Bounds need to be relative, as the dim layer is a child.
             dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
