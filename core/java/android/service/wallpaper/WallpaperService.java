@@ -112,6 +112,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -431,6 +432,7 @@ public abstract class WallpaperService extends Service {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);
+                mIWallpaperEngine.mPendingResizeCount.incrementAndGet();
                 mCaller.sendMessage(msg);
             }
 
@@ -510,6 +512,7 @@ public abstract class WallpaperService extends Service {
         public Engine(Supplier<Long> clockFunction, Handler handler) {
             mClockFunction = clockFunction;
             mHandler = handler;
+            mMergedConfiguration.setOverrideConfiguration(getResources().getConfiguration());
         }
 
         /**
@@ -1051,6 +1054,10 @@ public abstract class WallpaperService extends Service {
             out.print(prefix); out.print("mZoom="); out.println(mZoom);
             out.print(prefix); out.print("mPreviewSurfacePosition=");
                     out.println(mPreviewSurfacePosition);
+            final int pendingCount = mIWallpaperEngine.mPendingResizeCount.get();
+            if (pendingCount != 0) {
+                out.print(prefix); out.print("mPendingResizeCount="); out.println(pendingCount);
+            }
             synchronized (mLock) {
                 out.print(prefix); out.print("mPendingXOffset="); out.print(mPendingXOffset);
                         out.print(" mPendingXOffset="); out.println(mPendingXOffset);
@@ -1113,10 +1120,6 @@ public abstract class WallpaperService extends Service {
             }
         }
 
-        private void updateConfiguration(MergedConfiguration mergedConfiguration) {
-            mMergedConfiguration.setTo(mergedConfiguration);
-        }
-
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
             if (mDestroyed) {
                 Log.w(TAG, "Ignoring updateSurface due to destroyed");
@@ -1165,7 +1168,7 @@ public abstract class WallpaperService extends Service {
                             | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
                     final Configuration config = mMergedConfiguration.getMergedConfiguration();
-                    final Rect maxBounds = config.windowConfiguration.getMaxBounds();
+                    final Rect maxBounds = new Rect(config.windowConfiguration.getMaxBounds());
                     if (myWidth == ViewGroup.LayoutParams.MATCH_PARENT
                             && myHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
                         mLayout.width = myWidth;
@@ -1221,6 +1224,17 @@ public abstract class WallpaperService extends Service {
                     final int relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, 0, 0, mWinFrames, mMergedConfiguration,
                             mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
+                    final Rect outMaxBounds = mMergedConfiguration.getMergedConfiguration()
+                            .windowConfiguration.getMaxBounds();
+                    if (!outMaxBounds.equals(maxBounds)) {
+                        Log.i(TAG, "Retry updateSurface because bounds changed from relayout: "
+                                + maxBounds + " -> " + outMaxBounds);
+                        mSurfaceHolder.mSurfaceLock.unlock();
+                        mDrawingAllowed = false;
+                        mCaller.sendMessage(mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
+                                redrawNeeded ? 1 : 0));
+                        return;
+                    }
 
                     final int transformHint = SurfaceControl.rotationToBufferTransform(
                             (mDisplay.getInstallOrientation() + mDisplay.getRotation()) % 4);
@@ -2324,6 +2338,8 @@ public abstract class WallpaperService extends Service {
         final IBinder mWindowToken;
         final int mWindowType;
         final boolean mIsPreview;
+        final AtomicInteger mPendingResizeCount = new AtomicInteger();
+        boolean mReportDraw;
         boolean mShownReported;
         int mReqWidth;
         int mReqHeight;
@@ -2579,11 +2595,7 @@ public abstract class WallpaperService extends Service {
                     mEngine.doCommand(cmd);
                 } break;
                 case MSG_WINDOW_RESIZED: {
-                    final boolean reportDraw = message.arg1 != 0;
-                    mEngine.updateConfiguration(((MergedConfiguration) message.obj));
-                    mEngine.updateSurface(true, false, reportDraw);
-                    mEngine.doOffsetsChanged(true);
-                    mEngine.scaleAndCropScreenshot();
+                    handleResized((MergedConfiguration) message.obj, message.arg1 != 0);
                 } break;
                 case MSG_WINDOW_MOVED: {
                     // Do nothing. What does it mean for a Wallpaper to move?
@@ -2630,6 +2642,40 @@ public abstract class WallpaperService extends Service {
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);
             }
+        }
+
+        /**
+         * In general this performs relayout for IWindow#resized. If there are several pending
+         * (in the message queue) MSG_WINDOW_RESIZED from server side, only the last one will be
+         * handled (ignore intermediate states). Note that this procedure cannot be skipped if the
+         * configuration is not changed because this is also used to dispatch insets changes.
+         */
+        private void handleResized(MergedConfiguration config, boolean reportDraw) {
+            // The config can be null when retrying for a changed config from relayout, otherwise
+            // it is from IWindow#resized which always sends non-null config.
+            final int pendingCount = config != null ? mPendingResizeCount.decrementAndGet() : -1;
+            if (reportDraw) {
+                mReportDraw = true;
+            }
+            if (pendingCount > 0) {
+                if (DEBUG) {
+                    Log.d(TAG, "Skip outdated resize, bounds="
+                            + config.getMergedConfiguration().windowConfiguration.getMaxBounds()
+                            + " pendingCount=" + pendingCount);
+                }
+                return;
+            }
+            if (config != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Update config from resized, bounds="
+                            + config.getMergedConfiguration().windowConfiguration.getMaxBounds());
+                }
+                mEngine.mMergedConfiguration.setTo(config);
+            }
+            mEngine.updateSurface(true /* forceRelayout */, false /* forceReport */, mReportDraw);
+            mReportDraw = false;
+            mEngine.doOffsetsChanged(true);
+            mEngine.scaleAndCropScreenshot();
         }
     }
 
