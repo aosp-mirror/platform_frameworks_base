@@ -637,6 +637,7 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onDetachedFromWindow() {
+        mPanelInteractionDetector.disable();
         OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
         if (dispatcher != null) {
             findOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
@@ -674,7 +675,6 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void dismissWithoutCallback(boolean animate) {
-        mPanelInteractionDetector.disable();
         if (animate) {
             animateAway(false /* sendReason */, 0 /* reason */);
         } else {
@@ -685,7 +685,6 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void dismissFromSystemServer() {
-        mPanelInteractionDetector.disable();
         animateAway(false /* sendReason */, 0 /* reason */);
     }
 
