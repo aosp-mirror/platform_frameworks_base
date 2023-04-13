@@ -39,6 +39,11 @@ open class DumpManager @Inject constructor() {
     private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = ArrayMap()
     private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = ArrayMap()
 
+    /** See [registerCriticalDumpable]. */
+    fun registerCriticalDumpable(module: Dumpable) {
+        registerCriticalDumpable(module::class.java.simpleName, module)
+    }
+
     /**
      * Registers a dumpable to be called during the CRITICAL section of the bug report.
      *
