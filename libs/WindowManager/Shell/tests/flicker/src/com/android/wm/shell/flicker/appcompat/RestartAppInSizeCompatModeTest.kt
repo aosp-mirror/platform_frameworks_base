@@ -53,22 +53,29 @@ class RestartAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flick
         get() = {
             super.transition(this)
             transitions { letterboxApp.clickRestart(wmHelper) }
-            teardown { letterboxApp.exit(wmHelper) }
         }
 
     @Postsubmit @Test fun appVisibleAtStartAndEnd() = assertLetterboxAppVisibleAtStartAndEnd()
 
     @Postsubmit
     @Test
-    fun appLayerVisibilityChanges() {
-        flicker.assertLayers {
-            this.isVisible(letterboxApp)
+    fun appWindowVisibilityChanges() {
+        flicker.assertWm {
+            this.isAppWindowVisible(letterboxApp)
                 .then()
-                .isInvisible(letterboxApp)
+                .isAppWindowInvisible(letterboxApp) // animatingExit true
                 .then()
-                .isVisible(letterboxApp)
+                .isAppWindowVisible(letterboxApp) // Activity finish relaunching
         }
     }
+
+    @Postsubmit
+    @Test
+    fun appLayerKeepVisible() = assertLetterboxAppLayerKeepVisible()
+
+    @Postsubmit
+    @Test
+    fun appIsLetterboxedAtStart() = assertAppLetterboxedAtStart()
 
     @Postsubmit
     @Test
