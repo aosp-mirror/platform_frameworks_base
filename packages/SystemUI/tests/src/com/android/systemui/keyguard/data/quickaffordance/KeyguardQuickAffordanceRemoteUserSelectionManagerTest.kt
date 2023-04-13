@@ -112,7 +112,7 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `selections - primary user process`() =
+    fun selections_primaryUserProcess() =
         testScope.runTest {
             val values = mutableListOf<Map<String, List<String>>>()
             val job = launch { underTest.selections.toList(values) }
@@ -163,7 +163,7 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `selections - secondary user process - always empty`() =
+    fun selections_secondaryUserProcess_alwaysEmpty() =
         testScope.runTest {
             whenever(userHandle.isSystem).thenReturn(false)
             val values = mutableListOf<Map<String, List<String>>>()

@@ -73,7 +73,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `lockScreenState - visible when launchable`() =
+    fun lockScreenState_visibleWhenLaunchable() =
         testScope.runTest {
             setLaunchable()
 
@@ -84,7 +84,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `lockScreenState - hidden when app not installed on device`() =
+    fun lockScreenState_hiddenWhenAppNotInstalledOnDevice() =
         testScope.runTest {
             setLaunchable(isVideoCameraAppInstalled = false)
 
@@ -95,7 +95,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `lockScreenState - hidden when camera disabled by admin`() =
+    fun lockScreenState_hiddenWhenCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isCameraDisabledByAdmin = true)
 
@@ -106,7 +106,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - default when launchable`() =
+    fun getPickerScreenState_defaultWhenLaunchable() =
         testScope.runTest {
             setLaunchable()
 
@@ -115,7 +115,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when app not installed on device`() =
+    fun getPickerScreenState_unavailableWhenAppNotInstalledOnDevice() =
         testScope.runTest {
             setLaunchable(isVideoCameraAppInstalled = false)
 
@@ -124,7 +124,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when camera disabled by admin`() =
+    fun getPickerScreenState_unavailableWhenCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isCameraDisabledByAdmin = true)
 

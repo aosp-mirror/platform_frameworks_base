@@ -47,7 +47,7 @@ class PowerInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun `isInteractive - screen turns off`() =
+    fun isInteractive_screenTurnsOff() =
         runBlocking(IMMEDIATE) {
             repository.setInteractive(true)
             var value: Boolean? = null
@@ -60,7 +60,7 @@ class PowerInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInteractive - becomes interactive`() =
+    fun isInteractive_becomesInteractive() =
         runBlocking(IMMEDIATE) {
             repository.setInteractive(false)
             var value: Boolean? = null

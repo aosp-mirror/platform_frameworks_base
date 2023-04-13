@@ -66,7 +66,7 @@ class PowerRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun `isInteractive - registers for broadcasts`() =
+    fun isInteractive_registersForBroadcasts() =
         runBlocking(IMMEDIATE) {
             val job = underTest.isInteractive.onEach {}.launchIn(this)
 
@@ -78,7 +78,7 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInteractive - unregisters from broadcasts`() =
+    fun isInteractive_unregistersFromBroadcasts() =
         runBlocking(IMMEDIATE) {
             val job = underTest.isInteractive.onEach {}.launchIn(this)
             verifyRegistered()
@@ -89,7 +89,7 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInteractive - emits initial true value if screen was on`() =
+    fun isInteractive_emitsInitialTrueValueIfScreenWasOn() =
         runBlocking(IMMEDIATE) {
             isInteractive = true
             var value: Boolean? = null
@@ -102,7 +102,7 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInteractive - emits initial false value if screen was off`() =
+    fun isInteractive_emitsInitialFalseValueIfScreenWasOff() =
         runBlocking(IMMEDIATE) {
             isInteractive = false
             var value: Boolean? = null
@@ -115,7 +115,7 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInteractive - emits true when the screen turns on`() =
+    fun isInteractive_emitsTrueWhenTheScreenTurnsOn() =
         runBlocking(IMMEDIATE) {
             var value: Boolean? = null
             val job = underTest.isInteractive.onEach { value = it }.launchIn(this)
@@ -129,7 +129,7 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInteractive - emits false when the screen turns off`() =
+    fun isInteractive_emitsFalseWhenTheScreenTurnsOff() =
         runBlocking(IMMEDIATE) {
             var value: Boolean? = null
             val job = underTest.isInteractive.onEach { value = it }.launchIn(this)
@@ -143,7 +143,7 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInteractive - emits correctly over time`() =
+    fun isInteractive_emitsCorrectlyOverTime() =
         runBlocking(IMMEDIATE) {
             val values = mutableListOf<Boolean>()
             val job = underTest.isInteractive.onEach(values::add).launchIn(this)

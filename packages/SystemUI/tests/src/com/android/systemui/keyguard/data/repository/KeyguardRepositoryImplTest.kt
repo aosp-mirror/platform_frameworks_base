@@ -281,7 +281,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isDozing - starts with correct initial value for isDozing`() =
+    fun isDozing_startsWithCorrectInitialValueForIsDozing() =
         testScope.runTest {
             var latest: Boolean? = null
 

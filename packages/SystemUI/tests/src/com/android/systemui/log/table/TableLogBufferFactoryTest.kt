@@ -31,7 +31,7 @@ class TableLogBufferFactoryTest : SysuiTestCase() {
     private val underTest = TableLogBufferFactory(dumpManager, systemClock)
 
     @Test
-    fun `create - always creates new instance`() {
+    fun create_alwaysCreatesNewInstance() {
         val b1 = underTest.create(NAME_1, SIZE)
         val b1_copy = underTest.create(NAME_1, SIZE)
         val b2 = underTest.create(NAME_2, SIZE)
@@ -43,7 +43,7 @@ class TableLogBufferFactoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getOrCreate - reuses instance`() {
+    fun getOrCreate_reusesInstance() {
         val b1 = underTest.getOrCreate(NAME_1, SIZE)
         val b1_copy = underTest.getOrCreate(NAME_1, SIZE)
         val b2 = underTest.getOrCreate(NAME_2, SIZE)

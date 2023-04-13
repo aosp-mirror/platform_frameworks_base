@@ -55,7 +55,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - sets up registration and delivers initial model`() = runBlockingTest {
+    fun affordance_setsUpRegistrationAndDeliversInitialModel() = runBlockingTest {
         whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
@@ -75,7 +75,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - scanner activity changed - delivers model with updated intent`() =
+    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() =
         runBlockingTest {
             whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
             var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
@@ -93,7 +93,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `affordance - scanner preference changed - delivers visible model`() = runBlockingTest {
+    fun affordance_scannerPreferenceChanged_deliversVisibleModel() = runBlockingTest {
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
         val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
         val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
@@ -109,7 +109,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - scanner preference changed - delivers none`() = runBlockingTest {
+    fun affordance_scannerPreferenceChanged_deliversNone() = runBlockingTest {
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
         val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
         val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
@@ -136,7 +136,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - enabled if configured on device - can open camera`() = runTest {
+    fun getPickerScreenState_enabledIfConfiguredOnDevice_canOpenCamera() = runTest {
         whenever(controller.isAvailableOnDevice).thenReturn(true)
         whenever(controller.isAbleToOpenCameraApp).thenReturn(true)
 
@@ -145,7 +145,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - disabled if configured on device - cannot open camera`() = runTest {
+    fun getPickerScreenState_disabledIfConfiguredOnDevice_cannotOpenCamera() = runTest {
         whenever(controller.isAvailableOnDevice).thenReturn(true)
         whenever(controller.isAbleToOpenCameraApp).thenReturn(false)
 
@@ -154,7 +154,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - unavailable if not configured on device`() = runTest {
+    fun getPickerScreenState_unavailableIfNotConfiguredOnDevice() = runTest {
         whenever(controller.isAvailableOnDevice).thenReturn(false)
         whenever(controller.isAbleToOpenCameraApp).thenReturn(true)
 

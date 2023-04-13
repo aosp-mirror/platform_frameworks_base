@@ -73,7 +73,7 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
     }
 
     @Test
-    fun `calls callback and updates profiles when an intent received`() {
+    fun callsCallbackAndUpdatesProfilesWhenAnIntentReceived() {
         tracker.initialize(0)
         tracker.addCallback(callback, executor)
         val profileID = tracker.userId + 10
