@@ -856,7 +856,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ENABLE_DEVICE_POLICY_ENGINE_FOR_FINANCE_FLAG =
             "enable_device_policy_engine";
-    private static final boolean DEFAULT_ENABLE_DEVICE_POLICY_ENGINE_FOR_FINANCE_FLAG = false;
+    private static final boolean DEFAULT_ENABLE_DEVICE_POLICY_ENGINE_FOR_FINANCE_FLAG = true;
 
     // TODO(b/265683382) remove the flag after rollout.
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";

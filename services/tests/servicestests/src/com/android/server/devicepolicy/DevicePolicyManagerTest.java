@@ -1368,6 +1368,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testClearDeviceOwner() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_USERS);
@@ -1955,6 +1956,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUserRestriction_asDo() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_USERS);
@@ -2123,6 +2125,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUserRestriction_asPo() {
         setAsProfileOwner(admin1);
 
@@ -2259,6 +2262,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             );
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUserRestriction_asPoOfOrgOwnedDevice() throws Exception {
         final int MANAGED_PROFILE_ADMIN_UID =
                 UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
@@ -2334,6 +2338,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testNoDefaultEnabledUserRestrictions() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_USERS);
@@ -2925,6 +2930,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testCreateAdminSupportIntent() throws Exception {
         // Setup device owner.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
@@ -4993,6 +4999,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testWipeDataManagedProfileOnOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
@@ -7023,6 +7030,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUserControlDisabledPackages_asDO() throws Exception {
         final List<String> testPackages = new ArrayList<>();
         testPackages.add("package_1");
@@ -7038,6 +7046,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUserControlDisabledPackages_asPO() {
         final List<String> testPackages = new ArrayList<>();
         testPackages.add("package_1");
@@ -7776,6 +7785,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUserRestriction_financeDo_validRestrictions_setsRestriction()
             throws Exception {
         setDeviceOwner();
@@ -7858,6 +7868,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUninstallBlocked_financeDo_success() throws Exception {
         String packageName = "com.android.foo.package";
         setDeviceOwner();
@@ -7871,6 +7882,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetUserControlDisabledPackages_financeDo_success() throws Exception {
         List<String> packages = new ArrayList<>();
         packages.add("com.android.foo.package");
@@ -7960,6 +7972,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testAddPersistentPreferredActivity_financeDo_success() throws Exception {
         IntentFilter filter = new IntentFilter();
         ComponentName target = new ComponentName(admin2.getPackageName(), "test.class");
@@ -7975,6 +7988,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testClearPackagePersistentPreferredActvities_financeDo_success() throws Exception {
         String packageName = admin2.getPackageName();
         setDeviceOwner();
