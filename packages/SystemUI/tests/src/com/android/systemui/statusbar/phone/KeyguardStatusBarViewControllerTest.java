@@ -54,6 +54,7 @@ import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -120,6 +121,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock private CommandQueue mCommandQueue;
     @Mock private KeyguardLogger mLogger;
 
+    @Mock private NotificationMediaManager mNotificationMediaManager;
+
     private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
@@ -167,7 +170,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mSecureSettings,
                 mCommandQueue,
                 mFakeExecutor,
-                mLogger
+                mLogger,
+                mNotificationMediaManager
         );
     }
 
