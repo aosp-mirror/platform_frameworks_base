@@ -6190,7 +6190,7 @@
 
     <!-- Flag indicating whether the show Stylus pointer icon.
      If set, a pointer icon will be shown over the location of a stylus pointer.-->
-    <bool name="config_enableStylusPointerIcon">false</bool>
+    <bool name="config_enableStylusPointerIcon">true</bool>
 
     <!-- Determines whether SafetyCenter feature is enabled. -->
     <bool name="config_enableSafetyCenter">true</bool>

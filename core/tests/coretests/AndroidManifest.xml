@@ -1715,6 +1715,17 @@
             <meta-data android:name="android.view.im"
                        android:resource="@xml/ime_meta_handwriting"/>
         </service>
+
+        <activity android:name="android.widget.PointerIconTestActivity"
+                  android:label="PointerIconTestActivity"
+                  android:screenOrientation="portrait"
+                  android:exported="true"
+                  android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
