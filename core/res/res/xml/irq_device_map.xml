@@ -18,14 +18,16 @@
 -->
 <irq-device-map>
   <!--  This file maps devices (chips) that can send interrupts to the main processor (and bring it
-        out of sleep) to logical subsystems in userspace code. Since each Android device has its own
-        uniquely designed chipset, this mapping is expected to be empty by default and should be
-        overridden by device-specific configs.
+        out of sleep) to logical subsystems in userspace code. Since each Android device can have
+        a differently designed chipset, this mapping is expected to be empty by default and should
+        be overridden by device-specific configs.
         This mapping helps the system to meaningfully attribute CPU wakeups to logical work that
-        happened on the device. The devices are referred to by their names as defined in the kernel.
-        Currently, defined subsystems are:
-        - Alarm: Use this to denote wakeup alarms requested by apps via the AlarmManager API.
-        - Wifi: Use this to denote network traffic that uses the wifi transport.
+        happened on the device and the app activity that caused it. The devices are referred to by
+        their names as defined in the kernel. Currently, defined subsystems are:
+            - Alarm: Use this to denote wakeup alarms requested by apps via the AlarmManager API.
+            - Wifi: Use this to denote network traffic that uses the wifi transport.
+            - Sound_trigger: Use this to denote sound phrase detection, like the ones supported by
+        SoundTriggerManager.
 
         The overlay should use tags <device> and <subsystem> to describe this mapping in the
         following way:
