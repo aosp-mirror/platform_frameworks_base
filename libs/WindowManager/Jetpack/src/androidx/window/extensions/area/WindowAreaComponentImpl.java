@@ -129,11 +129,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
      * {@link WindowAreaComponent#STATUS_AVAILABLE} or
      * {@link WindowAreaComponent#STATUS_UNAVAILABLE} if the feature is supported or not in that
      * state respectively. When the rear display feature is triggered, the status is updated to be
-     * {@link WindowAreaComponent#STATUS_UNAVAILABLE}.
+     * {@link WindowAreaComponent#STATUS_ACTIVE}.
      * TODO(b/240727590): Prefix with AREA_
-     *
-     * TODO(b/239833099): Add a STATUS_ACTIVE option to let apps know if a feature is currently
-     *  enabled.
      *
      * @param consumer {@link Consumer} interested in receiving updates to the status of
      * rear display mode.
@@ -407,18 +404,21 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         }
     }
 
-
     @GuardedBy("mLock")
     private int getCurrentRearDisplayModeStatus() {
         if (mRearDisplayState == INVALID_DEVICE_STATE) {
             return WindowAreaComponent.STATUS_UNSUPPORTED;
         }
 
-        if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
-                || !ArrayUtils.contains(mCurrentSupportedDeviceStates, mRearDisplayState)
-                || isRearDisplayActive()) {
+        if (!ArrayUtils.contains(mCurrentSupportedDeviceStates, mRearDisplayState)) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }
+
+        if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
+                || isRearDisplayActive()) {
+            return WindowAreaComponent.STATUS_ACTIVE;
+        }
+
         return WindowAreaComponent.STATUS_AVAILABLE;
     }
 
