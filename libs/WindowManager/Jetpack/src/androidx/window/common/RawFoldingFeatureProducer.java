@@ -31,7 +31,6 @@ import androidx.window.util.BaseDataProducer;
 import com.android.internal.R;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -86,11 +85,11 @@ public final class RawFoldingFeatureProducer extends BaseDataProducer<String> {
     }
 
     @Override
-    protected void onListenersChanged(Set<Consumer<String>> callbacks) {
-        if (callbacks.isEmpty()) {
-            unregisterObserversIfNeeded();
-        } else {
+    protected void onListenersChanged() {
+        if (hasListeners()) {
             registerObserversIfNeeded();
+        } else {
+            unregisterObserversIfNeeded();
         }
     }
 
