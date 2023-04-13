@@ -29,6 +29,8 @@ import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
@@ -64,6 +66,11 @@ interface BiometricsModule {
     @Binds
     @SysUISingleton
     fun bindsLogContextInteractor(impl: LogContextInteractorImpl): LogContextInteractor
+
+    @Binds
+    @SysUISingleton
+    fun providesSideFpsOverlayInteractor(impl: SideFpsOverlayInteractorImpl):
+            SideFpsOverlayInteractor
 
     companion object {
         /** Background [Executor] for HAL related operations. */
