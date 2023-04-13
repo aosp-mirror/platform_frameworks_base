@@ -150,7 +150,7 @@ public class AppOpMigrationHelperImpl implements AppOpMigrationHelper {
         for (int modeIndex = 0; modeIndex < modesSize; modeIndex++) {
             int opCode = appOpCodeModes.keyAt(modeIndex);
             int opMode = appOpCodeModes.valueAt(modeIndex);
-            appOpNameModes.put(AppOpsManager.opToName(opCode), opMode);
+            appOpNameModes.put(AppOpsManager.opToPublicName(opCode), opMode);
         }
         return appOpNameModes;
     }
