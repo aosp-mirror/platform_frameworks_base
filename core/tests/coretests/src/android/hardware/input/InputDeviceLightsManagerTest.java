@@ -28,9 +28,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
@@ -39,6 +42,8 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.view.InputDevice;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,12 +81,15 @@ public class InputDeviceLightsManagerTest {
 
     @Before
     public void setUp() throws Exception {
+        final Context context = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
 
         when(mIInputManagerMock.getInputDevice(eq(DEVICE_ID))).thenReturn(
                 createInputDevice(DEVICE_ID));
 
-        mInputManager = InputManager.resetInstance(mIInputManagerMock);
+        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        mInputManager = new InputManager(context);
+        when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(mInputManager);
 
         ArrayMap<Integer, LightState> lightStatesById = new ArrayMap<>();
         doAnswer(invocation -> {
@@ -106,7 +114,7 @@ public class InputDeviceLightsManagerTest {
 
     @After
     public void tearDown() {
-        InputManager.clearInstance();
+        InputManagerGlobal.clearInstance();
     }
 
     private InputDevice createInputDevice(int id) {
