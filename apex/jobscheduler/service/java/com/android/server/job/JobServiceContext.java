@@ -1464,7 +1464,8 @@ public final class JobServiceContext implements ServiceConnection {
                     JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT,
                     String.valueOf(mRunningJob.getJobId()));
         }
-        mNotificationCoordinator.removeNotificationAssociation(this, reschedulingStopReason);
+        mNotificationCoordinator.removeNotificationAssociation(this,
+                reschedulingStopReason, completedJob);
         if (mWakeLock != null) {
             mWakeLock.release();
         }
