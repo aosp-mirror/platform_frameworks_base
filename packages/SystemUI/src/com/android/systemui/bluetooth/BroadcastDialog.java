@@ -155,8 +155,7 @@ public class BroadcastDialog extends SystemUIDialog {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void start() {
         registerBroadcastCallBack(mExecutor, mBroadcastCallback);
     }
 
@@ -200,8 +199,7 @@ public class BroadcastDialog extends SystemUIDialog {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void stop() {
         unregisterBroadcastCallBack(mBroadcastCallback);
     }
 
