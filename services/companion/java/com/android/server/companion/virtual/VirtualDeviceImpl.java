@@ -49,6 +49,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -500,13 +501,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualDpad(VirtualDpadConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualDpad_enforcePermission();
         Objects.requireNonNull(config);
-        synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
-                throw new SecurityException(
-                        "Cannot create a virtual dpad for a display not associated with "
-                                + "this virtual device");
-            }
-        }
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createDpad(config.getInputDeviceName(), config.getVendorId(),
@@ -521,12 +516,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualKeyboard(VirtualKeyboardConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualKeyboard_enforcePermission();
         Objects.requireNonNull(config);
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
         synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
-                throw new SecurityException(
-                        "Cannot create a virtual keyboard for a display not associated with "
-                                + "this virtual device");
-            }
             mLocaleList = LocaleList.forLanguageTags(config.getLanguageTag());
         }
         final long ident = Binder.clearCallingIdentity();
@@ -544,13 +535,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualMouse(VirtualMouseConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualMouse_enforcePermission();
         Objects.requireNonNull(config);
-        synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
-                throw new SecurityException(
-                        "Cannot create a virtual mouse for a display not associated with this "
-                                + "virtual device");
-            }
-        }
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createMouse(config.getInputDeviceName(), config.getVendorId(),
@@ -566,13 +551,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             @NonNull IBinder deviceToken) {
         super.createVirtualTouchscreen_enforcePermission();
         Objects.requireNonNull(config);
-        synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
-                throw new SecurityException(
-                        "Cannot create a virtual touchscreen for a display not associated with "
-                                + "this virtual device");
-            }
-        }
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
         int screenHeight = config.getHeight();
         int screenWidth = config.getWidth();
         if (screenHeight <= 0 || screenWidth <= 0) {
@@ -597,13 +576,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             @NonNull IBinder deviceToken) {
         super.createVirtualNavigationTouchpad_enforcePermission();
         Objects.requireNonNull(config);
-        synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
-                throw new SecurityException(
-                        "Cannot create a virtual navigation touchpad for a display not associated "
-                                + "with this virtual device");
-            }
-        }
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
         int touchpadHeight = config.getHeight();
         int touchpadWidth = config.getWidth();
         if (touchpadHeight <= 0 || touchpadWidth <= 0) {
@@ -984,7 +957,21 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
 
         releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
+    }
 
+    private void checkVirtualInputDeviceDisplayIdAssociation(int displayId) {
+        if (mContext.checkCallingPermission(android.Manifest.permission.INJECT_EVENTS)
+                    == PackageManager.PERMISSION_GRANTED) {
+            // The INJECT_EVENTS permission allows for injecting input to any window / display.
+            return;
+        }
+        synchronized (mVirtualDeviceLock) {
+            if (!mVirtualDisplays.contains(displayId)) {
+                throw new SecurityException(
+                        "Cannot create a virtual input device for display " + displayId
+                                + " which not associated with this virtual device");
+            }
+        }
     }
 
     /**
