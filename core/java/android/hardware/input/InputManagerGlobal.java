@@ -102,17 +102,26 @@ public final class InputManagerGlobal {
 
     private static InputManagerGlobal sInstance;
 
+    private final String mVelocityTrackerStrategy;
+
     private final IInputManager mIm;
 
     public InputManagerGlobal(IInputManager im) {
         mIm = im;
+        String strategy = null;
+        try {
+            strategy = mIm.getVelocityTrackerStrategy();
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not get VelocityTracker strategy: " + ex);
+        }
+        mVelocityTrackerStrategy = strategy;
     }
 
     /**
      * Gets an instance of the input manager global singleton.
      *
-     * @return The display manager instance, may be null early in system startup
-     * before the display manager has been fully initialized.
+     * @return The input manager instance, may be null early in system startup
+     * before the input manager has been fully initialized.
      */
     public static InputManagerGlobal getInstance() {
         synchronized (InputManagerGlobal.class) {
@@ -149,6 +158,14 @@ public final class InputManagerGlobal {
         synchronized (InputManagerGlobal.class) {
             sInstance = null;
         }
+    }
+
+    /**
+     * Get the current VelocityTracker strategy.
+     * Only works when the system has fully booted up.
+     */
+    public String getVelocityTrackerStrategy() {
+        return mVelocityTrackerStrategy;
     }
 
     /**
@@ -309,9 +326,7 @@ public final class InputManagerGlobal {
      * @see InputManager#registerInputDeviceListener
      */
     public void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
 
         synchronized (mInputDeviceListeners) {
             populateInputDevicesLocked();
@@ -407,9 +422,7 @@ public final class InputManagerGlobal {
      * @see InputManager#getInputDeviceByDescriptor
      */
     InputDevice getInputDeviceByDescriptor(String descriptor) {
-        if (descriptor == null) {
-            throw new IllegalArgumentException("descriptor must not be null.");
-        }
+        Objects.requireNonNull(descriptor, "descriptor must not be null.");
 
         synchronized (mInputDeviceListeners) {
             populateInputDevicesLocked();
@@ -526,9 +539,8 @@ public final class InputManagerGlobal {
      */
     void registerOnTabletModeChangedListener(
             OnTabletModeChangedListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
+
         synchronized (mOnTabletModeChangedListeners) {
             if (mOnTabletModeChangedListeners == null) {
                 initializeTabletModeListenerLocked();
@@ -546,9 +558,8 @@ public final class InputManagerGlobal {
      * @see InputManager#unregisterOnTabletModeChangedListener(OnTabletModeChangedListener)
      */
     void unregisterOnTabletModeChangedListener(OnTabletModeChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
+        Objects.requireNonNull(listener, "listener must not be null");
+
         synchronized (mOnTabletModeChangedListeners) {
             int idx = findOnTabletModeChangedListenerLocked(listener);
             if (idx >= 0) {
@@ -603,7 +614,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#addInputDeviceBatteryListener(int, Executor, InputDeviceBatteryListener)
      */
-    void addInputDeviceBatteryListener(int deviceId, @NonNull Executor executor,
+    public void addInputDeviceBatteryListener(int deviceId, @NonNull Executor executor,
             @NonNull InputDeviceBatteryListener listener) {
         Objects.requireNonNull(executor, "executor should not be null");
         Objects.requireNonNull(listener, "listener should not be null");
@@ -714,7 +725,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#getInputDeviceBatteryState(int, boolean)
+     * @see #getInputDeviceBatteryState(int, boolean)
      */
     @NonNull
     public BatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
@@ -873,6 +884,38 @@ public final class InputManagerGlobal {
                 mKeyboardBacklightListeners = null;
                 mKeyboardBacklightListener = null;
             }
+        }
+    }
+
+    /**
+     * @see InputManager#getKeyboardLayoutsForInputDevice(InputDeviceIdentifier)
+     */
+    @NonNull
+    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
+            @NonNull InputDeviceIdentifier identifier) {
+        try {
+            return mIm.getKeyboardLayoutsForInputDevice(identifier);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#setCurrentKeyboardLayoutForInputDevice
+     * (InputDeviceIdentifier, String)
+     */
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void setCurrentKeyboardLayoutForInputDevice(
+            @NonNull InputDeviceIdentifier identifier,
+            @NonNull String keyboardLayoutDescriptor) {
+        Objects.requireNonNull(identifier, "identifier must not be null");
+        Objects.requireNonNull(keyboardLayoutDescriptor,
+                "keyboardLayoutDescriptor must not be null");
+        try {
+            mIm.setCurrentKeyboardLayoutForInputDevice(identifier,
+                    keyboardLayoutDescriptor);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -1162,9 +1205,8 @@ public final class InputManagerGlobal {
      */
 
     public boolean injectInputEvent(InputEvent event, int mode, int targetUid) {
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
+        Objects.requireNonNull(event , "event must not be null");
+
         if (mode != InputEventInjectionSync.NONE
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
                 && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {

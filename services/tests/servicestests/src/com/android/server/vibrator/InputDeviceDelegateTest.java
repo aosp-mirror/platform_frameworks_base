@@ -77,16 +77,19 @@ public class InputDeviceDelegateTest {
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
+    private InputManager mInputManager;
     private InputDeviceDelegate mInputDeviceDelegate;
     private IInputDevicesChangedListener mIInputDevicesChangedListener;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
-        InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
+        InputManagerGlobal.resetInstance(mIInputManagerMock);
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
 
-        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
+        mInputManager = new InputManager(mContextSpy);
+        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE)))
+                .thenReturn(mInputManager);
         doAnswer(invocation -> mIInputDevicesChangedListener = invocation.getArgument(0))
                 .when(mIInputManagerMock).registerInputDevicesChangedListener(any());
 
@@ -97,7 +100,7 @@ public class InputDeviceDelegateTest {
 
     @After
     public void tearDown() throws Exception {
-        InputManager.clearInstance();
+        InputManagerGlobal.clearInstance();
     }
 
     @Test
