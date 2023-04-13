@@ -246,9 +246,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_LOCK_SETTINGS] =
                 writeIfChanged(stateChecksums[STATE_LOCK_SETTINGS], KEY_LOCK_SETTINGS,
                         lockSettingsData, data);
-        stateChecksums[STATE_SOFTAP_CONFIG] =
+        if (getBaseContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            stateChecksums[STATE_SOFTAP_CONFIG] = 0;
+        } else {
+            stateChecksums[STATE_SOFTAP_CONFIG] =
                 writeIfChanged(stateChecksums[STATE_SOFTAP_CONFIG], KEY_SOFTAP_CONFIG,
-                        softApConfigData, data);
+                    softApConfigData, data);
+        }
         stateChecksums[STATE_NETWORK_POLICIES] =
                 writeIfChanged(stateChecksums[STATE_NETWORK_POLICIES], KEY_NETWORK_POLICIES,
                         netPoliciesData, data);
@@ -364,6 +368,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     break;
 
                 case KEY_SOFTAP_CONFIG :
+                    if (getBaseContext().getPackageManager()
+                            .hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+                        break;
+                    }
                     byte[] softapData = new byte[size];
                     data.readEntityData(softapData, 0, size);
                     restoreSoftApConfiguration(softapData);
@@ -504,7 +512,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
             }
             // softap config
-            if (version >= FULL_BACKUP_ADDED_SOFTAP_CONF) {
+            if (version >= FULL_BACKUP_ADDED_SOFTAP_CONF
+                    && !getBaseContext().getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_WATCH)) {
                 nBytes = in.readInt();
                 if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of softap config data");
                 if (nBytes > buffer.length) buffer = new byte[nBytes];
