@@ -191,7 +191,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     }
 
     @Override
-    protected void onStart() {
+    protected final void onStart() {
         super.onStart();
 
         if (mDismissReceiver != null) {
@@ -204,10 +204,18 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         mDialogManager.setShowing(this, true);
         mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, true)
                 .commitUpdate(mContext.getDisplayId());
+
+        start();
     }
 
+    /**
+     * Called when {@link #onStart} is called. Subclasses wishing to override {@link #onStart()}
+     * should override this method instead.
+     */
+    protected void start() {}
+
     @Override
-    protected void onStop() {
+    protected final void onStop() {
         super.onStop();
 
         if (mDismissReceiver != null) {
@@ -218,7 +226,15 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         mDialogManager.setShowing(this, false);
         mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, false)
                 .commitUpdate(mContext.getDisplayId());
+
+        stop();
     }
+
+    /**
+     * Called when {@link #onStop} is called. Subclasses wishing to override {@link #onStop()}
+     * should override this method instead.
+     */
+    protected void stop() {}
 
     public void setShowForAllUsers(boolean show) {
         setShowForAllUsers(this, show);

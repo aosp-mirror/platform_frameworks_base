@@ -2477,8 +2477,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
 
         @Override
-        protected void onStart() {
-            super.onStart();
+        protected void start() {
             mGlobalActionsLayout.updateList();
 
             if (mBackgroundDrawable instanceof ScrimDrawable) {
@@ -2509,8 +2508,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
 
         @Override
-        protected void onStop() {
-            super.onStop();
+        protected void stop() {
             mColorExtractor.removeOnColorsChangedListener(this);
         }
 
