@@ -49,6 +49,7 @@ import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.disableflags.DisableStateTracker;
@@ -118,6 +119,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final Executor mMainExecutor;
     private final Object mLock = new Object();
     private final KeyguardLogger mLogger;
+
+    // TODO(b/273443374): remove
+    private NotificationMediaManager mNotificationMediaManager;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -283,7 +287,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             SecureSettings secureSettings,
             CommandQueue commandQueue,
             @Main Executor mainExecutor,
-            KeyguardLogger logger
+            KeyguardLogger logger,
+            NotificationMediaManager notificationMediaManager
     ) {
         super(view);
         mCarrierTextController = carrierTextController;
@@ -335,6 +340,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 /* mask2= */ DISABLE2_SYSTEM_ICONS,
                 this::updateViewState
         );
+        mNotificationMediaManager = notificationMediaManager;
     }
 
     @Override
@@ -484,8 +490,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                     * (1.0f - mKeyguardHeadsUpShowingAmount);
         }
 
-        if (mSystemEventAnimator.isAnimationRunning()) {
+        if (mSystemEventAnimator.isAnimationRunning()
+                && !mNotificationMediaManager.isLockscreenWallpaperOnNotificationShade()) {
             newAlpha = Math.min(newAlpha, mSystemEventAnimatorAlpha);
+        } else {
+            mView.setTranslationX(0);
         }
 
         boolean hideForBypass =
@@ -625,11 +634,21 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     private StatusBarSystemEventDefaultAnimator getSystemEventAnimator(boolean isAnimationRunning) {
         return new StatusBarSystemEventDefaultAnimator(getResources(), (alpha) -> {
-            mSystemEventAnimatorAlpha = alpha;
+            // TODO(b/273443374): remove if-else condition
+            if (!mNotificationMediaManager.isLockscreenWallpaperOnNotificationShade()) {
+                mSystemEventAnimatorAlpha = alpha;
+            } else {
+                mSystemEventAnimatorAlpha = 1f;
+            }
             updateViewState();
             return Unit.INSTANCE;
         }, (translationX) -> {
-            mView.setTranslationX(translationX);
+            // TODO(b/273443374): remove if-else condition
+            if (!mNotificationMediaManager.isLockscreenWallpaperOnNotificationShade()) {
+                mView.setTranslationX(translationX);
+            } else {
+                mView.setTranslationX(0);
+            }
             return Unit.INSTANCE;
         }, isAnimationRunning);
     }
