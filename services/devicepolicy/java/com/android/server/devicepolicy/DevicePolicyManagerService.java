@@ -14725,7 +14725,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final int userId = mInjector.userHandleGetCallingUserId();
-        if (isPermissionCheckFlagEnabled()) {
+        if (isPolicyEngineForFinanceFlagEnabled()) {
             LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
                     PolicyDefinition.LOCK_TASK, userId);
             if (policy == null) {
@@ -16145,7 +16145,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final UserManager.EnforcingUser enforcingUser = sources.get(0);
                 final int sourceType = enforcingUser.getUserRestrictionSource();
                 if (sourceType == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER
-                        || sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER ) {
+                        || sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
                     ActiveAdmin admin = getMostProbableDPCAdminForLocalPolicy(userId);
                     if (admin != null) {
                         result = new Bundle();
