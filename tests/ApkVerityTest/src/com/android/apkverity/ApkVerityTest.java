@@ -408,8 +408,7 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         damageFileAgainstBlockDevice(apkPath, offsetFirstByte);
 
         // Expect actual read from disk to fail but only at damaged page.
-        BlockDeviceWriter.dropCaches(mDevice);
-        assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetFirstByte));
+        expectReadFromBlockDeviceToFail(apkPath, offsetFirstByte);
         if (apkSize > offsetFirstByte + FSVERITY_PAGE_SIZE) {
             long lastByteOfTheSamePage =
                     offsetFirstByte % FSVERITY_PAGE_SIZE + FSVERITY_PAGE_SIZE - 1;
@@ -437,8 +436,7 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         damageFileAgainstBlockDevice(apkPath, offsetOfLastByte);
 
         // Expect actual read from disk to fail but only at damaged page.
-        BlockDeviceWriter.dropCaches(mDevice);
-        assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetOfLastByte));
+        expectReadFromBlockDeviceToFail(apkPath, offsetOfLastByte);
         if (offsetOfLastByte - FSVERITY_PAGE_SIZE > 0) {
             long firstByteOfTheSamePage = offsetOfLastByte - offsetOfLastByte % FSVERITY_PAGE_SIZE;
             assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, firstByteOfTheSamePage));
@@ -456,27 +454,32 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
             String path = appDir + "/" + basename;
             damageFileAgainstBlockDevice(path, kTargetOffset);
 
-            // Retry is sometimes needed to pass the test. Package manager may have FD leaks
-            // (see b/122744005 as example) that prevents the file in question to be evicted
-            // from filesystem cache. Forcing GC workarounds the problem.
-            int retry = 5;
-            for (; retry > 0; retry--) {
-                BlockDeviceWriter.dropCaches(mDevice);
-                if (!BlockDeviceWriter.canReadByte(mDevice, path, kTargetOffset)) {
-                    break;
-                }
-                try {
-                    String openFiles = expectRemoteCommandToSucceed("lsof " + apkPath);
-                    CLog.d("lsof: " + openFiles);
-                    Thread.sleep(1000);
-                    forceGCOnOpenFilesProcess(getOpenFilesPIDs(openFiles));
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-            }
-            assertTrue("Read from " + path + " should fail", retry > 0);
+            expectReadFromBlockDeviceToFail(path, kTargetOffset);
         }
+    }
+
+    private void expectReadFromBlockDeviceToFail(String readPath, long offset)
+            throws DeviceNotAvailableException {
+        // Retry is sometimes needed to pass the test. Package manager may have FD leaks
+        // (see b/122744005 as example) that prevents the file in question to be evicted
+        // from filesystem cache. Forcing GC workarounds the problem.
+        int retry = 5;
+        for (; retry > 0; retry--) {
+            BlockDeviceWriter.dropCaches(mDevice);
+            if (!BlockDeviceWriter.canReadByte(mDevice, readPath, offset)) {
+                break;
+            }
+            try {
+                String openFiles = expectRemoteCommandToSucceed("lsof " + readPath);
+                CLog.d("lsof: " + openFiles);
+                Thread.sleep(1000);
+                forceGCOnOpenFilesProcess(getOpenFilesPIDs(openFiles));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+        assertTrue("Read from " + readPath + " should fail", retry > 0);
     }
 
     /**
