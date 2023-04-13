@@ -22,6 +22,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.testing.AndroidTestingRunner
 import android.util.DisplayMetrics
 import android.view.View
+import android.view.ViewGroup
 import android.widget.PopupWindow.OnDismissListener
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.filters.SmallTest
@@ -29,13 +30,17 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.EmptyTestActivity
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.widget.FakeListAdapter
+import com.android.systemui.widget.FakeListAdapter.FakeListAdapterItem
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -52,10 +57,16 @@ open class ControlsPopupMenuTest : SysuiTestCase() {
 
     @Rule @JvmField val activityScenarioRule = ActivityScenarioRule(EmptyTestActivity::class.java)
 
-    private val testDisplayMetrics: DisplayMetrics = DisplayMetrics()
+    private val testDisplayMetrics = DisplayMetrics()
+
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
+    }
 
     @Test
-    fun testDismissListenerWorks() = testPopup { popupMenu ->
+    fun testDismissListenerWorks() = testPopup { activity, popupMenu ->
+        popupMenu.setAdapter(FakeListAdapter())
         val listener = mock(OnDismissListener::class.java)
         popupMenu.setOnDismissListener(listener)
         popupMenu.show()
@@ -66,7 +77,9 @@ open class ControlsPopupMenuTest : SysuiTestCase() {
     }
 
     @Test
-    fun testPopupDoesntExceedMaxWidth() = testPopup { popupMenu ->
+    fun testPopupDoesntExceedMaxWidth() = testPopup { activity, popupMenu ->
+        popupMenu.setAdapter(FakeListAdapter())
+        popupMenu.width = ViewGroup.LayoutParams.MATCH_PARENT
         testDisplayMetrics.widthPixels = DISPLAY_WIDTH_WIDE
 
         popupMenu.show()
@@ -75,7 +88,9 @@ open class ControlsPopupMenuTest : SysuiTestCase() {
     }
 
     @Test
-    fun testPopupMarginsWidthLessMax() = testPopup { popupMenu ->
+    fun testPopupMarginsWidthLessMax() = testPopup { activity, popupMenu ->
+        popupMenu.setAdapter(FakeListAdapter())
+        popupMenu.width = ViewGroup.LayoutParams.MATCH_PARENT
         testDisplayMetrics.widthPixels = DISPLAY_WIDTH_NARROW
 
         popupMenu.show()
@@ -83,10 +98,32 @@ open class ControlsPopupMenuTest : SysuiTestCase() {
         assertThat(popupMenu.width).isEqualTo(DISPLAY_WIDTH_NARROW - 2 * HORIZONTAL_MARGIN)
     }
 
-    private fun testPopup(test: (popup: ControlsPopupMenu) -> Unit) {
+    @Test
+    fun testWrapContentDoesntExceedMax() = testPopup { activity, popupMenu ->
+        popupMenu.setAdapter(
+            FakeListAdapter(
+                listOf(
+                    FakeListAdapterItem({ _, _, _ ->
+                        View(activity).apply { minimumWidth = MAX_WIDTH + 1 }
+                    })
+                )
+            )
+        )
+        popupMenu.width = ViewGroup.LayoutParams.WRAP_CONTENT
+        testDisplayMetrics.widthPixels = DISPLAY_WIDTH_NARROW
+
+        popupMenu.show()
+
+        assertThat(popupMenu.width).isEqualTo(DISPLAY_WIDTH_NARROW - 2 * HORIZONTAL_MARGIN)
+    }
+
+    private fun testPopup(test: (activity: Activity, popup: ControlsPopupMenu) -> Unit) {
         activityScenarioRule.scenario.onActivity { activity ->
             val testActivity = setupActivity(activity)
-            test(ControlsPopupMenu(testActivity).apply { anchorView = View(testActivity) })
+            test(
+                testActivity,
+                ControlsPopupMenu(testActivity).apply { anchorView = View(testActivity) }
+            )
         }
     }
 
