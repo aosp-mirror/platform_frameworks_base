@@ -26,11 +26,11 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
+import dagger.Lazy;
+
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
@@ -142,6 +142,14 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
+    public void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController, String customMessage) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.postStartActivityDismissingKeyguard(intent, delay,
+                        animationController, customMessage));
+    }
+
+    @Override
     public void postStartActivityDismissingKeyguard(PendingIntent intent,
             ActivityLaunchAnimator.Controller animationController) {
         mActualStarterOptionalLazy.get().ifPresent(
@@ -160,5 +168,13 @@ public class ActivityStarterDelegate implements ActivityStarter {
             boolean afterKeyguardGone) {
         mActualStarterOptionalLazy.get().ifPresent(
                 starter -> starter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone));
+    }
+
+    @Override
+    public void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
+            boolean afterKeyguardGone, String customMessage) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone,
+                        customMessage));
     }
 }

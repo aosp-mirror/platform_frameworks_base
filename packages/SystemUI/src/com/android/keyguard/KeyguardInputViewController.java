@@ -121,7 +121,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     }
 
     @Override
-    public void showMessage(CharSequence message, ColorStateList colorState) {
+    public void showMessage(CharSequence message, ColorStateList colorState, boolean animated) {
     }
 
     public void startAppearAnimation() {

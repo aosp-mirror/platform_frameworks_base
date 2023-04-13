@@ -333,14 +333,14 @@ public class KeyguardPatternViewController
     }
 
     @Override
-    public void showMessage(CharSequence message, ColorStateList colorState) {
+    public void showMessage(CharSequence message, ColorStateList colorState, boolean animated) {
         if (mMessageAreaController == null) {
             return;
         }
         if (colorState != null) {
             mMessageAreaController.setNextMessageColor(colorState);
         }
-        mMessageAreaController.setMessage(message);
+        mMessageAreaController.setMessage(message, animated);
     }
 
     @Override
