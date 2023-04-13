@@ -59,7 +59,8 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         int numTypes = (request.getCredentialOptions().stream()
                 .map(CredentialOption::getType).collect(
                         Collectors.toSet())).size(); // Dedupe type strings
-        mRequestSessionMetric.collectGetFlowInitialMetricInfo(numTypes);
+        mRequestSessionMetric.collectGetFlowInitialMetricInfo(numTypes,
+                /*origin=*/request.getOrigin() != null);
     }
 
     /**
