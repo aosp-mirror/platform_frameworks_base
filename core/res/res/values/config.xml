@@ -4310,8 +4310,12 @@
          This package must be trusted, as it has the permissions to control other applications
          on the device.
          Example: "com.android.wellbeing"
+
+         Note: This config is deprecated, please use config_systemWellbeing instead.
      -->
-    <string name="config_defaultWellbeingPackage" translatable="false"></string>
+    <string name="config_defaultWellbeingPackage" translatable="false">
+        @string/config_systemWellbeing
+    </string>
 
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
