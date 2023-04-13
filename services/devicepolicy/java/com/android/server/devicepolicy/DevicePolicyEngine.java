@@ -792,7 +792,7 @@ final class DevicePolicyEngine {
                             admin.getUserId());
             if (receivers.isEmpty()) {
                 Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_SET_RESULT"
-                        + "in package " + admin.getPackageName());
+                        + " in package " + admin.getPackageName());
                 return;
             }
 
@@ -845,7 +845,7 @@ final class DevicePolicyEngine {
                             admin.getUserId());
             if (receivers.isEmpty()) {
                 Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_CHANGED"
-                        + "in package " + admin.getPackageName());
+                        + " in package " + admin.getPackageName());
                 return;
             }
 
@@ -868,7 +868,7 @@ final class DevicePolicyEngine {
         for (ResolveInfo resolveInfo : receivers) {
             if (!Manifest.permission.BIND_DEVICE_ADMIN.equals(
                     resolveInfo.activityInfo.permission)) {
-                Log.w(TAG, "Receiver " + resolveInfo.activityInfo + " is not protected by"
+                Log.w(TAG, "Receiver " + resolveInfo.activityInfo + " is not protected by "
                         + "BIND_DEVICE_ADMIN permission!");
                 continue;
             }
