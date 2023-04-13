@@ -930,6 +930,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
         mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
 
+        verify(mKeyguardFaceAuthInteractor).onNotificationPanelClicked();
         verify(mUpdateMonitor).requestFaceAuth(
                 FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
     }

@@ -129,6 +129,7 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
@@ -330,6 +331,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private final ConversationNotificationManager mConversationNotificationManager;
     private final AuthController mAuthController;
     private final MediaHierarchyManager mMediaHierarchyManager;
@@ -747,7 +749,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             DumpManager dumpManager,
             KeyguardLongPressViewModel keyguardLongPressViewModel,
             KeyguardInteractor keyguardInteractor,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
         mInteractionJankMonitor = interactionJankMonitor;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -891,6 +894,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mScreenOffAnimationController = screenOffAnimationController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mLastDownEvents = new NPVCDownEventState.Buffer(MAX_DOWN_EVENT_BUFFER_SIZE);
+        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
 
         int currentMode = navigationModeController.addListener(
                 mode -> mIsGestureNavigation = QuickStepContract.isGesturalMode(mode));
@@ -2764,6 +2768,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mShadeLog.v("onMiddleClicked on Keyguard, mDozingOnDown: false");
                     // Try triggering face auth, this "might" run. Check
                     // KeyguardUpdateMonitor#shouldListenForFace to see when face auth won't run.
+                    mKeyguardFaceAuthInteractor.onNotificationPanelClicked();
                     boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(
                             FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
 

@@ -303,6 +303,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected ArgumentCaptor<NotificationStackScrollLayout.OnEmptySpaceClickListener>
             mEmptySpaceClickListenerCaptor;
     @Mock protected ActivityStarter mActivityStarter;
+    @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
 
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected KeyguardInteractor mKeyguardInteractor;
@@ -600,7 +601,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mDumpManager,
                 mKeyuardLongPressViewModel,
                 mKeyguardInteractor,
-                mActivityStarter);
+                mActivityStarter,
+                mKeyguardFaceAuthInteractor);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 null,
@@ -667,7 +669,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLog,
-                mock(KeyguardFaceAuthInteractor.class)
+                mKeyguardFaceAuthInteractor
         );
     }
 
