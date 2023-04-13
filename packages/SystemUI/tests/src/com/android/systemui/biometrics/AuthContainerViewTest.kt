@@ -170,23 +170,15 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun testFocusLossAfterRotating() {
+    fun testActionCancel_panelInteractionDetectorDisable() {
         val container = initializeFingerprintContainer()
-        waitForIdleSync()
-
-        val requestID = authContainer?.requestId ?: 0L
-
-        verify(callback).onDialogAnimatedIn(requestID)
-        container.onOrientationChanged()
-        container.onWindowFocusChanged(false)
-        waitForIdleSync()
-
-        verify(callback, never()).onDismissed(
-                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
-                eq<ByteArray?>(null), /* credentialAttestation */
-                eq(requestID)
+        container.mBiometricCallback.onAction(
+                AuthBiometricView.Callback.ACTION_USER_CANCELED
         )
+        waitForIdleSync()
+        verify(panelInteractionDetector).disable()
     }
+
 
     @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
