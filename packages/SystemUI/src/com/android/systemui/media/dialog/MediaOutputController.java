@@ -126,9 +126,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final ActivityStarter mActivityStarter;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
-    private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final CommonNotifCollection mNotifCollection;
     private final Object mMediaDevicesLock = new Object();
+    @VisibleForTesting
+    final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
     final List<MediaDevice> mCachedMediaDevices = new CopyOnWriteArrayList<>();
@@ -1258,7 +1259,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return null;
     }
 
-    private final MediaController.Callback mCb = new MediaController.Callback() {
+    @VisibleForTesting
+    final MediaController.Callback mCb = new MediaController.Callback() {
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
             mCallback.onMediaChanged();
