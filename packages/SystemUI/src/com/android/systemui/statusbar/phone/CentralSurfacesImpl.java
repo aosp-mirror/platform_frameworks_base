@@ -2418,11 +2418,22 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
+    public void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
+            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
+            Callback callback, int flags,
+            @androidx.annotation.Nullable ActivityLaunchAnimator.Controller animationController,
+            UserHandle userHandle) {
+        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
+                disallowEnterPictureInPictureWhileLaunching, callback, flags, animationController,
+                userHandle, null /* customMessage */);
+    }
+
+    @Override
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             final boolean dismissShade, final boolean disallowEnterPictureInPictureWhileLaunching,
             final Callback callback, int flags,
             @Nullable ActivityLaunchAnimator.Controller animationController,
-            final UserHandle userHandle) {
+            final UserHandle userHandle, @Nullable String customMessage) {
         if (onlyProvisioned && !mDeviceProvisionedController.isDeviceProvisioned()) return;
 
         final boolean willLaunchResolverActivity =
@@ -2509,7 +2520,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 && mKeyguardStateController.isOccluded();
         boolean deferred = !occluded;
         executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShadeDirectly,
-                willLaunchResolverActivity, deferred /* deferred */, animate);
+                willLaunchResolverActivity, deferred /* deferred */, animate,
+                customMessage /* customMessage */);
     }
 
     /**
@@ -2562,7 +2574,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             final boolean afterKeyguardGone,
             final boolean deferred) {
         executeRunnableDismissingKeyguard(runnable, cancelAction, dismissShade, afterKeyguardGone,
-                deferred, false /* willAnimateOnKeyguard */);
+                deferred, false /* willAnimateOnKeyguard */, null /* customMessage */);
     }
 
     @Override
@@ -2571,7 +2583,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             final boolean dismissShade,
             final boolean afterKeyguardGone,
             final boolean deferred,
-            final boolean willAnimateOnKeyguard) {
+            final boolean willAnimateOnKeyguard,
+            @Nullable String customMessage) {
         OnDismissAction onDismissAction = new OnDismissAction() {
             @Override
             public boolean onDismiss() {
@@ -2600,7 +2613,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 return willAnimateOnKeyguard;
             }
         };
-        dismissKeyguardThenExecute(onDismissAction, cancelAction, afterKeyguardGone);
+        dismissKeyguardThenExecute(onDismissAction, cancelAction, afterKeyguardGone, customMessage);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -2681,6 +2694,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone) {
+        dismissKeyguardThenExecute(action, cancelAction, afterKeyguardGone, null);
+    }
+
+    @Override
+    public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
+            boolean afterKeyguardGone, String customMessage) {
         if (!action.willRunAnimationOnKeyguard()
                 && mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_ASLEEP
                 && mKeyguardStateController.canDismissLockScreen()
@@ -2693,7 +2712,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         if (mKeyguardStateController.isShowing()) {
             mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
-                    afterKeyguardGone);
+                    afterKeyguardGone, customMessage);
         } else {
             // If the keyguard isn't showing but the device is dreaming, we should exit the dream.
             if (mKeyguardUpdateMonitor.isDreaming()) {
@@ -2701,7 +2720,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             action.onDismiss();
         }
+
     }
+
     /**
      * Notify the shade controller that the current user changed
      *
@@ -2906,6 +2927,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void postStartActivityDismissingKeyguard(Intent intent, int delay,
             @Nullable ActivityLaunchAnimator.Controller animationController) {
+        postStartActivityDismissingKeyguard(intent, delay, animationController,
+                null /* customMessage */);
+    }
+
+    @Override
+    public void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            @Nullable String customMessage) {
         mMainExecutor.executeDelayed(
                 () ->
                         startActivityDismissingKeyguard(intent, true /* onlyProvisioned */,
@@ -2914,7 +2943,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                 null /* callback */,
                                 0 /* flags */,
                                 animationController,
-                                getActivityUserHandle(intent)),
+                                getActivityUserHandle(intent), customMessage),
                 delay);
     }
 

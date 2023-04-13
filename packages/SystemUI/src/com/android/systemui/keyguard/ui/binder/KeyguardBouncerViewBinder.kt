@@ -193,7 +193,11 @@ object KeyguardBouncerViewBinder {
 
                     launch {
                         viewModel.bouncerShowMessage.collect {
-                            securityContainerController.showMessage(it.message, it.colorStateList)
+                            securityContainerController.showMessage(
+                                it.message,
+                                it.colorStateList,
+                                /* animated= */ true
+                            )
                             viewModel.onMessageShown()
                         }
                     }

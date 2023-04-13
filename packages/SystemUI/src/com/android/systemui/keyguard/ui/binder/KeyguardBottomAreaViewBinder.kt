@@ -498,7 +498,7 @@ object KeyguardBottomAreaViewBinder {
         activityStarter: ActivityStarter,
         view: View,
     ) {
-        activityStarter.startActivity(
+        activityStarter.postStartActivityDismissingKeyguard(
             Intent(Intent.ACTION_SET_WALLPAPER).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 view.context
@@ -506,8 +506,9 @@ object KeyguardBottomAreaViewBinder {
                     .takeIf { it.isNotEmpty() }
                     ?.let { packageName -> setPackage(packageName) }
             },
-            /* dismissShade= */ true,
-            ActivityLaunchAnimator.Controller.fromView(view),
+            /* delay= */ 0,
+            /* animationController= */ ActivityLaunchAnimator.Controller.fromView(view),
+            /* customMessage= */ view.context.getString(R.string.keyguard_unlock_to_customize_ls)
         )
     }
 
