@@ -16,11 +16,13 @@
 
 package com.android.systemui.qs.pipeline.prototyping
 
+import android.util.Log
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.qs.pipeline.data.repository.AutoAddRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.statusbar.commandline.Command
@@ -46,6 +48,7 @@ class PrototypeCoreStartable
 @Inject
 constructor(
     private val tileSpecRepository: TileSpecRepository,
+    private val autoAddRepository: AutoAddRepository,
     private val userRepository: UserRepository,
     private val featureFlags: FeatureFlags,
     @Application private val scope: CoroutineScope,
@@ -59,6 +62,13 @@ constructor(
                 userRepository.selectedUserInfo
                     .flatMapLatest { user -> tileSpecRepository.tilesSpecs(user.id) }
                     .collect {}
+            }
+            if (featureFlags.isEnabled(Flags.QS_PIPELINE_AUTO_ADD)) {
+                scope.launch {
+                    userRepository.selectedUserInfo
+                        .flatMapLatest { user -> autoAddRepository.autoAddedTiles(user.id) }
+                        .collect { tiles -> Log.d(TAG, "Auto-added tiles: $tiles") }
+                }
             }
             commandRegistry.registerCommand(COMMAND, ::CommandExecutor)
         }
@@ -105,5 +115,6 @@ constructor(
 
     companion object {
         private const val COMMAND = "qs-pipeline"
+        private const val TAG = "PrototypeCoreStartable"
     }
 }
