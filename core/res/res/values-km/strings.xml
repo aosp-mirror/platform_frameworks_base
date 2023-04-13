@@ -1899,7 +1899,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​សំណើ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"បាន​ប្ដូរ​ទៅ​សំណើ SS ថ្មី"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ការជូនដំណឹង​អំពីការ​ដាក់នុយ"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ប្រវត្តិរូបការងារ"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"កម្រងព័ត៌មានការងារ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"បាន​ជូនដំណឹង"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"បាន​ផ្ទៀងផ្ទាត់​"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ពង្រីក"</string>

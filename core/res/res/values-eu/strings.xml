@@ -1899,7 +1899,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS eskaera USSD eskaerara aldatu da"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS eskaera berrira aldatu da"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-alerta"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Work profila"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Laneko profila"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Egin du soinua"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Egiaztatuta"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Zabaldu"</string>

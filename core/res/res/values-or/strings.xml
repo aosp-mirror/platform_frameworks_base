@@ -157,7 +157,7 @@
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ଫର୍‌ୱର୍ଡ କରାଗଲା ନାହିଁ"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ଫିଚର୍ କୋଡ୍ ସମ୍ପୂର୍ଣ୍ଣ।"</string>
     <string name="fcError" msgid="5325116502080221346">"ସଂଯୋଗରେ ସମସ୍ୟା କିମ୍ୱା ଅମାନ୍ୟ ଫିଚର୍ କୋଡ୍।"</string>
-    <string name="httpErrorOk" msgid="6206751415788256357">"ଠିକ୍‍ ଅଛି"</string>
+    <string name="httpErrorOk" msgid="6206751415788256357">"ଠିକ ଅଛି"</string>
     <string name="httpError" msgid="3406003584150566720">"ନେଟ୍‍ୱର୍କରେ ଏକ ତ୍ରୁଟି ଥିଲା।"</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"URL ମିଳିଲା ନାହିଁ।"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"ସାଇଟ୍‍ ପ୍ରମାଣୀକରଣ ସ୍କିମ୍‍ ସପୋର୍ଟ କରୁନାହିଁ।"</string>
@@ -1128,7 +1128,7 @@
     <string name="VideoView_error_title" msgid="5750686717225068016">"ଭିଡିଓ ସମସ୍ୟା"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"ଏହି ଡିଭାଇସ୍‍କୁ ଷ୍ଟ୍ରିମ୍‍ କରିବା ପାଇଁ ଏହି ଭିଡିଓ ମାନ୍ୟ ନୁହେଁ।"</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"ଏହି ଭିଡିଓ ଚଲାଇ ହେବନାହିଁ"</string>
-    <string name="VideoView_error_button" msgid="5138809446603764272">"ଠିକ୍‍ ଅଛି"</string>
+    <string name="VideoView_error_button" msgid="5138809446603764272">"ଠିକ ଅଛି"</string>
     <string name="relative_time" msgid="8572030016028033243">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="8365974533050605886">"ମଧ୍ୟାହ୍ନ"</string>
     <string name="Noon" msgid="6902418443846838189">"ମଧ୍ୟାହ୍ନ"</string>
@@ -1161,9 +1161,9 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ସିଷ୍ଟମ୍ ପାଇଁ ପ୍ରର୍ଯ୍ୟାପ୍ତ ଷ୍ଟୋରେଜ୍‌ ନାହିଁ। ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ, ଆପଣଙ୍କ ପାଖରେ 250MB ଖାଲି ଜାଗା ଅଛି ଏବଂ ପୁନଃ ଆରମ୍ଭ କରନ୍ତୁ।"</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"ଅଧିକ ସୂଚନା ପାଇଁ କିମ୍ବା ଆପ୍‍ ବନ୍ଦ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
-    <string name="ok" msgid="2646370155170753815">"ଠିକ୍‍ ଅଛି"</string>
+    <string name="ok" msgid="2646370155170753815">"ଠିକ ଅଛି"</string>
     <string name="cancel" msgid="6908697720451760115">"ବାତିଲ କରନ୍ତୁ"</string>
-    <string name="yes" msgid="9069828999585032361">"ଠିକ୍‍ ଅଛି"</string>
+    <string name="yes" msgid="9069828999585032361">"ଠିକ ଅଛି"</string>
     <string name="no" msgid="5122037903299899715">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"ଧ୍ୟାନଦିଅନ୍ତୁ"</string>
     <string name="loading" msgid="3138021523725055037">"ଲୋଡ୍ କରାଯାଉଛି…"</string>
@@ -1221,7 +1221,7 @@
     <string name="anr_activity_process" msgid="3477362583767128667">"<xliff:g id="ACTIVITY">%1$s</xliff:g> କାମ କରୁନାହିଁ"</string>
     <string name="anr_application_process" msgid="4978772139461676184">"<xliff:g id="APPLICATION">%1$s</xliff:g> କାମ କରୁନାହିଁ"</string>
     <string name="anr_process" msgid="1664277165911816067">"<xliff:g id="PROCESS">%1$s</xliff:g> ପ୍ରୋସେସ୍‍ କାମ କରୁନାହିଁ"</string>
-    <string name="force_close" msgid="9035203496368973803">"ଠିକ୍‍ ଅଛି"</string>
+    <string name="force_close" msgid="9035203496368973803">"ଠିକ ଅଛି"</string>
     <string name="report" msgid="2149194372340349521">"ରିପୋର୍ଟ କରନ୍ତୁ"</string>
     <string name="wait" msgid="7765985809494033348">"ଅପେକ୍ଷା କରନ୍ତୁ"</string>
     <string name="webpage_unresponsive" msgid="7850879412195273433">"ଏହି ପୃଷ୍ଠାଟି ଚାଲୁନାହିଁ।\n\nଆପଣ ଏହାକୁ ବନ୍ଦ କରିବେ କି?"</string>
@@ -1353,7 +1353,7 @@
     <string name="perms_description_app" msgid="2747752389870161996">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଦ୍ୱରା ପ୍ରଦତ୍ତ।"</string>
     <string name="no_permissions" msgid="5729199278862516390">"କୌଣସି ଅନୁମତିର ଆବଶ୍ୟକତା ନାହିଁ"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ଶୁଳ୍କ ଲାଗୁ ହୋଇପାରେ"</string>
-    <string name="dlg_ok" msgid="5103447663504839312">"ଠିକ୍‍ ଅଛି"</string>
+    <string name="dlg_ok" msgid="5103447663504839312">"ଠିକ ଅଛି"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ମାଧ୍ୟମରେ ଏହି ଡିଭାଇସ୍‌ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB ମାଧ୍ୟମରେ ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ଫାଇଲ୍ ଟ୍ରାନ୍ସଫର୍ ଚାଲୁ କରାଗଲା"</string>
@@ -1860,7 +1860,7 @@
     <string name="package_installed_device_owner" msgid="7035926868974878525">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
-    <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ୍ ଅଛି"</string>
+    <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ ଅଛି"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ବେଟେରୀ ସେଭର ଗାଢ଼ା ଥିମକୁ ଚାଲୁ କରେ ଏବଂ ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ ଇଫେକ୍ଟ, କିଛି ଫିଚର ଏବଂ କିଛି ନେଟୱାର୍କ ସଂଯୋଗକୁ ସୀମିତ କିମ୍ବା ବନ୍ଦ କରେ।"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ବ୍ୟାଟେରୀ ସେଭର୍ ଗାଢ଼ା ଥିମକୁ ଚାଲୁ କରେ ଏବଂ ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ୍ ଇଫେକ୍ଟ, କିଛି ଫିଚର୍ ଏବଂ କିଛି ନେଟୱାର୍କ ସଂଯୋଗକୁ ସୀମିତ କିମ୍ବା ବନ୍ଦ କରେ।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ ଯେମିତି ଆପଣ ଇମେଜଗୁଡ଼ିକୁ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ସେଗୁଡ଼ିକ ଡିସପ୍ଲେ ହୁଏ ନାହିଁ।"</string>
@@ -1899,7 +1899,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS ଅନୁରୋଧ, USSD ଅନୁରୋଧକୁ ପରିବର୍ତ୍ତନ ହେଲା"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"ନୂତନ SS ଅନୁରୋଧରେ ପରିବର୍ତ୍ତନ ହେଲା"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ଫିସିଂ ଆଲର୍ଟ"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ୱାର୍କ ପ୍ରୋଫାଇଲ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ଆଲର୍ଟ କରାଯାଇଛି"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"ଯାଞ୍ଚ କରାଯାଇଛି"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ବଢ଼ାନ୍ତୁ"</string>
@@ -2083,7 +2083,7 @@
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ଏହି ବିଜ୍ଞପ୍ତିର ରେଙ୍କ ତଳକୁ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
     <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକ ବର୍ତ୍ତମାନ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ମାଧ୍ୟମରେ ପ୍ରଦାନ କରାଯାଉଛି। Android ଆଡେପ୍ଟିଭ୍ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଆଉ ସମର୍ଥିତ ନୁହେଁ।"</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ଠିକ୍ ଅଛି"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ଠିକ ଅଛି"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12ରେ Android ଆଡେପ୍ଟିଭ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି। ଏହି ଫିଚର ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକୁ ଦେଖାଏ ଏବଂ ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବ୍ୟବସ୍ଥିତ କରେ।\n\nଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ କଣ୍ଟାକ୍ଟ ନାମ ଏବଂ ମେସେଜଗୁଡ଼ିକ ପରି ବ୍ୟକ୍ତିଗତ ସୂଚନା ସମେତ ବିଜ୍ଞପ୍ତିର ବିଷୟବସ୍ତୁକୁ ଆକ୍ସେସ କରିପାରିବ। ଏହି ଫିଚର ଫୋନ କଲଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ଏବଂ \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ନିୟନ୍ତ୍ରଣ କରିବା ପରି, ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ମଧ୍ୟ ଖାରଜ କରିପାରିବ କିମ୍ବା ସେଗୁଡ଼ିକର ଉତ୍ତର ଦେଇପାରିବ।"</string>
