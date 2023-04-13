@@ -34,6 +34,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.AcquiredAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.AuthenticationStatus
 import com.android.systemui.keyguard.shared.model.DetectionStatus
@@ -133,6 +134,7 @@ constructor(
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     dumpManager: DumpManager,
 ) : DeviceEntryFaceAuthRepository, Dumpable {
     private var authCancellationSignal: CancellationSignal? = null
@@ -211,6 +213,13 @@ constructor(
         observeFaceAuthGatingChecks()
         observeFaceDetectGatingChecks()
         observeFaceAuthResettingConditions()
+        listenForSchedulingWatchdog()
+    }
+
+    private fun listenForSchedulingWatchdog() {
+        keyguardTransitionInteractor.anyStateToGoneTransition
+            .onEach { faceManager?.scheduleWatchdog() }
+            .launchIn(applicationScope)
     }
 
     private fun observeFaceAuthResettingConditions() {
