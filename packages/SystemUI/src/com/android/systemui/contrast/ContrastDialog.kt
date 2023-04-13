@@ -86,13 +86,11 @@ class ContrastDialog(
         highlightContrast(toContrastLevel(initialContrast))
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun start() {
         uiModeManager.addContrastChangeListener(mainExecutor, this)
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun stop() {
         uiModeManager.removeContrastChangeListener(this)
     }
 
