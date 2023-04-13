@@ -326,6 +326,13 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
             @Nullable ActivityLaunchAnimator.Controller animationController,
             UserHandle userHandle);
 
+    /** Starts an activity intent that dismisses keyguard. */
+    void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
+            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
+            Callback callback, int flags,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            UserHandle userHandle, @Nullable String customMessage);
+
     void readyForKeyguardDone();
 
     void executeRunnableDismissingKeyguard(Runnable runnable,
@@ -339,7 +346,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
             boolean dismissShade,
             boolean afterKeyguardGone,
             boolean deferred,
-            boolean willAnimateOnKeyguard);
+            boolean willAnimateOnKeyguard,
+            @Nullable String customMessage);
 
     void resetUserExpandedStates();
 
