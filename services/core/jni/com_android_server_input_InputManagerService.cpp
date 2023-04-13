@@ -1311,17 +1311,17 @@ bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t
 
     JNIEnv* env = jniEnv();
     switch (inputEvent->getType()) {
-    case AINPUT_EVENT_TYPE_KEY:
-        inputEventObj = android_view_KeyEvent_fromNative(env,
-                static_cast<const KeyEvent*>(inputEvent));
-        break;
-    case AINPUT_EVENT_TYPE_MOTION:
-        inputEventObj =
-                android_view_MotionEvent_obtainAsCopy(env,
-                                                      static_cast<const MotionEvent&>(*inputEvent));
-        break;
-    default:
-        return true; // dispatch the event normally
+        case InputEventType::KEY:
+            inputEventObj =
+                    android_view_KeyEvent_fromNative(env, static_cast<const KeyEvent*>(inputEvent));
+            break;
+        case InputEventType::MOTION:
+            inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
+                                                                  static_cast<const MotionEvent&>(
+                                                                          *inputEvent));
+            break;
+        default:
+            return true; // dispatch the event normally
     }
 
     if (!inputEventObj) {
