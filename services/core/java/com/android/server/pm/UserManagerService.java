@@ -2658,6 +2658,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void setUserRestrictionInner(int userId, @NonNull String key, boolean value) {
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
+            Slog.e(LOG_TAG, "Setting invalid restriction " + key);
             return;
         }
         synchronized (mRestrictionsLock) {
