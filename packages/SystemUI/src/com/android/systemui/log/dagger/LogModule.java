@@ -31,6 +31,7 @@ import com.android.systemui.plugins.log.LogcatEchoTrackerDebug;
 import com.android.systemui.plugins.log.LogcatEchoTrackerProd;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.wakelock.WakeLockLog;
 
 import dagger.Module;
 import dagger.Provides;
@@ -166,6 +167,14 @@ public class LogModule {
     public static LogBuffer provideBroadcastDispatcherLogBuffer(LogBufferFactory factory) {
         return factory.create("BroadcastDispatcherLog", 500 /* maxSize */,
                 false /* systrace */);
+    }
+
+    /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastSender} */
+    @Provides
+    @SysUISingleton
+    @WakeLockLog
+    public static LogBuffer provideWakeLockLog(LogBufferFactory factory) {
+        return factory.create("WakeLockLog", 500 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to Toasts shown by SystemUI. */
