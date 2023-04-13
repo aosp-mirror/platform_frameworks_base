@@ -173,6 +173,13 @@ data class RequestDisplayInfo(
     val appName: String,
     val preferImmediatelyAvailableCredentials: Boolean,
     val preferIdentityDocUi: Boolean,
+    // A top level branding icon + display name preferred by the app.
+    val preferTopBrandingContent: TopBrandingContent?,
+)
+
+data class TopBrandingContent(
+    val icon: Drawable,
+    val displayName: String,
 )
 
 /**
