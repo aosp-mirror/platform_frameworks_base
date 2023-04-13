@@ -577,14 +577,14 @@ public class ApkLiteParseUtils {
 
                 ParseResult<Integer> targetResult = FrameworkParsingPackageUtils.computeTargetSdkVersion(
                         targetVer, targetCode, SDK_CODENAMES, input,
-                        allowUnknownCodenames);
+                        allowUnknownCodenames, codePath);
                 if (targetResult.isError()) {
                     return input.error(targetResult);
                 }
                 targetSdkVersion = targetResult.getResult();
 
                 ParseResult<Integer> minResult = FrameworkParsingPackageUtils.computeMinSdkVersion(
-                        minVer, minCode, SDK_VERSION, SDK_CODENAMES, input);
+                        minVer, minCode, SDK_VERSION, SDK_CODENAMES, input, codePath);
                 if (minResult.isError()) {
                     return input.error(minResult);
                 }

@@ -1949,6 +1949,8 @@ public class PackageParser {
         int type;
         boolean foundApp = false;
 
+        String pkgName = (pkg != null) ? pkg.packageName : "<unknown>";
+
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifest);
 
@@ -2218,14 +2220,14 @@ public class PackageParser {
                     sa.recycle();
 
                     final int minSdkVersion = PackageParser.computeMinSdkVersion(minVers, minCode,
-                            SDK_VERSION, SDK_CODENAMES, outError);
+                            SDK_VERSION, SDK_CODENAMES, outError, pkgName);
                     if (minSdkVersion < 0) {
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
                     }
 
                     final int targetSdkVersion = PackageParser.computeTargetSdkVersion(targetVers,
-                            targetCode, SDK_CODENAMES, outError);
+                            targetCode, SDK_CODENAMES, outError, pkgName);
                     if (targetSdkVersion < 0) {
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
@@ -2610,13 +2612,15 @@ public class PackageParser {
      * @param platformSdkCodenames array of allowed pre-release SDK codenames
      *                             for this platform
      * @param outError output array to populate with error, if applicable
+     * @param pkgName for debug logging
      * @return the targetSdkVersion to use at runtime, or -1 if the package is
      *         not compatible with this platform
      * @hide Exposed for unit testing only.
      */
     public static int computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
-            @NonNull String[] outError) {
+            @NonNull String[] outError,
+            String pkgName) {
         // If it's a release SDK, return the version number unmodified.
         if (targetCode == null) {
             return targetVers;
@@ -2626,6 +2630,15 @@ public class PackageParser {
         // definitely targets this SDK.
         if (matchTargetCode(platformSdkCodenames, targetCode)) {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
+        }
+
+        // TODO(b/294161396): add a check for a "true REL" flag.
+        if (platformSdkCodenames.length == 0
+                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
+                targetCode)) {
+            Slog.w(TAG, "Package " + pkgName + " requires development platform " + targetCode
+                    + ", returning current version " + Build.VERSION.SDK_INT);
+            return Build.VERSION.SDK_INT;
         }
 
         // Otherwise, we're looking at an incompatible pre-release SDK.
@@ -2674,13 +2687,15 @@ public class PackageParser {
      * @param platformSdkCodenames array of allowed prerelease SDK codenames
      *                             for this platform
      * @param outError output array to populate with error, if applicable
+     * @param pkgName for debug logging
      * @return the minSdkVersion to use at runtime, or -1 if the package is not
      *         compatible with this platform
      * @hide Exposed for unit testing only.
      */
     public static int computeMinSdkVersion(@IntRange(from = 1) int minVers,
             @Nullable String minCode, @IntRange(from = 1) int platformSdkVersion,
-            @NonNull String[] platformSdkCodenames, @NonNull String[] outError) {
+            @NonNull String[] platformSdkCodenames, @NonNull String[] outError,
+            String pkgName) {
         // If it's a release SDK, make sure we meet the minimum SDK requirement.
         if (minCode == null) {
             if (minVers <= platformSdkVersion) {
@@ -2697,6 +2712,15 @@ public class PackageParser {
         // definitely meet the minimum SDK requirement.
         if (matchTargetCode(platformSdkCodenames, minCode)) {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
+        }
+
+        // TODO(b/294161396): add a check for a "true REL" flag.
+        if (platformSdkCodenames.length == 0
+                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
+                minCode)) {
+            Slog.w(TAG, "Package " + pkgName + " requires min development platform " + minCode
+                    + ", returning current version " + Build.VERSION.SDK_INT);
+            return Build.VERSION.SDK_INT;
         }
 
         // Otherwise, we're looking at an incompatible pre-release SDK.
