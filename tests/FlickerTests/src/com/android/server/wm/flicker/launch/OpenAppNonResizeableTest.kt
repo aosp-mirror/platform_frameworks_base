@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
@@ -70,7 +69,7 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
      * Checks that the [ComponentNameMatcher.NAV_BAR] layer starts invisible, becomes visible during
      * unlocking animation and remains visible at the end
      */
-    @FlakyTest(bugId = 227083463)
+    @Presubmit
     @Test
     fun navBarLayerVisibilityChanges() {
         Assume.assumeFalse(flicker.scenario.isTablet)
@@ -155,8 +154,19 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarWindowIsAlwaysVisible() {}
 
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesFirstAndOnlyTopWindow() =
+        super.appWindowBecomesFirstAndOnlyTopWindow()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+
     /** Checks the [ComponentNameMatcher.NAV_BAR] is visible at the end of the transition */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerIsVisibleAtEnd() {
         Assume.assumeFalse(flicker.scenario.isTablet)
@@ -185,17 +195,10 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
         super.appLayerBecomesVisible()
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest @Test override fun entireScreenCovered() = super.entireScreenCovered()
-
-    @FlakyTest(bugId = 218470989)
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest(bugId = 227143265)
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     @FlakyTest(bugId = 251217585)
     @Test
