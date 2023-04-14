@@ -122,8 +122,8 @@ constructor(
                     "lastHingeAngle: $lastHingeAngle, " +
                     "lastHingeAngleBeforeTransition: $lastHingeAngleBeforeTransition"
             )
-            Trace.setCounter("hinge_angle", angle.toLong())
         }
+        Trace.setCounter("DeviceFoldStateProvider#onHingeAngle", angle.toLong())
 
         val currentDirection =
                 if (angle < lastHingeAngle) FOLD_UPDATE_START_CLOSING else FOLD_UPDATE_START_OPENING
