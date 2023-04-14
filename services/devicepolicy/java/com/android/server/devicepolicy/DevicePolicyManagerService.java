@@ -7711,27 +7711,69 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void updateTelephonyCrossProfileIntentFilters(int parentUserId, int profileUserId,
             boolean enableWorkTelephony) {
         try {
-            String packageName = mContext.getOpPackageName();
-            if (enableWorkTelephony) {
-                // Reset call/sms cross profile intent filters to be handled by managed profile.
-                for (DefaultCrossProfileIntentFilter filter :
-                        DefaultCrossProfileIntentFiltersUtils
-                                .getDefaultManagedProfileTelephonyFilters()) {
-                    IntentFilter intentFilter = filter.filter.getIntentFilter();
-                    if (!mIPackageManager.removeCrossProfileIntentFilter(intentFilter, packageName,
-                            profileUserId, parentUserId, filter.flags)) {
-                        Slogf.w(LOG_TAG,
-                                "Failed to remove cross-profile intent filter: " + intentFilter);
-                    }
-
-                    mIPackageManager.addCrossProfileIntentFilter(intentFilter, packageName,
-                            parentUserId, profileUserId, PackageManager.SKIP_CURRENT_PROFILE);
+            // This should only occur when managed profile is being removed.
+            if (!enableWorkTelephony && profileUserId == UserHandle.USER_NULL) {
+                mIPackageManager.clearCrossProfileIntentFilters(parentUserId,
+                        mContext.getPackageName());
+                return;
+            }
+            for (DefaultCrossProfileIntentFilter filter :
+                    DefaultCrossProfileIntentFiltersUtils
+                            .getDefaultCrossProfileTelephonyIntentFilters(!enableWorkTelephony)) {
+                if (removeCrossProfileIntentFilter(filter, parentUserId, profileUserId)) {
+                    Slogf.w(LOG_TAG,
+                            "Failed to remove cross-profile intent filter: "
+                                    + filter.filter.getIntentFilter() + ", enableWorkTelephony: "
+                                    + enableWorkTelephony);
                 }
-            } else {
-                mIPackageManager.clearCrossProfileIntentFilters(parentUserId, packageName);
+            }
+            for (DefaultCrossProfileIntentFilter filter :
+                    DefaultCrossProfileIntentFiltersUtils
+                            .getDefaultCrossProfileTelephonyIntentFilters(enableWorkTelephony)) {
+                addCrossProfileIntentFilter(filter, parentUserId, profileUserId);
             }
         } catch (RemoteException re) {
             Slogf.wtf(LOG_TAG, "Error updating telephony cross profile intent filters", re);
+        }
+    }
+
+    void addCrossProfileIntentFilter(DefaultCrossProfileIntentFilter filter, int parentUserId,
+            int profileUserId)
+            throws RemoteException {
+        if (filter.direction == DefaultCrossProfileIntentFilter.Direction.TO_PROFILE) {
+            mIPackageManager.addCrossProfileIntentFilter(
+                    filter.filter.getIntentFilter(),
+                    mContext.getOpPackageName(),
+                    parentUserId,
+                    profileUserId,
+                    filter.flags);
+        } else {
+            mIPackageManager.addCrossProfileIntentFilter(
+                    filter.filter.getIntentFilter(),
+                    mContext.getOpPackageName(),
+                    profileUserId,
+                    parentUserId,
+                    filter.flags);
+        }
+    }
+
+    boolean removeCrossProfileIntentFilter(DefaultCrossProfileIntentFilter filter, int parentUserId,
+            int profileUserId)
+            throws RemoteException {
+        if (filter.direction == DefaultCrossProfileIntentFilter.Direction.TO_PROFILE) {
+            return mIPackageManager.removeCrossProfileIntentFilter(
+                    filter.filter.getIntentFilter(),
+                    mContext.getOpPackageName(),
+                    parentUserId,
+                    profileUserId,
+                    filter.flags);
+        } else {
+            return mIPackageManager.removeCrossProfileIntentFilter(
+                    filter.filter.getIntentFilter(),
+                    mContext.getOpPackageName(),
+                    profileUserId,
+                    parentUserId,
+                    filter.flags);
         }
     }
 
@@ -23346,14 +23388,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         applyManagedSubscriptionsPolicyIfRequired();
 
         int policyType = getManagedSubscriptionsPolicy().getPolicyType();
-        if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
-            final long id = mInjector.binderClearCallingIdentity();
-            try {
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
                 installOemDefaultDialerAndSmsApp(caller.getUserId());
                 updateTelephonyCrossProfileIntentFilters(parentUserId, caller.getUserId(), true);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+            } else if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS) {
+                updateTelephonyCrossProfileIntentFilters(parentUserId, caller.getUserId(), false);
             }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
