@@ -4298,6 +4298,11 @@ public class ComputerEngine implements Computer {
         if (Process.isSdkSandboxUid(uid)) {
             uid = getBaseSdkSandboxUid();
         }
+        if (Process.isIsolatedUid(uid)
+                && mPermissionManager.getHotwordDetectionServiceProvider() != null
+                && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
+            uid = getIsolatedOwner(uid);
+        }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
@@ -4333,6 +4338,11 @@ public class ComputerEngine implements Computer {
             int uid = uids[i];
             if (Process.isSdkSandboxUid(uid)) {
                 uid = getBaseSdkSandboxUid();
+            }
+            if (Process.isIsolatedUid(uid)
+                    && mPermissionManager.getHotwordDetectionServiceProvider() != null
+                    && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
+                uid = getIsolatedOwner(uid);
             }
             final int appId = UserHandle.getAppId(uid);
             final Object obj = mSettings.getSettingBase(appId);
