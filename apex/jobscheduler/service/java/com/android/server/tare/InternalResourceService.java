@@ -1351,6 +1351,7 @@ public class InternalResourceService extends SystemService {
         }
 
         @Override
+        @EconomyManager.EnabledMode
         public int getEnabledMode() {
             return InternalResourceService.this.getEnabledMode();
         }
