@@ -2344,7 +2344,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     @VisibleForTesting
-    void clearInternalHandleAfterTest() {
+    void clearInternalHandlerAfterTest() {
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
         }
