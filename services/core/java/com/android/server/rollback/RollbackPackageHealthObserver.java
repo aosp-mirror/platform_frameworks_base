@@ -17,10 +17,12 @@
 package com.android.server.rollback;
 
 import android.annotation.AnyThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -68,6 +70,9 @@ import java.util.function.Consumer;
 final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
+    private static final String PROP_ATTEMPTING_REBOOT = "sys.attempting_reboot";
+    private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
+            | ApplicationInfo.FLAG_SYSTEM;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -114,10 +119,10 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
             // For native crashes, we will directly roll back any available rollbacks
             // Note: For non-native crashes the rollback-all step has higher impact
             impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
-        } else if (mitigationCount == 1 && getAvailableRollback(failedPackage) != null) {
+        } else if (getAvailableRollback(failedPackage) != null) {
             // Rollback is available, we may get a callback into #execute
             impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
-        } else if (mitigationCount > 1 && anyRollbackAvailable) {
+        } else if (anyRollbackAvailable) {
             // If any rollbacks are available, we will commit them
             impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_70;
         }
@@ -133,14 +138,10 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
             return true;
         }
 
-        if (mitigationCount == 1) {
-            RollbackInfo rollback = getAvailableRollback(failedPackage);
-            if (rollback == null) {
-                Slog.w(TAG, "Expected rollback but no valid rollback found for " + failedPackage);
-                return false;
-            }
+        RollbackInfo rollback = getAvailableRollback(failedPackage);
+        if (rollback != null) {
             mHandler.post(() -> rollbackPackage(rollback, failedPackage, rollbackReason));
-        } else if (mitigationCount > 1) {
+        } else {
             mHandler.post(() -> rollbackAll(rollbackReason));
         }
 
@@ -151,6 +152,30 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public boolean isPersistent() {
+        return true;
+    }
+
+    @Override
+    public boolean mayObservePackage(String packageName) {
+        if (mContext.getSystemService(RollbackManager.class)
+                .getAvailableRollbacks().isEmpty()) {
+            return false;
+        }
+        return isPersistentSystemApp(packageName);
+    }
+
+    private boolean isPersistentSystemApp(@NonNull String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
+            return (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     private void assertInWorkerThread() {
@@ -425,6 +450,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                 markStagedSessionHandled(rollback.getRollbackId());
                 // Wait for all pending staged sessions to get handled before rebooting.
                 if (isPendingStagedSessionsEmpty()) {
+                    SystemProperties.set(PROP_ATTEMPTING_REBOOT, "true");
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
                 }
             }
