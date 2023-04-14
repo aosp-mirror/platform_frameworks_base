@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menu Kebolehaksesan"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Menu Kebolehcapaian menyediakan menu pada skrin yang besar untuk mengawal peranti anda. Anda boleh mengunci peranti anda, mengawal kelantangan dan kecerahan, mengambil tangkapan skrin dan banyak lagi."</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"Menu Kebolehaksesan menyediakan menu pada skrin yang besar untuk mengawal peranti anda. Anda boleh mengunci peranti anda, mengawal kelantangan dan kecerahan, mengambil tangkapan skrin dan banyak lagi."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Tetapan Kebolehaksesan"</string>
@@ -20,7 +20,7 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"Kurangkan kecerahan"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Pergi ke skrin sebelumnya"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Pergi ke skrin seterusnya"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"Menu Kebolehcapaian menyediakan menu pada skrin yang besar untuk mengawal peranti anda. Anda boleh mengunci peranti anda, mengawal kelantangan dan kecerahan, mengambil tangkapan skrin dan pelbagai lagi."</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"Menu Kebolehaksesan menyediakan menu pada skrin yang besar untuk mengawal peranti anda. Anda boleh mengunci peranti anda, mengawal kelantangan dan kecerahan, mengambil tangkapan skrin dan pelbagai lagi."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Kawal peranti melalui menu besar"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Tetapan Menu Kebolehaksesan"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Butang besar"</string>

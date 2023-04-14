@@ -12,20 +12,20 @@
     <string name="lockscreen_label" msgid="648347953557887087">"ସ୍କ୍ରୀନ୍‌ ଲକ୍ କରନ୍ତୁ"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"କ୍ୱିକ ସେଟିଂସ"</string>
     <string name="notifications_label" msgid="6829741046963013567">"ବିଜ୍ଞପ୍ତି"</string>
-    <string name="screenshot_label" msgid="863978141223970162">"ସ୍କ୍ରିନସଟ୍‌"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"ସ୍କ୍ରିନସଟ"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"ସ୍କ୍ରୀନଶଟ୍‌ ନିଅନ୍ତୁ"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"ଭଲ୍ୟୁମ୍ ବଢ଼ାନ୍ତୁ"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"ଭଲ୍ୟୁମ୍ କମାନ୍ତୁ"</string>
     <string name="brightness_up_label" msgid="8010753822854544846">"ଉଜ୍ଜ୍ୱଳତା ବଢ଼ାନ୍ତୁ"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"ଉଜ୍ଜ୍ୱଳତା କମ୍ କରନ୍ତୁ"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"ଉଜ୍ଜ୍ୱଳତା କମ କରନ୍ତୁ"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"ପୂର୍ବବର୍ତ୍ତୀ ସ୍କ୍ରିନ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"ପରବର୍ତ୍ତୀ ସ୍କ୍ରିନ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"ଆପଣଙ୍କ ଡିଭାଇସକୁ ନିୟନ୍ତ୍ରଣ କରିବା ପାଇଁ ଆକ୍ସେସିବିଲିଟୀ ମେନୁ ଏକ ବଡ଼ ଅନ-ସ୍କ୍ରିନ ମେନୁ ପ୍ରଦାନ କରେ। ଆପଣ ଆପଣଙ୍କ ଡିଭାଇସକୁ ଲକ କରିପାରିବେ, ଭଲ୍ୟୁମ ଓ ଉଜ୍ଜ୍ୱଳତାକୁ ନିୟନ୍ତ୍ରଣ କରିପାରିବେ, ସ୍କ୍ରିନସଟ ନେଇପାରିବେ ଏବଂ ଆହୁରି ଅନେକ କିଛି କରିପାରିବେ।"</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"ବଡ଼ ମେନୁ ମାଧ୍ୟମରେ ଡିଭାଇସକୁ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"ଆକ୍ସେସିବିଲିଟୀ ମେନୁ ସେଟିଂସ"</string>
-    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"ବଡ଼ ବଟନ୍"</string>
-    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"ଆକ୍ସେସିବିଲିଟୀ ମେନୁ ବଟନ୍‌ର ଆକାର ବଢ଼ାନ୍ତୁ"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"ବଡ଼ ବଟନ"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"ଆକ୍ସେସିବିଲିଟୀ ମେନୁ ବଟନର ଆକାର ବଢ଼ାନ୍ତୁ"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"ସାହାଯ୍ୟ"</string>
     <string name="brightness_percentage_label" msgid="7391554573977867369">"ଉଜ୍ଜ୍ୱଳତା <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
-    <string name="music_volume_percentage_label" msgid="398635599662604706">"ସଙ୍ଗୀତର ଭଲ୍ୟୁମ୍ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"ମ୍ୟୁଜିକର ଭଲ୍ୟୁମ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
 </resources>

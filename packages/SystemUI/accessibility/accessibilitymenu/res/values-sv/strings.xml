@@ -5,7 +5,7 @@
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Tillgänglighetsmenyn är en stor meny på skärmen som du kan styra enheten med. Du kan låsa enheten, ställa in volym och ljusstyrka, ta skärmbilder och annat."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistent"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistent"</string>
-    <string name="a11y_settings_label" msgid="3977714687248445050">"Tillgänglighetsinställningar"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Tillgänglighets­inställningar"</string>
     <string name="power_label" msgid="7699720321491287839">"Styrka"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Strömalternativ"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Senaste apparna"</string>
@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Tillbaka till föregående skärm"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Fortsätt till nästa skärm"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Tillgänglighetsmenyn är en stor meny på skärmen som du kan styra enheten med. Du kan låsa enheten, ställa in volym och ljusstyrka, ta skärmbilder och annat."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Styra enheten via en stor meny"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Styr enheten via en stor meny"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Inställningar för tillgänglighetsmenyn"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Stora knappar"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Öka knapparnas storlek i tillgänglighetsmenyn"</string>

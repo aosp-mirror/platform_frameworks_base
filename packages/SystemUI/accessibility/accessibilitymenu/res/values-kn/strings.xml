@@ -9,7 +9,7 @@
     <string name="power_label" msgid="7699720321491287839">"ಪವರ್ ಬಟನ್‌"</string>
     <string name="power_utterance" msgid="7444296686402104807">"ಪವರ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
-    <string name="lockscreen_label" msgid="648347953557887087">"ಲಾಕ್ ಪರದೆ"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
     <string name="notifications_label" msgid="6829741046963013567">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="screenshot_label" msgid="863978141223970162">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
@@ -26,6 +26,6 @@
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"ದೊಡ್ಡ ಬಟನ್‌ಗಳು"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಮೆನು ಬಟನ್‌ಗಳ ಗಾತ್ರವನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"ಸಹಾಯ"</string>
-    <string name="brightness_percentage_label" msgid="7391554573977867369">"ಪ್ರಕಾಶಮಾನ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"ಪ್ರಖರತೆ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
     <string name="music_volume_percentage_label" msgid="398635599662604706">"ಸಂಗೀತ ವಾಲ್ಯೂಮ್‌ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
 </resources>

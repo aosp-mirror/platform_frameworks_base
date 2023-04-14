@@ -24,7 +24,7 @@
     <string name="accessibility_menu_summary" msgid="340071398148208130">"बड़े मेन्यू की मदद से डिवाइस को कंट्रोल करें"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"सुलभता मेन्यू सेटिंग"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"बड़े बटन"</string>
-    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"सुलभता मेन्यू के बटनाें का आकार बढ़ाएं"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"सुलभता मेन्यू के बटनाें का साइज़ बढ़ाएं"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"सहायता"</string>
     <string name="brightness_percentage_label" msgid="7391554573977867369">"स्क्रीन की रोशनी <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
     <string name="music_volume_percentage_label" msgid="398635599662604706">"संगीत की आवाज़ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>

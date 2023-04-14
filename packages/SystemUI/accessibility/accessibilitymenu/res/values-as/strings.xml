@@ -8,12 +8,12 @@
     <string name="a11y_settings_label" msgid="3977714687248445050">"সাধ্য সুবিধাৰ ছেটিং"</string>
     <string name="power_label" msgid="7699720321491287839">"অন/অফ"</string>
     <string name="power_utterance" msgid="7444296686402104807">"অন/অফ বুটামৰ বিকল্পসমূহ"</string>
-    <string name="recent_apps_label" msgid="6583276995616385847">"শেহতীয়া এপসমূহ"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"শেহতীয়া এপ্‌সমূহ"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"লক স্ক্ৰীন"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"ক্ষিপ্ৰ ছেটিং"</string>
     <string name="notifications_label" msgid="6829741046963013567">"জাননীসমূহ"</string>
-    <string name="screenshot_label" msgid="863978141223970162">"স্ক্ৰীণশ্বট"</string>
-    <string name="screenshot_utterance" msgid="1430760563401895074">"স্ক্ৰীণশ্বট লওক"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"স্ক্ৰীনশ্বট"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"স্ক্ৰীনশ্বট লওক"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"ভলিউম বঢ়াওক"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"ভলিউম কমাওক"</string>
     <string name="brightness_up_label" msgid="8010753822854544846">"উজ্জ্বলতা বঢ়াওক"</string>

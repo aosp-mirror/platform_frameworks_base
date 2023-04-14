@@ -27,5 +27,5 @@
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"अ‍ॅक्सेसिबिलिटी मेनू बटणांचा आकार वाढवा"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"मदत"</string>
     <string name="brightness_percentage_label" msgid="7391554573977867369">"ब्राइटनेस <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
-    <string name="music_volume_percentage_label" msgid="398635599662604706">"गाण्याचा व्हॉल्यूम <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"संगीताचा व्हॉल्यूम <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
 </resources>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Toeganklikheid- kieslys"</string>
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Toeganklikheid-kieslys"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Die Toeganklikheidkieslys bied ’n groot kieslys op die skerm om jou toestel te beheer. Jy kan jou toestel sluit, volume en helderheid beheer, skermskote neem, en meer."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistent"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistent"</string>
-    <string name="a11y_settings_label" msgid="3977714687248445050">"Toeganklikheidinstellings"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Toeganklikheid-instellings"</string>
     <string name="power_label" msgid="7699720321491287839">"Krag"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Kragopsies"</string>
-    <string name="recent_apps_label" msgid="6583276995616385847">"Onlangse programme"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"Onlangse apps"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"Sluitskerm"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"Kitsinstellings"</string>
     <string name="notifications_label" msgid="6829741046963013567">"Kennisgewings"</string>
