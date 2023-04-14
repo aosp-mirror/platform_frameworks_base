@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.FileUtils;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -85,8 +86,8 @@ class WallpaperDataParser {
         mWallpaperCropper = wallpaperCropper;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
-        mIsLockscreenLiveWallpaperEnabled = context.getSystemService(WallpaperManager.class)
-                .isLockscreenLiveWallpaperEnabled();
+        mIsLockscreenLiveWallpaperEnabled =
+                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", false);
     }
 
     private JournaledFile makeJournaledFile(int userId) {
