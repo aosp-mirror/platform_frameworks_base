@@ -2922,14 +2922,15 @@ public class BubbleStackView extends FrameLayout
         final float targetX = isLtr
                 ? mTempRect.left - margin
                 : mTempRect.right + margin - mManageMenu.getWidth();
-        final float targetY = mTempRect.bottom - mManageMenu.getHeight();
+        final float menuHeight = getVisibleManageMenuHeight();
+        final float targetY = mTempRect.bottom - menuHeight;
 
         final float xOffsetForAnimation = (isLtr ? 1 : -1) * mManageMenu.getWidth() / 4f;
         if (show) {
             mManageMenu.setScaleX(0.5f);
             mManageMenu.setScaleY(0.5f);
             mManageMenu.setTranslationX(targetX - xOffsetForAnimation);
-            mManageMenu.setTranslationY(targetY + mManageMenu.getHeight() / 4f);
+            mManageMenu.setTranslationY(targetY + menuHeight / 4f);
             mManageMenu.setAlpha(0f);
 
             PhysicsAnimator.getInstance(mManageMenu)
@@ -2955,7 +2956,7 @@ public class BubbleStackView extends FrameLayout
                     .spring(DynamicAnimation.SCALE_X, 0.5f)
                     .spring(DynamicAnimation.SCALE_Y, 0.5f)
                     .spring(DynamicAnimation.TRANSLATION_X, targetX - xOffsetForAnimation)
-                    .spring(DynamicAnimation.TRANSLATION_Y, targetY + mManageMenu.getHeight() / 4f)
+                    .spring(DynamicAnimation.TRANSLATION_Y, targetY + menuHeight / 4f)
                     .withEndActions(() -> {
                         mManageMenu.setVisibility(View.INVISIBLE);
                         if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
@@ -3269,6 +3270,24 @@ public class BubbleStackView extends FrameLayout
             return 0;
         }
         return mBubbleContainer.indexOfChild(provider.getIconView());
+    }
+
+    /**
+     * Menu height calculated for animation
+     * It takes into account view visibility to get the correct total height
+     */
+    private float getVisibleManageMenuHeight() {
+        float menuHeight = 0;
+
+        for (int i = 0; i < mManageMenu.getChildCount(); i++) {
+            View subview = mManageMenu.getChildAt(i);
+
+            if (subview.getVisibility() == VISIBLE) {
+                menuHeight += subview.getHeight();
+            }
+        }
+
+        return menuHeight;
     }
 
     /**
