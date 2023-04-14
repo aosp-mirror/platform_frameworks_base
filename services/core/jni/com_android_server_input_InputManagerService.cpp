@@ -485,17 +485,7 @@ void NativeInputManager::dump(std::string& dump) {
     }
     dump += "\n";
 
-    mInputManager->getReader().dump(dump);
-    dump += "\n";
-
-    mInputManager->getBlocker().dump(dump);
-    dump += "\n";
-
-    mInputManager->getProcessor().dump(dump);
-    dump += "\n";
-
-    mInputManager->getDispatcher().dump(dump);
-    dump += "\n";
+    mInputManager->dump(dump);
 }
 
 bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -760,7 +750,6 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
-    mInputManager->getBlocker().notifyInputDevicesChanged(inputDevices);
     JNIEnv* env = jniEnv();
 
     size_t count = inputDevices.size();
