@@ -299,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"सुरू"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"थांबा"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"एकहाती मोड"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"कॉंट्रास्ट"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"साधारण"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"मध्यम"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"उच्च"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"डिव्हाइसचा मायक्रोफोन अनब्लॉक करायचा आहे का?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"डिव्हाइसचा कॅमेरा अनब्लॉक करायचा आहे का?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"डिव्हाइसचा कॅमेरा आणि मायक्रोफोन अनब्लॉक करायचा आहे का?"</string>
@@ -458,6 +462,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"बंद करा"</string>
     <string name="sound_settings" msgid="8874581353127418308">"आवाज आणि व्हायब्रेशन"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"सेटिंग्ज"</string>
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"सुरक्षित आवाजापर्यंत कमी केले"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"आवाजाची पातळी शिफारस केलेल्या वेळेपेक्षा जास्त वेळ उच्च आहे"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ॲप पिन केले आहे"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"तुम्ही अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"तुम्ही अनपिन करेर्यंत हे त्याला दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी मागे आणि होम वर स्पर्श करा आणि धरून ठेवा."</string>
@@ -848,8 +854,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"मध्‍यम"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"लहान"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"मोठा"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"फुल स्क्रीन"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"पूर्ण झाले"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"संपादित करा"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"मॅग्निफायर विंडो सेटिंग्ज"</string>
@@ -885,6 +890,9 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सर्व नियंत्रणे काढून टाकली आहेत"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदल सेव्ह केले गेले नाहीत"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"इतर अ‍ॅप्स पहा"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"पुन्हा संगतवार लावा"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"नियंत्रणे जोडा"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"संपादनावर परत जा"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियंत्रणे लोड करता अली नाहीत. ॲपची सेटिंग्ज बदलली नसल्याची खात्री करण्यासाठी <xliff:g id="APP">%s</xliff:g> ॲप तपासा."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"कंपॅटिबल नियंत्रणे उपलब्ध नाहीत"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"इतर"</string>
@@ -1114,7 +1122,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"तुमचे कामाशी संबंधित धोरण तुम्हाला फक्त कार्य प्रोफाइलवरून फोन कॉल करन्याची अनुमती देते"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"बंद करा"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"लॉक स्क्रीन सेटिंग्ज"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"वाय-फाय उपलब्ध नाही"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"कॅमेरा ब्लॉक केला"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"कॅमेरा आणि मायक्रोफोन ब्लॉक केले आहेत"</string>

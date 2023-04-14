@@ -124,7 +124,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Головна"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Меню"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Спеціальні можливості"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Доступність"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Обернути екран"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Огляд"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
@@ -299,6 +299,14 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Почати"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зупинити"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим керування однією рукою"</string>
+    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Надати доступ до камери пристрою?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Надати доступ до камери й мікрофона?"</string>
@@ -458,6 +466,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"вимкнути"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук і вібрація"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Налаштування"</string>
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Гучність знижено до безпечнішого рівня"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Аудіо відтворювалося з високою гучністю довше, ніж рекомендується"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Додаток закріплено"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ви постійно бачитимете екран, доки не відкріпите його. Щоб відкріпити екран, натисніть і втримуйте кнопки \"Назад\" та \"Огляд\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ви бачитимете цей екран, доки не відкріпите його. Для цього натисніть і утримуйте кнопки \"Назад\" та \"Головний екран\"."</string>
@@ -477,11 +487,11 @@
     <string name="stream_system" msgid="7663148785370565134">"Система"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Дзвінок"</string>
     <string name="stream_music" msgid="2188224742361847580">"Медіа"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Сигнал"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Будильник"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Сповіщення"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Двотональний багаточастотний аналоговий сигнал"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"Спеціальні можливості"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"Доступність"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Дзвінок"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вібросигнал"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"без звуку"</string>
@@ -502,7 +512,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Увімкнути демонстраційний режим"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Показати демонстраційний режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Сигнал"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Будильник"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Гаманець"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Швидше й безпечніше сплачуйте за покупки за допомогою телефона"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показати все"</string>
@@ -848,12 +858,11 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Звичайна"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Мала"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Велика"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"На весь екран"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Готово"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Змінити"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Налаштування розміру лупи"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Кнопка спеціальних можливостей. Змініть або замініть її в Налаштуваннях.\n\n"<annotation id="link">"Переглянути налаштування"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Торкніться, щоб відкрити функції доступності. Змінити або замінити цю кнопку можна в Налаштуваннях.\n\n"<annotation id="link">"Налаштування"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Щоб тимчасово сховати кнопку, перемістіть її на край екрана"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Відмінити"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Ярлик функції \"<xliff:g id="FEATURE_NAME">%s</xliff:g>\" вилучено"</string>
@@ -885,6 +894,9 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усі елементи керування вилучено"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Зміни не збережено"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Переглянути інші додатки"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Упорядкувати"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Додати елементи керування"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Повернутися до редагування"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Не вдалося завантажити елементи керування. Перевірте в додатку <xliff:g id="APP">%s</xliff:g>, чи його налаштування не змінились."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Сумісні елементи керування недоступні"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Інше"</string>
@@ -1114,7 +1126,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Відповідно до правил організації ви можете телефонувати лише з робочого профілю"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Перейти в робочий профіль"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Закрити"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Параметри заблокованого екрана"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Мережа Wi-Fi недоступна"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камеру заблоковано"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камеру й мікрофон заблоковано"</string>

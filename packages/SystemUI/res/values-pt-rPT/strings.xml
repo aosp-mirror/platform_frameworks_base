@@ -299,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo para uma mão"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contraste"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Padrão"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Médio"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Alto"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Desbloquear o microfone do dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Desbloquear a câmara do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Pretende desbloquear a câmara e o microfone?"</string>
@@ -458,6 +462,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desativar"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Som e vibração"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Definições"</string>
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Volume reduzido para um nível mais seguro"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"O volume está elevado há mais tempo que o recomendado"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"A app está fixada"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Anterior e em Vista geral para soltar."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Anterior e em Página inicial para soltar."</string>
@@ -848,8 +854,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Médio"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Pequeno"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grande"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Ecrã inteiro"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Concluir"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Editar"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Definições da janela da lupa"</string>
@@ -885,6 +890,9 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controlos foram removidos."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Alterações não guardadas."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outras apps"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Reorganizar"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Adicionar controlos"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Regressar à edição"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Não foi possível carregar os controlos. Verifique a app <xliff:g id="APP">%s</xliff:g> para se certificar de que as definições da mesma não foram alteradas."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Controlos compatíveis indisponíveis"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
@@ -1114,7 +1122,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"A sua Política de Trabalho só lhe permite fazer chamadas telefónicas a partir do perfil de trabalho"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Mudar para perfil de trabalho"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fechar"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Definições do ecrã de bloqueio"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi indisponível"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Câmara bloqueada"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Câmara e microfone bloqueados"</string>
