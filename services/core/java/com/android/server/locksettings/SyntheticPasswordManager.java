@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
 
@@ -545,6 +546,11 @@ class SyntheticPasswordManager {
         return null;
     }
 
+    @VisibleForTesting
+    public boolean isAutoPinConfirmationFeatureAvailable() {
+        return LockPatternUtils.isAutoPinConfirmFeatureAvailable();
+    }
+
     private synchronized boolean isWeaverAvailable() {
         if (mWeaver != null) {
             return true;
@@ -901,8 +907,8 @@ class SyntheticPasswordManager {
             LockscreenCredential credential, SyntheticPassword sp, int userId) {
         long protectorId = generateProtectorId();
         int pinLength = PIN_LENGTH_UNAVAILABLE;
-        if (LockPatternUtils.isAutoPinConfirmFeatureAvailable()) {
-            pinLength = derivePinLength(credential, userId);
+        if (isAutoPinConfirmationFeatureAvailable()) {
+            pinLength = derivePinLength(credential.size(), credential.isPin(), userId);
         }
         // There's no need to store password data about an empty LSKF.
         PasswordData pwd = credential.isNone() ? null :
@@ -978,13 +984,13 @@ class SyntheticPasswordManager {
         return protectorId;
     }
 
-    private int derivePinLength(LockscreenCredential credential, int userId) {
-        if (!credential.isPin()
-                || !mStorage.getBoolean(LockPatternUtils.AUTO_PIN_CONFIRM, false, userId)
-                || credential.size() < LockPatternUtils.MIN_AUTO_PIN_REQUIREMENT_LENGTH) {
+    private int derivePinLength(int sizeOfCredential, boolean isPinCredential, int userId) {
+        if (!isPinCredential
+                || !mStorage.isAutoPinConfirmSettingEnabled(userId)
+                || sizeOfCredential < LockPatternUtils.MIN_AUTO_PIN_REQUIREMENT_LENGTH) {
             return PIN_LENGTH_UNAVAILABLE;
         }
-        return credential.size();
+        return sizeOfCredential;
     }
 
     public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
@@ -1347,16 +1353,36 @@ class SyntheticPasswordManager {
             savePasswordMetrics(credential, result.syntheticPassword, protectorId, userId);
             syncState(userId); // Not strictly needed as the upgrade can be re-done, but be safe.
         }
-        if (LockPatternUtils.isAutoPinConfirmFeatureAvailable()
-                && result.syntheticPassword != null && pwd != null) {
-            int expectedPinLength = derivePinLength(credential, userId);
-            if (pwd.pinLength != expectedPinLength) {
-                pwd.pinLength = expectedPinLength;
-                saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
-                syncState(userId);
-            }
-        }
         return result;
+    }
+
+    /**
+     * {@link LockPatternUtils#refreshStoredPinLength(int)}
+     * @param passwordMetrics passwordMetrics object containing the cached pin length
+     * @param userId userId of the user whose pin length we want to store on disk
+     * @param protectorId current LSKF based protectorId
+     * @return true/false depending on whether PIN length has been saved on disk
+     */
+    public boolean refreshPinLengthOnDisk(PasswordMetrics passwordMetrics,
+            long protectorId, int userId) {
+        if (!isAutoPinConfirmationFeatureAvailable()) {
+            return false;
+        }
+
+        byte[] pwdDataBytes = loadState(PASSWORD_DATA_NAME, protectorId, userId);
+        if (pwdDataBytes == null) {
+            return false;
+        }
+
+        PasswordData pwd = PasswordData.fromBytes(pwdDataBytes);
+        int pinLength = derivePinLength(passwordMetrics.length,
+                passwordMetrics.credType == CREDENTIAL_TYPE_PIN, userId);
+        if (pwd.pinLength != pinLength) {
+            pwd.pinLength = pinLength;
+            saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
+            syncState(userId);
+        }
+        return true;
     }
 
     /**
