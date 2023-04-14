@@ -509,7 +509,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"استفاده از زبان‌های سیستم"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"تنظیمات <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> بازنشد"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"این روش ورودی ممکن است بتواند تمام متنی را که تایپ می‌کنید جمع‌آوری کند، از جمله اطلاعات شخصی مانند گذرواژه‌ها و شماره‌های کارت اعتباری. این روش توسط برنامه <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ارائه می‌شود. از این روش ورودی استفاده می‌کنید؟"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"توجه: بعد از راه‌اندازی تا زمانی‌که قفل تلفنتان را باز نکنید، این برنامه نمی‌تواند شروع شود"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"توجه: بعداز بازراه‌اندازی تا زمانی‌که قفل تلفنتان را باز نکنید، این برنامه نمی‌تواند شروع شود"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"‏وضعیت ثبت IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ثبت‌شده"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ثبت نشده است"</string>
@@ -629,7 +629,7 @@
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"پیش‌فرض دستگاه"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیرفعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاهتان باید راه‌اندازی مجدد شود. اکنون راه‌اندازی مجدد کنید یا لغو کنید."</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاه باید بازراه‌اندازی شود. یا اکنون بازراه‌اندازی کنید یا لغو کنید."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"هدفون سیمی"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"روشن"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"خاموش"</string>

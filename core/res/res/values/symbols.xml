@@ -3141,7 +3141,6 @@
   <java-symbol type="style" name="AlertDialogWithEmergencyButton"/>
   <java-symbol type="string" name="work_mode_emergency_call_button" />
   <java-symbol type="string" name="work_mode_off_title" />
-  <java-symbol type="string" name="work_mode_off_message" />
   <java-symbol type="string" name="work_mode_turn_on" />
 
   <java-symbol type="string" name="deprecated_target_sdk_message" />

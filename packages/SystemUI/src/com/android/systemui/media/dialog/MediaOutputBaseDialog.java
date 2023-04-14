@@ -273,8 +273,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void start() {
         mMediaOutputController.start(this);
         if (isBroadcastSupported() && !mIsLeBroadcastCallbackRegistered) {
             mMediaOutputController.registerLeBroadcastServiceCallback(mExecutor,
@@ -284,8 +283,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void stop() {
         if (isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
             mMediaOutputController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
             mIsLeBroadcastCallbackRegistered = false;

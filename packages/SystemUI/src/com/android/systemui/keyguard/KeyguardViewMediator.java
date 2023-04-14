@@ -857,6 +857,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             mCustomMessage = null;
             return message;
         }
+
+        @Override
+        public void setCustomMessage(CharSequence customMessage) {
+            mCustomMessage = customMessage;
+        }
     };
 
     /**

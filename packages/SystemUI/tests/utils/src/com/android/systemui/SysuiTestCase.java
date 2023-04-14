@@ -22,12 +22,14 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.ParcelFileDescriptor;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.testing.LeakCheck;
+import android.testing.TestWithLooperRule;
 import android.testing.TestableLooper;
 import android.util.Log;
 
@@ -73,12 +75,21 @@ public abstract class SysuiTestCase {
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+
+    // set the highest order so it's the innermost rule
+    @Rule(order = Integer.MAX_VALUE)
+    public TestWithLooperRule mlooperRule = new TestWithLooperRule();
+
     public TestableDependency mDependency;
     private Instrumentation mRealInstrumentation;
     private FakeBroadcastDispatcher mFakeBroadcastDispatcher;
 
     @Before
     public void SysuiSetup() throws Exception {
+        // Manually associate a Display to context for Robolectric test. Similar to b/214297409
+        if (isRobolectricTest()) {
+            mContext = mContext.createDefaultDisplayContext();
+        }
         SystemUIInitializer initializer =
                 SystemUIInitializerFactory.createFromConfigNoAssert(mContext);
         initializer.init(true);
@@ -213,6 +224,10 @@ public abstract class SysuiTestCase {
         // Ensure we are non-idle, so the idle handler can run.
         h.post(new EmptyRunnable());
         idler.waitForIdle();
+    }
+
+    public static boolean isRobolectricTest() {
+        return Build.FINGERPRINT.contains("robolectric");
     }
 
     private static final void validateThread(Looper l) {

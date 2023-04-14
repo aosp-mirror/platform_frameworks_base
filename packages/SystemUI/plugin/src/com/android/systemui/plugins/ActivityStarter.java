@@ -79,6 +79,11 @@ public interface ActivityStarter {
     void postStartActivityDismissingKeyguard(Intent intent, int delay);
     void postStartActivityDismissingKeyguard(Intent intent, int delay,
             @Nullable ActivityLaunchAnimator.Controller animationController);
+
+    /** Posts a start activity intent that dismisses keyguard. */
+    void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            @Nullable String customMessage);
     void postStartActivityDismissingKeyguard(PendingIntent intent);
 
     /**
@@ -92,6 +97,10 @@ public interface ActivityStarter {
 
     void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
             boolean afterKeyguardGone);
+
+    /** Authenticates if needed and dismisses keyguard to execute an action. */
+    void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
+            boolean afterKeyguardGone, @Nullable String customMessage);
 
     interface Callback {
         void onActivityStarted(int resultCode);

@@ -274,9 +274,6 @@ public class PipTransition extends PipTransitionController {
         if (!requestHasPipEnter(request)) {
             throw new IllegalStateException("Called PiP augmentRequest when request has no PiP");
         }
-        mEnterAnimationType = mPipOrganizer.shouldAlwaysFadeIn()
-                ? ANIM_TYPE_ALPHA
-                : mPipAnimationController.takeOneShotEnterAnimationType();
         if (mEnterAnimationType == ANIM_TYPE_ALPHA) {
             mRequestedEnterTransition = transition;
             mRequestedEnterTask = request.getTriggerTask().token;
@@ -614,6 +611,7 @@ public class PipTransition extends PipTransitionController {
                         0 /* startingAngle */, rotationDelta);
         animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
                 .setPipAnimationCallback(mPipAnimationCallback)
+                .setPipTransactionHandler(mPipOrganizer.getPipTransactionHandler())
                 .setDuration(mEnterExitAnimationDuration)
                 .start();
     }
@@ -663,6 +661,11 @@ public class PipTransition extends PipTransitionController {
                     + transitTypeToString(transitType), new Throwable());
         }
         return false;
+    }
+
+    @Override
+    public void setEnterAnimationType(@PipAnimationController.AnimationType int type) {
+        mEnterAnimationType = type;
     }
 
     private void startEnterAnimation(@NonNull TransitionInfo info,
@@ -786,8 +789,6 @@ public class PipTransition extends PipTransitionController {
 
         final int enterAnimationType = mEnterAnimationType;
         if (enterAnimationType == ANIM_TYPE_ALPHA) {
-            // Restore to default type.
-            mEnterAnimationType = ANIM_TYPE_BOUNDS;
             startTransaction.setAlpha(leash, 0f);
         }
         startTransaction.apply();

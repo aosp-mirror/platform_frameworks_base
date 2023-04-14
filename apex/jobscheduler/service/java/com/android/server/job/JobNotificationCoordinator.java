@@ -27,15 +27,26 @@ import android.content.pm.UserPackage;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Slog;
+import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.notification.NotificationManagerInternal;
 
 class JobNotificationCoordinator {
     private static final String TAG = "JobNotificationCoordinator";
+
+    /**
+     * Local lock for independent objects like mUijNotifications and mUijNotificationChannels which
+     * don't depend on other JS objects such as JobServiceContext which require the global JS lock.
+     *
+     * Note: do <b>NOT</b> acquire the global lock while this one is held.
+     */
+    private final Object mUijLock = new Object();
 
     /**
      * Mapping of UserPackage -> {notificationId -> List<JobServiceContext>} to track which jobs
@@ -48,6 +59,27 @@ class JobNotificationCoordinator {
      */
     private final ArrayMap<JobServiceContext, NotificationDetails> mNotificationDetails =
             new ArrayMap<>();
+
+    /**
+     * Mapping of userId -> {packageName, notificationIds} tracking which notifications
+     * associated with each app belong to user-initiated jobs.
+     *
+     * Note: this map can be accessed without holding the main JS lock, so that other services like
+     * NotificationManagerService can call into JS and verify associations.
+     */
+    @GuardedBy("mUijLock")
+    private final SparseArrayMap<String, IntArray> mUijNotifications = new SparseArrayMap<>();
+
+    /**
+     * Mapping of userId -> {packageName, notificationChannels} tracking which notification channels
+     * associated with each app are hosting a user-initiated job notification.
+     *
+     * Note: this map can be accessed without holding the main JS lock, so that other services like
+     * NotificationManagerService can call into JS and verify associations.
+     */
+    @GuardedBy("mUijLock")
+    private final SparseArrayMap<String, ArraySet<String>> mUijNotificationChannels =
+            new SparseArrayMap<>();
 
     private static final class NotificationDetails {
         @NonNull
@@ -81,15 +113,24 @@ class JobNotificationCoordinator {
             int callingPid, int callingUid, int notificationId, @NonNull Notification notification,
             @JobService.JobEndNotificationPolicy int jobEndNotificationPolicy) {
         validateNotification(packageName, callingUid, notification, jobEndNotificationPolicy);
+        final JobStatus jobStatus = hostingContext.getRunningJobLocked();
         final NotificationDetails oldDetails = mNotificationDetails.get(hostingContext);
         if (oldDetails != null && oldDetails.notificationId != notificationId) {
             // App is switching notification IDs. Remove association with the old one.
-            removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED);
+            removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED,
+                    jobStatus);
         }
         final int userId = UserHandle.getUserId(callingUid);
-        final JobStatus jobStatus = hostingContext.getRunningJobLocked();
         if (jobStatus != null && jobStatus.startedAsUserInitiatedJob) {
             notification.flags |= Notification.FLAG_USER_INITIATED_JOB;
+            synchronized (mUijLock) {
+                maybeCreateUijNotificationSetsLocked(userId, packageName);
+                final IntArray notificationIds = mUijNotifications.get(userId, packageName);
+                if (notificationIds.indexOf(notificationId) == -1) {
+                    notificationIds.add(notificationId);
+                }
+                mUijNotificationChannels.get(userId, packageName).add(notification.getChannelId());
+            }
         }
         final UserPackage userPackage = UserPackage.of(userId, packageName);
         final NotificationDetails details = new NotificationDetails(
@@ -110,7 +151,7 @@ class JobNotificationCoordinator {
     }
 
     void removeNotificationAssociation(@NonNull JobServiceContext hostingContext,
-            @JobParameters.StopReason int stopReason) {
+            @JobParameters.StopReason int stopReason, JobStatus completedJob) {
         final NotificationDetails details = mNotificationDetails.remove(hostingContext);
         if (details == null) {
             return;
@@ -121,10 +162,11 @@ class JobNotificationCoordinator {
             Slog.wtf(TAG, "Association data structures not in sync");
             return;
         }
-        final String packageName = details.userPackage.packageName;
         final int userId = UserHandle.getUserId(details.appUid);
+        final String packageName = details.userPackage.packageName;
+        final int notificationId = details.notificationId;
         boolean stripUijFlag = true;
-        ArraySet<JobServiceContext> associatedContexts = associations.get(details.notificationId);
+        ArraySet<JobServiceContext> associatedContexts = associations.get(notificationId);
         if (associatedContexts == null || associatedContexts.isEmpty()) {
             // No more jobs using this notification. Apply the final job stop policy.
             // If the user attempted to stop the job/app, then always remove the notification
@@ -133,23 +175,50 @@ class JobNotificationCoordinator {
                     || stopReason == JobParameters.STOP_REASON_USER) {
                 mNotificationManagerInternal.cancelNotification(
                         packageName, packageName, details.appUid, details.appPid, /* tag */ null,
-                        details.notificationId, userId);
+                        notificationId, userId);
                 stripUijFlag = false;
             }
         } else {
             // Strip the UIJ flag only if there are no other UIJs associated with the notification
-            stripUijFlag = !isNotificationAssociatedWithAnyUserInitiatedJobs(
-                    details.notificationId, userId, packageName);
+            stripUijFlag = !isNotificationUsedForAnyUij(userId, packageName, notificationId);
         }
         if (stripUijFlag) {
-            // Strip the user-initiated job flag from the notification.
             mNotificationManagerInternal.removeUserInitiatedJobFlagFromNotification(
-                    packageName, details.notificationId, userId);
+                    packageName, notificationId, userId);
+        }
+
+        // Clean up UIJ related objects if the just completed job was a UIJ
+        if (completedJob != null && completedJob.startedAsUserInitiatedJob) {
+            maybeDeleteNotificationIdAssociation(userId, packageName, notificationId);
+            maybeDeleteNotificationChannelAssociation(
+                    userId, packageName, details.notificationChannel);
         }
     }
 
     boolean isNotificationAssociatedWithAnyUserInitiatedJobs(int notificationId,
-            int userId, String packageName) {
+            int userId, @NonNull String packageName) {
+        synchronized (mUijLock) {
+            final IntArray notifications = mUijNotifications.get(userId, packageName);
+            if (notifications != null) {
+                return notifications.indexOf(notificationId) != -1;
+            }
+            return false;
+        }
+    }
+
+    boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+            @NonNull String notificationChannel, int userId, @NonNull String packageName) {
+        synchronized (mUijLock) {
+            final ArraySet<String> channels = mUijNotificationChannels.get(userId, packageName);
+            if (channels != null) {
+                return channels.contains(notificationChannel);
+            }
+            return false;
+        }
+    }
+
+    private boolean isNotificationUsedForAnyUij(int userId, String packageName,
+            int notificationId) {
         final UserPackage pkgDetails = UserPackage.of(userId, packageName);
         final SparseSetArray<JobServiceContext> associations = mCurrentAssociations.get(pkgDetails);
         if (associations == null) {
@@ -170,8 +239,26 @@ class JobNotificationCoordinator {
         return false;
     }
 
-    boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(String notificationChannel,
-            int userId, String packageName) {
+    private void maybeDeleteNotificationIdAssociation(int userId, String packageName,
+            int notificationId) {
+        if (isNotificationUsedForAnyUij(userId, packageName, notificationId)) {
+            return;
+        }
+
+        // Safe to delete - no UIJs for this package are using this notification id
+        synchronized (mUijLock) {
+            final IntArray notifications = mUijNotifications.get(userId, packageName);
+            if (notifications != null) {
+                notifications.remove(notifications.indexOf(notificationId));
+                if (notifications.size() == 0) {
+                    mUijNotifications.delete(userId, packageName);
+                }
+            }
+        }
+    }
+
+    private void maybeDeleteNotificationChannelAssociation(int userId, String packageName,
+            String notificationChannel) {
         for (int i = mNotificationDetails.size() - 1; i >= 0; i--) {
             final JobServiceContext jsc = mNotificationDetails.keyAt(i);
             final NotificationDetails details = mNotificationDetails.get(jsc);
@@ -183,11 +270,31 @@ class JobNotificationCoordinator {
                     && details.notificationChannel.equals(notificationChannel)) {
                 final JobStatus jobStatus = jsc.getRunningJobLocked();
                 if (jobStatus != null && jobStatus.startedAsUserInitiatedJob) {
-                    return true;
+                    return;
                 }
             }
         }
-        return false;
+
+        // Safe to delete - no UIJs for this package are using this notification channel
+        synchronized (mUijLock) {
+            ArraySet<String> channels = mUijNotificationChannels.get(userId, packageName);
+            if (channels != null) {
+                channels.remove(notificationChannel);
+                if (channels.isEmpty()) {
+                    mUijNotificationChannels.delete(userId, packageName);
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mUijLock")
+    private void maybeCreateUijNotificationSetsLocked(int userId, String packageName) {
+        if (mUijNotifications.get(userId, packageName) == null) {
+            mUijNotifications.add(userId, packageName, new IntArray());
+        }
+        if (mUijNotificationChannels.get(userId, packageName) == null) {
+            mUijNotificationChannels.add(userId, packageName, new ArraySet<>());
+        }
     }
 
     private void validateNotification(@NonNull String packageName, int callingUid,

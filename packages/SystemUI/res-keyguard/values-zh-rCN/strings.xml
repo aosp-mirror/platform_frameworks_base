@@ -21,14 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"输入您的 PIN 码"</string>
-    <!-- no translation found for keyguard_enter_pin (8114529922480276834) -->
-    <skip />
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"输入 PIN 码"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"绘制您的图案"</string>
-    <!-- no translation found for keyguard_enter_pattern (7616595160901084119) -->
-    <skip />
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"绘制图案"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"输入您的密码"</string>
-    <!-- no translation found for keyguard_enter_password (6483623792371009758) -->
-    <skip />
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"输入密码"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"SIM 卡无效。"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"已充满电"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在无线充电"</string>
@@ -58,68 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"出现错误，无法停用 eSIM 卡。"</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"输入"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"图案错误"</string>
-    <!-- no translation found for kg_wrong_pattern_try_again (3603524940234151881) -->
-    <skip />
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"图案有误。请重试。"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"密码错误"</string>
-    <!-- no translation found for kg_wrong_password_try_again (6602878676125765920) -->
-    <skip />
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"密码有误。请重试。"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN 码错误"</string>
-    <!-- no translation found for kg_wrong_pin_try_again (3129729383303430190) -->
-    <skip />
-    <!-- no translation found for kg_wrong_input_try_fp_suggestion (3143861542242024833) -->
-    <skip />
-    <!-- no translation found for kg_fp_not_recognized (5183108260932029241) -->
-    <skip />
-    <!-- no translation found for bouncer_face_not_recognized (1666128054475597485) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pin (4752168242723808390) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_password (1473132729225398039) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pattern (4867893307468801501) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pin (5850845723433047605) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_password (5551690347827728042) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pattern (736884689355181602) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pin_or_fp (5635161174698729890) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_password_or_fp (2251295907826814237) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pattern_or_fp (2391870539909135046) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_dpm_lock (6002804765868345917) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pin (5374732179740050373) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_password (9097968458291129795) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pattern (215072203613597906) -->
-    <skip />
-    <!-- no translation found for kg_prompt_unattended_update (8223448855578632202) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pin_auth_timeout (5868644725126275245) -->
-    <skip />
-    <!-- no translation found for kg_prompt_password_auth_timeout (5809110458491920871) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pattern_auth_timeout (1860605401869262178) -->
-    <skip />
-    <!-- no translation found for kg_prompt_auth_timeout (6620679830980315048) -->
-    <skip />
-    <!-- no translation found for kg_face_locked_out (2751559491287575) -->
-    <skip />
-    <!-- no translation found for kg_fp_locked_out (6228277682396768830) -->
-    <skip />
-    <!-- no translation found for kg_trust_agent_disabled (5400691179958727891) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pin (5492230176361601475) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pattern (8266214607346180952) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_password (6170245108400198659) -->
-    <skip />
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN 码有误。请重试。"</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"或使用指纹解锁"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"未能识别指纹"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"无法识别面孔"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"请重试，或输入 PIN 码"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"请重试，或输入密码"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"请重试，或绘制图案"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"如果出错的尝试次数太多，必须输入 PIN 码才能解锁"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"如果出错的尝试次数太多，必须输入密码才能解锁"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"如果出错的尝试次数太多，必须绘制图案才能解锁"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"请使用 PIN 码或指纹解锁"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"请使用密码或指纹解锁"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"请使用图案或指纹解锁"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"为提高安全性，工作政策已锁定设备"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"一旦设备被锁定，必须输入 PIN 码才能解锁"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"一旦设备被锁定，必须输入密码才能解锁"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"一旦设备被锁定，必须绘制图案才能解锁"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"可用更新会在设备闲置期间安装"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"需要锁定设备以提高安全性。已有一段时间未使用 PIN 码了。"</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"需要锁定设备以提高安全性。已有一段时间未使用密码了。"</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"需要锁定设备以提高安全性。已有一段时间未使用图案了。"</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"需要锁定设备以提高安全性。设备处于未锁定状态已有一段时间了。"</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"无法使用面孔解锁。尝试次数太多。"</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"无法使用指纹解锁。尝试次数太多。"</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"可信代理已被停用"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"输错 PIN 码的尝试次数太多"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"绘错图案的尝试次数太多"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"输错密码的尝试次数太多"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{请在 # 秒后重试。}other{请在 # 秒后重试。}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"请输入 SIM 卡 PIN 码。"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"请输入“<xliff:g id="CARRIER">%1$s</xliff:g>”的 SIM 卡 PIN 码。"</string>
@@ -142,12 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM 卡 PUK 码操作失败！"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"切换输入法"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"飞行模式"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (3321211830602827742) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (2672166323886110512) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (3967993994418885887) -->
-    <skip />
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"设备重启后，必须绘制图案才能解锁"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"设备重启后，必须输入 PIN 码才能解锁"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"设备重启后，必须输入密码才能解锁"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用图案"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"为增强安全性，请改用 PIN 码"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"为增强安全性，请改用密码"</string>

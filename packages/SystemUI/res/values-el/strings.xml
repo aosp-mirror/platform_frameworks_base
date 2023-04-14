@@ -299,6 +299,14 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Έναρξη"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Διακοπή"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Λειτουργία ενός χεριού"</string>
+    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
+    <skip />
+    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Κατάργηση αποκλεισμού μικροφώνου συσκευής;"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Κατάργηση αποκλεισμού κάμερας συσκευής;"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Κατάργηση αποκλεισμού κάμερας και μικροφώνου συσκευής;"</string>
@@ -886,12 +894,9 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Όλα τα στοιχεία ελέγχου καταργήθηκαν"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Οι αλλαγές δεν αποθηκεύτηκαν"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Εμφάνιση άλλων εφαρμογών"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Αναδιάταξη"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Προσθήκη στοιχείων ελέγχου"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Επιστροφή στην επεξεργασία"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Δεν ήταν δυνατή η φόρτωση των στοιχείων ελέγχου. Ελέγξτε την εφαρμογή <xliff:g id="APP">%s</xliff:g> για να βεβαιωθείτε ότι δεν έχουν αλλάξει οι ρυθμίσεις της εφαρμογής."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Μη διαθέσιμα συμβατά στοιχεία ελέγχου"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Άλλο"</string>
@@ -1121,7 +1126,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Η πολιτική εργασίας σάς επιτρέπει να πραγματοποιείτε τηλεφωνικές κλήσεις μόνο από το προφίλ εργασίας σας."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Εναλλαγή σε προφίλ εργασίας"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Κλείσιμο"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Ρυθμίσεις κλειδώματος οθόνης"</string>
+    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Δεν υπάρχει διαθέσιμο δίκτυο Wi-Fi"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Η κάμερα έχει αποκλειστεί"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Η κάμερα και το μικρόφωνο έχουν αποκλειστεί"</string>

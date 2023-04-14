@@ -1748,6 +1748,21 @@ public final class Settings {
     public static final String ACTION_DREAM_SETTINGS = "android.settings.DREAM_SETTINGS";
 
     /**
+     * Activity Action: Show Communal settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COMMUNAL_SETTING = "android.settings.COMMUNAL_SETTINGS";
+
+    /**
      * Activity Action: Show Notification assistant settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -2585,7 +2600,7 @@ public final class Settings {
      * <p>
      * To start an activity with this intent, apps should set the wellbeing package explicitly in
      * the intent together with this action. The wellbeing package is defined in
-     * {@code com.android.internal.R.string.config_defaultWellbeingPackage}.
+     * {@code com.android.internal.R.string.config_systemWellbeing}.
      * <p>
      * Output: Nothing
      *

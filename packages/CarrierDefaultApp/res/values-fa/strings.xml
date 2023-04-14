@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2809080280462257271">"ارتباطات شرکت مخابراتی"</string>
+    <string name="app_name" msgid="2809080280462257271">"ارتباطات اپراتور تلفن همراه"</string>
     <string name="android_system_label" msgid="2797790869522345065">"شرکت مخابراتی دستگاه همراه"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"داده تلفن همراه تمام شده است"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"داده شبکه تلفن همراه شما غیرفعال شده است"</string>

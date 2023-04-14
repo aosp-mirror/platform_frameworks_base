@@ -306,7 +306,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.LocaleList;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -2865,11 +2864,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        if (animate && mTransitionController.inCollectingTransition(startingWindow)
-                && startingWindow.cancelAndRedraw()) {
+        if (animate && mTransitionController.inCollectingTransition(startingWindow)) {
             // Defer remove starting window after transition start.
-            // If splash screen window was in collecting, the client side is unable to draw because
-            // of Session#cancelDraw, which will blocking the remove animation.
+            // The surface of app window could really show after the transition finish.
             startingWindow.mSyncTransaction.addTransactionCommittedListener(Runnable::run, () -> {
                 synchronized (mAtmService.mGlobalLock) {
                     surface.remove(true);
@@ -4147,7 +4144,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     void handleAppDied() {
         final boolean remove;
-        if ((mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
+        if (Process.isSdkSandboxUid(getUid())) {
+            // Sandbox activities are created for SDKs run in the sandbox process, when the sandbox
+            // process dies, the SDKs are unloaded and can not handle the activity, so sandbox
+            // activity records should be removed.
+            remove = true;
+        } else if ((mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
                 || mRelaunchReason == RELAUNCH_REASON_FREE_RESIZE)
                 && launchCount < 3 && !finishing) {
             // If the process crashed during a resize, always try to relaunch it, unless it has
@@ -10591,17 +10593,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        LocaleList locale;
         final ActivityTaskManagerInternal.PackageConfig appConfig =
                 mAtmService.mPackageConfigPersister.findPackageConfiguration(
                         task.realActivity.getPackageName(), mUserId);
-        // if there is no app locale for the package, clear the target activity's locale.
-        if (appConfig == null || appConfig.mLocales == null || appConfig.mLocales.isEmpty()) {
-            locale = LocaleList.getEmptyLocaleList();
-        } else {
-            locale = appConfig.mLocales;
+        // If package lookup yields locales, set the target activity's locales to match,
+        // otherwise leave target activity as-is.
+        if (appConfig != null && appConfig.mLocales != null && !appConfig.mLocales.isEmpty()) {
+            resolvedConfig.setLocales(appConfig.mLocales);
         }
-        resolvedConfig.setLocales(locale);
     }
 
     /**

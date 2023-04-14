@@ -52,14 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite uporabiti shranjeni ključ za dostop do aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Želite uporabiti shranjene podatke za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Izberite shranjene podatke za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Izberite možnost za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Želite te podatke uporabiti v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijava na drug način"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Prikaz možnosti"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Naprej"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Možnosti prijave"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Za uporabnika <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Zaklenjeni upravitelji gesel"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Dotaknite se, da odklenete"</string>

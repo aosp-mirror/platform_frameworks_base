@@ -30,6 +30,7 @@ constructor(
     @MainThread
     fun disable() {
         if (action != null) {
+            Log.i(TAG, "Disable dectector")
             action = null
             shadeExpansionStateManager.removeExpansionListener(this::onPanelExpansionChanged)
         }
@@ -40,7 +41,7 @@ constructor(
         mainExecutor.execute {
             action?.let {
                 if (event.tracking || (event.expanded && event.fraction > 0)) {
-                    Log.v(TAG, "Detected panel interaction, event: $event")
+                    Log.i(TAG, "Detected panel interaction, event: $event")
                     it.onPanelInteraction.run()
                     disable()
                 }

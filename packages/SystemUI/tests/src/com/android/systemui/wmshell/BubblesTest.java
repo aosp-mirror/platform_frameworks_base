@@ -1257,6 +1257,7 @@ public class BubblesTest extends SysuiTestCase {
         stackView.showManageMenu(true);
         assertSysuiStates(true /* stackExpanded */, true /* mangeMenuExpanded */);
         assertTrue(stackView.isManageMenuSettingsVisible());
+        assertTrue(stackView.isManageMenuDontBubbleVisible());
     }
 
     @Test
@@ -1274,6 +1275,7 @@ public class BubblesTest extends SysuiTestCase {
         stackView.showManageMenu(true);
         assertSysuiStates(true /* stackExpanded */, true /* mangeMenuExpanded */);
         assertFalse(stackView.isManageMenuSettingsVisible());
+        assertFalse(stackView.isManageMenuDontBubbleVisible());
     }
 
     @Test
