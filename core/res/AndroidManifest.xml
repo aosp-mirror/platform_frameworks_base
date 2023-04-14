@@ -1466,6 +1466,9 @@
 
     <!-- Allows an application to initiate a phone call without going through
         the Dialer user interface for the user to confirm the call.
+        <p>
+        <em>Note: An app holding this permission can also call carrier MMI codes to change settings
+        such as call forwarding or call waiting preferences.
         <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.CALL_PHONE"
