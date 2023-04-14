@@ -212,7 +212,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     /**
      * Wakes up the device if the device was dozing.
      */
-    void wakeUpIfDozing(long time, View where, String why, @PowerManager.WakeReason int wakeReason);
+    void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
 
     NotificationShadeWindowView getNotificationShadeWindowView();
 

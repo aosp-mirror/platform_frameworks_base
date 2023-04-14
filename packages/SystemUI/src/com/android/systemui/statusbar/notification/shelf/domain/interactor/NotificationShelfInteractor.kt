@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.notification.shelf.domain.interactor
 
+import android.os.PowerManager
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationShelf
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -31,6 +35,9 @@ class NotificationShelfInteractor
 constructor(
     private val keyguardRepository: KeyguardRepository,
     private val deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository,
+    private val centralSurfaces: CentralSurfaces,
+    private val systemClock: SystemClock,
+    private val keyguardTransitionController: LockscreenShadeTransitionController,
 ) {
     /** Is the shelf showing on the keyguard? */
     val isShowingOnKeyguard: Flow<Boolean>
@@ -45,4 +52,14 @@ constructor(
             ) { isKeyguardShowing, isBypassEnabled ->
                 isKeyguardShowing && isBypassEnabled
             }
+
+    /** Transition keyguard to the locked shade, triggered by the shelf. */
+    fun goToLockedShadeFromShelf() {
+        centralSurfaces.wakeUpIfDozing(
+            systemClock.uptimeMillis(),
+            "SHADE_CLICK",
+            PowerManager.WAKE_REASON_GESTURE,
+        )
+        keyguardTransitionController.goToLockedShade(null)
+    }
 }
