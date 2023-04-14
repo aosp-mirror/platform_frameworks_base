@@ -374,7 +374,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @After
     public void teardown() {
         if (mDialog != null) {
-            mDialog.clearInternalHandleAfterTest();
+            mDialog.clearInternalHandlerAfterTest();
         }
     }
 
