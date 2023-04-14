@@ -80,6 +80,11 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
     /** {@inheritDoc} */
     @Test
     @Ignore("Display is off at the start")
+    override fun taskBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is off at the start")
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
