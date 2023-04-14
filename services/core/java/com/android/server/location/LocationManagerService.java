@@ -363,9 +363,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
             if (realProvider != null) {
                 // custom logic wrapping all non-passive providers
                 if (manager != mPassiveManager) {
+                    int defaultStationaryThrottlingSetting =
+                            mContext.getPackageManager().hasSystemFeature(
+                                PackageManager.FEATURE_WATCH) ? 0 : 1;
                     boolean enableStationaryThrottling = Settings.Global.getInt(
                             mContext.getContentResolver(),
-                            Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE, 1) != 0;
+                            Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE,
+                            defaultStationaryThrottlingSetting) != 0;
                     if (enableStationaryThrottling) {
                         realProvider = new StationaryThrottlingLocationProvider(manager.getName(),
                                 mInjector, realProvider);
