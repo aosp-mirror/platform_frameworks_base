@@ -14906,6 +14906,14 @@ public final class Settings {
         public static final String ENABLE_TARE = "enable_tare";
 
         /**
+         * Whether to show the TARE page in Developer Options or not.
+         * 1 = true, everything else = false
+         *
+         * @hide
+         */
+        public static final String SHOW_TARE_DEVELOPER_OPTIONS = "show_tare_developer_options";
+
+        /**
          * Settings for AlarmManager's TARE EconomicPolicy (list of its economic factors).
          *
          * Keys are listed in {@link android.app.tare.EconomyManager}.
