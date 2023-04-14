@@ -21,8 +21,11 @@ import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_U
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -38,6 +41,8 @@ import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
+import com.android.internal.R;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,6 +55,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Presubmit
@@ -70,6 +76,8 @@ public class FaceManagerTest {
     private IFaceService mService;
     @Mock
     private FaceManager.AuthenticationCallback mAuthCallback;
+    @Mock
+    private FaceManager.EnrollmentCallback mEnrollmentCallback;
 
     @Captor
     private ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback> mCaptor;
@@ -107,9 +115,7 @@ public class FaceManagerTest {
 
     @Test
     public void getSensorPropertiesInternal_noBinderCalls() throws RemoteException {
-        verify(mService).addAuthenticatorsRegisteredCallback(mCaptor.capture());
-
-        mCaptor.getValue().onAllAuthenticatorsRegistered(mProps);
+        initializeProperties();
         List<FaceSensorPropertiesInternal> actual = mFaceManager.getSensorPropertiesInternal();
 
         assertThat(actual).containsExactlyElementsIn(mProps);
@@ -147,5 +153,34 @@ public class FaceManagerTest {
                 new FaceAuthenticateOptions.Builder().build());
 
         verify(mAuthCallback).onAuthenticationError(eq(FACE_ERROR_HW_UNAVAILABLE), any());
+    }
+
+    @Test
+    public void enrollment_errorWhenFaceEnrollmentExists() throws RemoteException {
+        when(mResources.getInteger(R.integer.config_faceMaxTemplatesPerUser)).thenReturn(1);
+        when(mService.getEnrolledFaces(anyInt(), anyInt(), anyString()))
+                .thenReturn(Collections.emptyList())
+                .thenReturn(Collections.singletonList(new Face("Face" /* name */, 0 /* faceId */,
+                        0 /* deviceId */)));
+
+        initializeProperties();
+        mFaceManager.enroll(USER_ID, new byte[]{},
+                new CancellationSignal(), mEnrollmentCallback, null /* disabledFeatures */);
+
+        verify(mService).enroll(eq(USER_ID), any(), any(), any(), anyString(), any(), any(),
+                anyBoolean());
+
+        mFaceManager.enroll(USER_ID, new byte[]{},
+                new CancellationSignal(), mEnrollmentCallback, null /* disabledFeatures */);
+
+        verify(mService, atMost(1 /* maxNumberOfInvocations */)).enroll(eq(USER_ID), any(), any(),
+                any(), anyString(), any(), any(), anyBoolean());
+        verify(mEnrollmentCallback).onEnrollmentError(eq(FACE_ERROR_HW_UNAVAILABLE), anyString());
+    }
+
+    private void initializeProperties() throws RemoteException {
+        verify(mService).addAuthenticatorsRegisteredCallback(mCaptor.capture());
+
+        mCaptor.getValue().onAllAuthenticatorsRegistered(mProps);
     }
 }
