@@ -2254,8 +2254,8 @@ public class AudioService extends IAudioService.Stub
                 synchronized (VolumeStreamState.class) {
                     mStreamStates[AudioSystem.STREAM_DTMF]
                             .setAllIndexes(mStreamStates[dtmfStreamAlias], caller);
-                    mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].mVolumeIndexSettingName =
-                            System.VOLUME_SETTINGS_INT[a11yStreamAlias];
+                    mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].setSettingName(
+                            System.VOLUME_SETTINGS_INT[a11yStreamAlias]);
                     mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].setAllIndexes(
                             mStreamStates[a11yStreamAlias], caller);
                 }
@@ -7513,7 +7513,7 @@ public class AudioService extends IAudioService.Stub
         private int mPublicStreamType = AudioSystem.STREAM_MUSIC;
         private AudioAttributes mAudioAttributes = AudioProductStrategy.getDefaultAttributes();
         private boolean mIsMuted = false;
-        private final String mSettingName;
+        private String mSettingName;
 
         // No API in AudioSystem to get a device from strategy or from attributes.
         // Need a valid public stream type to use current API getDeviceForStream
@@ -7842,15 +7842,19 @@ public class AudioService extends IAudioService.Stub
         }
 
         private void persistVolumeGroup(int device) {
-            if (mUseFixedVolume) {
+            // No need to persist the index if the volume group is backed up
+            // by a public stream type as this is redundant
+            if (mUseFixedVolume || mHasValidStreamType) {
                 return;
             }
             if (DEBUG_VOL) {
                 Log.v(TAG, "persistVolumeGroup: storing index " + getIndex(device) + " for group "
                         + mAudioVolumeGroup.name()
                         + ", device " + AudioSystem.getOutputDeviceName(device)
-                        + " and User=" + getCurrentUserId());
+                        + " and User=" + getCurrentUserId()
+                        + " mSettingName: " + mSettingName);
             }
+
             boolean success = mSettings.putSystemIntForUser(mContentResolver,
                     getSettingNameForDevice(device),
                     getIndex(device),
@@ -7911,6 +7915,14 @@ public class AudioService extends IAudioService.Stub
                 return mSettingName;
             }
             return mSettingName + "_" + AudioSystem.getOutputDeviceName(device);
+        }
+
+        void setSettingName(String settingName) {
+            mSettingName = settingName;
+        }
+
+        String getSettingName() {
+            return mSettingName;
         }
 
         private void dump(PrintWriter pw) {
@@ -8037,6 +8049,9 @@ public class AudioService extends IAudioService.Stub
          */
         public void setVolumeGroupState(VolumeGroupState volumeGroupState) {
             mVolumeGroupState = volumeGroupState;
+            if (mVolumeGroupState != null) {
+                mVolumeGroupState.setSettingName(mVolumeIndexSettingName);
+            }
         }
         /**
          * Update the minimum index that can be used without MODIFY_AUDIO_SETTINGS permission
@@ -8105,6 +8120,17 @@ public class AudioService extends IAudioService.Stub
 
         private boolean hasValidSettingsName() {
             return (mVolumeIndexSettingName != null && !mVolumeIndexSettingName.isEmpty());
+        }
+
+        void setSettingName(String settingName) {
+            mVolumeIndexSettingName = settingName;
+            if (mVolumeGroupState != null) {
+                mVolumeGroupState.setSettingName(mVolumeIndexSettingName);
+            }
+        }
+
+        String getSettingName() {
+            return mVolumeIndexSettingName;
         }
 
         public void readSettings() {
@@ -8755,7 +8781,7 @@ public class AudioService extends IAudioService.Stub
             if (streamState.hasValidSettingsName()) {
                 mSettings.putSystemIntForUser(mContentResolver,
                         streamState.getSettingNameForDevice(device),
-                        (streamState.getIndex(device) + 5)/ 10,
+                        (streamState.getIndex(device) + 5) / 10,
                         UserHandle.USER_CURRENT);
             }
         }
