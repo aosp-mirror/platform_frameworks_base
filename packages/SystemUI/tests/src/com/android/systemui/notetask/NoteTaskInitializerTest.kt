@@ -20,9 +20,11 @@ import android.test.suitebuilder.annotation.SmallTest
 import android.view.KeyEvent
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -46,6 +48,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     @Mock lateinit var roleManager: RoleManager
     private val clock = FakeSystemClock()
     private val executor = FakeExecutor(clock)
+    private val userTracker = FakeUserTracker()
 
     @Before
     fun setUp() {
@@ -63,6 +66,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
             isEnabled = isEnabled,
             roleManager = roleManager,
             backgroundExecutor = executor,
+            userTracker = userTracker,
         )
     }
 
@@ -71,7 +75,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     fun initialize() {
         createNoteTaskInitializer().initialize()
 
-        verify(controller).setNoteTaskShortcutEnabled(true)
+        verify(controller).setNoteTaskShortcutEnabled(eq(true), eq(userTracker.userHandle))
         verify(commandQueue).addCallback(any())
         verify(roleManager).addOnRoleHoldersChangedListenerAsUser(any(), any(), any())
     }
@@ -80,7 +84,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     fun initialize_flagDisabled() {
         createNoteTaskInitializer(isEnabled = false).initialize()
 
-        verify(controller, never()).setNoteTaskShortcutEnabled(any())
+        verify(controller, never()).setNoteTaskShortcutEnabled(any(), any())
         verify(commandQueue, never()).addCallback(any())
         verify(roleManager, never()).addOnRoleHoldersChangedListenerAsUser(any(), any(), any())
     }
@@ -89,7 +93,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     fun initialize_bubblesNotPresent() {
         createNoteTaskInitializer(bubbles = null).initialize()
 
-        verify(controller, never()).setNoteTaskShortcutEnabled(any())
+        verify(controller, never()).setNoteTaskShortcutEnabled(any(), any())
         verify(commandQueue, never()).addCallback(any())
         verify(roleManager, never()).addOnRoleHoldersChangedListenerAsUser(any(), any(), any())
     }
@@ -98,24 +102,36 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     // region handleSystemKey
     @Test
     fun handleSystemKey_receiveValidSystemKey_shouldShowNoteTask() {
-        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent(KeyEvent.ACTION_DOWN,
-                KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL))
+        createNoteTaskInitializer()
+            .callbacks
+            .handleSystemKey(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL))
 
         verify(controller).showNoteTask(entryPoint = NoteTaskEntryPoint.TAIL_BUTTON)
     }
 
     @Test
     fun handleSystemKey_receiveKeyboardShortcut_shouldShowNoteTask() {
-        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent(0, 0, KeyEvent.ACTION_DOWN,
-                KeyEvent.KEYCODE_N, 0, KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON))
+        createNoteTaskInitializer()
+            .callbacks
+            .handleSystemKey(
+                KeyEvent(
+                    0,
+                    0,
+                    KeyEvent.ACTION_DOWN,
+                    KeyEvent.KEYCODE_N,
+                    0,
+                    KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON
+                )
+            )
 
         verify(controller).showNoteTask(entryPoint = NoteTaskEntryPoint.KEYBOARD_SHORTCUT)
     }
-    
+
     @Test
     fun handleSystemKey_receiveInvalidSystemKey_shouldDoNothing() {
-        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent(KeyEvent.ACTION_DOWN,
-                KeyEvent.KEYCODE_UNKNOWN))
+        createNoteTaskInitializer()
+            .callbacks
+            .handleSystemKey(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_UNKNOWN))
 
         verifyZeroInteractions(controller)
     }

@@ -94,7 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Cancel"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Restart"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Don’t show again"</string>
-    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"Double-tap to move this app"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Double-tap to\nmove this app"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximize"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimize"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Close"</string>

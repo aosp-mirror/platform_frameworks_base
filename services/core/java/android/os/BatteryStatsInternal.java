@@ -39,12 +39,14 @@ public abstract class BatteryStatsInternal {
     public static final int CPU_WAKEUP_SUBSYSTEM_UNKNOWN = -1;
     public static final int CPU_WAKEUP_SUBSYSTEM_ALARM = 1;
     public static final int CPU_WAKEUP_SUBSYSTEM_WIFI = 2;
+    public static final int CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER = 3;
 
     /** @hide */
     @IntDef(prefix = {"CPU_WAKEUP_SUBSYSTEM_"}, value = {
             CPU_WAKEUP_SUBSYSTEM_UNKNOWN,
             CPU_WAKEUP_SUBSYSTEM_ALARM,
             CPU_WAKEUP_SUBSYSTEM_WIFI,
+            CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface CpuWakeupSubsystem {

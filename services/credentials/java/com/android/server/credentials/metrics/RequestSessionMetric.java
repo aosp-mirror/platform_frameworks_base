@@ -149,13 +149,28 @@ public class RequestSessionMetric {
     }
 
     /**
-     * Collects request class type count in the RequestSession flow.
+     * Collects initializations for Create flow metrics.
+     *
+     * @param origin indicates if an origin was passed in or not
+     */
+    public void collectCreateFlowInitialMetricInfo(boolean origin) {
+        try {
+            mInitialPhaseMetric.setOriginSpecified(origin);
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
+    /**
+     * Collects initializations for Get flow metrics.
      *
      * @param requestClassTypeCount the number of class types in the request
+     * @param origin indicates if an origin was passed in or not
      */
-    public void collectGetFlowInitialMetricInfo(int requestClassTypeCount) {
+    public void collectGetFlowInitialMetricInfo(int requestClassTypeCount, boolean origin) {
         try {
             mInitialPhaseMetric.setCountRequestClassType(requestClassTypeCount);
+            mInitialPhaseMetric.setOriginSpecified(origin);
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }

@@ -32,7 +32,7 @@ import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
-@Module
+@Module(includes = [QSAutoAddModule::class])
 abstract class QSPipelineModule {
 
     /** Implementation for [TileSpecRepository] */

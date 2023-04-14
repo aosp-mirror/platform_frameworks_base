@@ -108,8 +108,8 @@ import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
 import com.android.server.power.stats.BatteryUsageStatsStore;
-import com.android.server.power.stats.CpuWakeupStats;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.wakeups.CpuWakeupStats;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -515,13 +515,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         @Override
         public void noteCpuWakingActivity(int subsystem, long elapsedMillis, int... uids) {
             Objects.requireNonNull(uids);
-            mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids);
+            mHandler.post(() -> mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids));
         }
-
         @Override
         public void noteWakingSoundTrigger(long elapsedMillis, int uid) {
-            // TODO(b/267717665): Pipe to noteCpuWakingActivity once SoundTrigger starts using this.
-            Slog.w(TAG, "Sound trigger event dispatched to uid " + uid);
+            noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER, elapsedMillis, uid);
         }
     }
 

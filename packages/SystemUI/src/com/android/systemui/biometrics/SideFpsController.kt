@@ -144,8 +144,7 @@ constructor(
                 orientationListener.enable()
             }
         }
-    @VisibleForTesting
-    internal var overlayOffsets: SensorLocationInternal = SensorLocationInternal.DEFAULT
+    @VisibleForTesting var overlayOffsets: SensorLocationInternal = SensorLocationInternal.DEFAULT
 
     private val overlayViewParams =
         WindowManager.LayoutParams(
@@ -297,7 +296,7 @@ constructor(
     }
 
     @VisibleForTesting
-    internal fun updateOverlayParams(display: Display, bounds: Rect) {
+    fun updateOverlayParams(display: Display, bounds: Rect) {
         val isNaturalOrientation = display.isNaturalOrientation()
         val isDefaultOrientation =
             if (isReverseDefaultRotation) !isNaturalOrientation else isNaturalOrientation

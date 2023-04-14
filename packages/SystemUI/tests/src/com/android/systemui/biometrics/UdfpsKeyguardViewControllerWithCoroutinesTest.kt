@@ -17,8 +17,8 @@
 package com.android.systemui.biometrics
 
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.classifier.FalsingCollector
@@ -39,10 +39,9 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -54,22 +53,27 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControllerBaseTest() {
     lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
     @Mock private lateinit var bouncerLogger: TableLogBuffer
 
+    private lateinit var testScope: TestScope
+
     @Before
     override fun setUp() {
+        testScope = TestScope()
+
         allowTestableLooperAsMainThread() // repeatWhenAttached requires the main thread
         MockitoAnnotations.initMocks(this)
         keyguardBouncerRepository =
             KeyguardBouncerRepositoryImpl(
                 mock(com.android.keyguard.ViewMediatorCallback::class.java),
                 FakeSystemClock(),
-                TestCoroutineScope(),
+                testScope.backgroundScope,
                 bouncerLogger,
             )
         super.setUp()
@@ -107,7 +111,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
 
     @Test
     fun shadeLocked_showAlternateBouncer_unpauseAuth() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             // GIVEN view is attached + on the SHADE_LOCKED (udfps view not showing)
             mController.onViewAttached()
             captureStatusBarStateListeners()
@@ -116,7 +120,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
             // WHEN alternate bouncer is requested
             val job = mController.listenForAlternateBouncerVisibility(this)
             keyguardBouncerRepository.setAlternateVisible(true)
-            yield()
+            runCurrent()
 
             // THEN udfps view will animate in & pause auth is updated to NOT pause
             verify(mView).animateInUdfpsBouncer(any())
@@ -128,7 +132,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
     /** After migration to MODERN_BOUNCER, replaces UdfpsKeyguardViewControllerTest version */
     @Test
     fun shouldPauseAuthBouncerShowing() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             // GIVEN view attached and we're on the keyguard
             mController.onViewAttached()
             captureStatusBarStateListeners()
@@ -138,15 +142,11 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
             val job = mController.listenForBouncerExpansion(this)
             keyguardBouncerRepository.setPrimaryShow(true)
             keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
-            yield()
+            runCurrent()
 
             // THEN UDFPS shouldPauseAuth == true
             assertTrue(mController.shouldPauseAuth())
 
             job.cancel()
         }
-
-    companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
-    }
 }

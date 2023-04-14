@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -43,6 +45,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -108,5 +112,32 @@ public class SystemUIDialogTest extends SysuiTestCase {
 
         dialog.dismiss();
         assertFalse(dialog.isShowing());
+    }
+
+    @Test public void startAndStopAreCalled() {
+        AtomicBoolean calledStart = new AtomicBoolean(false);
+        AtomicBoolean calledStop = new AtomicBoolean(false);
+        SystemUIDialog dialog = new SystemUIDialog(mContext) {
+            @Override
+            protected void start() {
+                calledStart.set(true);
+            }
+
+            @Override
+            protected void stop() {
+                calledStop.set(true);
+            }
+        };
+
+        assertThat(calledStart.get()).isFalse();
+        assertThat(calledStop.get()).isFalse();
+
+        dialog.show();
+        assertThat(calledStart.get()).isTrue();
+        assertThat(calledStop.get()).isFalse();
+
+        dialog.dismiss();
+        assertThat(calledStart.get()).isTrue();
+        assertThat(calledStop.get()).isTrue();
     }
 }

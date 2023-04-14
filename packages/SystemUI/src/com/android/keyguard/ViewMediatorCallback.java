@@ -96,6 +96,11 @@ public interface ViewMediatorCallback {
     CharSequence consumeCustomMessage();
 
     /**
+     * Sets a message to be consumed the next time the bouncer shows up.
+     */
+    void setCustomMessage(CharSequence customMessage);
+
+    /**
      * Call when cancel button is pressed in bouncer.
      */
     void onCancelClicked();

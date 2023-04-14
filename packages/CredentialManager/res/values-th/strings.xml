@@ -52,14 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ใช้พาสคีย์ที่บันทึกไว้สำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ใช่ไหม"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ใช้การลงชื่อเข้าใช้ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" ใช่ไหม"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"เลือกการลงชื่อเข้าใช้ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
-    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ต้องการเลือกตัวเลือกสำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ใช้ข้อมูลนี้กับ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ลงชื่อเข้าใช้ด้วยวิธีอื่น"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ดูตัวเลือก"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ต่อไป"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ตัวเลือกการลงชื่อเข้าใช้"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"สำหรับ <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"เครื่องมือจัดการรหัสผ่านที่ล็อกไว้"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"แตะเพื่อปลดล็อก"</string>

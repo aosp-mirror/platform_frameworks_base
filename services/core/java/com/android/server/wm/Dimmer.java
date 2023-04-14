@@ -263,16 +263,19 @@ class Dimmer {
      * {@link WindowContainer#prepareSurfaces}. After calling this, the container should
      * chain {@link WindowContainer#prepareSurfaces} down to it's children to give them
      * a chance to request dims to continue.
-     * @return Non-null dim bounds if the dimmer is showing.
      */
-    Rect resetDimStates() {
+    void resetDimStates() {
         if (mDimState == null) {
-            return null;
+            return;
         }
         if (!mDimState.mDontReset) {
             mDimState.mDimming = false;
         }
-        return mDimState.mDimBounds;
+    }
+
+    /** Returns non-null bounds if the dimmer is showing. */
+    Rect getDimBounds() {
+        return mDimState != null ? mDimState.mDimBounds : null;
     }
 
     void dontAnimateExit() {
