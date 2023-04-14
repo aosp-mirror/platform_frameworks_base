@@ -276,7 +276,6 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
                 centralSurfaces.wakeUpIfDozing(
                         SystemClock.uptimeMillis(),
-                        it,
                         "SHADE_CLICK",
                         PowerManager.WAKE_REASON_GESTURE,
                 )

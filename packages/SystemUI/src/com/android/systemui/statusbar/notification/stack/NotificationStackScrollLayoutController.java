@@ -1370,14 +1370,6 @@ public class NotificationStackScrollLayoutController {
         mView.onUpdateRowStates();
     }
 
-    public ActivatableNotificationView getActivatedChild() {
-        return mView.getActivatedChild();
-    }
-
-    public void setActivatedChild(ActivatableNotificationView view) {
-        mView.setActivatedChild(view);
-    }
-
     public void runAfterAnimationFinished(Runnable r) {
         mView.runAfterAnimationFinished(r);
     }
@@ -1598,6 +1590,14 @@ public class NotificationStackScrollLayoutController {
     public void setShelf(NotificationShelf shelf) {
         if (!NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) return;
         mView.setShelf(shelf);
+    }
+
+    public int getShelfHeight() {
+        if (!NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) {
+            return 0;
+        }
+        ExpandableView shelf = mView.getShelf();
+        return shelf == null ? 0 : shelf.getIntrinsicHeight();
     }
 
     /**
