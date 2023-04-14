@@ -128,7 +128,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
@@ -1081,11 +1081,11 @@ public class DisplayPolicy {
                 // The index of the provider and corresponding insets types cannot change at
                 // runtime as ensured in WMS. Make use of the index in the provider directly
                 // to access the latest provided size at runtime.
-                final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
+                final TriFunction<DisplayFrames, WindowContainer, Rect, Integer> frameProvider =
                         getFrameProvider(win, i, INSETS_OVERRIDE_INDEX_INVALID);
                 final InsetsFrameProvider.InsetsSizeOverride[] overrides =
                         provider.getInsetsSizeOverrides();
-                final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+                final SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
                         overrideProviders;
                 if (overrides != null) {
                     overrideProviders = new SparseArray<>();
@@ -1106,7 +1106,7 @@ public class DisplayPolicy {
         }
     }
 
-    private static TriConsumer<DisplayFrames, WindowContainer, Rect> getFrameProvider(
+    private static TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getFrameProvider(
             WindowState win, int index, int overrideIndex) {
         return (displayFrames, windowContainer, inOutFrame) -> {
             final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
@@ -1152,6 +1152,7 @@ public class DisplayPolicy {
                     inOutFrame.set(sTmpRect2);
                 }
             }
+            return ifp.getFlags();
         };
     }
 
@@ -1179,7 +1180,7 @@ public class DisplayPolicy {
         }
     }
 
-    TriConsumer<DisplayFrames, WindowContainer, Rect> getImeSourceFrameProvider() {
+    TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getImeSourceFrameProvider() {
         return (displayFrames, windowContainer, inOutFrame) -> {
             WindowState windowState = windowContainer.asWindowState();
             if (windowState == null) {
@@ -1198,6 +1199,7 @@ public class DisplayPolicy {
             } else {
                 inOutFrame.inset(windowState.mGivenContentInsets);
             }
+            return 0;
         };
     }
 

@@ -52,7 +52,7 @@ import android.view.InsetsState;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -289,10 +289,12 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         InsetsSourceProvider statusBarProvider =
                 getController().getOrCreateSourceProvider(ID_STATUS_BAR, statusBars());
-        final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>> imeOverrideProviders =
-                new SparseArray<>();
-        imeOverrideProviders.put(TYPE_INPUT_METHOD, ((displayFrames, windowState, rect) ->
-                rect.set(0, 1, 2, 3)));
+        final SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
+                imeOverrideProviders = new SparseArray<>();
+        imeOverrideProviders.put(TYPE_INPUT_METHOD, ((displayFrames, windowState, rect) -> {
+            rect.set(0, 1, 2, 3);
+            return 0;
+        }));
         statusBarProvider.setWindowContainer(statusBar, null, imeOverrideProviders);
         getController().getOrCreateSourceProvider(ID_IME, ime())
                 .setWindowContainer(ime, null, null);
