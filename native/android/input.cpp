@@ -33,6 +33,7 @@
 #include <errno.h>
 
 using android::InputEvent;
+using android::InputEventType;
 using android::InputQueue;
 using android::KeyEvent;
 using android::Looper;
@@ -41,7 +42,8 @@ using android::sp;
 using android::Vector;
 
 int32_t AInputEvent_getType(const AInputEvent* event) {
-    return static_cast<const InputEvent*>(event)->getType();
+    const InputEventType eventType = static_cast<const InputEvent*>(event)->getType();
+    return static_cast<int32_t>(eventType);
 }
 
 int32_t AInputEvent_getDeviceId(const AInputEvent* event) {
