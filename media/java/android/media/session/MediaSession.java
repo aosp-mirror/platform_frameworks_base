@@ -293,12 +293,16 @@ public final class MediaSession {
      * Set the component name of the manifest-declared {@link android.content.BroadcastReceiver}
      * class that should receive media buttons. This allows restarting playback after the session
      * has been stopped. If your app is started in this way an {@link Intent#ACTION_MEDIA_BUTTON}
-     * intent will be sent to the broadcast receiver.
-     * <p>
-     * Note: The given {@link android.content.BroadcastReceiver} should belong to the same package
-     * as the context that was given when creating {@link MediaSession}.
+     * intent will be sent to the broadcast receiver. On apps targeting Android U and above, this
+     * will throw an {@link IllegalArgumentException} if the provided {@link ComponentName} does not
+     * resolve to an existing {@link android.content.BroadcastReceiver broadcast receiver}.
+     *
+     * <p>Note: The given {@link android.content.BroadcastReceiver} should belong to the same
+     * package as the context that was given when creating {@link MediaSession}.
      *
      * @param broadcastReceiver the component name of the BroadcastReceiver class
+     * @throws IllegalArgumentException if {@code broadcastReceiver} does not exist on apps
+     *     targeting Android U and above
      */
     public void setMediaButtonBroadcastReceiver(@Nullable ComponentName broadcastReceiver) {
         try {

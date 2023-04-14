@@ -16,14 +16,22 @@
 
 package com.android.server.media;
 
+import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.PendingIntent;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ResolveInfo;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -42,6 +50,7 @@ import android.media.session.ParcelableListBinder;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -52,6 +61,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -73,6 +83,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 // TODO(jaewan): Do not call service method directly -- introduce listener instead.
 public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionRecordImpl {
+
+    /**
+     * {@link MediaSession#setMediaButtonBroadcastReceiver(ComponentName)} throws an {@link
+     * IllegalArgumentException} if the provided {@link ComponentName} does not resolve to a valid
+     * {@link android.content.BroadcastReceiver broadcast receiver} for apps targeting Android U and
+     * above. For apps targeting Android T and below, the request will be ignored.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long THROW_FOR_INVALID_BROADCAST_RECEIVER = 270049379L;
+
     private static final String TAG = "MediaSessionRecord";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -871,6 +892,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
     };
 
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    private static boolean componentNameExists(
+            @NonNull ComponentName componentName, @NonNull Context context, int userId) {
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mediaButtonIntent.setComponent(componentName);
+
+        UserHandle userHandle = UserHandle.of(userId);
+        PackageManager pm = context.getPackageManager();
+
+        List<ResolveInfo> resolveInfos =
+                pm.queryBroadcastReceiversAsUser(
+                        mediaButtonIntent, PackageManager.ResolveInfoFlags.of(0), userHandle);
+        return !resolveInfos.isEmpty();
+    }
+
     private final class SessionStub extends ISession.Stub {
         @Override
         public void destroySession() throws RemoteException {
@@ -955,7 +992,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
 
         @Override
+        @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
         public void setMediaButtonBroadcastReceiver(ComponentName receiver) throws RemoteException {
+            final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 //mPackageName has been verified in MediaSessionService.enforcePackageName().
@@ -970,6 +1009,20 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         != 0) {
                     return;
                 }
+
+                if (!componentNameExists(receiver, mContext, mUserId)) {
+                    if (CompatChanges.isChangeEnabled(THROW_FOR_INVALID_BROADCAST_RECEIVER, uid)) {
+                        throw new IllegalArgumentException("Invalid component name: " + receiver);
+                    } else {
+                        Log.w(
+                                TAG,
+                                "setMediaButtonBroadcastReceiver(): "
+                                        + "Ignoring invalid component name="
+                                        + receiver);
+                    }
+                    return;
+                }
+
                 mMediaButtonReceiverHolder = MediaButtonReceiverHolder.create(mUserId, receiver);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
             } finally {
