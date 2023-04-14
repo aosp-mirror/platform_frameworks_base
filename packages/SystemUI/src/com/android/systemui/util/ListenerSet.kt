@@ -22,34 +22,27 @@ import java.util.concurrent.CopyOnWriteArrayList
  * A collection of listeners, observers, callbacks, etc.
  *
  * This container is optimized for infrequent mutation and frequent iteration, with thread safety
- * and reentrant-safety guarantees as well.
+ * and reentrant-safety guarantees as well. Specifically, to ensure that
+ * [ConcurrentModificationException] is never thrown, this iterator will not reflect changes made to
+ * the set after the iterator is constructed.
  */
-class ListenerSet<E> : Iterable<E> {
-    private val listeners: CopyOnWriteArrayList<E> = CopyOnWriteArrayList()
+class ListenerSet<E : Any>
+/** Private constructor takes the internal list so that we can use auto-delegation */
+private constructor(private val listeners: CopyOnWriteArrayList<E>) :
+    Collection<E> by listeners, Set<E> {
+
+    /** Create a new instance */
+    constructor() : this(CopyOnWriteArrayList())
 
     /**
-     * A thread-safe, reentrant-safe method to add a listener.
-     * Does nothing if the listener is already in the set.
+     * A thread-safe, reentrant-safe method to add a listener. Does nothing if the listener is
+     * already in the set.
      */
     fun addIfAbsent(element: E): Boolean = listeners.addIfAbsent(element)
 
-    /**
-     * A thread-safe, reentrant-safe method to remove a listener.
-     */
+    /** A thread-safe, reentrant-safe method to remove a listener. */
     fun remove(element: E): Boolean = listeners.remove(element)
-
-    /**
-     * Determine if the listener set is empty
-     */
-    fun isEmpty(): Boolean = listeners.isEmpty()
-
-    /**
-     * Returns an iterator over the listeners currently in the set.  Note that to ensure
-     * [ConcurrentModificationException] is never thrown, this iterator will not reflect changes
-     * made to the set after the iterator is constructed.
-     */
-    override fun iterator(): Iterator<E> = listeners.iterator()
 }
 
 /** Extension to match Collection which is implemented to only be (easily) accessible in kotlin */
-fun <T> ListenerSet<T>.isNotEmpty(): Boolean = !isEmpty()
+fun <T : Any> ListenerSet<T>.isNotEmpty(): Boolean = !isEmpty()
