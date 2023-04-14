@@ -326,16 +326,6 @@ public final class AlarmManagerServiceTest {
         }
 
         @Override
-        void setKernelTimeZoneOffset(int utcOffsetMillis) {
-            // Do nothing.
-        }
-
-        @Override
-        void syncKernelTimeZoneOffset() {
-            // Do nothing.
-        }
-
-        @Override
         int getCallingUid() {
             return mTestCallingUid;
         }
