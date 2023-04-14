@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
@@ -75,6 +76,8 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Mock private DemoModeController mDemoModeController;
     @Mock
     private NotificationIconContainer mAodIcons;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     @Before
     public void setup() {
@@ -91,6 +94,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
                 Optional.of(mBubbles),
                 mDemoModeController,
                 mDarkIconDispatcher,
+                mFeatureFlags,
                 mStatusBarWindowController,
                 mScreenOffAnimationController);
     }

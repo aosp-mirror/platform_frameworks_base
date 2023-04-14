@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
@@ -25,8 +24,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * for affecting the state of the system (e.g. starting an intent, given that the presenter may
  * want to perform some action before doing so).
  */
-public interface NotificationPresenter extends ExpandableNotificationRow.OnExpandClickListener,
-        ActivatableNotificationView.OnActivatedListener {
+public interface NotificationPresenter extends ExpandableNotificationRow.OnExpandClickListener {
     /**
      * Returns true if the presenter is not visible. For example, it may not be necessary to do
      * animations if this returns true.
