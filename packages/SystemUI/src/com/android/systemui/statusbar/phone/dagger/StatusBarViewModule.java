@@ -98,21 +98,6 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationShadeWindowView providesNotificationShadeWindowView(
-            LayoutInflater layoutInflater) {
-        NotificationShadeWindowView notificationShadeWindowView = (NotificationShadeWindowView)
-                layoutInflater.inflate(R.layout.super_notification_shade, /* root= */ null);
-        if (notificationShadeWindowView == null) {
-            throw new IllegalStateException(
-                    "R.layout.super_notification_shade could not be properly inflated");
-        }
-
-        return notificationShadeWindowView;
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationStackScrollLayout providesNotificationStackScrollLayout(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller);
