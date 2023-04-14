@@ -972,9 +972,9 @@ static void nativeSurfaceFlushJankData(JNIEnv* env, jclass clazz, jlong nativeOb
     SurfaceComposerClient::Transaction::sendSurfaceFlushJankDataTransaction(ctrl);
 }
 
-static void nativeSanitize(JNIEnv* env, jclass clazz, jlong transactionObj) {
+static void nativeSanitize(JNIEnv* env, jclass clazz, jlong transactionObj, jint pid, jint uid) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->sanitize();
+    transaction->sanitize(pid, uid);
 }
 
 static void nativeSetDestinationFrame(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2268,7 +2268,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*) nativeSetTrustedPresentationCallback },
     {"nativeClearTrustedPresentationCallback", "(JJ)V",
             (void*) nativeClearTrustedPresentationCallback },
-    {"nativeSanitize", "(J)V",
+    {"nativeSanitize", "(JII)V",
             (void*) nativeSanitize },
     {"nativeSetDestinationFrame", "(JJIIII)V",
                 (void*)nativeSetDestinationFrame },

@@ -2675,7 +2675,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void finishDrawingWindow(Session session, IWindow client,
             @Nullable SurfaceControl.Transaction postDrawTransaction, int seqId) {
         if (postDrawTransaction != null) {
-            postDrawTransaction.sanitize();
+            postDrawTransaction.sanitize(Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         final long origId = Binder.clearCallingIdentity();
