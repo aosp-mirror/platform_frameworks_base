@@ -25,6 +25,7 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.view.InsetsSource.FLAG_SUPPRESS_SCRIM;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -1717,12 +1718,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         if (insetsHeight != -1 && !mEdgeBackGestureHandler.isButtonForcedVisible()) {
             navBarProvider.setInsetsSize(Insets.of(0, 0, 0, insetsHeight));
         }
+        final boolean needsScrim = userContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_navBarNeedsScrim);
+        navBarProvider.setFlags(needsScrim ? 0 : FLAG_SUPPRESS_SCRIM, FLAG_SUPPRESS_SCRIM);
 
         final InsetsFrameProvider tappableElementProvider = new InsetsFrameProvider(
                 mInsetsSourceOwner, 0, WindowInsets.Type.tappableElement());
-        final boolean navBarTapThrough = userContext.getResources().getBoolean(
+        final boolean tapThrough = userContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_navBarTapThrough);
-        if (navBarTapThrough) {
+        if (tapThrough) {
             tappableElementProvider.setInsetsSize(Insets.NONE);
         }
 
