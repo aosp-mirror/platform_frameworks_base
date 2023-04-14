@@ -18,7 +18,6 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import android.view.ViewGroup
 import com.android.systemui.statusbar.RemoteInputController
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
@@ -254,7 +253,4 @@ interface ShadeNotificationPresenter {
 
     /** Returns whether the screen has temporarily woken up to display notifications. */
     fun hasPulsingNotifications(): Boolean
-
-    /** The current activated notification. */
-    var activatedChild: ActivatableNotificationView?
 }

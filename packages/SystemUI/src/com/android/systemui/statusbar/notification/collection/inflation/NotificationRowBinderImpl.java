@@ -177,7 +177,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private void bindRow(NotificationEntry entry, ExpandableNotificationRow row) {
         mListContainer.bindRow(row);
         mNotificationRemoteInputManager.bindRow(row);
-        row.setOnActivatedListener(mPresenter);
         entry.setRow(row);
         mNotifBindPipeline.manageRow(entry, row);
         mBindRowCallback.onBindRow(row);

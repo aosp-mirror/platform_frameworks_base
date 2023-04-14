@@ -969,15 +969,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    protected boolean handleSlideBack() {
-        if (mMenuRow != null && mMenuRow.isMenuVisible()) {
-            animateResetTranslation();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public boolean isSummaryWithChildren() {
         return mIsSummaryWithChildren;
     }
