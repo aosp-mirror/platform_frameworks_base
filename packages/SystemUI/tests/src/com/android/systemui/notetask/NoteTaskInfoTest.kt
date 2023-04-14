@@ -15,6 +15,7 @@
  */
 package com.android.systemui.notetask
 
+import android.os.UserHandle
 import android.test.suitebuilder.annotation.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
@@ -28,7 +29,7 @@ import org.junit.runner.RunWith
 internal class NoteTaskInfoTest : SysuiTestCase() {
 
     private fun createNoteTaskInfo(): NoteTaskInfo =
-        NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID)
+        NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID, UserHandle.of(0))
 
     @Test
     fun launchMode_keyguardLocked_launchModeActivity() {

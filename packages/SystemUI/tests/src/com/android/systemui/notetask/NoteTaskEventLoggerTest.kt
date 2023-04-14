@@ -15,6 +15,7 @@
  */
 package com.android.systemui.notetask
 
+import android.os.UserHandle
 import android.test.suitebuilder.annotation.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.internal.logging.UiEventLogger
@@ -44,7 +45,7 @@ internal class NoteTaskEventLoggerTest : SysuiTestCase() {
         NoteTaskEventLogger(uiEventLogger)
 
     private fun createNoteTaskInfo(): NoteTaskInfo =
-        NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID)
+        NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID, UserHandle.of(0))
 
     @Before
     fun setUp() {
