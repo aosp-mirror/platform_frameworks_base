@@ -632,6 +632,38 @@ final class DevicePolicyEngine {
     }
 
     /**
+     * Returns all the {@code policyKeys} set by any admin that share the same
+     * {@link PolicyKey#getIdentifier()} as the provided {@code policyDefinition}.
+     *
+     * <p>For example, getLocalPolicyKeysSetByAllAdmins(PERMISSION_GRANT) returns all permission
+     * grants set by any admin.
+     *
+     * <p>Note that this will always return at most one item for policies that do not require
+     * additional params (e.g. {@link PolicyDefinition#LOCK_TASK} vs
+     * {@link PolicyDefinition#PERMISSION_GRANT(String, String)}).
+     *
+     */
+    @NonNull
+    <V> Set<PolicyKey> getLocalPolicyKeysSetByAllAdmins(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            int userId) {
+        Objects.requireNonNull(policyDefinition);
+
+        synchronized (mLock) {
+            if (policyDefinition.isGlobalOnlyPolicy() || !mLocalPolicies.contains(userId)) {
+                return Set.of();
+            }
+            Set<PolicyKey> keys = new HashSet<>();
+            for (PolicyKey key : mLocalPolicies.get(userId).keySet()) {
+                if (key.hasSameIdentifierAs(policyDefinition.getPolicyKey())) {
+                    keys.add(key);
+                }
+            }
+            return keys;
+        }
+    }
+
+    /**
      * Returns all user restriction policies set by the given admin.
      *
      * <p>Pass in {@link UserHandle#USER_ALL} for {@code userId} to get global restrictions set by
