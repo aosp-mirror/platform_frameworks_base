@@ -665,7 +665,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fiziksel klavye"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Klavye düzenini seçin"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Varsayılan"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı aç"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı açma"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranı açmaya izin ver"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Bir uygulamanın ekranı açmasına izin verin. İzin verildiğinde, uygulama sizin belirgin niyetiniz olmadan istediği zaman ekranı açabilir."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulamasında anons durdurulsun mu?"</string>
