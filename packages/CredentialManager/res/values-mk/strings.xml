@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Подобрена безбедност на сметката"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Секој клуч е поврзан само со апликацијата или веб-сајтот за кој бил создаден за да не може никогаш по грешка да се најавите на измамничка апликација или веб-сајт. Плус, кога серверите ги чуваат само јавните клучеви, хакирањето е многу потешко."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Беспрекорна транзиција"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Иако се движиме кон иднина без лозинки, лозинките сепак ќе бидат достапни покрај криптографските клучеви"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Како што се движиме кон иднина без лозинки, лозинките сепак ќе бидат достапни покрај криптографските клучеви."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Изберете каде да ги зачувате вашите <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изберете управник со лозинки за да ги зачувате вашите податоци и да се најавите побрзо следниот пат"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Да се создаде криптографски клуч за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Да се користи вашиот зачуван криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Да се користи вашето зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Изберете зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Избери опција за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Да се користат овие информации на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Најавете се на друг начин"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Прикажи ги опциите"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Продолжи"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Опции за најавување"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"За <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Заклучени управници со лозинки"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Допрете за да отклучите"</string>

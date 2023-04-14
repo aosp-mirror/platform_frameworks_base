@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Konto täiustatud turvalisus"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Iga võti on lingitud vaid rakenduse või veebisaidiga, mille jaoks see loodi, seega ei saa te petturlikku rakendusse või veebisaidile kunagi kogemata sisse logida. Ja kuna serverid säilitavad vaid avalikke võtmeid, on häkkimine palju keerulisem."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Sujuv üleminek"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Liigume paroolivaba tuleviku poole, kuid paroolid jäävad pääsuvõtmete kõrval siiski kättesaadavaks"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Liikudes paroolivaba tuleviku poole, jäävad paroolid pääsuvõtmete kõrval siiski kättesaadavaks."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Valige, kuhu soovite oma <xliff:g id="CREATETYPES">%1$s</xliff:g> salvestada"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Valige paroolihaldur, et salvestada oma teave ja järgmisel korral kiiremini sisse logida"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Kas luua rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> jaoks pääsuvõti?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Kas kasutada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud pääsuvõtit?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Kas kasutada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud sisselogimisandmeid?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Valige rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> jaoks salvestatud sisselogimisandmed"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Kas teha valik rakendusele <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Kas soovite kasutada seda teavet rakenduses <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Logige sisse muul viisil"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Kuva valikud"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Jätka"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Sisselogimise valikud"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Kasutajale <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Lukustatud paroolihaldurid"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Avamiseks puudutage"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Sisselogimisandmete haldamine"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Muus seadmes"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Kasuta teist seadet"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Rakendus <xliff:g id="APP_NAME">%1$s</xliff:g> tühistas taotluse"</string>
 </resources>

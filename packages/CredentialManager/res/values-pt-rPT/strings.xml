@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Segurança melhorada nas contas"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada chave é exclusivamente associada à app ou ao Website para o qual foi criada, por isso, nunca pode iniciar sessão numa app ou num Website fraudulento acidentalmente. Além disso, os servidores só mantêm chaves públicas, o que dificulta a pirataria."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transição sem complicações"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"À medida que avançamos para um futuro sem palavras-passe, as palavras-passe continuam disponíveis juntamente com as chaves de acesso"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"À medida que avançamos para um futuro sem palavras-passe, as palavras-passe continuam disponíveis juntamente com as chaves de acesso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde guardar as suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gestor de palavras-passe para guardar as suas informações e iniciar sessão mais rapidamente da próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Criar uma chave de acesso para a app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar a sua chave de acesso guardada na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Usar o seu início de sessão guardado na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Escolha um início de sessão guardado para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Escolher uma opção para a app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Usar estas informações na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Iniciar sessão de outra forma"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Ver opções"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuar"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opções de início de sessão"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Para <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Gestores de palavras-passe bloqueados"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Tocar para desbloquear"</string>

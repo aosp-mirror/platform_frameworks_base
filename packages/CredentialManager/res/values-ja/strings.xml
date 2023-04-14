@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"アカウントのセキュリティを強化"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"作成された各鍵は、対象となるアプリまたはウェブサイトのみとリンクされるため、間違って不正なアプリやウェブサイトにログインすることはありません。さらに、公開鍵はサーバーのみに保存されるため、ハッキングのリスクも大幅に抑えられます。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"シームレスな移行"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"将来的にパスワードレスに移行するにあたり、パスワードもパスキーと並行して引き続きご利用いただけます"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"将来的にパスワードレスに移行するにあたり、パスワードもパスキーと並行して引き続きご利用いただけます。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g>の保存先を選択"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"パスワード マネージャーを選択して情報を保存しておくと、次回からすばやくログインできます"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> のパスキーを作成しますか？"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> の保存したパスキーを使用しますか？"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> の保存したログイン情報を使用しますか？"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> の保存したログイン情報の選択"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> のオプションを選択しますか？"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> でこの情報を使用しますか？"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"別の方法でログイン"</string>
     <string name="snackbar_action" msgid="37373514216505085">"オプションを表示"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"続行"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ログイン オプション"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> 用"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"パスワード マネージャー ロック中"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"タップしてロック解除"</string>

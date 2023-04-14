@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"የተሻሻለ የመለያ ደህንነት"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ወደ አጭበርባሪ መተግበሪያ ወይም ድር ጣቢያ በስህተት መቼም መግባት እንዳይችሉ እያንዳንዱ ቁልፍ ከተፈጠረለት መተግበሪያ ወይም ድር ጣቢያ ጋር ለሚመለከተው ተወስኖ የተገናኘ ነው። በተጨማሪም አገልጋዮች ይፋዊ ቁልፎችን ብቻ ስለሚጠብቁ ሰርጎ መግባት የበለጠ ከባድ ነው።"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"እንከን አልባ ትርጉም"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"ወደ የይለፍ ቃል የሌለው ወደፊት ስንሄድ የይለፍ ቃላት አሁንም ከይለፍ ቁልፎች ጎን ለጎን ይገኛሉ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ወደ የይለፍ ቃል የሌለው ወደፊት ስንሄድ የይለፍ ቃላት ከይለፍ ቁልፎች ጎን ለጎን ይገኛሉ።"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"የእርስዎን <xliff:g id="CREATETYPES">%1$s</xliff:g> የት እንደሚያስቀምጡ ይምረጡ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"መረጃዎን ለማስቀመጥ እና በቀጣይ ጊዜ በፍጥነት በመለያ ለመግባት የሚስጥር ቁልፍ አስተዳዳሪን ይምረጡ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የይለፍ ቁልፍ ይፈጠር?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"የተቀመጠ የይለፍ ቁልፍዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"የተቀመጠ መግቢያዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠ መግቢያ ይጠቀሙ"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> አማራጭ ይመረጥ?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ይህን መረጃ በ<xliff:g id="APP_NAME">%1$s</xliff:g> ላይ ይጠቀማሉ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"በሌላ መንገድ ይግቡ"</string>
     <string name="snackbar_action" msgid="37373514216505085">"አማራጮችን አሳይ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ቀጥል"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"የመግቢያ አማራጮች"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"ለ<xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"የተቆለፉ የሚስጥር ቁልፍ አስተዳዳሪዎች"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"ለመክፈት መታ ያድርጉ"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"መግቢያዎችን ያስተዳድሩ"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ከሌላ መሣሪያ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"የተለየ መሣሪያ ይጠቀሙ"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"ጥያቄ በ<xliff:g id="APP_NAME">%1$s</xliff:g> ተሰርዟል"</string>
 </resources>

@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"खाताको सुदृढ सुरक्षा"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"तपाईं कहिले पनि गल्तीले कुनै कपटपूर्ण एप वा वेबसाइटमा लग इन गर्न नसक्नुहोस् भन्नाका लागि हरेक की जुन एप वा वेबसाइटको लागि बनाइएको थियो त्यसलाई खास गरी सोही एप वा वेबसाइटसँग लिंक गरिन्छ। यसका साथै, सर्भरहरूले सार्वजनिक की मात्र राख्ने भएकाले ह्याक गर्न झनै कठिन हुन्छ।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"निर्बाध ट्रान्जिसन"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"हामी पासवर्डरहित भविष्यतर्फ बढ्दै गर्दा पासकीका साथसाथै पासवर्ड पनि उपलब्ध भइरहने छन्"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"हामी पासवर्डरहित भविष्यतर्फ बढ्दै गर्दा पासकीका साथसाथै पासवर्ड पनि उपलब्ध हुने छ।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तपाईं आफ्ना <xliff:g id="CREATETYPES">%1$s</xliff:g> कहाँ सेभ गर्न चाहनुहुन्छ भन्ने कुरा छनौट गर्नुहोस्"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"कुनै पासवर्ड म्यानेजरमा आफ्नो जानकारी सेभ गरी अर्को पटक अझ छिटो साइन इन गर्नुहोस्"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> को पासकी बनाउने हो?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"आफूले सेभ गरेको पासकी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"आफूले सेभ गरेको साइन इनसम्बन्धी जानकारी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि सेभ गरिएका साइन इनसम्बन्धी जानकारी छनौट गर्नुहोस्"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन गर्न प्रयोग गरिने क्रिडेन्सियल छनौट गर्ने हो?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन गर्न गर्नका निम्ति यो जानकारी प्रयोग गर्ने हो?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"अर्कै विधि प्रयोग गरी साइन इन गर्नुहोस्"</string>
     <string name="snackbar_action" msgid="37373514216505085">"विकल्पहरू हेर्नुहोस्"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"जारी राख्नुहोस्"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन‍ इनसम्बन्धी विकल्पहरू"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> का लागि"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"लक गरिएका पासवर्ड म्यानेजरहरू"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"अनलक गर्न ट्याप गर्नुहोस्"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"साइन इनसम्बन्धी विकल्पहरू व्यवस्थापन गर्नुहोस्"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"अर्को डिभाइसका लागि"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"अर्कै डिभाइस प्रयोग गरी हेर्नुहोस्"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले अनुरोध रद्द गरेको छ"</string>
 </resources>

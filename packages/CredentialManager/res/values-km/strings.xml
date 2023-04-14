@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"សុវត្ថិភាពគណនីដែលប្រសើរឡើង"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"កូដនីមួយៗត្រូវបានភ្ជាប់ផ្តាច់មុខជាមួយកម្មវិធី ឬគេហទំព័រដែលវាត្រូវបានបង្កើតឡើង ដូច្នេះអ្នកមិនអាចចូលទៅក្នុងកម្មវិធី ឬគេហទំព័រក្លែងបន្លំដោយច្រឡំបានឡើយ។ លើសពីនេះ ជាមួយនឹងម៉ាស៊ីនមេដែលរក្សាតែកូដសាធារណៈប៉ុណ្ណោះ ការលួចចូលគឺពិបាកខ្លាំង។"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ដំណើរផ្លាស់ប្ដូរយ៉ាងរលូន"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"នៅពេលដែលយើងឈានទៅរកអនាគតដែលគ្មានពាក្យសម្ងាត់ ពាក្យសម្ងាត់នៅតែអាចប្រើបានរួមជាមួយកូដសម្ងាត់"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"នៅពេលដែលយើងឈានទៅរកអនាគតដែលគ្មានពាក្យសម្ងាត់ ពាក្យសម្ងាត់នៅតែអាចប្រើបានរួមជាមួយកូដសម្ងាត់។"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ជ្រើសរើសកន្លែង​ដែលត្រូវរក្សាទុក<xliff:g id="CREATETYPES">%1$s</xliff:g>របស់អ្នក"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ជ្រើសរើស​កម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ ដើម្បីរក្សាទុក​ព័ត៌មានរបស់អ្នក និងចូលគណនី​បានកាន់តែរហ័ស​នៅពេលលើកក្រោយ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"បង្កើត​កូដសម្ងាត់​សម្រាប់ <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ប្រើកូដសម្ងាត់ដែលបានរក្សាទុករបស់អ្នកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ប្រើការចូល​គណនីដែលបានរក្សាទុករបស់អ្នកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ជ្រើសរើសការចូលគណនីដែលបានរក្សាទុកសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ជ្រើសរើសជម្រើសសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ប្រើព័ត៌មាននេះ​នៅលើ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ចូលគណនីដោយប្រើវិធីផ្សេងទៀត"</string>
     <string name="snackbar_action" msgid="37373514216505085">"មើលជម្រើស"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"បន្ត"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ជម្រើស​ចូលគណនី"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"សម្រាប់ <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"កម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ដែលបានចាក់សោ"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"ចុចដើម្បីដោះសោ"</string>

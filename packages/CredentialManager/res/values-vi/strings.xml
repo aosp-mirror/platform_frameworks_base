@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Cải thiện tính bảo mật của tài khoản"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Mỗi khoá được liên kết riêng với ứng dụng hoặc trang web mà khoá đó được tạo. Vì vậy, bạn sẽ không bao giờ đăng nhập nhầm vào một ứng dụng hoặc trang web lừa đảo. Ngoài ra, với các máy chủ chỉ lưu giữ khoá công khai, việc xâm nhập càng khó hơn nhiều."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Chuyển đổi liền mạch"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Trong quá trình chúng tôi hướng đến tương lai không dùng mật khẩu, bạn vẫn sẽ dùng được mật khẩu cùng với mã xác thực"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Trong quá trình chúng tôi hướng đến tương lai không dùng mật khẩu, bạn vẫn sẽ dùng được mật khẩu cùng với mã xác thực."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Chọn vị trí lưu <xliff:g id="CREATETYPES">%1$s</xliff:g> của bạn"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Hãy chọn một trình quản lý mật khẩu để lưu thông tin của bạn và đăng nhập nhanh hơn trong lần tới"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Tạo mã xác thực cho <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Dùng mã xác thực bạn đã lưu cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Dùng thông tin đăng nhập bạn đã lưu cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Chọn thông tin đăng nhập đã lưu cho <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Chọn một lựa chọn cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Sử dụng thông tin này trên <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Đăng nhập bằng cách khác"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Xem các lựa chọn"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Tiếp tục"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Tuỳ chọn đăng nhập"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Cho <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Trình quản lý mật khẩu đã khoá"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Nhấn để mở khoá"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Quản lý thông tin đăng nhập"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Từ một thiết bị khác"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Dùng thiết bị khác"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> đã huỷ yêu cầu"</string>
 </resources>

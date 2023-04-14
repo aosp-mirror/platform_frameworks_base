@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"提升帳戶安全性"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"系統會為應用程式或網站建立專屬的對應金鑰，因此你不會意外登入詐騙應用程式或網站。此外，伺服器上只存放公開金鑰，可大幅降低駭客入侵的風險。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"流暢轉換"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"即使現在已邁入無密碼時代，密碼仍可與密碼金鑰並用"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"我們日後將改採無密碼技術，密碼仍可與密碼金鑰並行使用。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"選擇要將<xliff:g id="CREATETYPES">%1$s</xliff:g>存在哪裡"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"選取密碼管理工具並儲存資訊，下次就能更快登入"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要為「<xliff:g id="APPNAME">%1$s</xliff:g>」建立密碼金鑰嗎？"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"要使用已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」密碼金鑰嗎？"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"要使用已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資訊嗎？"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"選擇已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資訊"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"要選擇適用於「<xliff:g id="APP_NAME">%1$s</xliff:g>」的項目嗎？"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"要在「<xliff:g id="APP_NAME">%1$s</xliff:g>」上使用這項資訊嗎？"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"使用其他方式登入"</string>
     <string name="snackbar_action" msgid="37373514216505085">"查看選項"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"繼續"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"登入選項"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> 專用"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"已鎖定的密碼管理工具"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"輕觸即可解鎖"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"管理登入資訊"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"透過其他裝置"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"使用其他裝置"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"要求已由 <xliff:g id="APP_NAME">%1$s</xliff:g> 取消"</string>
 </resources>

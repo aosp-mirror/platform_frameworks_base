@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Securitate îmbunătățită a contului"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Fiecare cheie este conectată în mod exclusiv cu aplicația sau site-ul pentru care a fost creată, prin urmare nu te poți conecta niciodată din greșeală la o aplicație sau un site fraudulos. În plus, întrucât pe servere sunt stocate doar chei publice, hackingul este mult mai dificil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Tranziție fluidă"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Ne îndreptăm spre un viitor fără parole, în care parolele vor fi disponibile pe lângă cheile de acces"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Ne îndreptăm spre un viitor fără parole, însă acestea sunt încă disponibile, alături de cheile de acces."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Alege unde dorești să salvezi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selectează un manager de parole pentru a salva informațiile și a te conecta mai rapid data viitoare"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Creezi o cheie de acces pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Folosești cheia de acces salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Folosești datele de conectare salvate pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Alege o conectare salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Alegi o opțiune pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Folosești aceste informații în <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Conectează-te altfel"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Afișează opțiunile"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuă"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opțiuni de conectare"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Pentru <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Manageri de parole blocate"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Atinge pentru a debloca"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gestionează acreditările"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De pe alt dispozitiv"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Folosește alt dispozitiv"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Solicitare anulată de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

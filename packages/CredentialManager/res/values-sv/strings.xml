@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Förbättrad kontosäkerhet"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Varje nyckel är exklusivt länkad till appen eller webbplatsen den skapades för, så du kan aldrig logga in i en bedräglig app eller webbplats av misstag. Hackning blir dessutom mycket svårare eftersom servrar bara behåller offentliga nycklar."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"En sömlös övergång"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Medan vi beger oss mot en lösenordslös framtid kommer lösenord fortfarande att vara tillgängliga utöver nycklar"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Medan vi beger oss mot en lösenordslös framtid kommer lösenord fortfarande att vara tillgängliga utöver nycklar."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Välj var du vill spara <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Välj en lösenordshanterare för att spara dina uppgifter och logga in snabbare nästa gång"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vill du skapa en nyckel för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vill du använda din sparade nyckel för <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Vill du använda dina sparade inloggningsuppgifter för <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Välj en sparad inloggning för <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Vill du välja ett alternativ för <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Vill du använda den här informationen på <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Logga in på ett annat sätt"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Visa alternativ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Fortsätt"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Inloggningsalternativ"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"För <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Låsta lösenordshanterare"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Tryck för att låsa upp"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Hantera inloggningar"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Via en annan enhet"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Använd en annan enhet"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Begäran avbruten av <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

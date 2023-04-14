@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ປັບປຸງຄວາມປອດໄພບັນຊີ"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ກະແຈແຕ່ລະອັນແມ່ນລິ້ງເຈາະຈົງກັບແອັບ ຫຼື ເວັບໄຊທີ່ພວກມັນຖືກສ້າງໃຫ້, ດັ່ງນັ້ນທ່ານຈະບໍ່ສາມາດເຂົ້າສູ່ລະບົບຫາແອັບ ຫຼື ເວັບໄຊສໍ້ໂກງຕ່າງໆໂດຍບໍ່ໄດ້ຕັ້ງໃຈໄດ້. ນອກຈາກນັ້ນ, ເຊີບເວີຍັງມີການເກັບກະແຈສາທາລະນະໄວ້ເທົ່ານັ້ນ, ການແຮັກຈຶ່ງເປັນເລື່ອງຍາກຂຶ້ນຫຼາຍ."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ການປ່ຽນຜ່ານທີ່ຕໍ່ເນື່ອງ"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"ໃນຂະນະທີ່ພວກເຮົາກ້າວໄປສູ່ອະນາຄົດທີ່ບໍ່ຕ້ອງໃຊ້ລະຫັດຜ່ານ, ລະຫັດຜ່ານຈະຍັງຄົງໃຊ້ໄດ້ຄວບຄູ່ໄປກັບກະແຈຜ່ານ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ໃນຂະນະທີ່ພວກເຮົາກ້າວໄປສູ່ອະນາຄົດທີ່ບໍ່ຕ້ອງໃຊ້ລະຫັດຜ່ານ, ລະຫັດຜ່ານຈະຍັງຄົງໃຊ້ໄດ້ຄວບຄູ່ໄປກັບກະແຈຜ່ານ."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ເລືອກບ່ອນທີ່ຈະບັນທຶກ <xliff:g id="CREATETYPES">%1$s</xliff:g> ຂອງທ່ານ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ເລືອກຕົວຈັດການລະຫັດຜ່ານເພື່ອບັນທຶກຂໍ້ມູນຂອງທ່ານ ແລະ ເຂົ້າສູ່ລະບົບໄວຂຶ້ນໃນເທື່ອຕໍ່ໄປ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ສ້າງກະແຈຜ່ານສຳລັບ <xliff:g id="APPNAME">%1$s</xliff:g> ບໍ?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ໃຊ້ກະແຈຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ໃຊ້ການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ເລືອກການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ເລືອກຕົວເລືອກສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ໃຊ້ຂໍ້ມູນນີ້ຢູ່ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ເຂົ້າສູ່ລະບົບດ້ວຍວິທີອື່ນ"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ເບິ່ງຕົວເລືອກ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ສືບຕໍ່"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ຕົວເລືອກການເຂົ້າສູ່ລະບົບ"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"ຕົວຈັດການລະຫັດຜ່ານທີ່ລັອກໄວ້"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"ແຕະເພື່ອປົດລັອກ"</string>

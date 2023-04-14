@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Bætt reikningsöryggi"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Hver lykill er eingöngu tengdur forritinu eða vefsvæðinu sem hann var búinn til fyrir. Því er engin hætta á að þú skráir þig óvart inn á sviksamlegt forrit eða vefsvæði. Einnig er erfiðara að hakka þegar þjónar geyma aðeins opinbera lykla."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Snurðulaus skipti"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Við stefnum að framtíð án aðgangsorða en aðgangsorð verða áfram í boði samhliða aðgangslyklum"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Við stefnum að framtíð án aðgangsorða en aðgangsorð verða áfram í boði samhliða aðgangslyklum."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Veldu hvar þú vilt vista <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Veldu aðgangsorðastjórnun til að vista upplýsingarnar og vera fljótari að skrá þig inn næst"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Viltu búa til aðgangslykil fyrir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,12 +52,14 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Nota vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Nota vistaða innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Veldu vistaða innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
-    <skip />
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Velja valkost fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Nota þessar upplýsingar í <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Skrá inn með öðrum hætti"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Skoða valkosti"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Áfram"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Innskráningarkostir"</string>
+    <!-- no translation found for button_label_view_more (3429098227286495651) -->
+    <skip />
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Fyrir: <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Læst aðgangsorðastjórnun"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Ýttu til að opna"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Stjórna innskráningu"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Úr öðru tæki"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Nota annað tæki"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> hætti við beiðnina"</string>
 </resources>
