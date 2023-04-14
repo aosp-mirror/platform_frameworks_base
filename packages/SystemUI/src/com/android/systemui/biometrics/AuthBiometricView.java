@@ -258,7 +258,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     /** Ignore all events from this (secondary) modality except successful authentication. */
-    protected boolean ignoreUnsuccessfulEventsFrom(@Modality int modality) {
+    protected boolean ignoreUnsuccessfulEventsFrom(@Modality int modality,
+            String unsuccessfulReason) {
         return false;
     }
 
@@ -541,7 +542,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     public void onAuthenticationFailed(
             @Modality int modality, @Nullable String failureReason) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, failureReason)) {
             return;
         }
 
@@ -556,7 +557,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      * @param error message
      */
     public void onError(@Modality int modality, String error) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, error)) {
             return;
         }
 
@@ -586,7 +587,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      * @param help message
      */
     public void onHelp(@Modality int modality, String help) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, help)) {
             return;
         }
         if (mSize != AuthDialog.SIZE_MEDIUM) {
