@@ -32,7 +32,6 @@ import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBO
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TAP_OUTSIDE;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TIMED_OUT;
-import static com.android.systemui.flags.Flags.CLIPBOARD_REMOTE_BEHAVIOR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -277,7 +276,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         } else if (!mIsMinimized) {
             setExpandedView();
         }
-        if (mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR) && mClipboardModel.isRemote()) {
+        if (mClipboardModel.isRemote()) {
             mTimeoutHandler.cancelTimeout();
             mOnUiUpdate = null;
         } else {
@@ -291,8 +290,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         mView.setMinimized(false);
         switch (model.getType()) {
             case TEXT:
-                if ((mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR) && model.isRemote())
-                        || DeviceConfig.getBoolean(
+                if (model.isRemote() || DeviceConfig.getBoolean(
                         DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
                     if (model.getTextLinks() != null) {
                         classifyText(model);
@@ -326,11 +324,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 mView.showDefaultTextPreview();
                 break;
         }
-        if (mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR)) {
-            if (!model.isRemote()) {
-                maybeShowRemoteCopy(model.getClipData());
-            }
-        } else {
+        if (!model.isRemote()) {
             maybeShowRemoteCopy(model.getClipData());
         }
         if (model.getType() != ClipboardModel.Type.OTHER) {
