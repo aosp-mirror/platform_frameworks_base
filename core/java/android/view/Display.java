@@ -2188,7 +2188,7 @@ public final class Display {
          */
         @NonNull
         public float[] getAlternativeRefreshRates() {
-            return mAlternativeRefreshRates;
+            return Arrays.copyOf(mAlternativeRefreshRates, mAlternativeRefreshRates.length);
         }
 
         /**
@@ -2197,7 +2197,7 @@ public final class Display {
         @NonNull
         @HdrCapabilities.HdrType
         public int[] getSupportedHdrTypes() {
-            return mSupportedHdrTypes;
+            return Arrays.copyOf(mSupportedHdrTypes, mSupportedHdrTypes.length);
         }
 
         /**
@@ -2497,8 +2497,10 @@ public final class Display {
          * @deprecated use {@link Display#getMode()}
          * and {@link Mode#getSupportedHdrTypes()} instead
          */
-        public @HdrType int[] getSupportedHdrTypes() {
-            return mSupportedHdrTypes;
+        @Deprecated
+        @HdrType
+        public int[] getSupportedHdrTypes() {
+            return Arrays.copyOf(mSupportedHdrTypes, mSupportedHdrTypes.length);
         }
         /**
          * Returns the desired content max luminance data in cd/m2 for this display.
