@@ -52,9 +52,14 @@ public class TvPipSystemAction extends TvPipAction {
                 broadcastAction);
     }
 
-    void update(@StringRes int title, @DrawableRes int icon) {
+    /**
+     * @return true if the title and/or icon were changed.
+     */
+    boolean update(@StringRes int title, @DrawableRes int icon) {
+        boolean changed = title != mTitleResource || icon != mIconResource;
         mTitleResource = title;
         mIconResource = icon;
+        return changed;
     }
 
     void populateButton(@NonNull TvWindowMenuActionButton button, Handler mainHandler) {

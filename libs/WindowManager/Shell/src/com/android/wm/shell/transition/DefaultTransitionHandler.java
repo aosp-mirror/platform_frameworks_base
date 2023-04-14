@@ -327,6 +327,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         @ColorInt int backgroundColorForTransition = 0;
         final int wallpaperTransit = getWallpaperTransitType(info);
+        boolean isDisplayRotationAnimationStarted = false;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.hasAllFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY
@@ -350,6 +351,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         startRotationAnimation(startTransaction, change, info, anim, animations,
                                 onAnimFinish);
+                        isDisplayRotationAnimationStarted = true;
                         continue;
                     }
                 } else {
@@ -403,6 +405,14 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             ROTATION_ANIMATION_ROTATE, animations, onAnimFinish);
                     continue;
                 }
+            }
+
+            // Hide the invisible surface directly without animating it if there is a display
+            // rotation animation playing.
+            if (isDisplayRotationAnimationStarted && TransitionUtil.isClosingType(
+                    change.getMode())) {
+                startTransaction.hide(change.getLeash());
+                continue;
             }
 
             // The back gesture has animated this change before transition happen, so here we don't

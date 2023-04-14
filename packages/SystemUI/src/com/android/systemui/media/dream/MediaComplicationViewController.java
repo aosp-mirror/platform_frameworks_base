@@ -31,7 +31,7 @@ import javax.inject.Named;
 
 /**
  * {@link MediaComplicationViewController} handles connecting the
- * {@link com.android.systemui.dreams.complication.Complication} view to the {@link MediaHost}.
+ * {@link com.android.systemui.complication.Complication} view to the {@link MediaHost}.
  */
 public class MediaComplicationViewController extends ViewController<FrameLayout> {
     private final MediaHost mMediaHost;

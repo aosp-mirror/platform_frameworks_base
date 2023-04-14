@@ -34,7 +34,9 @@ import android.os.Build
 import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
@@ -170,7 +172,13 @@ constructor(
             return
         }
 
-        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked) ?: return
+        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked)
+
+        if (info == null) {
+            logDebug { "Default notes app isn't set" }
+            showNoDefaultNotesAppToast()
+            return
+        }
 
         infoReference.set(info)
 
@@ -207,6 +215,12 @@ constructor(
         logDebug { "onShowNoteTask - completed: $info" }
     }
 
+    @VisibleForTesting
+    fun showNoDefaultNotesAppToast() {
+        Toast.makeText(context, R.string.set_default_notes_app_toast_content, Toast.LENGTH_SHORT)
+            .show()
+    }
+
     /**
      * Set `android:enabled` property in the `AndroidManifest` associated with the Shortcut
      * component to [value].
@@ -214,7 +228,7 @@ constructor(
      * If the shortcut entry `android:enabled` is set to `true`, the shortcut will be visible in the
      * Widget Picker to all users.
      */
-    fun setNoteTaskShortcutEnabled(value: Boolean) {
+    fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
         val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
 
         val enabledState =
@@ -224,7 +238,16 @@ constructor(
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED
             }
 
-        context.packageManager.setComponentEnabledSetting(
+        // If the required user matches the tracking user, the injected context is already a context
+        // of the required user. Avoid calling #createContextAsUser because creating a context for
+        // a user takes time.
+        val userContext =
+            if (user == userTracker.userHandle) {
+                context
+            } else {
+                context.createContextAsUser(user, /* flags= */ 0)
+            }
+        userContext.packageManager.setComponentEnabledSetting(
             componentName,
             enabledState,
             PackageManager.DONT_KILL_APP,
@@ -246,7 +269,7 @@ constructor(
         val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
         val hasNotesRoleHolder = isEnabled && !packageName.isNullOrEmpty()
 
-        setNoteTaskShortcutEnabled(hasNotesRoleHolder)
+        setNoteTaskShortcutEnabled(hasNotesRoleHolder, user)
 
         if (hasNotesRoleHolder) {
             shortcutManager.enableShortcuts(listOf(SHORTCUT_ID))

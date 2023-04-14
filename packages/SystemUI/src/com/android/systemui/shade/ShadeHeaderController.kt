@@ -19,11 +19,14 @@ package com.android.systemui.shade
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.IdRes
+import android.app.PendingIntent
 import android.app.StatusBarManager
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
+import android.provider.AlarmClock
 import android.util.Pair
 import android.view.DisplayCutout
 import android.view.View
@@ -41,6 +44,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.shade.ShadeHeaderController.Companion.HEADER_TRANSITION_ID
@@ -58,6 +62,7 @@ import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.Cent
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.SHADE_HEADER
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.statusbar.policy.VariableDateView
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.ViewController
@@ -91,6 +96,8 @@ constructor(
     private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager,
     private val demoModeController: DemoModeController,
     private val qsBatteryModeController: QsBatteryModeController,
+    private val nextAlarmController: NextAlarmController,
+    private val activityStarter: ActivityStarter,
 ) : ViewController<View>(header), Dumpable {
 
     companion object {
@@ -102,6 +109,8 @@ constructor(
         @VisibleForTesting internal val QS_HEADER_CONSTRAINT = R.id.qs_header_constraint
         @VisibleForTesting
         internal val LARGE_SCREEN_HEADER_CONSTRAINT = R.id.large_screen_header_constraint
+
+        @VisibleForTesting internal val DEFAULT_CLOCK_INTENT = Intent(AlarmClock.ACTION_SHOW_ALARMS)
 
         private fun Int.stateToString() =
             when (this) {
@@ -125,6 +134,7 @@ constructor(
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
     private var lastInsets: WindowInsets? = null
+    private var nextAlarmIntent: PendingIntent? = null
 
     private var qsDisabled = false
     private var visible = false
@@ -252,6 +262,11 @@ constructor(
             }
         }
 
+    private val nextAlarmCallback =
+        NextAlarmController.NextAlarmChangeCallback { nextAlarm ->
+            nextAlarmIntent = nextAlarm?.showIntent
+        }
+
     override fun onInit() {
         variableDateViewControllerFactory.create(date as VariableDateView).init()
         batteryMeterViewController.init()
@@ -286,19 +301,23 @@ constructor(
 
             mShadeCarrierGroup.setPaddingRelative((v.width * v.scaleX).toInt(), 0, 0, 0)
         }
+        clock.setOnClickListener { launchClockActivity() }
 
         dumpManager.registerDumpable(this)
         configurationController.addCallback(configurationControllerListener)
         demoModeController.addCallback(demoModeReceiver)
         statusBarIconController.addIconGroup(iconManager)
+        nextAlarmController.addCallback(nextAlarmCallback)
     }
 
     override fun onViewDetached() {
+        clock.setOnClickListener(null)
         privacyIconsController.chipVisibilityListener = null
         dumpManager.unregisterDumpable(this::class.java.simpleName)
         configurationController.removeCallback(configurationControllerListener)
         demoModeController.removeCallback(demoModeReceiver)
         statusBarIconController.removeIconGroup(iconManager)
+        nextAlarmController.removeCallback(nextAlarmCallback)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -316,6 +335,15 @@ constructor(
             .setInterpolator(if (show) Interpolators.ALPHA_OUT else Interpolators.ALPHA_IN)
             .setListener(CustomizerAnimationListener(show))
             .start()
+    }
+
+    @VisibleForTesting
+    internal fun launchClockActivity() {
+        if (nextAlarmIntent != null) {
+            activityStarter.postStartActivityDismissingKeyguard(nextAlarmIntent)
+        } else {
+            activityStarter.postStartActivityDismissingKeyguard(DEFAULT_CLOCK_INTENT, 0 /*delay */)
+        }
     }
 
     private fun loadConstraints() {

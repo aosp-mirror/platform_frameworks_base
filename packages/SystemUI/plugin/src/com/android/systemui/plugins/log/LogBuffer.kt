@@ -253,8 +253,8 @@ constructor(
     @Synchronized
     fun unfreeze() {
         if (frozen) {
-            log(TAG, LogLevel.DEBUG, { str1 = name }, { "$str1 unfrozen" })
             frozen = false
+            log(TAG, LogLevel.DEBUG, { str1 = name }, { "$str1 unfrozen" })
         }
     }
 

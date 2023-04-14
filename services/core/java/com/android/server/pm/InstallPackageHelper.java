@@ -994,7 +994,7 @@ final class InstallPackageHelper {
                     reconciledPackages = ReconcilePackageUtils.reconcilePackages(
                             requests, Collections.unmodifiableMap(mPm.mPackages),
                             versionInfos, mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
-                            mPm.mSettings, mContext);
+                            mPm.mSettings);
                 } catch (ReconcileFailure e) {
                     for (InstallRequest request : requests) {
                         request.setError("Reconciliation failed...", e);
@@ -1135,22 +1135,22 @@ final class InstallPackageHelper {
         // behavior.
         if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                 "MinInstallableTargetSdk__install_block_enabled",
-                false)) {
+                true)) {
             int minInstallableTargetSdk =
                     DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                             "MinInstallableTargetSdk__min_installable_target_sdk",
-                            0);
+                            PackageManagerService.MIN_INSTALLABLE_TARGET_SDK);
 
             // Determine if enforcement is in strict mode
             boolean strictMode = false;
 
             if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     "MinInstallableTargetSdk__install_block_strict_mode_enabled",
-                    false)) {
+                    true)) {
                 if (parsedPackage.getTargetSdkVersion()
                         < DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                         "MinInstallableTargetSdk__strict_mode_target_sdk",
-                        0)) {
+                        PackageManagerService.MIN_INSTALLABLE_TARGET_SDK)) {
                     strictMode = true;
                 }
             }
@@ -3930,7 +3930,7 @@ final class InstallPackageHelper {
                                 mPm.mPackages, Collections.singletonMap(pkgName,
                                         mPm.getSettingsVersionForPackage(parsedPackage)),
                                 mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
-                                mPm.mSettings, mContext);
+                                mPm.mSettings);
                 if ((scanFlags & SCAN_AS_APEX) == 0) {
                     appIdCreated = optimisticallyRegisterAppId(installRequest);
                 } else {

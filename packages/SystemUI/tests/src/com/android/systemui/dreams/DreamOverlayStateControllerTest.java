@@ -31,7 +31,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.complication.Complication;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -232,6 +232,23 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         mExecutor.runAllReady();
         assertThat(stateController.getComplications(true).contains(complication))
                 .isTrue();
+    }
+
+    @Test
+    public void testComplicationsNotShownForLowLight() {
+        final Complication complication = Mockito.mock(Complication.class);
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+
+        // Add a complication and verify it's returned in getComplications.
+        stateController.addComplication(complication);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications().contains(complication))
+                .isTrue();
+
+        stateController.setLowLightActive(true);
+        mExecutor.runAllReady();
+
+        assertThat(stateController.getComplications()).isEmpty();
     }
 
     @Test

@@ -92,13 +92,17 @@ public class ThermalStatusRestriction extends JobRestriction {
         final int priority = job.getEffectivePriority();
         if (mThermalStatus >= HIGHER_PRIORITY_THRESHOLD) {
             // For moderate throttling:
-            // Only let expedited & user-initiated jobs run if:
+            // Let all user-initiated jobs run.
+            // Only let expedited jobs run if:
             // 1. They haven't previously run
             // 2. They're already running and aren't yet in overtime
             // Only let high priority jobs run if:
             //   They are already running and aren't yet in overtime
             // Don't let any other job run.
-            if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
+            if (job.shouldTreatAsUserInitiatedJob()) {
+                return false;
+            }
+            if (job.shouldTreatAsExpeditedJob()) {
                 return job.getNumPreviousAttempts() > 0
                         || (mService.isCurrentlyRunningLocked(job)
                                 && mService.isJobInOvertimeLocked(job));

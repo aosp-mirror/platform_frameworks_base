@@ -67,10 +67,6 @@ object Flags {
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply")
 
-    // TODO(b/254512425): Tracking Bug
-    val NOTIFICATION_MEMORY_MONITOR_ENABLED =
-        releasedFlag(112, "notification_memory_monitor_enabled")
-
     /**
      * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
      * enable it on release builds.
@@ -280,6 +276,10 @@ object Flags {
 
     @JvmField
     val QS_PIPELINE_NEW_HOST = unreleasedFlag(504, "qs_pipeline_new_host", teamfood = false)
+
+    // TODO(b/278068252): Tracking Bug
+    @JvmField
+    val QS_PIPELINE_AUTO_ADD = unreleasedFlag(505, "qs_pipeline_auto_add", teamfood = false)
 
     // TODO(b/254512383): Tracking Bug
     @JvmField

@@ -2343,6 +2343,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
     }
 
+    @VisibleForTesting
+    void clearInternalHandleAfterTest() {
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
     private final class CustomDialog extends Dialog implements DialogInterface {
         public CustomDialog(Context context) {
             super(context, R.style.volume_dialog_theme);
