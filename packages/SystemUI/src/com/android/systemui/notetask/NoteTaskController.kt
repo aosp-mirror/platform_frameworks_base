@@ -30,6 +30,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.UserHandle
 import android.os.UserManager
@@ -187,9 +188,10 @@ constructor(
             logDebug { "onShowNoteTask - start: $info on user#${user.identifier}" }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
-                    // TODO: provide app bubble icon
                     val intent = createNoteTaskIntent(info)
-                    bubbles.showOrHideAppBubble(intent, user, null /* icon */)
+                    val icon =
+                        Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
+                    bubbles.showOrHideAppBubble(intent, user, icon)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }
