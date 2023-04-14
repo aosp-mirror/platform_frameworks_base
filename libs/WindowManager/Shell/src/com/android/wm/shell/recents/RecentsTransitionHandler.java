@@ -540,7 +540,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 mergeActivityOnly(info, t);
             } else if (!didMergeThings) {
                 // Didn't recognize anything in incoming transition so don't merge it.
-                Slog.w(TAG, "Don't know how to merge this transition.");
+                Slog.w(TAG, "Don't know how to merge this transition, foundRecentsClosing="
+                        + foundRecentsClosing);
+                if (foundRecentsClosing) {
+                    mWillFinishToHome = false;
+                    cancel(false /* toHome */);
+                }
                 return;
             }
             // At this point, we are accepting the merge.
