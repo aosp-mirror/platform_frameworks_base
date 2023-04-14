@@ -23,7 +23,7 @@ import android.graphics.Region;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
@@ -54,8 +54,8 @@ public class ShadeTouchHandler implements DreamTouchHandler {
         }
 
         session.registerInputListener(ev -> {
-            final NotificationPanelViewController viewController =
-                    mSurfaces.map(CentralSurfaces::getNotificationPanelViewController).orElse(null);
+            final ShadeViewController viewController =
+                    mSurfaces.map(CentralSurfaces::getShadeViewController).orElse(null);
 
             if (viewController != null) {
                 viewController.handleExternalTouch((MotionEvent) ev);

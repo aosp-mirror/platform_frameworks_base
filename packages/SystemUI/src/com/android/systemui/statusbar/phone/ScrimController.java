@@ -64,7 +64,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -649,7 +649,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         calculateAndUpdatePanelExpansion();
     }
 
-    /** See {@link NotificationPanelViewController#setPanelScrimMinFraction(float)}. */
+    /** See {@link ShadeViewController#setPanelScrimMinFraction(float)}. */
     public void setPanelScrimMinFraction(float minFraction) {
         if (isNaN(minFraction)) {
             throw new IllegalArgumentException("minFraction should not be NaN");
