@@ -300,10 +300,11 @@ TEST(ObfuscatorTest, WriteObfuscationMapInProtocolBufferFormat) {
   ASSERT_TRUE(obfuscator.Consume(test::ContextBuilder().Build().get(),
                                  getProtocolBufferTableUnderTest().get()));
 
-  obfuscator.WriteObfuscationMap("obfuscated_map.pb");
+  const auto map_path = testing::TempDir() + "/obfuscated_map.pb";
+  ASSERT_TRUE(obfuscator.WriteObfuscationMap(map_path));
 
   std::string pbOut;
-  android::base::ReadFileToString("obfuscated_map.pb", &pbOut, false /* follow_symlinks */);
+  ASSERT_TRUE(android::base::ReadFileToString(map_path, &pbOut, false /* follow_symlinks */));
   EXPECT_THAT(pbOut, HasSubstr("drawable/xmlfile.xml"));
   EXPECT_THAT(pbOut, HasSubstr("drawable/pngfile.png"));
   EXPECT_THAT(pbOut, HasSubstr("mycolor"));
@@ -328,10 +329,11 @@ TEST(ObfuscatorTest, WriteObfuscatingMapWithNonEnabledOption) {
   ASSERT_TRUE(obfuscator.Consume(test::ContextBuilder().Build().get(),
                                  getProtocolBufferTableUnderTest().get()));
 
-  obfuscator.WriteObfuscationMap("obfuscated_map.pb");
+  const auto map_path = testing::TempDir() + "/obfuscated_map.pb";
+  ASSERT_TRUE(obfuscator.WriteObfuscationMap(map_path));
 
   std::string pbOut;
-  android::base::ReadFileToString("obfuscated_map.pb", &pbOut, false /* follow_symlinks */);
+  ASSERT_TRUE(android::base::ReadFileToString(map_path, &pbOut, false /* follow_symlinks */));
   ASSERT_THAT(pbOut, Eq(""));
 }
 
