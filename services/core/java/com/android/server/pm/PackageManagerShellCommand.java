@@ -124,10 +124,12 @@ import dalvik.system.DexFile;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
@@ -348,6 +350,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runDisableVerificationForUid();
                 case "set-silent-updates-policy":
                     return runSetSilentUpdatesPolicy();
+                case "get-app-metadata":
+                    return runGetAppMetadata();
                 default: {
                     if (ART_SERVICE_COMMANDS.contains(cmd)) {
                         if (DexOptHelper.useArtService()) {
@@ -3537,6 +3541,30 @@ class PackageManagerShellCommand extends ShellCommand {
                     + e.getClass().getName() + " - "
                     + e.getMessage() + "]");
             return -1;
+        }
+        return 1;
+    }
+
+    private int runGetAppMetadata() {
+        final PrintWriter pw = getOutPrintWriter();
+        String pkgName = getNextArgRequired();
+        ParcelFileDescriptor pfd = null;
+        try {
+            pfd = mInterface.getAppMetadataFd(pkgName, mContext.getUserId());
+        } catch (RemoteException e) {
+            pw.println("Failure [" + e.getClass().getName() + " - " + e.getMessage() + "]");
+            return -1;
+        }
+        if (pfd != null) {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new ParcelFileDescriptor.AutoCloseInputStream(pfd)))) {
+                while (br.ready()) {
+                    pw.println(br.readLine());
+                }
+            } catch (IOException e) {
+                pw.println("Failure [" + e.getClass().getName() + " - " + e.getMessage() + "]");
+                return -1;
+            }
         }
         return 1;
     }

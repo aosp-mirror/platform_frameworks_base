@@ -49,6 +49,7 @@ import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
+import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerService.DEBUG_BACKUP;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
@@ -495,6 +496,13 @@ final class InstallPackageHelper {
         if (mPm.mCustomResolverComponentName != null
                 && mPm.mCustomResolverComponentName.getPackageName().equals(pkg.getPackageName())) {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
+        }
+
+        File appMetadataFile = new File(pkgSetting.getPath(), APP_METADATA_FILE_NAME);
+        if (appMetadataFile.exists()) {
+            pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+        } else {
+            pkgSetting.setAppMetadataFilePath(null);
         }
 
         if (pkg.getPackageName().equals("android")) {
