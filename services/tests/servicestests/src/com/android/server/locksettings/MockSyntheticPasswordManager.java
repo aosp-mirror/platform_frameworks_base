@@ -113,6 +113,11 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
     }
 
     @Override
+    public boolean isAutoPinConfirmationFeatureAvailable() {
+        return true;
+    }
+
+    @Override
     protected IWeaver getWeaverHidlService() throws RemoteException {
         return mWeaverService;
     }
