@@ -913,6 +913,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mMaximumObscuringOpacityForTouch = Settings.Global.getFloat(resolver,
                     Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
                     InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+            if (mMaximumObscuringOpacityForTouch < 0.0f
+                    || mMaximumObscuringOpacityForTouch > 1.0f) {
+                mMaximumObscuringOpacityForTouch =
+                        InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
+            }
         }
 
         void updateSystemUiSettings(boolean handleChange) {
