@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Ievadiet savu PIN kodu"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Ievadiet PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Ievadiet savu kombināciju"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Uzzīmējiet kombināciju"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Ievadiet paroli"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Ievadiet paroli"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nederīga karte."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Akumulators uzlādēts"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek bezvadu uzlāde"</string>
@@ -52,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Kļūdas dēļ nevar atspējot eSIM karti."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Ievadīšanas taustiņš"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Nepareiza kombinācija"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Nepareiza kombinācija. Mēģiniet vēlreiz."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Nepareiza parole"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Nepareiza parole. Mēģiniet vēlreiz."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Nepareizs PIN kods."</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Nepareizs PIN. Mēģiniet vēlreiz."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Vai atbloķējiet, izmantojot pirksta nospiedumu"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Pirksta nospiedums netika atpazīts"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Seja netika atpazīta"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Mēģiniet vēlreiz vai ievadiet PIN"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Mēģiniet vēlreiz vai ievadiet paroli"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Mēģiniet vēlreiz vai uzzīmējiet kombināciju"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Pārsniedzot mēģinājumu skaitu, jāievada PIN"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Pārsniedzot mēģinājumu skaitu, jāievada parole"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Pārsniedzot mēģinājumu skaitu, jāzīmē kombinācija"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Atbloķējiet ar PIN vai pirksta nospiedumu"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Atbloķējiet ar paroli vai pirksta nospiedumu"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Atbloķējiet ar kombināciju vai pirksta nospiedumu"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Saskaņā ar darbavietas politiku papildu drošībai ierīce ir bloķēta"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pēc bloķēšanas ir jāievada PIN"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Pēc bloķēšanas ir jāievada parole"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Pēc bloķēšanas ir jāzīmē kombinācija"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Atjauninājums tiks instalēts neaktīvajā laikā"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Jāveic papildu drošības darbība. PIN ilgu laiku nav lietots."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Jāveic papildu drošības darbība. Parole ilgu laiku nav lietota."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Jāveic papildu drošības darbība. Kombinācija ilgu laiku nav lietota."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Jāveic papildu drošības darbība. Ierīce ilgu laiku netika atbloķēta."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Nevar autorizēt pēc sejas. Pārāk daudz mēģinājumu."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Nevar autorizēt ar pirksta nospiedumu. Pārāk daudz mēģinājumu."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Uzticamības pārbaudes programma nav pieejama"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Pārāk daudz mēģinājumu ar nepareizu PIN."</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Pārāk daudz mēģinājumu ar nepareizu kombināciju."</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Pārāk daudz mēģinājumu ar nepareizu paroli."</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Mēģiniet vēlreiz pēc # sekundes.}zero{Mēģiniet vēlreiz pēc # sekundēm.}one{Mēģiniet vēlreiz pēc # sekundes.}other{Mēģiniet vēlreiz pēc # sekundēm.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Ievadiet SIM kartes PIN kodu."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Ievadiet SIM kartes “<xliff:g id="CARRIER">%1$s</xliff:g>” PIN kodu."</string>
@@ -76,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM kartes PUK koda ievadīšana neizdevās!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Pārslēgt ievades metodi"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Lidojuma režīms"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Pēc ierīces restartēšanas ir jāievada atbloķēšanas kombinācija."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Pēc ierīces restartēšanas ir jāievada PIN kods."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Pēc ierīces restartēšanas ir jāievada parole."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Pēc ierīces restartēšanas ir jāuzzīmē kombinācija"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Pēc ierīces restartēšanas ir jāievada PIN"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Pēc ierīces restartēšanas ir jāievada parole"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Papildu drošībai izmantojiet kombināciju"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Papildu drošībai izmantojiet PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Papildu drošībai izmantojiet paroli"</string>

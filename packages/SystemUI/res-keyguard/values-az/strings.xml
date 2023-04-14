@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN kodu daxil edin"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN daxil edin"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Modeli daxil edin"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Model çəkin"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Şifrənizi daxil edin"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Parol daxil edin"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Yanlış Kart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Enerji yığılıb"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Simsiz şəkildə batareya yığır"</string>
@@ -52,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"eSIM xəta səbəbi ilə deaktiv edilmədi."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Daxil edin"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Yanlış model"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Səhv model. Yenə sınayın."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Yanlış parol"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Səhv parol. Yenə sınayın."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Yanlış PIN"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Səhv PIN. Yenə sınayın."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Yaxud barmaq izi ilə kiliddən çıxarın"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Barmaq izi tanınmır"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Üz tanınmır"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Təkrar sınayın və ya PIN daxil edin"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Təkrar sınayın və ya parol daxil edin"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Təkrar sınayın və ya model çəkin"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Çoxlu cəhddən sonra PIN tələb edilir"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Çoxlu cəhddən sonra parol tələb edilir"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Çoxlu cəhddən sonra model tələb edilir"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"PIN/barmaq izi ilə açın"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Parol/barmaq izi ilə açın"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Model/barmaq izi ilə açın"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Qoruma üçün cihaz iş siyasətinə uyğun kilidləndi"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Kilidləmədən sonra PIN tələb edilir"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Kilidləmədən sonra parol tələb edilir"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Kilidləmədən sonra model tələb edilir"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Güncəllənmə qeyri-işlək saatlarda quraşdırılacaq"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Qoruma lazımdır. PIN bir müddət işlənməyib."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Qoruma lazımdır. Parol bir müddət işlənməyib."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Qoruma lazımdır. Model bir müddət işlənməyib."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Qoruma lazımdır. Cihaz bir müddət açılmayıb."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Üz ilə açmaq olmur. Çox cəhd edilib."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Barmaq izi ilə açmaq olmur. Çox cəhd edilib."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"İnam agenti əlçatan deyil"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Səhv PIN ilə çox cəhd edildi"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Səhv model ilə çox cəhd edildi"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Səhv parol ilə çox cəhd edildi"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# saniyə sonra yenidən cəhd edin.}other{# saniyə sonra yenidən cəhd edin.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM PIN\'ni daxil edin."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" üçün SIM PIN\'ni daxil edin."</string>
@@ -76,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK əməliyyatı alınmadı!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Daxiletmə metoduna keçin"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Təyyarə rejimi"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Cihaz yenidən başladıqdan sonra model tələb olunur"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Cihaz yeniden başladıqdan sonra PIN tələb olunur"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Cihaz yeniden başladıqdan sonra parol tələb olunur"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Cihaz təkrar başladıldıqdan sonra model tələb edilir"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Cihaz təkrar başladıldıqdan sonra PIN tələb edilir"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Cihaz təkrar başladıldıqdan sonra parol tələb edilir"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Əlavə təhlükəsizlik üçün modeldən istifadə edin"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Əlavə təhlükəsizlik üçün PIN istifadə edin"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Əlavə təhlükəsizlik üçün paroldan istifadə edin"</string>

@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"तुमचा पिन एंटर करा"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"पिन एंटर करा"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"तुमचा पॅटर्न एंटर करा"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"पॅटर्न ड्रॉ करा"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"तुमचा पासवर्ड एंटर करा"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"पासवर्ड एंटर करा"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"अवैध कार्ड."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज झाली"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस पद्धतीने चार्ज करत आहे"</string>
@@ -52,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"एका एररमुळे eSIM बंद होऊ शकत नाही."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"एंटर करा"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"चुकीचा पॅटर्न"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"पॅटर्न चुकीचा आहे. पुन्हा प्रयत्न करा."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"चुकीचा पासवर्ड"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"पासवर्ड चुकीचा आहे. पुन्हा प्रयत्न करा."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"चुकीचा पिन"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"पिन चुकीचा आहे. पुन्हा प्रयत्न करा."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"किंवा फिंगरप्रिंट वापरून अनलॉक करा"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिंट ओळखले नाही"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"चेहरा ओळखता आला नाही"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"पुन्हा प्रयत्न करा किंवा पिन एंटर करा"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"पुन्हा प्रयत्न करा किंवा पासवर्ड एंटर करा"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"पुन्हा प्रयत्न करा किंवा पॅटर्न ड्रॉ करा"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"अनेक वेळा प्रयत्न केल्यानंतर पिन आवश्यक आहे"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"अनेक वेळा प्रयत्न केल्यानंतर पासवर्ड आवश्यक आहे"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"अनेक वेळा प्रयत्न केल्यानंतर पॅटर्न आवश्यक आहे"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"पिन किंवा फिंगरप्रिंट वापरून अनलॉक करा"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"पासवर्ड किंवा फिंगरप्रिंट वापरून अनलॉक करा"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"पॅटर्न किंवा फिंगरप्रिंट वापरून अनलॉक करा"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"अतिरिक्त सुरक्षेसाठी, कामाशी संबंधित धोरणाद्वारे डिव्हाइस लॉक केला होता"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"लॉकडाउननंतर पिन आवश्यक आहे"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"लॉकडाउननंतर पासवर्ड आवश्यक आहे"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"लॉकडाउननंतर पॅटर्न आवश्यक आहे"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"अपडेट हे इनॅक्टिव्ह तासांदरम्यान इंस्टॉल होईल"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पिन अनलॉक केला गेला नव्हता."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पासवर्ड अनलॉक केला गेला नव्हता."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पॅटर्न अनलॉक केला गेला नव्हता."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी डिव्हाइस अनलॉक केले गेले नव्हते."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"चेहरा वापरून अनलॉक करू शकत नाही. खूप जास्त प्रयत्न."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"फिंगरप्रिंट वापरून अनलॉक करू शकत नाही. खूप जास्त प्रयत्न."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"विश्वसनीय एजंट उपलब्ध नाही"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"चुकीचा पिन वापरून खूप जास्त प्रयत्न केले"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"चुकीचा पॅटर्न वापरून खूप जास्त प्रयत्न केले"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"चुकीचा पासवर्ड वापरून खूप जास्त प्रयत्न केले"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# सेकंदामध्ये पुन्हा प्रयत्न करा.}other{# सेकंदांमध्ये पुन्हा प्रयत्न करा.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"सिम पिन एंटर करा"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" साठी सिम पिन एंटर करा"</string>
@@ -76,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"सिम PUK कार्य अयशस्‍वी झाले!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"इनपुट पद्धत स्विच करा"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"विमान मोड"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"डिव्हाइस रीस्टार्ट झाल्यावर पॅटर्न आवश्यक आहे"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"डिव्हाइस रीस्टार्ट झाल्यावर पिन आवश्यक आहे"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"डिव्हाइस रीस्टार्ट झाल्यावर पासवर्ड आवश्यक आहे"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"डिव्हाइस रीस्टार्ट झाल्यानंतर पॅटर्न आवश्यक आहे"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"डिव्हाइस रीस्टार्ट झाल्यानंतर पिन आवश्यक आहे"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"डिव्हाइस रीस्टार्ट झाल्यानंतर पासवर्ड आवश्यक आहे"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"अतिरिक्त सुरक्षेसाठी, त्याऐवजी पॅटर्न वापरा"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"अतिरिक्त सुरक्षेसाठी, त्याऐवजी पिन वापरा"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"अतिरिक्त सुरक्षेसाठी, त्याऐवजी पासवर्ड वापरा"</string>
