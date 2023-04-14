@@ -25,7 +25,6 @@ import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -125,9 +124,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelperIfEligibleForUser(USAGE_STATS_HELPER, new UsageStatsBackupHelper(mUserId));
         addHelperIfEligibleForUser(SHORTCUT_MANAGER_HELPER, new ShortcutBackupHelper(mUserId));
         addHelperIfEligibleForUser(ACCOUNT_MANAGER_HELPER, new AccountManagerBackupHelper(mUserId));
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_SLICES_DISABLED)) {
-            addHelperIfEligibleForUser(SLICES_HELPER, new SliceBackupHelper(this));
-        }
+        addHelperIfEligibleForUser(SLICES_HELPER, new SliceBackupHelper(this));
         addHelperIfEligibleForUser(PEOPLE_HELPER, new PeopleBackupHelper(mUserId));
         addHelperIfEligibleForUser(APP_LOCALES_HELPER, new AppSpecificLocalesBackupHelper(mUserId));
         addHelperIfEligibleForUser(APP_GENDER_HELPER,
