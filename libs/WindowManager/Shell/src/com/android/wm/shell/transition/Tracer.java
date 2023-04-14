@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.TraceBuffer;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,8 +41,9 @@ import java.util.Map;
 /**
  * Helper class to collect and dump transition traces.
  */
-public class Tracer {
+public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
     private static final int ALWAYS_ON_TRACING_CAPACITY = 15 * 1024; // 15 KB
+    private static final int ACTIVE_TRACING_BUFFER_CAPACITY = 5000 * 1024; // 5 MB
 
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 
@@ -50,6 +52,7 @@ public class Tracer {
             "/data/misc/wmtrace/shell_transition_trace" + WINSCOPE_EXT;
 
     private final Object mEnabledLock = new Object();
+    private boolean mActiveTracingEnabled = false;
 
     private final TraceBuffer mTraceBuffer = new TraceBuffer(ALWAYS_ON_TRACING_CAPACITY,
             (proto) -> handleOnEntryRemovedFromTrace(proto));
@@ -158,6 +161,54 @@ public class Tracer {
     }
 
     /**
+     * Starts collecting transitions for the trace.
+     * If called while a trace is already running, this will reset the trace.
+     */
+    public void startTrace(@Nullable PrintWriter pw) {
+        if (IS_USER) {
+            LogAndPrintln.e(pw, "Tracing is not supported on user builds.");
+            return;
+        }
+        Trace.beginSection("Tracer#startTrace");
+        LogAndPrintln.i(pw, "Starting shell transition trace.");
+        synchronized (mEnabledLock) {
+            mActiveTracingEnabled = true;
+            mTraceBuffer.resetBuffer();
+            mTraceBuffer.setCapacity(ACTIVE_TRACING_BUFFER_CAPACITY);
+        }
+        Trace.endSection();
+    }
+
+    /**
+     * Stops collecting the transition trace and dump to trace to file.
+     *
+     * Dumps the trace to @link{TRACE_FILE}.
+     */
+    public void stopTrace(@Nullable PrintWriter pw) {
+        stopTrace(pw, new File(TRACE_FILE));
+    }
+
+    /**
+     * Stops collecting the transition trace and dump to trace to file.
+     * @param outputFile The file to dump the transition trace to.
+     */
+    public void stopTrace(@Nullable PrintWriter pw, File outputFile) {
+        if (IS_USER) {
+            LogAndPrintln.e(pw, "Tracing is not supported on user builds.");
+            return;
+        }
+        Trace.beginSection("Tracer#stopTrace");
+        LogAndPrintln.i(pw, "Stopping shell transition trace.");
+        synchronized (mEnabledLock) {
+            mActiveTracingEnabled = false;
+            writeTraceToFileLocked(pw, outputFile);
+            mTraceBuffer.resetBuffer();
+            mTraceBuffer.setCapacity(ALWAYS_ON_TRACING_CAPACITY);
+        }
+        Trace.endSection();
+    }
+
+    /**
      * Being called while taking a bugreport so that tracing files can be included in the bugreport.
      *
      * @param pw Print writer
@@ -211,6 +262,39 @@ public class Tracer {
             mRemovedFromTraceCallbacks.get(proto).run();
             mRemovedFromTraceCallbacks.remove(proto);
         }
+    }
+
+    @Override
+    public boolean onShellCommand(String[] args, PrintWriter pw) {
+        switch (args[0]) {
+            case "start": {
+                startTrace(pw);
+                return true;
+            }
+            case "stop": {
+                stopTrace(pw);
+                return true;
+            }
+            case "save-for-bugreport": {
+                saveForBugreport(pw);
+                return true;
+            }
+            default: {
+                pw.println("Invalid command: " + args[0]);
+                printShellCommandHelp(pw, "");
+                return false;
+            }
+        }
+    }
+
+    @Override
+    public void printShellCommandHelp(PrintWriter pw, String prefix) {
+        pw.println(prefix + "start");
+        pw.println(prefix + "  Start tracing the transitions.");
+        pw.println(prefix + "stop");
+        pw.println(prefix + "  Stop tracing the transitions.");
+        pw.println(prefix + "save-for-bugreport");
+        pw.println(prefix + "  Flush in memory transition trace to file.");
     }
 
     private static class LogAndPrintln {

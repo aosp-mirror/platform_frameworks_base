@@ -74,10 +74,12 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.TransitionUtil;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -106,7 +108,8 @@ import java.util.Arrays;
  * track, it will be marked as SYNC. This means that all currently active tracks must be flushed
  * before the SYNC transition can play.
  */
-public class Transitions implements RemoteCallable<Transitions> {
+public class Transitions implements RemoteCallable<Transitions>,
+        ShellCommandHandler.ShellCommandActionHandler {
     static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
@@ -170,6 +173,9 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
+
+    @Nullable
+    private final ShellCommandHandler mShellCommandHandler;
 
     private final ArrayList<TransitionObserver> mObservers = new ArrayList<>();
 
@@ -246,8 +252,23 @@ public class Transitions implements RemoteCallable<Transitions> {
             @NonNull WindowOrganizer organizer,
             @NonNull TransactionPool pool,
             @NonNull DisplayController displayController,
-            @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
+            @NonNull ShellExecutor mainExecutor,
+            @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
+        this(context, shellInit, shellController, organizer, pool, displayController, mainExecutor,
+                mainHandler, animExecutor, null);
+    }
+
+    public Transitions(@NonNull Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
+            @NonNull WindowOrganizer organizer,
+            @NonNull TransactionPool pool,
+            @NonNull DisplayController displayController,
+            @NonNull ShellExecutor mainExecutor,
+            @NonNull Handler mainHandler,
+            @NonNull ShellExecutor animExecutor,
+            @Nullable ShellCommandHandler shellCommandHandler) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -263,6 +284,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Default");
         // Next lowest priority is remote transitions.
         mHandlers.add(mRemoteTransitionHandler);
+        mShellCommandHandler = shellCommandHandler;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -293,6 +315,10 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             // Pre-load the instance.
             TransitionMetrics.getInstance();
+        }
+
+        if (mShellCommandHandler != null) {
+            mShellCommandHandler.addCommandCallback("transitions", this, this);
         }
     }
 
@@ -1372,5 +1398,27 @@ public class Transitions implements RemoteCallable<Transitions> {
 
             mMainExecutor.execute(() -> dispatchAnimScaleSetting(mTransitionAnimationScaleSetting));
         }
+    }
+
+
+    @Override
+    public boolean onShellCommand(String[] args, PrintWriter pw) {
+        switch (args[0]) {
+            case "tracing": {
+                mTracer.onShellCommand(Arrays.copyOfRange(args, 1, args.length), pw);
+                return true;
+            }
+            default: {
+                pw.println("Invalid command: " + args[0]);
+                printShellCommandHelp(pw, "");
+                return false;
+            }
+        }
+    }
+
+    @Override
+    public void printShellCommandHelp(PrintWriter pw, String prefix) {
+        pw.println(prefix + "tracing");
+        mTracer.printShellCommandHelp(pw, prefix + "  ");
     }
 }
