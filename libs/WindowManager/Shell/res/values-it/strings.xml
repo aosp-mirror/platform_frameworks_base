@@ -32,17 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Ridimensiona"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Accantona"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Annulla accantonamento"</string>
-    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"L\'app potrebbe non funzionare con lo schermo diviso"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"L\'app non supporta la modalità schermo diviso"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Questa app può essere aperta soltanto in 1 finestra."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"L\'app potrebbe non funzionare su un display secondario."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"L\'app non supporta l\'avvio su display secondari."</string>
-    <!-- no translation found for accessibility_divider (6407584574218956849) -->
-    <skip />
-    <!-- no translation found for divider_title (1963391955593749442) -->
-    <skip />
+    <string name="accessibility_divider" msgid="6407584574218956849">"Strumento per schermo diviso"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Strumento per schermo diviso"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Schermata sinistra a schermo intero"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Schermata sinistra al 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Schermata sinistra al 50%"</string>
@@ -89,8 +85,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Il problema non si è risolto?\nTocca per ripristinare"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nessun problema con la fotocamera? Tocca per ignorare."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Visualizza più contenuti e fai di più"</string>
-    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
-    <skip />
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Trascina in un\'altra app per usare lo schermo diviso"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tocca due volte fuori da un\'app per riposizionarla"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Espandi per avere ulteriori informazioni."</string>
@@ -99,7 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Annulla"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Riavvia"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Non mostrare più"</string>
-    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"Tocca due volte per spostare questa app"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Tocca due volte per\nspostare questa app"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Ingrandisci"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Riduci a icona"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Chiudi"</string>
@@ -115,4 +110,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="close_text" msgid="4986518933445178928">"Chiudi"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Chiudi il menu"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Apri menu"</string>
 </resources>
