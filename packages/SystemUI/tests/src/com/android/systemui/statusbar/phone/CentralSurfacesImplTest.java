@@ -561,7 +561,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // TODO: we should be able to call mCentralSurfaces.start() and have all the below values
         // initialized automatically and make NPVC private.
         mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
-        mCentralSurfaces.mNotificationPanelViewController = mNotificationPanelViewController;
+        mCentralSurfaces.mShadeSurface = mNotificationPanelViewController;
         mCentralSurfaces.mQsController = mQuickSettingsController;
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;
         mCentralSurfaces.mPresenter = mNotificationPresenter;

@@ -69,11 +69,11 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -251,7 +251,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
     @Nullable protected CentralSurfaces mCentralSurfaces;
-    private NotificationPanelViewController mNotificationPanelViewController;
+    private ShadeViewController mShadeViewController;
     private BiometricUnlockController mBiometricUnlockController;
     private boolean mCentralSurfacesRegistered;
 
@@ -371,7 +371,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void registerCentralSurfaces(CentralSurfaces centralSurfaces,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
@@ -380,7 +380,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBiometricUnlockController = biometricUnlockController;
 
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mExpansionCallback);
-        mNotificationPanelViewController = notificationPanelViewController;
+        mShadeViewController = shadeViewController;
         if (shadeExpansionStateManager != null) {
             shadeExpansionStateManager.addExpansionListener(this);
         }
@@ -482,8 +482,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         // Avoid having the shade and the bouncer open at the same time over a dream.
         final boolean hideBouncerOverDream =
                 mDreamOverlayStateController.isOverlayActive()
-                        && (mNotificationPanelViewController.isExpanded()
-                        || mNotificationPanelViewController.isExpanding());
+                        && (mShadeViewController.isExpanded()
+                        || mShadeViewController.isExpanding());
 
         final boolean isUserTrackingStarted =
                 event.getFraction() != EXPANSION_HIDDEN && event.getTracking();
@@ -495,7 +495,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 && !mKeyguardStateController.isOccluded()
                 && !mKeyguardStateController.canDismissLockScreen()
                 && !bouncerIsAnimatingAway()
-                && !mNotificationPanelViewController.isUnlockHintRunning()
+                && !mShadeViewController.isUnlockHintRunning()
                 && !(mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED);
     }
 
@@ -699,7 +699,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mKeyguardStateController.isShowing()) {
             final boolean isOccluded = mKeyguardStateController.isOccluded();
             // Hide quick settings.
-            mNotificationPanelViewController.resetViews(/* animate= */ !isOccluded);
+            mShadeViewController.resetViews(/* animate= */ !isOccluded);
             // Hide bouncer and quick-quick settings.
             if (isOccluded && !mDozing) {
                 mCentralSurfaces.hideKeyguard();
@@ -862,7 +862,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void startPreHideAnimation(Runnable finishRunnable) {
         if (primaryBouncerIsShowing()) {
             mPrimaryBouncerInteractor.startDisappearAnimation(finishRunnable);
-            mNotificationPanelViewController.startBouncerPreHideAnimation();
+            mShadeViewController.startBouncerPreHideAnimation();
 
             // We update the state (which will show the keyguard) only if an animation will run on
             // the keyguard. If there is no animation, we wait before updating the state so that we
@@ -873,12 +873,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }
-        mNotificationPanelViewController.blockExpansionForCurrentTouch();
+        mShadeViewController.blockExpansionForCurrentTouch();
     }
 
     @Override
     public void blockPanelExpansionFromCurrentTouch() {
-        mNotificationPanelViewController.blockExpansionForCurrentTouch();
+        mShadeViewController.blockExpansionForCurrentTouch();
     }
 
     @Override
@@ -975,7 +975,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void onKeyguardFadedAway() {
         mNotificationContainer.postDelayed(() -> mNotificationShadeWindowController
                         .setKeyguardFadingAway(false), 100);
-        mNotificationPanelViewController.resetViewGroupFade();
+        mShadeViewController.resetViewGroupFade();
         mCentralSurfaces.finishKeyguardFadingAway();
         mBiometricUnlockController.finishKeyguardFadingAway();
         WindowManagerGlobal.getInstance().trimMemory(
@@ -1050,7 +1050,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (hideImmediately) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             } else {
-                mNotificationPanelViewController.expandToNotifications();
+                mShadeViewController.expandToNotifications();
             }
         }
         return;
