@@ -165,19 +165,19 @@ class PhoneStatusBarViewController private constructor(
             if (event.action == MotionEvent.ACTION_DOWN) {
                 // If the view that would receive the touch is disabled, just have status
                 // bar eat the gesture.
-                if (!centralSurfaces.notificationPanelViewController.isViewEnabled) {
+                if (!centralSurfaces.shadeViewController.isViewEnabled) {
                     shadeLogger.logMotionEvent(event,
                             "onTouchForwardedFromStatusBar: panel view disabled")
                     return true
                 }
-                if (centralSurfaces.notificationPanelViewController.isFullyCollapsed &&
+                if (centralSurfaces.shadeViewController.isFullyCollapsed &&
                         event.y < 1f) {
                     // b/235889526 Eat events on the top edge of the phone when collapsed
                     shadeLogger.logMotionEvent(event, "top edge touch ignored")
                     return true
                 }
             }
-            return centralSurfaces.notificationPanelViewController.handleExternalTouch(event)
+            return centralSurfaces.shadeViewController.handleExternalTouch(event)
         }
     }
 

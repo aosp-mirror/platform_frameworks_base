@@ -94,6 +94,12 @@ interface ShadeSurface : ShadeViewController {
     fun setTouchAndAnimationDisabled(disabled: Boolean)
 
     /**
+     * Notify us that {@link NotificationWakeUpCoordinator} is going to play the doze wakeup
+     * animation after a delay. If so, we'll keep the clock centered until that animation starts.
+     */
+    fun setWillPlayDelayedDozeAmountAnimation(willPlay: Boolean)
+
+    /**
      * Sets the dozing state.
      *
      * @param dozing `true` when dozing.
@@ -104,17 +110,11 @@ interface ShadeSurface : ShadeViewController {
     /** @see view.setImportantForAccessibility */
     fun setImportantForAccessibility(mode: Int)
 
-    /** Sets Qs ScrimEnabled and updates QS state. */
-    fun setQsScrimEnabled(qsScrimEnabled: Boolean)
-
     /** Sets the view's X translation to zero. */
     fun resetTranslation()
 
     /** Sets the view's alpha to max. */
     fun resetAlpha()
-
-    /** @see ViewGroupFadeHelper.reset */
-    fun resetViewGroupFade()
 
     /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
     fun onBackPressed()

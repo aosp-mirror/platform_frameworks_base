@@ -52,8 +52,8 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
@@ -107,7 +107,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private PhoneStatusBarView mStatusBar;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationPanelViewController mNotificationPanelViewController;
+    private final ShadeViewController mShadeViewController;
     private LinearLayout mEndSideContent;
     private View mClockView;
     private View mOngoingCallChip;
@@ -198,7 +198,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
             CarrierConfigTracker carrierConfigTracker,
@@ -221,7 +221,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mDarkIconManagerFactory = darkIconManagerFactory;
         mKeyguardStateController = keyguardStateController;
-        mNotificationPanelViewController = notificationPanelViewController;
+        mShadeViewController = shadeViewController;
         mStatusBarStateController = statusBarStateController;
         mCommandQueue = commandQueue;
         mCarrierConfigTracker = carrierConfigTracker;
@@ -509,7 +509,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private boolean shouldHideNotificationIcons() {
         if (!mShadeExpansionStateManager.isClosed()
-                && mNotificationPanelViewController.shouldHideStatusBarIconsWhenExpanded()) {
+                && mShadeViewController.shouldHideStatusBarIconsWhenExpanded()) {
             return true;
         }
 

@@ -56,8 +56,8 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.log.LogcatEchoTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
@@ -117,7 +117,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     @Mock
-    private NotificationPanelViewController mNotificationPanelViewController;
+    private ShadeViewController mShadeViewController;
     @Mock
     private StatusBarIconController.DarkIconManager.Factory mIconManagerFactory;
     @Mock
@@ -507,7 +507,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mIconManagerFactory,
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
-                mNotificationPanelViewController,
+                mShadeViewController,
                 mStatusBarStateController,
                 mCommandQueue,
                 mCarrierConfigTracker,
