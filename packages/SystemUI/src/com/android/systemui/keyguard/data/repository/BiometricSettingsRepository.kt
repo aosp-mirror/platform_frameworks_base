@@ -212,14 +212,9 @@ constructor(
                             userId: Int,
                             hasEnrollments: Boolean
                         ) {
-                            // TODO(b/242022358), use authController.isFaceAuthEnrolled after
-                            //  ag/20176811 is available.
-                            if (
-                                sensorBiometricType == BiometricType.FACE &&
-                                    userId == selectedUserId
-                            ) {
+                            if (sensorBiometricType == BiometricType.FACE) {
                                 trySendWithFailureLogging(
-                                    hasEnrollments,
+                                    authController.isFaceAuthEnrolled(selectedUserId),
                                     TAG,
                                     "Face enrollment changed"
                                 )
