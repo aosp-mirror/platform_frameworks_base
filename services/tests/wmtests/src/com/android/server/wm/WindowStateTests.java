@@ -110,6 +110,8 @@ import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.testutils.StubTransaction;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

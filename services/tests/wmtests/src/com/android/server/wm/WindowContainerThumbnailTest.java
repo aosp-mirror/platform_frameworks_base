@@ -29,6 +29,8 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.testutils.StubTransaction;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

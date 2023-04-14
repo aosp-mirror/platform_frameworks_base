@@ -30,6 +30,8 @@ import android.window.SurfaceSyncGroup;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.testutils.StubTransaction;
+
 import org.junit.Before;
 import org.junit.Test;
 

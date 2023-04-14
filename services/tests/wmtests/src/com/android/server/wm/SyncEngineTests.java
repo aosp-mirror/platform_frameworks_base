@@ -42,6 +42,7 @@ import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.testutils.StubTransaction;
 import com.android.server.testutils.TestHandler;
 
 import org.junit.Before;
