@@ -17,10 +17,12 @@
 package com.android.server.companion;
 
 import android.companion.AssociationInfo;
+import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
 import android.os.Binder;
 import android.os.ShellCommand;
 
+import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.companion.transport.CompanionTransportManager;
 
@@ -35,14 +37,18 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final CompanionTransportManager mTransportManager;
 
+    private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
+
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
             AssociationStore associationStore,
             CompanionDevicePresenceMonitor devicePresenceMonitor,
-            CompanionTransportManager transportManager) {
+            CompanionTransportManager transportManager,
+            SystemDataTransferRequestStore systemDataTransferRequestStore) {
         mService = service;
         mAssociationStore = associationStore;
         mDevicePresenceMonitor = devicePresenceMonitor;
         mTransportManager = transportManager;
+        mSystemDataTransferRequestStore = systemDataTransferRequestStore;
     }
 
     @Override
@@ -59,7 +65,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                         // TODO(b/212535524): use AssociationInfo.toShortString(), once it's not
                         //  longer referenced in tests.
                         out.println(association.getPackageName() + " "
-                                + association.getDeviceMacAddress());
+                                + association.getDeviceMacAddress() + " " + association.getId());
                     }
                 }
                 break;
@@ -117,6 +123,17 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     mTransportManager.createDummyTransport(associationId);
                     break;
 
+                case "allow-permission-sync": {
+                    int userId = getNextIntArgRequired();
+                    associationId = getNextIntArgRequired();
+                    boolean enabled = getNextBooleanArgRequired();
+                    PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+                    request.setUserId(userId);
+                    request.setUserConsented(enabled);
+                    mSystemDataTransferRequestStore.writeRequest(userId, request);
+                }
+                break;
+
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -132,6 +149,15 @@ class CompanionDeviceShellCommand extends ShellCommand {
 
     private int getNextIntArgRequired() {
         return Integer.parseInt(getNextArgRequired());
+    }
+
+    private boolean getNextBooleanArgRequired() {
+        String arg = getNextArgRequired();
+        if ("true".equalsIgnoreCase(arg) || "false".equalsIgnoreCase(arg)) {
+            return Boolean.parseBoolean(arg);
+        } else {
+            throw new IllegalArgumentException("Expected a boolean argument but was: " + arg);
+        }
     }
 
     @Override
