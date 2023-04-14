@@ -2910,6 +2910,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         serializer.attributeLongHex(null, "loadingCompletedTime",
                 pkg.getLoadingCompletedTime());
 
+        if (pkg.getAppMetadataFilePath() != null) {
+            serializer.attribute(null, "appMetadataFilePath",
+                    pkg.getAppMetadataFilePath());
+        }
+
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
                 pkg.getUsesSdkLibrariesVersionsMajor());
 
@@ -2998,6 +3003,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         serializer.attributeLongHex(null, "loadingCompletedTime", pkg.getLoadingCompletedTime());
 
         serializer.attribute(null, "domainSetId", pkg.getDomainSetId().toString());
+
+        if (pkg.getAppMetadataFilePath() != null) {
+            serializer.attribute(null, "appMetadataFilePath", pkg.getAppMetadataFilePath());
+        }
 
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
                 pkg.getUsesSdkLibrariesVersionsMajor());
@@ -3772,6 +3781,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         float loadingProgress = 0;
         long loadingCompletedTime = 0;
         UUID domainSetId;
+        String appMetadataFilePath = null;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3809,6 +3819,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
+            appMetadataFilePath = parser.getAttributeValue(null, "appMetadataFilePath");
 
             String domainSetIdString = parser.getAttributeValue(null, "domainSetId");
 
@@ -3952,7 +3963,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setUpdateAvailable(updateAvailable)
                     .setForceQueryableOverride(installedForceQueryable)
                     .setLoadingProgress(loadingProgress)
-                    .setLoadingCompletedTime(loadingCompletedTime);
+                    .setLoadingCompletedTime(loadingCompletedTime)
+                    .setAppMetadataFilePath(appMetadataFilePath);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
