@@ -43,7 +43,9 @@ public class MetricUtilities {
     public static final String USER_CANCELED_SUBSTRING = "TYPE_USER_CANCELED";
 
     public static final int DEFAULT_INT_32 = -1;
+    public static final String DEFAULT_STRING = "";
     public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
+    public static final String[] DEFAULT_REPEATED_STR = new String[0];
     // Used for single count metric emits, such as singular amounts of various types
     public static final int UNIT = 1;
     // Used for zero count metric emits, such as zero amounts of various types
@@ -143,7 +145,12 @@ public class MetricUtilities {
                     finalPhaseMetric.getAuthenticationEntryCount(),
                     /* clicked_entries */ browsedClickedEntries,
                     /* provider_of_clicked_entry */ browsedProviderUid,
-                    /* api_status */ apiStatus
+                    /* api_status */ apiStatus,
+                    DEFAULT_REPEATED_INT_32,
+                    DEFAULT_REPEATED_INT_32,
+                    DEFAULT_REPEATED_STR,
+                    DEFAULT_REPEATED_INT_32,
+                    DEFAULT_STRING
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
@@ -222,7 +229,11 @@ public class MetricUtilities {
                     /* candidate_provider_credential_entry_type_count */
                     candidateCredentialTypeCountList,
                     /* candidate_provider_remote_entry_count */ candidateRemoteEntryCountList,
-                    /* candidate_provider_authentication_entry_count */ candidateAuthEntryCountList
+                    /* candidate_provider_authentication_entry_count */ candidateAuthEntryCountList,
+                    DEFAULT_REPEATED_STR,
+                    false,
+                    DEFAULT_REPEATED_STR,
+                    DEFAULT_REPEATED_INT_32
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
@@ -285,10 +296,12 @@ public class MetricUtilities {
                     /* initial_timestamp_reference_nanoseconds */
                     initialPhaseMetric.getCredentialServiceStartedTimeNanoseconds(),
                     /* count_credential_request_classtypes */
-                    initialPhaseMetric.getCountRequestClassType()
+                    initialPhaseMetric.getCountRequestClassType(),
                     // TODO(b/271135048) - add total count of request options
                     // TODO(b/271135048) - Uncomment once built past PWG review -
-                    // initialPhaseMetric.isOriginSpecified()
+                    DEFAULT_REPEATED_STR,
+                    DEFAULT_REPEATED_INT_32,
+                    initialPhaseMetric.isOriginSpecified()
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
