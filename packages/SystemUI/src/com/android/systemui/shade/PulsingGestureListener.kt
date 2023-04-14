@@ -90,7 +90,6 @@ class PulsingGestureListener @Inject constructor(
                 shadeLogger.d("Single tap handled, requesting centralSurfaces.wakeUpIfDozing")
                 centralSurfaces.wakeUpIfDozing(
                     SystemClock.uptimeMillis(),
-                    notificationShadeWindowView,
                     "PULSING_SINGLE_TAP",
                     PowerManager.WAKE_REASON_TAP
                 )
@@ -116,7 +115,6 @@ class PulsingGestureListener @Inject constructor(
         ) {
             centralSurfaces.wakeUpIfDozing(
                     SystemClock.uptimeMillis(),
-                    notificationShadeWindowView,
                     "PULSING_DOUBLE_TAP",
                     PowerManager.WAKE_REASON_TAP
             )

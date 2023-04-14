@@ -20,7 +20,6 @@ import android.view.View;
 
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -104,11 +103,6 @@ public class LegacyNotificationShelfControllerImpl implements NotificationShelfC
     @Override
     public int getIntrinsicHeight() {
         return mView.getIntrinsicHeight();
-    }
-
-    @Override
-    public void setOnActivatedListener(ActivatableNotificationView.OnActivatedListener listener) {
-        mView.setOnActivatedListener(listener);
     }
 
     @Override

@@ -124,7 +124,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
             mCentralSurfacesOptionalLazy.get().ifPresent(
                     centralSurfaces -> centralSurfaces.wakeUpIfDozing(
-                            SystemClock.uptimeMillis(), view, "NOTIFICATION_CLICK",
+                            SystemClock.uptimeMillis(), "NOTIFICATION_CLICK",
                             PowerManager.WAKE_REASON_GESTURE));
 
             final NotificationEntry entry = getNotificationForParent(view.getParent());

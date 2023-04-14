@@ -21,9 +21,7 @@ import android.content.ContentResolver;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.ViewStub;
-
 import androidx.constraintlayout.motion.widget.MotionLayout;
-
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
@@ -52,6 +50,7 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
@@ -75,18 +74,16 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
-
-import java.util.concurrent.Executor;
-
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+import java.util.concurrent.Executor;
+import javax.inject.Named;
+import javax.inject.Provider;
 
-@Module(subcomponents = StatusBarFragmentComponent.class)
+@Module(subcomponents = StatusBarFragmentComponent.class,
+        includes = { ActivatableNotificationViewModelModule.class })
 public abstract class StatusBarViewModule {
 
     public static final String SHADE_HEADER = "large_screen_shade_header";

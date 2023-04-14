@@ -25,15 +25,12 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import android.metrics.LogMaker;
-import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
@@ -61,7 +58,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -282,16 +278,5 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
 
         assertTrue("CentralSurfaces alerts disabled shouldn't allow interruptions",
                 mInterruptSuppressor.suppressInterruptions(entry));
-    }
-
-    @Test
-    public void onActivatedMetrics() {
-        ActivatableNotificationView view =  mock(ActivatableNotificationView.class);
-        mStatusBarNotificationPresenter.onActivated(view);
-
-        MetricsAsserts.assertHasLog("missing lockscreen note tap log",
-                mMetricsLogger.getLogs(),
-                new LogMaker(MetricsEvent.ACTION_LS_NOTE)
-                        .setType(MetricsEvent.TYPE_ACTION));
     }
 }

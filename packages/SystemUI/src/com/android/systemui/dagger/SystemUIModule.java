@@ -29,6 +29,7 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.accessibility.AccessibilityModule;
+import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
@@ -140,6 +141,7 @@ import javax.inject.Named;
  */
 @Module(includes = {
             AccessibilityModule.class,
+            AccessibilityRepositoryModule.class,
             AppOpsModule.class,
             AssistModule.class,
             BiometricsModule.class,

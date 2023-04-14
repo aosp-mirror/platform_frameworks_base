@@ -17,10 +17,8 @@
 package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 
 import android.view.View
-import android.view.accessibility.AccessibilityManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -28,19 +26,17 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.NotificationShelfController
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController
-import com.android.systemui.statusbar.notification.row.ExpandableOutlineViewController
-import com.android.systemui.statusbar.notification.row.ExpandableViewController
+import com.android.systemui.statusbar.notification.row.ui.viewbinder.ActivatableNotificationViewBinder
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.NotificationTapHelper
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.util.kotlin.getValue
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -57,11 +53,9 @@ constructor(
     private val shelf: NotificationShelf,
     private val viewModel: NotificationShelfViewModel,
     featureFlags: FeatureFlags,
-    private val notifTapHelperFactory: NotificationTapHelper.Factory,
-    private val a11yManager: AccessibilityManager,
     private val falsingManager: FalsingManager,
-    private val falsingCollector: FalsingCollector,
     hostControllerLazy: Lazy<NotificationStackScrollLayoutController>,
+    private val notificationIconAreaController: NotificationIconAreaController,
 ) : NotificationShelfController {
 
     private val hostController: NotificationStackScrollLayoutController by hostControllerLazy
@@ -78,43 +72,28 @@ constructor(
     }
 
     fun init() {
-        NotificationShelfViewBinder.bind(viewModel, shelf)
-
-        ActivatableNotificationViewController(
-                shelf,
-                notifTapHelperFactory,
-                ExpandableOutlineViewController(shelf, ExpandableViewController(shelf)),
-                a11yManager,
-                falsingManager,
-                falsingCollector,
-            )
-            .init()
+        NotificationShelfViewBinder.bind(viewModel, shelf, falsingManager)
         hostController.setShelf(shelf)
         hostController.setOnNotificationRemovedListener { child, _ ->
             view.requestRoundnessResetFor(child)
         }
+        notificationIconAreaController.setShelfIcons(shelf.shelfIcons)
     }
 
     override val intrinsicHeight: Int
-        get() = shelf.intrinsicHeight
+        get() = unsupported
 
     override val shelfIcons: NotificationIconContainer
-        get() = shelf.shelfIcons
+        get() = unsupported
 
     override fun canModifyColorOfNotifications(): Boolean = unsupported
-
-    override fun setOnActivatedListener(listener: ActivatableNotificationView.OnActivatedListener) {
-        shelf.setOnActivatedListener(listener)
-    }
 
     override fun bind(
         ambientState: AmbientState,
         notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
     ) = unsupported
 
-    override fun setOnClickListener(listener: View.OnClickListener) {
-        shelf.setOnClickListener(listener)
-    }
+    override fun setOnClickListener(listener: View.OnClickListener) = unsupported
 
     private val unsupported: Nothing
         get() = NotificationShelfController.throwIllegalFlagStateError(expected = true)
@@ -122,14 +101,32 @@ constructor(
 
 /** Binds a [NotificationShelf] to its backend. */
 object NotificationShelfViewBinder {
-    fun bind(viewModel: NotificationShelfViewModel, shelf: NotificationShelf) {
+    fun bind(
+        viewModel: NotificationShelfViewModel,
+        shelf: NotificationShelf,
+        falsingManager: FalsingManager,
+    ) {
+        ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.canModifyColorOfNotifications
                     .onEach(shelf::setCanModifyColorOfNotifications)
                     .launchIn(this)
                 viewModel.isClickable.onEach(shelf::setCanInteract).launchIn(this)
+                registerViewListenersWhileAttached(shelf, viewModel)
             }
+        }
+    }
+
+    private suspend fun registerViewListenersWhileAttached(
+        shelf: NotificationShelf,
+        viewModel: NotificationShelfViewModel,
+    ) {
+        try {
+            shelf.setOnClickListener { viewModel.onShelfClicked() }
+            awaitCancellation()
+        } finally {
+            shelf.setOnClickListener(null)
         }
     }
 }

@@ -288,7 +288,6 @@ public class NotificationShadeWindowViewController {
                             mService.userActivity();
                             mService.wakeUpIfDozing(
                                     mClock.uptimeMillis(),
-                                    mView,
                                     "LOCK_ICON_TOUCH",
                                     PowerManager.WAKE_REASON_GESTURE);
                         }
