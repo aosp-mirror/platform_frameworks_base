@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"App wurde installiert."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Möchtest du diese App installieren?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Möchtest du diese App aktualisieren?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Diese App mit einem Update von <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> aktualisieren?\n\nSie erhält normalerweise Updates von <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Wenn du ein Update von einer anderen Quelle verwendest, erhältst du möglicherweise zukünftige Updates von beliebigen Quellen auf deinem Smartphone. Die Funktionalität der App kann sich ändern."</string>
     <string name="install_failed" msgid="5777824004474125469">"App wurde nicht installiert."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die Installation des Pakets wurde blockiert."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Die App wurde nicht installiert, da das Paket in Konflikt mit einem bestehenden Paket steht."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Dieser Nutzer darf keine unbekannten Apps installieren"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Dieser Nutzer darf keine Apps installieren"</string>
     <string name="ok" msgid="7871959885003339302">"Ok"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Trotzdem aktualisieren"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Apps verwalten"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Kein freier Speicher vorhanden"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht installiert werden. Gib Speicherplatz frei und versuche es noch einmal."</string>
