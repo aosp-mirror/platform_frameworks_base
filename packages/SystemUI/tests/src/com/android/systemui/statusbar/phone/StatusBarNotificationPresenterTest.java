@@ -38,11 +38,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.FakeDisplayTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeNotificationPresenter;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -107,12 +107,12 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationStackScrollLayout.class));
         when(notificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
 
-        NotificationPanelViewController npvc = mock(NotificationPanelViewController.class);
-        when(npvc.getShadeNotificationPresenter())
+        ShadeViewController shadeViewController = mock(ShadeViewController.class);
+        when(shadeViewController.getShadeNotificationPresenter())
                 .thenReturn(mock(ShadeNotificationPresenter.class));
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
-                npvc,
+                shadeViewController,
                 mock(QuickSettingsController.class),
                 mock(HeadsUpManagerPhone.class),
                 notificationShadeWindowView,
