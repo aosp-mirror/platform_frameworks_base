@@ -25,7 +25,6 @@ import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -145,8 +144,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
 
     @Test
     fun offerKeepInParent_parentDismissed() {
-        whenever(featureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION))
-            .thenReturn(true)
         whenever(view.isParentDismissed).thenReturn(true)
 
         Assert.assertTrue(controller.offerToKeepInParentForAnimation())
@@ -155,9 +152,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
 
     @Test
     fun offerKeepInParent_parentNotDismissed() {
-        whenever(featureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION))
-            .thenReturn(true)
-
         Assert.assertFalse(controller.offerToKeepInParentForAnimation())
         Mockito.verify(view, never()).setKeepInParentForDismissAnimation(anyBoolean())
     }
