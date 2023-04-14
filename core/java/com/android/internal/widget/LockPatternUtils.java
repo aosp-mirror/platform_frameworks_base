@@ -622,6 +622,24 @@ public class LockPatternUtils {
             return PIN_LENGTH_UNAVAILABLE;
         }
     }
+
+    /**
+     * This method saves the pin length value to disk based on the user's auto pin
+     * confirmation flag setting. If the auto pin confirmation flag is disabled, or if the
+     * user does not have a PIN setup, or if length of PIN is less than minimum storable PIN length
+     * value, the pin length value is set to PIN_LENGTH_UNAVAILABLE. Otherwise, if the
+     * flag is enabled, the pin length value is set to the actual length of the user's PIN.
+     * @param userId user id of the user whose pin length we want to save
+     * @return true/false depending on whether PIN length has been saved or not
+     */
+    public boolean refreshStoredPinLength(int userId) {
+        try {
+            return getLockSettings().refreshStoredPinLength(userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not store PIN length on disk " + e);
+            return false;
+        }
+    }
     /**
      * Records that the user has chosen a pattern at some time, even if the pattern is
      * currently cleared.
