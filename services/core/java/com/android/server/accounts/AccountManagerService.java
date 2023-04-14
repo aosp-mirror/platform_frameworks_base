@@ -482,14 +482,13 @@ public class AccountManagerService
         Bundle.setDefusable(extras, true);
         int callingUid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "addAccountExplicitly: " + account + ", caller's uid " + callingUid
-                    + ", pid " + Binder.getCallingPid());
-        }
         Objects.requireNonNull(account, "account cannot be null");
+        Log.v(TAG, "addAccountExplicitly: caller's uid=" + callingUid + ", pid="
+                + Binder.getCallingPid() + ", packageName=" + opPackageName + ", accountType="
+                + account.type);
         if (!isAccountManagedByCaller(account.type, callingUid, userId)) {
-            String msg = String.format("uid %s cannot explicitly add accounts of type: %s",
-                    callingUid, account.type);
+            String msg = String.format("uid=%s, package=%s cannot explicitly add "
+                    + "accounts of type: %s", callingUid, opPackageName, account.type);
             throw new SecurityException(msg);
         }
         /*
