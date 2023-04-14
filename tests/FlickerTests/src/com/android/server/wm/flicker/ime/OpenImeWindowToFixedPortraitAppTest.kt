@@ -15,7 +15,7 @@
  */
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
 import android.tools.common.datatypes.component.ComponentNameMatcher
@@ -60,19 +60,19 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerVisibleStart() {
         flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerExistsEnd() {
         flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerVisibleRegionKeepsTheSame() {
         var imeLayerVisibleRegionBeforeTransition: RegionSubject? = null
@@ -85,7 +85,7 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun appWindowWithLetterboxCoversExactlyOnScreen() {
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
