@@ -92,6 +92,21 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun lockscreenTranslationYResettedAfterJobCancelled() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Float>()
+
+            val pixels = 100
+            val job =
+                underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
+            repository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
+
+            assertThat(values.last()).isEqualTo(0f)
+
+            job.cancel()
+        }
+
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING
