@@ -335,7 +335,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         @Override
         public boolean onTouch(View v, MotionEvent e) {
             final int id = v.getId();
-            if (id != R.id.caption_handle && id != R.id.desktop_mode_caption) {
+            if (id != R.id.caption_handle && id != R.id.desktop_mode_caption
+                    && id != R.id.open_menu_button && id != R.id.close_window) {
                 return false;
             }
             moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
