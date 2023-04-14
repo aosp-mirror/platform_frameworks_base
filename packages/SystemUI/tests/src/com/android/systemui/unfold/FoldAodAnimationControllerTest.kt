@@ -31,8 +31,8 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.shade.ShadeFoldAnimator
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -74,7 +74,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     @Mock lateinit var lightRevealScrim: LightRevealScrim
 
-    @Mock lateinit var notificationPanelViewController: NotificationPanelViewController
+    @Mock lateinit var shadeViewController: ShadeViewController
 
     @Mock lateinit var viewGroup: ViewGroup
 
@@ -100,13 +100,12 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
         // TODO(b/254878364): remove this call to NPVC.getView()
-        whenever(notificationPanelViewController.shadeFoldAnimator).thenReturn(shadeFoldAnimator)
+        whenever(shadeViewController.shadeFoldAnimator).thenReturn(shadeFoldAnimator)
         whenever(shadeFoldAnimator.view).thenReturn(viewGroup)
         whenever(viewGroup.viewTreeObserver).thenReturn(viewTreeObserver)
         whenever(wakefulnessLifecycle.lastSleepReason)
             .thenReturn(PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD)
-        whenever(centralSurfaces.notificationPanelViewController)
-            .thenReturn(notificationPanelViewController)
+        whenever(centralSurfaces.shadeViewController).thenReturn(shadeViewController)
         whenever(shadeFoldAnimator.startFoldToAodAnimation(any(), any(), any())).then {
             val onActionStarted = it.arguments[0] as Runnable
             onActionStarted.run()

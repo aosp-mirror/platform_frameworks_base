@@ -41,8 +41,8 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -87,7 +87,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private NotificationPanelViewController mNotificationPanel;
+    @Mock private ShadeViewController mShadeViewController;
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
@@ -108,7 +108,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mCentralSurfaces,
                 mStatusBarKeyguardViewManager,
                 mNotificationShadeWindowViewController,
-                mNotificationPanel,
+                mShadeViewController,
                 mAmbientIndicationContainer);
     }
 

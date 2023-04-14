@@ -37,8 +37,8 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -50,11 +50,11 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Assert;
 
+import dagger.Lazy;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Implementation of DozeHost for SystemUI.
@@ -90,7 +90,7 @@ public final class DozeServiceHost implements DozeHost {
     private final AuthController mAuthController;
     private final NotificationIconAreaController mNotificationIconAreaController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private NotificationPanelViewController mNotificationPanel;
+    private ShadeViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
     private CentralSurfaces mCentralSurfaces;
     private boolean mAlwaysOnSuppressed;
@@ -141,7 +141,7 @@ public final class DozeServiceHost implements DozeHost {
             CentralSurfaces centralSurfaces,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationShadeWindowViewController notificationShadeWindowViewController,
-            NotificationPanelViewController notificationPanel,
+            ShadeViewController notificationPanel,
             View ambientIndicationContainer) {
         mCentralSurfaces = centralSurfaces;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;

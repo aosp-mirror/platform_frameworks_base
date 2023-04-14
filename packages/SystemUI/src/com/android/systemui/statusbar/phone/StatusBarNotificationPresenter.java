@@ -36,9 +36,9 @@ import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -82,7 +82,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
 
-    private final NotificationPanelViewController mNotificationPanel;
+    private final ShadeViewController mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
@@ -105,7 +105,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     @Inject
     StatusBarNotificationPresenter(
             Context context,
-            NotificationPanelViewController panel,
+            ShadeViewController panel,
             QuickSettingsController quickSettingsController,
             HeadsUpManagerPhone headsUp,
             NotificationShadeWindowView statusBarWindow,

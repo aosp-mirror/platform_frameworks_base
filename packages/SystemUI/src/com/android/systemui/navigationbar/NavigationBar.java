@@ -741,7 +741,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.setComponents(mRecentsOptional);
         if (mCentralSurfacesOptionalLazy.get().isPresent()) {
             mView.setComponents(
-                    mCentralSurfacesOptionalLazy.get().get().getNotificationPanelViewController());
+                    mCentralSurfacesOptionalLazy.get().get().getShadeViewController());
         }
         mView.setDisabledFlags(mDisabledFlags1, mSysUiFlagsContainer);
         mView.setOnVerticalChangedListener(this::onVerticalChanged);
@@ -1343,8 +1343,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private void onVerticalChanged(boolean isVertical) {
         Optional<CentralSurfaces> cs = mCentralSurfacesOptionalLazy.get();
-        if (cs.isPresent() && cs.get().getNotificationPanelViewController() != null) {
-            cs.get().getNotificationPanelViewController().setQsScrimEnabled(!isVertical);
+        if (cs.isPresent() && cs.get().getShadeViewController() != null) {
+            cs.get().getShadeViewController().setQsScrimEnabled(!isVertical);
         }
     }
 

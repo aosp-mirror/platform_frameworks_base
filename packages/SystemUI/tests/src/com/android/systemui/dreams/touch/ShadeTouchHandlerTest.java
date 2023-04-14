@@ -28,7 +28,7 @@ import android.view.MotionEvent;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -49,7 +49,7 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
     CentralSurfaces mCentralSurfaces;
 
     @Mock
-    NotificationPanelViewController mNotificationPanelViewController;
+    ShadeViewController mShadeViewController;
 
     @Mock
     DreamTouchHandler.TouchSession mTouchSession;
@@ -63,8 +63,8 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTouchHandler = new ShadeTouchHandler(Optional.of(mCentralSurfaces),
                 TOUCH_HEIGHT);
-        when(mCentralSurfaces.getNotificationPanelViewController())
-                .thenReturn(mNotificationPanelViewController);
+        when(mCentralSurfaces.getShadeViewController())
+                .thenReturn(mShadeViewController);
     }
 
     /**
@@ -97,7 +97,7 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
     }
 
     /**
-     * Ensure touches are propagated to the {@link NotificationPanelViewController}.
+     * Ensure touches are propagated to the {@link ShadeViewController}.
      */
     @Test
     public void testEventPropagation() {
@@ -110,7 +110,7 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
         mTouchHandler.onSessionStart(mTouchSession);
         verify(mTouchSession).registerInputListener(inputEventListenerArgumentCaptor.capture());
         inputEventListenerArgumentCaptor.getValue().onInputEvent(motionEvent);
-        verify(mNotificationPanelViewController).handleExternalTouch(motionEvent);
+        verify(mShadeViewController).handleExternalTouch(motionEvent);
     }
 
 }
