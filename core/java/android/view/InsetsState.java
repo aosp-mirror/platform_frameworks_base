@@ -143,8 +143,13 @@ public class InsetsState implements Parcelable {
         boolean[] typeVisibilityMap = new boolean[Type.SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
+        @InsetsType int suppressScrimTypes = 0;
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
+
+            if ((source.getFlags() & InsetsSource.FLAG_SUPPRESS_SCRIM) != 0) {
+                suppressScrimTypes |= source.getType();
+            }
 
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
                     idSideMap, typeVisibilityMap);
@@ -177,7 +182,7 @@ public class InsetsState implements Parcelable {
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, calculateRelativeCutout(frame),
+                alwaysConsumeSystemBars, suppressScrimTypes, calculateRelativeCutout(frame),
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
                 calculateRelativeDisplayShape(frame),
