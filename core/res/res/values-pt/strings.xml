@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite que o app acesse dados do sensor corporal, como a frequência cardíaca, a temperatura e a porcentagem de oxigênio no sangue, enquanto o app está em uso."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Acessar dados do sensor corporal, como a frequência cardíaca, segundo plano"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite que o app acesse dados do sensor corporal, como a frequência cardíaca, a temperatura e a porcentagem de oxigênio no sangue, enquanto o app está em segundo plano."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Acessar dados de temperatura do sensor corporal no pulso enquanto o app está em uso."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite que o app acesse dados de temperatura do sensor corporal no pulso enquanto está em uso."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Acessar dados de temperatura do sensor corporal no pulso enquanto o app está em segundo plano."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite que o app acesse dados de temperatura do sensor corporal no pulso enquanto está em segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler detalhes e eventos da agenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Este app pode ler todos os eventos da agenda armazenados no seu tablet e compartilhar ou salvar os dados da sua agenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Este app pode ler todos os eventos da agenda armazenados no seu dispositivo Android TV e compartilhar ou salvar os dados da sua agenda."</string>
@@ -801,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o sistema comece a ver as informações de recursos de um app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acessar os dados do sensor em uma taxa de amostragem elevada"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que o app receba amostras de dados do sensor em uma taxa maior que 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"atualizar o app sem a ação do usuário"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite que o titular atualize o app instalado anteriormente sem ação do usuário"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Definir regras para senha"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controla o tamanho e os caracteres permitidos nos PINs e nas senhas do bloqueio de tela."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorar tentativas de desbloqueio de tela"</string>
@@ -1957,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"O app <xliff:g id="APP_NAME_0">%1$s</xliff:g> não está disponível no momento. Isso é gerenciado pelo app <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saiba mais"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Retomar app"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Ativar apps de trabalho?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Acesse seus apps e notificações de trabalho"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Reativar apps de trabalho?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Reativar"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergência"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Acesse seus apps e ligações de trabalho"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>

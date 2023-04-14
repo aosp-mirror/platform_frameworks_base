@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Zezwala aplikacji na dostęp do danych z czujników na ciele, takich jak tętno, temperatura i poziom saturacji, gdy aplikacja ta jest używana."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Zezwól na dostęp do danych z czujników na ciele, np. tętna, podczas używania aplikacji w tle"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Zezwala aplikacji na dostęp do danych z czujników na ciele, takich jak tętno, temperatura i poziom saturacji, gdy aplikacja ta jest używana w tle."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Dostęp do pochodzących z czujnika na ciele danych temperatury na nadgarstku, kiedy aplikacja jest w użyciu."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Zezwala na dostęp aplikacji do pochodzących z czujnika na ciele danych temperatury na nadgarstku, kiedy aplikacja jest w użyciu."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Dostęp do pochodzących z czujnika na ciele danych temperatury na nadgarstku, kiedy aplikacja działa w tle."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Zezwala na dostęp aplikacji do pochodzących z czujnika na ciele danych temperatury na nadgarstku, kiedy aplikacja działa w tle."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Odczytywanie wydarzeń i informacji z kalendarza"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ta aplikacja może odczytywać wszystkie zapisane na tablecie wydarzenia z kalendarza i udostępniać oraz zapisywać dane kalendarza."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ta aplikacja może odczytywać wszystkie wydarzenia z kalendarza zapisane na urządzeniu z Androidem TV oraz udostępniać i zapisywać dane z kalendarza."</string>
@@ -802,10 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umożliwia posiadaczowi rozpoczęcie przeglądania informacji o funkcjach aplikacji."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"dostęp do danych czujnika z wysoką częstotliwością"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Zezwala aplikacji na pobieranie próbek danych z czujnika z częstotliwością wyższą niż 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizacja aplikacji bez działania ze strony użytkownika"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Pozwala na aktualizowanie zainstalowanej wcześniej aplikacji bez działania ze strony użytkownika"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorowanie prób odblokowania ekranu"</string>
@@ -1958,11 +1952,11 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacja <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie jest teraz dostępna. Zarządza tym aplikacja <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Więcej informacji"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Wznów działanie aplikacji"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Włączyć aplikacje służbowe?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Uzyskaj dostęp do służbowych aplikacji i powiadomień"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Włącz"</string>
+    <!-- no translation found for work_mode_off_title (6367463960165135829) -->
+    <skip />
+    <!-- no translation found for work_mode_turn_on (5316648862401307800) -->
+    <skip />
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Połączenie alarmowe"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Uzyskaj dostęp do służbowych aplikacji i połączeń"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>

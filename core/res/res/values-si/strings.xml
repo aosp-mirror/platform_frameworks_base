@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"යෙදුම භාවිතයේ පවතින අතරතුර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"පසුබිමේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"යෙදුම පසුබිමේ ඇති අතර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"යෙදුම භාවිතයේ පවතින අතරේ ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වන්න."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"යෙදුම භාවිතයේ ඇති අතරේ, ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"යෙදුම පසුබිමේ ඇති අතරේ ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වන්න."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"යෙදුම පසුබිමේ ඇති අතරේ, ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"යෙදුමක් සඳහා විශේෂාංග තොරතුරු බැලීම ආරම්භ කිරීමට දරන්නාට ඉඩ දෙන්න."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ඉහළ නියැදි කිරීමේ වේගයකින් සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ට වඩා වැඩි වේගයකින් සංවේදක දත්ත නියැදි කිරීමට යෙදුමට ඉඩ දෙයි"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"යෙදුම පරිශීලක ක්‍රියාවෙන් තොරව යාවත්කාලීන කරන්න"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"පරිශීලක ක්‍රියාවෙන් තොරව කලින් ස්ථාපිත යෙදුම යාවත්කාලීන කිරීමට දරන්නාට ඉඩ දෙයි"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> මේ අවස්ථාවේදී ලබා ගත නොහැකිය. මෙය <xliff:g id="APP_NAME_1">%2$s</xliff:g> මගින් කළමනාකරණය කෙරේ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"තව දැන ගන්න"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"යෙදුම විරාම කිරීම ඉවත් කරන්න"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"කාර්යාල යෙදු. ක්‍රියා. කරන්නද?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ඔබගේ කාර්යාල යෙදුම් සහ දැනුම්දීම් වෙත ප්‍රවේශය ලබා ගන්න"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ක්‍රියාත්මක කරන්න"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"කාර්ය යෙදුම් විරාම නොකරන්න ද?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"විරාම නොකරන්න"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"හදිසි අවස්ථාව"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"ඔබේ කාර්යාල යෙදුම් සහ ඇමතුම් වෙත ප්‍රවේශය ලබා ගන්න"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> නොතිබේ"</string>

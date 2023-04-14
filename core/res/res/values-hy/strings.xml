@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները) հավելվածի օգտագործման ժամանակ։"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Մարմնի սենսորների տվյալների հասանելիություն ֆոնային ռեժիմում"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները), երբ հավելվածն աշխատում է ֆոնային ռեժիմում։"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն հավելվածի օգտագործման ընթացքում։"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն ֆոնային ռեժիմում։"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Ֆոնային ռեժիմում գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր Android TV սարքում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Թույլ է տալիս դիտել հավելվածի գործառույթների մասին տեղեկությունները։"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"օգտագործել սենսորների տվյալները բարձր հաճախականության վրա"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Թույլ է տալիս հավելվածին փորձել սենսորների տվյալները 200 Հց-ից բարձր հաճախականության վրա"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"թարմացնել հավելվածն առանց օգտատիրոջ գործողության"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Թույլ է տալիս թարմացնել նախկինում տեղադրված հավելվածները՝ առանց օգտատիրոջ գործողության"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Կառավարել էկրանի ապակողպման գաղտնաբառերի և PIN կոդերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> հավելվածը հասանելի չէ։ Դրա աշխատանքը սահմանափակում է <xliff:g id="APP_NAME_1">%2$s</xliff:g> հավելվածը։"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Միացնե՞լ հավելվածները"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Ձեզ հասանելի կդառնան ձեր աշխատանքային հավելվածներն ու ծանուցումները"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Վերսկսե՞լ աշխ. հավելվածները"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Վերսկսել"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Արտակարգ իրավիճակ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Ստացեք ձեր աշխատանքային հավելվածների և զանգերի հասանելիություն"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
@@ -2134,7 +2126,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Հավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Սկիզբ"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Հետ"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին օգտագործած հավելվածները"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին հավելվածներ"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Ծանուցումներ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Արագ կարգավորումներ"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Սնուցման պատուհան"</string>

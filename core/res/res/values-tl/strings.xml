@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Nagpapahintulot sa app na i-access ang data ng sensor ng katawan, gaya ng bilis ng tibok ng puso, temperatura, at porsyento ng oxygen sa dugo, habang ginagamit ang app."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"I-access ang data ng sensor ng katawan gaya ng heart rate habang nasa background"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Nagpapahintulot sa app na i-access ang data ng sensor ng katawan, gaya ng bilis ng tibok ng puso, temperatura, at porsyento ng oxygen sa dugo, habang nasa background ang app."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"I-access ang data ng temperatura ng wrist mula sa sensor ng katawan habang ginagamit ang app."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Nagpapahintulot sa app na i-access ang data ng temperatura ng wrist mula sa sensor ng katawan, habang ginagamit ang app."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"I-access ang data ng temperatura ng wrist mula sa sensor ng katawan habang nasa background ang app."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Nagpapahintulot sa app na i-access ang data ng temperatura ng wrist mula sa sensor ng katawan, habang nasa background ang app."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Magbasa ng mga event sa kalendaryo at detalye"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong Android TV device at maibabahagi o mase-save nito ang data ng kalendaryo mo."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Nagbibigay-daan sa may hawak na simulang tingnan ang impormasyon ng mga feature para sa isang app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mag-access ng data ng sensor sa mataas na rate ng pag-sample"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Pinapahintulutan ang app na mag-sample ng data ng sensor sa rate na higit sa 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"i-update ang app nang walang pagkilos mula sa user"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Pinapayagan ang may-ari na i-update ang app na dati nitong na-install nang walang pagkilos mula sa user"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa screen lock."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Hindi available ang <xliff:g id="APP_NAME_0">%1$s</xliff:g> sa ngayon. Pinamamahalaan ito ng <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Matuto pa"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"I-unpause ang app"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"I-on ang app para sa trabaho?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Makakuha ng access sa iyong mga app para sa trabaho at notification"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"I-on"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"I-unpause ang mga work app?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"I-unpause"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergency"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Makakuha ng access sa iyong mga app para sa trabaho at tawag"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Hindi available ang app"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Hindi available sa ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Hindi available ang <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>

@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ઍપ ઉપયોગમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે હૃદયના ધબકારા જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરો"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"કૅલેન્ડર ઇવેન્ટ્સ અને વિગતો વાંચો"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત બધા કૅલેન્ડર ઇવેન્ટને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ધારકને ઍપ માટેની સુવિધાઓની માહિતી જોવાનું શરૂ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ઉચ્ચ સેમ્પ્લિંગ રેટ પર સેન્સરનો ડેટા ઍક્સેસ કરો"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ઍપને 200 Hzથી વધુના દરે સેન્સરના ડેટાના નમૂનાની મંજૂરી આપે છે"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"વપરાશકર્તા દ્વારા કરવામાં આવતી ક્રિયા વિના ઍપને અપડેટ કરો"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"હોલ્ડરને વપરાશકર્તા દ્વારા કરવામાં આવતી ક્રિયા વિના, અગાઉ ઇન્સ્ટૉલ કરેલી ઍપને અપડેટ કરવાની મંજૂરી આપે છે"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોનું નિયમન કરો"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> હમણાં ઉપલબ્ધ નથી. આને <xliff:g id="APP_NAME_1">%2$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"વધુ જાણો"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ઍપ ફરી શરૂ કરો"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"શું ઑફિસ માટેની ઍપ ચાલુ કરીએ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"તમારી ઑફિસ માટેની ઍપ અને નોટિફિકેશનનો ઍક્સેસ મેળવો"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ચાલુ કરો"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ઑફિસની થોભાવેલી ઍપ ચાલુ કરીએ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ફરી ચાલુ કરો"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ઇમર્જન્સી"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"તમારી ઑફિસ માટેની ઍપ અને કૉલનો ઍક્સેસ મેળવો"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ઍપ ઉપલબ્ધ નથી"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> હાલમાં ઉપલબ્ધ નથી."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ઉપલબ્ધ નથી"</string>

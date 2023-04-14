@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"यसले यो एप प्रयोग गरिँदै गरेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ब्याकग्राउन्डमा चलेका बेला हृदयको गति जस्ता बडी सेन्सरसम्बन्धी डेटा हेरियोस् र प्रयोग गरियोस्"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"यसले यो एप ब्याकग्राउन्डमा चलेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"यो एप प्रयोग भइरहेका बेला बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति।"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"यसले यो एप प्रयोग भइरहेका बेला यो एपलाई बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति दिन्छ।"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"यो एप ब्याकग्राउन्डमा चलिरहेका बेला बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति।"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"यसले यो एप ब्याकग्राउन्डमा चलिरहेका बेला यो एपलाई बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"होल्डरलाई एपका सुविधासम्बन्धी जानकारी हेर्न दिन्छ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"नमुना लिने उच्च दरमा सेन्सरसम्बन्धी डेटा प्रयोग गर्ने"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यो अनुमति दिइएमा एपले २०० हर्जभन्दा बढी दरमा सेन्सरसम्बन्धी डेटाको नमुना लिन सक्छ"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"एप स्वतः अपडेट गरियोस्"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"तपाईंले यो अनुमति दिनुभयो भने होल्डरले पहिले नै इन्स्टल गरेको एप स्वतः अपडेट गर्न पाउँछ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
@@ -1288,13 +1282,13 @@
     <string name="volume_call" msgid="7625321655265747433">"इन-कल भोल्युम"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ब्लुटुथ भित्री-कल मात्रा"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"आलर्मको भोल्युम"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"सूचना मात्रा"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"सूचनाको भोल्युम"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"मात्रा"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ब्लुटुथ भोल्युम"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"घन्टिको आवाज मात्रा"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"कला मात्रा"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"मिडियाको भोल्युम"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचना भोल्युम"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचनाको भोल्युम"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"डिफल्ट रिङटोन"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"डिफल्ट (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"कुनै पनि होइन"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> अहिले उपलब्ध छैन। यो <xliff:g id="APP_NAME_1">%2$s</xliff:g> द्वारा व्यवस्थित छ।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"थप जान्नुहोस्"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"एपको पज हटाउनुहोस्"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"कामसम्बन्धी एपहरू अन गर्ने हो?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"कामसम्बन्धी एप चलाउने र सूचना प्राप्त गर्ने सुविधा अन गर्नुहोस्"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"अन गर्नुहोस्"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"कामसम्बन्धी एपहरू अनपज गर्ने हो?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"अनपज गर्नुहोस्"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आपत्‌कालीन"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"कामसम्बन्धी एप चलाउने र कल प्राप्त गर्ने सुविधा अन गर्नुहोस्"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध छैन"</string>

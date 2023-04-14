@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека се користи апликацијата."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Пристап до податоци од телесните сензори, како пулсот, додека работи во заднина"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека апликацијата работи во заднина."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Пристап до податоците за температура на зглобот од телесниот сензор додека се користи апликацијата."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Дозволува апликацијата да пристапува до податоците за температура на зглобот од телесниот сензор додека се користи апликацијата."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Пристап до податоците за температура на зглобот од телесниот сензор додека апликацијата работи во заднина."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Дозволува апликацијата да пристапува до податоците за температура на зглобот од телесниот сензор додека апликацијата работи во заднина."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чита настани и детали од календарот"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Апликацијава може да ги чита сите настани во календарот складирани во вашиот таблет и да ги споделува или зачувува податоците од календарот."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Апликацијава може да ги чита сите настани во календарот складирани во вашиот уред Android TV и да ги споделува или зачувува податоците од календарот."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"му дозволува на сопственикот да почне со прегледување на податоците за функциите за некоја апликација"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"пристапува до податоците со висока фреквенција на семпл"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозволува апликацијата да пристапува до податоците од сензорите со фреквенција на семпл поголема од 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ажурирај ја апликацијата без дејство од корисникот"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволува сопственикот да ја ажурира апликацијата што претходно ја инсталирал без дејство од корисникот"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Постави правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Следи ги обидите за отклучување на екранот"</string>
@@ -1705,7 +1699,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење на дејствата"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење дејства"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или хардверскиот сензор и да врши интеракција со апликациите во ваше име."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Да се вклучат работни апликации?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Добијте пристап до вашите работни апликации и известувања"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Вклучи"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Да се актив. работните аплик.?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Прекини ја паузата"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Итен случај"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Добијте пристап до вашите работни апликации и повици"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> е недостапна"</string>

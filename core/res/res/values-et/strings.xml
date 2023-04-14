@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Lubab rakendusel pääseda juurde kehaanduri andmetele, nagu pulss, temperatuur ja vere hapnikusisaldus, kui rakendust kasutatakse."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Juurdepääs kehaanduri andmetele, nagu pulss, kui rakendus töötab taustal"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Lubab rakendusel pääseda juurde kehaanduri andmetele, nagu pulss, temperatuur ja vere hapnikusisaldus, kui rakendus töötab taustal."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Juurdepääs kehaanduri randmetemperatuuri andmetele, kui rakendust kasutatakse."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Lubab rakendusel pääseda juurde kehaanduri randmetemperatuuri andmetele, kui rakendust kasutatakse."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Juurdepääs kehaanduri randmetemperatuuri andmetele, kui rakendus töötab taustal."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Lubab rakendusel pääseda juurde kehaanduri randmetemperatuuri andmetele, kui rakendus töötab taustal."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Kalendrisündmuste ja üksikasjade lugemine"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"See rakendus saab kõiki teie tahvelarvutisse salvestatud kalendrisündmusi lugeda ja teie kalendriandmeid jagada või salvestada."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"See rakendus saab kõiki teie Android TV seadmesse salvestatud kalendrisündmusi lugeda ja teie kalendriandmeid jagada või salvestada."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Võimaldab omanikul alustada rakenduse funktsioonide teabe vaatamist."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"juurdepääs anduri andmetele kõrgel diskreetimissagedusel"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Võimaldab rakendusel anduri andmeid diskreetida sagedusel, mis on suurem kui 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"rakenduse värskendamine ilma kasutaja toiminguta"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Võimaldab hoidjal värskendada varem installitud rakendust ilma kasutaja toiminguta"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Juhitakse ekraaniluku paroolide ja PIN-koodide pikkusi ning lubatud tähemärkide seadeid."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekraani avamiskatsete jälgimine"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> pole praegu saadaval. Seda haldab rakendus <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Lisateave"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Jätka rakendust"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Lülitada töörakendused sisse?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Hankige juurdepääs oma töörakendustele ja märguannetele"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Lülita sisse"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Kas jätkata töörakendusi?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Jätka"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hädaolukord"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Hankige juurdepääs oma töörakendustele ja kõnedele"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Rakendus ei ole saadaval"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole praegu saadaval."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ei ole saadaval"</string>

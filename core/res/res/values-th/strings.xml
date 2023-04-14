@@ -209,8 +209,8 @@
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"แอปส่วนตัวจะถูกบล็อกในวันที่ <xliff:g id="DATE">%1$s</xliff:g> เวลา <xliff:g id="TIME">%2$s</xliff:g> ผู้ดูแลระบบไอทีไม่อนุญาตให้หยุดใช้โปรไฟล์งานเกิน <xliff:g id="NUMBER">%3$d</xliff:g> วัน"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"เปิด"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"การโทรและข้อความปิดอยู่"</string>
-    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"คุณหยุดแอปงานไว้ชั่วคราว และจะไม่ได้รับสายโทรเข้ารวมถึง SMS"</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"เลิกหยุดแอปงาน"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"คุณได้หยุดแอปงานไว้ชั่วคราว จึงจะไม่ได้รับสายโทรเข้ารวมถึง SMS"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ยกเลิกการหยุดแอปงานชั่วคราว"</string>
     <string name="me" msgid="6207584824693813140">"ฉัน"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ตัวเลือกของแท็บเล็ต"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ตัวเลือกของ Android TV"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะใช้งานแอป"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"เข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ ขณะแอปทำงานในเบื้องหลัง"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะที่แอปทำงานในเบื้องหลัง"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"เข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะใช้งานแอป"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"อนุญาตให้แอปเข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะใช้งานแอป"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"เข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะที่แอปทำงานในเบื้องหลัง"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"อนุญาตให้แอปเข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะที่แอปทำงานในเบื้องหลัง"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในแท็บเล็ต รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"แอปนี้อ่านกิจกรรมทั้งหมดในปฏิทินที่จัดเก็บไว้ในอุปกรณ์ Android TV ได้ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ด้วย"</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"อนุญาตให้เจ้าของเริ่มดูข้อมูลฟีเจอร์สำหรับแอป"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"เข้าถึงข้อมูลเซ็นเซอร์ที่อัตราการสุ่มตัวอย่างสูง"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"อนุญาตให้แอปสุ่มตัวอย่างข้อมูลเซ็นเซอร์ที่อัตราสูงกว่า 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"อัปเดตแอปโดยที่ผู้ใช้ไม่ต้องดำเนินการใดๆ"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"อนุญาตให้ผู้ให้บริการอัปเดตแอปที่ติดตั้งไว้ก่อนหน้านี้โดยที่ผู้ใช้ไม่ต้องดำเนินการใดๆ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"เปิด <xliff:g id="APP_NAME_0">%1$s</xliff:g> ไม่ได้ในขณะนี้ แอปนี้จัดการโดย <xliff:g id="APP_NAME_1">%2$s</xliff:g>"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ยกเลิกการหยุดแอปชั่วคราว"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"เปิดแอปงานใช่ไหม"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"รับสิทธิ์เข้าถึงแอปงานและการแจ้งเตือนต่างๆ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"เปิด"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ยกเลิกการหยุดแอปงานใช่ไหม"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ยกเลิกการหยุดชั่วคราว"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ฉุกเฉิน"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"รับสิทธิ์เข้าถึงแอปงานและการโทร"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"แอปไม่พร้อมใช้งาน"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่พร้อมใช้งานในขณะนี้"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่พร้อมใช้งาน"</string>

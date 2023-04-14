@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心跳速率"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"在應用程式使用期間存取手錶人體感應器上的溫度資料。"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"允許應用程式在使用期間存取手錶人體感應器上的溫度資料。"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"在背景執行應用程式時存取手錶人體感應器上的溫度資料。"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"允許應用程式在背景執行時存取手錶人體感應器上的溫度資料。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許具有這項權限的應用程式開始查看其他應用程式的功能資訊。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"允許應用程式以高於 200 Hz 的頻率對感應器資料進行取樣"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"自動更新應用程式 (使用者不必操作)"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"允許容器更新先前安裝的應用程式，使用者不必操作"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」。這項設定是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」管理。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"瞭解詳情"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"取消暫停應用程式"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"要開啟工作應用程式存取權嗎？"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"開啟工作應用程式和通知的存取權"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"開啟"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"要取消暫停工作應用程式嗎？"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"取消暫停"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"撥打緊急電話"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"要求存取工作應用程式和通話"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"應用程式無法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」目前無法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"無法存取「<xliff:g id="ACTIVITY">%1$s</xliff:g>」"</string>
