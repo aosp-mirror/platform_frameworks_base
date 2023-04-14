@@ -392,8 +392,7 @@ class HeadsUpCoordinator @Inject constructor(
             mNotificationInterruptStateProvider.logFullScreenIntentDecision(entry, fsiDecision)
             if (fsiDecision.shouldLaunch) {
                 mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
-            } else if (mFlags.fsiOnDNDUpdate() &&
-                fsiDecision == FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND) {
+            } else if (fsiDecision == FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND) {
                 // If DND was the only reason this entry was suppressed, note it for potential
                 // reconsideration on later ranking updates.
                 addForFSIReconsideration(entry, mSystemClock.currentTimeMillis())
@@ -509,7 +508,7 @@ class HeadsUpCoordinator @Inject constructor(
                 //   - was suppressed from FSI launch only by a DND suppression
                 //   - is within the recency window for reconsideration
                 // If any of these entries are no longer suppressed, launch the FSI now.
-                if (mFlags.fsiOnDNDUpdate() && isCandidateForFSIReconsideration(entry)) {
+                if (isCandidateForFSIReconsideration(entry)) {
                     val decision =
                         mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry)
                     if (decision.shouldLaunch) {

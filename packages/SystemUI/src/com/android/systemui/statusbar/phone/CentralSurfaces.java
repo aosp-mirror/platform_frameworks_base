@@ -430,9 +430,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void collapseShade();
 
-    /** Collapse the shade, but conditional on a flag specific to the trigger of a bugreport. */
-    void collapseShadeForBugreport();
-
     int getWakefulnessState();
 
     boolean isScreenFullyOff();

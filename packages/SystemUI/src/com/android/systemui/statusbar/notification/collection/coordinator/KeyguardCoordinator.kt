@@ -95,9 +95,7 @@ constructor(
         pipeline.addFinalizeFilter(notifFilter)
         keyguardNotificationVisibilityProvider.addOnStateChangedListener(::invalidateListFromFilter)
         updateSectionHeadersVisibility()
-        if (notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard) {
-            attachUnseenFilter(pipeline)
-        }
+        attachUnseenFilter(pipeline)
     }
 
     private fun attachUnseenFilter(pipeline: NotifPipeline) {

@@ -58,12 +58,6 @@ object Flags {
             "notification_drag_to_contents"
         )
 
-    // TODO(b/254512517): Tracking Bug
-    val FSI_REQUIRES_KEYGUARD = releasedFlag(110, "fsi_requires_keyguard")
-
-    // TODO(b/259130119): Tracking Bug
-    val FSI_ON_DND_UPDATE = releasedFlag(259130119, "fsi_on_dnd_update")
-
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply")
 
@@ -74,15 +68,7 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
         unreleasedFlag(119, "notification_memory_logging_enabled")
 
-    // TODO(b/254512731): Tracking Bug
-    @JvmField val NOTIFICATION_DISMISSAL_FADE = releasedFlag(113, "notification_dismissal_fade")
-
     @JvmField val USE_ROUNDNESS_SOURCETYPES = releasedFlag(116, "use_roundness_sourcetype")
-
-    // TODO(b/259217907)
-    @JvmField
-    val NOTIFICATION_GROUP_DISMISSAL_ANIMATION =
-        releasedFlag(259217907, "notification_group_dismissal_animation")
 
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
@@ -90,14 +76,6 @@ object Flags {
 
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
-
-    // TODO(b/260335638): Tracking Bug
-    @JvmField
-    val NOTIFICATION_INLINE_REPLY_ANIMATION =
-        releasedFlag(174148361, "notification_inline_reply_animation")
-
-    val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
-        releasedFlag(254647461, "filter_unseen_notifs_on_keyguard")
 
     // TODO(b/277338665): Tracking Bug
     @JvmField
@@ -613,8 +591,6 @@ object Flags {
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
 
     // 1800 - shade container
-    @JvmField
-    val LEAVE_SHADE_OPEN_FOR_BUGREPORT = releasedFlag(1800, "leave_shade_open_for_bugreport")
     // TODO(b/265944639): Tracking Bug
     @JvmField val DUAL_SHADE = unreleasedFlag(1801, "dual_shade")
 
