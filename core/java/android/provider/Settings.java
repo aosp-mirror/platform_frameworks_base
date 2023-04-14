@@ -12130,6 +12130,14 @@ public final class Settings {
         public static final String ADB_WIFI_ENABLED = "adb_wifi_enabled";
 
         /**
+         * Whether existing ADB sessions over both USB and Wifi should be terminated when the user
+         * revokes debugging authorizations.
+         * @hide
+         */
+        public static final String ADB_DISCONNECT_SESSIONS_ON_REVOKE =
+                "adb_disconnect_sessions_on_revoke";
+
+        /**
          * Whether Views are allowed to save their attribute data.
          * @hide
          */

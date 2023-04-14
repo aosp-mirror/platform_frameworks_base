@@ -110,6 +110,7 @@ public class SettingsBackupTest {
                     Settings.Global.ADB_ALLOWED_CONNECTION_TIME,
                     Settings.Global.ADB_ENABLED,
                     Settings.Global.ADB_WIFI_ENABLED,
+                    Settings.Global.ADB_DISCONNECT_SESSIONS_ON_REVOKE,
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
