@@ -45,6 +45,9 @@
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
     <!-- The threshold to progress back animation for edge swipe -->
     <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
+    <!-- This value is used to calculate the target if the screen is wider than the
+        navigation_edge_action_progress_threshold. See BackAnimation#setSwipeThresholds -->
+    <item name="back_progress_non_linear_factor" format="float" type="dimen">0.2</item>
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->
