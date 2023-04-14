@@ -213,12 +213,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
 
         RecentsController(IRecentsAnimationRunner listener) {
             mListener = listener;
-            mDeathHandler = () -> mExecutor.execute(() -> {
-                if (mListener == null) return;
-                if (mFinishCB != null) {
-                    finish(mWillFinishToHome, false /* leaveHint */);
-                }
-            });
+            mDeathHandler = () -> finish(mWillFinishToHome, false /* leaveHint */);
             try {
                 mListener.asBinder().linkToDeath(mDeathHandler, 0 /* flags */);
             } catch (RemoteException e) {
@@ -245,7 +240,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             if (mFinishCB != null) {
-                finish(toHome, false /* userLeave */);
+                finishInner(toHome, false /* userLeave */);
             } else {
                 cleanUp();
             }
@@ -552,13 +547,13 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             t.apply();
             // not using the incoming anim-only surfaces
             info.releaseAnimSurfaces();
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
             if (appearedTargets == null) return;
             try {
                 mListener.onTasksAppeared(appearedTargets);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error sending appeared tasks to recents animation", e);
             }
+            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         }
 
         /** For now, just set-up a jump-cut to the new activity. */
