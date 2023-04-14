@@ -17,29 +17,33 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
-    <string name="confirmation_title" msgid="8024993972587946678">"Dopustite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="confirmation_title" msgid="4593465730772390351">"Želite li dopustiti aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"satom"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Odaberite <xliff:g id="PROFILE_NAME">%1$s</xliff:g> kojim će upravljati aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="6566922405914995759">"Aplikacija je potrebna za upravljanje vašim uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će sinkronizirati podatke, primjerice ime pozivatelja, stupati u interakciju s vašim obavijestima i pristupati vašim dopuštenjima za telefon, SMS-ove, kontakte, kalendar, zapisnike poziva i uređaje u blizini."</string>
-    <string name="summary_watch_single_device" msgid="7443464525873186735">"Aplikacija je potrebna za upravljanje vašim uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će sinkronizirati podatke, primjerice ime pozivatelja i pristupati sljedećim dopuštenjima:"</string>
+    <string name="summary_watch" msgid="898569637110705523">"Ta je aplikacija potrebna za upravljanje vašim uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će sinkronizirati podatke, primjerice ime pozivatelja, stupati u interakciju s vašim obavijestima i pristupati vašim dopuštenjima za telefon, SMS-ove, kontakte, kalendar, zapisnike poziva i uređaje u blizini."</string>
+    <!-- no translation found for summary_watch_single_device (3173948915947011333) -->
+    <skip />
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Dopustiti aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da upravlja uređajem &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"naočale"</string>
     <string name="summary_glasses_multi_device" msgid="615259525961937348">"Ta je aplikacija potrebna za upravljanje uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će stupati u interakciju s vašim obavijestima i pristupati vašim dopuštenjima za telefon, SMS-ove, kontakte, mikrofon i uređaje u blizini."</string>
-    <string name="summary_glasses_single_device" msgid="5783761806783565716">"Aplikacija će moći pristupati ovim dopuštenjima na telefonu:"</string>
+    <!-- no translation found for summary_glasses_single_device (3000909894067413398) -->
+    <skip />
     <string name="title_app_streaming" msgid="2270331024626446950">"Omogućite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa informacijama s vašeg telefona"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Usluge na različitim uređajima"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> zahtijeva dopuštenje u ime vašeg uređaja <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> za emitiranje aplikacija između vaših uređaja"</string>
+    <!-- no translation found for helper_summary_app_streaming (2396773196949578425) -->
+    <skip />
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Omogućite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa informacijama s vašeg telefona"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Usluge za Google Play"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> zahtijeva dopuštenje u ime vašeg uređaja <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> za pristup fotografijama, medijskim sadržajima i obavijestima na telefonu"</string>
+    <!-- no translation found for helper_summary_computer (8774832742608187072) -->
+    <skip />
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Dopustiti &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; da izvede tu radnju?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> zahtijeva dopuštenje u ime vašeg uređaja <xliff:g id="DEVICE_NAME">%2$s</xliff:g> za emitiranje aplikacija i drugih značajki sustava na uređajima u blizini"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"uređaj"</string>
-    <string name="summary_generic_single_device" msgid="4735072202474939111">"Ta će aplikacija moći sinkronizirati podatke između vašeg telefona i uređaja <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, primjerice ime pozivatelja."</string>
-    <string name="summary_generic" msgid="4988130802522924650">"Ta će aplikacija moći sinkronizirati podatke između vašeg telefona i odabranog uređaja, primjerice ime pozivatelja."</string>
+    <string name="summary_generic_single_device" msgid="4181180669689590417">"Ta će aplikacija moći sinkronizirati podatke između vašeg telefona i uređaja <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, primjerice ime pozivatelja"</string>
+    <string name="summary_generic" msgid="1761976003668044801">"Ta će aplikacija moći sinkronizirati podatke između vašeg telefona i odabranog uređaja, primjerice ime pozivatelja"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Dopusti"</string>
     <string name="consent_no" msgid="2640796915611404382">"Nemoj dopustiti"</string>
     <string name="consent_back" msgid="2560683030046918882">"Natrag"</string>
@@ -69,4 +73,6 @@
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streaming aplikacija vašeg telefona"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Emitiranje aplikacija i drugih značajki sustava s vašeg telefona"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"telefonu"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"tabletu"</string>
 </resources>
