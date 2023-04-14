@@ -35,7 +35,9 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         captionView.setOnTouchListener(onCaptionTouchListener)
         captionHandle.setOnTouchListener(onCaptionTouchListener)
         openMenuButton.setOnClickListener(onCaptionButtonClickListener)
+        openMenuButton.setOnTouchListener(onCaptionTouchListener)
         closeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName
         appIconImageView.setImageDrawable(appIcon)
     }
