@@ -1354,8 +1354,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mHeadsUpManager);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
-        mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
-                backdrop.findViewById(R.id.backdrop_back), mScrimController, mLockscreenWallpaper);
+        if (mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
+            mMediaManager.setup(null, null, null, mScrimController, null);
+        } else {
+            mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
+                    backdrop.findViewById(R.id.backdrop_back), mScrimController,
+                    mLockscreenWallpaper);
+        }
         float maxWallpaperZoom = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_wallpaperMaxScale);
         mNotificationShadeDepthControllerLazy.get().addListener(depth -> {
@@ -2720,7 +2725,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     @Override
     public void setLockscreenUser(int newUserId) {
-        if (mLockscreenWallpaper != null) {
+        if (mLockscreenWallpaper != null && !mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
             mLockscreenWallpaper.setCurrentUser(newUserId);
         }
         mScrimController.setCurrentUser(newUserId);
