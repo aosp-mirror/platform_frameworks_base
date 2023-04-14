@@ -191,12 +191,6 @@ open class OpenAppFromNotificationWarm(flicker: FlickerTest) : OpenAppTransition
     @Postsubmit
     override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
     companion object {
         /**
          * Creates the test configurations.
