@@ -19,6 +19,8 @@ package com.android.server.biometrics.sensors.face.aidl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -109,7 +111,8 @@ public class SensorTest {
                 mUserSwitchCallback);
         mHalCallback = new Sensor.HalSessionCallback(mContext, new Handler(mLooper.getLooper()),
                 TAG, mScheduler, SENSOR_ID,
-                USER_ID, mLockoutCache, mLockoutResetDispatcher, mHalSessionCallback);
+                USER_ID, mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
+                mHalSessionCallback);
 
         final SensorProps sensor1 = new SensorProps();
         sensor1.commonProps = new CommonProps();
@@ -164,5 +167,6 @@ public class SensorTest {
     private void verifyNotLocked() {
         assertEquals(LockoutTracker.LOCKOUT_NONE, mLockoutCache.getLockoutModeForUser(USER_ID));
         verify(mLockoutResetDispatcher).notifyLockoutResetCallbacks(eq(SENSOR_ID));
+        verify(mAuthSessionCoordinator).resetLockoutFor(eq(USER_ID), anyInt(), anyLong());
     }
 }
