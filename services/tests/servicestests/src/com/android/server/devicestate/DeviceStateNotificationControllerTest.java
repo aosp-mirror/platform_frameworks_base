@@ -17,8 +17,13 @@
 package com.android.server.devicestate;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +45,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+
+import java.util.Locale;
 
 /**
  * Unit tests for {@link DeviceStateNotificationController}.
@@ -77,6 +84,8 @@ public class DeviceStateNotificationControllerTest {
             Notification.class);
     private final NotificationManager mNotificationManager = mock(NotificationManager.class);
 
+    private DeviceStateNotificationController.NotificationInfoProvider mNotificationInfoProvider;
+
     @Before
     public void setup() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
@@ -97,6 +106,11 @@ public class DeviceStateNotificationControllerTest {
                         THERMAL_TITLE_2, THERMAL_CONTENT_2,
                         POWER_SAVE_TITLE_2, POWER_SAVE_CONTENT_2));
 
+        mNotificationInfoProvider =
+                new DeviceStateNotificationController.NotificationInfoProvider(context);
+        mNotificationInfoProvider = spy(mNotificationInfoProvider);
+        doReturn(notificationInfos).when(mNotificationInfoProvider).loadNotificationInfos();
+
         when(packageManager.getNameForUid(VALID_APP_UID)).thenReturn(VALID_APP_NAME);
         when(packageManager.getNameForUid(INVALID_APP_UID)).thenReturn(INVALID_APP_NAME);
         when(packageManager.getApplicationInfo(eq(VALID_APP_NAME), ArgumentMatchers.any()))
@@ -106,7 +120,7 @@ public class DeviceStateNotificationControllerTest {
         when(applicationInfo.loadLabel(eq(packageManager))).thenReturn(VALID_APP_LABEL);
 
         mController = new DeviceStateNotificationController(
-                context, handler, cancelStateRunnable, notificationInfos,
+                context, handler, cancelStateRunnable, mNotificationInfoProvider,
                 packageManager, mNotificationManager);
     }
 
@@ -222,5 +236,27 @@ public class DeviceStateNotificationControllerTest {
                 eq(DeviceStateNotificationController.NOTIFICATION_TAG),
                 eq(DeviceStateNotificationController.NOTIFICATION_ID),
                 mNotificationCaptor.capture());
+    }
+
+    @Test
+    public void test_notificationInfoProvider() {
+        assertNull(mNotificationInfoProvider.getCachedLocale());
+
+        mNotificationInfoProvider.getNotificationInfos(Locale.ENGLISH);
+        verify(mNotificationInfoProvider).refreshNotificationInfos(eq(Locale.ENGLISH));
+        assertEquals(Locale.ENGLISH, mNotificationInfoProvider.getCachedLocale());
+        clearInvocations(mNotificationInfoProvider);
+
+        // If the same locale is used again, the provider uses the cached value, so it won't refresh
+        mNotificationInfoProvider.getNotificationInfos(Locale.ENGLISH);
+        verify(mNotificationInfoProvider, never()).refreshNotificationInfos(eq(Locale.ENGLISH));
+        assertEquals(Locale.ENGLISH, mNotificationInfoProvider.getCachedLocale());
+        clearInvocations(mNotificationInfoProvider);
+
+        // If a different locale is used, the provider refreshes.
+        mNotificationInfoProvider.getNotificationInfos(Locale.ITALY);
+        verify(mNotificationInfoProvider).refreshNotificationInfos(eq(Locale.ITALY));
+        assertEquals(Locale.ITALY, mNotificationInfoProvider.getCachedLocale());
+        clearInvocations(mNotificationInfoProvider);
     }
 }
