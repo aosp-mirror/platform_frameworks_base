@@ -22,6 +22,7 @@ import static android.view.InsetsSourceProto.VISIBLE;
 import static android.view.InsetsSourceProto.VISIBLE_FRAME;
 import static android.view.WindowInsets.Type.ime;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,7 +34,10 @@ import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type.InsetsType;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Represents the state of a single entity generating insets for clients.
@@ -43,6 +47,24 @@ public class InsetsSource implements Parcelable {
 
     /** The insets source ID of IME */
     public static final int ID_IME = createId(null, 0, ime());
+
+    /**
+     * Controls whether this source suppresses the scrim. If the scrim is ignored, the system won't
+     * draw a semi-transparent scrim behind the system bar area even when the bar contrast is
+     * enforced.
+     *
+     * @see android.R.styleable#Window_enforceStatusBarContrast
+     * @see android.R.styleable#Window_enforceNavigationBarContrast
+     */
+    public static final int FLAG_SUPPRESS_SCRIM = 1;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = "FLAG_", value = {
+            FLAG_SUPPRESS_SCRIM,
+    })
+    public @interface Flags {}
+
+    private @Flags int mFlags;
 
     /**
      * An unique integer to identify this source across processes.
@@ -75,6 +97,7 @@ public class InsetsSource implements Parcelable {
         mVisibleFrame = other.mVisibleFrame != null
                 ? new Rect(other.mVisibleFrame)
                 : null;
+        mFlags = other.mFlags;
         mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
@@ -84,6 +107,7 @@ public class InsetsSource implements Parcelable {
         mVisibleFrame = other.mVisibleFrame != null
                 ? new Rect(other.mVisibleFrame)
                 : null;
+        mFlags = other.mFlags;
         mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
@@ -107,6 +131,11 @@ public class InsetsSource implements Parcelable {
         return this;
     }
 
+    public InsetsSource setFlags(@Flags int flags) {
+        mFlags = flags;
+        return this;
+    }
+
     public int getId() {
         return mId;
     }
@@ -125,6 +154,10 @@ public class InsetsSource implements Parcelable {
 
     public boolean isVisible() {
         return mVisible;
+    }
+
+    public @Flags int getFlags() {
+        return mFlags;
     }
 
     boolean isUserControllable() {
@@ -254,6 +287,14 @@ public class InsetsSource implements Parcelable {
                 + WindowInsets.Type.indexOf(type);
     }
 
+    public static String flagsToString(@Flags int flags) {
+        final StringJoiner joiner = new StringJoiner(" ");
+        if ((flags & FLAG_SUPPRESS_SCRIM) != 0) {
+            joiner.add("SUPPRESS_SCRIM");
+        }
+        return joiner.toString();
+    }
+
     /**
      * Export the state of {@link InsetsSource} into a protocol buffer output stream.
      *
@@ -280,6 +321,7 @@ public class InsetsSource implements Parcelable {
             pw.print(" visibleFrame="); pw.print(mVisibleFrame.toShortString());
         }
         pw.print(" visible="); pw.print(mVisible);
+        pw.print(" flags="); pw.print(flagsToString(mFlags));
         pw.print(" insetsRoundedCornerFrame="); pw.print(mInsetsRoundedCornerFrame);
         pw.println();
     }
@@ -302,6 +344,7 @@ public class InsetsSource implements Parcelable {
         if (mId != that.mId) return false;
         if (mType != that.mType) return false;
         if (mVisible != that.mVisible) return false;
+        if (mFlags != that.mFlags) return false;
         if (excludeInvisibleImeFrames && !mVisible && mType == WindowInsets.Type.ime()) return true;
         if (!Objects.equals(mVisibleFrame, that.mVisibleFrame)) return false;
         if (mInsetsRoundedCornerFrame != that.mInsetsRoundedCornerFrame) return false;
@@ -310,7 +353,8 @@ public class InsetsSource implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mInsetsRoundedCornerFrame);
+        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mFlags,
+                mInsetsRoundedCornerFrame);
     }
 
     public InsetsSource(Parcel in) {
@@ -323,6 +367,7 @@ public class InsetsSource implements Parcelable {
             mVisibleFrame = null;
         }
         mVisible = in.readBoolean();
+        mFlags = in.readInt();
         mInsetsRoundedCornerFrame = in.readBoolean();
     }
 
@@ -343,6 +388,7 @@ public class InsetsSource implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeBoolean(mVisible);
+        dest.writeInt(mFlags);
         dest.writeBoolean(mInsetsRoundedCornerFrame);
     }
 
@@ -352,6 +398,7 @@ public class InsetsSource implements Parcelable {
                 + " mType=" + WindowInsets.Type.toString(mType)
                 + " mFrame=" + mFrame.toShortString()
                 + " mVisible=" + mVisible
+                + " mFlags=[" + flagsToString(mFlags) + "]"
                 + (mInsetsRoundedCornerFrame ? " insetsRoundedCornerFrame" : "")
                 + "}";
     }

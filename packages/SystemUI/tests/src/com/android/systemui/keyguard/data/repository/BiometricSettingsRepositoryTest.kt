@@ -227,9 +227,13 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
 
             assertThat(faceEnrolled()).isFalse()
 
+            whenever(authController.isFaceAuthEnrolled(ANOTHER_USER_ID)).thenReturn(true)
+
             enrollmentChange(FACE, ANOTHER_USER_ID, true)
 
             assertThat(faceEnrolled()).isFalse()
+
+            whenever(authController.isFaceAuthEnrolled(PRIMARY_USER_ID)).thenReturn(true)
 
             enrollmentChange(FACE, PRIMARY_USER_ID, true)
 
@@ -264,6 +268,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
 
             verify(authController).addCallback(authControllerCallback.capture())
 
+            whenever(authController.isFaceAuthEnrolled(ANOTHER_USER_ID)).thenReturn(true)
             enrollmentChange(FACE, ANOTHER_USER_ID, true)
 
             assertThat(faceEnrolled()).isTrue()

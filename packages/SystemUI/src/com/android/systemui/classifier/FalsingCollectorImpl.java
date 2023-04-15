@@ -174,10 +174,6 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     @Override
-    public void onNotificationActive() {
-    }
-
-    @Override
     public void setShowingAod(boolean showingAod) {
         mShowingAod = showingAod;
         updateSessionActive();

@@ -48,9 +48,9 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.util.Compile;
@@ -212,13 +212,14 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     /**
      * Wakes up the device if the device was dozing.
      */
-    void wakeUpIfDozing(long time, View where, String why, @PowerManager.WakeReason int wakeReason);
+    void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
 
     NotificationShadeWindowView getNotificationShadeWindowView();
 
     NotificationShadeWindowViewController getNotificationShadeWindowViewController();
 
-    NotificationPanelViewController getNotificationPanelViewController();
+    /** */
+    ShadeViewController getShadeViewController();
 
     /** Get the Keyguard Message Area that displays auth messages. */
     AuthKeyguardMessageArea getKeyguardMessageArea();
@@ -429,9 +430,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
 
     void collapseShade();
-
-    /** Collapse the shade, but conditional on a flag specific to the trigger of a bugreport. */
-    void collapseShadeForBugreport();
 
     int getWakefulnessState();
 

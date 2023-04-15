@@ -25,10 +25,6 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
-    public void onNotificationActive() {
-    }
-
-    @Override
     public void setShowingAod(boolean showingAod) {
     }
 

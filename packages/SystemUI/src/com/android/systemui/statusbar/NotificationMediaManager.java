@@ -24,6 +24,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -43,6 +44,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -117,6 +119,8 @@ public class NotificationMediaManager implements Dumpable {
     private ScrimController mScrimController;
     @Nullable
     private LockscreenWallpaper mLockscreenWallpaper;
+    @VisibleForTesting
+    boolean mIsLockscreenLiveWallpaperEnabled;
 
     private final DelayableExecutor mMainExecutor;
 
@@ -179,7 +183,8 @@ public class NotificationMediaManager implements Dumpable {
             StatusBarStateController statusBarStateController,
             SysuiColorExtractor colorExtractor,
             KeyguardStateController keyguardStateController,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            WallpaperManager wallpaperManager) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
@@ -195,6 +200,7 @@ public class NotificationMediaManager implements Dumpable {
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
         mKeyguardStateController = keyguardStateController;
+        mIsLockscreenLiveWallpaperEnabled = wallpaperManager.isLockscreenLiveWallpaperEnabled();
 
         setupNotifPipeline();
 
@@ -474,13 +480,16 @@ public class NotificationMediaManager implements Dumpable {
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
+
+        if (mIsLockscreenLiveWallpaperEnabled) return;
+
         Trace.beginSection("CentralSurfaces#updateMediaMetaData");
         if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
             Trace.endSection();
             return;
         }
 
-        if (mBackdrop == null) {
+        if (getBackDropView() == null) {
             Trace.endSection();
             return; // called too early
         }
@@ -707,6 +716,12 @@ public class NotificationMediaManager implements Dumpable {
         return mBackdrop != null && mLockscreenWallpaper != null
                 && !mLockscreenWallpaper.isLockscreenLiveWallpaperEnabled()
                 && (mBackdropFront.isVisibleToUser() || mBackdropBack.isVisibleToUser());
+    }
+
+    // TODO(b/273443374) temporary test helper; remove
+    @VisibleForTesting
+    BackDropView getBackDropView() {
+        return mBackdrop;
     }
 
     /**

@@ -87,7 +87,10 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     PersistentDataBlockManagerInternal getPersistentDataBlockManager() {
         return mPersistentDataBlockManager;
     }
-
+    @Override
+    public boolean isAutoPinConfirmSettingEnabled(int userId) {
+        return true;
+    }
     private File remapToStorageDir(File origPath) {
         File mappedPath = new File(mStorageDir, origPath.toString());
         mappedPath.getParentFile().mkdirs();
