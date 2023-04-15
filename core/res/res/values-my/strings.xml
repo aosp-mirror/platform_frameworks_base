@@ -1889,7 +1889,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS တောင်းဆိုမှုကို USSD တောင်းဆိုမှုအဖြစ် ပြောင်းထားသည်"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS တောင်းဆိုမှုအသစ်သို့ ပြောင်းထားသည်"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"အယောင်ဆောင်ဖြားယောင်းခြင်း သတိပေးချက်"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"အလုပ်ကိုယ်ရေးအချက်အလက်"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"အလုပ်ပရိုဖိုင်"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"သတိပေးထားသည်"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"စိစစ်ထားသည်"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ချဲ့ရန်"</string>

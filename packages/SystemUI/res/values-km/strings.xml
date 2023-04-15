@@ -471,13 +471,13 @@
     <string name="wallet_error_generic" msgid="257704570182963611">"មានបញ្ហា​ក្នុងការទាញយក​កាត​របស់អ្នក សូម​ព្យាយាមម្ដងទៀត​នៅពេលក្រោយ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"ការកំណត់អេក្រង់ចាក់សោ"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"ស្កេន​កូដ QR"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"ប្រវត្តិរូបការងារ"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"កម្រងព័ត៌មានការងារ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ពេលជិះយន្តហោះ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"អ្នកនឹងមិនលឺម៉ោងរោទ៍ <xliff:g id="WHEN">%1$s</xliff:g> បន្ទាប់របស់អ្នកទេ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ហតស្ប៉ត"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"ប្រវត្តិរូបការងារ"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"កម្រងព័ត៌មានការងារ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ល្អសម្រាប់អ្នកប្រើមួយចំនួន តែមិនសម្រាប់គ្រប់គ្នាទេ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"កម្មវិធីសម្រួល UI ប្រព័ន្ធផ្តល់ជូនអ្នកនូវមធ្យោបាយបន្ថែមទៀតដើម្បីកែសម្រួល និងប្តូរចំណុចប្រទាក់អ្នកប្រើ Android តាមបំណង។ លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
@@ -833,7 +833,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"មិនអាច​ផ្ទុក​ស្ថានភាព​បានទេ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"មានបញ្ហា សូម​ព្យាយាម​ម្តងទៀត"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ផ្ទាំងគ្រប់គ្រង"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ការគ្រប់គ្រង"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"បញ្ចូល​ឧបករណ៍​មេឌៀ"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"ក្រុម"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"បានជ្រើសរើស​ឧបករណ៍ 1"</string>
