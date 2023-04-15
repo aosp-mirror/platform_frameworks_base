@@ -47,19 +47,11 @@
     {
       "name": "FrameworksCoreTests",
       "options": [
+        // TODO(b/267225211) Include android.accessibilityservice in presubmit after
+        // checking stability in postsubmit (and fixing if necessary)
         {
+          "include-filter": "android.view.accessibility",
           "include-filter": "com.android.internal.accessibility"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.view.accessibility"
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -92,15 +84,9 @@
       "name": "FrameworksCoreTests",
       "options": [
         {
+          "include-filter": "android.accessibilityservice",
+          "include-filter": "android.view.accessibility",
           "include-filter": "com.android.internal.accessibility"
-        }
-      ]
-    },
-    {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.view.accessibility"
         }
       ]
     }
