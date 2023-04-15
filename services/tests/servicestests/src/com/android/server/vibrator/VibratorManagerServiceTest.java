@@ -170,6 +170,8 @@ public class VibratorManagerServiceTest {
     private VibratorFrameworkStatsLogger mVibratorFrameworkStatsLoggerMock;
     @Mock
     private VirtualDeviceManagerInternal mVirtualDeviceManagerInternalMock;
+    @Mock
+    private AudioManager mAudioManagerMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
 
@@ -198,6 +200,7 @@ public class VibratorManagerServiceTest {
         when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibrator);
         when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
         when(mContextSpy.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManagerMock);
+        when(mContextSpy.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(mAudioManagerMock);
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
@@ -228,7 +231,7 @@ public class VibratorManagerServiceTest {
                 Vibrator.VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_MEDIUM);
-
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         addLocalServiceMock(PackageManagerInternal.class, mPackageManagerInternalMock);
         addLocalServiceMock(PowerManagerInternal.class, mPowerManagerInternalMock);
         addLocalServiceMock(VirtualDeviceManagerInternal.class, mVirtualDeviceManagerInternalMock);
@@ -496,12 +499,10 @@ public class VibratorManagerServiceTest {
             service.registerVibratorStateListener(i, listeners[i]);
         }
 
-        vibrate(service, CombinedVibration.startParallel()
+        vibrateAndWaitUntilFinished(service, CombinedVibration.startParallel()
                 .addVibrator(0, VibrationEffect.createOneShot(40, 100))
                 .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .combine(), ALARM_ATTRS);
-        // Wait until service knows vibrator is on.
-        assertTrue(waitUntil(s -> s.isVibrating(0), service, TEST_TIMEOUT_MILLIS));
 
         verify(listeners[0]).onVibrating(eq(true));
         verify(listeners[1]).onVibrating(eq(true));
@@ -1689,7 +1690,7 @@ public class VibratorManagerServiceTest {
         VibratorManagerService service = createSystemReadyService();
 
         VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
-                new long[]{10, 10_000}, new int[]{255, 0}, 1);
+                new long[]{100, 200, 300}, new int[]{128, 255, 255}, 1);
         vibrate(service, repeatingEffect, ALARM_ATTRS);
 
         // VibrationThread will start this vibration async, so wait until vibration is triggered.
@@ -2218,9 +2219,7 @@ public class VibratorManagerServiceTest {
     }
 
     private void setRingerMode(int ringerMode) {
-        AudioManager audioManager = mContextSpy.getSystemService(AudioManager.class);
-        audioManager.setRingerModeInternal(ringerMode);
-        assertEquals(ringerMode, audioManager.getRingerModeInternal());
+        when(mAudioManagerMock.getRingerModeInternal()).thenReturn(ringerMode);
     }
 
     private void setUserSetting(String settingName, int value) {
