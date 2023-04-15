@@ -61,37 +61,6 @@ constructor(
 
     companion object {
         @JvmField val GUTS_ANIMATION_DURATION = 500L
-        val controlIds =
-            setOf(
-                R.id.media_progress_bar,
-                R.id.actionNext,
-                R.id.actionPrev,
-                R.id.action0,
-                R.id.action1,
-                R.id.action2,
-                R.id.action3,
-                R.id.action4,
-                R.id.media_scrubbing_elapsed_time,
-                R.id.media_scrubbing_total_time
-            )
-
-        val detailIds =
-            setOf(
-                R.id.header_title,
-                R.id.header_artist,
-                R.id.media_explicit_indicator,
-                R.id.actionPlayPause,
-            )
-
-        val backgroundIds =
-            setOf(
-                R.id.album_art,
-                R.id.turbulence_noise_view,
-                R.id.touch_ripple_view,
-            )
-
-        // Sizing view id for recommendation card view.
-        val recSizingViewId = R.id.sizing_view
     }
 
     /** A listener when the current dimensions of the player change */
@@ -182,15 +151,14 @@ constructor(
                         lastOrientation = newOrientation
                         // Update the height of media controls for the expanded layout. it is needed
                         // for large screen devices.
-                        if (type == TYPE.PLAYER) {
-                            backgroundIds.forEach { id ->
-                                expandedLayout.getConstraint(id).layout.mHeight =
-                                    context.resources.getDimensionPixelSize(
-                                        R.dimen.qs_media_session_height_expanded
-                                    )
+                        val backgroundIds =
+                            if (type == TYPE.PLAYER) {
+                                MediaViewHolder.backgroundIds
+                            } else {
+                                setOf(RecommendationViewHolder.backgroundId)
                             }
-                        } else {
-                            expandedLayout.getConstraint(recSizingViewId).layout.mHeight =
+                        backgroundIds.forEach { id ->
+                            expandedLayout.getConstraint(id).layout.mHeight =
                                 context.resources.getDimensionPixelSize(
                                     R.dimen.qs_media_session_height_expanded
                                 )
@@ -338,19 +306,19 @@ constructor(
         squishedViewState.height = squishedHeight
         // We are not overriding the squishedViewStates height but only the children to avoid
         // them remeasuring the whole view. Instead it just remains as the original size
-        backgroundIds.forEach { id ->
+        MediaViewHolder.backgroundIds.forEach { id ->
             squishedViewState.widgetStates.get(id)?.let { state -> state.height = squishedHeight }
         }
 
         // media player
         calculateWidgetGroupAlphaForSquishiness(
-            controlIds,
+            MediaViewHolder.expandedBottomActionIds,
             squishedViewState.measureHeight.toFloat(),
             squishedViewState,
             squishFraction
         )
         calculateWidgetGroupAlphaForSquishiness(
-            detailIds,
+            MediaViewHolder.detailIds,
             squishedViewState.measureHeight.toFloat(),
             squishedViewState,
             squishFraction
@@ -660,7 +628,7 @@ constructor(
                 result.height = result.measureHeight
                 result.width = result.measureWidth
                 // Make sure all background views are also resized such that their size is correct
-                backgroundIds.forEach { id ->
+                MediaViewHolder.backgroundIds.forEach { id ->
                     result.widgetStates.get(id)?.let { state ->
                         state.height = result.height
                         state.width = result.width
