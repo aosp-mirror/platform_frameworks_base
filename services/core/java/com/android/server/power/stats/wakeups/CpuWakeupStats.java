@@ -17,6 +17,8 @@
 package com.android.server.power.stats.wakeups;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SENSOR;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
@@ -54,10 +56,11 @@ import java.util.regex.Pattern;
  */
 public class CpuWakeupStats {
     private static final String TAG = "CpuWakeupStats";
-
     private static final String SUBSYSTEM_ALARM_STRING = "Alarm";
     private static final String SUBSYSTEM_WIFI_STRING = "Wifi";
     private static final String SUBSYSTEM_SOUND_TRIGGER_STRING = "Sound_trigger";
+    private static final String SUBSYSTEM_SENSOR_STRING = "Sensor";
+    private static final String SUBSYSTEM_CELLULAR_DATA_STRING = "Cellular_data";
     private static final String TRACE_TRACK_WAKEUP_ATTRIBUTION = "wakeup_attribution";
     @VisibleForTesting
     static final long WAKEUP_REASON_HALF_WINDOW_MS = 500;
@@ -111,6 +114,10 @@ public class CpuWakeupStats {
                 return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__WIFI;
             case CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER:
                 return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__SOUND_TRIGGER;
+            case CPU_WAKEUP_SUBSYSTEM_SENSOR:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__SENSOR;
+            case CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__CELLULAR_DATA;
         }
         return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN;
     }
@@ -542,6 +549,10 @@ public class CpuWakeupStats {
                 return CPU_WAKEUP_SUBSYSTEM_WIFI;
             case SUBSYSTEM_SOUND_TRIGGER_STRING:
                 return CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
+            case SUBSYSTEM_SENSOR_STRING:
+                return CPU_WAKEUP_SUBSYSTEM_SENSOR;
+            case SUBSYSTEM_CELLULAR_DATA_STRING:
+                return CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
         }
         return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
     }
@@ -554,6 +565,10 @@ public class CpuWakeupStats {
                 return SUBSYSTEM_WIFI_STRING;
             case CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER:
                 return SUBSYSTEM_SOUND_TRIGGER_STRING;
+            case CPU_WAKEUP_SUBSYSTEM_SENSOR:
+                return SUBSYSTEM_SENSOR_STRING;
+            case CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA:
+                return SUBSYSTEM_CELLULAR_DATA_STRING;
             case CPU_WAKEUP_SUBSYSTEM_UNKNOWN:
                 return "Unknown";
         }

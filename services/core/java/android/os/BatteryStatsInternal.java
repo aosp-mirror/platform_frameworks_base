@@ -17,7 +17,6 @@
 package android.os;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.net.Network;
 
 import com.android.internal.os.BinderCallsStats;
@@ -40,6 +39,8 @@ public abstract class BatteryStatsInternal {
     public static final int CPU_WAKEUP_SUBSYSTEM_ALARM = 1;
     public static final int CPU_WAKEUP_SUBSYSTEM_WIFI = 2;
     public static final int CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER = 3;
+    public static final int CPU_WAKEUP_SUBSYSTEM_SENSOR = 4;
+    public static final int CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA = 5;
 
     /** @hide */
     @IntDef(prefix = {"CPU_WAKEUP_SUBSYSTEM_"}, value = {
@@ -47,9 +48,11 @@ public abstract class BatteryStatsInternal {
             CPU_WAKEUP_SUBSYSTEM_ALARM,
             CPU_WAKEUP_SUBSYSTEM_WIFI,
             CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
+            CPU_WAKEUP_SUBSYSTEM_SENSOR,
+            CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface CpuWakeupSubsystem {
+    public @interface CpuWakeupSubsystem {
     }
 
     /**
@@ -107,19 +110,16 @@ public abstract class BatteryStatsInternal {
     public abstract void noteBinderThreadNativeIds(int[] binderThreadNativeTids);
 
     /**
-     * Reports any activity that could potentially have caused the CPU to wake up.
-     * Accepts a timestamp to allow free ordering between the event and its reporting.
-     * @param subsystem The subsystem this activity should be attributed to.
-     * @param elapsedMillis The time when this activity happened in the elapsed timebase.
-     * @param uids The uid (or uids) that should be blamed for this activity.
-     */
-    public abstract void noteCpuWakingActivity(@CpuWakeupSubsystem int subsystem,
-            long elapsedMillis, @NonNull int... uids);
-
-    /**
      * Reports a sound trigger recognition event that may have woken up the CPU.
      * @param elapsedMillis The time when the event happened in the elapsed timebase.
      * @param uid The uid that requested this trigger.
      */
     public abstract void noteWakingSoundTrigger(long elapsedMillis, int uid);
+
+    /**
+     * Reports an alarm batch that would have woken up the CPU.
+     * @param elapsedMillis The time at which this alarm batch was scheduled to go off.
+     * @param uids the uids of all apps that have any alarm in this batch.
+     */
+    public abstract void noteWakingAlarmBatch(long elapsedMillis, int... uids);
 }
