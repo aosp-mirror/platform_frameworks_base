@@ -50,10 +50,11 @@ class MultiBiometricLockoutState {
     private Map<Integer, AuthenticatorState> createUnlockedMap() {
         Map<Integer, AuthenticatorState> lockOutMap = new HashMap<>();
         lockOutMap.put(BIOMETRIC_STRONG,
-                new AuthenticatorState(BIOMETRIC_STRONG, false, 0, mClock));
-        lockOutMap.put(BIOMETRIC_WEAK, new AuthenticatorState(BIOMETRIC_WEAK, false, 0, mClock));
+                new AuthenticatorState(BIOMETRIC_STRONG, false, false));
+        lockOutMap.put(BIOMETRIC_WEAK,
+                new AuthenticatorState(BIOMETRIC_WEAK, false, false));
         lockOutMap.put(BIOMETRIC_CONVENIENCE,
-                new AuthenticatorState(BIOMETRIC_CONVENIENCE, false, 0, mClock));
+                new AuthenticatorState(BIOMETRIC_CONVENIENCE, false, false));
         return lockOutMap;
     }
 
@@ -64,54 +65,71 @@ class MultiBiometricLockoutState {
         return mCanUserAuthenticate.get(userId);
     }
 
-    void setAuthenticatorTo(int userId, @Authenticators.Types int strength, boolean canAuth) {
+    void setPermanentLockOut(int userId, @Authenticators.Types int strength) {
         final Map<Integer, AuthenticatorState> authMap = getAuthMapForUser(userId);
         switch (strength) {
             case Authenticators.BIOMETRIC_STRONG:
-                authMap.get(BIOMETRIC_STRONG).mPermanentlyLockedOut = !canAuth;
+                authMap.get(BIOMETRIC_STRONG).mPermanentlyLockedOut = true;
                 // fall through
             case Authenticators.BIOMETRIC_WEAK:
-                authMap.get(BIOMETRIC_WEAK).mPermanentlyLockedOut = !canAuth;
+                authMap.get(BIOMETRIC_WEAK).mPermanentlyLockedOut = true;
                 // fall through
             case Authenticators.BIOMETRIC_CONVENIENCE:
-                authMap.get(BIOMETRIC_CONVENIENCE).mPermanentlyLockedOut = !canAuth;
+                authMap.get(BIOMETRIC_CONVENIENCE).mPermanentlyLockedOut = true;
                 return;
             default:
                 Slog.e(TAG, "increaseLockoutTime called for invalid strength : "  + strength);
         }
     }
 
-    void increaseLockoutTime(int userId, @Authenticators.Types int strength, long duration) {
+    void clearPermanentLockOut(int userId, @Authenticators.Types int strength) {
         final Map<Integer, AuthenticatorState> authMap = getAuthMapForUser(userId);
         switch (strength) {
             case Authenticators.BIOMETRIC_STRONG:
-                authMap.get(BIOMETRIC_STRONG).increaseLockoutTo(duration);
+                authMap.get(BIOMETRIC_STRONG).mPermanentlyLockedOut = false;
                 // fall through
             case Authenticators.BIOMETRIC_WEAK:
-                authMap.get(BIOMETRIC_WEAK).increaseLockoutTo(duration);
+                authMap.get(BIOMETRIC_WEAK).mPermanentlyLockedOut = false;
                 // fall through
             case Authenticators.BIOMETRIC_CONVENIENCE:
-                authMap.get(BIOMETRIC_CONVENIENCE).increaseLockoutTo(duration);
+                authMap.get(BIOMETRIC_CONVENIENCE).mPermanentlyLockedOut = false;
                 return;
             default:
                 Slog.e(TAG, "increaseLockoutTime called for invalid strength : "  + strength);
         }
     }
 
-    void clearLockoutTime(int userId, @Authenticators.Types int strength) {
+    void setTimedLockout(int userId, @Authenticators.Types int strength) {
         final Map<Integer, AuthenticatorState> authMap = getAuthMapForUser(userId);
         switch (strength) {
             case Authenticators.BIOMETRIC_STRONG:
-                authMap.get(BIOMETRIC_STRONG).setTimedLockout(0);
+                authMap.get(BIOMETRIC_STRONG).mTimedLockout = true;
                 // fall through
             case Authenticators.BIOMETRIC_WEAK:
-                authMap.get(BIOMETRIC_WEAK).setTimedLockout(0);
+                authMap.get(BIOMETRIC_WEAK).mTimedLockout = true;
                 // fall through
             case Authenticators.BIOMETRIC_CONVENIENCE:
-                authMap.get(BIOMETRIC_CONVENIENCE).setTimedLockout(0);
+                authMap.get(BIOMETRIC_CONVENIENCE).mTimedLockout = true;
                 return;
             default:
-                Slog.e(TAG, "clearLockoutTime called for invalid strength : "  + strength);
+                Slog.e(TAG, "increaseLockoutTime called for invalid strength : "  + strength);
+        }
+    }
+
+    void clearTimedLockout(int userId, @Authenticators.Types int strength) {
+        final Map<Integer, AuthenticatorState> authMap = getAuthMapForUser(userId);
+        switch (strength) {
+            case Authenticators.BIOMETRIC_STRONG:
+                authMap.get(BIOMETRIC_STRONG).mTimedLockout = false;
+                // fall through
+            case Authenticators.BIOMETRIC_WEAK:
+                authMap.get(BIOMETRIC_WEAK).mTimedLockout = false;
+                // fall through
+            case Authenticators.BIOMETRIC_CONVENIENCE:
+                authMap.get(BIOMETRIC_CONVENIENCE).mTimedLockout = false;
+                return;
+            default:
+                Slog.e(TAG, "increaseLockoutTime called for invalid strength : "  + strength);
         }
     }
 
@@ -132,7 +150,7 @@ class MultiBiometricLockoutState {
         final AuthenticatorState state = authMap.get(strength);
         if (state.mPermanentlyLockedOut) {
             return LockoutTracker.LOCKOUT_PERMANENT;
-        } else if (state.isTimedLockout()) {
+        } else if (state.mTimedLockout) {
             return LockoutTracker.LOCKOUT_TIMED;
         } else {
             return LockoutTracker.LOCKOUT_NONE;
@@ -158,43 +176,21 @@ class MultiBiometricLockoutState {
     private static class AuthenticatorState {
         private Integer mAuthenticatorType;
         private boolean mPermanentlyLockedOut;
-        private long mTimedLockout;
-        private Clock mClock;
+        private boolean mTimedLockout;
 
         AuthenticatorState(Integer authenticatorId, boolean permanentlyLockedOut,
-                long timedLockout, Clock clock) {
+                boolean timedLockout) {
             mAuthenticatorType = authenticatorId;
             mPermanentlyLockedOut = permanentlyLockedOut;
             mTimedLockout = timedLockout;
-            mClock = clock;
-        }
-
-        boolean canAuthenticate() {
-            return !mPermanentlyLockedOut && !isTimedLockout();
-        }
-
-        boolean isTimedLockout() {
-            return mClock.millis() - mTimedLockout < 0;
-        }
-
-        void setTimedLockout(long duration) {
-            mTimedLockout = duration;
-        }
-
-        /**
-         * Either increases the lockout to duration, or leaves it as it, whichever is longer.
-         */
-        void increaseLockoutTo(long duration) {
-            mTimedLockout = Math.max(mTimedLockout, duration);
         }
 
         String toString(long currentTime) {
-            final String duration =
-                    mTimedLockout - currentTime > 0 ? (mTimedLockout - currentTime) + "ms" : "none";
+            final String timedLockout = mTimedLockout ? "true" : "false";
             final String permanentLockout = mPermanentlyLockedOut ? "true" : "false";
-            return String.format("(%s, permanentLockout=%s, timedLockoutRemaining=%s)",
+            return String.format("(%s, permanentLockout=%s, timedLockout=%s)",
                     BiometricManager.authenticatorToStr(mAuthenticatorType), permanentLockout,
-                    duration);
+                    timedLockout);
         }
     }
 }
