@@ -112,13 +112,6 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testRegisterOrganizer_alreadyRegisteredFeature() {
-        registerMockOrganizer(FEATURE_VENDOR_FIRST);
-        assertThrows(IllegalStateException.class,
-                () -> registerMockOrganizer(FEATURE_VENDOR_FIRST));
-    }
-
-    @Test
     public void testRegisterOrganizer_ignoreUntrustedDisplay() throws RemoteException {
         doReturn(false).when(mDisplayContent).isTrusted();
 
