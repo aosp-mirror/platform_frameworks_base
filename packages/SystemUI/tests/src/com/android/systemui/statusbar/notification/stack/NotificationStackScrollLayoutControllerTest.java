@@ -403,7 +403,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Test
     public void testSetNotifStats_updatesHasFilteredOutSeenNotifications() {
-        when(mNotifPipelineFlags.getShouldFilterUnseenNotifsOnKeyguard()).thenReturn(true);
         mSeenNotificationsProvider.setHasFilteredOutSeenNotifications(true);
         mController.attach(mNotificationStackScrollLayout);
         mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());

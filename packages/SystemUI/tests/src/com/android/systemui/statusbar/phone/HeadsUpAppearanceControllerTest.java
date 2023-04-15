@@ -38,8 +38,8 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeHeadsUpTracker;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -65,8 +65,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     private final NotificationStackScrollLayoutController mStackScrollerController =
             mock(NotificationStackScrollLayoutController.class);
-    private final NotificationPanelViewController mPanelView =
-            mock(NotificationPanelViewController.class);
+    private final ShadeViewController mShadeViewController =
+            mock(ShadeViewController.class);
     private final ShadeHeadsUpTracker mShadeHeadsUpTracker = mock(ShadeHeadsUpTracker.class);
     private final DarkIconDispatcher mDarkIconDispatcher = mock(DarkIconDispatcher.class);
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
@@ -104,7 +104,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mCommandQueue = mock(CommandQueue.class);
         mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
         mFeatureFlag = mock(FeatureFlags.class);
-        when(mPanelView.getShadeHeadsUpTracker()).thenReturn(mShadeHeadsUpTracker);
+        when(mShadeViewController.getShadeHeadsUpTracker()).thenReturn(mShadeHeadsUpTracker);
         when(mFeatureFlag.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)).thenReturn(true);
         mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
@@ -116,7 +116,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mCommandQueue,
                 mStackScrollerController,
-                mPanelView,
+                mShadeViewController,
                 mNotificationRoundnessManager,
                 mFeatureFlag,
                 mHeadsUpStatusBarView,
@@ -200,7 +200,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mCommandQueue,
                 mStackScrollerController,
-                mPanelView,
+                mShadeViewController,
                 mNotificationRoundnessManager,
                 mFeatureFlag,
                 mHeadsUpStatusBarView,

@@ -124,6 +124,7 @@ final class VibrationSettings {
     private static final Set<Integer> SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST = new HashSet<>(
             Arrays.asList(
                     USAGE_TOUCH,
+                    USAGE_ACCESSIBILITY,
                     USAGE_PHYSICAL_EMULATION,
                     USAGE_HARDWARE_FEEDBACK));
 

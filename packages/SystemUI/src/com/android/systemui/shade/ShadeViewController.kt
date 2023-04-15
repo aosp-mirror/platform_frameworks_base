@@ -18,11 +18,12 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import android.view.ViewGroup
 import com.android.systemui.statusbar.RemoteInputController
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
+import com.android.systemui.statusbar.phone.KeyguardStatusBarView
+import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController
 import java.util.function.Consumer
 
 /**
@@ -148,6 +149,9 @@ interface ShadeViewController {
     /** Sets whether the screen has temporarily woken up to display notifications. */
     fun setPulsing(pulsing: Boolean)
 
+    /** Sets Qs ScrimEnabled and updates QS state. */
+    fun setQsScrimEnabled(qsScrimEnabled: Boolean)
+
     /** Sets the top spacing for the ambient indicator. */
     fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean)
 
@@ -167,6 +171,9 @@ interface ShadeViewController {
      */
     val isUnlockHintRunning: Boolean
 
+    /** @see ViewGroupFadeHelper.reset */
+    fun resetViewGroupFade()
+
     /**
      * Set the alpha and translationY of the keyguard elements which only show on the lockscreen,
      * but not in shade locked / shade. This is used when dragging down to the full shade.
@@ -182,6 +189,14 @@ interface ShadeViewController {
      * @param alpha value between 0 and 1. -1 if the value is to be reset.
      */
     fun setKeyguardStatusBarAlpha(alpha: Float)
+
+    /**
+     * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
+     * screen off animation controller in order to animate in AOD without "actually" fully switching
+     * to the KEYGUARD state, which is a heavy transition that causes jank as 10+ files react to the
+     * change.
+     */
+    fun showAodUi()
 
     /**
      * This method should not be used anymore, you should probably use [.isShadeFullyOpen] instead.
@@ -209,6 +224,23 @@ interface ShadeViewController {
 
     /** Returns the ShadeNotificationPresenter. */
     val shadeNotificationPresenter: ShadeNotificationPresenter
+
+    companion object {
+        const val WAKEUP_ANIMATION_DELAY_MS = 250
+        const val FLING_MAX_LENGTH_SECONDS = 0.6f
+        const val FLING_SPEED_UP_FACTOR = 0.6f
+        const val FLING_CLOSING_MAX_LENGTH_SECONDS = 0.6f
+        const val FLING_CLOSING_SPEED_UP_FACTOR = 0.6f
+
+        /** Fling expanding QS. */
+        const val FLING_EXPAND = 0
+
+        /** Fling collapsing QS, potentially stopping when QS becomes QQS. */
+        const val FLING_COLLAPSE = 1
+
+        /** Fling until QS is completely hidden. */
+        const val FLING_HIDE = 2
+    }
 }
 
 /** Manages listeners for when users begin expanding the shade from a HUN. */
@@ -254,7 +286,24 @@ interface ShadeNotificationPresenter {
 
     /** Returns whether the screen has temporarily woken up to display notifications. */
     fun hasPulsingNotifications(): Boolean
+}
 
-    /** The current activated notification. */
-    var activatedChild: ActivatableNotificationView?
+/**
+ * An interface that provides the current state of the notification panel and related views, which
+ * is needed to calculate [KeyguardStatusBarView]'s state in [KeyguardStatusBarViewController].
+ */
+interface ShadeViewStateProvider {
+    /** Returns the expanded height of the panel view. */
+    val panelViewExpandedHeight: Float
+
+    /**
+     * Returns true if heads up should be visible.
+     *
+     * TODO(b/138786270): If HeadsUpAppearanceController was injectable, we could inject it into
+     *   [KeyguardStatusBarViewController] and remove this method.
+     */
+    fun shouldHeadsUpBeVisible(): Boolean
+
+    /** Return the fraction of the shade that's expanded, when in lockscreen. */
+    val lockscreenShadeDragProgress: Float
 }

@@ -8526,6 +8526,14 @@ public class WindowManagerService extends IWindowManager.Stub
             //                    while in overview
             return;
         }
+        final WindowState w = t.getWindowState();
+        if (w != null) {
+            final Task task = w.getTask();
+            if (task != null && w.mTransitionController.isTransientHide(task)) {
+                // Don't disturb transient animation by accident touch.
+                return;
+            }
+        }
 
         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s",
                 t);

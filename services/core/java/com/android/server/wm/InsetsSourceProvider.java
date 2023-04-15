@@ -47,7 +47,7 @@ import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -73,8 +73,9 @@ class InsetsSourceProvider {
     private @Nullable InsetsControlTarget mFakeControlTarget;
 
     private @Nullable ControlAdapter mAdapter;
-    private TriConsumer<DisplayFrames, WindowContainer, Rect> mFrameProvider;
-    private SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>> mOverrideFrameProviders;
+    private TriFunction<DisplayFrames, WindowContainer, Rect, Integer> mFrameProvider;
+    private SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
+            mOverrideFrameProviders;
     private final SparseArray<Rect> mOverrideFrames = new SparseArray<Rect>();
     private boolean mIsLeashReadyForDispatching;
     private final Rect mSourceFrame = new Rect();
@@ -149,8 +150,8 @@ class InsetsSourceProvider {
      *                               resulting frame that should be reported to given window type.
      */
     void setWindowContainer(@Nullable WindowContainer windowContainer,
-            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider,
-            @Nullable SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+            @Nullable TriFunction<DisplayFrames, WindowContainer, Rect, Integer> frameProvider,
+            @Nullable SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
                     overrideFrameProviders) {
         if (mWindowContainer != null) {
             if (mControllable) {
@@ -203,7 +204,7 @@ class InsetsSourceProvider {
             if (mServerVisible) {
                 mTmpRect.set(mWindowContainer.getBounds());
                 if (mFrameProvider != null) {
-                    mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
+                    mFrameProvider.apply(mWindowContainer.getDisplayContent().mDisplayFrames,
                             mWindowContainer, mTmpRect);
                 }
             } else {
@@ -216,8 +217,11 @@ class InsetsSourceProvider {
 
         mSourceFrame.set(frame);
         if (mFrameProvider != null) {
-            mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
-                    mWindowContainer, mSourceFrame);
+            final int flags = mFrameProvider.apply(
+                    mWindowContainer.getDisplayContent().mDisplayFrames,
+                    mWindowContainer,
+                    mSourceFrame);
+            mSource.setFlags(flags);
         }
         updateSourceFrameForServerVisibility();
 
@@ -233,10 +237,10 @@ class InsetsSourceProvider {
                 } else {
                     overrideFrame = new Rect(frame);
                 }
-                final TriConsumer<DisplayFrames, WindowContainer, Rect> provider =
+                final TriFunction<DisplayFrames, WindowContainer, Rect, Integer> provider =
                         mOverrideFrameProviders.get(windowType);
                 if (provider != null) {
-                    mOverrideFrameProviders.get(windowType).accept(
+                    mOverrideFrameProviders.get(windowType).apply(
                             mWindowContainer.getDisplayContent().mDisplayFrames, mWindowContainer,
                             overrideFrame);
                 }
@@ -274,7 +278,7 @@ class InsetsSourceProvider {
         source.setVisible(mSource.isVisible());
         mTmpRect.set(frame);
         if (mFrameProvider != null) {
-            mFrameProvider.accept(displayFrames, mWindowContainer, mTmpRect);
+            mFrameProvider.apply(displayFrames, mWindowContainer, mTmpRect);
         }
         source.setFrame(mTmpRect);
         return source;

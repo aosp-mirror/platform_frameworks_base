@@ -28,7 +28,6 @@ import com.google.security.cryptauth.lib.securegcm.CryptoException;
 import com.google.security.cryptauth.lib.securegcm.D2DConnectionContextV1;
 import com.google.security.cryptauth.lib.securegcm.D2DHandshakeContext;
 import com.google.security.cryptauth.lib.securegcm.D2DHandshakeContext.Role;
-import com.google.security.cryptauth.lib.securegcm.DefaultUkey2Logger;
 import com.google.security.cryptauth.lib.securegcm.HandshakeException;
 
 import libcore.io.IoUtils;
@@ -329,7 +328,7 @@ public class SecureChannel {
         }
 
         mRole = Role.Initiator;
-        mHandshakeContext = D2DHandshakeContext.forInitiator(DefaultUkey2Logger.INSTANCE);
+        mHandshakeContext = D2DHandshakeContext.forInitiator();
 
         // Send Client Init
         if (DEBUG) {
@@ -350,7 +349,7 @@ public class SecureChannel {
 
         if (mHandshakeContext == null) { // Server-side logic
             mRole = Role.Responder;
-            mHandshakeContext = D2DHandshakeContext.forResponder(DefaultUkey2Logger.INSTANCE);
+            mHandshakeContext = D2DHandshakeContext.forResponder();
 
             // Receive Client Init
             if (DEBUG) {

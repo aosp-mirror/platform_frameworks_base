@@ -303,7 +303,7 @@ public class WallpaperManager {
     private final Context mContext;
     private final boolean mWcgEnabled;
     private final ColorManagementProxy mCmProxy;
-    private Boolean mIsLockscreenLiveWallpaperEnabled = null;
+    private static Boolean sIsLockscreenLiveWallpaperEnabled = null;
 
     /**
      * Special drawable that draws a wallpaper as fast as possible.  Assumes
@@ -823,18 +823,18 @@ public class WallpaperManager {
     @TestApi
     public boolean isLockscreenLiveWallpaperEnabled() {
         if (sGlobals == null) {
-            mIsLockscreenLiveWallpaperEnabled = SystemProperties.getBoolean(
+            sIsLockscreenLiveWallpaperEnabled = SystemProperties.getBoolean(
                     "persist.wm.debug.lockscreen_live_wallpaper", false);
         }
-        if (mIsLockscreenLiveWallpaperEnabled == null) {
+        if (sIsLockscreenLiveWallpaperEnabled == null) {
             try {
-                mIsLockscreenLiveWallpaperEnabled =
+                sIsLockscreenLiveWallpaperEnabled =
                         sGlobals.mService.isLockscreenLiveWallpaperEnabled();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return mIsLockscreenLiveWallpaperEnabled;
+        return sIsLockscreenLiveWallpaperEnabled;
     }
 
     /**
@@ -2757,7 +2757,7 @@ public class WallpaperManager {
     public static InputStream openDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
         final String whichProp;
         final int defaultResId;
-        if (which == FLAG_LOCK) {
+        if (which == FLAG_LOCK && !sIsLockscreenLiveWallpaperEnabled) {
             /* Factory-default lock wallpapers are not yet supported
             whichProp = PROP_LOCK_WALLPAPER;
             defaultResId = com.android.internal.R.drawable.default_lock_wallpaper;

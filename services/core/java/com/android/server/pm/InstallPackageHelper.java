@@ -49,6 +49,7 @@ import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
+import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerService.DEBUG_BACKUP;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
@@ -495,6 +496,13 @@ final class InstallPackageHelper {
         if (mPm.mCustomResolverComponentName != null
                 && mPm.mCustomResolverComponentName.getPackageName().equals(pkg.getPackageName())) {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
+        }
+
+        File appMetadataFile = new File(pkgSetting.getPath(), APP_METADATA_FILE_NAME);
+        if (appMetadataFile.exists()) {
+            pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+        } else {
+            pkgSetting.setAppMetadataFilePath(null);
         }
 
         if (pkg.getPackageName().equals("android")) {
@@ -2265,10 +2273,26 @@ final class InstallPackageHelper {
                     // The caller explicitly specified INSTALL_ALL_USERS flag.
                     // Thus, updating the settings to install the app for all users.
                     for (int currentUserId : allUsers) {
-                        ps.setInstalled(true, currentUserId);
-                        if (!installRequest.isApplicationEnabledSettingPersistent()) {
-                            ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
-                                    installerPackageName);
+                        // If the app is already installed for the currentUser,
+                        // keep it as installed as we might be updating the app at this place.
+                        // If not currently installed, check if the currentUser is restricted by
+                        // DISALLOW_INSTALL_APPS or DISALLOW_DEBUGGING_FEATURES device policy.
+                        // Install / update the app if the user isn't restricted. Skip otherwise.
+                        final boolean installedForCurrentUser = ArrayUtils.contains(
+                                installedForUsers, currentUserId);
+                        final boolean restrictedByPolicy =
+                                mPm.isUserRestricted(currentUserId,
+                                        UserManager.DISALLOW_INSTALL_APPS)
+                                || mPm.isUserRestricted(currentUserId,
+                                        UserManager.DISALLOW_DEBUGGING_FEATURES);
+                        if (installedForCurrentUser || !restrictedByPolicy) {
+                            ps.setInstalled(true, currentUserId);
+                            if (!installRequest.isApplicationEnabledSettingPersistent()) {
+                                ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
+                                        installerPackageName);
+                            }
+                        } else {
+                            ps.setInstalled(false, currentUserId);
                         }
                     }
                 }

@@ -36,6 +36,7 @@ import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.content.pm.UserInfo
+import android.graphics.drawable.Icon
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.test.ext.truth.content.IntentSubject.assertThat
@@ -64,7 +65,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -326,7 +326,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 entryPoint = expectedInfo.entryPoint!!,
             )
 
-        verifyZeroInteractions(context)
+        // Context package name used to create bubble icon from drawable resource id
+        verify(context).packageName
         verifyNoteTaskOpenInBubbleInUser(userTracker.userHandle)
         verifyZeroInteractions(eventLogger)
     }
@@ -603,13 +604,18 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     private fun verifyNoteTaskOpenInBubbleInUser(userHandle: UserHandle) {
         val intentCaptor = argumentCaptor<Intent>()
+        val iconCaptor = argumentCaptor<Icon>()
         verify(bubbles)
-            .showOrHideAppBubble(capture(intentCaptor), eq(userHandle), /* icon = */ isNull())
+            .showOrHideAppBubble(capture(intentCaptor), eq(userHandle), capture(iconCaptor))
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTE_TASK_PACKAGE_NAME)
             assertThat(intent.flags).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
+        }
+        iconCaptor.value.let { icon ->
+            assertThat(icon).isNotNull()
+            assertThat(icon.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
         }
     }
 

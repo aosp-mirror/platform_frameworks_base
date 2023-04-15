@@ -134,9 +134,9 @@ import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -3098,7 +3098,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * @return the View Controller for the Keyguard View this class is mediating.
      */
     public KeyguardViewController registerCentralSurfaces(CentralSurfaces centralSurfaces,
-            NotificationPanelViewController panelView,
+            ShadeViewController panelView,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
