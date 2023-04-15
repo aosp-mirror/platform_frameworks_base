@@ -26,8 +26,8 @@ import java.util.HashMap;
 final class TaskFpsCallbackController {
 
     private final Context mContext;
-    private final HashMap<ITaskFpsCallback, Long> mTaskFpsCallbacks;
-    private final HashMap<ITaskFpsCallback, IBinder.DeathRecipient> mDeathRecipients;
+    private final HashMap<IBinder, Long> mTaskFpsCallbacks;
+    private final HashMap<IBinder, IBinder.DeathRecipient> mDeathRecipients;
 
     TaskFpsCallbackController(Context context) {
         mContext = context;
@@ -36,32 +36,42 @@ final class TaskFpsCallbackController {
     }
 
     void registerListener(int taskId, ITaskFpsCallback callback) {
-        if (mTaskFpsCallbacks.containsKey(callback)) {
+        if (callback == null) {
+            return;
+        }
+
+        IBinder binder = callback.asBinder();
+        if (mTaskFpsCallbacks.containsKey(binder)) {
             return;
         }
 
         final long nativeListener = nativeRegister(callback, taskId);
-        mTaskFpsCallbacks.put(callback, nativeListener);
+        mTaskFpsCallbacks.put(binder, nativeListener);
 
         final IBinder.DeathRecipient deathRecipient = () -> unregisterListener(callback);
         try {
-            callback.asBinder().linkToDeath(deathRecipient, 0);
-            mDeathRecipients.put(callback, deathRecipient);
+            binder.linkToDeath(deathRecipient, 0);
+            mDeathRecipients.put(binder, deathRecipient);
         } catch (RemoteException e) {
             // ignore
         }
     }
 
     void unregisterListener(ITaskFpsCallback callback) {
-        if (!mTaskFpsCallbacks.containsKey(callback)) {
+        if (callback == null) {
             return;
         }
 
-        callback.asBinder().unlinkToDeath(mDeathRecipients.get(callback), 0);
-        mDeathRecipients.remove(callback);
+        IBinder binder = callback.asBinder();
+        if (!mTaskFpsCallbacks.containsKey(binder)) {
+            return;
+        }
 
-        nativeUnregister(mTaskFpsCallbacks.get(callback));
-        mTaskFpsCallbacks.remove(callback);
+        binder.unlinkToDeath(mDeathRecipients.get(binder), 0);
+        mDeathRecipients.remove(binder);
+
+        nativeUnregister(mTaskFpsCallbacks.get(binder));
+        mTaskFpsCallbacks.remove(binder);
     }
 
     private static native long nativeRegister(ITaskFpsCallback callback, int taskId);
