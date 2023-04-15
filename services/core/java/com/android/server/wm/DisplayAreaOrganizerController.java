@@ -135,12 +135,6 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register display organizer=%s uid=%d",
                         organizer.asBinder(), uid);
                 if (mOrganizersByFeatureIds.get(feature) != null) {
-                    if (mOrganizersByFeatureIds.get(feature).mOrganizer.asBinder()
-                            .isBinderAlive()) {
-                        throw new IllegalStateException(
-                                "Replacing existing organizer currently unsupported");
-                    }
-
                     mOrganizersByFeatureIds.remove(feature).destroy();
                     Slog.d(TAG, "Replacing dead organizer for feature=" + feature);
                 }
