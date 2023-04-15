@@ -147,6 +147,7 @@ class MediaViewHolder constructor(itemView: View) {
 
         val expandedBottomActionIds =
             setOf(
+                R.id.media_progress_bar,
                 R.id.actionPrev,
                 R.id.actionNext,
                 R.id.action0,
@@ -155,7 +156,22 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.action3,
                 R.id.action4,
                 R.id.media_scrubbing_elapsed_time,
-                R.id.media_scrubbing_total_time
+                R.id.media_scrubbing_total_time,
+            )
+
+        val detailIds =
+            setOf(
+                R.id.header_title,
+                R.id.header_artist,
+                R.id.media_explicit_indicator,
+                R.id.actionPlayPause,
+            )
+
+        val backgroundIds =
+            setOf(
+                R.id.album_art,
+                R.id.turbulence_noise_view,
+                R.id.touch_ripple_view,
             )
     }
 }
