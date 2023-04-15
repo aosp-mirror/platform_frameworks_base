@@ -97,6 +97,11 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
 
     /** {@inheritDoc} */
     @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun taskBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarLayerPositionAtStartAndEnd() {}
 
@@ -126,9 +131,6 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
     @Test
     @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
     override fun navBarWindowIsAlwaysVisible() {}
-
-    /** {@inheritDoc} */
-    @FlakyTest @Test override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 246284526)

@@ -18,7 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.util.ArrayMap;
 import android.util.Pools.SynchronizedPool;
 
@@ -286,7 +286,8 @@ public final class VelocityTracker {
     private VelocityTracker(@VelocityTrackerStrategy int strategy) {
         // If user has not selected a specific strategy
         if (strategy == VELOCITY_TRACKER_STRATEGY_DEFAULT) {
-            final String strategyProperty = InputManager.getInstance().getVelocityTrackerStrategy();
+            final String strategyProperty = InputManagerGlobal.getInstance()
+                    .getVelocityTrackerStrategy();
             // Check if user specified strategy by overriding system property.
             if (strategyProperty == null || strategyProperty.isEmpty()) {
                 mStrategy = strategy;

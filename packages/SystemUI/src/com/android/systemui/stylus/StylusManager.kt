@@ -353,6 +353,8 @@ constructor(
                     // before CoreStartables run, and will not be removed.
                     // In many cases, it reports the battery level of the stylus.
                     registerBatteryListener(deviceId)
+                } else if (device.bluetoothAddress != null) {
+                    onStylusBluetoothConnected(deviceId, device.bluetoothAddress)
                 }
             }
         }

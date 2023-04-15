@@ -85,7 +85,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.launcher3.icons.BubbleBadgeIconFactory;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -1227,8 +1226,7 @@ public class BubblesTest extends SysuiTestCase {
                 mBubbleController,
                 mBubbleController.getStackView(),
                 new BubbleIconFactory(mContext,
-                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size)),
-                new BubbleBadgeIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                         mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
                         mContext.getResources().getColor(R.color.important_conversation),
                         mContext.getResources().getDimensionPixelSize(

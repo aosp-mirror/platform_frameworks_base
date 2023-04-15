@@ -94,6 +94,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         mProvider.setWindowContainer(statusBar,
                 (displayFrames, windowState, rect) -> {
                     rect.set(10, 10, 20, 20);
+                    return 0;
                 }, null);
         mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();

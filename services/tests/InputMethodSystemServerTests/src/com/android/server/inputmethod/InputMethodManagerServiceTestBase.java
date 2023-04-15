@@ -34,9 +34,10 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -121,6 +122,7 @@ public class InputMethodManagerServiceTestBase {
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
+    protected boolean mIsLargeScreen;
 
     @BeforeClass
     public static void setupClass() {
@@ -145,6 +147,8 @@ public class InputMethodManagerServiceTestBase {
         spyOn(mContext);
 
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        mIsLargeScreen = mContext.getResources().getConfiguration()
+                .isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
         mCallingUserId = UserHandle.getCallingUserId();
         mEditorInfo = new EditorInfo();
         mEditorInfo.packageName = TEST_EDITOR_PKG_NAME;
@@ -178,7 +182,7 @@ public class InputMethodManagerServiceTestBase {
 
         // Injecting and mocked InputMethodBindingController and InputMethod.
         mMockInputMethodInvoker = IInputMethodInvoker.create(mMockInputMethod);
-        InputManager.resetInstance(mMockIInputManager);
+        InputManagerGlobal.resetInstance(mMockIInputManager);
         synchronized (ImfLock.class) {
             when(mMockInputMethodBindingController.getCurMethod())
                     .thenReturn(mMockInputMethodInvoker);

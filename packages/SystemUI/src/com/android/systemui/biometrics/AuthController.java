@@ -1349,7 +1349,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         default void onEnrollmentsChanged(@Modality int modality) {}
 
         /**
-         * Called when UDFPS enrollments have changed. This is called after boot and on changes to
+         * Called when enrollments have changed. This is called after boot and on changes to
          * enrollment.
          */
         default void onEnrollmentsChanged(

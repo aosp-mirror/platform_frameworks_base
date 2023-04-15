@@ -47,7 +47,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
-import com.android.launcher3.icons.BubbleBadgeIconFactory;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
@@ -436,7 +435,6 @@ public class Bubble implements BubbleViewProvider {
      * @param stackView the view the bubble is added to, iff showing as floating.
      * @param layerView the layer the bubble is added to, iff showing in the bubble bar.
      * @param iconFactory the icon factory use to create images for the bubble.
-     * @param badgeIconFactory the icon factory to create app badges for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
@@ -444,7 +442,6 @@ public class Bubble implements BubbleViewProvider {
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
-            BubbleBadgeIconFactory badgeIconFactory,
             boolean skipInflation) {
         if (isBubbleLoading()) {
             mInflationTask.cancel(true /* mayInterruptIfRunning */);
@@ -455,7 +452,6 @@ public class Bubble implements BubbleViewProvider {
                 stackView,
                 layerView,
                 iconFactory,
-                badgeIconFactory,
                 skipInflation,
                 callback,
                 mMainExecutor);

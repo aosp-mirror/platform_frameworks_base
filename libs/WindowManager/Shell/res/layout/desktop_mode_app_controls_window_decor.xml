@@ -31,8 +31,7 @@
         android:orientation="horizontal"
         android:clickable="true"
         android:focusable="true"
-        android:paddingStart="8dp"
-        android:background="?android:selectableItemBackgroundBorderless">
+        android:paddingStart="8dp">
 
         <ImageView
             android:id="@+id/application_icon"
@@ -88,6 +87,6 @@
         android:src="@drawable/decor_close_button_dark"
         android:scaleType="fitCenter"
         android:gravity="end"
-        android:background="?android:selectableItemBackgroundBorderless"
+        android:background="@null"
         android:tint="@color/desktop_mode_caption_close_button_dark"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

@@ -18,17 +18,27 @@
 
 package com.android.systemui.statusbar.notification.shelf.domain.interactor
 
+import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.statusbar.LockscreenShadeTransitionController
+import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.Mockito.isNull
+import org.mockito.Mockito.verify
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -36,8 +46,17 @@ class NotificationShelfInteractorTest : SysuiTestCase() {
 
     private val keyguardRepository = FakeKeyguardRepository()
     private val deviceEntryFaceAuthRepository = FakeDeviceEntryFaceAuthRepository()
+    private val centralSurfaces: CentralSurfaces = mock()
+    private val systemClock = FakeSystemClock()
+    private val keyguardTransitionController: LockscreenShadeTransitionController = mock()
     private val underTest =
-        NotificationShelfInteractor(keyguardRepository, deviceEntryFaceAuthRepository)
+        NotificationShelfInteractor(
+            keyguardRepository,
+            deviceEntryFaceAuthRepository,
+            centralSurfaces,
+            systemClock,
+            keyguardTransitionController,
+        )
 
     @Test
     fun shelfIsNotStatic_whenKeyguardNotShowing() = runTest {
@@ -84,5 +103,20 @@ class NotificationShelfInteractorTest : SysuiTestCase() {
         keyguardRepository.setKeyguardShowing(false)
 
         assertThat(onKeyguard).isFalse()
+    }
+
+    @Test
+    fun goToLockedShadeFromShelf_wakesUpFromDoze() {
+        underTest.goToLockedShadeFromShelf()
+
+        verify(centralSurfaces)
+            .wakeUpIfDozing(anyLong(), any(), eq(PowerManager.WAKE_REASON_GESTURE))
+    }
+
+    @Test
+    fun goToLockedShadeFromShelf_invokesKeyguardTransitionController() {
+        underTest.goToLockedShadeFromShelf()
+
+        verify(keyguardTransitionController).goToLockedShade(isNull(), eq(true))
     }
 }

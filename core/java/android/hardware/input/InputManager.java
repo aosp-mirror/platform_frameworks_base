@@ -53,11 +53,8 @@ import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,18 +70,8 @@ public final class InputManager {
     // To enable these logs, run: 'adb shell setprop log.tag.InputManager DEBUG' (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static InputManager sInstance;
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final IInputManager mIm;
-
-    /**
-     * We hold a weak reference to the context to avoid leaking it indefinitely,
-     * since we currently store the input manager instance as a static variable that
-     * will outlive any context.
-     */
-    @Nullable
-    private WeakReference<Context> mWeakContext;
 
     /**
      * Whether a PointerIcon is shown for stylus pointers.
@@ -255,99 +242,43 @@ public final class InputManager {
      */
     public static final int SWITCH_STATE_ON = 1;
 
-    private static String sVelocityTrackerStrategy;
+    private final InputManagerGlobal mGlobal;
+    private final Context mContext;
 
-    private InputManagerGlobal mGlobal;
-
-    private InputManager() {
+    /** @hide */
+    public InputManager(Context context) {
         mGlobal = InputManagerGlobal.getInstance();
         mIm = mGlobal.getInputManagerService();
-        try {
-            sVelocityTrackerStrategy = mIm.getVelocityTrackerStrategy();
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get VelocityTracker strategy: " + ex);
-        }
+        mContext = context;
     }
 
     /**
      * Gets an instance of the input manager.
      *
-     * @return The input manager instance.
+     *  Warning: The usage of this method is not supported!
      *
-     * @hide
-     */
-    @VisibleForTesting
-    public static InputManager resetInstance(IInputManager inputManagerService) {
-        synchronized (InputManager.class) {
-            InputManagerGlobal.resetInstance(inputManagerService);
-            sInstance = new InputManager();
-            return sInstance;
-        }
-    }
-
-    /**
-     * Clear the instance of the input manager.
+     *  @return The input manager instance.
+     *  Use {@link Context#getSystemService(Class)}
+     *  to obtain the InputManager instance.
      *
-     * @hide
-     */
-    @VisibleForTesting
-    public static void clearInstance() {
-        synchronized (InputManager.class) {
-            InputManagerGlobal.clearInstance();
-            sInstance = null;
-        }
-    }
-
-    /**
-     * Gets an instance of the input manager.
+     * TODO (b/277717573): Soft remove this API in version V.
+     * TODO (b/277039664): Migrate app usage off this API.
      *
-     * @return The input manager instance.
-     * @deprecated Use {@link Context#getSystemService(Class)} or {@link #getInstance(Context)}
-     * to obtain the InputManager instance.
      * @hide
      */
     @Deprecated
     @UnsupportedAppUsage
     public static InputManager getInstance() {
-        return getInstance(ActivityThread.currentApplication());
+        return Objects.requireNonNull(ActivityThread.currentApplication())
+                .getSystemService(InputManager.class);
     }
 
     /**
-     * Gets an instance of the input manager.
-     *
-     * @return The input manager instance.
-     * @hide
-     */
-    public static InputManager getInstance(Context context) {
-        synchronized (InputManager.class) {
-            if (sInstance == null) {
-                sInstance = new InputManager();
-            }
-            if (sInstance.mWeakContext == null || sInstance.mWeakContext.get() == null) {
-                sInstance.mWeakContext = new WeakReference(context);
-            }
-            return sInstance;
-        }
-    }
-
-    @NonNull
-    private Context getContext() {
-        WeakReference<Context> weakContext = Objects.requireNonNull(mWeakContext,
-                "A context is required for InputManager. Get the InputManager instance using "
-                        + "Context#getSystemService before calling this method.");
-        // If we get at this point, an app calling this function could potentially expect a
-        // Context that has disappeared due to garbage collection. Holding a weak reference
-        // is a temporary solution that should be resolved before the release of a
-        // production version. This is being tracked in b/267758905
-        return Objects.requireNonNull(weakContext.get(), "missing Context");
-    }
-
-    /**
-     * Get the current VelocityTracker strategy. Only works when the system has fully booted up.
+     * Get the current VelocityTracker strategy.
      * @hide
      */
     public String getVelocityTrackerStrategy() {
-        return sVelocityTrackerStrategy;
+        return mGlobal.getVelocityTrackerStrategy();
     }
 
     /**
@@ -584,11 +515,7 @@ public final class InputManager {
     @NonNull
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        try {
-            return mIm.getKeyboardLayoutsForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.getKeyboardLayoutsForInputDevice(identifier);
     }
 
     /**
@@ -647,19 +574,8 @@ public final class InputManager {
     @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void setCurrentKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
             @NonNull String keyboardLayoutDescriptor) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("identifier must not be null");
-        }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
-
-        try {
-            mIm.setCurrentKeyboardLayoutForInputDevice(identifier,
-                    keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.setCurrentKeyboardLayoutForInputDevice(identifier,
+                keyboardLayoutDescriptor);
     }
 
     /**
@@ -956,8 +872,7 @@ public final class InputManager {
      */
     @FloatRange(from = 0, to = 1)
     public float getMaximumObscuringOpacityForTouch() {
-        Context context = ActivityThread.currentApplication();
-        return InputSettings.getMaximumObscuringOpacityForTouch(context);
+        return InputSettings.getMaximumObscuringOpacityForTouch(mContext);
     }
 
     /**
@@ -1123,7 +1038,7 @@ public final class InputManager {
      */
     public boolean isStylusPointerIconEnabled() {
         if (mIsStylusPointerIconEnabled == null) {
-            mIsStylusPointerIconEnabled = getContext().getResources()
+            mIsStylusPointerIconEnabled = mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
                     || InputProperties.force_enable_stylus_pointer_icon().orElse(false);
         }

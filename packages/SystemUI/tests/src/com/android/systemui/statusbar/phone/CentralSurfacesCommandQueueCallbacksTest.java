@@ -46,9 +46,9 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
@@ -76,7 +76,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private QuickSettingsController mQuickSettingsController;
-    @Mock private NotificationPanelViewController mNotificationPanelViewController;
+    @Mock private ShadeViewController mShadeViewController;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -110,7 +110,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mContext.getResources(),
                 mShadeController,
                 mCommandQueue,
-                mNotificationPanelViewController,
+                mShadeViewController,
                 mRemoteInputQuickSettingsDisabler,
                 mMetricsLogger,
                 mKeyguardUpdateMonitor,
@@ -153,9 +153,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Trying to open it does nothing.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController, never()).expandToNotifications();
+        verify(mShadeViewController, never()).expandToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelViewController, never()).expand(anyBoolean());
+        verify(mShadeViewController, never()).expand(anyBoolean());
     }
 
     @Test
@@ -171,9 +171,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Can now be opened.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController).expandToNotifications();
+        verify(mShadeViewController).expandToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelViewController).expandToQs();
+        verify(mShadeViewController).expandToQs();
     }
 
     @Test

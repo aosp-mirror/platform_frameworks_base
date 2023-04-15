@@ -73,7 +73,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -338,21 +337,6 @@ public class SoundTriggerService extends SystemService {
                 }, 0);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to register death listener.", e);
-            }
-        }
-
-        @Override
-        public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
-                throws RemoteException {
-            try {
-                return super.onTransact(code, data, reply, flags);
-            } catch (RuntimeException e) {
-                // The activity manager only throws security exceptions, so let's
-                // log all others.
-                if (!(e instanceof SecurityException)) {
-                    Slog.wtf(TAG, "SoundTriggerService Crash", e);
-                }
-                throw e;
             }
         }
 
