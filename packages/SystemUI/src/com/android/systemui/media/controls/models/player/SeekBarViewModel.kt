@@ -20,6 +20,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.SystemClock
+import android.os.Trace
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -39,6 +40,8 @@ import javax.inject.Inject
 
 private const val POSITION_UPDATE_INTERVAL_MILLIS = 100L
 private const val MIN_FLING_VELOCITY_SCALE_FACTOR = 10
+
+private const val TRACE_POSITION_NAME = "SeekBarPollingPosition"
 
 private fun PlaybackState.isInMotion(): Boolean {
     return this.state == PlaybackState.STATE_PLAYING ||
@@ -295,14 +298,20 @@ constructor(
     @WorkerThread
     private fun checkIfPollingNeeded() {
         val needed = listening && !scrubbing && playbackState?.isInMotion() ?: false
+        val traceCookie = controller?.sessionToken.hashCode()
         if (needed) {
             if (cancel == null) {
-                cancel =
+                Trace.beginAsyncSection(TRACE_POSITION_NAME, traceCookie)
+                val cancelPolling =
                     bgExecutor.executeRepeatedly(
                         this::checkPlaybackPosition,
                         0L,
                         POSITION_UPDATE_INTERVAL_MILLIS
                     )
+                cancel = Runnable {
+                    cancelPolling.run()
+                    Trace.endAsyncSection(TRACE_POSITION_NAME, traceCookie)
+                }
             }
         } else {
             cancel?.run()
