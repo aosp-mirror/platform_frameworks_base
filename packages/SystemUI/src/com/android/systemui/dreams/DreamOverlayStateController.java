@@ -182,6 +182,10 @@ public class DreamOverlayStateController implements
      * Returns collection of present {@link Complication}.
      */
     public Collection<Complication> getComplications(boolean filterByAvailability) {
+        if (isLowLightActive()) {
+            // Don't show complications on low light.
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableCollection(filterByAvailability
                 ? mComplications
                 .stream()

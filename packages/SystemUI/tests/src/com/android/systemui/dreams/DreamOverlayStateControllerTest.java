@@ -235,6 +235,23 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testComplicationsNotShownForLowLight() {
+        final Complication complication = Mockito.mock(Complication.class);
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+
+        // Add a complication and verify it's returned in getComplications.
+        stateController.addComplication(complication);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications().contains(complication))
+                .isTrue();
+
+        stateController.setLowLightActive(true);
+        mExecutor.runAllReady();
+
+        assertThat(stateController.getComplications()).isEmpty();
+    }
+
+    @Test
     public void testNotifyLowLightChanged() {
         final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
 
