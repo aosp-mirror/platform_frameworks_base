@@ -2131,7 +2131,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         mDeviceManagementResourcesProvider.load();
-        if (isPermissionCheckFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled() || isPolicyEngineForFinanceFlagEnabled()) {
             mDevicePolicyEngine.load();
         }
 
@@ -3280,8 +3280,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         policy.validatePasswordOwner();
         updateMaximumTimeToLockLocked(userHandle);
-        updateLockTaskPackagesLocked(mContext, policy.mLockTaskPackages, userHandle);
-        updateLockTaskFeaturesLocked(policy.mLockTaskFeatures, userHandle);
+        if (!isPolicyEngineForFinanceFlagEnabled()) {
+            updateLockTaskPackagesLocked(mContext, policy.mLockTaskPackages, userHandle);
+            updateLockTaskFeaturesLocked(policy.mLockTaskFeatures, userHandle);
+        }
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
@@ -3593,7 +3595,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         startOwnerService(userId, "start-user");
-        if (isPermissionCheckFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled() || isPolicyEngineForFinanceFlagEnabled()) {
             mDevicePolicyEngine.handleStartUser(userId);
         }
     }
@@ -3620,7 +3622,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void handleUnlockUser(int userId) {
         startOwnerService(userId, "unlock-user");
-        if (isPermissionCheckFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled() || isPolicyEngineForFinanceFlagEnabled()) {
             mDevicePolicyEngine.handleUnlockUser(userId);
         }
     }
@@ -3632,7 +3634,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void handleStopUser(int userId) {
         updateNetworkPreferenceForUser(userId, List.of(PreferentialNetworkServiceConfig.DEFAULT));
         mDeviceAdminServiceController.stopServicesForUser(userId, /* actionForLog= */ "stop-user");
-        if (isPermissionCheckFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled() || isPolicyEngineForFinanceFlagEnabled()) {
             mDevicePolicyEngine.handleStopUser(userId);
         }
     }
@@ -10205,7 +10207,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         policy.mAffiliationIds.clear();
         policy.mLockTaskPackages.clear();
-        updateLockTaskPackagesLocked(mContext, policy.mLockTaskPackages, userId);
+        if (!isPolicyEngineForFinanceFlagEnabled()) {
+            updateLockTaskPackagesLocked(mContext, policy.mLockTaskPackages, userId);
+        }
         policy.mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
         saveSettingsLocked(userId);
 
@@ -10995,7 +10999,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
-        if (!isPermissionCheckFlagEnabled()) {
+        if (!isPermissionCheckFlagEnabled() && !isPolicyEngineForFinanceFlagEnabled()) {
             // TODO: Figure out if something like this needs to be restored for policy engine
             final ComponentName profileOwner = getProfileOwnerAsUser(userId);
             if (profileOwner == null) {
@@ -14878,6 +14882,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
 
                 final List<String> lockTaskPackages = getUserData(userId).mLockTaskPackages;
+                // TODO(b/278438525): handle in the policy engine
                 if (!lockTaskPackages.isEmpty()) {
                     Slogf.d(LOG_TAG,
                             "User id " + userId + " not affiliated. Clearing lock task packages");
