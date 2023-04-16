@@ -197,10 +197,11 @@ public class PackageManagerTests extends AndroidTestCase {
         }
 
         public Intent getResult() {
-            try {
-                return mResult.take();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            while (true) {
+                try {
+                    return mResult.take();
+                } catch (InterruptedException e) {
+                }
             }
         }
     }
