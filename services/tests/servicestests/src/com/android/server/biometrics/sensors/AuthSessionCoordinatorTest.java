@@ -154,7 +154,7 @@ public class AuthSessionCoordinatorTest {
                 LockoutTracker.LOCKOUT_NONE);
         assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
                 LockoutTracker.LOCKOUT_NONE);
-        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
                 LockoutTracker.LOCKOUT_NONE);
     }
 
@@ -194,7 +194,7 @@ public class AuthSessionCoordinatorTest {
                 LockoutTracker.LOCKOUT_NONE);
         assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
                 LockoutTracker.LOCKOUT_NONE);
-        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
                 LockoutTracker.LOCKOUT_NONE);
 
         assertThat(

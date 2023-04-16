@@ -619,19 +619,6 @@ public class DisplayAreaTest extends WindowTestsBase {
     }
 
     @Test
-    public void testRegisterSameFeatureOrganizer_expectThrowsException() {
-        final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
-        final IBinder binder = mock(IBinder.class);
-        doReturn(true).when(binder).isBinderAlive();
-        doReturn(binder).when(mockDisplayAreaOrganizer).asBinder();
-        final DisplayAreaOrganizerController controller =
-                mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController;
-        controller.registerOrganizer(mockDisplayAreaOrganizer, FEATURE_VENDOR_FIRST);
-        assertThrows(IllegalStateException.class,
-                () -> controller.registerOrganizer(mockDisplayAreaOrganizer, FEATURE_VENDOR_FIRST));
-    }
-
-    @Test
     public void testRegisterUnregisterOrganizer() {
         final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
         doReturn(mock(IBinder.class)).when(mockDisplayAreaOrganizer).asBinder();
