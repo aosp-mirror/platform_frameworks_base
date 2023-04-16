@@ -18,6 +18,7 @@ package com.android.systemui.animation
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.fonts.Font
+import android.graphics.fonts.FontVariationAxis
 import android.graphics.text.PositionedGlyphs
 import android.text.Layout
 import android.text.TextPaint
@@ -211,8 +212,15 @@ class TextInterpolator(layout: Layout) {
                     run.baseX[i] = MathUtils.lerp(run.baseX[i], run.targetX[i], progress)
                     run.baseY[i] = MathUtils.lerp(run.baseY[i], run.targetY[i], progress)
                 }
-                run.fontRuns.forEach {
-                    it.baseFont = fontInterpolator.lerp(it.baseFont, it.targetFont, progress)
+                run.fontRuns.forEach { fontRun ->
+                    fontRun.baseFont =
+                        fontInterpolator.lerp(fontRun.baseFont, fontRun.targetFont, progress)
+                    val tmpFontVariationsArray = mutableListOf<FontVariationAxis>()
+                    fontRun.baseFont.axes.forEach {
+                        tmpFontVariationsArray.add(FontVariationAxis(it.tag, it.styleValue))
+                    }
+                    basePaint.fontVariationSettings =
+                        FontVariationAxis.toFontVariationSettings(tmpFontVariationsArray)
                 }
             }
         }
