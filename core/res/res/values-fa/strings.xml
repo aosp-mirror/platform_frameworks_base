@@ -233,8 +233,8 @@
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"ساعت شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"‏آیا می‎خواهید تلفن خاموش شود؟"</string>
-    <string name="reboot_safemode_title" msgid="5853949122655346734">"راه‌اندازی مجدد در حالت امن"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
+    <string name="reboot_safemode_title" msgid="5853949122655346734">"بازراه‌اندازی به حالت امن"</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید به حالت امن بازراه‌اندازی شود؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با بازراه‌اندازی سیستم، این برنامه‌ها دوباره بازیابی می‌شوند."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"اخیر"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"برنامه‌های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"گزینه‌های رایانهٔ لوحی"</string>
@@ -566,7 +566,7 @@
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"تغییر مجموعه موسیقی شما"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"به برنامه اجازه می‌دهد مجموعه موسیقی‌تان را تغییر دهد."</string>
-    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیوی شما"</string>
+    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیو  شما"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"به برنامه اجازه می‌دهد مجموعه ویدیویتان را تغییر دهد."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"تغییر مجموعه عکس شما"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"به برنامه اجازه می‌دهد مجموعه عکستان را تغییر دهد."</string>
@@ -1007,7 +1007,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"تست کارخانه انجام نشد"</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"‏عملکرد FACTORY_TEST تنها برای بسته‌های نصب شده در /system/app پشتیبانی می‌شود."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"‏بسته‌ای یافت نشد که عملکرد FACTORY_TEST را ارائه کند."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"راه‌اندازی مجدد"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"بازراه‌اندازی"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"‏صفحه در \"<xliff:g id="TITLE">%s</xliff:g>\" می‎گوید:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"جاوا اسکریپت"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"تأیید پیمایش"</string>
@@ -1368,7 +1368,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"کنسول سریال فعال است"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"‏عملکرد تحت‌تأثیر قرار گرفته است. برای غیرفعال کردن، bootloader را بررسی کنید."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"‏MTE آزمایشی فعال شد"</string>
-    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، راه‌اندازی مجدد کنید. اگر بااستفاده ازarm64.memtag.bootctl فعال شده است، پیش‌از راه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، بازراه‌اندازی کنید. اگر بااستفاده از arm64.memtag.bootctl فعال شده است، پیش‌از بازراه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏مایعات یا خاکروبه در درگاه USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏درگاه USB به‌طور خودکار غیرفعال شده است. برای اطلاعات بیشتر، ضربه بزنید."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏می‌توان از درگاه USB استفاده کرد"</string>
