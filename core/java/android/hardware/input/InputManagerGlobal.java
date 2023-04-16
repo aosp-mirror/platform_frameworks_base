@@ -1252,7 +1252,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#requestPointerCapture(IBinder, boolean)
      */
-    void requestPointerCapture(IBinder windowToken, boolean enable) {
+    public void requestPointerCapture(IBinder windowToken, boolean enable) {
         try {
             mIm.requestPointerCapture(windowToken, enable);
         } catch (RemoteException ex) {
