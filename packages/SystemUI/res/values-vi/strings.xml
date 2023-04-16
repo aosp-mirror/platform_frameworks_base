@@ -833,7 +833,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Không tải được trạng thái"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Lỗi, hãy thử lại"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Thêm các tùy chọn điều khiển"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Chỉnh sửa tùy chọn điều khiển"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Chỉnh sửa chế độ điều khiển"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Thêm thiết bị đầu ra"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Nhóm"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Đã chọn 1 thiết bị"</string>

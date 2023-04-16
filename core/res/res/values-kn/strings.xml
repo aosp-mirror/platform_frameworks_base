@@ -1389,7 +1389,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"‍ಇತರ ಆ್ಯಪ್‍ಗಳ ಮೇಲೆ ಪ್ರದರ್ಶಿಸುವಿಕೆ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> ಇತರೆ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> ಇತರೆ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> ಈ ಫೀಚರ್ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"ಪ್ರಸ್ತುತ ವಿಷಯವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"</string>
@@ -2098,8 +2098,8 @@
     <string name="mime_type_document_ext" msgid="2398002765046677311">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಡಾಕ್ಯುಮೆಂಟ್"</string>
     <string name="mime_type_spreadsheet" msgid="8188407519131275838">"ಸ್ಪ್ರೆಡ್‌ಶೀಟ್"</string>
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಸ್ಪ್ರೆಡ್‌ಶೀಟ್"</string>
-    <string name="mime_type_presentation" msgid="1145384236788242075">"ಪ್ರಸ್ತುತಿ"</string>
-    <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಪ್ರಸ್ತುತಿ"</string>
+    <string name="mime_type_presentation" msgid="1145384236788242075">"ಪ್ರೆಸೆಂಟೇಷನ್"</string>
+    <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಪ್ರೆಸೆಂಟೇಷನ್"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್‌ನಲ್ಲಿರುವಾಗಲೂ ಬ್ಲೂಟೂತ್ ಆನ್ ಆಗಿರುತ್ತದೆ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ಲೋಡ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ಫೈಲ್}one{{file_name} + # ಫೈಲ್‌ಗಳು}other{{file_name} + # ಫೈಲ್‌ಗಳು}}"</string>
