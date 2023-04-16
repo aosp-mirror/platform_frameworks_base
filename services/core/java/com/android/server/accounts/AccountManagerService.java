@@ -5912,22 +5912,24 @@ public class AccountManagerService
     }
 
     private boolean canUserModifyAccountsForType(int userId, String accountType, int callingUid) {
-        // the managing app can always modify accounts
-        if (isProfileOwner(callingUid)) {
-            return true;
-        }
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext
-                .getSystemService(Context.DEVICE_POLICY_SERVICE);
-        String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
-        if (typesArray == null) {
-            return true;
-        }
-        for (String forbiddenType : typesArray) {
-            if (forbiddenType.equals(accountType)) {
-                return false;
+        return Binder.withCleanCallingIdentity(() -> {
+            // the managing app can always modify accounts
+            if (isProfileOwner(callingUid)) {
+                return true;
             }
-        }
-        return true;
+            DevicePolicyManager dpm = (DevicePolicyManager) mContext
+                    .getSystemService(Context.DEVICE_POLICY_SERVICE);
+            String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
+            if (typesArray == null) {
+                return true;
+            }
+            for (String forbiddenType : typesArray) {
+                if (forbiddenType.equals(accountType)) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     private boolean isProfileOwner(int uid) {
