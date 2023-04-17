@@ -59,6 +59,8 @@ public class MagnificationThumbnail {
     public final FrameLayout mThumbnailLayout;
 
     private final View mThumbNailView;
+    private int mThumbnailWidth;
+    private int mThumbnailHeight;
 
     private final WindowManager.LayoutParams mBackgroundParams;
     private boolean mVisible = false;
@@ -82,6 +84,8 @@ public class MagnificationThumbnail {
         mThumbNailView =
                 mThumbnailLayout.findViewById(R.id.accessibility_magnification_thumbnail_view);
         mBackgroundParams = createLayoutParams();
+        mThumbnailWidth = 0;
+        mThumbnailHeight = 0;
     }
 
     /**
@@ -105,12 +109,12 @@ public class MagnificationThumbnail {
 
     private void setBackgroundBounds() {
         Point magnificationBoundary = getMagnificationThumbnailPadding(mContext);
-        final int thumbNailWidth = (int) (mWindowBounds.width() / BG_ASPECT_RATIO);
-        final int thumbNailHeight = (int) (mWindowBounds.height() / BG_ASPECT_RATIO);
+        mThumbnailWidth = (int) (mWindowBounds.width() / BG_ASPECT_RATIO);
+        mThumbnailHeight = (int) (mWindowBounds.height() / BG_ASPECT_RATIO);
         int initX = magnificationBoundary.x;
         int initY = magnificationBoundary.y;
-        mBackgroundParams.width = thumbNailWidth;
-        mBackgroundParams.height = thumbNailHeight;
+        mBackgroundParams.width = mThumbnailWidth;
+        mBackgroundParams.height = mThumbnailHeight;
         mBackgroundParams.x = initX;
         mBackgroundParams.y = initY;
     }
@@ -260,11 +264,21 @@ public class MagnificationThumbnail {
             mThumbNailView.setScaleX(scaleDown);
             mThumbNailView.setScaleY(scaleDown);
         }
+        float thumbnailWidth;
+        float thumbnailHeight;
+        if (mThumbNailView.getWidth() == 0 || mThumbNailView.getHeight() == 0) {
+            // if the thumbnail view size is not updated correctly, we just use the cached values.
+            thumbnailWidth = mThumbnailWidth;
+            thumbnailHeight = mThumbnailHeight;
+        } else {
+            thumbnailWidth = mThumbNailView.getWidth();
+            thumbnailHeight = mThumbNailView.getHeight();
+        }
         if (!Float.isNaN(centerX)) {
             var padding = mThumbNailView.getPaddingTop();
             var ratio = 1f / BG_ASPECT_RATIO;
-            var centerXScaled = centerX * ratio - (mThumbNailView.getWidth() / 2f + padding);
-            var centerYScaled = centerY * ratio - (mThumbNailView.getHeight() / 2f + padding);
+            var centerXScaled = centerX * ratio - (thumbnailWidth / 2f + padding);
+            var centerYScaled = centerY * ratio - (thumbnailHeight / 2f + padding);
 
             if (DEBUG) {
                 Log.d(
