@@ -163,6 +163,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -832,6 +833,18 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN user is considered as "having trust" and bouncer can be skipped
         Assert.assertTrue(mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser()));
         Assert.assertTrue(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()));
+    }
+
+    @Test
+    public void testOnEnabledTrustAgentsChangedCallback() {
+        final Random random = new Random();
+        final int userId = random.nextInt();
+        final KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+
+        mKeyguardUpdateMonitor.registerCallback(callback);
+        mKeyguardUpdateMonitor.onEnabledTrustAgentsChanged(userId);
+
+        verify(callback).onEnabledTrustAgentsChanged(eq(userId));
     }
 
     @Test

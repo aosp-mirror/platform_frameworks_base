@@ -438,6 +438,11 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
+    public void onEnabledTrustAgentsChanged(int userId) {
+
+    }
+
+    @Override
     @NonNull
     public List<FingerprintSensorPropertiesInternal> getSensorProperties() {
         final List<FingerprintSensorPropertiesInternal> properties = new ArrayList<>();
