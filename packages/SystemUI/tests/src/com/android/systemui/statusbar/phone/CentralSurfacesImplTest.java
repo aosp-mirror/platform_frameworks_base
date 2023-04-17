@@ -138,6 +138,7 @@ import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -231,6 +232,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
     @Mock private LightRevealScrimViewModel mLightRevealScrimViewModel;
+    @Mock private LightRevealScrim mLightRevealScrim;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
@@ -345,6 +347,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.WM_SHADE_ALLOW_BACK_GESTURE, true);
         // For the Shade to animate during the Back gesture, we must enable the animation flag.
         mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true);
+        mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -538,6 +541,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDreamManager,
                 mCameraLauncherLazy,
                 () -> mLightRevealScrimViewModel,
+                mLightRevealScrim,
                 mAlternateBouncerInteractor,
                 mUserTracker,
                 () -> mFingerprintManager

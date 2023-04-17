@@ -19,6 +19,7 @@ package com.android.systemui.shade
 import android.view.LayoutInflater
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import dagger.Module
 import dagger.Provides
@@ -58,6 +59,14 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationPanelView {
             return notificationShadeWindowView.findViewById(R.id.notification_panel)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesLightRevealScrim(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): LightRevealScrim {
+            return notificationShadeWindowView.findViewById(R.id.light_reveal_scrim)
         }
     }
 }
