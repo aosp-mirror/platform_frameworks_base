@@ -98,14 +98,6 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationStackScrollLayout providesNotificationStackScrollLayout(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationShelf providesNotificationShelf(LayoutInflater layoutInflater,
             NotificationStackScrollLayout notificationStackScrollLayout) {
         NotificationShelf view = (NotificationShelf) layoutInflater.inflate(

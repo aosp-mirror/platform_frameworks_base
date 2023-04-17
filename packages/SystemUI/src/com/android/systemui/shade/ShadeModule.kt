@@ -19,6 +19,7 @@ package com.android.systemui.shade
 import android.view.LayoutInflater
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import dagger.Module
 import dagger.Provides
 
@@ -39,6 +40,15 @@ abstract class ShadeModule {
                 ?: throw IllegalStateException(
                     "R.layout.super_notification_shade could not be properly inflated"
                 )
+        }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
+        fun providesNotificationStackScrollLayout(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): NotificationStackScrollLayout {
+            return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller)
         }
     }
 }
