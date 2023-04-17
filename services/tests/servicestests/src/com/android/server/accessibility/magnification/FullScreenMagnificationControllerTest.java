@@ -538,7 +538,10 @@ public class FullScreenMagnificationControllerTest {
                 mConfigCaptor.capture());
         assertConfigEquals(config, mConfigCaptor.getValue());
 
-        verify(mMockThumbnail).setThumbNailBounds(any(), anyFloat(), anyFloat(), anyFloat());
+        // The first time is triggered when the thumbnail is just created.
+        // The second time is triggered when the magnification region changed.
+        verify(mMockThumbnail, times(2)).setThumbNailBounds(
+                any(), anyFloat(), anyFloat(), anyFloat());
     }
 
     @Test
