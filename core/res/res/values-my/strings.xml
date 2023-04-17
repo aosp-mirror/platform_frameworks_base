@@ -209,7 +209,7 @@
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ကိုယ်ပိုင်အက်ပ်များကို <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> တွင် ပိတ်ပါမည်။ သင့်အလုပ်ပရိုဖိုင် <xliff:g id="NUMBER">%3$d</xliff:g> ရက်ထက်ပိုပြီး ပိတ်ထားခြင်းကို သင်၏ IT စီမံခန့်ခွဲသူက ခွင့်မပြုပါ။"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ဖွင့်ရန်"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ခေါ်ဆိုမှုနှင့် မက်ဆေ့ဂျ်များ ပိတ်ထားသည်"</string>
-    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"အလုပ်သုံးအက်ပ်များကို သင်ခဏရပ်လိုက်ပါပြီ။ ဖုန်းခေါ်ဆိုမှု (သို့) မိုဘိုင်းမက်ဆေ့ဂျ်များ ရရှိမည်မဟုတ်ပါ။"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"အလုပ်သုံးအက်ပ်များကို သင်ခဏရပ်လိုက်သည်။ ဖုန်းခေါ်ဆိုမှု (သို့) မိုဘိုင်းမက်ဆေ့ဂျ်များ ရရှိမည်မဟုတ်ပါ။"</string>
     <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"အလုပ်သုံးအက်ပ် ဆက်သုံးရန်"</string>
     <string name="me" msgid="6207584824693813140">"ကျွန်ုပ်"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"အက်ပ်သုံးစဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"နောက်ခံတွင်ဖွင့်စဉ် နှလုံးခုန်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာ သုံးခြင်း"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"နောက်ခံတွင်အက်ပ်ဖွင့်စဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"အက်ပ်သုံးနေစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာကို သုံးပါ။"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"အက်ပ်သုံးနေစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာသုံးရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"နောက်ခံတွင် အက်ပ်ဖွင့်ထားစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာကို သုံးပါ။"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"နောက်ခံတွင် အက်ပ်ဖွင့်ထားစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာသုံးရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ပြက္ခဒိန်ဖြစ်ရပ်များနှင့် အသေးစိတ်အချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ဤအက်ပ်သည် သင့်တက်ဘလက်တွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များကို ကြည့်ရှုနိုင်ပြီး သင့်ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်းနှင့် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ဤအက်ပ်သည် သင့် Android TV စက်ပစ္စည်းတွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များအားလုံးကို ဖတ်နိုင်ပြီး သင်၏ ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်း သို့မဟုတ် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်သည်။"</string>
@@ -584,8 +580,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"တွဲချိတ်ထားသော ဘလူးတုသ်သုံးစက်များနှင့် ချိတ်ဆက်ရန် အက်ပ်ကိုခွင့်ပြုမည်"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာခြင်း"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာရန် အက်ပ်အား ခွင့်ပြုမည်"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ခြင်း"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ခြင်း"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"အနီးရှိ Wi-Fi စက်များနှင့် ပြန်လှန်တုံ့ပြန်ခြင်း"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
@@ -688,7 +684,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ဖုန်းကို သင့်ဘယ်ဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ဖုန်းကို သင့်ညာဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"သင့်မျက်နှာကို မမြင်ရပါ။ ဖုန်းကို မျက်လုံးနှင့် တစ်တန်းတည်းထား၍ ကိုင်ပါ။"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"သင့်မျက်နှာ မမြင်ရပါ။ ဖုန်းနှင့် မျက်စိ တစ်တန်းတည်းထားပါ။"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"လှုပ်လွန်းသည်။ ဖုန်းကို ငြိမ်ငြိမ်ကိုင်ပါ။"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"သင့်မျက်နှာကို ပြန်စာရင်းသွင်းပါ။"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"မျက်နှာကို မသိပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"အသုံးပြုသူက မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ပယ်ဖျက်ထားသည်"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်။ မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ပိတ်လိုက်သည်။"</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်။ ဖန်သားပြင် လော့ခ်ကို အစားထိုးထည့်သွင်းပါ။"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ဝန်ဆောင်မှုအချက်အလက်ကိုများကို ခွင့်ပြုချက်ရထားသည့် အက်ပ်အား စတင်ကြည့်နိုင်ရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"နမူနာနှုန်းမြင့်သော အာရုံခံစနစ်ဒေတာကို သုံးပါ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"၂၀၀ Hz နှုန်းထက်ပိုများသော အာရုံခံစနစ်ဒေတာကို နမူနာယူရန် အက်ပ်အား ခွင့်ပြုပါ"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"အသုံးပြုသူလုပ်ဆောင်ချက်မပါဘဲ အက်ပ်ကို အပ်ဒိတ်လုပ်ခြင်း"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"အသုံးပြုသူလုပ်ဆောင်ချက်မပါဘဲ ယခင်က ထည့်သွင်းထားသော အက်ပ်ကို စနစ်အား အပ်ဒိတ်လုပ်ခွင့်ပြုသည်"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ပါ"</string>
@@ -1365,7 +1360,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB မှတစ်ဆင့် ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ဖြင့် ဖိုင်လွှဲပြောင်းခြင်းကို ဖွင့်ထားသည်"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB မှတစ်ဆင့် PTP ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB မှတစ်ဆင့် မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးရန် ဖွင့်ထားသည်"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB သုံး၍ ချိတ်ဆက်ခြင်း ဖွင့်ထားသည်"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB မှတစ်ဆင့် MIDI ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"စက်ပစ္စည်းကို ‘ဝဘ်ကမ်’ အဖြစ် ချိတ်ဆက်လိုက်သည်"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB တွဲဖက်ပစ္စည်းကို ချိတ်ဆက်ထားသည်"</string>
@@ -1914,7 +1909,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS တောင်းဆိုမှုကို USSD တောင်းဆိုမှုအဖြစ် ပြောင်းထားသည်"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS တောင်းဆိုမှုအသစ်သို့ ပြောင်းထားသည်"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"အယောင်ဆောင်ဖြားယောင်းခြင်း သတိပေးချက်"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"အလုပ်ကိုယ်ရေးအချက်အလက်"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"အလုပ်ပရိုဖိုင်"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"သတိပေးထားသည်"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"စိစစ်ထားသည်"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ချဲ့ရန်"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ကို လောလောဆယ် မရနိုင်ပါ။ ၎င်းကို <xliff:g id="APP_NAME_1">%2$s</xliff:g> က စီမံထားပါသည်။"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ပိုမိုလေ့လာရန်"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"အက်ပ်ကို ခဏမရပ်တော့ရန်"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"အလုပ်သုံးအက်ပ်များ ဖွင့်မလား။"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"သင့်အလုပ်သုံးအက်ပ်နှင့် အကြောင်းကြားချက်များသုံးခွင့် ရယူပါ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ဖွင့်ရန်"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"အလုပ်သုံးအက်ပ် ပြန်ဖွင့်မလား။"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ပြန်ဖွင့်ရန်"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"အရေးပေါ်"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"သင်၏ အလုပ်သုံးအက်ပ်နှင့် ခေါ်ဆိုမှုများကို ဝင်ခွင့်တောင်းဆိုပါ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> မရနိုင်ပါ"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ဖွင့်ရန်တို့ပါ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"အလုပ်သုံးအက်ပ်များ မရှိပါ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ကိုယ်ပိုင်အက်ပ်များ မရှိပါ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> ကို သင့်ကိုယ်ပိုင်ပရိုဖိုင်တွင် ဖွင့်မလား။"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> ကို သင့်အလုပ်ပရိုဖိုင်တွင် ဖွင့်မလား။"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ကိုယ်ပိုင်ဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"အလုပ်သုံးဘရောင်ဇာ သုံးရန်"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ဆင်းမ်ကွန်ရက် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>

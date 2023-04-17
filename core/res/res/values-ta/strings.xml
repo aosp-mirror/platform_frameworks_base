@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ஆப்ஸ் பயன்பாட்டில் இருக்கும்போது இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார் தரவை அணுக ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"பின்னணியில் இயங்கும்போது இதயத் துடிப்பு போன்ற உடல் சென்சார் தரவை அணுகுதல்"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ஆப்ஸ் பின்னணியில் இயங்கும்போது இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார் தரவை அணுக ஆப்ஸை அனுமதிக்கிறது."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ஆப்ஸ் பயன்பாட்டில் இருக்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுதல்."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ஆப்ஸ் பயன்பாட்டில் இருக்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுவதற்கு ஆப்ஸை அனுமதிக்கும்."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ஆப்ஸ் பின்னணியில் இயங்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுதல்."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ஆப்ஸ் பின்னணியில் இயங்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுவதற்கு ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"கேலெண்டர் நிகழ்வுகளையும் விவரங்களையும் படிக்கலாம்"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"இந்த ஆப்ஸ் உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"உங்கள் Android TVயில் சேமித்துள்ள அனைத்துக் கேலெண்டர் நிகழ்வுகளையும் இந்த ஆப்ஸால் தெரிந்துகொள்ள முடியும். அத்துடன் உங்களின் கேலெண்டர் தரவைப் பகிரவும் சேமிக்கவும் முடியும்."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"பயனரால் \'முகம் காட்டித் திறத்தல்\' ரத்துசெய்யப்பட்டது"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"பலமுறை முயன்றுவிட்டீர்கள். \'முகம் காட்டித் திறத்தல்\' அம்சம் முடக்கப்பட்டது."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"பலமுறை முயன்றுவிட்டீர்கள். இதற்குப் பதிலாக, திரைப் பூட்டைப் பயன்படுத்தவும்."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"முகத்தைச் சரிபார்க்க இயலவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைக்கவில்லை."</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ஆப்ஸின் அம்சங்கள் குறித்த தகவல்களைப் பார்ப்பதற்கான அனுமதியை ஹோல்டருக்கு வழங்கும்."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"அதிகளவிலான சாம்பிளிங் ரேட்டில் சென்சார் தரவை அணுகுதல்"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 ஹெர்ட்ஸ்க்கும் அதிகமான வீதத்தில் சென்சார் தரவை மாதிரியாக்க ஆப்ஸை அனுமதிக்கும்"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"பயனர் நடவடிக்கை இல்லாமல் ஆப்ஸைப் புதுப்பித்தல்"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"பயனர் நடவடிக்கை இல்லாமல் ஏற்கெனவே நிறுவப்பட்ட ஆப்ஸைப் புதுப்பிக்க ஹோல்டரை அனுமதிக்கும்"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"திரையை அன்லாக் செய்வதற்கான முயற்சிகளைக் கண்காணி"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"இப்போது <xliff:g id="APP_NAME_0">%1$s</xliff:g> ஆப்ஸை உபயோகிக்க இயலாது. இதை <xliff:g id="APP_NAME_1">%2$s</xliff:g> நிர்வகிக்கிறது."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"மேலும் அறிக"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ஆப்ஸ் இயக்கு"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"பணி ஆப்ஸை இயக்கவா?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"உங்கள் பணி ஆப்ஸுக்கும் அறிவிப்புகளுக்குமான அணுகலைப் பெறுங்கள்"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"இயக்கு"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"பணி ஆப்ஸை மீண்டும் இயக்கவா?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"மீண்டும் இயக்கு"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"அவசர அழைப்பு"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"உங்கள் பணி ஆப்ஸுக்கும் அழைப்புகளுக்குமான அணுகலைப் பெறுங்கள்"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> இல்லை"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ஆன் செய்யத் தட்டுக"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"பணி ஆப்ஸ் எதுவுமில்லை"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"தனிப்பட்ட ஆப்ஸ் எதுவுமில்லை"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"உங்கள் தனிப்பட்ட கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"உங்கள் பணிக் கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"தனிப்பட்ட உலாவியைப் பயன்படுத்து"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"பணி உலாவியைப் பயன்படுத்து"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"சிம் நெட்வொர்க் அன்லாக் பின்"</string>

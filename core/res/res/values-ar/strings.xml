@@ -467,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"يتيح هذا الإذن للتطبيق بالوصول إلى بيانات أجهزة استشعار الجسم، مثل معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم، وذلك عندما يكون التطبيق قيد الاستخدام."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"الوصول في الخلفية إلى بيانات استشعار الجسم، مثل معدّل نبضات القلب"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"يتيح هذا الإذن للتطبيق الوصول إلى بيانات أجهزة استشعار الجسم، مثل معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم، وذلك عند استخدام التطبيق في الخلفية."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"الوصول إلى بيانات درجة حرارة المعصم من خلال جهاز استشعار الجسم عندما يكون التطبيق قيد الاستخدام"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"يسمح هذا الإذن للتطبيق بالوصول إلى بيانات درجة حرارة المعصم من خلال جهاز استشعار الجسم، وذلك عندما يكون التطبيق قيد الاستخدام."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"الوصول إلى بيانات درجة حرارة المعصم من خلال جهاز استشعار الجسم عندما يكون التطبيق مفعّلاً في الخلفية"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"يسمح هذا الإذن للتطبيق بالوصول إلى بيانات درجة حرارة المعصم من خلال جهاز استشعار الجسم، وذلك عندما يكون التطبيق مفعّلاً في الخلفية."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"قراءة أحداث التقويم والتفاصيل"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على الجهاز اللوحي ومشاركة بيانات التقويم أو حفظها."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على جهاز Android TV ومشاركة بيانات التقويم أو حفظها."</string>
@@ -717,7 +713,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"تمّ إلغاء عملية مصادقة الوجه."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ألغى المستخدم ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"تم إجراء عدد كبير جدًا من المحاولات، لذا تم إيقاف ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"تم إجراء عدد كبير جدًا من المحاولات. أدخِل قفل الشاشة بدلاً من ذلك."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"يتعذّر التحقق من الوجه. حاول مرة أخرى."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"لم يسبق لك إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
@@ -804,10 +801,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"للسماح للمالك ببدء عرض معلومات عن ميزات التطبيق."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"الوصول إلى بيانات جهاز الاستشعار بمعدّل مرتفع للبيانات في الملف الصوتي"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"يسمح هذا الأذن للتطبيق بزيادة بيانات جهاز الاستشعار بمعدّل بيانات في الملف الصوتي أكبر من 200 هرتز."</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"تحديث التطبيق بدون تأكيد المستخدم"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"يسمح هذا الإذن للمالك بتحديث التطبيق المثبّت مسبقًا بدون تأكيد المستخدم."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"مراقبة محاولات فتح قفل الشاشة"</string>
@@ -1960,11 +1955,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"التطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> غير متاح الآن، وهو مُدار بواسطة <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"مزيد من المعلومات"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"استئناف تشغيل التطبيق"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"هل تريد تفعيل تطبيقات العمل؟"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"الوصول إلى تطبيقات العمل وإشعاراتها"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"تفعيل"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"أتريد إلغاء إيقاف تطبيقات العمل مؤقتًا؟"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"إلغاء الإيقاف المؤقت"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"الطوارئ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"الوصول إلى المكالمات وتطبيقات العمل"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"تطبيق <xliff:g id="ACTIVITY">%1$s</xliff:g> غير متاح"</string>
@@ -2174,8 +2167,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"انقر لتفعيل الميزة"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ما مِن تطبيقات عمل."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ما مِن تطبيقات شخصية."</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"هل تريد فتح <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي؟"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"هل تريد فتح <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي للعمل؟"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استخدام المتصفّح الشخصي"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استخدام متصفّح العمل"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏رقم التعريف الشخصي لإلغاء قفل شبكة شريحة SIM"</string>

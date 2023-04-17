@@ -209,7 +209,7 @@
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"برنامه‌های شخصی در تاریخ <xliff:g id="DATE">%1$s</xliff:g> ساعت <xliff:g id="TIME">%2$s</xliff:g> مسدود خواهند شد. سرپرست فناوری اطلاعات اجازه نمی‌دهد نمایه کاری شما بیشتر از <xliff:g id="NUMBER">%3$d</xliff:g> روز خاموش بماند."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"روشن کردن"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"تماس‌ها و پیام‌ها خاموش هستند"</string>
-    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"برنامه‌های کاری را موقتاً متوقف کرده‌اید. تماس‌ها یا پیامک‌ها را دریافت نخواهید کرد."</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"برنامه‌های کاری را موقتاً متوقف کرده‌اید. تماس یا پیامکی دریافت نخواهید کرد."</string>
     <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ازسرگیری برنامه‌های کاری"</string>
     <string name="me" msgid="6207584824693813140">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"گزینه‌های رایانهٔ لوحی"</string>
@@ -235,8 +235,8 @@
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"ساعت شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"‏آیا می‎خواهید تلفن خاموش شود؟"</string>
-    <string name="reboot_safemode_title" msgid="5853949122655346734">"راه‌اندازی مجدد در حالت امن"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
+    <string name="reboot_safemode_title" msgid="5853949122655346734">"بازراه‌اندازی به حالت امن"</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید به حالت امن بازراه‌اندازی شود؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با بازراه‌اندازی سیستم، این برنامه‌ها دوباره بازیابی می‌شوند."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"اخیر"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"برنامه‌های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"گزینه‌های رایانهٔ لوحی"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"به برنامه اجازه می‌دهد تا زمانی که درحال استفاده است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین اجرا در پس‌زمینه"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"به برنامه اجازه می‌دهد تا زمانی که در پس‌زمینه درحال اجرا است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"دسترسی به داده‌های دمای مچ دست حسگر بدن درحین استفاده از برنامه."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"به برنامه اجازه می‌دهد تا زمانی که درحال استفاده است، به داده‌های دمای مچ دست حسگر بدن دسترسی داشته باشد."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"دسترسی به داده‌های دمای مچ دست حسگر بدن وقتی برنامه در پس‌زمینه است."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"به برنامه اجازه می‌دهد تا زمانی که در پس‌زمینه است، به داده‌های دمای مچ دست حسگر بدن دسترسی داشته باشد."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"خواندن رویدادها و جزئیات تقویم"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در رایانه لوحی شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏این برنامه می‌تواند همه رویدادهای تقویم را که در Android TV شما ذخیره‌شده بخواند، و داده‌های تقویم شما را هم‌رسانی یا ذخیره کند."</string>
@@ -608,7 +604,7 @@
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"تغییر مجموعه موسیقی شما"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"به برنامه اجازه می‌دهد مجموعه موسیقی‌تان را تغییر دهد."</string>
-    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیوی شما"</string>
+    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیو  شما"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"به برنامه اجازه می‌دهد مجموعه ویدیویتان را تغییر دهد."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"تغییر مجموعه عکس شما"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"به برنامه اجازه می‌دهد مجموعه عکستان را تغییر دهد."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"عملیات شناسایی چهره لغو شد."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"کاربر «قفل‌گشایی با چهره» را لغو کرد"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"تلاش‌ها بیش از حدمجاز شده است. «قفل‌گشایی با چهره» غیرفعال است."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"تلاش‌ها بیش از حدمجاز شده است. درعوض قفل صفحه را وارد کنید."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چهره تأیید نشد. دوباره امتحان کنید."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"«قفل‌گشایی با چهره» را راه‌اندازی نکرده‌اید"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"به دارنده اجازه می‌دهد اطلاعات مربوط به ویژگی‌های برنامه را مشاهده کند."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"دسترسی به داده‌های حسگر با نرخ نمونه‌برداری بالا"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"به برنامه اجازه می‌دهد داده‌های حسگر را با نرخ بیش‌از ۲۰۰ هرتز نمونه‌برداری کند"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"به‌روزرسانی برنامه بدون اقدام کاربر"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"به دارنده اجازه می‌دهد برنامه‌ای را که قبلاً نصب کرده است بدون اقدام کاربر به‌روزرسانی کند"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تنظیم قوانین گذرواژه"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"پایش تلاش‌های باز کردن قفل صفحه"</string>
@@ -1062,7 +1057,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"تست کارخانه انجام نشد"</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"‏عملکرد FACTORY_TEST تنها برای بسته‌های نصب شده در /system/app پشتیبانی می‌شود."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"‏بسته‌ای یافت نشد که عملکرد FACTORY_TEST را ارائه کند."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"راه‌اندازی مجدد"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"بازراه‌اندازی"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"‏صفحه در \"<xliff:g id="TITLE">%s</xliff:g>\" می‎گوید:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"جاوا اسکریپت"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"تأیید پیمایش"</string>
@@ -1384,7 +1379,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"کنسول سریال فعال است"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"‏عملکرد تحت‌تأثیر قرار گرفته است. برای غیرفعال کردن، bootloader را بررسی کنید."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"‏MTE آزمایشی فعال شد"</string>
-    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، راه‌اندازی مجدد کنید. اگر بااستفاده ازarm64.memtag.bootctl فعال شده است، پیش‌از راه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، بازراه‌اندازی کنید. اگر بااستفاده از arm64.memtag.bootctl فعال شده است، پیش‌از بازراه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏مایعات یا خاکروبه در درگاه USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏درگاه USB به‌طور خودکار غیرفعال شده است. برای اطلاعات بیشتر، ضربه بزنید."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏می‌توان از درگاه USB استفاده کرد"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> درحال‌حاضر در دسترس نیست. <xliff:g id="APP_NAME_1">%2$s</xliff:g> آن را مدیریت می‌کند."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"بیشتر بدانید"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو توقف موقت برنامه"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"برنامه‌های کاری روشن شود؟"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"دسترسی به اعلان‌ها و برنامه‌های کاری"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"برنامه‌های کاری ازسر گرفته شود؟"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ازسرگیری"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"اضطراری"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"دسترسی به تماس‌ها و برنامه‌های کاری"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> دردسترس نیست"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"برای روشن کردن، ضربه بزنید"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> در نمایه شخصی باز شود؟"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> در نمایه کاری باز شود؟"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استفاده از مرورگر شخصی"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استفاده از مرورگر کاری"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"پین باز کردن قفل شبکه سیم‌کارت"</string>

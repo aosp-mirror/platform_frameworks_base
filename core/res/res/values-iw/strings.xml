@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של חיישני גוף, כמו דופק, חום גוף ושיעור החמצן בדם, כשנעשה שימוש באפליקציה."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"גישה לנתונים של חיישני גוף, כמו דופק, כשהאפליקציה פועלת ברקע"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של חיישני גוף, כמו דופק, חום גוף ושיעור החמצן בדם, כשהאפליקציה פועלת ברקע."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"הרשאת גישה לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשנעשה שימוש באפליקציה."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשנעשה שימוש באפליקציה."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"הרשאת גישה לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשהאפליקציה פועלת ברקע."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ההרשאה מאפשרת לאפליקציה לגשת לנתונים של החיישן הלביש, כמו טמפרטורת פרק כף היד, כשהאפליקציה פועלת ברקע."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"קריאה של אירועי יומן והפרטים שלהם"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"האפליקציה הזו יכולה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, ולשתף או לשמור את נתוני היומן."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏האפליקציה הזו יכולה לקרוא את כל אירועי היומן המאוחסנים במכשיר ה-Android TV, ולשתף או לשמור את נתוני היומן."</string>
@@ -689,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"צריך להזיז את הטלפון שמאלה"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"צריך להזיז את הטלפון ימינה"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"יש להביט ישירות אל המכשיר."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"אי אפשר לראות את הפנים שלך. צריך להחזיק את הטלפון בגובה העיניים."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"אי אפשר לראות את הפנים שלך. יש להחזיק את הטלפון בגובה העיניים."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"יש לסרוק שוב את הפנים."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"לא ניתן לזהות את הפנים. יש לנסות שוב."</string>
@@ -714,7 +710,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"הפעולה לאימות הפנים בוטלה."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"הפתיחה ע\"י זיהוי הפנים בוטלה על ידי המשתמש"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"בוצעו יותר מדי ניסיונות. הושבתה הפתיחה ע\"י זיהוי הפנים."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"בוצעו יותר מדי ניסיונות. יש להשתמש בנעילת המסך במקום."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"לא ניתן לאמת את הפנים. יש לנסות שוב."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"לא הגדרת פתיחה ע\"י זיהוי הפנים"</string>
@@ -801,10 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"בעלי ההרשאה יוכלו להתחיל לצפות בפרטי התכונות של אפליקציות."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"גישה לנתוני חיישנים בתדירות דגימה גבוהה"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"האפליקציה תוכל לדגום נתוני חיישנים בתדירות של מעל 200 הרץ"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"עדכון אפליקציה ללא פעולה מצד המשתמש"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"בעלי ההרשאה הזו יוכלו לעדכן אפליקציה שכבר הותקנה ללא פעולה מצד המשתמש"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"הגדרת כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי האימות של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
@@ -1184,7 +1179,7 @@
     <string name="not_selected" msgid="410652016565864475">"לא נבחר"</string>
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{כוכב אחד מתוך {max}}one{# כוכבים מתוך {max}}two{# כוכבים מתוך {max}}other{# כוכבים מתוך {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"בתהליך"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"השלמת הפעולה באמצעות"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"השלמת הפעולה עם"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"‏השלמת הפעולה באמצעות %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"להשלמת הפעולה"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"פתיחה באמצעות"</string>
@@ -1957,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"האפליקציה <xliff:g id="APP_NAME_0">%1$s</xliff:g> לא זמינה כרגע. אפשר לנהל זאת באפליקציה <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"מידע נוסף"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ביטול ההשהיה של האפליקציה"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"להפעיל את האפליקציות לעבודה?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"קבלת גישה להתראות ולאפליקציות בפרופיל העבודה"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"הפעלה"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"להפעיל את האפליקציות לעבודה?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"הפעלה"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"שיחת חירום"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"קבלת גישה לשיחות ולאפליקציות בפרופיל העבודה"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> לא זמינה"</string>
@@ -2171,8 +2164,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"יש להקיש כדי להפעיל את פרופיל העבודה"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"אין אפליקציות לעבודה"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"אין אפליקציות לשימוש אישי"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"לפתוח את <xliff:g id="APP">%s</xliff:g> בפרופיל האישי?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"לפתוח את <xliff:g id="APP">%s</xliff:g> בפרופיל העבודה?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"בדפדפן האישי"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"בדפדפן של העבודה"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏קוד אימות לביטול הנעילה של רשת SIM"</string>

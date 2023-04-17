@@ -210,7 +210,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktifkan"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Panggilan dan pesan dinonaktifkan"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Anda menjeda aplikasi kerja. Anda tidak akan menerima panggilan telepon atau pesan teks."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Lanjutkan aplikasi kerja"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Aktifkan lagi"</string>
     <string name="me" msgid="6207584824693813140">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsi tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opsi Android TV"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Mengizinkan aplikasi mengakses data sensor tubuh, seperti detak jantung, suhu, dan persentase oksigen dalam darah, saat aplikasi sedang digunakan."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Mengakses data sensor tubuh, seperti detak jantung, saat ada di latar belakang"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Mengizinkan aplikasi mengakses data sensor tubuh, seperti detak jantung, suhu, dan persentase oksigen dalam darah, saat aplikasi berada di latar belakang."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Mengakses data suhu pergelangan tangan sensor tubuh saat aplikasi sedang digunakan."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Mengizinkan aplikasi mengakses data suhu pergelangan tangan sensor tubuh, saat aplikasi sedang digunakan."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Mengakses data suhu pergelangan tangan sensor tubuh saat aplikasi sedang berada di latar belakang."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Mengizinkan aplikasi mengakses data suhu pergelangan tangan sensor tubuh, saat aplikasi sedang berada di latar belakang."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Baca acara kalender dan detailnya"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikasi ini dapat membaca semua acara kalender yang tersimpan di tablet dan membagikan atau menyimpan data kalender."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aplikasi ini dapat membaca semua acara kalender yang tersimpan di perangkat Android TV dan membagikan atau menyimpan data kalender."</string>
@@ -688,7 +684,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Gerakkan ponsel ke kiri Anda"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Gerakkan ponsel ke kanan Anda"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lihat langsung ke perangkat."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Tidak dapat melihat wajah Anda. Pegang ponsel sejajar dengan mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Wajah tidak terlihat. Pegang ponsel sejajar mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu banyak gerakan. Stabilkan ponsel."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Daftarkan ulang wajah Anda."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Tidak dapat mengenali wajah. Coba lagi."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Pemrosesan wajah dibatalkan."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Buka dengan Wajah dibatalkan oleh pengguna"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Terlalu banyak percobaan. Coba lagi nanti."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Terlalu banyak upaya gagal. Buka dengan Wajah dinonaktifkan."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Terlalu banyak upaya gagal. Masukkan kunci layar."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat memverifikasi wajah. Coba lagi."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyiapkan Buka dengan Wajah"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Memungkinkan pemegang mulai melihat info fitur untuk aplikasi."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mengakses data sensor pada frekuensi sampling yang tinggi"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Mengizinkan aplikasi mengambil sampel data sensor pada frekuensi yang lebih besar dari 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"mengupdate aplikasi tanpa tindakan pengguna"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Mengizinkan pemegang mengupdate aplikasi yang sebelumnya diinstal tanpa tindakan pengguna"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau upaya pembukaan kunci layar"</string>
@@ -1878,7 +1873,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Oke"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Penghemat Baterai akan mengaktifkan Tema gelap dan membatasi atau menonaktifkan aktivitas latar belakang, beberapa efek visual, fitur tertentu, dan beberapa koneksi jaringan."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Penghemat Baterai akan mengaktifkan Tema gelap dan membatasi atau menonaktifkan aktivitas latar belakang, beberapa efek visual, fitur tertentu, dan beberapa koneksi jaringan."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah diketuk."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya, gambar hanya akan ditampilkan setelah diketuk."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktifkan Penghemat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktifkan"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Selama 1 menit (hingga {formattedTime})}other{Selama # menit (hingga {formattedTime})}}"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> saat ini tidak tersedia. Aplikasi ini dikelola oleh <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Pelajari lebih lanjut"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Batalkan jeda aplikasi"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Aktifkan aplikasi kerja?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Dapatkan akses ke aplikasi kerja dan notifikasi"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktifkan"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Batalkan jeda aplikasi kerja?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Batalkan jeda"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Darurat"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Dapatkan akses ke aplikasi kerja dan panggilan"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikasi tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia saat ini."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> tidak tersedia"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Ketuk untuk mengaktifkan"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Tidak ada aplikasi kerja"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Tidak ada aplikasi pribadi"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Buka <xliff:g id="APP">%s</xliff:g> di profil pribadi?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Buka <xliff:g id="APP">%s</xliff:g> di profil kerja?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan browser pribadi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan browser kerja"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN pembuka kunci SIM network"</string>

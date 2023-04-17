@@ -211,7 +211,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Attiva"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Chiamate e messaggi sono disattivati"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Hai messo in pausa le app di lavoro. Non riceverai telefonate o messaggi."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"App lavoro on"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Riattiva app lavoro"</string>
     <string name="me" msgid="6207584824693813140">"Io"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opzioni tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opzioni Android TV"</string>
@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Autorizza l\'app ad accedere ai dati dei sensori del corpo, ad esempio battito cardiaco, temperatura e percentuale di ossigeno nel sangue, mentre l\'app è in uso."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accesso ai dati dei sensori del corpo, come il battito cardiaco, in background"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Autorizza l\'app ad accedere ai dati dei sensori del corpo, ad esempio battito cardiaco, temperatura e percentuale di ossigeno nel sangue, mentre l\'app è in background."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accesso ai dati della temperatura del polso misurata dal sensore del corpo mentre l\'app è in uso."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Consente all\'app, mentre è in uso, di accedere ai dati della temperatura del polso misurata dal sensore del corpo."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accesso ai dati della temperatura del polso misurata dal sensore del corpo mentre l\'app è in background."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Consente all\'app, mentre è in background, di accedere ai dati della temperatura del polso misurata dal sensore del corpo."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"lettura di eventi di calendario e dettagli"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Questa app può leggere tutti gli eventi di calendario memorizzati sul tablet e condividere o salvare i dati di calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Questa app può leggere tutti gli eventi di calendario memorizzati sul dispositivo Android TV e condividere o salvare i dati di calendario."</string>
@@ -714,7 +710,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operazione associata al volto annullata."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Sblocco con il volto annullato dall\'utente"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Troppi tentativi. Riprova più tardi."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Troppi tentativi. Sblocco con il volto disattivato."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Troppi tentativi. Inserisci il blocco schermo."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossibile verificare il volto. Riprova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Non hai configurato lo sblocco con il volto"</string>
@@ -1955,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Scopri di più"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Riattiva app"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Attivare le app di lavoro?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Attiva l\'accesso alle app di lavoro e alle notifiche"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Attiva"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Riattivare app di lavoro?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Riattiva"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergenza"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Richiedi l\'accesso alle app di lavoro e alle chiamate"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
@@ -2169,8 +2164,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Tocca per attivare"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nessuna app di lavoro"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nessuna app personale"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Aprire <xliff:g id="APP">%s</xliff:g> nel tuo profilo personale?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Aprire <xliff:g id="APP">%s</xliff:g> nel tuo profilo di lavoro?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usa il browser personale"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usa il browser di lavoro"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN di sblocco rete SIM"</string>

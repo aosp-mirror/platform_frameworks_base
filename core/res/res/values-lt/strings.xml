@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Leidžiama programai pasiekti kūno jutiklių duomenis, pvz., pulso dažnį, temperatūrą ir deguonies procentinę dalį kraujyje, kai programa naudojama."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Prieiga prie kūno jutiklių duomenų, pvz., pulso dažnio, kai veikia fone"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Leidžiama programai pasiekti kūno jutiklių duomenis, pvz., pulso dažnį, temperatūrą ir deguonies procentinę dalį kraujyje, kai programa veikia fone."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Pasiekti kūno jutiklio riešo temperatūros duomenis, kol programa naudojama."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Leidžiama programai pasiekti kūno jutiklio riešo temperatūros duomenis, kol programa naudojama."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Pasiekti kūno jutiklio riešo temperatūros duomenis, kol programa veikia fone."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Leidžiama programai pasiekti kūno jutiklio riešo temperatūros duomenis, kol programa veikia fone."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Skaityti kalendoriaus įvykius arba išsamią informaciją"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ši programa gali nuskaityti visus planšetiniame kompiuteryje saugomus kalendoriaus įvykius ir bendrinti arba išsaugoti kalendoriaus duomenis."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ši programa gali nuskaityti visus „Android TV“ įrenginyje saugomus kalendoriaus įvykius ir bendrinti arba išsaugoti kalendoriaus duomenis."</string>
@@ -715,7 +711,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Veido atpažinimo operacija atšaukta."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Atrakinimą pagal veidą atšaukė naudotojas"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Per daug bandymų. Vėliau bandykite dar kartą."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Per daug bandymų. Atrakinimas pagal veidą išjungtas."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Per daug bandymų. Geriau naudokite ekrano užraktą."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nepavyko patvirtinti veido. Bandykite dar kartą."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nenustatėte atrakinimo pagal veidą"</string>
@@ -802,10 +799,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Savininkui leidžiama pradėti programos funkcijų informacijos peržiūrą."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pasiekti jutiklių duomenis dideliu skaitmeninimo dažniu"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Programai leidžiama skaitmeninti jutiklių duomenis didesniu nei 200 Hz dažniu"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"atnaujinti programą be naudotojo veiksmo"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Leidžiama kūrėjui atnaujinti programą, jei prieš tai ji buvo įdiegta be naudotojo veiksmo"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Valdykite, kokio ilgio ekrano užrakto slaptažodžius ir PIN kodus galima naudoti."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Stebėti bandymus atrakinti ekraną"</string>
@@ -1958,11 +1953,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Programa „<xliff:g id="APP_NAME_0">%1$s</xliff:g>“ šiuo metu nepasiekiama. Tai tvarkoma naudojant programą „<xliff:g id="APP_NAME_1">%2$s</xliff:g>“."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Sužinoti daugiau"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Atšaukti programos pristabdymą"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Įjungti darbo programas?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Pasiekite darbo programas ir pranešimus"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Įjungti"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Atš. darbo progr. pristabd.?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Atšaukti pristabdymą"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Pagalbos tarnyba"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Pasiekite darbo programas ir skambučius"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programa nepasiekiama."</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ šiuo metu nepasiekiama."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"„<xliff:g id="ACTIVITY">%1$s</xliff:g>“ nepasiekiama"</string>
@@ -2172,8 +2165,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Paliesti, norint įjungti"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nėra darbo programų"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nėra asmeninių programų"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Atidaryti „<xliff:g id="APP">%s</xliff:g>“ asmeniniame profilyje?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Atidaryti „<xliff:g id="APP">%s</xliff:g>“ darbo profilyje?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Naudoti asmeninę naršyklę"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Naudoti darbo naršyklę"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM tinklo operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>

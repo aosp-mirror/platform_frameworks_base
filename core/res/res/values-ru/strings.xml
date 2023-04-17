@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Когда приложение используется, это разрешение предоставляет ему доступ к данным нательных датчиков (например, пульсу, температуре, уровню кислорода в крови)."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ к данным нательных датчиков, когда приложение работает в фоновом режиме"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Когда приложение работает в фоновом режиме, это разрешение предоставляет ему доступ к данным нательных датчиков (например, пульсу, температуре, уровню кислорода в крови)."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Доступ к данным с нательных датчиков о температуре запястья (при использовании приложения)"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Когда приложение используется, это разрешение предоставляет ему доступ к данным о температуре запястья, которые собираются нательными датчиками."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Доступ к данным с нательных датчиков о температуре запястья (при работе приложения в фоновом режиме)"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Когда приложение работает в фоновом режиме, это разрешение предоставляет ему доступ к данным о температуре запястья, которые собираются нательными датчиками."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чтение мероприятий и данных"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Приложение может считывать, отправлять и сохранять информацию о мероприятиях в календаре планшета."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Приложение может считывать, отправлять и сохранять информацию о мероприятиях в календаре устройства Android TV."</string>
@@ -715,7 +711,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Распознавание отменено"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Фейсконтроль: операция отменена пользователем."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Слишком много попыток. Повторите позже."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Слишком много попыток. Фейсконтроль отключен."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Слишком много попыток. Используйте другой способ разблокировки экрана."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не удалось распознать лицо. Повторите попытку."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Вы не настроили фейсконтроль."</string>
@@ -1292,7 +1289,7 @@
     <string name="volume_unknown" msgid="4041914008166576293">"Громкость"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Громкость Bluetooth-устройства"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Громкость рингтона"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Громкости мелодии вызова"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Громкость разговора"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Громкость мультимедиа"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Громкость уведомлений"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Мелодия по умолчанию"</string>
@@ -1956,11 +1953,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Приложение \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" недоступно. Его работу ограничивает приложение \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Подробнее"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Возобновить работу приложения"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Включить рабочие приложения?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Вы получите доступ к рабочим приложениям и уведомлениям"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Включить"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Включить рабочие приложения?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Включить"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Экстренный вызов"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Получите доступ к рабочим приложениям и звонкам."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложение недоступно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" сейчас недоступно."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2170,8 +2165,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Нажмите, чтобы включить"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Не поддерживается рабочими приложениями."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Не поддерживается личными приложениями."</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Открыть приложение \"<xliff:g id="APP">%s</xliff:g>\" в личном профиле?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Открыть приложение \"<xliff:g id="APP">%s</xliff:g>\" в рабочем профиле?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Использовать личный браузер"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Использовать рабочий браузер"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код для разблокировки сети SIM-карты"</string>

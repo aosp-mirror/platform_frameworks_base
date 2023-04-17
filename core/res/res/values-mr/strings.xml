@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ॲप वापरात असताना हार्ट रेट, तापमान आणि रक्तातील ऑक्सिजनची टक्केवारी यांसारखा शरीर सेन्सर डेटा अ‍ॅक्सेस करण्याची अनुमती ॲपला देते."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"बॅकग्राउंडमध्ये असताना, हार्ट रेट यासारखा शरीर सेन्सर डेटा अ‍ॅक्सेस करा"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ॲप हे बॅकग्राउंडमध्ये असताना हार्ट रेट, तापमान आणि रक्तातील ऑक्सिजनची टक्केवारी यांसारखा शरीर सेन्सर डेटा अ‍ॅक्सेस करण्याची अनुमती ॲपला द्या."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ॲप वापरात असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करा."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ॲप वापरात असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करण्याची ॲपला अनुमती देते."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ॲप बॅकग्राउंडमध्ये असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करा."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ॲप बॅकग्राउंडमध्ये असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करण्याची ॲपला अनुमती देते."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कॅलेंडर इव्हेंट आणि तपशील वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"हा अ‍ॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"हे अ‍ॅप तुमच्या Android TV डिव्हाइसवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"चेहरा ऑपरेशन रद्द केले गेले."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"वापरकर्त्याने फेस अनलॉक रद्द केले आहे"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"बरेच प्रयत्न. फेस अनलॉक बंद केले आहे."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"बरेच प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा पडताळणी करू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"तुम्ही फेस अनलॉक सेट केले नाही"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> आत्ता उपलब्ध नाही. हे <xliff:g id="APP_NAME_1">%2$s</xliff:g> कडून व्यवस्थापित केले जाते."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"अधिक जाणून घ्या"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"अ‍ॅप उघडा"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"कार्य अ‍ॅप्स सुरू करायची का?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"तुमची कार्य ॲप्स आणि सूचना यांचा अ‍ॅक्सेस मिळवा"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"सुरू करा"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"वर्क ॲप्स पुन्हा सुरू करायची?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"पुन्हा सुरू करा"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आणीबाणी"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"तुमची कार्य ॲप्स आणि कॉल यांचा अ‍ॅक्सेस मिळवा"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ॲप उपलब्ध नाही"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता उपलब्ध नाही."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नाही"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"सुरू करण्यासाठी टॅप करा"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"कोणतीही कार्य ॲप्स सपोर्ट करत नाहीत"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"कोणतीही वैयक्तिक ॲप्स सपोर्ट करत नाहीत"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"तुमच्या वैयक्तिक प्रोफाइलमध्ये <xliff:g id="APP">%s</xliff:g> उघडायचे आहे का?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"तुमच्या कार्य प्रोफाइलमध्ये <xliff:g id="APP">%s</xliff:g> उघडायचे आहे का?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"वैयक्तिक ब्राउझर वापरा"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउझर वापरा"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क अनलॉक पिन"</string>

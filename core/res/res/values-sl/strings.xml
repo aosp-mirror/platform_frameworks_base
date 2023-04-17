@@ -212,7 +212,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Vklopi"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Klici in sporočila so izklopljeni"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Delovne aplikacije so začasno zaustavljene. Telefonskih klicev in sporočil SMS ne boste prejemali."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Zaženi delovne aplikacije"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Aktiviraj delovne aplikacije"</string>
     <string name="me" msgid="6207584824693813140">"Jaz"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabličnega računalnika"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Možnosti naprave Android TV"</string>
@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Aplikaciji dovoljuje dostop do podatkov tipal telesnih funkcij, kot so srčni utrip, temperatura, odstotek kisika v krvi, ko je aplikacija v uporabi."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Dostop do podatkov tipal telesnih funkcij, kot je srčni utrip, ko je v ozadju"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Aplikaciji dovoljuje dostop do podatkov tipal telesnih funkcij, kot so srčni utrip, temperatura, odstotek kisika v krvi, ko je aplikacija v ozadju."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Dostop do podatkov tipal telesnih funkcij o temperaturi na zapestju, ko je aplikacija v uporabi."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Aplikaciji dovoljuje dostop do podatkov tipal telesnih funkcij o temperaturi na zapestju, ko je aplikacija v uporabi."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Dostop do podatkov tipal telesnih funkcij o temperaturi na zapestju, ko je aplikacija v ozadju."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Aplikaciji dovoljuje dostop do podatkov tipal telesnih funkcij o temperaturi na zapestju, ko je aplikacija v ozadju."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Branje dogodkov v koledarjih in podrobnosti koledarjev"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ta aplikacija lahko prebere vse dogodke v koledarju, ki so shranjeni v tabličnem računalniku, ter shrani podatke koledarja ali jih deli z drugimi."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ta aplikacija lahko prebere vse dogodke v koledarju, ki so shranjeni v napravi Android TV, ter shrani podatke koledarja ali jih deli z drugimi."</string>
@@ -629,11 +625,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Napaka pri preverjanju pristnosti"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Uporaba odklepanja s poverilnico"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Odklenite zaslon, če želite nadaljevati."</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prst dobro pridržite na tipalu."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prst dobro pridržite na tipalu"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Prstnega odtisa ni mogoče prepoznati. Poskusite znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Očistite tipalo prstnih odtisov in poskusite znova."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Očistite tipalo in poskusite znova."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prst dobro pridržite na tipalu."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prst dobro pridržite na tipalu"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Prepočasen premik prsta. Poskusite znova."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Poskusite z drugim prstnim odtisom."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Presvetlo je."</string>
@@ -715,7 +711,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Dejanje z obrazom je bilo preklicano."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Odklepanje z obrazom je preklical uporabnik."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Preveč poskusov. Poskusite znova pozneje."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Preveč poskusov. Odklepanje z obrazom je onemogočeno."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Preveč poskusov. Uporabite odklepanje zaslona s poverilnico."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Obraza ni mogoče preveriti. Poskusite znova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Odklepanja z obrazom niste nastavili."</string>
@@ -802,10 +799,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Imetniku omogoča začetek ogledovanja informacij o funkcijah poljubne aplikacije."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"dostop do podatkov tipal z večjo hitrostjo vzorčenja"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikaciji dovoljuje, da vzorči podatke tipal s hitrostjo, večjo od 200 Hz."</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"posodobitev aplikacije brez dejanja uporabnika"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Dovoli shranjevalniku, da posodobi aplikacijo, ki jo je pred tem namestil brez dejanja uporabnika."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih in kodah PIN za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadzor nad poskusi odklepanja zaslona"</string>
@@ -1958,11 +1953,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutno ni na voljo. To upravlja aplikacija <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Več o tem"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Prekliči začasno zaustavitev aplikacije"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Vklop delovnih aplikacij?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Pridobite dostop do delovnih aplikacij in obvestil za delovni profil."</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Vklopi"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Želite znova aktivirati delovne aplikacije?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Znova aktiviraj"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Nujni primer"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Zagotovite si dostop do delovnih aplikacij in klicev."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija ni na voljo"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno ni na voljo."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"»<xliff:g id="ACTIVITY">%1$s</xliff:g>« ni na voljo"</string>
@@ -2172,8 +2165,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Dotaknite se za vklop"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nobena delovna aplikacija ni na voljo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nobena osebna aplikacija"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Želite aplikacijo <xliff:g id="APP">%s</xliff:g> odpreti v osebnem profilu?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Želite aplikacijo <xliff:g id="APP">%s</xliff:g> odpreti v delovnem profilu?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Uporabi osebni brskalnik"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Uporabi delovni brskalnik"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Koda PIN za odklepanje omrežja kartice SIM"</string>

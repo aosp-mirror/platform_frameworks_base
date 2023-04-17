@@ -208,9 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ຈົນກວ່າທ່ານຈະເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານ"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ແອັບສ່ວນຕົວຈະຖືກບລັອກໃນວັນທີ <xliff:g id="DATE">%1$s</xliff:g> ເວລາ <xliff:g id="TIME">%2$s</xliff:g>. ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ປິດໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານເກີນ <xliff:g id="NUMBER">%3$d</xliff:g> ມື້."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ເປີດໃຊ້"</string>
-    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ໂທ ແລະ ຂໍ້ຄວາມປິດຢູ່"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ປິດການໂທ ແລະ ຂໍ້ຄວາມໄວ້ແລ້ວ"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ທ່ານໄດ້ຢຸດແອັບບ່ອນເຮັດວຽກໄວ້ຊົ່ວຄາວແລ້ວ. ທ່ານຈະບໍ່ໄດ້ຮັບການໂທທາງໂທລະສັບ ຫຼື ຂໍ້ຄວາມ."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ແອັບບ່ອນເຮັດວຽກເຊົາຢຸດໄວ້ຊົ່ວຄາວ"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ຍົກເລີກການຢຸດແອັບເຮັດວຽກຊົ່ວຄາວ"</string>
     <string name="me" msgid="6207584824693813140">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ໂຕເລືອກແທັບເລັດ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ຕົວເລືອກ Android TV"</string>
@@ -262,7 +262,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ໂໝດປິດສຽງ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ປິດສຽງແລ້ວ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ເປິດສຽງແລ້ວ"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດໃນຍົນ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດຢູ່ໃນຍົນ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ເປີດໂໝດຢູ່ໃນຍົນແລ້ວ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ປິດໂໝດໃນຍົນແລ້ວ"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"​ການ​ຕັ້ງ​ຄ່າ"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ໃຊ້ແອັບຢູ່."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ນຳໃຊ້ແອັບ."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ນຳໃຊ້ແອັບ."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ແອັບເຮັດວຽກໃນພື້ນຫຼັງ."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ແອັບເຮັດວຽກໃນພື້ນຫຼັງ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ແອັບນີ້ສາມາດອ່ານນັດໝາຍປະຕິທິນທັງໝົດທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ແບ່ງປັນ ຫຼື ບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ຜູ້ໃຊ້ຍົກເລີກການປົດລັອກດ້ວຍໜ້າແລ້ວ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ປິດການນຳໃຊ້ການປົດລັອກດ້ວຍໜ້າແລ້ວ."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ກະລຸນາເຂົ້າການລັອກໜ້າຈໍແທນ."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າເທື່ອ"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້. ມັນຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ຍົກເລີກການຢຸດແອັບຊົ່ວຄາວ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ເປີດໃຊ້ແອັບບ່ອນເຮັດວຽກບໍ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ຮັບສິດເຂົ້າເຖິງແອັບບ່ອນເຮັດວຽກ ແລະ ການແຈ້ງເຕືອນຂອງທ່ານ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ເປີດ​"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ຍົກເລີກການຢຸດຊົ່ວຄາວແອັບບ່ອນເຮັດວຽກບໍ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ຍົກເລີກການຢຸດຊົ່ວຄາວ"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ສຸກເສີນ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"ຮັບສິດເຂົ້າເຖິງແອັບບ່ອນເຮັດວຽກ ແລະ ການໂທຂອງທ່ານ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"ບໍ່ສາມາດໃຊ້ <xliff:g id="ACTIVITY">%1$s</xliff:g> ໄດ້"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ແຕະເພື່ອເປີດໃຊ້"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ບໍ່ມີແອັບບ່ອນເຮັດວຽກ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ບໍ່ມີແອັບສ່ວນຕົວ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"ເປີດ <xliff:g id="APP">%s</xliff:g> ໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານບໍ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"ເປີດ <xliff:g id="APP">%s</xliff:g> ໃນ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານບໍ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບສ່ວນຕົວ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບບ່ອນເຮັດວຽກ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ປົດລັອກເຄືອຂ່າຍຊິມ"</string>

@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite aplicației să acceseze date de la senzorii corporali, cum ar fi pulsul, temperatura și procentul de oxigen din sânge, în timpul folosirii aplicației."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Să acceseze date de la senzorii corporali, precum pulsul, când rulează în fundal"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite aplicației să acceseze date de la senzorii corporali, cum ar fi pulsul, temperatura și procentul de oxigen din sânge, în timp ce aplicația rulează în fundal."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accesează date despre temperatura încheieturii de la senzorii corporali în timpul folosirii aplicației."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite aplicației să acceseze date despre temperatura încheieturii de la senzorii corporali în timpul folosirii aplicației."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accesează date despre temperatura încheieturii de la senzorii corporali în timp ce aplicația rulează în fundal."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite aplicației să acceseze date despre temperatura încheieturii de la senzorii corporali în timp ce aplicația rulează în fundal."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"să citească evenimentele din calendar și detaliile"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Această aplicație poate să citească toate evenimentele din calendar stocate pe tabletă și să trimită sau să salveze datele din calendar."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Această aplicație poate să citească toate evenimentele din calendar stocate pe dispozitivul Android TV și să trimită sau să salveze datele din calendar."</string>
@@ -714,7 +710,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operațiunea privind chipul a fost anulată."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Deblocarea facială a fost anulată de utilizator"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Prea multe încercări. Reîncearcă mai târziu."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Prea multe încercări. Deblocarea facială este dezactivată."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Prea multe încercări. Folosește blocarea ecranului."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nu se poate confirma fața. Încearcă din nou."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nu ai configurat Deblocarea facială"</string>
@@ -801,10 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite proprietarului să înceapă să vadă informațiile despre funcții pentru o aplicație."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"să acceseze date de la senzori la o rată de eșantionare mare"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite aplicației să colecteze date de la senzori la o rată de eșantionare de peste 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"să actualizeze aplicația fără acțiuni din partea utilizatorului"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite deținătorului să actualizeze aplicația pe care a instalat-o anterior fără acțiuni din partea utilizatorului"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Stabilește lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Să monitorizeze încercările de deblocare a ecranului"</string>
@@ -1957,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Momentan, aplicația <xliff:g id="APP_NAME_0">%1$s</xliff:g> nu este disponibilă. Aceasta este gestionată de <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Află mai multe"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulează întreruperea aplicației"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Activezi aplicațiile pentru lucru?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Obține acces la aplicațiile și notificările pentru lucru"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Activează"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații lucru?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Reactivează"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgență"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Solicită acces la aplicațiile și apelurile pentru lucru"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nu este disponibilă"</string>
@@ -2171,8 +2164,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Atinge pentru a activa"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nicio aplicație pentru lucru"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nicio aplicație personală"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Deschizi <xliff:g id="APP">%s</xliff:g> în profilul personal?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Deschizi <xliff:g id="APP">%s</xliff:g> în profilul de serviciu?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Folosește browserul personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Folosește browserul de serviciu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Codul PIN de deblocare SIM privind rețeaua"</string>

@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Hurushusu programu ifikie data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, halijoto na asilimia ya oksijeni kwenye damu wakati programu inatumika."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Fikia data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, wakati programu inatumika chinichini"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Hurushusu programu ifikie data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, halijoto na asilimia ya oksijeni kwenye damu wakati programu inatumika chinichini."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Fikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Huruhusu programu kufikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Fikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika chinichini."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Huruhusu programu kufikia data ya kitambuzi cha halijoto ya kifundo cha mkono, wakati programu inatumika chinichini."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Soma matukio na maelezo ya kalenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako kibao na kushiriki au kuhifadhi data yako ya kalenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kifaa chako cha Android TV na kushiriki au kuhifadhi data ya kalenda yako."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Utendaji wa kitambulisho umeghairiwa."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Hatua ya Kufungua kwa Uso imeghairiwa na mtumiaji"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Umejaribu mara nyingi mno. Jaribu tena baadaye."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Umejaribu mara nyingi mno. Umezima kipengele cha Kufungua kwa Uso."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Umejaribu mara nyingi mno. Weka mbinu ya kufunga skrini badala yake."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Imeshindwa kuthibitisha uso. Jaribu tena."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hujaweka mipangilio ya kipengele cha Kufungua kwa Uso"</string>
@@ -1876,7 +1873,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Sawa"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozigusa."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Washa"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Kwa dakika moja (hadi {formattedTime})}other{Kwa dakika # (hadi {formattedTime})}}"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> haipatikani kwa sasa. Inasimamiwa na <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Pata maelezo zaidi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Acha kusimamisha programu"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Iwashe programu za kazini?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Pata uwezo wa kufikia arifa na programu zako za kazini"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Washa"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Je, ungependa kuacha kusitisha programu za kazini?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Acha kusitisha"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Simu za dharura"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Pata uwezo wa kufikia simu na programu zako za kazini"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programu haipatikani"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> haipatikani hivi sasa."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> haipatikani"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Gusa ili uwashe"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Hakuna programu za kazini"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Hakuna programu za binafsi"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Je, unataka kufungua <xliff:g id="APP">%s</xliff:g> katika wasifu wako binafsi?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Je, unataka kufungua <xliff:g id="APP">%s</xliff:g> katika wasifu wako wa kazi?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Tumia kivinjari cha binafsi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Tumia kivinjari cha kazini"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ya kufungua mtandao wa SIM"</string>

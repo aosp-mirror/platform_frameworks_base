@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើទិន្នន័យឧបករណ៍ចាប់សញ្ញារាងកាយ ដូចជាចង្វាក់បេះដូង សីតុណ្ហភាព និងភាគរយនៃអុកស៊ីសែនក្នុងឈាមជាដើម ខណៈពេលកំពុងប្រើកម្មវិធី។"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ចូលប្រើទិន្នន័យឧបករណ៍ចាប់សញ្ញារាងកាយ ដូចជាចង្វាក់បេះដូងជាដើម ខណៈពេលស្ថិតនៅផ្ទៃខាងក្រោយ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើទិន្នន័យឧបករណ៍ចាប់សញ្ញារាងកាយ ដូចជាចង្វាក់បេះដូង សីតុណ្ហភាព និងភាគរយនៃអុកស៊ីសែនក្នុងឈាមជាដើម ខណៈពេលដែលកម្មវិធីស្ថិតនៅផ្ទៃខាងក្រោយ។"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ចូលប្រើ​ទិន្នន័យសីតុណ្ហភាពកដៃ​ពីសេនស័ររាងកាយ នៅពេល​កំពុងប្រើកម្មវិធី។"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើ​ទិន្នន័យសីតុណ្ហភាពកដៃ​ពីសេនស័ររាងកាយ នៅពេល​កំពុងប្រើកម្មវិធី។"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ចូលប្រើ​ទិន្នន័យសីតុណ្ហភាព​កដៃពីសេនស័ររាងកាយ នៅពេល​កម្មវិធីស្ថិត​នៅផ្ទៃខាងក្រោយ។"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"អនុញ្ញាតឱ្យ​កម្មវិធីចូលប្រើ​ទិន្នន័យសីតុណ្ហភាព​កដៃពីសេនស័ររាងកាយ នៅពេល​កម្មវិធីស្ថិត​នៅផ្ទៃខាងក្រោយ។"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"អាន​ព្រឹត្តិការណ៍​ប្រតិទិន​ និង​ព័ត៌មាន​លម្អិត"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"កម្មវិធី​នេះ​អាច​ធ្វើការ​អាន​ព្រឹត្តិការណ៍​ប្រតិទិន​ទាំងអស់​ ដែល​ផ្ទុក​នៅលើ​ថេប្លេត​របស់​អ្នក​ និង​ចែករំលែក​ ឬ​រក្សាទុក​ទិន្នន័យ​ប្រតិទិន​របស់​អ្នក​។"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"កម្មវិធីនេះ​អាចអានព្រឹត្តិការណ៍​ក្នុងប្រតិទិន​ទាំងអស់​ដែលបានរក្សាទុក​នៅក្នុងឧបករណ៍ Android TV របស់អ្នក និង​ចែករំលែក ឬរក្សាទុក​ទិន្នន័យ​ប្រតិទិន​របស់អ្នក។"</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ផ្ទៃមុខ។"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"អ្នកប្រើប្រាស់​បានបោះបង់​ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ព្យាយាម​ដោះសោ​ច្រើនដងពេក។ ការដោះសោ​តាមទម្រង់មុខ​ត្រូវបានបិទ​។"</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ព្យាយាម​ដោះសោ​ច្រើនដងពេក។ សូមបញ្ចូល​ការចាក់សោ​អេក្រង់​ជំនួសវិញ​។"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"មិន​អាច​ផ្ទៀងផ្ទាត់​មុខ​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"អ្នក​មិនបាន​រៀបចំ​ការដោះសោតាមទម្រង់មុខ​ទេ"</string>
@@ -1912,7 +1909,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​សំណើ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"បាន​ប្ដូរ​ទៅ​សំណើ SS ថ្មី"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ការជូនដំណឹង​អំពីការ​ដាក់នុយ"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ប្រវត្តិរូបការងារ"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"កម្រងព័ត៌មានការងារ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"បាន​ជូនដំណឹង"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"បាន​ផ្ទៀងផ្ទាត់​"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ពង្រីក"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> មិន​អាច​ប្រើ​បាន​ទេនៅពេលនេះ។ វា​ស្ថិត​ក្រោម​ការគ្រប់គ្រងរបស់ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ។"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ស្វែងយល់បន្ថែម"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ឈប់ផ្អាក​កម្មវិធី"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"បើក​កម្មវិធី​ការងារឬ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ទទួលបានសិទ្ធិចូលប្រើការជូនដំណឹង និងកម្មវិធីការងាររបស់អ្នក"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"បើក"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ឈប់ផ្អាកកម្មវិធីការងារឬ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ឈប់ផ្អាក"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ពេលមានអាសន្ន"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"សុំសិទ្ធិចូលប្រើប្រាស់កម្មវិធី​ការងារ និងការហៅរបស់អ្នក"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"មិនអាច​ប្រើ​កម្មវិធី​នេះបានទេ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ចុច​ដើម្បី​បើក"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"គ្មាន​កម្មវិធី​ការងារ​ទេ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"គ្មាន​កម្មវិធី​ផ្ទាល់ខ្លួន​ទេ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"បើក <xliff:g id="APP">%s</xliff:g> នៅក្នុងកម្រង​ព័ត៌មាន​ផ្ទាល់​ខ្លួនរបស់អ្នកឬ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"បើក <xliff:g id="APP">%s</xliff:g> នៅក្នុងកម្រងព័ត៌មានការងាររបស់អ្នកឬ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​ផ្ទាល់ខ្លួន"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​សម្រាប់​ការងារ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"កូដ PIN ដោះ​សោ​បណ្ដាញ​ស៊ីម"</string>

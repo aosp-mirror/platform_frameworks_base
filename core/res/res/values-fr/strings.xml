@@ -211,7 +211,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activer"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Les appels et messages sont désactivés"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Vous avez suspendu les applis professionnelles. Vous ne recevrez pas d\'appels ni de messages."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Activer apps pro"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Réactiver les applis professionnelles"</string>
     <string name="me" msgid="6207584824693813140">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Options de la tablette"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Options Android TV"</string>
@@ -317,7 +317,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder aux données d\'activité physique"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Caméra"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"détecter des appareils à proximité et s\'y connecter"</string>
@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet à l\'appli d\'accéder aux données des capteurs corporels (fréquence cardiaque, température, taux d\'oxygène dans le sang, etc.) quand l\'appli est en cours d\'utilisation."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données de capteurs corporels (comme le pouls) en arrière-plan"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet à l\'appli d\'accéder aux données des capteurs corporels (fréquence cardiaque, température, taux d\'oxygène dans le sang, etc.) quand l\'appli est en arrière-plan."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accédez aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en cours d\'utilisation."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permet à l\'appli d\'accéder aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en cours d\'utilisation."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accédez aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en arrière-plan."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permet à l\'appli d\'accéder aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en arrière-plan."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lire les événements d\'agenda et les détails associés"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Cette application peut lire tous les événements d\'agenda enregistrés sur votre tablette et partager ou enregistrer vos données d\'agenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Cette application peut lire tous les événements de l\'agenda enregistrés sur votre appareil Android TV, et partager ou enregistrer les données de votre agenda."</string>
@@ -714,7 +710,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Opération de reconnaissance faciale annulée."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Déverrouillage par reconnaissance faciale annulé par l\'utilisateur"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Trop de tentatives. Réessayez plus tard."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Tentatives trop nombreuses. Déverrouillage par reconnaissance faciale désactivé."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Tentatives trop nombreuses. Utilisez le verrouillage de l\'écran."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossible de valider votre visage. Réessayez."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Déverrouillage par reconnaissance faciale non configuré"</string>
@@ -801,10 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet à l\'appli autorisée de commencer à voir les infos sur les fonctionnalités d\'une appli."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accéder aux données des capteurs à un taux d\'échantillonnage élevé"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Autorise l\'appli à échantillonner les données des capteurs à un taux supérieur à 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"mettre à jour l\'appli sans action de l\'utilisateur"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Autorise l\'appli précédemment installée à se mettre à jour sans action de l\'utilisateur"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les codes d\'accès de verrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1362,7 +1357,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Aucune autorisation requise"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"Cela peut engendrer des frais"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Appareil en charge via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Recharge de cet appareil via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Recharge via USB de l\'appareil connecté"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transfert de fichiers via USB activé"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB activé"</string>
@@ -1877,7 +1872,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive l\'activité en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'Économiseur de données ?"</string>
@@ -1957,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"L\'application <xliff:g id="APP_NAME_0">%1$s</xliff:g> n\'est pas disponible pour le moment. Cette suspension est gérée par l\'application <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"En savoir plus"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Débloquer l\'application"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Activer les applis pro ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Accéder à vos applis et notifications professionnelles"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Activer"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Réactiver les applis pro ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Réactiver"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgence"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Demandez l\'accès à vos applications professionnelles et à vos appels"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponible"</string>
@@ -2100,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées remplacent les notifications intelligentes dans Android 12. Cette fonctionnalité affiche les suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris aux informations personnelles tels que les noms des contacts et les messages. Elle peut aussi fermer les notifications ou effectuer des actions comme répondre à un appel téléphonique et contrôler le mode Ne pas déranger."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications intelligentes dans Android 12. Cette fonctionnalité affiche des suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris à des infos personnelles tels que les noms et les messages des contacts. Elle peut aussi fermer les notifications, ou y répondre (répondre aux appels téléphoniques, par exemple), et contrôler Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Économiseur de batterie activé"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Réduction de l\'utilisation de la batterie pour prolonger son autonomie"</string>
@@ -2171,8 +2164,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Appuyez pour l\'activer"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Aucune appli professionnelle"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Aucune appli personnelle"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans votre profil personnel ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans votre profil professionnel ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utiliser le navigateur personnel"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utiliser le navigateur professionnel"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Code PIN de déblocage du réseau SIM"</string>
