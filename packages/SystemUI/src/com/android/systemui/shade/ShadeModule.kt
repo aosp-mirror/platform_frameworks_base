@@ -50,5 +50,14 @@ abstract class ShadeModule {
         ): NotificationStackScrollLayout {
             return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller)
         }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
+        fun providesNotificationPanelView(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): NotificationPanelView {
+            return notificationShadeWindowView.findViewById(R.id.notification_panel)
+        }
     }
 }

@@ -135,14 +135,6 @@ public abstract class StatusBarViewModule {
     }
 
     /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationPanelView getNotificationPanelView(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.getNotificationPanelView();
-    }
-
-    /** */
     @Binds
     @CentralSurfacesComponent.CentralSurfacesScope
     abstract ShadeViewController bindsShadeViewController(
