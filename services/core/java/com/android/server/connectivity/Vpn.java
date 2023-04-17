@@ -231,7 +231,8 @@ public class Vpn {
      * <p>If retries have exceeded the length of this array, the last entry in the array will be
      * used as a repeating interval.
      */
-    private static final long[] IKEV2_VPN_RETRY_DELAYS_SEC = {1L, 2L, 5L, 30L, 60L, 300L, 900L};
+    private static final long[] IKEV2_VPN_RETRY_DELAYS_MS =
+            {1_000L, 2_000L, 5_000L, 30_000L, 60_000L, 300_000L, 900_000L};
 
     /**
      * A constant to pass to {@link IkeV2VpnRunner#scheduleStartIkeSession(long)} to mean the
@@ -647,14 +648,14 @@ public class Vpn {
         /**
          * Retrieves the next retry delay
          *
-         * <p>If retries have exceeded the IKEV2_VPN_RETRY_DELAYS_SEC, the last entry in
+         * <p>If retries have exceeded the size of IKEV2_VPN_RETRY_DELAYS_MS, the last entry in
          * the array will be used as a repeating interval.
          */
-        public long getNextRetryDelaySeconds(int retryCount) {
-            if (retryCount >= IKEV2_VPN_RETRY_DELAYS_SEC.length) {
-                return IKEV2_VPN_RETRY_DELAYS_SEC[IKEV2_VPN_RETRY_DELAYS_SEC.length - 1];
+        public long getNextRetryDelayMs(int retryCount) {
+            if (retryCount >= IKEV2_VPN_RETRY_DELAYS_MS.length) {
+                return IKEV2_VPN_RETRY_DELAYS_MS[IKEV2_VPN_RETRY_DELAYS_MS.length - 1];
             } else {
-                return IKEV2_VPN_RETRY_DELAYS_SEC[retryCount];
+                return IKEV2_VPN_RETRY_DELAYS_MS[retryCount];
             }
         }
 
@@ -3782,7 +3783,7 @@ public class Vpn {
             }
             final long retryDelayMs = RETRY_DELAY_AUTO_BACKOFF != delayMs
                     ? delayMs
-                    : mDeps.getNextRetryDelaySeconds(mRetryCount++) * 1000;
+                    : mDeps.getNextRetryDelayMs(mRetryCount++);
             Log.d(TAG, "Retry new IKE session after " + retryDelayMs + " milliseconds.");
             // If the default network is lost during the retry delay, the mActiveNetwork will be
             // null, and the new IKE session won't be established until there is a new default
