@@ -69,7 +69,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun `lightRevealEffect - does not change during keyguard transition`() =
+    fun lightRevealEffect_doesNotChangeDuringKeyguardTransition() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<LightRevealEffect>()
             val job = underTest.lightRevealEffect.onEach(values::add).launchIn(this)
@@ -103,7 +103,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `revealAmount - inverted when appropriate`() =
+    fun revealAmount_invertedWhenAppropriate() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<Float>()
             val job = underTest.revealAmount.onEach(values::add).launchIn(this)
@@ -132,7 +132,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `revealAmount - ignores transitions that do not affect reveal amount`() =
+    fun revealAmount_ignoresTransitionsThatDoNotAffectRevealAmount() =
         runTest(UnconfinedTestDispatcher()) {
             val values = mutableListOf<Float>()
             val job = underTest.revealAmount.onEach(values::add).launchIn(this)

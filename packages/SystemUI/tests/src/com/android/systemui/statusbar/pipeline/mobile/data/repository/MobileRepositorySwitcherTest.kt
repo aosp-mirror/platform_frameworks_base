@@ -156,7 +156,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     }
 
     @Test
-    fun `active repo matches demo mode setting`() =
+    fun activeRepoMatchesDemoModeSetting() =
         runBlocking(IMMEDIATE) {
             whenever(demoModeController.isInDemoMode).thenReturn(false)
 
@@ -177,7 +177,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         }
 
     @Test
-    fun `subscription list updates when demo mode changes`() =
+    fun subscriptionListUpdatesWhenDemoModeChanges() =
         runBlocking(IMMEDIATE) {
             whenever(demoModeController.isInDemoMode).thenReturn(false)
 

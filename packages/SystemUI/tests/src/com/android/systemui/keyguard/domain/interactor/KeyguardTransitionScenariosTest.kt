@@ -180,7 +180,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     }
 
     @Test
-    fun `DREAMING to LOCKSCREEN`() =
+    fun DREAMINGtoLOCKSCREEN() =
         testScope.runTest {
             // GIVEN a device is dreaming
             keyguardRepository.setDreamingWithOverlay(true)
@@ -215,7 +215,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `LOCKSCREEN to PRIMARY_BOUNCER via bouncer showing call`() =
+    fun LOCKSCREENtoPRIMARY_BOUNCERviaBouncerShowingCall() =
         testScope.runTest {
             // GIVEN a device that has at least woken up
             keyguardRepository.setWakefulnessModel(startingToWake())
@@ -242,7 +242,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `OCCLUDED to DOZING`() =
+    fun OCCLUDEDtoDOZING() =
         testScope.runTest {
             // GIVEN a device with AOD not available
             keyguardRepository.setAodAvailable(false)
@@ -269,7 +269,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `OCCLUDED to AOD`() =
+    fun OCCLUDEDtoAOD() =
         testScope.runTest {
             // GIVEN a device with AOD available
             keyguardRepository.setAodAvailable(true)
@@ -296,7 +296,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `LOCKSCREEN to DREAMING`() =
+    fun LOCKSCREENtoDREAMING() =
         testScope.runTest {
             // GIVEN a device that is not dreaming or dozing
             keyguardRepository.setDreamingWithOverlay(false)
@@ -327,7 +327,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `LOCKSCREEN to DOZING`() =
+    fun LOCKSCREENtoDOZING() =
         testScope.runTest {
             // GIVEN a device with AOD not available
             keyguardRepository.setAodAvailable(false)
@@ -354,7 +354,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `LOCKSCREEN to AOD`() =
+    fun LOCKSCREENtoAOD() =
         testScope.runTest {
             // GIVEN a device with AOD available
             keyguardRepository.setAodAvailable(true)
@@ -381,7 +381,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `DOZING to LOCKSCREEN`() =
+    fun DOZINGtoLOCKSCREEN() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
             runTransition(KeyguardState.LOCKSCREEN, KeyguardState.DOZING)
@@ -404,7 +404,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `DOZING to LOCKSCREEN cannot be interruped by DREAMING`() =
+    fun DOZINGtoLOCKSCREENcannotBeInterrupedByDREAMING() =
         testScope.runTest {
             // GIVEN a prior transition has started to LOCKSCREEN
             transitionRepository.sendTransitionStep(
@@ -430,7 +430,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `DOZING to GONE`() =
+    fun DOZINGtoGONE() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
             runTransition(KeyguardState.LOCKSCREEN, KeyguardState.DOZING)
@@ -453,7 +453,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `GONE to DOZING`() =
+    fun GONEtoDOZING() =
         testScope.runTest {
             // GIVEN a device with AOD not available
             keyguardRepository.setAodAvailable(false)
@@ -480,7 +480,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `GONE to AOD`() =
+    fun GONEtoAOD() =
         testScope.runTest {
             // GIVEN a device with AOD available
             keyguardRepository.setAodAvailable(true)
@@ -507,7 +507,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `GONE to LOCKSREEN`() =
+    fun GONEtoLOCKSREEN() =
         testScope.runTest {
             // GIVEN a prior transition has run to GONE
             runTransition(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
@@ -530,7 +530,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `GONE to DREAMING`() =
+    fun GONEtoDREAMING() =
         testScope.runTest {
             // GIVEN a device that is not dreaming or dozing
             keyguardRepository.setDreamingWithOverlay(false)
@@ -561,7 +561,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `ALTERNATE_BOUNCER to PRIMARY_BOUNCER`() =
+    fun ALTERNATE_BOUNCERtoPRIMARY_BOUNCER() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             runTransition(KeyguardState.LOCKSCREEN, KeyguardState.ALTERNATE_BOUNCER)
@@ -584,7 +584,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `ALTERNATE_BOUNCER to AOD`() =
+    fun ALTERNATE_BOUNCERtoAOD() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
@@ -613,7 +613,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `ALTERNATE_BOUNCER to DOZING`() =
+    fun ALTERNATE_BOUNCERtoDOZING() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
@@ -643,7 +643,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `ALTERNATE_BOUNCER to LOCKSCREEN`() =
+    fun ALTERNATE_BOUNCERtoLOCKSCREEN() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
@@ -671,7 +671,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `PRIMARY_BOUNCER to AOD`() =
+    fun PRIMARY_BOUNCERtoAOD() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
             bouncerRepository.setPrimaryShow(true)
@@ -699,7 +699,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `PRIMARY_BOUNCER to DOZING`() =
+    fun PRIMARY_BOUNCERtoDOZING() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
             bouncerRepository.setPrimaryShow(true)
@@ -727,7 +727,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `PRIMARY_BOUNCER to LOCKSCREEN`() =
+    fun PRIMARY_BOUNCERtoLOCKSCREEN() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
             bouncerRepository.setPrimaryShow(true)
@@ -754,7 +754,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `OCCLUDED to GONE`() =
+    fun OCCLUDEDtoGONE() =
         testScope.runTest {
             // GIVEN a device on lockscreen
             keyguardRepository.setKeyguardShowing(true)
@@ -785,7 +785,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `OCCLUDED to LOCKSCREEN`() =
+    fun OCCLUDEDtoLOCKSCREEN() =
         testScope.runTest {
             // GIVEN a device on lockscreen
             keyguardRepository.setKeyguardShowing(true)

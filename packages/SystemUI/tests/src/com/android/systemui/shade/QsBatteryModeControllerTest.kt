@@ -54,7 +54,7 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `returns MODE_ON for qqs with center cutout`() {
+    fun returnsMODE_ONforQqsWithCenterCutout() {
         assertThat(
                 controller.getBatteryMode(CENTER_TOP_CUTOUT, QQS_START_FRAME.prevFrameToFraction())
             )
@@ -62,13 +62,13 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `returns MODE_ESTIMATE for qs with center cutout`() {
+    fun returnsMODE_ESTIMATEforQsWithCenterCutout() {
         assertThat(controller.getBatteryMode(CENTER_TOP_CUTOUT, QS_END_FRAME.nextFrameToFraction()))
             .isEqualTo(BatteryMeterView.MODE_ESTIMATE)
     }
 
     @Test
-    fun `returns MODE_ON for qqs with corner cutout`() {
+    fun returnsMODE_ONforQqsWithCornerCutout() {
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(true)
 
         assertThat(
@@ -78,7 +78,7 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `returns MODE_ESTIMATE for qs with corner cutout`() {
+    fun returnsMODE_ESTIMATEforQsWithCornerCutout() {
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(true)
 
         assertThat(controller.getBatteryMode(CENTER_TOP_CUTOUT, QS_END_FRAME.nextFrameToFraction()))
@@ -86,7 +86,7 @@ class QsBatteryModeControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `returns null in-between`() {
+    fun returnsNullInBetween() {
         assertThat(
                 controller.getBatteryMode(CENTER_TOP_CUTOUT, QQS_START_FRAME.nextFrameToFraction())
             )

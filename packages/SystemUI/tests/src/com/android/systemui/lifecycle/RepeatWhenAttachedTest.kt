@@ -88,7 +88,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
     }
 
     @Test(expected = IllegalStateException::class)
-    fun `repeatWhenAttached - enforces main thread`() =
+    fun repeatWhenAttached_enforcesMainThread() =
         testScope.runTest {
             Assert.setTestThread(null)
 
@@ -96,7 +96,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test(expected = IllegalStateException::class)
-    fun `repeatWhenAttached - dispose enforces main thread`() =
+    fun repeatWhenAttached_disposeEnforcesMainThread() =
         testScope.runTest {
             val disposableHandle = repeatWhenAttached()
             Assert.setTestThread(null)
@@ -105,7 +105,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - view starts detached - runs block when attached`() =
+    fun repeatWhenAttached_viewStartsDetached_runsBlockWhenAttached() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(false)
             repeatWhenAttached()
@@ -120,7 +120,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - view already attached - immediately runs block`() =
+    fun repeatWhenAttached_viewAlreadyAttached_immediatelyRunsBlock() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
 
@@ -132,7 +132,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - starts visible without focus - STARTED`() =
+    fun repeatWhenAttached_startsVisibleWithoutFocus_STARTED() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             whenever(view.windowVisibility).thenReturn(View.VISIBLE)
@@ -145,7 +145,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - starts with focus but invisible - CREATED`() =
+    fun repeatWhenAttached_startsWithFocusButInvisible_CREATED() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             whenever(view.hasWindowFocus()).thenReturn(true)
@@ -158,7 +158,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - starts visible and with focus - RESUMED`() =
+    fun repeatWhenAttached_startsVisibleAndWithFocus_RESUMED() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             whenever(view.windowVisibility).thenReturn(View.VISIBLE)
@@ -172,7 +172,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - becomes visible without focus - STARTED`() =
+    fun repeatWhenAttached_becomesVisibleWithoutFocus_STARTED() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             repeatWhenAttached()
@@ -188,7 +188,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - gains focus but invisible - CREATED`() =
+    fun repeatWhenAttached_gainsFocusButInvisible_CREATED() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             repeatWhenAttached()
@@ -204,7 +204,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - becomes visible and gains focus - RESUMED`() =
+    fun repeatWhenAttached_becomesVisibleAndGainsFocus_RESUMED() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             repeatWhenAttached()
@@ -224,7 +224,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - view gets detached - destroys the lifecycle`() =
+    fun repeatWhenAttached_viewGetsDetached_destroysTheLifecycle() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             repeatWhenAttached()
@@ -238,7 +238,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - view gets reattached - recreates a lifecycle`() =
+    fun repeatWhenAttached_viewGetsReattached_recreatesAlifecycle() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             repeatWhenAttached()
@@ -255,7 +255,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - dispose attached`() =
+    fun repeatWhenAttached_disposeAttached() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             val handle = repeatWhenAttached()
@@ -269,7 +269,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - dispose never attached`() =
+    fun repeatWhenAttached_disposeNeverAttached() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(false)
             val handle = repeatWhenAttached()
@@ -281,7 +281,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         }
 
     @Test
-    fun `repeatWhenAttached - dispose previously attached now detached`() =
+    fun repeatWhenAttached_disposePreviouslyAttachedNowDetached() =
         testScope.runTest {
             whenever(view.isAttachedToWindow).thenReturn(true)
             val handle = repeatWhenAttached()

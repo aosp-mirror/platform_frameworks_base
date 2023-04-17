@@ -92,7 +92,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isEnabled - always false when quick settings are visible`() =
+    fun isEnabled_alwaysFalseWhenQuickSettingsAreVisible() =
         testScope.runTest {
             val isEnabled = collectLastValue(underTest.isLongPressHandlingEnabled)
             KeyguardState.values().forEach { keyguardState ->
@@ -163,7 +163,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `long pressed - close dialogs broadcast received - popup dismissed`() =
+    fun longPressed_closeDialogsBroadcastReceived_popupDismissed() =
         testScope.runTest {
             val isMenuVisible by collectLastValue(underTest.isMenuVisible)
             runCurrent()
@@ -211,7 +211,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `logs when menu is shown`() =
+    fun logsWhenMenuIsShown() =
         testScope.runTest {
             collectLastValue(underTest.isMenuVisible)
             runCurrent()
@@ -223,7 +223,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `logs when menu is clicked`() =
+    fun logsWhenMenuIsClicked() =
         testScope.runTest {
             collectLastValue(underTest.isMenuVisible)
             runCurrent()

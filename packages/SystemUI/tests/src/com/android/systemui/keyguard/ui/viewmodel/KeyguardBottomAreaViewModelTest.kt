@@ -251,7 +251,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun `startButton - present - visible model - starts activity on click`() =
+    fun startButton_present_visibleModel_startsActivityOnClick() =
         testScope.runTest {
             repository.setKeyguardShowing(true)
             val latest = collectLastValue(underTest.startButton)
@@ -280,7 +280,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `startButton - hidden when device policy disables all keyguard features`() =
+    fun startButton_hiddenWhenDevicePolicyDisablesAllKeyguardFeatures() =
         testScope.runTest {
             whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
@@ -315,7 +315,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `startButton - in preview mode - visible even when keyguard not showing`() =
+    fun startButton_inPreviewMode_visibleEvenWhenKeyguardNotShowing() =
         testScope.runTest {
             underTest.enablePreviewMode(
                 initiallySelectedSlotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
@@ -359,7 +359,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `endButton - in higlighted preview mode - dimmed when other is selected`() =
+    fun endButton_inHiglightedPreviewMode_dimmedWhenOtherIsSelected() =
         testScope.runTest {
             underTest.enablePreviewMode(
                 initiallySelectedSlotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
@@ -416,7 +416,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `endButton - present - visible model - do nothing on click`() =
+    fun endButton_present_visibleModel_doNothingOnClick() =
         testScope.runTest {
             repository.setKeyguardShowing(true)
             val latest = collectLastValue(underTest.endButton)
@@ -445,7 +445,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `startButton - not present - model is hidden`() =
+    fun startButton_notPresent_modelIsHidden() =
         testScope.runTest {
             val latest = collectLastValue(underTest.startButton)
 
@@ -524,7 +524,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `alpha - in preview mode - does not change`() =
+    fun alpha_inPreviewMode_doesNotChange() =
         testScope.runTest {
             underTest.enablePreviewMode(
                 initiallySelectedSlotId = null,
@@ -629,7 +629,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isClickable - true when alpha at threshold`() =
+    fun isClickable_trueWhenAlphaAtThreshold() =
         testScope.runTest {
             repository.setKeyguardShowing(true)
             repository.setBottomAreaAlpha(
@@ -661,7 +661,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isClickable - true when alpha above threshold`() =
+    fun isClickable_trueWhenAlphaAboveThreshold() =
         testScope.runTest {
             repository.setKeyguardShowing(true)
             val latest = collectLastValue(underTest.startButton)
@@ -692,7 +692,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isClickable - false when alpha below threshold`() =
+    fun isClickable_falseWhenAlphaBelowThreshold() =
         testScope.runTest {
             repository.setKeyguardShowing(true)
             val latest = collectLastValue(underTest.startButton)
@@ -723,7 +723,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isClickable - false when alpha at zero`() =
+    fun isClickable_falseWhenAlphaAtZero() =
         testScope.runTest {
             repository.setKeyguardShowing(true)
             val latest = collectLastValue(underTest.startButton)

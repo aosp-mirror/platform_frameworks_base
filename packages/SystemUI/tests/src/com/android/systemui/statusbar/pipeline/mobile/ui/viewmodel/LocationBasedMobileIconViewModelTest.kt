@@ -92,7 +92,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun `location based view models receive same icon id when common impl updates`() =
+    fun locationBasedViewModelsReceiveSameIconIdWhenCommonImplUpdates() =
         testScope.runTest {
             var latestHome: SignalIconModel? = null
             val homeJob = homeIcon.icon.onEach { latestHome = it }.launchIn(this)

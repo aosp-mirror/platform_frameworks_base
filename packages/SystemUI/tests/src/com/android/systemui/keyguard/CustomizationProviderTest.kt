@@ -211,7 +211,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun `onAttachInfo - reportsContext`() {
+    fun onAttachInfo_reportsContext() {
         val callback: SystemUIAppComponentFactoryBase.ContextAvailableCallback = mock()
         underTest.setContextAvailableCallback(callback)
 
@@ -254,7 +254,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun `insert and query selection`() =
+    fun insertAndQuerySelection() =
         testScope.runTest {
             val slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
             val affordanceId = AFFORDANCE_2
@@ -278,7 +278,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `query slots`() =
+    fun querySlotsProvidesTwoSlots() =
         testScope.runTest {
             assertThat(querySlots())
                 .isEqualTo(
@@ -296,7 +296,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `query affordances`() =
+    fun queryAffordancesProvidesTwoAffordances() =
         testScope.runTest {
             assertThat(queryAffordances())
                 .isEqualTo(
@@ -316,7 +316,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `delete and query selection`() =
+    fun deleteAndQuerySelection() =
         testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
@@ -351,7 +351,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `delete all selections in a slot`() =
+    fun deleteAllSelectionsInAslot() =
         testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,

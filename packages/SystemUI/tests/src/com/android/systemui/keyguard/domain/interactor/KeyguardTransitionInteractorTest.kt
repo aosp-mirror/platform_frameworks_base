@@ -52,7 +52,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun `transition collectors receives only appropriate events`() = runTest {
+    fun transitionCollectorsReceivesOnlyAppropriateEvents() = runTest {
         val lockscreenToAodSteps by collectValues(underTest.lockscreenToAodTransition)
         val aodToLockscreenSteps by collectValues(underTest.aodToLockscreenTransition)
 
