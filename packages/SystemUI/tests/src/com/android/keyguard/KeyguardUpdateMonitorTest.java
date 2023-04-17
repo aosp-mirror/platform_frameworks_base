@@ -2528,19 +2528,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBatteryChangedIntent_unplugDevice_resetIncompatibleCharger() {
-        mKeyguardUpdateMonitor.mIncompatibleCharger = true;
-        Intent batteryChangedIntent =
-                getBatteryIntent().putExtra(BatteryManager.EXTRA_PLUGGED, -1);
-
-        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(mContext, batteryChangedIntent);
-
-        BatteryStatus status = verifyRefreshBatteryInfo();
-        assertThat(status.incompatibleCharger.get()).isFalse();
-        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isFalse();
-    }
-
-    @Test
     public void unfoldWakeup_requestActiveUnlock_forceDismissKeyguard()
             throws RemoteException {
         // GIVEN shouldTriggerActiveUnlock
