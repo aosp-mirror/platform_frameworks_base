@@ -265,7 +265,8 @@ public abstract class JobService extends Service {
      * @see JobInfo.Builder#setRequiredNetworkType(int)
      */
     public void onNetworkChanged(@NonNull JobParameters params) {
-        Log.w(TAG, "onNetworkChanged() not implemented. Must override in a subclass.");
+        Log.w(TAG, "onNetworkChanged() not implemented in " + getClass().getName()
+                + ". Must override in a subclass.");
     }
 
     /**
