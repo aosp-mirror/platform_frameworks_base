@@ -152,6 +152,7 @@ import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.BinderUtils;
+import com.android.net.module.util.LinkPropertiesUtils;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.NetworkStackConstants;
 import com.android.server.DeviceIdleInternal;
@@ -231,6 +232,33 @@ public class Vpn {
      * used as a repeating interval.
      */
     private static final long[] IKEV2_VPN_RETRY_DELAYS_SEC = {1L, 2L, 5L, 30L, 60L, 300L, 900L};
+
+    /**
+     * A constant to pass to {@link IkeV2VpnRunner#scheduleStartIkeSession(long)} to mean the
+     * delay should be computed automatically with backoff.
+     */
+    private static final long RETRY_DELAY_AUTO_BACKOFF = -1;
+
+    /**
+     * How long to wait before trying to migrate the IKE connection when NetworkCapabilities or
+     * LinkProperties change in a way that may require migration.
+     *
+     * This delay is useful to avoid multiple migration tries (e.g. when a network changes
+     * both its NC and LP at the same time, e.g. when it first connects) and to minimize the
+     * cases where an old list of addresses is detected for the network.
+     *
+     * In practice, the IKE library reads the LinkProperties of the passed network with
+     * the synchronous {@link ConnectivityManager#getLinkProperties(Network)}, which means in
+     * most cases the race would resolve correctly, but this delay increases the chance that
+     * it correctly is.
+     * Further, using the synchronous method in the IKE library is actually dangerous because
+     * it is racy (it races with {@code IkeNetworkCallbackBase#onLost} and it should be fixed
+     * by using callbacks instead. When that happens, the race within IKE is fixed but the
+     * race between that callback and the one in IkeV2VpnRunner becomes a much bigger problem,
+     * and this delay will be necessary to ensure the correct link address list is used.
+     */
+    private static final long IKE_DELAY_ON_NC_LP_CHANGE_MS = 300;
+
     /**
      * Largest profile size allowable for Platform VPNs.
      *
@@ -3718,13 +3746,20 @@ public class Vpn {
             }
         }
 
-        private void scheduleRetryNewIkeSession() {
+        /**
+         * Schedule starting an IKE session.
+         * @param delayMs the delay after which to try starting the session. This should be
+         *                RETRY_DELAY_AUTO_BACKOFF for automatic retries with backoff.
+         */
+        private void scheduleStartIkeSession(final long delayMs) {
             if (mScheduledHandleRetryIkeSessionFuture != null) {
                 Log.d(TAG, "There is a pending retrying task, skip the new retrying task");
                 return;
             }
-            final long retryDelay = mDeps.getNextRetryDelaySeconds(mRetryCount++);
-            Log.d(TAG, "Retry new IKE session after " + retryDelay + " seconds.");
+            final long retryDelayMs = RETRY_DELAY_AUTO_BACKOFF != delayMs
+                    ? delayMs
+                    : mDeps.getNextRetryDelaySeconds(mRetryCount++) * 1000;
+            Log.d(TAG, "Retry new IKE session after " + retryDelayMs + " milliseconds.");
             // If the default network is lost during the retry delay, the mActiveNetwork will be
             // null, and the new IKE session won't be established until there is a new default
             // network bringing up.
@@ -3735,7 +3770,7 @@ public class Vpn {
                         // Reset mScheduledHandleRetryIkeSessionFuture since it's already run on
                         // executor thread.
                         mScheduledHandleRetryIkeSessionFuture = null;
-                    }, retryDelay, TimeUnit.SECONDS);
+                    }, retryDelayMs, TimeUnit.MILLISECONDS);
         }
 
         /** Called when the NetworkCapabilities of underlying network is changed */
@@ -3747,15 +3782,23 @@ public class Vpn {
             if (oldNc == null || !nc.getSubscriptionIds().equals(oldNc.getSubscriptionIds())) {
                 // A new default network is available, or the subscription has changed.
                 // Try to migrate the session, or failing that, start a new one.
-                startOrMigrateIkeSession(mActiveNetwork);
+                scheduleStartIkeSession(IKE_DELAY_ON_NC_LP_CHANGE_MS);
             }
         }
 
         /** Called when the LinkProperties of underlying network is changed */
         public void onDefaultNetworkLinkPropertiesChanged(@NonNull LinkProperties lp) {
-            mEventChanges.log("[UnderlyingNW] Lp changed from "
-                    + mUnderlyingLinkProperties + " to " + lp);
+            final LinkProperties oldLp = mUnderlyingLinkProperties;
+            mEventChanges.log("[UnderlyingNW] Lp changed from " + oldLp + " to " + lp);
             mUnderlyingLinkProperties = lp;
+            if (oldLp == null || !LinkPropertiesUtils.isIdenticalAllLinkAddresses(oldLp, lp)) {
+                // If some of the link addresses changed, the IKE session may need to be migrated
+                // or restarted, for example if the available IP families have changed or if the
+                // source address used has gone away. See IkeConnectionController#onNetworkSetByUser
+                // and IkeConnectionController#selectAndSetRemoteAddress for where this ends up
+                // re-evaluating the session.
+                scheduleStartIkeSession(IKE_DELAY_ON_NC_LP_CHANGE_MS);
+            }
         }
 
         class VpnConnectivityDiagnosticsCallback
@@ -4033,7 +4076,7 @@ public class Vpn {
                 markFailedAndDisconnect(exception);
                 return;
             } else {
-                scheduleRetryNewIkeSession();
+                scheduleStartIkeSession(RETRY_DELAY_AUTO_BACKOFF);
             }
 
             // Close all obsolete state, but keep VPN alive incase a usable network comes up.
