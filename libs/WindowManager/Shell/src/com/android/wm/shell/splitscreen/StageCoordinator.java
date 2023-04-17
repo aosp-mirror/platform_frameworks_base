@@ -468,26 +468,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     RemoteAnimationTarget[] wallpapers,
                     RemoteAnimationTarget[] nonApps,
                     final IRemoteAnimationFinishedCallback finishedCallback) {
-                boolean openingToSide = false;
-                if (apps != null) {
-                    for (int i = 0; i < apps.length; ++i) {
-                        if (apps[i].mode == MODE_OPENING
-                                && mSideStage.containsTask(apps[i].taskId)) {
-                            openingToSide = true;
-                            break;
-                        }
-                    }
-                } else if (mSideStage.getChildCount() != 0) {
-                    // There are chances the entering app transition got canceled by performing
-                    // rotation transition. Checks if there is any child task existed in split
-                    // screen before fallback to cancel entering flow.
-                    openingToSide = true;
-                }
-
-                if (isEnteringSplit && !openingToSide) {
+                if (isEnteringSplit && mSideStage.getChildCount() == 0) {
                     mMainExecutor.execute(() -> exitSplitScreen(
-                            mSideStage.getChildCount() == 0 ? mMainStage : mSideStage,
-                            EXIT_REASON_UNKNOWN));
+                            null /* childrenToTop */, EXIT_REASON_UNKNOWN));
+                    mSplitUnsupportedToast.show();
                 }
 
                 if (finishedCallback != null) {
@@ -572,26 +556,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
-                boolean openingToSide = false;
-                if (apps != null) {
-                    for (int i = 0; i < apps.length; ++i) {
-                        if (apps[i].mode == MODE_OPENING
-                                && mSideStage.containsTask(apps[i].taskId)) {
-                            openingToSide = true;
-                            break;
-                        }
-                    }
-                } else if (mSideStage.getChildCount() != 0) {
-                    // There are chances the entering app transition got canceled by performing
-                    // rotation transition. Checks if there is any child task existed in split
-                    // screen before fallback to cancel entering flow.
-                    openingToSide = true;
-                }
-
-                if (isEnteringSplit && !openingToSide && apps != null) {
+                if (isEnteringSplit && mSideStage.getChildCount() == 0) {
                     mMainExecutor.execute(() -> exitSplitScreen(
-                            mSideStage.getChildCount() == 0 ? mMainStage : mSideStage,
-                            EXIT_REASON_UNKNOWN));
+                            null /* childrenToTop */, EXIT_REASON_UNKNOWN));
+                    mSplitUnsupportedToast.show();
                 }
 
                 if (apps != null) {
