@@ -1401,7 +1401,7 @@ public class OomAdjuster {
 
         mLastFreeSwapPercent = freeSwapPercent;
 
-        return mService.mAppProfiler.updateLowMemStateLSP(numCached, numEmpty, numTrimming);
+        return mService.mAppProfiler.updateLowMemStateLSP(numCached, numEmpty, numTrimming, now);
     }
 
     @GuardedBy({"mService", "mProcLock"})
