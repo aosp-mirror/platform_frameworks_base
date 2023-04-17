@@ -39,13 +39,33 @@ class UnfoldRemoteFilterTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTransitionProgress_withInterval_propagated() {
-        runOnMainThreadWithInterval(
-            { progressProvider.onTransitionStarted() },
-            { progressProvider.onTransitionProgress(0.5f) }
-        )
+    fun onTransitionProgress_firstProgressEvent_propagatedImmediately() {
+        progressProvider.onTransitionStarted()
+        progressProvider.onTransitionProgress(0.5f)
 
         listener.assertLastProgress(0.5f)
+    }
+
+    @Test
+    fun onTransitionProgress_secondProgressEvent_isNotPropagatedImmediately() =
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            progressProvider.onTransitionStarted()
+            progressProvider.onTransitionProgress(0.5f)
+            progressProvider.onTransitionProgress(0.8f)
+
+            // 0.8f should be set only later, after the animation
+            listener.assertLastProgress(0.5f)
+        }
+
+    @Test
+    fun onTransitionProgress_severalProgressEventsWithInterval_propagated() {
+        runOnMainThreadWithInterval(
+            { progressProvider.onTransitionStarted() },
+            { progressProvider.onTransitionProgress(0.5f) },
+            { progressProvider.onTransitionProgress(0.8f) }
+        )
+
+        listener.assertLastProgress(0.8f)
     }
 
     @Test
