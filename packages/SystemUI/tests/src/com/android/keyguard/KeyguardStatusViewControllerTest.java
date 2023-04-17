@@ -130,7 +130,7 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     public void updatePosition_primaryClockAnimation() {
         ClockController mockClock = mock(ClockController.class);
         when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
-        when(mockClock.getConfig()).thenReturn(new ClockConfig(false, false, true));
+        when(mockClock.getConfig()).thenReturn(new ClockConfig(false, true));
 
         mController.updatePosition(10, 15, 20f, true);
 
@@ -145,7 +145,7 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     public void updatePosition_alternateClockAnimation() {
         ClockController mockClock = mock(ClockController.class);
         when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
-        when(mockClock.getConfig()).thenReturn(new ClockConfig(false, true, true));
+        when(mockClock.getConfig()).thenReturn(new ClockConfig(true, true));
 
         mController.updatePosition(10, 15, 20f, true);
 

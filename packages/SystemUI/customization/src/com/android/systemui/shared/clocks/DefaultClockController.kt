@@ -62,10 +62,7 @@ class DefaultClockController(
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
 
     override val events: DefaultClockEvents
-    override lateinit var animations: DefaultClockAnimations
-        private set
-
-    override val config = ClockConfig(hasCustomPositionUpdatedAnimation = true)
+    override val config = ClockConfig()
 
     init {
         val parent = FrameLayout(ctx)
@@ -84,13 +81,13 @@ class DefaultClockController(
         clocks = listOf(smallClock.view, largeClock.view)
 
         events = DefaultClockEvents()
-        animations = DefaultClockAnimations(0f, 0f)
         events.onLocaleChanged(Locale.getDefault())
     }
 
     override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
         largeClock.recomputePadding(null)
-        animations = DefaultClockAnimations(dozeFraction, foldFraction)
+        largeClock.animations = LargeClockAnimations(largeClock.view, dozeFraction, foldFraction)
+        smallClock.animations = DefaultClockAnimations(smallClock.view, dozeFraction, foldFraction)
         events.onColorPaletteChanged(resources)
         events.onTimeZoneChanged(TimeZone.getDefault())
         smallClock.events.onTimeTick()
@@ -114,6 +111,9 @@ class DefaultClockController(
             set(value) {
                 view.logBuffer = value
             }
+
+        override var animations: DefaultClockAnimations = DefaultClockAnimations(view, 0f, 0f)
+            internal set
 
         init {
             if (seedColor != null) {
@@ -170,6 +170,12 @@ class DefaultClockController(
         view: AnimatableClockView,
         seedColor: Int?,
     ) : DefaultClockFaceController(view, seedColor) {
+        override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
+
+        init {
+            animations = LargeClockAnimations(view, 0f, 0f)
+        }
+
         override fun recomputePadding(targetRegion: Rect?) {
             // We center the view within the targetRegion instead of within the parent
             // view by computing the difference and adding that to the padding.
@@ -220,7 +226,8 @@ class DefaultClockController(
         }
     }
 
-    inner class DefaultClockAnimations(
+    open inner class DefaultClockAnimations(
+        val view: AnimatableClockView,
         dozeFraction: Float,
         foldFraction: Float,
     ) : ClockAnimations {
@@ -229,34 +236,40 @@ class DefaultClockController(
 
         init {
             if (foldState.isActive) {
-                clocks.forEach { it.animateFoldAppear(false) }
+                view.animateFoldAppear(false)
             } else {
-                clocks.forEach { it.animateDoze(dozeState.isActive, false) }
+                view.animateDoze(dozeState.isActive, false)
             }
         }
 
         override fun enter() {
             if (!dozeState.isActive) {
-                clocks.forEach { it.animateAppearOnLockscreen() }
+                view.animateAppearOnLockscreen()
             }
         }
 
-        override fun charge() = clocks.forEach { it.animateCharge { dozeState.isActive } }
+        override fun charge() = view.animateCharge { dozeState.isActive }
 
         override fun fold(fraction: Float) {
             val (hasChanged, hasJumped) = foldState.update(fraction)
             if (hasChanged) {
-                clocks.forEach { it.animateFoldAppear(!hasJumped) }
+                view.animateFoldAppear(!hasJumped)
             }
         }
 
         override fun doze(fraction: Float) {
             val (hasChanged, hasJumped) = dozeState.update(fraction)
             if (hasChanged) {
-                clocks.forEach { it.animateDoze(dozeState.isActive, !hasJumped) }
+                view.animateDoze(dozeState.isActive, !hasJumped)
             }
         }
+    }
 
+    inner class LargeClockAnimations(
+        view: AnimatableClockView,
+        dozeFraction: Float,
+        foldFraction: Float,
+    ) : DefaultClockAnimations(view, dozeFraction, foldFraction) {
         override fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {
             largeClock.moveForSplitShade(fromRect, toRect, fraction)
         }

@@ -184,13 +184,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mClockController.getEvents()).thenReturn(mClockEvents);
         when(mSmallClockController.getEvents()).thenReturn(mClockFaceEvents);
         when(mLargeClockController.getEvents()).thenReturn(mClockFaceEvents);
-        when(mClockController.getAnimations()).thenReturn(mClockAnimations);
+        when(mLargeClockController.getAnimations()).thenReturn(mClockAnimations);
+        when(mSmallClockController.getAnimations()).thenReturn(mClockAnimations);
         when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
         when(mClockEventController.getClock()).thenReturn(mClockController);
         when(mSmallClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
         when(mLargeClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
@@ -384,9 +385,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         assertEquals(View.VISIBLE, mFakeDateView.getVisibility());
 
         when(mSmallClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
         when(mLargeClockController.getConfig())
-                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true));
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
         verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
         listenerArgumentCaptor.getValue().onCurrentClockChanged();
 
