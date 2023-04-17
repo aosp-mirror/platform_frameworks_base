@@ -200,7 +200,7 @@ public class FullScreenMagnificationControllerTest {
         assertFalse(mFullScreenMagnificationController.isRegistered(DISPLAY_0));
         assertFalse(mFullScreenMagnificationController.isRegistered(DISPLAY_1));
 
-        verify(mMockThumbnail, times(2)).hideThumbNail();
+        verify(mMockThumbnail, times(2)).hideThumbnail();
     }
 
     @Test
@@ -540,7 +540,7 @@ public class FullScreenMagnificationControllerTest {
 
         // The first time is triggered when the thumbnail is just created.
         // The second time is triggered when the magnification region changed.
-        verify(mMockThumbnail, times(2)).setThumbNailBounds(
+        verify(mMockThumbnail, times(2)).setThumbnailBounds(
                 any(), anyFloat(), anyFloat(), anyFloat());
     }
 
@@ -912,7 +912,7 @@ public class FullScreenMagnificationControllerTest {
         verifyNoMoreInteractions(mMockWindowManager);
 
         verify(mMockThumbnail)
-                .updateThumbNail(eq(scale), eq(startCenter.x), eq(startCenter.y));
+                .updateThumbnail(eq(scale), eq(startCenter.x), eq(startCenter.y));
     }
 
     @Test

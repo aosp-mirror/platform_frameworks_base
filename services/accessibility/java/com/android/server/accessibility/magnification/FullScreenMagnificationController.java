@@ -597,14 +597,14 @@ public class FullScreenMagnificationController implements
         @GuardedBy("mLock")
         void updateThumbnail(float scale, float centerX, float centerY) {
             if (mMagnificationThumbnail != null) {
-                mMagnificationThumbnail.updateThumbNail(scale, centerX, centerY);
+                mMagnificationThumbnail.updateThumbnail(scale, centerX, centerY);
             }
         }
 
         @GuardedBy("mLock")
         void refreshThumbnail(float scale, float centerX, float centerY) {
             if (mMagnificationThumbnail != null) {
-                mMagnificationThumbnail.setThumbNailBounds(
+                mMagnificationThumbnail.setThumbnailBounds(
                         mMagnificationBounds,
                         scale,
                         centerX,
@@ -616,7 +616,7 @@ public class FullScreenMagnificationController implements
         @GuardedBy("mLock")
         void hideThumbnail() {
             if (mMagnificationThumbnail != null) {
-                mMagnificationThumbnail.hideThumbNail();
+                mMagnificationThumbnail.hideThumbnail();
             }
         }
 
