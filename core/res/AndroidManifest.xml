@@ -2917,6 +2917,14 @@
     <permission android:name="android.permission.BIND_SATELLITE_SERVICE"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
+    <!-- Must be required by a SatelliteGatewayService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_SATELLITE_GATEWAY_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a telephony data service to ensure that only the
          system can bind to it.
          <p>Protection level: signature
