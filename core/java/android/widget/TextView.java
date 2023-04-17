@@ -62,6 +62,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.FontScaleConverterFactory;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -867,6 +868,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @UnsupportedAppUsage
     private float mSpacingAdd = 0.0f;
 
+    /**
+     * Remembers what line height was set to originally, before we broke it down into raw pixels.
+     *
+     * <p>This is stored as a complex dimension with both value and unit packed into one field!
+     * {@see TypedValue}
+     */
+    private int mLineHeightComplexDimen;
+
     private int mBreakStrategy;
     private int mHyphenationFrequency;
     private int mJustificationMode;
@@ -1233,7 +1242,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 defStyleAttr, defStyleRes);
         int firstBaselineToTopHeight = -1;
         int lastBaselineToBottomHeight = -1;
-        int lineHeight = -1;
+        float lineHeight = -1f;
+        int lineHeightUnit = -1;
 
         readTextAppearance(context, a, attributes, true /* styleArray */);
 
@@ -1583,7 +1593,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_lineHeight:
-                    lineHeight = a.getDimensionPixelSize(attr, -1);
+                    TypedValue peekValue = a.peekValue(attr);
+                    if (peekValue != null && peekValue.type == TypedValue.TYPE_DIMENSION) {
+                        lineHeightUnit = peekValue.getComplexUnit();
+                        lineHeight = TypedValue.complexToFloat(peekValue.data);
+                    } else {
+                        lineHeight = a.getDimensionPixelSize(attr, -1);
+                    }
                     break;
             }
         }
@@ -1936,7 +1952,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setLastBaselineToBottomHeight(lastBaselineToBottomHeight);
         }
         if (lineHeight >= 0) {
-            setLineHeight(lineHeight);
+            if (lineHeightUnit == -1) {
+                setLineHeightPx(lineHeight);
+            } else {
+                setLineHeight(lineHeightUnit, lineHeight);
+            }
         }
     }
 
@@ -4629,6 +4649,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (size != mTextPaint.getTextSize()) {
             mTextPaint.setTextSize(size);
 
+            maybeRecalculateLineHeight();
             if (shouldRequestLayout && mLayout != null) {
                 // Do not auto-size right after setting the text size.
                 mNeedsAutoSizeText = false;
@@ -6214,6 +6235,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (lineHeight != fontHeight) {
             // Set lineSpacingExtra by the difference of lineSpacing with lineHeight
             setLineSpacing(lineHeight - fontHeight, 1f);
+
+            mLineHeightComplexDimen =
+                        TypedValue.createComplexDimension(lineHeight, TypedValue.COMPLEX_UNIT_PX);
         }
     }
 
@@ -6236,8 +6260,54 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             @TypedValue.ComplexDimensionUnit int unit,
             @FloatRange(from = 0) float lineHeight
     ) {
-        setLineHeightPx(
-                TypedValue.applyDimension(unit, lineHeight, getDisplayMetricsOrSystem()));
+        var metrics = getDisplayMetricsOrSystem();
+        // We can avoid the recalculation if we know non-linear font scaling isn't being used
+        // (an optimization for the majority case).
+        // We also don't try to do the recalculation unless both textSize and lineHeight are in SP.
+        if (!FontScaleConverterFactory.isNonLinearFontScalingActive(
+                    getResources().getConfiguration().fontScale)
+                || unit != TypedValue.COMPLEX_UNIT_SP
+                || mTextSizeUnit != TypedValue.COMPLEX_UNIT_SP
+        ) {
+            setLineHeightPx(TypedValue.applyDimension(unit, lineHeight, metrics));
+
+            // Do this last so it overwrites what setLineHeightPx() sets it to.
+            mLineHeightComplexDimen = TypedValue.createComplexDimension(lineHeight, unit);
+            return;
+        }
+
+        // Recalculate a proportional line height when non-linear font scaling is in effect.
+        // Otherwise, a desired 2x line height at font scale 1.0 will not be 2x at font scale 2.0,
+        // due to non-linear font scaling compressing higher SP sizes. See b/273326061 for details.
+        // We know they are using SP units for both the text size and the line height
+        // at this point, so determine the ratio between them. This is the *intended* line spacing
+        // multiplier if font scale == 1.0. We can then determine what the pixel value for the line
+        // height would be if we preserved proportions.
+        var textSizePx = getTextSize();
+        var textSizeSp = TypedValue.convertPixelsToDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                textSizePx,
+                metrics
+        );
+        var ratio = lineHeight / textSizeSp;
+        setLineHeightPx(textSizePx * ratio);
+
+        // Do this last so it overwrites what setLineHeightPx() sets it to.
+        mLineHeightComplexDimen = TypedValue.createComplexDimension(lineHeight, unit);
+    }
+
+    private void maybeRecalculateLineHeight() {
+        if (mLineHeightComplexDimen == 0) {
+            return;
+        }
+        int unit = TypedValue.getUnitFromComplexDimension(mLineHeightComplexDimen);
+        if (unit != TypedValue.COMPLEX_UNIT_SP) {
+            // The lineHeight was never supplied in SP, so we didn't do any fancy recalculations
+            // in setLineHeight(). We don't need to recalculate.
+            return;
+        }
+
+        setLineHeight(unit, TypedValue.complexToFloat(mLineHeightComplexDimen));
     }
 
     /**
