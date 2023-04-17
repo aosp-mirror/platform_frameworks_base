@@ -24,12 +24,30 @@ import android.graphics.Canvas
 import android.graphics.Typeface
 import android.graphics.fonts.Font
 import android.text.Layout
+import android.text.TextPaint
 import android.util.LruCache
 
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
 private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
 
 typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
+
+interface TypefaceVariantCache {
+    fun getTypefaceForVariant(fvar: String, targetPaint: TextPaint): Typeface?
+}
+
+class TypefaceVariantCacheImpl() : TypefaceVariantCache {
+    private val cache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
+    override fun getTypefaceForVariant(fvar: String, targetPaint: TextPaint): Typeface? {
+        cache.get(fvar)?.let {
+            return it
+        }
+
+        targetPaint.fontVariationSettings = fvar
+        return targetPaint.typeface?.also { cache.put(fvar, it) }
+    }
+}
+
 /**
  * This class provides text animation between two styles.
  *
@@ -56,9 +74,19 @@ typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
  * ```
  * </code> </pre>
  */
-class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
+class TextAnimator(
+    layout: Layout,
+    private val invalidateCallback: () -> Unit,
+) {
+    var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl()
+        get() = field
+        set(value) {
+            field = value
+            textInterpolator.typefaceCache = value
+        }
+
     // Following two members are for mutable for testing purposes.
-    public var textInterpolator: TextInterpolator = TextInterpolator(layout)
+    public var textInterpolator: TextInterpolator = TextInterpolator(layout, typefaceCache)
     public var animator: ValueAnimator =
         ValueAnimator.ofFloat(1f).apply {
             duration = DEFAULT_ANIMATION_DURATION
@@ -68,9 +96,7 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
             }
             addListener(
                 object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        textInterpolator.rebase()
-                    }
+                    override fun onAnimationEnd(animation: Animator?) = textInterpolator.rebase()
                     override fun onAnimationCancel(animation: Animator?) = textInterpolator.rebase()
                 }
             )
@@ -115,8 +141,6 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
     }
 
     private val fontVariationUtils = FontVariationUtils()
-
-    private val typefaceCache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
 
     fun updateLayout(layout: Layout) {
         textInterpolator.layout = layout
@@ -220,12 +244,8 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         }
 
         if (!fvar.isNullOrBlank()) {
-            textInterpolator.targetPaint.typeface = typefaceCache.get(fvar) ?: run {
-                textInterpolator.targetPaint.fontVariationSettings = fvar
-                textInterpolator.targetPaint.typeface?.also {
-                    typefaceCache.put(fvar, textInterpolator.targetPaint.typeface)
-                }
-            }
+            textInterpolator.targetPaint.typeface =
+                typefaceCache.getTypefaceForVariant(fvar, textInterpolator.targetPaint)
         }
 
         if (color != null) {
@@ -304,7 +324,8 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
             weight = weight,
             width = width,
             opticalSize = opticalSize,
-            roundness = roundness,)
+            roundness = roundness,
+        )
         setTextStyle(
             fvar = fvar,
             textSize = textSize,
