@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
@@ -337,7 +338,7 @@ public final class BroadcastHelper {
                 broadcastAllowlist, null /* filterExtrasForReceiver */, null);
         // Send to PermissionController for all new users, even if it may not be running for some
         // users
-        if (isPrivacySafetyLabelChangeNotificationsEnabled()) {
+        if (isPrivacySafetyLabelChangeNotificationsEnabled(mContext)) {
             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                     packageName, extras, 0,
                     mContext.getPackageManager().getPermissionControllerPackageName(),
@@ -389,9 +390,13 @@ public final class BroadcastHelper {
     }
 
     /** Returns whether the Safety Label Change notification, a privacy feature, is enabled. */
-    public static boolean isPrivacySafetyLabelChangeNotificationsEnabled() {
+    public static boolean isPrivacySafetyLabelChangeNotificationsEnabled(Context context) {
+        PackageManager packageManager = context.getPackageManager();
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED, false);
+                SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED, false)
+            && !packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+            && !packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+            && !packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 
     @NonNull
