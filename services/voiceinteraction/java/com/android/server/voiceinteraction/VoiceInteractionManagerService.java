@@ -381,51 +381,21 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull Identity originatorIdentity, IBinder client,
                 ModuleProperties moduleProperties) {
             Objects.requireNonNull(originatorIdentity);
-            boolean forHotwordDetectionService;
+            boolean forHotwordDetectionService = false;
             synchronized (VoiceInteractionManagerServiceStub.this) {
                 enforceIsCurrentVoiceInteractionService();
                 forHotwordDetectionService =
                         mImpl != null && mImpl.mHotwordDetectionConnection != null;
             }
-            IVoiceInteractionSoundTriggerSession session;
-            if (forHotwordDetectionService) {
-                // Use our own identity and handle the permission checks ourselves. This allows
-                // properly checking/noting against the voice interactor or hotword detection
-                // service as needed.
-                if (HotwordDetectionConnection.DEBUG) {
-                    Slog.d(TAG, "Creating a SoundTriggerSession for a HotwordDetectionService");
-                }
-                originatorIdentity.uid = Binder.getCallingUid();
-                originatorIdentity.pid = Binder.getCallingPid();
-                session = new SoundTriggerSessionPermissionsDecorator(
-                        createSoundTriggerSessionForSelfIdentity(client, moduleProperties),
-                        mContext,
-                        originatorIdentity);
-            } else {
-                if (HotwordDetectionConnection.DEBUG) {
-                    Slog.d(TAG, "Creating a SoundTriggerSession");
-                }
-                try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
-                        originatorIdentity)) {
-                    session = new SoundTriggerSession(mSoundTriggerInternal.attach(client,
-                                moduleProperties, false));
-                }
+            if (HotwordDetectionConnection.DEBUG) {
+                Slog.d(TAG, "Creating a SoundTriggerSession, for HDS: "
+                        + forHotwordDetectionService);
             }
-            return new SoundTriggerSessionBinderProxy(session);
-        }
-
-        private IVoiceInteractionSoundTriggerSession createSoundTriggerSessionForSelfIdentity(
-                IBinder client, ModuleProperties moduleProperties) {
-            Identity identity = new Identity();
-            identity.uid = Process.myUid();
-            identity.pid = Process.myPid();
-            identity.packageName = ActivityThread.currentOpPackageName();
-            return Binder.withCleanCallingIdentity(() -> {
-                try (SafeCloseable ignored = IdentityContext.create(identity)) {
-                    return new SoundTriggerSession(
-                            mSoundTriggerInternal.attach(client, moduleProperties, false));
-                }
-            });
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
+                    originatorIdentity)) {
+                return new SoundTriggerSession(mSoundTriggerInternal.attach(client,
+                            moduleProperties, forHotwordDetectionService));
+            }
         }
 
         @Override
@@ -1700,11 +1670,7 @@ public class VoiceInteractionManagerService extends SystemService {
             return null;
         }
 
-        /**
-         * Implementation of SoundTriggerSession. Does not implement {@link #asBinder()} as it's
-         * intended to be wrapped by an {@link IVoiceInteractionSoundTriggerSession.Stub} object.
-         */
-        private class SoundTriggerSession implements IVoiceInteractionSoundTriggerSession {
+        private class SoundTriggerSession extends IVoiceInteractionSoundTriggerSession.Stub {
             final SoundTriggerInternal.Session mSession;
             private IHotwordRecognitionStatusCallback mSessionExternalCallback;
             private IRecognitionStatusCallback mSessionInternalCallback;
@@ -1848,12 +1814,6 @@ public class VoiceInteractionManagerService extends SystemService {
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
-            }
-
-            @Override
-            public IBinder asBinder() {
-                throw new UnsupportedOperationException(
-                        "This object isn't intended to be used as a Binder.");
             }
 
             @Override
