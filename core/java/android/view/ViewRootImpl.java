@@ -8923,8 +8923,7 @@ public final class ViewRootImpl implements ViewParent,
                 return true;
             }
             return mEvent instanceof MotionEvent
-                    && (mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
-                        || mEvent.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER));
+                    && (mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER));
         }
 
         public boolean shouldSendToSynthesizer() {
