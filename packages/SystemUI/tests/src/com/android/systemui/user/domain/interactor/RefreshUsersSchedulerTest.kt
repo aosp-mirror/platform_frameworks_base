@@ -45,7 +45,7 @@ class RefreshUsersSchedulerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `pause - prevents the next refresh from happening`() =
+    fun pause_preventsTheNextRefreshFromHappening() =
         runBlocking(IMMEDIATE) {
             underTest =
                 RefreshUsersScheduler(
@@ -60,7 +60,7 @@ class RefreshUsersSchedulerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `unpauseAndRefresh - forces the refresh even when paused`() =
+    fun unpauseAndRefresh_forcesTheRefreshEvenWhenPaused() =
         runBlocking(IMMEDIATE) {
             underTest =
                 RefreshUsersScheduler(
@@ -76,7 +76,7 @@ class RefreshUsersSchedulerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `refreshIfNotPaused - refreshes when not paused`() =
+    fun refreshIfNotPaused_refreshesWhenNotPaused() =
         runBlocking(IMMEDIATE) {
             underTest =
                 RefreshUsersScheduler(

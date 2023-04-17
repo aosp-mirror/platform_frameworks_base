@@ -520,7 +520,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     // is private and can only be tested by looking at [isDefaultConnectionFailed].
 
     @Test
-    fun `data switch - in same group - validated matches previous value - expires after 2s`() =
+    fun dataSwitch_inSameGroup_validatedMatchesPreviousValue_expiresAfter2s() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
@@ -548,7 +548,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data switch - in same group - not validated - immediately marked as failed`() =
+    fun dataSwitch_inSameGroup_notValidated_immediatelyMarkedAsFailed() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
@@ -567,7 +567,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data switch - lose validation - then switch happens - clears forced bit`() =
+    fun dataSwitch_loseValidation_thenSwitchHappens_clearsForcedBit() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
@@ -602,7 +602,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data switch - while already forcing validation - resets clock`() =
+    fun dataSwitch_whileAlreadyForcingValidation_resetsClock() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
