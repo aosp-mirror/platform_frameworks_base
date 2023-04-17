@@ -82,13 +82,6 @@ public class DecorContext extends ContextThemeWrapper {
             }
             return mContentCaptureManager;
         }
-        // TODO(b/154191411): Try to revisit this issue in S.
-        // We use application to get DisplayManager here because ViewRootImpl holds reference of
-        // DisplayManager and implicitly holds reference of mContext, which makes activity cannot
-        // be GC'd even after destroyed if mContext is an activity object.
-        if (Context.DISPLAY_SERVICE.equals(name)) {
-            return super.getSystemService(name);
-        }
         // LayoutInflater and WallpaperManagerService should also be obtained from visual context
         // instead of base context.
         return (context != null) ? context.getSystemService(name) : super.getSystemService(name);
