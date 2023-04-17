@@ -24,7 +24,6 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
@@ -1193,14 +1192,15 @@ public class BubbleController implements ConfigurationChangeListener,
             return;
         }
 
+        String appBubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(), user);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
-        if (!isResizableActivity(intent, packageManager, KEY_APP_BUBBLE)) return;
+        if (!isResizableActivity(intent, packageManager, appBubbleKey)) return;
 
-        Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE);
+        Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(appBubbleKey);
         if (existingAppBubble != null) {
             BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
             if (isStackExpanded()) {
-                if (selectedBubble != null && KEY_APP_BUBBLE.equals(selectedBubble.getKey())) {
+                if (selectedBubble != null && appBubbleKey.equals(selectedBubble.getKey())) {
                     // App bubble is expanded, lets collapse
                     collapseStack();
                 } else {
@@ -1214,7 +1214,7 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         } else {
             // App bubble does not exist, lets add and expand it
-            Bubble b = new Bubble(intent, user, icon, mMainExecutor);
+            Bubble b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
             b.setShouldAutoExpand(true);
             inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
         }
@@ -1247,8 +1247,8 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     /** Sets the app bubble's taskId which is cached for SysUI. */
-    public void setAppBubbleTaskId(int taskId) {
-        mImpl.mCachedState.setAppBubbleTaskId(taskId);
+    public void setAppBubbleTaskId(String key, int taskId) {
+        mImpl.mCachedState.setAppBubbleTaskId(key, taskId);
     }
 
     /**
@@ -2045,7 +2045,8 @@ public class BubbleController implements ConfigurationChangeListener,
             private HashSet<String> mSuppressedBubbleKeys = new HashSet<>();
             private HashMap<String, String> mSuppressedGroupToNotifKeys = new HashMap<>();
             private HashMap<String, Bubble> mShortcutIdToBubble = new HashMap<>();
-            private int mAppBubbleTaskId = INVALID_TASK_ID;
+
+            private HashMap<String, Integer> mAppBubbleTaskIds = new HashMap();
 
             private ArrayList<Bubble> mTmpBubbles = new ArrayList<>();
 
@@ -2077,20 +2078,20 @@ public class BubbleController implements ConfigurationChangeListener,
 
                 mSuppressedBubbleKeys.clear();
                 mShortcutIdToBubble.clear();
-                mAppBubbleTaskId = INVALID_TASK_ID;
+                mAppBubbleTaskIds.clear();
                 for (Bubble b : mTmpBubbles) {
                     mShortcutIdToBubble.put(b.getShortcutId(), b);
                     updateBubbleSuppressedState(b);
 
-                    if (KEY_APP_BUBBLE.equals(b.getKey())) {
-                        mAppBubbleTaskId = b.getTaskId();
+                    if (b.isAppBubble()) {
+                        mAppBubbleTaskIds.put(b.getKey(), b.getTaskId());
                     }
                 }
             }
 
             /** Sets the app bubble's taskId which is cached for SysUI. */
-            synchronized void setAppBubbleTaskId(int taskId) {
-                mAppBubbleTaskId = taskId;
+            synchronized void setAppBubbleTaskId(String key, int taskId) {
+                mAppBubbleTaskIds.put(key, taskId);
             }
 
             /**
@@ -2143,7 +2144,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     pw.println("   suppressing: " + key);
                 }
 
-                pw.print("mAppBubbleTaskId: " + mAppBubbleTaskId);
+                pw.print("mAppBubbleTaskIds: " + mAppBubbleTaskIds.values());
             }
         }
 
@@ -2205,7 +2206,7 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public boolean isAppBubbleTaskId(int taskId) {
-            return mCachedState.mAppBubbleTaskId == taskId;
+            return mCachedState.mAppBubbleTaskIds.values().contains(taskId);
         }
 
         @Override
