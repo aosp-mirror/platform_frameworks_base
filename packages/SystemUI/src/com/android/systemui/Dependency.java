@@ -106,7 +106,6 @@ import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
@@ -134,13 +133,13 @@ import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
+import dagger.Lazy;
+
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import dagger.Lazy;
 
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
@@ -270,7 +269,6 @@ public class Dependency {
     @Inject Lazy<NotificationShadeWindowController> mNotificationShadeWindowController;
     @Inject Lazy<StatusBarWindowController> mTempStatusBarWindowController;
     @Inject Lazy<DarkIconDispatcher> mDarkIconDispatcher;
-    @Inject Lazy<ConfigurationController> mConfigurationController;
     @Inject Lazy<StatusBarIconController> mStatusBarIconController;
     @Inject Lazy<ScreenLifecycle> mScreenLifecycle;
     @Inject Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
@@ -440,8 +438,6 @@ public class Dependency {
         mProviders.put(StatusBarWindowController.class, mTempStatusBarWindowController::get);
 
         mProviders.put(DarkIconDispatcher.class, mDarkIconDispatcher::get);
-
-        mProviders.put(ConfigurationController.class, mConfigurationController::get);
 
         mProviders.put(StatusBarIconController.class, mStatusBarIconController::get);
 
