@@ -576,7 +576,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse lokationer fra din mediesamling."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Brug biometri"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Brug biometri eller skærmlås"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Bekræft, at det er dig"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verificer, at det er dig"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Brug dine biometriske data for at fortsætte"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Brug dine biometriske data eller din skærmlås for at fortsætte"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk hardware er ikke tilgængelig"</string>
@@ -667,7 +667,7 @@
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansigtsdækning er registreret. Dit ansigt skal være helt synligt."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansigt ikke bekræftet. Hardware ikke tilgængelig."</string>
+    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansigt ikke verificeret. Hardware ikke tilgængelig."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Prøv ansigtslås igen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Der kan ikke gemmes nye ansigtsdata. Slet et gammelt først."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansigtshandlingen blev annulleret."</string>
@@ -1256,7 +1256,7 @@
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Sluk skærmen for at afslutte konfigurationen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktiver"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du verificere dit fingeraftryk?"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at verificere dit fingeraftryk."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
