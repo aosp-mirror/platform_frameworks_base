@@ -217,6 +217,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     public void onProviderResponseFailure(int errorCode, Exception exception) {
         if (exception instanceof GetCredentialException) {
             mProviderException = (GetCredentialException) exception;
+            // TODO(b/271135048) : Decide on exception type length
+            mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
         updateStatusAndInvokeCallback(toStatus(errorCode),

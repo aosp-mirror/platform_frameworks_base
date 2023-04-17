@@ -32,7 +32,7 @@ public enum ApiStatus {
     private final int mInnerMetricCode;
 
     ApiStatus(int innerMetricCode) {
-        this.mInnerMetricCode = innerMetricCode;
+        mInnerMetricCode = innerMetricCode;
     }
 
     /**
@@ -41,6 +41,6 @@ public enum ApiStatus {
      * @return a code corresponding to the west world metric name
      */
     public int getMetricCode() {
-        return this.mInnerMetricCode;
+        return mInnerMetricCode;
     }
 }
