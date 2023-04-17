@@ -2809,6 +2809,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Override
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
+        mNotificationStackScrollLayoutController.updateShowEmptyShadeView();
         updateVisibility();
     }
 
