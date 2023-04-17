@@ -122,6 +122,22 @@ class FontScaleConverterFactoryTest {
         }
     }
 
+    @SmallTest
+    fun testIsNonLinearFontScalingActive() {
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(0f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(-1f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(0.85f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.02f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.10f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.15f)).isTrue()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.1499999f))
+                .isTrue()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.5f)).isTrue()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(2f)).isTrue()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(3f)).isTrue()
+    }
+
     @LargeTest
     @Test
     fun allFeasibleScalesAndConversionsDoNotCrash() {
