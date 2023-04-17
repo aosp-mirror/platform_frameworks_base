@@ -98,7 +98,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         whenever(context.getString(R.string.note_task_button_label))
             .thenReturn(NOTE_TASK_SHORT_LABEL)
         whenever(context.packageManager).thenReturn(packageManager)
-        whenever(resolver.resolveInfo(any(), any())).thenReturn(NOTE_TASK_INFO)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(NOTE_TASK_INFO)
         whenever(userManager.isUserUnlocked).thenReturn(true)
         whenever(
                 devicePolicyManager.getKeyguardDisabledFeatures(
@@ -142,7 +142,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = true,
-                key = Bubble.KEY_APP_BUBBLE,
+                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
@@ -157,7 +157,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = false,
-                key = Bubble.KEY_APP_BUBBLE,
+                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verify(eventLogger).logNoteTaskClosed(expectedInfo)
@@ -172,7 +172,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = true,
-                key = Bubble.KEY_APP_BUBBLE,
+                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
@@ -186,7 +186,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             .apply { infoReference.set(expectedInfo) }
             .onBubbleExpandChanged(
                 isExpanding = false,
-                key = Bubble.KEY_APP_BUBBLE,
+                key = Bubble.getAppBubbleKeyForApp(expectedInfo.packageName, expectedInfo.user),
             )
 
         verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
@@ -208,7 +208,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController(isEnabled = false)
             .onBubbleExpandChanged(
                 isExpanding = true,
-                key = Bubble.KEY_APP_BUBBLE,
+                key = Bubble.getAppBubbleKeyForApp(NOTE_TASK_INFO.packageName, NOTE_TASK_INFO.user),
             )
 
         verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
@@ -224,7 +224,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 isKeyguardLocked = true,
             )
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
 
         createNoteTaskController()
             .showNoteTask(
@@ -256,9 +256,10 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             NOTE_TASK_INFO.copy(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
                 isKeyguardLocked = true,
+                user = user10,
             )
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
 
         createNoteTaskController()
             .showNoteTaskAsUser(
@@ -292,7 +293,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 isKeyguardLocked = true,
             )
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
         whenever(activityManager.getRunningTasks(anyInt()))
             .thenReturn(listOf(NOTE_RUNNING_TASK_INFO))
 
@@ -318,7 +319,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
                 isKeyguardLocked = false,
             )
-        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
 
         createNoteTaskController()
@@ -344,7 +345,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun showNoteTask_intentResolverReturnsNull_shouldShowToast() {
-        whenever(resolver.resolveInfo(any(), any())).thenReturn(null)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(null)
         val noteTaskController = spy(createNoteTaskController())
         doNothing().whenever(noteTaskController).showNoDefaultNotesAppToast()
 
@@ -384,7 +385,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 isKeyguardLocked = true,
             )
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
 
         createNoteTaskController()
             .showNoteTask(
@@ -717,6 +718,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             NoteTaskInfo(
                 packageName = NOTE_TASK_PACKAGE_NAME,
                 uid = NOTE_TASK_UID,
+                user = UserHandle.of(0),
             )
         private val NOTE_RUNNING_TASK_INFO =
             ActivityManager.RunningTaskInfo().apply {
