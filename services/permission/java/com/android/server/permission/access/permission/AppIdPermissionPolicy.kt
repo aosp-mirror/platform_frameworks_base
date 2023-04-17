@@ -22,7 +22,6 @@ import android.content.pm.PermissionGroupInfo
 import android.content.pm.PermissionInfo
 import android.content.pm.SigningDetails
 import android.os.Build
-import android.os.UserHandle
 import android.util.Log
 import com.android.internal.os.RoSystemProperties
 import com.android.modules.utils.BinaryXmlPullParser
@@ -1200,8 +1199,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             return true
         }
         if (permission.isRetailDemo &&
-            packageName in knownPackages[KnownPackages.PACKAGE_RETAIL_DEMO]!! &&
-            isDeviceOrProfileOwnerUid(packageState.appId)) {
+            packageName in knownPackages[KnownPackages.PACKAGE_RETAIL_DEMO]!!) {
             // Special permission granted only to the OEM specified retail demo app.
             // Note that the original code was passing app ID as UID, so this behavior is kept
             // unchanged.
@@ -1257,16 +1255,25 @@ class AppIdPermissionPolicy : SchemePolicy() {
         return false
     }
 
-    private fun MutateStateScope.isDeviceOrProfileOwnerUid(uid: Int): Boolean {
-        val userId = UserHandle.getUserId(uid)
-        val ownerPackageName = newState.externalState.deviceAndProfileOwners[userId] ?: return false
-        val ownerPackageState = newState.externalState.packageStates[ownerPackageName]
-            ?: return false
-        val ownerUid = UserHandle.getUid(userId, ownerPackageState.appId)
-        return uid == ownerUid
-    }
-
     override fun MutateStateScope.onSystemReady() {
+        // HACK: PACKAGE_USAGE_STATS is the only permission with the retailDemo protection flag,
+        // and we have to wait until DevicePolicyManagerService is started to know whether the
+        // retail demo package is a profile owner so that it can have the permission.
+        // Since there's no simple callback for profile owner change, and we are deprecating and
+        // removing the retailDemo protection flag in favor of a proper role soon, we can just
+        // re-evaluate the permission here, which is also how the old implementation has been
+        // working.
+        // TODO: Partially revert ag/22690114 once we can remove support for the retailDemo
+        //  protection flag.
+        val externalState = newState.externalState
+        for (packageName in externalState.knownPackages[KnownPackages.PACKAGE_RETAIL_DEMO]!!) {
+            val appId = externalState.packageStates[packageName]?.appId ?: continue
+            newState.userStates.forEachIndexed { _, userId, _ ->
+                evaluatePermissionState(
+                    appId, userId, Manifest.permission.PACKAGE_USAGE_STATS, null
+                )
+            }
+        }
         if (!privilegedPermissionAllowlistViolations.isEmpty()) {
             throw IllegalStateException("Signature|privileged permissions not in privileged" +
                 " permission allowlist: $privilegedPermissionAllowlistViolations")
