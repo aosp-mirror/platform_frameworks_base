@@ -163,7 +163,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAttachDetach() throws Exception {
         // Normal attachment / detachment.
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         assertNotNull(module);
         module.detach();
     }
@@ -171,7 +171,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testLoadUnloadModel() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         final int hwHandle = 7;
         int handle = loadGenericModel(module, hwHandle).first;
@@ -182,7 +182,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testLoadPreemptModel() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         final int hwHandle = 7;
         Pair<Integer, SoundTriggerHwCallback> loadResult = loadGenericModel(module, hwHandle);
@@ -201,7 +201,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testLoadUnloadPhraseModel() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         final int hwHandle = 73;
         int handle = loadPhraseModel(module, hwHandle).first;
@@ -212,7 +212,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testStartStopRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -237,7 +237,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testStartRecognitionBusy() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -261,7 +261,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testStartStopPhraseRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 67;
@@ -286,7 +286,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -331,7 +331,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testPhraseRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 7;
@@ -361,7 +361,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForceRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -398,7 +398,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForceRecognitionNotSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -429,7 +429,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForcePhraseRecognition() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -466,7 +466,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testForcePhraseRecognitionNotSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 17;
@@ -498,7 +498,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAbortRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 11;
@@ -528,7 +528,7 @@ public class SoundTriggerMiddlewareImplTest {
     public void testAbortPhraseRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
 
         // Load the model.
         final int hwHandle = 11;
@@ -557,7 +557,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testParameterSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 12;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
@@ -579,7 +579,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testParameterNotSupported() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 13;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
@@ -597,7 +597,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testGetParameter() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 14;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
@@ -614,7 +614,7 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testSetParameter() throws Exception {
         ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
+        ISoundTriggerModule module = mService.attach(0, callback, false);
         final int hwHandle = 17;
         int modelHandle = loadGenericModel(module, hwHandle).first;
 
