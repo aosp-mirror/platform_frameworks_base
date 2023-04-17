@@ -105,7 +105,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network event - create new subscription`() =
+    fun networkEvent_createNewSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -121,7 +121,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi carrier merged event - create new subscription`() =
+    fun wifiCarrierMergedEvent_createNewSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -137,7 +137,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network event - reuses subscription when same Id`() =
+    fun networkEvent_reusesSubscriptionWhenSameId() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -159,7 +159,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi carrier merged event - reuses subscription when same Id`() =
+    fun wifiCarrierMergedEvent_reusesSubscriptionWhenSameId() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -181,7 +181,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `multiple subscriptions`() =
+    fun multipleSubscriptions() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -195,7 +195,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile subscription and carrier merged subscription`() =
+    fun mobileSubscriptionAndCarrierMergedSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -209,7 +209,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `multiple mobile subscriptions and carrier merged subscription`() =
+    fun multipleMobileSubscriptionsAndCarrierMergedSubscription() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -224,7 +224,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - disables connection - subId specified - single conn`() =
+    fun mobileDisabledEvent_disablesConnection_subIdSpecified_singleConn() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -239,7 +239,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - disables connection - subId not specified - single conn`() =
+    fun mobileDisabledEvent_disablesConnection_subIdNotSpecified_singleConn() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -254,7 +254,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - disables connection - subId specified - multiple conn`() =
+    fun mobileDisabledEvent_disablesConnection_subIdSpecified_multipleConn() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -270,7 +270,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile disabled event - subId not specified - multiple conn - ignores command`() =
+    fun mobileDisabledEvent_subIdNotSpecified_multipleConn_ignoresCommand() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -286,7 +286,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi network updates to disabled - carrier merged connection removed`() =
+    fun wifiNetworkUpdatesToDisabled_carrierMergedConnectionRemoved() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -303,7 +303,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `wifi network updates to active - carrier merged connection removed`() =
+    fun wifiNetworkUpdatesToActive_carrierMergedConnectionRemoved() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -326,7 +326,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile sub updates to carrier merged - only one connection`() =
+    fun mobileSubUpdatesToCarrierMerged_onlyOneConnection() =
         testScope.runTest {
             var latestSubsList: List<SubscriptionModel>? = null
             var connections: List<DemoMobileConnectionRepository>? = null
@@ -352,7 +352,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `mobile sub updates to carrier merged then back - has old mobile data`() =
+    fun mobileSubUpdatesToCarrierMergedThenBack_hasOldMobileData() =
         testScope.runTest {
             var latestSubsList: List<SubscriptionModel>? = null
             var connections: List<DemoMobileConnectionRepository>? = null
@@ -393,7 +393,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
 
     /** Regression test for b/261706421 */
     @Test
-    fun `multiple connections - remove all - does not throw`() =
+    fun multipleConnections_removeAll_doesNotThrow() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.subscriptions.onEach { latest = it }.launchIn(this)
@@ -411,7 +411,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `demo connection - single subscription`() =
+    fun demoConnection_singleSubscription() =
         testScope.runTest {
             var currentEvent: FakeNetworkEventModel = validMobileEvent(subId = 1)
             var connections: List<DemoMobileConnectionRepository>? = null
@@ -440,7 +440,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `demo connection - two connections - update second - no affect on first`() =
+    fun demoConnection_twoConnections_updateSecond_noAffectOnFirst() =
         testScope.runTest {
             var currentEvent1 = validMobileEvent(subId = 1)
             var connection1: DemoMobileConnectionRepository? = null
@@ -487,7 +487,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `demo connection - two connections - update carrier merged - no affect on first`() =
+    fun demoConnection_twoConnections_updateCarrierMerged_noAffectOnFirst() =
         testScope.runTest {
             var currentEvent1 = validMobileEvent(subId = 1)
             var connection1: DemoMobileConnectionRepository? = null

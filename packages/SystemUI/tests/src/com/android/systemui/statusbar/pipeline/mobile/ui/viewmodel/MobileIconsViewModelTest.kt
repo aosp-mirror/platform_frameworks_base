@@ -111,7 +111,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `caching - mobile icon view model is reused for same sub id`() =
+    fun caching_mobileIconViewModelIsReusedForSameSubId() =
         testScope.runTest {
             val model1 = underTest.viewModelForSub(1, StatusBarLocation.HOME)
             val model2 = underTest.viewModelForSub(1, StatusBarLocation.QS)
@@ -120,7 +120,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `caching - invalid view models are removed from cache when sub disappears`() =
+    fun caching_invalidViewModelsAreRemovedFromCacheWhenSubDisappears() =
         testScope.runTest {
             // Retrieve models to trigger caching
             val model1 = underTest.viewModelForSub(1, StatusBarLocation.HOME)
