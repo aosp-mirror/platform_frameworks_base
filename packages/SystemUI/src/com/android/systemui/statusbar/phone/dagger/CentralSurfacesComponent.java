@@ -20,8 +20,6 @@ import static com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.ST
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.android.keyguard.LockIconViewController;
-import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -115,11 +113,6 @@ public interface CentralSurfacesComponent {
 
     /** Creates a QuickSettingsController. */
     QuickSettingsController getQuickSettingsController();
-
-    /**
-     * Creates a LockIconViewController. Must be init after creation.
-     */
-    LockIconViewController getLockIconViewController();
 
     /**
      * Creates a StatusBarHeadsUpChangeListener.

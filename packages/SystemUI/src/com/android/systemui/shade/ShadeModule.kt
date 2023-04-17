@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.view.LayoutInflater
+import com.android.keyguard.LockIconView
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthRippleController
@@ -88,6 +89,15 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): AuthRippleView? {
             return notificationShadeWindowView.findViewById(R.id.auth_ripple)
+        }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
+        fun providesLockIconView(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): LockIconView {
+            return notificationShadeWindowView.findViewById(R.id.lock_icon_view)
         }
     }
 }

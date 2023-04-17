@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -25,7 +24,6 @@ import android.view.ViewStub;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.battery.BatteryMeterViewController;
@@ -137,15 +135,6 @@ public abstract class StatusBarViewModule {
     abstract ShadeViewController bindsShadeViewController(
             NotificationPanelViewController notificationPanelViewController);
 
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static LockIconView getLockIconView(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.lock_icon_view);
-    }
-
-    /** */
     @Provides
     @Named(SHADE_HEADER)
     @CentralSurfacesComponent.CentralSurfacesScope
