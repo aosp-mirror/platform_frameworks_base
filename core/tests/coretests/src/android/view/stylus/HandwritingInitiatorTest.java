@@ -23,14 +23,20 @@ import static android.view.stylus.HandwritingTestUtil.createView;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.HandwritingInitiator;
@@ -38,7 +44,9 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -47,6 +55,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Tests for {@link HandwritingInitiator}
@@ -541,6 +550,111 @@ public class HandwritingInitiatorTest {
 
         assertThat(mHandwritingInitiator.mConnectedView).isNotNull();
         assertThat(mHandwritingInitiator.mConnectedView.get()).isEqualTo(mTestView1);
+    }
+
+    @Test
+    public void startHandwriting_hidesHint() {
+        EditText editText =
+                new EditText(InstrumentationRegistry.getInstrumentation().getTargetContext());
+        editText.setHint("hint");
+        editText.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        verifyEditTextDrawsText(editText, "hint");
+
+        mHandwritingInitiator.onTouchEvent(createStylusEvent(ACTION_DOWN, 0, 0, 0));
+        mHandwritingInitiator.startHandwriting(editText);
+
+        verifyEditTextDrawsText(editText, null);
+    }
+
+    @Test
+    public void startHandwriting_clearFocus_restoresHint() {
+        EditText editText =
+                new EditText(InstrumentationRegistry.getInstrumentation().getTargetContext());
+        editText.setHint("hint");
+        editText.setLayoutParams(new ViewGroup.LayoutParams(1024, 1024));
+        editText.requestFocus();
+
+        verifyEditTextDrawsText(editText, "hint");
+
+        mHandwritingInitiator.onTouchEvent(createStylusEvent(ACTION_DOWN, 0, 0, 0));
+        mHandwritingInitiator.startHandwriting(editText);
+
+        verifyEditTextDrawsText(editText, null);
+
+        editText.clearFocus();
+
+        verifyEditTextDrawsText(editText, "hint");
+    }
+
+    @Test
+    public void startHandwriting_setHint_restoresHint() {
+        EditText editText =
+                new EditText(InstrumentationRegistry.getInstrumentation().getTargetContext());
+        editText.setHint("hint");
+        editText.setLayoutParams(new ViewGroup.LayoutParams(1024, 1024));
+
+        verifyEditTextDrawsText(editText, "hint");
+
+        mHandwritingInitiator.onTouchEvent(createStylusEvent(ACTION_DOWN, 0, 0, 0));
+        mHandwritingInitiator.startHandwriting(editText);
+
+        verifyEditTextDrawsText(editText, null);
+
+        editText.setHint("new hint");
+
+        verifyEditTextDrawsText(editText, "new hint");
+    }
+
+    @Test
+    public void startHandwriting_setText_restoresHint() {
+        EditText editText =
+                new EditText(InstrumentationRegistry.getInstrumentation().getTargetContext());
+        editText.setHint("hint");
+        editText.setLayoutParams(new ViewGroup.LayoutParams(1024, 1024));
+
+        verifyEditTextDrawsText(editText, "hint");
+
+        mHandwritingInitiator.onTouchEvent(createStylusEvent(ACTION_DOWN, 0, 0, 0));
+        mHandwritingInitiator.startHandwriting(editText);
+
+        verifyEditTextDrawsText(editText, null);
+
+        editText.setText("a");
+        editText.setText("");
+
+        verifyEditTextDrawsText(editText, "hint");
+    }
+
+    private void verifyEditTextDrawsText(EditText editText, String text) {
+        editText.measure(
+                View.MeasureSpec.makeMeasureSpec(1024, View.MeasureSpec.AT_MOST),
+                View.MeasureSpec.makeMeasureSpec(1024, View.MeasureSpec.AT_MOST));
+        Canvas canvas = prepareMockCanvas(editText);
+        editText.draw(canvas);
+        if (text != null) {
+            ArgumentCaptor<CharSequence> textCaptor = ArgumentCaptor.forClass(CharSequence.class);
+            verify(canvas).drawText(
+                    textCaptor.capture(), anyInt(), anyInt(), anyFloat(), anyFloat(), any());
+            assertThat(textCaptor.getValue().toString()).isEqualTo(text);
+        } else {
+            verify(canvas, never()).drawText(
+                    any(CharSequence.class), anyInt(), anyInt(), anyFloat(), anyFloat(), any());
+        }
+    }
+
+    private Canvas prepareMockCanvas(View view) {
+        Canvas canvas = mock(Canvas.class);
+        when(canvas.getClipBounds(any())).thenAnswer(invocation -> {
+            Rect outRect = invocation.getArgument(0);
+            outRect.top = 0;
+            outRect.left = 0;
+            outRect.right = view.getMeasuredWidth();
+            outRect.bottom = view.getMeasuredHeight();
+            return true;
+        });
+        return canvas;
     }
 
     private MotionEvent createStylusEvent(int action, int x, int y, long eventTime) {
