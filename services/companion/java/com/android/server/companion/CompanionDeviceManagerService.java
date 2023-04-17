@@ -604,25 +604,21 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void addOnTransportsChangedListener(IOnTransportsChangedListener listener) {
             mTransportManager.addListener(listener);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void removeOnTransportsChangedListener(IOnTransportsChangedListener listener) {
             mTransportManager.removeListener(listener);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void sendMessage(int messageType, byte[] data, int[] associationIds) {
             mTransportManager.sendMessage(messageType, data, associationIds);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void addOnMessageReceivedListener(int messageType,
                 IOnMessageReceivedListener listener) {
             mTransportManager.addListener(messageType, listener);
