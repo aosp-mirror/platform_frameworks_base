@@ -47,7 +47,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"ఇతర పాస్‌వర్డ్ మేనేజర్‌లు"</string>
     <string name="close_sheet" msgid="1393792015338908262">"షీట్‌ను మూసివేయండి"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"మునుపటి పేజీకి తిరిగి వెళ్లండి"</string>
-    <string name="accessibility_close_button" msgid="1163435587545377687">"మూసివేస్తుంది"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"మూసివేయండి"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"విస్మరించండి"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీ సేవ్ చేసిన పాస్-కీని ఉపయోగించాలా?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీరు సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఉపయోగించాలా?"</string>
@@ -58,8 +58,7 @@
     <string name="snackbar_action" msgid="37373514216505085">"ఆప్షన్‌లను చూడండి"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"కొనసాగించండి"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"సైన్ ఇన్ ఆప్షన్‌లు"</string>
-    <!-- no translation found for button_label_view_more (3429098227286495651) -->
-    <skip />
+    <string name="button_label_view_more" msgid="3429098227286495651">"మరిన్ని చూడండి"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> కోసం"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"లాక్ చేయబడిన పాస్‌వర్డ్ మేనేజర్‌లు"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"అన్‌లాక్ చేయడానికి ట్యాప్ చేయండి"</string>
