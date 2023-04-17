@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
-import com.android.systemui.statusbar.phone.TapAgainView;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
@@ -203,13 +202,6 @@ public abstract class StatusBarViewModule {
                 featureFlags,
                 batteryController);
 
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static TapAgainView getTapAgainView(NotificationPanelView npv) {
-        return npv.getTapAgainView();
     }
 
     /** */
