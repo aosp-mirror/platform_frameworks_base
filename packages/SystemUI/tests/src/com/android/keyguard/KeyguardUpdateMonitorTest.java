@@ -155,6 +155,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.internal.util.reflection.FieldSetter;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -303,6 +304,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class)
+                .strictness(Strictness.WARN)
                 .startMocking();
         ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
                 .when(SubscriptionManager::getDefaultSubscriptionId);
