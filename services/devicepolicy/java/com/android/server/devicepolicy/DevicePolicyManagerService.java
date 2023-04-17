@@ -11051,17 +11051,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         return true;
     }
-
-    private void enforceCanCallLockTaskLocked(CallerIdentity caller) {
-        Preconditions.checkCallAuthorization(isProfileOwner(caller)
-                || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
-
-        final int userId =  caller.getUserId();
-        if (!canUserUseLockTaskLocked(userId)) {
-            throw new SecurityException("User " + userId + " is not allowed to use lock task");
-        }
-    }
-
     private void enforceCanQueryLockTaskLocked(ComponentName who, String callerPackageName) {
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
         final int userId = caller.getUserId();
@@ -11087,6 +11076,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new SecurityException("User " + userId + " is not allowed to use lock task");
         }
         return enforcingAdmin;
+    }
+
+    private void enforceCanCallLockTaskLocked(CallerIdentity caller) {
+        Preconditions.checkCallAuthorization(isProfileOwner(caller)
+                || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
+
+        final int userId =  caller.getUserId();
+        if (!canUserUseLockTaskLocked(userId)) {
+            throw new SecurityException("User " + userId + " is not allowed to use lock task");
+        }
     }
 
     private boolean isSystemUid(CallerIdentity caller) {
@@ -14679,7 +14678,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (isPolicyEngineForFinanceFlagEnabled()) {
             EnforcingAdmin enforcingAdmin;
             synchronized (getLockObject()) {
-                enforcingAdmin = enforceCanCallLockTaskLocked(who, callerPackageName);
+                enforcingAdmin = enforceCanCallLockTaskLocked(who, caller.getPackageName());
             }
             if (packages.length == 0) {
                 mDevicePolicyEngine.removeLocalPolicy(
@@ -14806,8 +14805,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (isPolicyEngineForFinanceFlagEnabled()) {
             EnforcingAdmin enforcingAdmin;
             synchronized (getLockObject()) {
-                enforcingAdmin = enforceCanCallLockTaskLocked(who,
-                        callerPackageName);
+                enforcingAdmin = enforceCanCallLockTaskLocked(who, caller.getPackageName());
                 enforceCanSetLockTaskFeaturesOnFinancedDevice(caller, flags);
             }
             LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicySetByAdmin(
@@ -22516,11 +22514,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             "manage_device_policy_microphone_toggle";
 
     // DPC types
+    private static final int NOT_A_DPC = -1;
     private static final int DEFAULT_DEVICE_OWNER = 0;
     private static final int FINANCED_DEVICE_OWNER = 1;
     private static final int PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE = 2;
     private static final int PROFILE_OWNER_ON_USER_0 = 3;
     private static final int PROFILE_OWNER = 4;
+    private static final int PROFILE_OWNER_ON_USER = 5;
+    private static final int AFFILIATED_PROFILE_OWNER_ON_USER = 6;
+    // DPC types
+    @IntDef(value = {
+            NOT_A_DPC,
+            DEFAULT_DEVICE_OWNER,
+            FINANCED_DEVICE_OWNER,
+            PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE,
+            PROFILE_OWNER_ON_USER_0,
+            PROFILE_OWNER,
+            PROFILE_OWNER_ON_USER,
+            AFFILIATED_PROFILE_OWNER_ON_USER
+    })
+    private @interface DpcType {}
 
     // Permissions of existing DPC types.
     private static final List<String> DEFAULT_DEVICE_OWNER_PERMISSIONS = List.of(
@@ -22674,7 +22687,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     SET_TIME_ZONE
             );
 
-
+    /**
+     * All the additional permissions granted to a Profile Owner on user 0.
+     */
     private static final List<String> ADDITIONAL_PROFILE_OWNER_ON_USER_0_PERMISSIONS =
             List.of(
                     MANAGE_DEVICE_POLICY_AIRPLANE_MODE,
@@ -22699,6 +22714,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             );
 
     /**
+     * All the additional permissions granted to a Profile Owner on an unaffiliated user.
+     */
+    private static final List<String> ADDITIONAL_PROFILE_OWNER_ON_USER_PERMISSIONS =
+            List.of(
+                    MANAGE_DEVICE_POLICY_LOCK_TASK
+            );
+
+    /**
+     * All the additional permissions granted to a Profile Owner on an affiliated user.
+     */
+    private static final List<String> ADDITIONAL_AFFILIATED_PROFILE_OWNER_ON_USER_PERMISSIONS =
+            List.of();
+
+    /**
      * Combination of {@link PROFILE_OWNER_PERMISSIONS} and
      * {@link ADDITIONAL_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE_PERMISSIONS}.
      */
@@ -22710,6 +22739,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * {@link ADDITIONAL_PROFILE_OWNER_ON_USER_0_PERMISSIONS}.
      */
     private static final List<String> PROFILE_OWNER_ON_USER_0_PERMISSIONS  =
+            new ArrayList();
+
+    /**
+     * Combination of {@link PROFILE_OWNER_PERMISSIONS} and
+     * {@link ADDITIONAL_AFFILIATED_PROFIL_OWNER_ON_USER_PERMISSIONS}.
+     */
+    private static final List<String> AFFILIATED_PROFILE_OWNER_ON_USER_PERMISSIONS =
+            new ArrayList();
+
+    /**
+     * Combination of {@link PROFILE_OWNER_PERMISSIONS} and
+     * {@link ADDITIONAL_PROFILE_OWNER_ON_USER_PERMISSIONS}.
+     */
+    private static final List<String> PROFILE_OWNER_ON_USER_PERMISSIONS =
             new ArrayList();
 
 
@@ -22724,6 +22767,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // some extra permissions.
         PROFILE_OWNER_ON_USER_0_PERMISSIONS.addAll(PROFILE_OWNER_PERMISSIONS);
         PROFILE_OWNER_ON_USER_0_PERMISSIONS.addAll(ADDITIONAL_PROFILE_OWNER_ON_USER_0_PERMISSIONS);
+        // Profile owners on users have all the permission of a profile owner plus
+        // some extra permissions.
+        PROFILE_OWNER_ON_USER_PERMISSIONS.addAll(PROFILE_OWNER_PERMISSIONS);
+        PROFILE_OWNER_ON_USER_PERMISSIONS.addAll(
+                ADDITIONAL_PROFILE_OWNER_ON_USER_PERMISSIONS);
+        // Profile owners on affiliated users have all the permission of a profile owner on a user
+        // plus some extra permissions.
+        AFFILIATED_PROFILE_OWNER_ON_USER_PERMISSIONS.addAll(PROFILE_OWNER_ON_USER_PERMISSIONS);
+        AFFILIATED_PROFILE_OWNER_ON_USER_PERMISSIONS.addAll(
+                ADDITIONAL_AFFILIATED_PROFILE_OWNER_ON_USER_PERMISSIONS);
 
         DPC_PERMISSIONS.put(DEFAULT_DEVICE_OWNER, DEFAULT_DEVICE_OWNER_PERMISSIONS);
         DPC_PERMISSIONS.put(FINANCED_DEVICE_OWNER, FINANCED_DEVICE_OWNER_PERMISSIONS);
@@ -22731,6 +22784,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE_PERMISSIONS);
         DPC_PERMISSIONS.put(PROFILE_OWNER_ON_USER_0, PROFILE_OWNER_ON_USER_0_PERMISSIONS);
         DPC_PERMISSIONS.put(PROFILE_OWNER, PROFILE_OWNER_PERMISSIONS);
+        DPC_PERMISSIONS.put(PROFILE_OWNER_ON_USER, PROFILE_OWNER_ON_USER_PERMISSIONS);
+        DPC_PERMISSIONS.put(AFFILIATED_PROFILE_OWNER_ON_USER,
+                AFFILIATED_PROFILE_OWNER_ON_USER_PERMISSIONS);
     }
     //Map of Permission to Delegate Scope.
     private static final HashMap<String, String> DELEGATE_SCOPES = new HashMap<>();
@@ -23108,22 +23164,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
             return true;
         }
-        // Check the permissions of DPCs
-        if (isDefaultDeviceOwner(caller)) {
-            return DPC_PERMISSIONS.get(DEFAULT_DEVICE_OWNER).contains(permission);
-        }
-        if (isFinancedDeviceOwner(caller)) {
-            return DPC_PERMISSIONS.get(FINANCED_DEVICE_OWNER).contains(permission);
-        }
-        if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
-            return DPC_PERMISSIONS.get(PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE).contains(
-                    permission);
-        }
-        if (isProfileOwnerOnUser0(caller)) {
-            return DPC_PERMISSIONS.get(PROFILE_OWNER_ON_USER_0).contains(permission);
-        }
-        if (isProfileOwner(caller)) {
-            return DPC_PERMISSIONS.get(PROFILE_OWNER).contains(permission);
+        int dpcType = getDpcType(caller);
+        if (dpcType != NOT_A_DPC) {
+            return DPC_PERMISSIONS.get(dpcType).contains(permission);
         }
         // Check the permission for the role-holder
         if (isCallerDevicePolicyManagementRoleHolder(caller)) {
@@ -23191,6 +23234,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private int getAffectedUser(boolean calledOnParent) {
         int callingUserId = mInjector.userHandleGetCallingUserId();
         return calledOnParent ? getProfileParentId(callingUserId) : callingUserId;
+    }
+
+    /**
+     * Return the DPC type of the given caller.
+     */
+    private @DpcType int getDpcType(CallerIdentity caller) {
+        // Check the permissions of DPCs
+        if (isDefaultDeviceOwner(caller)) {
+            return DEFAULT_DEVICE_OWNER;
+        }
+        if (isFinancedDeviceOwner(caller)) {
+            return FINANCED_DEVICE_OWNER;
+        }
+        if (isProfileOwner(caller)) {
+            if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
+                return PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
+            }
+            if (isManagedProfile(caller.getUserId())) {
+                return PROFILE_OWNER;
+            }
+            if (isProfileOwnerOnUser0(caller)) {
+                return PROFILE_OWNER_ON_USER_0;
+            }
+            if (isUserAffiliatedWithDevice(caller.getUserId())) {
+                return AFFILIATED_PROFILE_OWNER_ON_USER;
+            }
+            return PROFILE_OWNER_ON_USER;
+        }
+        return NOT_A_DPC;
     }
 
     private boolean isPermissionCheckFlagEnabled() {
