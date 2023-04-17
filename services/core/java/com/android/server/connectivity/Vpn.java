@@ -707,6 +707,14 @@ public class Vpn {
                 boolean isIpv4) {
             return MtuUtils.getMtu(childProposals, maxMtu, underlyingMtu, isIpv4);
         }
+
+        /** Verify the binder calling UID is the one passed in arguments */
+        public void verifyCallingUidAndPackage(Context context, String packageName, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            if (getAppUid(context, packageName, userId) != callingUid) {
+                throw new SecurityException(packageName + " does not belong to uid " + callingUid);
+            }
+        }
     }
 
     @VisibleForTesting
@@ -754,7 +762,7 @@ public class Vpn {
         mUserManager = mContext.getSystemService(UserManager.class);
 
         mPackage = VpnConfig.LEGACY_VPN;
-        mOwnerUID = getAppUid(mPackage, mUserId);
+        mOwnerUID = getAppUid(mContext, mPackage, mUserId);
         mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(mPackage);
 
         try {
@@ -851,7 +859,7 @@ public class Vpn {
     }
 
     /**
-     * Chooses whether to force all connections to go though VPN.
+     * Chooses whether to force all connections to go through VPN.
      *
      * Used to enable/disable legacy VPN lockdown.
      *
@@ -859,7 +867,7 @@ public class Vpn {
      * {@link #setAlwaysOnPackage(String, boolean, List<String>)}; previous settings from calling
      * that function will be replaced and saved with the always-on state.
      *
-     * @param lockdown whether to prevent all traffic outside of a VPN.
+     * @param lockdown whether to prevent all traffic outside of the VPN.
      */
     public synchronized void setLockdown(boolean lockdown) {
         enforceControlPermissionOrInternalCaller();
@@ -1136,6 +1144,7 @@ public class Vpn {
             mAlwaysOn = false;
         }
 
+        final boolean oldLockdownState = mLockdown;
         mLockdown = (mAlwaysOn && lockdown);
         mLockdownAllowlist = (mLockdown && lockdownAllowlist != null)
                 ? Collections.unmodifiableList(new ArrayList<>(lockdownAllowlist))
@@ -1146,6 +1155,13 @@ public class Vpn {
         if (isCurrentPreparedPackage(packageName)) {
             updateAlwaysOnNotification(mNetworkInfo.getDetailedState());
             setVpnForcedLocked(mLockdown);
+
+            // Lockdown forces the VPN to be non-bypassable (see #agentConnect) because it makes
+            // no sense for a VPN to be bypassable when connected but not when not connected.
+            // As such, changes in lockdown need to restart the agent.
+            if (mNetworkAgent != null && oldLockdownState != mLockdown) {
+                startNewNetworkAgent(mNetworkAgent, "Lockdown mode changed");
+            }
         } else {
             // Prepare this app. The notification will update as a side-effect of updateState().
             // It also calls setVpnForcedLocked().
@@ -1383,7 +1399,8 @@ public class Vpn {
         // We can't just check that packageName matches mPackage, because if the app was uninstalled
         // and reinstalled it will no longer be prepared. Similarly if there is a shared UID, the
         // calling package may not be the same as the prepared package. Check both UID and package.
-        return getAppUid(packageName, mUserId) == mOwnerUID && mPackage.equals(packageName);
+        return getAppUid(mContext, packageName, mUserId) == mOwnerUID
+                && mPackage.equals(packageName);
     }
 
     /** Prepare the VPN for the given package. Does not perform permission checks. */
@@ -1424,7 +1441,7 @@ public class Vpn {
 
             Log.i(TAG, "Switched from " + mPackage + " to " + newPackage);
             mPackage = newPackage;
-            mOwnerUID = getAppUid(newPackage, mUserId);
+            mOwnerUID = getAppUid(mContext, newPackage, mUserId);
             mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(newPackage);
             try {
                 mNms.allowProtect(mOwnerUID);
@@ -1445,7 +1462,7 @@ public class Vpn {
         // Check if the caller is authorized.
         enforceControlPermissionOrInternalCaller();
 
-        final int uid = getAppUid(packageName, mUserId);
+        final int uid = getAppUid(mContext, packageName, mUserId);
         if (uid == -1 || VpnConfig.LEGACY_VPN.equals(packageName)) {
             // Authorization for nonexistent packages (or fake ones) can't be updated.
             return false;
@@ -1525,11 +1542,11 @@ public class Vpn {
                 || isVpnServicePreConsented(context, packageName);
     }
 
-    private int getAppUid(final String app, final int userId) {
+    private static int getAppUid(final Context context, final String app, final int userId) {
         if (VpnConfig.LEGACY_VPN.equals(app)) {
             return Process.myUid();
         }
-        PackageManager pm = mContext.getPackageManager();
+        PackageManager pm = context.getPackageManager();
         final long token = Binder.clearCallingIdentity();
         try {
             return pm.getPackageUidAsUser(app, userId);
@@ -1658,6 +1675,10 @@ public class Vpn {
      */
     private boolean updateLinkPropertiesInPlaceIfPossible(NetworkAgent agent, VpnConfig oldConfig) {
         // NetworkAgentConfig cannot be updated without registering a new NetworkAgent.
+        // Strictly speaking, bypassability is affected by lockdown and therefore it's possible
+        // it doesn't actually change even if mConfig.allowBypass changed. It might be theoretically
+        // possible to do handover in this case, but this is far from obvious to VPN authors and
+        // it's simpler if the rule is just "can't update in place if you change allow bypass".
         if (oldConfig.allowBypass != mConfig.allowBypass) {
             Log.i(TAG, "Handover not possible due to changes to allowBypass");
             return false;
@@ -1699,10 +1720,11 @@ public class Vpn {
         mLegacyState = LegacyVpnInfo.STATE_CONNECTING;
         updateState(DetailedState.CONNECTING, "agentConnect");
 
+        final boolean bypassable = mConfig.allowBypass && !mLockdown;
         final NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig.Builder()
                 .setLegacyType(ConnectivityManager.TYPE_VPN)
                 .setLegacyTypeName("VPN")
-                .setBypassableVpn(mConfig.allowBypass && !mLockdown)
+                .setBypassableVpn(bypassable)
                 .setVpnRequiresValidation(mConfig.requiresInternetValidation)
                 .setLocalRoutesExcludedForVpn(mConfig.excludeLocalRoutes)
                 .build();
@@ -1716,7 +1738,7 @@ public class Vpn {
         capsBuilder.setTransportInfo(new VpnTransportInfo(
                 getActiveVpnType(),
                 mConfig.session,
-                mConfig.allowBypass,
+                bypassable,
                 expensive));
 
         // Only apps targeting Q and above can explicitly declare themselves as metered.
@@ -1747,6 +1769,10 @@ public class Vpn {
             Binder.restoreCallingIdentity(token);
         }
         updateState(DetailedState.CONNECTED, "agentConnect");
+        if (isIkev2VpnRunner()) {
+            final IkeSessionWrapper session = ((IkeV2VpnRunner) mVpnRunner).mSession;
+            if (null != session) session.setUnderpinnedNetwork(mNetworkAgent.getNetwork());
+        }
     }
 
     private static boolean areLongLivedTcpConnectionsExpensive(@NonNull VpnRunner runner) {
@@ -1941,7 +1967,7 @@ public class Vpn {
     private SortedSet<Integer> getAppsUids(List<String> packageNames, int userId) {
         SortedSet<Integer> uids = new TreeSet<>();
         for (String app : packageNames) {
-            int uid = getAppUid(app, userId);
+            int uid = getAppUid(mContext, app, userId);
             if (uid != -1) uids.add(uid);
             // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
             // ConnectivityServiceTest.
@@ -3260,7 +3286,6 @@ public class Vpn {
                             prepareStatusIntent();
                         }
                         agentConnect(this::onValidationStatus);
-                        mSession.setUnderpinnedNetwork(mNetworkAgent.getNetwork());
                         return; // Link properties are already sent.
                     } else {
                         // Underlying networks also set in agentConnect()
@@ -3377,7 +3402,6 @@ public class Vpn {
                     if (!removedAddrs.isEmpty()) {
                         startNewNetworkAgent(
                                 mNetworkAgent, "MTU too low for IPv6; restarting network agent");
-                        mSession.setUnderpinnedNetwork(mNetworkAgent.getNetwork());
 
                         for (LinkAddress removed : removedAddrs) {
                             mTunnelIface.removeAddress(
@@ -3656,7 +3680,7 @@ public class Vpn {
             final VpnTransportInfo info = new VpnTransportInfo(
                     getActiveVpnType(),
                     mConfig.session,
-                    mConfig.allowBypass,
+                    mConfig.allowBypass && !mLockdown,
                     areLongLivedTcpConnectionsExpensive(keepaliveDelaySec));
             final boolean ncUpdateRequired = !info.equals(mNetworkCapabilities.getTransportInfo());
             if (ncUpdateRequired) {
@@ -4513,10 +4537,7 @@ public class Vpn {
     }
 
     private void verifyCallingUidAndPackage(String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        if (getAppUid(packageName, mUserId) != callingUid) {
-            throw new SecurityException(packageName + " does not belong to uid " + callingUid);
-        }
+        mDeps.verifyCallingUidAndPackage(mContext, packageName, mUserId);
     }
 
     @VisibleForTesting
