@@ -1166,7 +1166,7 @@
     <string name="selected" msgid="6614607926197755875">"נבחר"</string>
     <string name="not_selected" msgid="410652016565864475">"לא נבחר"</string>
     <string name="in_progress" msgid="2149208189184319441">"בתהליך"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"השלמת הפעולה באמצעות"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"השלמת הפעולה עם"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"‏השלמת הפעולה באמצעות %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"להשלמת הפעולה"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"פתיחה באמצעות"</string>

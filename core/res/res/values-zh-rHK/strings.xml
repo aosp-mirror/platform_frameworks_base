@@ -1851,8 +1851,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"好"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"「省電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"「省電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"「慳電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"「慳電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
@@ -2076,9 +2076,9 @@
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"加強版通知在 Android 12 取代了 Android 自動調整通知。此功能會顯示建議的操作和回覆，更可為您整理通知。\n\n加強版通知功能可存取您的通知內容 (包括聯絡人姓名和訊息等個人資料)，亦可以關閉或回應通知，例如接聽來電和控制「請勿騷擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"「日常安排模式」資料通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電量可能會在日常充電前耗盡"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"「省電模式」已啟用，以便延長電池壽命"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省電模式"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"已關閉省電模式"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"「慳電模式」已啟用，以便延長電池壽命"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"慳電模式"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"已關閉慳電模式"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"手機電量充足。各項功能已不再受限。"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"平板電腦電量充足。各項功能已不再受限。"</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"裝置電量充足。各項功能已不再受限。"</string>
