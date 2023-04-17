@@ -44,7 +44,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,10 +80,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mUserId = userId;
         mHandler = new Handler(Looper.myLooper());
-    }
-
-    public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + getDebugString());
     }
 
     public void setManagerScanning(boolean managerScanning) {
@@ -488,11 +483,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public String toString() {
-        return getDebugString();
-    }
-
-    private String getDebugString() {
+    protected String getDebugString() {
         return TextUtils.formatSimple(
                 "ProviderServiceProxy - package: %s, bound: %b, connection (active:%b, ready:%b)",
                 mComponentName.getPackageName(),
