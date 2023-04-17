@@ -280,6 +280,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.admin.AccountTypePolicyKey;
 import android.app.admin.BooleanPolicyValue;
 import android.app.admin.BundlePolicyValue;
 import android.app.admin.ComponentNamePolicyValue;
@@ -14019,16 +14020,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             caller = getCallerIdentity(who);
         }
         synchronized (getLockObject()) {
-            final ActiveAdmin ap;
             if (isPermissionCheckFlagEnabled()) {
+                int affectedUser = getAffectedUser(parent);
                 EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                         who,
                         MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT,
                         caller.getPackageName(),
-                        getAffectedUser(parent)
+                        affectedUser
                 );
-                ap = enforcingAdmin.getActiveAdmin();
+                if (disabled) {
+                    mDevicePolicyEngine.setLocalPolicy(
+                            PolicyDefinition.ACCOUNT_MANAGEMENT_DISABLED(accountType),
+                            enforcingAdmin,
+                            new BooleanPolicyValue(disabled),
+                            affectedUser);
+                } else {
+                    mDevicePolicyEngine.removeLocalPolicy(
+                            PolicyDefinition.ACCOUNT_MANAGEMENT_DISABLED(accountType),
+                            enforcingAdmin,
+                            affectedUser);
+                }
             } else {
+                final ActiveAdmin ap;
                 Objects.requireNonNull(who, "ComponentName is null");
                 /*
                  * When called on the parent DPM instance (parent == true), affects active admin
@@ -14045,13 +14058,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     ap = getParentOfAdminIfRequired(
                             getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()), parent);
                 }
+                if (disabled) {
+                    ap.accountTypesWithManagementDisabled.add(accountType);
+                } else {
+                    ap.accountTypesWithManagementDisabled.remove(accountType);
+                }
+                saveSettingsLocked(UserHandle.getCallingUserId());
             }
-            if (disabled) {
-                ap.accountTypesWithManagementDisabled.add(accountType);
-            } else {
-                ap.accountTypesWithManagementDisabled.remove(accountType);
-            }
-            saveSettingsLocked(UserHandle.getCallingUserId());
         }
     }
 
@@ -14069,41 +14082,64 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         CallerIdentity caller;
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
+        final ArraySet<String> resultSet = new ArraySet<>();
         if (isPermissionCheckFlagEnabled()) {
+            int affectedUser = parent ? getProfileParentId(userId) : userId;
             caller = getCallerIdentity(callerPackageName);
             if (!hasPermission(MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT,
-                    caller.getPackageName(), userId)
+                    callerPackageName, affectedUser)
                     && !hasFullCrossUsersPermission(caller, userId)) {
                 throw new SecurityException("Caller does not have permission to call this on user: "
-                        + userId);
+                        + affectedUser);
             }
-        } else {
-            caller = getCallerIdentity();
-            Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
-        }
+            Set<PolicyKey> keys = mDevicePolicyEngine.getLocalPolicyKeysSetByAllAdmins(
+                    PolicyDefinition.GENERIC_ACCOUNT_MANAGEMENT_DISABLED,
+                    affectedUser);
 
-        synchronized (getLockObject()) {
-            final ArraySet<String> resultSet = new ArraySet<>();
+            for (PolicyKey key : keys) {
+                if (!(key instanceof AccountTypePolicyKey)) {
+                    throw new IllegalStateException("PolicyKey for "
+                            + "MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT is not of type "
+                            + "AccountTypePolicyKey");
+                }
+                AccountTypePolicyKey parsedKey =
+                        (AccountTypePolicyKey) key;
+                String accountType = Objects.requireNonNull(parsedKey.getAccountType());
 
-            if (!parent) {
-                final DevicePolicyData policy = getUserData(userId);
-                for (ActiveAdmin admin : policy.mAdminList) {
-                    resultSet.addAll(admin.accountTypesWithManagementDisabled);
+                Boolean disabled = mDevicePolicyEngine.getResolvedPolicy(
+                        PolicyDefinition.ACCOUNT_MANAGEMENT_DISABLED(accountType),
+                        affectedUser);
+                if (disabled != null && disabled) {
+                    resultSet.add(accountType);
                 }
             }
 
-            // Check if there's a profile owner of an org-owned device and the method is called for
-            // the parent user of this profile owner.
-            final ActiveAdmin orgOwnedAdmin =
-                    getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
-            final boolean shouldGetParentAccounts = orgOwnedAdmin != null && (parent
-                    || UserHandle.getUserId(orgOwnedAdmin.getUid()) != userId);
-            if (shouldGetParentAccounts) {
-                resultSet.addAll(
-                        orgOwnedAdmin.getParentActiveAdmin().accountTypesWithManagementDisabled);
+        } else {
+            caller = getCallerIdentity();
+            Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
+
+            synchronized (getLockObject()) {
+                if (!parent) {
+                    final DevicePolicyData policy = getUserData(userId);
+                    for (ActiveAdmin admin : policy.mAdminList) {
+                        resultSet.addAll(admin.accountTypesWithManagementDisabled);
+                    }
+                }
+
+                // Check if there's a profile owner of an org-owned device and the method is called
+                // for the parent user of this profile owner.
+                final ActiveAdmin orgOwnedAdmin =
+                        getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
+                final boolean shouldGetParentAccounts = orgOwnedAdmin != null && (parent
+                        || UserHandle.getUserId(orgOwnedAdmin.getUid()) != userId);
+                if (shouldGetParentAccounts) {
+                    resultSet.addAll(
+                            orgOwnedAdmin.getParentActiveAdmin()
+                                    .accountTypesWithManagementDisabled);
+                }
             }
-            return resultSet.toArray(new String[resultSet.size()]);
         }
+        return resultSet.toArray(new String[resultSet.size()]);
     }
 
     @Override
