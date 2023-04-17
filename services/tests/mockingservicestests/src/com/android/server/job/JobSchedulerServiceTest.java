@@ -1132,7 +1132,7 @@ public class JobSchedulerServiceTest {
     @Test
     public void testRareJobBatching() {
         spyOn(mService);
-        doNothing().when(mService).evaluateControllerStatesLocked(any());
+        doReturn(false).when(mService).evaluateControllerStatesLocked(any());
         doNothing().when(mService).noteJobsPending(any());
         doReturn(true).when(mService).isReadyToBeExecutedLocked(any(), anyBoolean());
         advanceElapsedClock(24 * HOUR_IN_MILLIS);
