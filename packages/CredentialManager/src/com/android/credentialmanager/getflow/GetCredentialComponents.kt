@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,18 +200,31 @@ fun PrimarySelectionCard(
             authenticationEntryList.isEmpty()) || (sortedUserNameToCredentialEntryList.isEmpty() &&
             authenticationEntryList.size == 1)
         item {
-            HeadlineText(
-                text = stringResource(
-                    if (hasSingleEntry) {
-                        if (sortedUserNameToCredentialEntryList.firstOrNull()
-                                ?.sortedCredentialEntryList?.first()?.credentialType
-                            == CredentialType.PASSKEY
-                        ) R.string.get_dialog_title_use_passkey_for
-                        else R.string.get_dialog_title_use_sign_in_for
-                    } else R.string.get_dialog_title_choose_sign_in_for,
-                    requestDisplayInfo.appName
-                ),
-            )
+            if (requestDisplayInfo.preferIdentityDocUi) {
+                HeadlineText(
+                    text = stringResource(
+                        if (hasSingleEntry) {
+                            R.string.get_dialog_title_use_info_on
+                        } else {
+                            R.string.get_dialog_title_choose_option_for
+                        },
+                        requestDisplayInfo.appName
+                    ),
+                )
+            } else {
+                HeadlineText(
+                    text = stringResource(
+                        if (hasSingleEntry) {
+                            if (sortedUserNameToCredentialEntryList.firstOrNull()
+                                    ?.sortedCredentialEntryList?.first()?.credentialType
+                                == CredentialType.PASSKEY
+                            ) R.string.get_dialog_title_use_passkey_for
+                            else R.string.get_dialog_title_use_sign_in_for
+                        } else R.string.get_dialog_title_choose_sign_in_for,
+                        requestDisplayInfo.appName
+                    ),
+                )
+            }
         }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
         item {
