@@ -123,6 +123,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public void onFixedRotationStarted() {
     }
 
+    /** Called when the fixed rotation finished. */
+    public void onFixedRotationFinished() {
+    }
+
     public PipTransitionController(
             @NonNull ShellInit shellInit,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
