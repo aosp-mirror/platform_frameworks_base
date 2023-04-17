@@ -452,7 +452,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected PhoneStatusBarView mStatusBarView;
     private PhoneStatusBarViewController mPhoneStatusBarViewController;
     private PhoneStatusBarTransitions mStatusBarTransitions;
-    private AuthRippleController mAuthRippleController;
+    private final AuthRippleController mAuthRippleController;
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarInitializer mStatusBarInitializer;
@@ -768,6 +768,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
+            AuthRippleController authRippleController,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
             ScreenPinningRequest screenPinningRequest,
@@ -867,6 +868,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScreenPinningRequest = screenPinningRequest;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
+        mAuthRippleController = authRippleController;
         mNotificationShadeDepthControllerLazy = notificationShadeDepthControllerLazy;
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
@@ -1667,8 +1669,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
         mNotificationShelfController = mCentralSurfacesComponent.getNotificationShelfController();
-        mAuthRippleController = mCentralSurfacesComponent.getAuthRippleController();
-        mAuthRippleController.init();
 
         mHeadsUpManager.addListener(mCentralSurfacesComponent.getStatusBarHeadsUpChangeListener());
 

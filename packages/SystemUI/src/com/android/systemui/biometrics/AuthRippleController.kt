@@ -30,8 +30,10 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.settingslib.Utils
 import com.android.settingslib.udfps.UdfpsOverlayParams
+import com.android.systemui.CoreStartable
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -45,7 +47,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ViewController
@@ -61,7 +62,7 @@ import javax.inject.Provider
  *
  * The ripple uses the accent color of the current theme.
  */
-@CentralSurfacesScope
+@SysUISingleton
 class AuthRippleController @Inject constructor(
     private val sysuiContext: Context,
     private val authController: AuthController,
@@ -81,6 +82,7 @@ class AuthRippleController @Inject constructor(
     rippleView: AuthRippleView?
 ) :
     ViewController<AuthRippleView>(rippleView),
+    CoreStartable,
     KeyguardStateController.Callback,
     WakefulnessLifecycle.Observer {
 
@@ -93,6 +95,10 @@ class AuthRippleController @Inject constructor(
 
     private var udfpsController: UdfpsController? = null
     private var udfpsRadius: Float = -1f
+
+    override fun start() {
+        init()
+    }
 
     @VisibleForTesting
     public override fun onViewAttached() {

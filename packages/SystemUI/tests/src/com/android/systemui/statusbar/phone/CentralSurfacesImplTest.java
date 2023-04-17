@@ -101,6 +101,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.charging.WiredChargingRippleController;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -237,6 +238,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
+    @Mock private AuthRippleController mAuthRippleController;
     @Mock private NotificationListener mNotificationListener;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
@@ -500,6 +502,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mScrimController,
                 mLockscreenWallpaperLazy,
                 mBiometricUnlockControllerLazy,
+                mAuthRippleController,
                 mDozeServiceHost,
                 mPowerManager, mScreenPinningRequest,
                 mDozeScrimController,
