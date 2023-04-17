@@ -1754,6 +1754,7 @@ class MediaRouter2ServiceImpl {
             String indent = prefix + "  ";
             pw.println(indent + "mRunning=" + mRunning);
 
+            mSystemProvider.dump(pw, prefix);
             mWatcher.dump(pw, prefix);
         }
 
