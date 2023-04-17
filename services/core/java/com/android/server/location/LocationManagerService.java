@@ -204,8 +204,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
         public void onUserStarting(TargetUser user) {
             mUserInfoHelper.onUserStarted(user.getUserIdentifier());
 
-            // log location enabled state on start to minimize coverage loss
+            // log location enabled state and emergency state on start to minimize coverage loss
             mService.logLocationEnabledState();
+            mService.logEmergencyState();
         }
 
         @Override
@@ -571,6 +572,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     private void onEmergencyStateChanged() {
+        this.logEmergencyState();
+    }
+
+    private void logEmergencyState() {
         boolean isInEmergency = mInjector.getEmergencyHelper().isInEmergency(Long.MIN_VALUE);
         mInjector.getLocationUsageLogger().logEmergencyStateChanged(isInEmergency);
     }
