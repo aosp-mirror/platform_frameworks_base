@@ -301,6 +301,14 @@ public final class ViewRootImpl implements ViewParent,
             SystemProperties.getBoolean("persist.wm.debug.caption_on_shell", true);
 
     /**
+     * Whether the client (system UI) is handling the transient gesture and the corresponding
+     * animation.
+     * @hide
+     */
+    public static final boolean CLIENT_TRANSIENT =
+            SystemProperties.getBoolean("persist.wm.debug.client_transient", false);
+
+    /**
      * Whether the client should compute the window frame on its own.
      * @hide
      */
