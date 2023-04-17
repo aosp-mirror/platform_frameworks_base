@@ -102,7 +102,7 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
 
     @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
@@ -127,11 +127,11 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
     @Test
     override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
@@ -145,7 +145,7 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
-    @Postsubmit
+    @Ignore("Not applicable to this CUJ. App is full screen at the end")
     @Test
     override fun navBarWindowIsVisibleAtStartAndEnd() {
         super.navBarWindowIsVisibleAtStartAndEnd()
