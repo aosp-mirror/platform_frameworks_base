@@ -334,7 +334,7 @@ cc_library_shared {
                 "libtimeinstate",
                 "server_configurable_flags",
                 "libimage_io",
-                "libjpegrecoverymap",
+                "libultrahdr",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers
@@ -393,7 +393,7 @@ cc_library_shared {
                 "libimage_io",
                 "libjpegdecoder",
                 "libjpegencoder",
-                "libjpegrecoverymap",
+                "libultrahdr",
             ],
         },
         host_linux: {
