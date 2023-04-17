@@ -258,7 +258,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `selections for secondary user`() =
+    fun selectionsForSecondaryUser() =
         testScope.runTest {
             userTracker.set(
                 userInfos =

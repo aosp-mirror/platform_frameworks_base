@@ -249,7 +249,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `icon - uses empty state - when not in service`() =
+    fun icon_usesEmptyState_whenNotInService() =
         testScope.runTest {
             var latest: SignalIconModel? = null
             val job = underTest.icon.onEach { latest = it }.launchIn(this)
@@ -480,7 +480,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network type - alwaysShow - shown when not default`() =
+    fun networkType_alwaysShow_shownWhenNotDefault() =
         testScope.runTest {
             interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.mobileIsDefault.value = false
@@ -500,7 +500,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network type - not shown when not default`() =
+    fun networkType_notShownWhenNotDefault() =
         testScope.runTest {
             interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.isDataConnected.value = true
@@ -531,7 +531,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data activity - null when config is off`() =
+    fun dataActivity_nullWhenConfigIsOff() =
         testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(false)
@@ -563,7 +563,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data activity - config on - test indicators`() =
+    fun dataActivity_configOn_testIndicators() =
         testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(true)

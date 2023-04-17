@@ -48,7 +48,7 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `nextRevealEffect - effect switches between default and biometric with no dupes`() =
+    fun nextRevealEffect_effectSwitchesBetweenDefaultAndBiometricWithNoDupes() =
         runTest {
             val values = mutableListOf<LightRevealEffect>()
             val job = launch { underTest.revealEffect.collect { values.add(it) } }

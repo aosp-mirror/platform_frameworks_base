@@ -73,7 +73,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance triggered -- camera launch called`() {
+    fun affordanceTriggered_cameraLaunchCalled() {
         // When
         val result = underTest.onTriggered(null)
 
@@ -84,7 +84,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - default when launchable`() =
+    fun getPickerScreenState_defaultWhenLaunchable() =
         testScope.runTest {
             setLaunchable(true)
 
@@ -93,7 +93,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when camera app not installed`() =
+    fun getPickerScreenState_unavailableWhenCameraAppNotInstalled() =
         testScope.runTest {
             setLaunchable(isCameraAppInstalled = false)
 
@@ -102,7 +102,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when camera disabled by admin`() =
+    fun getPickerScreenState_unavailableWhenCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isCameraDisabledByDeviceAdmin = true)
 
@@ -111,7 +111,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when secure camera disabled by admin`() =
+    fun getPickerScreenState_unavailableWhenSecureCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isSecureCameraDisabledByDeviceAdmin = true)
 
