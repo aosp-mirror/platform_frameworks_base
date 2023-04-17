@@ -16825,6 +16825,23 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Recalculate the incompatible accounts cache.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void calculateHasIncompatibleAccounts() {
+        if (mService != null) {
+            try {
+                mService.calculateHasIncompatibleAccounts();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * @return {@code true} if bypassing the device policy management role qualification is allowed
      * with the current state of the device.
      *
