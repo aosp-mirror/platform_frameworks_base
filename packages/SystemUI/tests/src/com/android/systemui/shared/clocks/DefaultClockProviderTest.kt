@@ -201,7 +201,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
     @Test
     fun test_aodClock_always_whiteColor() {
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
-        clock.animations.doze(0.9f) // set AOD mode to active
+        clock.smallClock.animations.doze(0.9f) // set AOD mode to active
         clock.smallClock.events.onRegionDarknessChanged(true)
         verify((clock.smallClock.view as AnimatableClockView), never()).animateAppearOnLockscreen()
     }
