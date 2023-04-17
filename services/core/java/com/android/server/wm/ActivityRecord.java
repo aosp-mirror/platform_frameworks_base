@@ -5315,6 +5315,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (finishing || isState(STOPPED)) {
                 displayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
             }
+            // Because starting window was transferred, this activity may be a trampoline which has
+            // been occluded by next activity. If it has added windows, set client visibility
+            // immediately to avoid the client getting RELAYOUT_RES_FIRST_TIME from relayout and
+            // drawing an unnecessary frame.
+            if (startingMoved && !firstWindowDrawn && hasChild()) {
+                setClientVisible(false);
+            }
         } else {
             if (!appTransition.isTransitionSet()
                     && appTransition.isReady()) {
