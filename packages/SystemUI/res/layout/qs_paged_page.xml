@@ -21,5 +21,6 @@
     android:layout_height="match_parent"
     android:paddingStart="@dimen/qs_tiles_page_horizontal_margin"
     android:paddingEnd="@dimen/qs_tiles_page_horizontal_margin"
+    android:focusable="false"
     android:clipChildren="false"
     android:clipToPadding="false" />
