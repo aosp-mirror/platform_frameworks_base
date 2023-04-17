@@ -2012,7 +2012,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return;
         }
 
-        if (r.isState(RESUMED) && r == mRootWindowContainer.getTopResumedActivity()) {
+        if ((touchedActivity == null || r == touchedActivity) && r.isState(RESUMED)
+                && r == mRootWindowContainer.getTopResumedActivity()) {
             setLastResumedActivityUncheckLocked(r, "setFocusedTask-alreadyTop");
             return;
         }
