@@ -5907,9 +5907,9 @@
     <string name="resolver_no_personal_apps_available">No personal apps</string>
 
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_personal">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your personal profile?</string>
+    <string name="miniresolver_open_in_personal">Open personal <xliff:g id="app" example="YouTube">%s</xliff:g></string>
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_work">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your work profile?</string>
+    <string name="miniresolver_open_in_work">Open work <xliff:g id="app" example="YouTube">%s</xliff:g></string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->
