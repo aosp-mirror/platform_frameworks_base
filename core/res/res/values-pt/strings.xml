@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite que o app acesse dados do sensor corporal, como a frequência cardíaca, a temperatura e a porcentagem de oxigênio no sangue, enquanto o app está em uso."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Acessar dados do sensor corporal, como a frequência cardíaca, segundo plano"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite que o app acesse dados do sensor corporal, como a frequência cardíaca, a temperatura e a porcentagem de oxigênio no sangue, enquanto o app está em segundo plano."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Acessar dados de temperatura do sensor corporal no pulso enquanto o app está em uso."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite que o app acesse dados de temperatura do sensor corporal no pulso enquanto está em uso."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Acessar dados de temperatura do sensor corporal no pulso enquanto o app está em segundo plano."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite que o app acesse dados de temperatura do sensor corporal no pulso enquanto está em segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler detalhes e eventos da agenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Este app pode ler todos os eventos da agenda armazenados no seu tablet e compartilhar ou salvar os dados da sua agenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Este app pode ler todos os eventos da agenda armazenados no seu dispositivo Android TV e compartilhar ou salvar os dados da sua agenda."</string>
@@ -714,7 +710,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operação facial cancelada."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Desbloqueio facial cancelado pelo usuário"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Excesso de tentativas. Tente novamente mais tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Muitas tentativas. Desbloqueio facial desativado."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Muitas tentativas. Como alternativa, use o bloqueio de tela."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Não é possível verificar o rosto. Tente novamente."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"O Desbloqueio facial não foi configurado"</string>
@@ -1955,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"O app <xliff:g id="APP_NAME_0">%1$s</xliff:g> não está disponível no momento. Isso é gerenciado pelo app <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saiba mais"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Retomar app"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Ativar apps de trabalho?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Acesse seus apps e notificações de trabalho"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Reativar apps de trabalho?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Reativar"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergência"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Acesse seus apps e ligações de trabalho"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
@@ -2169,8 +2164,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Toque para ativar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nenhum app de trabalho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nenhum app pessoal"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Abrir o app <xliff:g id="APP">%s</xliff:g> no seu perfil pessoal?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Abrir o app <xliff:g id="APP">%s</xliff:g> no seu perfil de trabalho?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar o navegador pessoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar o navegador de trabalho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio da rede do chip"</string>

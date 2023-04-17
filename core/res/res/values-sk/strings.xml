@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Poskytne aplikácii prístup k dátam telových senzorov, ako sú pulz, teplota a saturácia krvi kyslíkom počas používania aplikácie."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Prístup k dátam telových senzorov (napríklad pulzu) počas spustenia na pozadí"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Poskytne aplikácii prístup k dátam telových senzorov, ako sú pulz, teplota a saturácia krvi kyslíkom počas spustenia aplikácie na pozadí."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Prístup k údajom o teplote zápästia z telového senzora počas používania aplikácie."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Umožňuje aplikácii prístup k údajom o teplote zápästia z telového senzora počas používania aplikácie."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Prístup k údajom o teplote zápästia z telového senzora, keď je aplikácia na pozadí."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Umožňuje aplikácii prístup k údajom o teplote zápästia z telového senzora, keď je aplikácia na pozadí."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čítanie udalostí kalendára a podrobností"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom tablete a zdieľať alebo ukladať dáta kalendára."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom zariadení Android TV a zdieľať alebo ukladať údaje kalendára."</string>
@@ -629,11 +625,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Chyba overenia"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použiť zámku obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadaním zámky obrazovky"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pridržte senzor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pritlačte prst na senzor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Odtlačok prsta sa nedá rozpoznať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistite senzor odtlačkov prstov a skúste to znova"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistite senzor a skúste to znova"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pridržte senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pritlačte prst na senzor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Vyskúšajte iný odtlačok prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Príliš jasno"</string>
@@ -715,7 +711,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operácia týkajúca sa tváre bola zrušená"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Odomknutie tvárou zrušil používateľ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Príliš veľa pokusov. Skúste to neskôr."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Príliš veľa pokusov. Odomknutie tvárou bolo zakázané."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Príliš veľa pokusov. Zadajte namiesto toho zámku obrazovky."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nedá sa overiť tvár. Skúste to znova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nenastavili ste odomknutie tvárou"</string>
@@ -1956,11 +1953,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie je momentálne k dispozícii. Spravuje to aplikácia <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Ďalšie informácie"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Znova spustiť aplikáciu"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Zapnúť pracovné aplikácie?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Získajte prístup k svojim pracovným aplikáciám a upozorneniam"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnúť"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušiť pozastavenie aplikácií?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušiť pozastavenie"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Zavolať na tiesňovú linku"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Získajte prístup k svojim pracovným aplikáciám a hovorom"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
@@ -2170,8 +2165,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Zapnúť klepnutím"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žiadne pracovné aplikácie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žiadne osobné aplikácie"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Chcete otvoriť <xliff:g id="APP">%s</xliff:g> v osobnom profile?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Chcete otvoriť <xliff:g id="APP">%s</xliff:g> v pracovnom profile?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použiť osobný prehliadač"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použiť pracovný prehliadač"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN na odomknutie siete pre SIM kartu"</string>

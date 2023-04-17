@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Lubab rakendusel pääseda juurde kehaanduri andmetele, nagu pulss, temperatuur ja vere hapnikusisaldus, kui rakendust kasutatakse."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Juurdepääs kehaanduri andmetele, nagu pulss, kui rakendus töötab taustal"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Lubab rakendusel pääseda juurde kehaanduri andmetele, nagu pulss, temperatuur ja vere hapnikusisaldus, kui rakendus töötab taustal."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Juurdepääs kehaanduri randmetemperatuuri andmetele, kui rakendust kasutatakse."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Lubab rakendusel pääseda juurde kehaanduri randmetemperatuuri andmetele, kui rakendust kasutatakse."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Juurdepääs kehaanduri randmetemperatuuri andmetele, kui rakendus töötab taustal."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Lubab rakendusel pääseda juurde kehaanduri randmetemperatuuri andmetele, kui rakendus töötab taustal."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Kalendrisündmuste ja üksikasjade lugemine"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"See rakendus saab kõiki teie tahvelarvutisse salvestatud kalendrisündmusi lugeda ja teie kalendriandmeid jagada või salvestada."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"See rakendus saab kõiki teie Android TV seadmesse salvestatud kalendrisündmusi lugeda ja teie kalendriandmeid jagada või salvestada."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Näotuvastuse toiming tühistati."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Kasutaja tühistas näoga avamise"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liiga palju katseid. Proovige hiljem uuesti."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Liiga palju katseid. Näoga avamine on keelatud."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Liiga palju katseid. Kasutage selle asemel ekraanilukku."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nägu ei saa kinnitada. Proovige uuesti."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Näoga avamine ei ole seadistatud"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> pole praegu saadaval. Seda haldab rakendus <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Lisateave"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Jätka rakendust"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Lülitada töörakendused sisse?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Hankige juurdepääs oma töörakendustele ja märguannetele"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Lülita sisse"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Kas jätkata töörakendusi?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Jätka"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hädaolukord"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Hankige juurdepääs oma töörakendustele ja kõnedele"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Rakendus ei ole saadaval"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole praegu saadaval."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ei ole saadaval"</string>
@@ -2114,7 +2109,7 @@
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g>-helifail"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"Video"</string>
     <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g>-videofail"</string>
-    <string name="mime_type_image" msgid="2134307276151645257">"Kujutis"</string>
+    <string name="mime_type_image" msgid="2134307276151645257">"Pilt"</string>
     <string name="mime_type_image_ext" msgid="5743552697560999471">"<xliff:g id="EXTENSION">%1$s</xliff:g>-kujutisefail"</string>
     <string name="mime_type_compressed" msgid="8737300936080662063">"Arhiiv"</string>
     <string name="mime_type_compressed_ext" msgid="4775627287994475737">"<xliff:g id="EXTENSION">%1$s</xliff:g>-arhiivifail"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Puudutage sisselülitamiseks"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Töörakendusi pole"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Isiklikke rakendusi pole"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Kas avada <xliff:g id="APP">%s</xliff:g> teie isiklikul profiilil?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Kas avada <xliff:g id="APP">%s</xliff:g> teie tööprofiilil?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kasuta isiklikku brauserit"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Kasuta tööbrauserit"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kaardi võrgu avamise PIN-kood"</string>

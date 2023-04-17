@@ -210,7 +210,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivieren"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Anrufe und Nachrichten sind deaktiviert"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Du hast geschäftliche Apps pausiert. Deshalb kannst du keine Anrufe oder Nachrichten empfangen."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Geschäftl. Apps nicht pausieren"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Pausierung aufheben"</string>
     <string name="me" msgid="6207584824693813140">"Eigene"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-Optionen"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-Optionen"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App in Benutzung ist."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Zugriff auf Daten des Körpersensors, etwa Herzfrequenz, wenn im Hintergrund"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App im Hintergrund ist."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zugreifen, während die App verwendet wird."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Ermöglicht der App, auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zuzugreifen, während die App verwendet wird."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zugreifen, während die App im Hintergrund ausgeführt wird."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Ermöglicht der App, auf Daten des Körpersensors zur Hauttemperatur am Handgelenk zuzugreifen, während die App im Hintergrund ausgeführt wird."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Kalendertermine und Details lesen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Diese App kann alle auf deinem Tablet gespeicherten Kalendertermine lesen und deine Kalenderdaten teilen oder speichern."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Diese App kann alle auf deinem Android TV-Gerät gespeicherten Kalendertermine lesen und die Kalenderdaten teilen oder speichern."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Gesichtserkennung abgebrochen."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Entsperrung per Gesichtserkennung vom Nutzer abgebrochen"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Zu viele Versuche. Die Entsperrung per Gesichtserkennung wurde deaktiviert."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Zu viele Versuche. Verwende stattdessen die Displaysperre."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Gesichtsprüfung nicht möglich. Noch mal versuchen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Entsperrung per Gesichtserkennung ist nicht eingerichtet"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Ermöglicht der App, die Informationen über die Funktionen einer anderen App anzusehen."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Sensordaten mit hoher Frequenz auslesen"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Erlaubt der App, Sensordaten mit einer Frequenz von mehr als 200 Hz auszulesen"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"App ohne Nutzeraktion aktualisieren"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Ermöglicht dem Inhaber, die App, die er zuvor installiert hat, ohne Nutzeraktion zu aktualisieren"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Versuche zum Entsperren des Displays überwachen"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ist momentan nicht verfügbar. Dies wird über die App \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\" verwaltet."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Weitere Informationen"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"App-Pausierung aufheben"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Geschäftliche Apps aktivieren?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Du erhältst Zugriff auf deine geschäftlichen Apps und Benachrichtigungen"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivieren"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Geschäftl. Apps nicht mehr pausieren?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Nicht mehr pausieren"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Notruf"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Zugriff auf deine geschäftlichen Apps und Anrufe anfordern"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App ist nicht verfügbar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ist derzeit nicht verfügbar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nicht verfügbar"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Zum Aktivieren tippen"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Keine geschäftlichen Apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Keine privaten Apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> in deinem privaten Profil öffnen?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> in deinem Arbeitsprofil öffnen?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Privaten Browser verwenden"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Arbeitsbrowser verwenden"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Entsperr-PIN für netzgebundenes Gerät"</string>
