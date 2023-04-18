@@ -727,10 +727,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         getRefBounds2(mTempRect);
         t.setPosition(leash2, mTempRect.left, mTempRect.top)
                 .setWindowCrop(leash2, mTempRect.width(), mTempRect.height());
-        // Make right or bottom side surface always higher than left or top side to avoid weird
-        // animation when dismiss split. e.g. App surface fling above on decor surface.
-        t.setLayer(leash1, 1);
-        t.setLayer(leash2, 2);
 
         if (mImePositionProcessor.adjustSurfaceLayoutForIme(
                 t, dividerLeash, leash1, leash2, dimLayer1, dimLayer2)) {
