@@ -69,9 +69,6 @@ interface ClockController {
     /** Events that clocks may need to respond to */
     val events: ClockEvents
 
-    /** Triggers for various animations */
-    val animations: ClockAnimations
-
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
     fun initialize(
         resources: Resources,
@@ -79,8 +76,10 @@ interface ClockController {
         foldFraction: Float,
     ) {
         events.onColorPaletteChanged(resources)
-        animations.doze(dozeFraction)
-        animations.fold(foldFraction)
+        smallClock.animations.doze(dozeFraction)
+        largeClock.animations.doze(dozeFraction)
+        smallClock.animations.fold(foldFraction)
+        largeClock.animations.fold(foldFraction)
         smallClock.events.onTimeTick()
         largeClock.events.onTimeTick()
     }
@@ -99,6 +98,9 @@ interface ClockFaceController {
 
     /** Events specific to this clock face */
     val events: ClockFaceEvents
+
+    /** Triggers for various animations */
+    val animations: ClockAnimations
 
     /** Some clocks may log debug information */
     var logBuffer: LogBuffer?
@@ -192,13 +194,6 @@ data class ClockMetadata(
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
 data class ClockConfig(
-    /**
-     * Whether this clock has a custom position update animation. If true, the keyguard will call
-     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
-     * animation will be used (e.g. a simple translation).
-     */
-    val hasCustomPositionUpdatedAnimation: Boolean = false,
-
     /** Transition to AOD should move smartspace like large clock instead of small clock */
     val useAlternateSmartspaceAODTransition: Boolean = false,
 
@@ -213,6 +208,13 @@ data class ClockFaceConfig(
 
     /** Call to check whether the clock consumes weather data */
     val hasCustomWeatherDataDisplay: Boolean = false,
+
+    /**
+     * Whether this clock has a custom position update animation. If true, the keyguard will call
+     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
+     * animation will be used (e.g. a simple translation).
+     */
+    val hasCustomPositionUpdatedAnimation: Boolean = false,
 )
 
 /** Structure for keeping clock-specific settings */

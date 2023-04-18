@@ -13,23 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.notetask
 
-import android.os.UserHandle
+package android.telephony.satellite.stub;
 
-/** Contextual information required to launch a Note Task by [NoteTaskController]. */
-data class NoteTaskInfo(
-    val packageName: String,
-    val uid: Int,
-    val user: UserHandle,
-    val entryPoint: NoteTaskEntryPoint? = null,
-    val isKeyguardLocked: Boolean = false,
-) {
-
-    val launchMode: NoteTaskLaunchMode =
-        if (isKeyguardLocked) {
-            NoteTaskLaunchMode.Activity
-        } else {
-            NoteTaskLaunchMode.AppBubble
-        }
+/**
+ * {@hide}
+ */
+oneway interface ISatelliteGateway {
+    // An empty service because Telephony does not need to use any APIs from this service.
+    // Once satellite modem is enabled, Telephony will bind to the ISatelliteGateway service; and
+    // when satellite modem is disabled, Telephony will unbind to the service.
 }

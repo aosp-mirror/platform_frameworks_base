@@ -72,7 +72,7 @@ object Flags {
 
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
-        unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
+        releasedFlag(259395680, "simplified_appear_fraction")
 
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
@@ -383,7 +383,7 @@ object Flags {
     val MEDIA_RETAIN_RECOMMENDATIONS = releasedFlag(916, "media_retain_recommendations")
 
     // TODO(b/270437894): Tracking Bug
-    val MEDIA_REMOTE_RESUME = unreleasedFlag(917, "media_remote_resume", teamfood = true)
+    val MEDIA_REMOTE_RESUME = releasedFlag(917, "media_remote_resume")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")

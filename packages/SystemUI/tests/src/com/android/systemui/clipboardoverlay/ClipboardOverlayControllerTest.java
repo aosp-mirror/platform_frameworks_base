@@ -25,7 +25,6 @@ import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBO
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_EXPANDED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_MINIMIZED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
-import static com.android.systemui.flags.Flags.CLIPBOARD_REMOTE_BEHAVIOR;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -121,7 +120,6 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mSampleClipData = new ClipData("Test", new String[]{"text/plain"},
                 new ClipData.Item("Test Item"));
 
-        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, false);
 
         mOverlayController = new ClipboardOverlayController(
                 mContext,
@@ -234,7 +232,6 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_remoteCopy_withFlagOn() {
-        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
         when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(true);
 
         mOverlayController.setClipData(mSampleClipData, "");
@@ -243,17 +240,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void test_remoteCopy_withFlagOff() {
-        when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(true);
-
-        mOverlayController.setClipData(mSampleClipData, "");
-
-        verify(mTimeoutHandler).resetTimeout();
-    }
-
-    @Test
     public void test_nonRemoteCopy() {
-        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
         when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(false);
 
         mOverlayController.setClipData(mSampleClipData, "");
@@ -279,7 +266,6 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     public void test_logOnClipboardActionsShown() {
         ClipData.Item item = mSampleClipData.getItemAt(0);
         item.setTextLinks(Mockito.mock(TextLinks.class));
-        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
         when(mClipboardUtils.isRemoteCopy(any(Context.class), any(ClipData.class), anyString()))
                 .thenReturn(true);
         when(mClipboardUtils.getAction(any(TextLinks.class), anyString()))

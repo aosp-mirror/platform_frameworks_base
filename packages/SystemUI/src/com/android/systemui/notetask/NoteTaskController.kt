@@ -85,12 +85,12 @@ constructor(
     fun onBubbleExpandChanged(isExpanding: Boolean, key: String?) {
         if (!isEnabled) return
 
-        if (key != Bubble.KEY_APP_BUBBLE) return
+        val info = infoReference.getAndSet(null) ?: return
 
-        val info = infoReference.getAndSet(null)
+        if (key != Bubble.getAppBubbleKeyForApp(info.packageName, info.user)) return
 
         // Safe guard mechanism, this callback should only be called for app bubbles.
-        if (info?.launchMode != NoteTaskLaunchMode.AppBubble) return
+        if (info.launchMode != NoteTaskLaunchMode.AppBubble) return
 
         if (isExpanding) {
             logDebug { "onBubbleExpandChanged - expanding: $info" }
@@ -173,7 +173,7 @@ constructor(
             return
         }
 
-        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked)
+        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked, user)
 
         if (info == null) {
             logDebug { "Default notes app isn't set" }

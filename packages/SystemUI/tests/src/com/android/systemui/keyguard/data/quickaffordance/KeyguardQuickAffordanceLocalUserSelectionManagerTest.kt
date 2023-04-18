@@ -164,7 +164,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `remembers selections by user`() = runTest {
+    fun remembersSelectionsByUser() = runTest {
         overrideResource(
             R.array.config_keyguardQuickAffordanceDefaults,
             arrayOf<String>(),
@@ -246,7 +246,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `selections respects defaults`() = runTest {
+    fun selectionsRespectsDefaults() = runTest {
         val slotId1 = "slot1"
         val slotId2 = "slot2"
         val affordanceId1 = "affordance1"
@@ -277,7 +277,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `selections ignores defaults after selecting an affordance`() = runTest {
+    fun selectionsIgnoresDefaultsAfterSelectingAnAffordance() = runTest {
         val slotId1 = "slot1"
         val slotId2 = "slot2"
         val affordanceId1 = "affordance1"
@@ -309,7 +309,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `selections ignores defaults after clearing a slot`() = runTest {
+    fun selectionsIgnoresDefaultsAfterClearingAslot() = runTest {
         val slotId1 = "slot1"
         val slotId2 = "slot2"
         val affordanceId1 = "affordance1"
@@ -341,7 +341,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `responds to backup and restore by reloading the selections from disk`() = runTest {
+    fun respondsToBackupAndRestoreByReloadingTheSelectionsFromDisk() = runTest {
         overrideResource(R.array.config_keyguardQuickAffordanceDefaults, arrayOf<String>())
         val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
         val job =

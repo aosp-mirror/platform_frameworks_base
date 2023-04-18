@@ -172,64 +172,64 @@ class CameraGestureHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - status bar state is keyguard - returns true`() {
+    fun canCameraGestureBeLaunched_statusBarStateIsKeyguard_returnsTrue() {
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.KEYGUARD)).isTrue()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - state is shade-locked - returns true`() {
+    fun canCameraGestureBeLaunched_stateIsShadeLocked_returnsTrue() {
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.SHADE_LOCKED)).isTrue()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - state is keyguard - camera activity on top - returns true`() {
+    fun canCameraGestureBeLaunched_stateIsKeyguard_cameraActivityOnTop_returnsTrue() {
         prepare(isCameraActivityRunningOnTop = true)
 
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.KEYGUARD)).isTrue()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - state is shade-locked - camera activity on top - true`() {
+    fun canCameraGestureBeLaunched_stateIsShadeLocked_cameraActivityOnTop_true() {
         prepare(isCameraActivityRunningOnTop = true)
 
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.SHADE_LOCKED)).isTrue()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - not allowed by admin - returns false`() {
+    fun canCameraGestureBeLaunched_notAllowedByAdmin_returnsFalse() {
         prepare(isCameraAllowedByAdmin = false)
 
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.KEYGUARD)).isFalse()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - intent does not resolve to any app - returns false`() {
+    fun canCameraGestureBeLaunched_intentDoesNotResolveToAnyApp_returnsFalse() {
         prepare(installedCameraAppCount = 0)
 
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.KEYGUARD)).isFalse()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - state is shade - no running tasks - returns true`() {
+    fun canCameraGestureBeLaunched_stateIsShade_noRunningTasks_returnsTrue() {
         prepare(isCameraActivityRunningOnTop = false, isTaskListEmpty = true)
 
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.SHADE)).isTrue()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - state is shade - camera activity on top - returns false`() {
+    fun canCameraGestureBeLaunched_stateIsShade_cameraActivityOnTop_returnsFalse() {
         prepare(isCameraActivityRunningOnTop = true)
 
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.SHADE)).isFalse()
     }
 
     @Test
-    fun `canCameraGestureBeLaunched - state is shade - camera activity not on top - true`() {
+    fun canCameraGestureBeLaunched_stateIsShade_cameraActivityNotOnTop_true() {
         assertThat(underTest.canCameraGestureBeLaunched(StatusBarState.SHADE)).isTrue()
     }
 
     @Test
-    fun `launchCamera - only one camera app installed - using secure screen lock option`() {
+    fun launchCamera_onlyOneCameraAppInstalled_usingSecureScreenLockOption() {
         val source = 1337
 
         underTest.launchCamera(source)
@@ -238,7 +238,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun `launchCamera - only one camera app installed - using non-secure screen lock option`() {
+    fun launchCamera_onlyOneCameraAppInstalled_usingNonSecureScreenLockOption() {
         prepare(isUsingSecureScreenLockOption = false)
         val source = 1337
 
@@ -248,7 +248,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun `launchCamera - multiple camera apps installed - using secure screen lock option`() {
+    fun launchCamera_multipleCameraAppsInstalled_usingSecureScreenLockOption() {
         prepare(installedCameraAppCount = 2)
         val source = 1337
 
@@ -262,7 +262,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun `launchCamera - multiple camera apps installed - using non-secure screen lock option`() {
+    fun launchCamera_multipleCameraAppsInstalled_usingNonSecureScreenLockOption() {
         prepare(
             isUsingSecureScreenLockOption = false,
             installedCameraAppCount = 2,
