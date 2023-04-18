@@ -93,7 +93,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Vinnur úr skjáupptöku"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Hefja upptöku?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu. Þar á meðal eru upplýsingar á borð við aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android-kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu, þar á meðal aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Taka upp hljóð"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Hljóð tækis"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Hljóð úr tækinu á borð við tónlist, símtöl og hringitóna"</string>

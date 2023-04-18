@@ -119,7 +119,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Үн жардамчысы"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Капчык"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR коддорунун сканери"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR сканери"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Кулпусун ачуу"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Түзмөк кулпуланды"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Жүз скандалууда"</string>
@@ -242,7 +242,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi туташкан жок"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Жарыктыгы"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Түстөрдү инверсиялоо"</string>
-    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түстөрдү тууралоо"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түсүн тууралоо"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Колдонуучунун параметрлери"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Бүттү"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Жабуу"</string>
@@ -282,7 +282,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC өчүрүлгөн"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC иштетилген"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Экрандан видео жаздырып алуу"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Экранды жаздыруу"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Баштадык"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Токтотуу"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Бир кол режими"</string>
@@ -564,7 +564,7 @@
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Алдыга түрүү"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
-    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Жок кылуу"</string>
+    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Өчүрүү"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Башкы бет"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Бүтүрүү"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
