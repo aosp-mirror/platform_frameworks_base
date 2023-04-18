@@ -178,6 +178,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
         @Override
         public void onUserInput() {
+            mKeyguardFaceAuthInteractor.onPrimaryBouncerUserInput();
             mUpdateMonitor.cancelFaceAuth();
         }
 
