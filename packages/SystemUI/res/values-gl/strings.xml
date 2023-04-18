@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Deter"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo dunha soa man"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contraste"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Nivel estándar"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Nivel medio"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Nivel alto"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Queres desbloquear o micrófono do dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Queres desbloquear a cámara do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Queres desbloquear a cámara e o micrófono do dispositivo?"</string>
@@ -409,7 +405,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silenciadas"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificacións"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borra todas as notificacións silenciadas"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas as notificacións silenciadas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"O modo Non molestar puxo en pausa as notificacións"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Non hai notificacións"</string>
@@ -889,17 +885,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"quitar dos controis favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover á posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controis"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Escolle os controis aos que queiras acceder desde Configuración rápida"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Para reorganizar os controis, mantenos premidos e arrástraos"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Quitáronse todos os controis"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Non se gardaron os cambios"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outras aplicacións"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Reordenar"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Engadir controis"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Seguir editando"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Non se puideron cargar os controis. Comproba a aplicación <xliff:g id="APP">%s</xliff:g> para asegurarte de que non se modificase a súa configuración."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Non hai controis compatibles que estean dispoñibles"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outra"</string>
@@ -1129,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"A política do teu traballo só che permite facer chamadas de teléfono desde o perfil de traballo"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Cambiar ao perfil de traballo"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Pechar"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizar pantalla de bloqueo"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wifi non dispoñible"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"A cámara está bloqueada"</string>
@@ -1137,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"O micrófono está bloqueado"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"O modo de prioridade está activado"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"A atención do Asistente está activada"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

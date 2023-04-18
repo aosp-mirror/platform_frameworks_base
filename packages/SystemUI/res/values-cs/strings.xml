@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odeberete z oblíbených"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Přesunout na pozici <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládací prvky"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládací prvky, které chcete mít v Rychlém nastavení"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ovládací prvky můžete uspořádat podržením a přetažením"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všechny ovládací prvky byly odstraněny"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Změny nebyly uloženy"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Vaše pracovní zásady vám umožňují telefonovat pouze z pracovního profilu"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Přepnout na pracovní profil"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Zavřít"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Přizpůsobit zámek obrazovky"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Síť Wi-Fi není dostupná"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera je blokována"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon je blokován"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Režim priority je zapnutý"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Pozornost Asistenta je zapnutá"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

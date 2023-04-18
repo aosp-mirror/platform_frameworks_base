@@ -258,7 +258,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"亮度"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"颜色反转"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"色彩校正"</string>
-    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"字号"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"字体大小"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"管理用户"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"完成"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"关闭"</string>
@@ -700,7 +700,7 @@
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列功能块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
     <string name="qs_edit" msgid="5583565172803472437">"编辑"</string>
@@ -792,10 +792,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要关闭移动数据网络吗？"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"您将无法通过<xliff:g id="CARRIER">%s</xliff:g>使用移动数据或互联网，只能通过 WLAN 连接到互联网。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"您的运营商"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"切换回 <xliff:g id="CARRIER">%s</xliff:g>？"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"移动流量不会根据可用性自动切换"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"是否要切换回 <xliff:g id="CARRIER">%s</xliff:g>？"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"移动流量不会根据网络可用情况自动切换"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"不用了"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"是，切换"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"是，请切换"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"由于某个应用遮挡了权限请求界面，因此“设置”应用无法验证您的回应。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"要允许“<xliff:g id="APP_0">%1$s</xliff:g>”显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块吗？"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- 可以读取“<xliff:g id="APP">%1$s</xliff:g>”中的信息"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要从“快捷设置”菜单访问的控制项"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未保存更改"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"根据您的工作政策，您只能通过工作资料拨打电话"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"切换到工作资料"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"关闭"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"自定义锁屏状态"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"没有 WLAN 连接"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"已禁用摄像头"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"已禁用麦克风"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"已开启优先模式"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"已开启 Google 助理感知功能"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

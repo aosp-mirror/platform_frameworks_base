@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"শুরু করুন"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"বন্ধ করুন"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"এক হাতে ব্যবহার করার মোড"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"কনট্রাস্ট"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"স্ট্যান্ডার্ড"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"মিডিয়াম"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"হাই"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ডিভাইসের মাইক্রোফোন আনব্লক করতে চান?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ডিভাইসের ক্যামেরা আনব্লক করতে চান?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ডিভাইসের ক্যামেরা এবং মাইক্রোফোন আনব্লক করতে চান?"</string>
@@ -707,7 +703,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"টাইলগুলি আবার সাজানোর জন্য ধরে থেকে টেনে আনুন"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"সরানোর জন্য এখানে টেনে আনুন"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"আপনাকে কমপক্ষে <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>টি টাইল রাখতে হবে"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"সম্পাদনা করুন"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"এডিট করুন"</string>
     <string name="tuner_time" msgid="2450785840990529997">"সময়"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"ঘণ্টা, মিনিট, এবং সেকেন্ড দেখান"</item>
@@ -784,7 +780,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"মোবাইল ডেটা"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"ওয়াই ফাই বন্ধ আছে"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"ওয়াই-ফাই বন্ধ আছে"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ব্লুটুথ বন্ধ আছে"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"বিরক্ত করবে না বিকল্পটি বন্ধ আছে"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"\'বিরক্ত করবে না\' মোড চালু আছে"</string>
@@ -796,7 +792,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"মোবাইল ডেটা বন্ধ করবেন?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"আপনি \'<xliff:g id="CARRIER">%s</xliff:g>\'-এর মাধ্যমে ডেটা অথবা ইন্টারনেট অ্যাক্সেস করতে পারবেন না। শুধুমাত্র ওয়াই-ফাইয়ের মাধ্যমেই ইন্টারনেট অ্যাক্সেস করা যাবে।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"আপনার পরিষেবা প্রদানকারী"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"আবার <xliff:g id="CARRIER">%s</xliff:g>-এর ডেটায় পরিবর্তন করবেন?"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"আবার <xliff:g id="CARRIER">%s</xliff:g>-এ পাল্টাবেন?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"উপলভ্যতার উপরে ভিত্তি করে অটোমেটিক মোবাইল ডেটায় পরিবর্তন করা হবে না"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"না থাক"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"হ্যাঁ, পাল্টান"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"পছন্দসই থেকে সরান"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> অবস্থানে সরান"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"যে কন্ট্রোল অ্যাক্সেস করতে চান তা \'দ্রুত সেটিংস\' থেকে বেছে নিন"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"কন্ট্রোলগুলিকে আবার সাজানোর জন্য ধরে রেখে টেনে আনুন"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"সমস্ত কন্ট্রোল সরানো হয়েছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"পরিবর্তন সেভ করা হয়নি"</string>
@@ -1126,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"কাজ সংক্রান্ত নীতি, আপনাকে শুধুমাত্র অফিস প্রোফাইল থেকে কল করার অনুমতি দেয়"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"অফিস প্রোফাইলে পাল্টে নিন"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"বন্ধ করুন"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"লক স্ক্রিন কাস্টমাইজ করুন"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ওয়াই-ফাই উপলভ্য নয়"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ক্যামেরার অ্যাক্সেস ব্লক করা আছে"</string>
@@ -1134,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\'প্রায়োরিটি\' মোড চালু করা আছে"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"অ্যাসিস্ট্যান্ট আপনার কথা শোনার জন্য চালু করা আছে"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

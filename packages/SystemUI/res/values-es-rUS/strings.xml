@@ -383,7 +383,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se borrarán todas las aplicaciones y los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen las contraseñas, los detalles del pago, las fotos, los mensajes y el audio que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que brinda esta función tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen las contraseñas, los detalles del pago, las fotos, los mensajes y el audio que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que brinda esta función tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen contraseñas, detalles de pago, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Deseas comenzar a grabar o transmitir contenido?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Deseas iniciar una grabación o transmisión con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"¿Quieres permitir que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparta o grabe contenido?"</string>
@@ -700,7 +700,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ícono izquierdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícono derecho"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionado y arrastra para agregar tarjetas"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar los mosaicos"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar las tarjetas"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tarjetas"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"quitar de favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Elige a qué controles accederás desde la Configuración rápida"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Se quitaron todos los controles"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se guardaron los cambios"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Tu política del trabajo te permite hacer llamadas telefónicas solo desde el perfil de trabajo"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Cambiar al perfil de trabajo"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Cerrar"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizar pantalla de bloqueo"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi no disponible"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"La cámara está bloqueada"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"El micrófono está bloqueado"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"El modo de prioridad está activado"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Asistente está prestando atención"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

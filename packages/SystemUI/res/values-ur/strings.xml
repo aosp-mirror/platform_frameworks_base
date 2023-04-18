@@ -792,7 +792,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"موبائل ڈیٹا آف کریں؟"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏آپ کو <xliff:g id="CARRIER">%s</xliff:g> کے ذریعے ڈیٹا یا انٹرنیٹ تک رسائی حاصل نہیں ہوگی۔ انٹرنیٹ صرف Wi-Fi کے ذریعے دستیاب ہوگا۔"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"آپ کا کریئر"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> پر واپس سوئچ کریں؟"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"‫<xliff:g id="CARRIER">%s</xliff:g> پر واپس سوئچ کریں؟"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"دستیابی کی بنیاد پر موبائل ڈیٹا خودکار طور پر تبدیل نہیں ہوگا"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"نہیں شکریہ"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"ہاں، سوئچ کریں"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"پسندیدگی ختم کریں"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"پوزیشن <xliff:g id="NUMBER">%d</xliff:g> میں منتقل کریں"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"کنٹرولز"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"فوری ترتیبات سے رسائی کے لیے کنٹرولز منتخب کریں"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"کنٹرولز کو دوبارہ ترتیب دینے کے ليے پکڑیں اور گھسیٹیں"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"سبھی کنٹرولز ہٹا دیے گئے"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تبدیلیاں محفوظ نہیں ہوئیں"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"آپ کے کام سے متعلق پالیسی آپ کو صرف دفتری پروفائل سے فون کالز کرنے کی اجازت دیتی ہے"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"دفتری پروفائل پر سوئچ کریں"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"بند کریں"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"مقفل اسکرین کو حسب ضرورت بنائیں"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"‏Wi-Fi دستیاب نہیں ہے"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"کیمرا مسدود ہے"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"مائیکروفون مسدود ہے"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ترجیحی موڈ آن ہے"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"اسسٹنٹ کی توجہ آن ہے"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

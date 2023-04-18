@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Սկսել"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Կանգնեցնել"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Մեկ ձեռքի ռեժիմ"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Կոնտրաստ"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Սովորական"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Միջին"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Բարձր"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Արգելահանե՞լ սարքի խոսափողը"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Արգելահանե՞լ սարքի տեսախցիկը"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Արգելահանե՞լ սարքի տեսախցիկը և խոսափողը"</string>
@@ -386,10 +382,10 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Հեռացնե՞լ օգտատիրոջը:"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Այս օգտատիրոջ բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Հեռացնել"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Ձայնագրման և հեռարձակման ընթացքում <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածին հասանելի կլինեն ձեր սարքի էկրանին ցուցադրվող տեղեկությունները և ձեր սարքով նվագարկվող նյութերը։ Սա ներառում է այնպիսի տեղեկություններ, ինչպիսիք են, օրինակ, գաղտնաբառերը, վճարային տվյալները, լուսանկարները, հաղորդագրությունները և նվագարկվող աուդիո ֆայլերը։"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Ձայնագրման և հեռարձակման ընթացքում ծառայությունների մատակարարին հասանելի կլինեն ձեր սարքի էկրանին ցուցադրվող տեղեկությունները և ձեր սարքով նվագարկվող նյութերը։ Սա ներառում է այնպիսի տեղեկություններ, ինչպիսիք են, օրինակ, գաղտնաբառերը, վճարային տվյալները, լուսանկարները, հաղորդագրությունները և նվագարկվող աուդիո ֆայլերը։"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Սկսե՞լ ձայնագրումը կամ հեռարձակումը"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Սկսե՞լ ձայնագրումը կամ հեռարձակումը <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածով"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Տեսագրման և հեռարձակման ընթացքում <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածին հասանելի կլինեն ձեր սարքի էկրանին ցուցադրվող տեղեկությունները և ձեր սարքով նվագարկվող նյութերը։ Սա ներառում է այնպիսի տեղեկություններ, ինչպիսիք են, օրինակ, գաղտնաբառերը, վճարային տվյալները, լուսանկարները, հաղորդագրությունները և նվագարկվող աուդիո ֆայլերը։"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Տեսագրման և հեռարձակման ընթացքում ծառայությունների մատակարարին հասանելի կլինեն ձեր սարքի էկրանին ցուցադրվող տեղեկությունները և ձեր սարքով նվագարկվող նյութերը։ Սա ներառում է այնպիսի տեղեկություններ, ինչպիսիք են, օրինակ, գաղտնաբառերը, վճարային տվյալները, լուսանկարները, հաղորդագրությունները և նվագարկվող աուդիո ֆայլերը։"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Սկսե՞լ տեսագրումը կամ հեռարձակումը"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Սկսե՞լ տեսագրումը կամ հեռարձակումը <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածով"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Թույլատրե՞լ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածին ցուցադրել կամ տեսագրել էկրանը"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Ամբողջ էկրանը"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Մեկ հավելված"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ընտրանուց հեռացնելու համար"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Տեղափոխել դիրք <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Կառավարման տարրեր"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Ընտրեք կառավարման տարրերը, որոնք պետք է հասանելի լինեն Արագ կարգավորումներում"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Պահեք և քաշեք՝ կառավարման տարրերը վերադասավորելու համար"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Կառավարման բոլոր տարրերը հեռացվեցին"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Փոփոխությունները չեն պահվել"</string>
@@ -1126,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Ձեր աշխատանքային կանոնների համաձայն՝ դուք կարող եք զանգեր կատարել աշխատանքային պրոֆիլից"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Անցնել աշխատանքային պրոֆիլ"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Փակել"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Անհատականացնել կողպէկրանը"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ցանց հասանելի չէ"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Տեսախցիկն արգելափակված է"</string>
@@ -1134,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Խոսափողն արգելափակված է"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Առաջնահերթության ռեժիմը միացված է"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Օգնականը լսում է"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

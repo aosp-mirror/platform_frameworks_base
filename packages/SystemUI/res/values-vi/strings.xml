@@ -520,7 +520,7 @@
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Trình quét mã QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Đang cập nhật"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ máy bay"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ trên máy bay"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
     <string name="alarm_template" msgid="2234991538018805736">"lúc <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"vào <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các tuỳ chọn điều khiển để truy cập từ trình đơn Cài đặt nhanh"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả tùy chọn điều khiển"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Chưa lưu các thay đổi"</string>
@@ -1051,10 +1052,10 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Thêm ô"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Không thêm ô"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chọn người dùng"</string>
-    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{Ứng dụng # đang hoạt động}other{Ứng dụng # đang hoạt động}}"</string>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# ứng dụng đang hoạt động}other{# ứng dụng đang hoạt động}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Thông tin mới"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ứng dụng đang hoạt động"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Các ứng dụng này vẫn hoạt động và đang chạy ngay cả khi bạn không sử dụng chúng. Việc này giúp cải thiện các chức năng nhưng đồng thời cũng có thể ảnh hưởng đến thời lượng pin."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Những ứng dụng sau vẫn hoạt động và chạy ngay cả khi bạn không sử dụng chúng. Việc này giúp cải thiện các chức năng nhưng đồng thời cũng có thể ảnh hưởng đến thời lượng pin."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Dừng"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Đã dừng"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Xong"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Chính sách của nơi làm việc chỉ cho phép bạn gọi điện thoại từ hồ sơ công việc"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Chuyển sang hồ sơ công việc"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Đóng"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Tuỳ chỉnh màn hình khoá"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Không có Wi-Fi"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Máy ảnh bị chặn"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Micrô bị chặn"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Chế độ ưu tiên đang bật"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Trợ lý đang bật"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

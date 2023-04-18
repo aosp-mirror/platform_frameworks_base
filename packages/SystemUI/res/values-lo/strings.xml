@@ -520,7 +520,7 @@
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"ຕົວສະແກນລະຫັດ QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"ກຳລັງອັບເດດ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"ໂໝດເຮືອ​ບິນ"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"ໂໝດຢູ່ໃນຍົນ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ທ່ານ​ຈະ​ບໍ່​ໄດ້​ຍິນ​ສຽງ​ໂມງ​ປ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"ເວ​ລາ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"ວັນ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ຍົກເລີກລາຍການທີ່ມັກ"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ຍ້າຍໄປຕຳແໜ່ງ <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ການຄວບຄຸມ"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ເລືອກການຄວບຄຸມເພື່ອເຂົ້າເຖິງຈາກການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ກົດຄ້າງໄວ້ເພື່ອຈັດຮຽງການຄວບຄຸມຄືນໃໝ່"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ລຶບການຄວບຄຸມທັງໝົດອອກແລ້ວ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງໄວ້"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"ນະໂຍບາຍບ່ອນເຮັດວຽກຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທລະສັບໄດ້ຈາກໂປຣໄຟລ໌ບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ສະຫຼັບໄປໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"ປິດ"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"ປັບແຕ່ງໜ້າຈໍລັອກ"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ບໍ່ພ້ອມໃຫ້ນຳໃຊ້"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ກ້ອງຖ່າຍຮູບຖືກບລັອກຢູ່"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ໄມໂຄຣໂຟນຖືກບລັອກຢູ່"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ໂໝດຄວາມສຳຄັນເປີດຢູ່"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ການເອີ້ນໃຊ້ຜູ້ຊ່ວຍເປີດຢູ່"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

@@ -131,7 +131,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Үн жардамчысы"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Капчык"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR коддорунун сканери"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR сканери"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"Кулпусу ачылды"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Түзмөк кулпуланды"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Жүз скандалууда"</string>
@@ -257,8 +257,8 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi туташкан жок"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Жарыктыгы"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Түстөрдү инверсиялоо"</string>
-    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түстөрдү тууралоо"</string>
-    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Ариптин өлчөмү"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Түсүн тууралоо"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Арип өлчөмү"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Колдонуучуларды тескөө"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Бүттү"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Жабуу"</string>
@@ -295,7 +295,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC өчүрүлгөн"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC иштетилген"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Экрандан видео жаздырып алуу"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Экранды жаздыруу"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Баштадык"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Токтотуу"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Бир кол режими"</string>
@@ -517,7 +517,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Колдонуу үчүн кулпусун ачыңыз"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Кыйытмаларды алууда ката кетти. Бир аздан кийин кайталап көрүңүз."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Экранды кулпулоо параметрлери"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR кодунун сканери"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR сканери"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Жаңырууда"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Жумуш профили"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Учак режими"</string>
@@ -606,7 +606,7 @@
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Алдыга түрүү"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
-    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Жок кылуу"</string>
+    <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Өчүрүү"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Башкы бет"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Бүтүрүү"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -795,7 +795,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Кайра <xliff:g id="CARRIER">%s</xliff:g> байланыш операторуна которуласызбы?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Жеткиликтүү болгондо мобилдик Интернет автоматтык түрдө которулбайт"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Жок, рахмат"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ооба, которулуу"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ооба, которулам"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Уруксат берүү сурамыңыз көрүнбөй калгандыктан, Параметрлер жообуңузду ырастай албай жатат."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосуна <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөтүүгө уруксат берилсинби?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунун маалыматын окуйт"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"сүйүктүүлөрдөн чыгаруу"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>-позицияга жылдыруу"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Башкаруу элементтери"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Ыкчам жөндөөлөрдө жеткиликтүү боло турган башкаруу элементтерин тандаңыз"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Башкаруу элементтеринин иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Бардык башкаруу элементтери өчүрүлдү"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгөртүүлөр сакталган жок"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Жумуш саясатыңызга ылайык, жумуш профилинен гана чалууларды аткара аласыз"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Жумуш профилине которулуу"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Жабуу"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Кулпу экранын тууралоо"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi жеткиликтүү эмес"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера бөгөттөлдү"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон бөгөттөлдү"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Маанилүү сүйлөшүүлөр режими күйүк"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Жардамчы иштетилди"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"আৰম্ভ কৰক"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"বন্ধ কৰক"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"এখন হাতেৰে ব্যৱহাৰ কৰা ম’ড"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"কনট্ৰাষ্ট"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"মানক"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"মধ্যমীয়া"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"উচ্চ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ডিভাইচৰ মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ডিভাইচৰ কেমেৰা অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ডিভাইচৰ কেমেৰা আৰু মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাবনে?"</string>
@@ -745,7 +741,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"লক স্ক্ৰীন"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"আপোনাৰ ফ\'নটো গৰম হোৱাৰ কাৰণে অফ কৰা হৈছিল"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"আপোনাৰ ফ’নটো এতিয়া স্বাভাৱিকভাৱে চলি আছে।\nঅধিক তথ্যৰ বাবে টিপক"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"আপোনাৰ ফ\'নটো অত্যধিক গৰম হোৱাৰ বাবে ইয়াক ঠাণ্ডা কৰিবলৈ অফ কৰা হৈছিল। আপোনাৰ ফ\'নটো এতিয়া স্বাভাৱিকভাৱে চলি আছে।\n\nআপোনাৰ ফ\'নটো গৰম হ\'ব পাৰে, যদিহে আপুনি:\n	• ফ\'নটোৰ হাৰ্ডৱেৰ অত্যধিক মাত্ৰাত ব্যৱহাৰ কৰা এপসমূহ চলালে (যেনে, ভিডিঅ\' গেইম, ভিডিঅ\', দিক্-নিৰ্দেশনা এপসমূহ)\n	• খুউব ডাঙৰ আকাৰৰ ফাইল আপল\'ড বা ডাউনল’ড কৰিলে\n	• আপোনাৰ ফ\'নটো উচ্চ তাপমাত্ৰাৰ পৰিৱেশত ব্যৱহাৰ কৰিলে"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"আপোনাৰ ফ\'নটো অত্যধিক গৰম হোৱাৰ বাবে ইয়াক ঠাণ্ডা কৰিবলৈ অফ কৰা হৈছিল। আপোনাৰ ফ\'নটো এতিয়া স্বাভাৱিকভাৱে চলি আছে।\n\nআপোনাৰ ফ\'নটো গৰম হ\'ব পাৰে, যদিহে আপুনি:\n	• ফ\'নটোৰ হাৰ্ডৱেৰ অত্যধিক মাত্ৰাত ব্যৱহাৰ কৰা এপ্‌সমূহ চলালে (যেনে, ভিডিঅ\' গেইম, ভিডিঅ\', দিক্-নিৰ্দেশনা এপ্‌সমূহ)\n	• খুউব ডাঙৰ আকাৰৰ ফাইল আপল\'ড বা ডাউনল’ড কৰিলে\n	• আপোনাৰ ফ\'নটো উচ্চ তাপমাত্ৰাৰ পৰিৱেশত ব্যৱহাৰ কৰিলে"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ফ\'নটো গৰম হ\'বলৈ ধৰিছে"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ফ’নটো ঠাণ্ডা হৈ থকাৰ সময়ত কিছুমান সুবিধা উপলব্ধ নহয়।\nঅধিক তথ্যৰ বাবে টিপক"</string>
@@ -760,7 +756,7 @@
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"সোঁ শ্বৰ্টকাটটোৱেও আনলক কৰিব"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"একো বাছনি কৰা হোৱা নাই"</string>
     <string name="tuner_launch_app" msgid="3906265365971743305">"<xliff:g id="APP">%1$s</xliff:g>ক লঞ্চ কৰক"</string>
-    <string name="tuner_other_apps" msgid="7767462881742291204">"অন্যান্য এপসমূহ"</string>
+    <string name="tuner_other_apps" msgid="7767462881742291204">"অন্যান্য এপ্‌সমূহ"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"পৰিচিত মানুহৰ গোট"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"যোগ চিহ্ন"</string>
     <string name="tuner_minus" msgid="5258518368944598545">"বিয়োগ চিহ্ন"</string>
@@ -791,7 +787,7 @@
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"অসুবিধা নিদিব-ক কোনো এপ্ (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম বা এপে অন কৰিলে।"</string>
-    <string name="running_foreground_services_title" msgid="5137313173431186685">"নেপথ্যত চলি থকা এপসমূহ"</string>
+    <string name="running_foreground_services_title" msgid="5137313173431186685">"নেপথ্যত চলি থকা এপ্‌সমূহ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"বেটাৰী আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে সবিশেষ জানিবলৈ টিপক"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ম’বাইল ডেটা অফ কৰিবনে?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"আপুনি <xliff:g id="CARRIER">%s</xliff:g>ৰ জৰিয়তে ডেটা সংযোগ বা ইণ্টাৰনেট সংযোগ নাপাব। কেৱল ৱাই-ফাইৰ যোগেৰে ইণ্টাৰনেট উপলব্ধ হ\'ব।"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"অপ্ৰিয়"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> নম্বৰ অৱস্থানলৈ স্থানান্তৰিত কৰক"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্ৰণসমূহ"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ক্ষিপ্ৰ ছেটিঙৰ পৰা এক্সেছ কৰিবলৈ নিয়ন্ত্ৰণসমূহ বাছনি কৰক"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"নিয়ন্ত্ৰণসমূহ পুনৰ সজাবলৈ ধৰি ৰাখক আৰু টানি আনি এৰক"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"আটাইবোৰ নিয়ন্ত্ৰণ আঁতৰোৱা হৈছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"সালসলনিসমূহ ছেভ নহ’ল"</string>
@@ -1058,7 +1055,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# টা এপ্‌ সক্ৰিয় হৈ আছে}one{# টা এপ্‌ সক্ৰিয় হৈ আছে}other{# টা এপ্‌ সক্ৰিয় হৈ আছে}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"নতুন তথ্য"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"সক্ৰিয় এপ্‌"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"এই এপ্‌সমূহ সক্ৰিয় আৰু আনকি আপুনি এইসমূহ ব্যৱহাৰ নকৰাৰ সময়তো চলি থাকে। ই সেইসমূহৰ কাৰ্য্যক্ষমতা উন্নত কৰে, কিন্তু ই বেটাৰীৰ জীৱনকালতো প্ৰভাৱ পেলাব পাৰে।"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"আপুনি এপ্‌সমূহ ব্যৱহাৰ নকৰাৰ সময়তো এইসমূহ সক্ৰিয় হৈ থাকে আৰু চলি থাকে। ই সেইসমূহৰ কাৰ্যক্ষমতা উন্নত কৰে, কিন্তু ই বেটাৰীৰ জীৱনকালতো প্ৰভাৱ পেলাব পাৰে।"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ কৰক"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"বন্ধ হ’ল"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হ’ল"</string>
@@ -1126,12 +1123,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"আপোনাৰ কৰ্মস্থানৰ নীতিয়ে আপোনাক কেৱল কৰ্মস্থানৰ প্ৰ’ফাইলৰ পৰা ফ’ন কল কৰিবলৈ দিয়ে"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"কৰ্মস্থানৰ প্ৰ’ফাইললৈ সলনি কৰক"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"বন্ধ কৰক"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="6152703934761402399">"লক স্ক্ৰীন কাষ্টমাইজ কৰক"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"লক স্ক্ৰীন কাষ্টমাইজ কৰিবলৈ আনলক কৰক"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ৱাই-ফাই উপলব্ধ নহয়"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"কেমেৰা অৱৰোধ কৰা আছে"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"কেমেৰা আৰু মাইক্ৰ’ফ’ন অৱৰোধ কৰা আছে"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্ৰ’ফ’ন অৱৰোধ কৰা আছে"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"অগ্ৰাধিকাৰ দিয়া ম’ড অন আছে"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistantএ আপোনাৰ কথা শুনি আছে"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ছেটিঙত টোকাৰ ডিফ’ল্ট এপ্ ছেট কৰক"</string>
 </resources>

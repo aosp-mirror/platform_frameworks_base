@@ -236,12 +236,12 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ચાલુ કરી રહ્યાં છીએ…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ઑટો રોટેટ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ઑટો રોટેટ સ્ક્રીન"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"સ્થાન"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"લોકેશન"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"સ્ક્રીન સેવર"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"કૅમેરાનો ઍક્સેસ"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"માઇકનો ઍક્સેસ"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ઉપલબ્ધ છે"</string>
-    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"બ્લૉક કરેલું છે"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"બ્લૉક કરેલો છે"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"મીડિયા ઉપકરણ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"વપરાશકર્તા"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"વાઇ-ફાઇ"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"મનપસંદમાંથી કાઢી નાખો"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"સ્થાન <xliff:g id="NUMBER">%d</xliff:g> પર ખસેડો"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"નિયંત્રણો"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ઝડપી સેટિંગમાંથી ઍક્સેસ કરવાના નિયંત્રણો પસંદ કરો"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"નિયંત્રણોને ફરીથી ગોઠવવા માટે તેમને હોલ્ડ કરીને ખેંચો"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"બધા નિયંત્રણો કાઢી નાખ્યા"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ફેરફારો સાચવ્યા નથી"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"તમારી ઑફિસની પૉલિસી તમને માત્ર ઑફિસની પ્રોફાઇલ પરથી જ ફોન કૉલ કરવાની મંજૂરી આપે છે"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ઑફિસની પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"બંધ કરો"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"લૉક સ્ક્રીન કસ્ટમાઇઝ કરો"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"વાઇ-ફાઇ ઉપલબ્ધ નથી"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"કૅમેરા બ્લૉક કરેલો છે"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"માઇક્રોફોન બ્લૉક કરેલો છે"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"પ્રાધાન્યતા મોડ ચાલુ છે"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant સક્રિય છે"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

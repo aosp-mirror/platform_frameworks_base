@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začni"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ustavi"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Enoročni način"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrast"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standardni"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Srednji"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Visok"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Želite odblokirati mikrofon v napravi?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Želite odblokirati fotoaparat v napravi?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Želite odblokirati fotoaparat in mikrofon v napravi?"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstranitev iz priljubljenih"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premakni na položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolniki"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Izberite kontrolnike, do katerih želite imeti dostop v hitrih nastavitvah."</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
@@ -1126,12 +1123,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Službeni pravilnik dovoljuje opravljanje telefonskih klicev le iz delovnega profila."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Preklopi na delovni profil"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Zapri"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Prilagajanje zaklenjenega zaslona"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Odklenite za prilagajanje zaklenjenega zaslona"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ni na voljo."</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Fotoaparat je blokiran."</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Fotoaparat in mikrofon sta blokirana."</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon je blokiran."</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prednostni način je vklopljen."</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Zaznavanje pomočnika je vklopljeno."</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Nastavite privzeto aplikacijo za zapiske v nastavitvah."</string>
 </resources>

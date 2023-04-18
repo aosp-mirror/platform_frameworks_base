@@ -793,7 +793,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> üzerinden veri veya internet erişiminiz olmayacak. İnternet yalnızca kablosuz bağlantı üzerinden kullanılabilecek."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operatörünüz"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> operatörüne geri dönülsün mü?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Uygunluk durumuna göre otomatik olarak mobil veriye geçilmez"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Kullanılabilir olduğunda otomatik olarak mobil veriye geçilmez"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Hayır, teşekkürler"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Evet, geçilsin"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Bir uygulama bir izin isteğinin anlaşılmasını engellediğinden, Ayarlar, yanıtınızı doğrulayamıyor."</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"favorilerden kaldırın"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>. konuma taşı"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Hızlı Ayarlar\'dan erişmek istediğiniz kontrolleri seçin"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Denetimleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm denetimler kaldırıldı"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Değişiklikler kaydedilmedi"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"İşletme politikanız yalnızca iş profilinden telefon araması yapmanıza izin veriyor"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"İş profiline geç"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Kapat"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Kilit ekranını özelleştir"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Kablosuz bağlantı kullanılamıyor"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera engellendi"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon engellendi"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Öncelik modu etkin"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Asistan dinliyor"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

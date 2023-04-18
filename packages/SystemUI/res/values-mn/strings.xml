@@ -700,7 +700,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Зүүн дүрс тэмдэг"</string>
     <string name="right_icon" msgid="1103955040645237425">"Баруун дүрс тэмдэг"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Хавтан нэмэхийн тулд дараад чирэх"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Хавтангуудыг дахин засварлахын тулд дараад чирнэ үү"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Хавтангуудыг дахин цэгцлэхийн тулд дараад чирнэ үү"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Устгахын тулд энд зөөнө үү"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Танд хамгийн багадаа <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> хавтан шаардлагатай"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Засах"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"дургүй гэж тэмдэглэх"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>-р байрлал руу зөөх"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Хяналт"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Шуурхай тохиргооноос хандах удирдлагуудаа сонгоно уу"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Хяналтуудыг дахин засварлахын тулд дараад чирнэ үү"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Бүх хяналтыг хассан"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өөрчлөлтийг хадгалаагүй"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Таны ажлын бодлого танд зөвхөн ажлын профайлаас утасны дуудлага хийхийг зөвшөөрдөг"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Ажлын профайл руу сэлгэх"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Хаах"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Түгжигдсэн дэлгэцийг өөрчлөх"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi боломжгүй байна"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камерыг блоклосон"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофоныг блоклосон"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Чухал горим асаалттай байна"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Туслах анхаарлаа хандуулж байна"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>
