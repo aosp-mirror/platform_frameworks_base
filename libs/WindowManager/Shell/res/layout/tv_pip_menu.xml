@@ -67,7 +67,7 @@
 
     <!-- Temporarily extending the background to show an edu text hint for opening the menu -->
     <FrameLayout
-        android:id="@+id/tv_pip_menu_edu_text_drawer_placeholder"
+        android:id="@+id/tv_pip_menu_edu_text_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/tv_pip"
