@@ -653,6 +653,58 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun isAuthenticatedIsResetToFalseWhenDeviceStartsGoingToSleep() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+
+            triggerFaceAuth(false)
+
+            authenticationCallback.value.onAuthenticationSucceeded(
+                mock(FaceManager.AuthenticationResult::class.java)
+            )
+
+            assertThat(authenticated()).isTrue()
+
+            keyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.STARTING_TO_SLEEP,
+                    isWakingUpOrAwake = false,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.POWER_BUTTON
+                )
+            )
+
+            assertThat(authenticated()).isFalse()
+        }
+
+    @Test
+    fun isAuthenticatedIsResetToFalseWhenDeviceGoesToSleep() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+
+            triggerFaceAuth(false)
+
+            authenticationCallback.value.onAuthenticationSucceeded(
+                mock(FaceManager.AuthenticationResult::class.java)
+            )
+
+            assertThat(authenticated()).isTrue()
+
+            keyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.ASLEEP,
+                    isWakingUpOrAwake = false,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.POWER_BUTTON
+                )
+            )
+
+            assertThat(authenticated()).isFalse()
+        }
+
+    @Test
     fun isAuthenticatedIsResetToFalseWhenUserIsSwitching() =
         testScope.runTest {
             initCollectors()
