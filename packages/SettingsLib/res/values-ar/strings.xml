@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"وقت أكثر."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"وقت أقل."</string>
     <string name="cancel" msgid="5665114069455378395">"إلغاء"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"حسنًا"</string>
     <string name="done" msgid="381184316122520313">"تم"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"المنبّهات والتذكيرات"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"هل تريد إضافة مستخدم جديد؟"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغير ذلك. ويمكن أيضًا للمستخدمين ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"سهولة الاستخدام\" إلى المستخدم الجديد."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"أتريد منح هذا المستخدم امتيازات مشرف؟"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"بصفته مشرفًا، سيتمكن من إدارة المستخدمين الآخرين وتعديل إعدادات الجهاز وإعادة ضبط الجهاز على الإعدادات الأصلية."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"هل تريد إعداد المستخدم الآن؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"يُرجى التأكّد من أن الشخص يمكنه استخدام الجهاز الآن وإعداد مساحته."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"هل ترغب في إعداد ملف شخصي الآن؟"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ستؤدي إعادة الضبط إلى بدء جلسة ضيف جديدة وحذف جميع التطبيقات والبيانات من الجلسة الحالية."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"هل تريد الخروج من وضع الضيف؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"سيؤدي الخروج من وضع الضيف إلى حذف التطبيقات والبيانات من جلسة الضيف الحالية."</string>
-    <string name="grant_admin" msgid="4273077214151417783">"منح هذا المستخدم امتيازات المشرف"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"عدم منح هذا المستخدم امتيازات المشرف"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"خروج"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"هل تريد حفظ النشاط في وضع الضيف؟"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"يمكنك حفظ نشاط من الجلسة الحالية أو حذف كلّ التطبيقات والبيانات."</string>

@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Lebih lama."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Lebih cepat."</string>
     <string name="cancel" msgid="5665114069455378395">"Batal"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"Oke"</string>
     <string name="done" msgid="381184316122520313">"Selesai"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarm dan pengingat"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Tambahkan pengguna baru?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda dapat menggunakan perangkat ini bersama orang lain dengan membuat pengguna tambahan. Setiap pengguna memiliki ruang sendiri, yang dapat disesuaikan dengan aplikasi, wallpaper, dan lainnya. Pengguna juga dapat menyesuaikan setelan perangkat seperti Wi-Fi yang dapat memengaruhi semua pengguna lain.\n\nSaat Anda menambahkan pengguna baru, pengguna tersebut perlu menyiapkan ruangnya.\n\nPengguna mana pun dapat mengupdate aplikasi untuk semua pengguna lainnya. Layanan dan setelan aksesibilitas mungkin tidak ditransfer ke pengguna baru."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruang mereka sendiri.\n\nPengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Berikan hak istimewa admin?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Sebagai admin, mereka akan dapat mengelola pengguna lainnya, mengubah setelan perangkat, dan mereset perangkat ke setelan pabrik."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Siapkan pengguna sekarang?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Pastikan orang tersebut ada untuk mengambil perangkat dan menyiapkan ruangnya"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Siapkan profil sekarang?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tindakan ini akan memulai sesi tamu baru dan menghapus semua aplikasi serta data dari sesi saat ini"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Keluar dari mode tamu?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tindakan ini akan menghapus aplikasi dan data dari sesi tamu saat ini"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Beri pengguna ini hak istimewa admin"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Jangan beri pengguna hak istimewa admin"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Keluar"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Simpan aktivitas tamu?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Anda bisa menyimpan aktivitas sesi saat ini atau menghapus semua aplikasi &amp; data"</string>
@@ -665,7 +677,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Keyboard fisik"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Pilih tata letak keyboard"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Default"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Aktifkan layar"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Mengaktifkan layar"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Izinkan pengaktifan layar"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Mengizinkan aplikasi mengaktifkan layar. Jika diizinkan, aplikasi dapat mengaktifkan layar kapan saja tanpa izin Anda."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
