@@ -52,10 +52,10 @@ import android.view.animation.Interpolator;
 
 import androidx.core.graphics.ColorUtils;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.util.drawable.DrawableSize;

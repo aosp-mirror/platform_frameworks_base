@@ -35,10 +35,10 @@ import android.view.animation.PathInterpolator;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
