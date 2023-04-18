@@ -77,8 +77,6 @@ public final class MediaRouter2 {
     @GuardedBy("sSystemRouterLock")
     private static Map<String, MediaRouter2> sSystemMediaRouter2Map = new ArrayMap<>();
 
-    private static MediaRouter2Manager sManager;
-
     @GuardedBy("sRouterLock")
     private static MediaRouter2 sInstance;
 
@@ -217,15 +215,8 @@ public final class MediaRouter2 {
         synchronized (sSystemRouterLock) {
             MediaRouter2 instance = sSystemMediaRouter2Map.get(clientPackageName);
             if (instance == null) {
-                if (sManager == null) {
-                    sManager = MediaRouter2Manager.getInstance(context.getApplicationContext());
-                }
                 instance = new MediaRouter2(context, clientPackageName);
                 sSystemMediaRouter2Map.put(clientPackageName, instance);
-                // Using direct executor here, since MediaRouter2Manager also posts
-                // to the main handler.
-                // Proxy implements MediaRouter2Manager.Callback
-                sManager.registerCallback(Runnable::run, (ProxyMediaRouter2Impl) instance.mImpl);
             }
             return instance;
         }
@@ -311,10 +302,9 @@ public final class MediaRouter2 {
 
     private MediaRouter2(Context context, String clientPackageName) {
         mContext = context;
-        mImpl = new ProxyMediaRouter2Impl(clientPackageName);
         mHandler = new Handler(Looper.getMainLooper());
+        mImpl = new ProxyMediaRouter2Impl(context, clientPackageName);
         mSystemController = new SystemRoutingController(mImpl.getSystemSessionInfo());
-        mDiscoveryPreference = sManager.getDiscoveryPreference(clientPackageName);
         ProxyMediaRouter2Impl proxyImpl = (ProxyMediaRouter2Impl) mImpl;
         proxyImpl.updateAllRoutesFromManager();
 
@@ -1899,23 +1889,32 @@ public final class MediaRouter2 {
      */
     private class ProxyMediaRouter2Impl implements MediaRouter2Impl, MediaRouter2Manager.Callback {
 
+        private final MediaRouter2Manager mManager;
         private final String mClientPackageName;
 
-        ProxyMediaRouter2Impl(@NonNull String clientPackageName) {
+        ProxyMediaRouter2Impl(@NonNull Context context, @NonNull String clientPackageName) {
+            mManager = MediaRouter2Manager.getInstance(context.getApplicationContext());
+
             mClientPackageName = clientPackageName;
+            mDiscoveryPreference = mManager.getDiscoveryPreference(clientPackageName);
+
+            // Using direct executor here, since MediaRouter2Manager also posts
+            // to the main handler.
+            // Proxy implements MediaRouter2Manager.Callback
+            mManager.registerCallback(/* executor */ Runnable::run, /* callback */ this);
         }
 
         @Override
         public void startScan() {
             if (!mIsScanning.getAndSet(true)) {
-                sManager.registerScanRequest();
+                mManager.registerScanRequest();
             }
         }
 
         @Override
         public void stopScan() {
             if (mIsScanning.getAndSet(false)) {
-                sManager.unregisterScanRequest();
+                mManager.unregisterScanRequest();
             }
         }
 
@@ -1936,7 +1935,7 @@ public final class MediaRouter2 {
         @Override
         public RoutingSessionInfo getSystemSessionInfo() {
             return ensureClientPackageNameForSystemSession(
-                    sManager.getSystemRoutingSession(mClientPackageName));
+                    mManager.getSystemRoutingSession(mClientPackageName));
         }
 
         /**
@@ -1971,7 +1970,7 @@ public final class MediaRouter2 {
 
         @Override
         public List<MediaRoute2Info> getAllRoutes() {
-            return sManager.getAllRoutes();
+            return mManager.getAllRoutes();
         }
 
         /** No-op. Controller hints can only be provided by the media app through a local router. */
@@ -1982,19 +1981,19 @@ public final class MediaRouter2 {
 
         @Override
         public void transferTo(MediaRoute2Info route) {
-            sManager.transfer(mClientPackageName, route);
+            mManager.transfer(mClientPackageName, route);
         }
 
         @Override
         public void stop() {
-            List<RoutingSessionInfo> sessionInfos = sManager.getRoutingSessions(mClientPackageName);
+            List<RoutingSessionInfo> sessionInfos = mManager.getRoutingSessions(mClientPackageName);
             RoutingSessionInfo sessionToRelease = sessionInfos.get(sessionInfos.size() - 1);
-            sManager.releaseSession(sessionToRelease);
+            mManager.releaseSession(sessionToRelease);
         }
 
         @Override
         public void transfer(RoutingController controller, MediaRoute2Info route) {
-            sManager.transfer(controller.getRoutingSessionInfo(), route);
+            mManager.transfer(controller.getRoutingSessionInfo(), route);
         }
 
         @Override
@@ -2003,7 +2002,7 @@ public final class MediaRouter2 {
 
             // Unlike non-system MediaRouter2, controller instances cannot be kept,
             // since the transfer events initiated from other apps will not come through manager.
-            List<RoutingSessionInfo> sessions = sManager.getRoutingSessions(mClientPackageName);
+            List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mClientPackageName);
             for (RoutingSessionInfo session : sessions) {
                 RoutingController controller;
                 if (session.isSystemSession()) {
@@ -2020,12 +2019,12 @@ public final class MediaRouter2 {
 
         @Override
         public void setRouteVolume(MediaRoute2Info route, int volume) {
-            sManager.setRouteVolume(route, volume);
+            mManager.setRouteVolume(route, volume);
         }
 
         @Override
         public void setSessionVolume(int volume, RoutingSessionInfo sessionInfo) {
-            sManager.setSessionVolume(sessionInfo, volume);
+            mManager.setSessionVolume(sessionInfo, volume);
         }
 
         /**
@@ -2042,7 +2041,7 @@ public final class MediaRouter2 {
         private void updateAllRoutesFromManager() {
             synchronized (mLock) {
                 mRoutes.clear();
-                for (MediaRoute2Info route : sManager.getAllRoutes()) {
+                for (MediaRoute2Info route : mManager.getAllRoutes()) {
                     mRoutes.put(route.getId(), route);
                 }
                 updateFilteredRoutesLocked();
@@ -2067,12 +2066,12 @@ public final class MediaRouter2 {
 
         @Override
         public void selectRoute(MediaRoute2Info route, RoutingSessionInfo sessionInfo) {
-            sManager.selectRoute(sessionInfo, route);
+            mManager.selectRoute(sessionInfo, route);
         }
 
         @Override
         public void deselectRoute(MediaRoute2Info route, RoutingSessionInfo sessionInfo) {
-            sManager.deselectRoute(sessionInfo, route);
+            mManager.deselectRoute(sessionInfo, route);
         }
 
         @Override
@@ -2080,7 +2079,7 @@ public final class MediaRouter2 {
                 boolean shouldReleaseSession,
                 boolean shouldNotifyStop,
                 RoutingController controller) {
-            sManager.releaseSession(controller.getRoutingSessionInfo());
+            mManager.releaseSession(controller.getRoutingSessionInfo());
         }
 
         @Override
