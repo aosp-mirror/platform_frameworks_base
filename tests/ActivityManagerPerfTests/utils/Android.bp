@@ -32,6 +32,6 @@ java_test {
     static_libs: [
         "androidx.test.rules",
         "junit",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
     ],
 }
