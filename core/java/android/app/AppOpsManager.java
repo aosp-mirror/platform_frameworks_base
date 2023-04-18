@@ -2505,7 +2505,7 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_TURN_SCREEN_ON, OPSTR_TURN_SCREEN_ON, "TURN_SCREEN_ON")
             .setPermission(Manifest.permission.TURN_SCREEN_ON)
-            .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
+            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
         new AppOpInfo.Builder(OP_GET_ACCOUNTS, OPSTR_GET_ACCOUNTS, "GET_ACCOUNTS")
             .setPermission(Manifest.permission.GET_ACCOUNTS)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
