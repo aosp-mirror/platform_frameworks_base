@@ -96,6 +96,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 public class ManagedServicesTest extends UiServiceTestCase {
 
@@ -1920,6 +1921,18 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertTrue(service.isBound(cn_disallowed, 0));
     }
 
+    @Test
+    public void isComponentEnabledForCurrentProfiles_isThreadSafe() throws InterruptedException {
+        for (UserInfo userInfo : mUm.getUsers()) {
+            mService.addApprovedList("pkg1/cmp1:pkg2/cmp2:pkg3/cmp3", userInfo.id, true);
+        }
+        testThreadSafety(() -> {
+            mService.rebindServices(false, 0);
+            assertThat(mService.isComponentEnabledForCurrentProfiles(
+                    new ComponentName("pkg1", "cmp1"))).isTrue();
+        }, 20, 30);
+    }
+
     private void mockServiceInfoWithMetaData(List<ComponentName> componentNames,
             ManagedServices service, ArrayMap<ComponentName, Bundle> metaDatas)
             throws RemoteException {
@@ -2297,5 +2310,39 @@ public class ManagedServicesTest extends UiServiceTestCase {
         public boolean shouldReflectToSettings() {
             return false;
         }
+    }
+
+    /**
+     * Helper method to test the thread safety of some operations.
+     *
+     * <p>Runs the supplied {@code operationToTest}, {@code nRunsPerThread} times,
+     * concurrently using {@code nThreads} threads, and waits for all of them to finish.
+     */
+    private static void testThreadSafety(Runnable operationToTest, int nThreads,
+            int nRunsPerThread) throws InterruptedException {
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch doneLatch = new CountDownLatch(nThreads);
+
+        for (int i = 0; i < nThreads; i++) {
+            Runnable threadRunnable = () -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < nRunsPerThread; j++) {
+                        operationToTest.run();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+            new Thread(threadRunnable, "Test Thread #" + i).start();
+        }
+
+        // Ready set go
+        startLatch.countDown();
+
+        // Wait for all test threads to be done.
+        doneLatch.await();
     }
 }
