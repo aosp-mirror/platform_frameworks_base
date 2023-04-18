@@ -16,6 +16,7 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -75,5 +76,28 @@ interface ImeVisibilityApplier {
     default void updateImeLayeringByTarget(IBinder windowToken) {
         // TODO: add a method in WindowManagerInternal to call DC#updateImeInputAndControlTarget
         //  here to end up updating IME layering after IMMS#attachNewInputLocked called.
+    }
+
+    /**
+     * Shows the IME screenshot and attach it to the given IME target window.
+     *
+     * @param windowToken The token of a window to show the IME screenshot.
+     * @param displayId The unique id to identify the display
+     * @param statsToken  A token that tracks the progress of an IME request.
+     * @return {@code true} if success, {@code false} otherwise.
+     */
+    default boolean showImeScreenshot(@NonNull IBinder windowToken, int displayId,
+            @Nullable ImeTracker.Token statsToken) {
+        return false;
+    }
+
+    /**
+     * Removes the IME screenshot on the given display.
+     *
+     * @param displayId The target display of showing IME screenshot.
+     * @return {@code true} if success, {@code false} otherwise.
+     */
+    default boolean removeImeScreenshot(int displayId) {
+        return false;
     }
 }
