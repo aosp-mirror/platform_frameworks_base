@@ -11053,7 +11053,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (!isPermissionCheckFlagEnabled() && !isPolicyEngineForFinanceFlagEnabled()) {
-            // TODO: Figure out if something like this needs to be restored for policy engine
             final ComponentName profileOwner = getProfileOwnerAsUser(userId);
             if (profileOwner == null) {
                 return false;
@@ -11640,7 +11639,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         caller.getUserId());
             }
             setBackwardsCompatibleAppRestrictions(
-                    packageName, restrictions, caller.getUserHandle());
+                    caller, packageName, restrictions, caller.getUserHandle());
         } else {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
@@ -11661,17 +11660,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Set app restrictions in user manager to keep backwards compatibility for the old
-     * getApplicationRestrictions API.
+     * Set app restrictions in user manager for DPC callers only to keep backwards compatibility
+     * for the old getApplicationRestrictions API.
      */
     private void setBackwardsCompatibleAppRestrictions(
-            String packageName, Bundle restrictions, UserHandle userHandle) {
-        Bundle restrictionsToApply = restrictions == null || restrictions.isEmpty()
-                ? getAppRestrictionsSetByAnyAdmin(packageName, userHandle)
-                : restrictions;
-        mInjector.binderWithCleanCallingIdentity(() -> {
-            mUserManager.setApplicationRestrictions(packageName, restrictionsToApply, userHandle);
-        });
+            CallerIdentity caller, String packageName, Bundle restrictions, UserHandle userHandle) {
+        if ((caller.hasAdminComponent() && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS))) {
+            Bundle restrictionsToApply = restrictions == null || restrictions.isEmpty()
+                    ? getAppRestrictionsSetByAnyAdmin(packageName, userHandle)
+                    : restrictions;
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                mUserManager.setApplicationRestrictions(packageName, restrictionsToApply,
+                        userHandle);
+            });
+        } else {
+            // Notify package of changes via an intent - only sent to explicitly registered
+            // receivers. Sending here because For DPCs, this is being sent in UMS.
+            final Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+            changeIntent.setPackage(packageName);
+            changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            mContext.sendBroadcastAsUser(changeIntent, userHandle);
+        }
     }
 
     private Bundle getAppRestrictionsSetByAnyAdmin(String packageName, UserHandle userHandle) {
