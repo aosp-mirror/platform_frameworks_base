@@ -842,6 +842,23 @@ public final class PasspointConfiguration implements Parcelable {
                 }
             }
         }
+        if (mServiceFriendlyNames != null) {
+            if (mServiceFriendlyNames.size() > MAX_NUMBER_OF_ENTRIES) {
+                Log.e(TAG, "ServiceFriendlyNames exceed the max!");
+                return false;
+            }
+            for (Map.Entry<String, String> names : mServiceFriendlyNames.entrySet()) {
+                if (names.getKey() == null || names.getValue() == null) {
+                    Log.e(TAG, "Service friendly name entry should not be null");
+                    return false;
+                }
+                if (names.getKey().length() > MAX_STRING_LENGTH
+                        || names.getValue().length() > MAX_STRING_LENGTH) {
+                    Log.e(TAG, "Service friendly name is to long");
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
