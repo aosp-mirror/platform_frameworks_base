@@ -24,6 +24,7 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.advanceTimeBy
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -380,10 +381,12 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         val keyguardCoordinator =
             KeyguardCoordinator(
                 testDispatcher,
+                mock<DumpManager>(),
                 headsUpManager,
                 keyguardNotifVisibilityProvider,
                 keyguardRepository,
                 keyguardTransitionRepository,
+                mock<KeyguardCoordinatorLogger>(),
                 notifPipelineFlags,
                 testScope.backgroundScope,
                 sectionHeaderVisibilityProvider,
