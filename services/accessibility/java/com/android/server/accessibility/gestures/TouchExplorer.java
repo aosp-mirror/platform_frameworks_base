@@ -1417,20 +1417,29 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     mSendTouchExplorationEndDelayed.forceSendAndRemove();
                 }
             }
-            if (!mState.isTouchInteracting()) {
+            if (!mState.isTouchInteracting() && !mState.isDragging()) {
                 // It makes no sense to delegate.
-                Slog.e(LOG_TAG, "Error: Trying to delegate from "
-                        + mState.getStateSymbolicName(mState.getState()));
+                Slog.e(
+                        LOG_TAG,
+                        "Error: Trying to delegate from "
+                                + mState.getStateSymbolicName(mState.getState()));
                 return;
             }
-            mState.startDelegating();
-            MotionEvent prototype = mState.getLastReceivedEvent();
-            if (prototype == null) {
+            MotionEvent event = mState.getLastReceivedEvent();
+            MotionEvent rawEvent = mState.getLastReceivedRawEvent();
+            if (event == null || rawEvent == null) {
                 Slog.d(LOG_TAG, "Unable to start delegating: unable to get last received event.");
                 return;
             }
             int policyFlags = mState.getLastReceivedPolicyFlags();
-            mDispatcher.sendDownForAllNotInjectedPointers(prototype, policyFlags);
+            if (mState.isDragging()) {
+                // Send an event to the end of the drag gesture.
+                mDispatcher.sendMotionEvent(
+                        event, ACTION_UP, rawEvent, ALL_POINTER_ID_BITS, policyFlags);
+            }
+            mState.startDelegating();
+            // Deliver all pointers to the view hierarchy.
+            mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
         }
     }
 
