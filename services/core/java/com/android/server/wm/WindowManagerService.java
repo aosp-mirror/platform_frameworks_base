@@ -723,6 +723,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
+
+    @Nullable ImeTargetChangeListener mImeTargetChangeListener;
+
     SettingsObserver mSettingsObserver;
     final EmbeddedWindowController mEmbeddedWindowController;
     final AnrController mAnrController;
@@ -1807,6 +1810,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (imMayMove) {
                 displayContent.computeImeTarget(true /* updateImeTarget */);
+                if (win.isImeOverlayLayeringTarget()) {
+                    dispatchImeTargetOverlayVisibilityChanged(client.asBinder(),
+                            win.isVisibleRequestedOrAdding(), false /* removed */);
+                }
             }
 
             // Don't do layout here, the window must call
@@ -2328,6 +2335,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 winAnimator.mSurfaceController.setSecure(win.isSecureLocked());
             }
 
+            final boolean wasVisible = win.isVisible();
+
             win.mRelayoutCalled = true;
             win.mInRelayout = true;
 
@@ -2335,7 +2344,6 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.i(WM_DEBUG_SCREEN_ON,
                     "Relayout %s: oldVis=%d newVis=%d. %s", win, oldVisibility,
                             viewVisibility, new RuntimeException().fillInStackTrace());
-
 
             win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags & WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
@@ -2500,6 +2508,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG_WM, "Relayout complete " + win + ": outFrames=" + outFrames);
             }
             win.mInRelayout = false;
+
+            final boolean winVisibleChanged = win.isVisible() != wasVisible;
+            if (win.isImeOverlayLayeringTarget() && winVisibleChanged) {
+                dispatchImeTargetOverlayVisibilityChanged(client.asBinder(),
+                        win.isVisible(), false /* removed */);
+            }
+            // Notify listeners about IME input target window visibility change.
+            final boolean isImeInputTarget = win.getDisplayContent().getImeInputTarget() == win;
+            if (isImeInputTarget && winVisibleChanged) {
+                dispatchImeInputTargetVisibilityChanged(win.mClient.asBinder(),
+                        win.isVisible() /* visible */, false /* removed */);
+            }
 
             if (outSyncIdBundle != null) {
                 final int maybeSyncSeqId;
@@ -3323,6 +3343,30 @@ public class WindowManagerService extends IWindowManager.Stub
             mKeyguardLockedStateListeners.finishBroadcast();
             mDispatchedKeyguardLockedState = isKeyguardLocked;
         });
+    }
+
+    void dispatchImeTargetOverlayVisibilityChanged(@NonNull IBinder token, boolean visible,
+            boolean removed) {
+        if (mImeTargetChangeListener != null) {
+            if (DEBUG_INPUT_METHOD) {
+                Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
+                        + "visible=" + visible + ", removed=" + removed);
+            }
+            mH.post(() -> mImeTargetChangeListener.onImeTargetOverlayVisibilityChanged(token,
+                    visible, removed));
+        }
+    }
+
+    void dispatchImeInputTargetVisibilityChanged(@NonNull IBinder token, boolean visible,
+            boolean removed) {
+        if (mImeTargetChangeListener != null) {
+            if (DEBUG_INPUT_METHOD) {
+                Slog.d(TAG, "onImeInputTargetVisibilityChanged, win=" + mWindowMap.get(token)
+                        + "visible=" + visible + ", removed=" + removed);
+            }
+            mH.post(() -> mImeTargetChangeListener.onImeInputTargetVisibilityChanged(token,
+                    visible, removed));
+        }
     }
 
     @Override
@@ -8262,13 +8306,19 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return null;
         }
+
+        @Override
+        public void setInputMethodTargetChangeListener(@NonNull ImeTargetChangeListener listener) {
+            synchronized (mGlobalLock) {
+                mImeTargetChangeListener = listener;
+            }
+        }
     }
 
     private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {
 
-        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
         @Override
-        public boolean showImeScreenShot(@NonNull IBinder imeTarget, int displayId) {
+        public boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId) {
             synchronized (mGlobalLock) {
                 final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
                 if (imeTargetWindow == null) {
@@ -8284,24 +8334,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 return true;
             }
         }
-
-        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
         @Override
-        public boolean updateImeParent(@NonNull IBinder imeTarget, int displayId) {
+        public boolean removeImeScreenshot(int displayId) {
             synchronized (mGlobalLock) {
-                final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
-                if (imeTargetWindow == null) {
-                    return false;
-                }
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null) {
-                    Slog.w(TAG, "Invalid displayId:" + displayId + ", fail to update ime parent");
+                    Slog.w(TAG, "Invalid displayId:" + displayId
+                            + ", fail to remove ime screenshot");
                     return false;
                 }
-
-                dc.updateImeParent();
-                return true;
+                dc.removeImeSurfaceImmediately();
             }
+            return true;
         }
     }
 
