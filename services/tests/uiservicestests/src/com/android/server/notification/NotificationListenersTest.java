@@ -71,10 +71,10 @@ import android.service.notification.StatusBarNotification;
 import android.testing.TestableContext;
 import android.util.ArraySet;
 import android.util.Pair;
-import com.android.modules.utils.TypedXmlPullParser;
-import com.android.modules.utils.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
 import com.google.common.collect.ImmutableList;
@@ -92,6 +92,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class NotificationListenersTest extends UiServiceTestCase {
 
@@ -624,6 +625,58 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
         verify(((INotificationListener) i1.getService()), times(1))
                 .onNotificationChannelGroupModification(anyString(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testNotificationListenerFilter_threadSafety() throws Exception {
+        testThreadSafety(() -> {
+            mListeners.setNotificationListenerFilter(
+                    new Pair<>(new ComponentName("pkg1", "cls1"), 0),
+                    new NotificationListenerFilter());
+            mListeners.setNotificationListenerFilter(
+                    new Pair<>(new ComponentName("pkg2", "cls2"), 10),
+                    new NotificationListenerFilter());
+            mListeners.setNotificationListenerFilter(
+                    new Pair<>(new ComponentName("pkg3", "cls3"), 11),
+                    new NotificationListenerFilter());
+
+            mListeners.onUserRemoved(10);
+            mListeners.onPackagesChanged(true, new String[]{"pkg1", "pkg2"}, new int[]{0, 0});
+        }, 20, 50);
+    }
+
+    /**
+     * Helper method to test the thread safety of some operations.
+     *
+     * <p>Runs the supplied {@code operationToTest}, {@code nRunsPerThread} times,
+     * concurrently using {@code nThreads} threads, and waits for all of them to finish.
+     */
+    private static void testThreadSafety(Runnable operationToTest, int nThreads,
+            int nRunsPerThread) throws InterruptedException {
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch doneLatch = new CountDownLatch(nThreads);
+
+        for (int i = 0; i < nThreads; i++) {
+            Runnable threadRunnable = () -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < nRunsPerThread; j++) {
+                        operationToTest.run();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+            new Thread(threadRunnable, "Test Thread #" + i).start();
+        }
+
+        // Ready set go
+        startLatch.countDown();
+
+        // Wait for all test threads to be done.
+        doneLatch.await();
     }
 
     private ManagedServices.ManagedServiceInfo getParcelingListener(

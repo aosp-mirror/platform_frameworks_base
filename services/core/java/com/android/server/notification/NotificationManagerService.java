@@ -10793,7 +10793,8 @@ public class NotificationManagerService extends SystemService {
         static final String FLAG_SEPARATOR = "\\|";
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
-        ArrayMap<Pair<ComponentName, Integer>, NotificationListenerFilter>
+        @GuardedBy("mRequestedNotificationListeners")
+        private final ArrayMap<Pair<ComponentName, Integer>, NotificationListenerFilter>
                 mRequestedNotificationListeners = new ArrayMap<>();
         private final boolean mIsHeadlessSystemUserMode;
 
@@ -10911,9 +10912,11 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onUserRemoved(int user) {
             super.onUserRemoved(user);
-            for (int i = mRequestedNotificationListeners.size() - 1; i >= 0; i--) {
-                if (mRequestedNotificationListeners.keyAt(i).second == user) {
-                    mRequestedNotificationListeners.removeAt(i);
+            synchronized (mRequestedNotificationListeners) {
+                for (int i = mRequestedNotificationListeners.size() - 1; i >= 0; i--) {
+                    if (mRequestedNotificationListeners.keyAt(i).second == user) {
+                        mRequestedNotificationListeners.removeAt(i);
+                    }
                 }
             }
         }
@@ -10922,31 +10925,34 @@ public class NotificationManagerService extends SystemService {
         public void onPackagesChanged(boolean removingPackage, String[] pkgList, int[] uidList) {
             super.onPackagesChanged(removingPackage, pkgList, uidList);
 
-            // Since the default behavior is to allow everything, we don't need to explicitly
-            // handle package add or update. they will be added to the xml file on next boot or
-            // when the user tries to change the settings.
-            if (removingPackage) {
-                for (int i = 0; i < pkgList.length; i++) {
-                    String pkg = pkgList[i];
-                    int userId = UserHandle.getUserId(uidList[i]);
-                    for (int j = mRequestedNotificationListeners.size() - 1; j >= 0; j--) {
-                        Pair<ComponentName, Integer> key = mRequestedNotificationListeners.keyAt(j);
-                        if (key.second == userId && key.first.getPackageName().equals(pkg)) {
-                            mRequestedNotificationListeners.removeAt(j);
+            synchronized (mRequestedNotificationListeners) {
+                // Since the default behavior is to allow everything, we don't need to explicitly
+                // handle package add or update. they will be added to the xml file on next boot or
+                // when the user tries to change the settings.
+                if (removingPackage) {
+                    for (int i = 0; i < pkgList.length; i++) {
+                        String pkg = pkgList[i];
+                        int userId = UserHandle.getUserId(uidList[i]);
+                        for (int j = mRequestedNotificationListeners.size() - 1; j >= 0; j--) {
+                            Pair<ComponentName, Integer> key =
+                                    mRequestedNotificationListeners.keyAt(j);
+                            if (key.second == userId && key.first.getPackageName().equals(pkg)) {
+                                mRequestedNotificationListeners.removeAt(j);
+                            }
                         }
                     }
                 }
-            }
 
-            // clean up anything in the disallowed pkgs list
-            for (int i = 0; i < pkgList.length; i++) {
-                String pkg = pkgList[i];
-                int userId = UserHandle.getUserId(uidList[i]);
-                for (int j = mRequestedNotificationListeners.size() - 1; j >= 0; j--) {
-                    NotificationListenerFilter nlf = mRequestedNotificationListeners.valueAt(j);
+                // clean up anything in the disallowed pkgs list
+                for (int i = 0; i < pkgList.length; i++) {
+                    String pkg = pkgList[i];
+                    for (int j = mRequestedNotificationListeners.size() - 1; j >= 0; j--) {
+                        NotificationListenerFilter nlf =
+                                mRequestedNotificationListeners.valueAt(j);
 
-                    VersionedPackage ai = new VersionedPackage(pkg, uidList[i]);
-                    nlf.removePackage(ai);
+                        VersionedPackage ai = new VersionedPackage(pkg, uidList[i]);
+                        nlf.removePackage(ai);
+                    }
                 }
             }
         }
@@ -10994,7 +11000,9 @@ public class NotificationManagerService extends SystemService {
                     }
                     NotificationListenerFilter nlf =
                             new NotificationListenerFilter(approved, disallowedPkgs);
-                    mRequestedNotificationListeners.put(Pair.create(cn, userId), nlf);
+                    synchronized (mRequestedNotificationListeners) {
+                        mRequestedNotificationListeners.put(Pair.create(cn, userId), nlf);
+                    }
                 }
             }
         }
@@ -11002,72 +11010,81 @@ public class NotificationManagerService extends SystemService {
         @Override
         protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {
             out.startTag(null, TAG_REQUESTED_LISTENERS);
-            for (Pair<ComponentName, Integer> listener : mRequestedNotificationListeners.keySet()) {
-                NotificationListenerFilter nlf = mRequestedNotificationListeners.get(listener);
-                out.startTag(null, TAG_REQUESTED_LISTENER);
-                XmlUtils.writeStringAttribute(
-                        out, ATT_COMPONENT, listener.first.flattenToString());
-                XmlUtils.writeIntAttribute(out, ATT_USER_ID, listener.second);
+            synchronized (mRequestedNotificationListeners) {
+                for (Pair<ComponentName, Integer> listener :
+                        mRequestedNotificationListeners.keySet()) {
+                    NotificationListenerFilter nlf = mRequestedNotificationListeners.get(listener);
+                    out.startTag(null, TAG_REQUESTED_LISTENER);
+                    XmlUtils.writeStringAttribute(
+                            out, ATT_COMPONENT, listener.first.flattenToString());
+                    XmlUtils.writeIntAttribute(out, ATT_USER_ID, listener.second);
 
-                out.startTag(null, TAG_APPROVED);
-                XmlUtils.writeIntAttribute(out, ATT_TYPES, nlf.getTypes());
-                out.endTag(null, TAG_APPROVED);
+                    out.startTag(null, TAG_APPROVED);
+                    XmlUtils.writeIntAttribute(out, ATT_TYPES, nlf.getTypes());
+                    out.endTag(null, TAG_APPROVED);
 
-                for (VersionedPackage ai : nlf.getDisallowedPackages()) {
-                    if (!TextUtils.isEmpty(ai.getPackageName())) {
-                        out.startTag(null, TAG_DISALLOWED);
-                        XmlUtils.writeStringAttribute(out, ATT_PKG, ai.getPackageName());
-                        XmlUtils.writeIntAttribute(out, ATT_UID, ai.getVersionCode());
-                        out.endTag(null, TAG_DISALLOWED);
+                    for (VersionedPackage ai : nlf.getDisallowedPackages()) {
+                        if (!TextUtils.isEmpty(ai.getPackageName())) {
+                            out.startTag(null, TAG_DISALLOWED);
+                            XmlUtils.writeStringAttribute(out, ATT_PKG, ai.getPackageName());
+                            XmlUtils.writeIntAttribute(out, ATT_UID, ai.getVersionCode());
+                            out.endTag(null, TAG_DISALLOWED);
+                        }
                     }
-                }
 
-                out.endTag(null, TAG_REQUESTED_LISTENER);
+                    out.endTag(null, TAG_REQUESTED_LISTENER);
+                }
             }
 
             out.endTag(null, TAG_REQUESTED_LISTENERS);
         }
 
-        protected @Nullable NotificationListenerFilter getNotificationListenerFilter(
+        @Nullable protected NotificationListenerFilter getNotificationListenerFilter(
                 Pair<ComponentName, Integer> pair) {
-            return mRequestedNotificationListeners.get(pair);
+            synchronized (mRequestedNotificationListeners) {
+                return mRequestedNotificationListeners.get(pair);
+            }
         }
 
         protected void setNotificationListenerFilter(Pair<ComponentName, Integer> pair,
                 NotificationListenerFilter nlf) {
-            mRequestedNotificationListeners.put(pair, nlf);
+            synchronized (mRequestedNotificationListeners) {
+                mRequestedNotificationListeners.put(pair, nlf);
+            }
         }
 
         @Override
         protected void ensureFilters(ServiceInfo si, int userId) {
-            Pair listener = Pair.create(si.getComponentName(), userId);
-            NotificationListenerFilter existingNlf =
-                    mRequestedNotificationListeners.get(listener);
-            if (si.metaData != null) {
-                if (existingNlf  == null) {
-                    // no stored filters for this listener; see if they provided a default
-                    if (si.metaData.containsKey(META_DATA_DEFAULT_FILTER_TYPES)) {
-                        String typeList =
-                                si.metaData.get(META_DATA_DEFAULT_FILTER_TYPES).toString();
-                        if (typeList != null) {
-                            int types = getTypesFromStringList(typeList);
-                            NotificationListenerFilter nlf =
-                                    new NotificationListenerFilter(types, new ArraySet<>());
-                            mRequestedNotificationListeners.put(listener, nlf);
+            Pair<ComponentName, Integer> listener = Pair.create(si.getComponentName(), userId);
+            synchronized (mRequestedNotificationListeners) {
+                NotificationListenerFilter existingNlf =
+                        mRequestedNotificationListeners.get(listener);
+                if (si.metaData != null) {
+                    if (existingNlf == null) {
+                        // no stored filters for this listener; see if they provided a default
+                        if (si.metaData.containsKey(META_DATA_DEFAULT_FILTER_TYPES)) {
+                            String typeList =
+                                    si.metaData.get(META_DATA_DEFAULT_FILTER_TYPES).toString();
+                            if (typeList != null) {
+                                int types = getTypesFromStringList(typeList);
+                                NotificationListenerFilter nlf =
+                                        new NotificationListenerFilter(types, new ArraySet<>());
+                                mRequestedNotificationListeners.put(listener, nlf);
+                            }
                         }
                     }
-                }
 
-                // also check the types they never want bridged
-                if (si.metaData.containsKey(META_DATA_DISABLED_FILTER_TYPES)) {
-                    int neverBridge = getTypesFromStringList(si.metaData.get(
-                            META_DATA_DISABLED_FILTER_TYPES).toString());
-                    if (neverBridge != 0) {
-                        NotificationListenerFilter nlf =
-                                mRequestedNotificationListeners.getOrDefault(
-                                        listener, new NotificationListenerFilter());
-                        nlf.setTypes(nlf.getTypes() & ~neverBridge);
-                        mRequestedNotificationListeners.put(listener, nlf);
+                    // also check the types they never want bridged
+                    if (si.metaData.containsKey(META_DATA_DISABLED_FILTER_TYPES)) {
+                        int neverBridge = getTypesFromStringList(si.metaData.get(
+                                META_DATA_DISABLED_FILTER_TYPES).toString());
+                        if (neverBridge != 0) {
+                            NotificationListenerFilter nlf =
+                                    mRequestedNotificationListeners.getOrDefault(
+                                            listener, new NotificationListenerFilter());
+                            nlf.setTypes(nlf.getTypes() & ~neverBridge);
+                            mRequestedNotificationListeners.put(listener, nlf);
+                        }
                     }
                 }
             }
