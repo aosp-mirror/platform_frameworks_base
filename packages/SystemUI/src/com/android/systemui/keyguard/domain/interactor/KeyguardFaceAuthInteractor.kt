@@ -59,6 +59,7 @@ interface KeyguardFaceAuthInteractor {
     fun onQsExpansionStared()
     fun onNotificationPanelClicked()
     fun onSwipeUpOnBouncer()
+    fun onPrimaryBouncerUserInput()
 }
 
 /**
