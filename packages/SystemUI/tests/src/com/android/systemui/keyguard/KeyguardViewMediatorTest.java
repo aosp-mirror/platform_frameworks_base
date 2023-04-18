@@ -514,7 +514,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertTrue(mViewMediator.isShowingAndNotOccluded());
-        verify(mStatusBarKeyguardViewManager).reset(anyBoolean());
+        verify(mStatusBarKeyguardViewManager).reset(false);
     }
 
     @Test
