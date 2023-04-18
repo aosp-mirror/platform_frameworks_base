@@ -95,8 +95,10 @@ public class AuthSessionCoordinator implements AuthSessionListener {
             }
         }
 
-        mRingBuffer.addApiCall("internal : onAuthSessionEnded(" + mUserId + ")");
-        clearSession();
+        if (mAuthOperations.isEmpty()) {
+            mRingBuffer.addApiCall("internal : onAuthSessionEnded(" + mUserId + ")");
+            clearSession();
+        }
     }
 
     private void clearSession() {
@@ -203,7 +205,7 @@ public class AuthSessionCoordinator implements AuthSessionListener {
             return;
         }
         mAuthOperations.remove(sensorId);
-        if (mIsAuthenticating && mAuthOperations.isEmpty()) {
+        if (mIsAuthenticating) {
             endAuthSession();
         }
     }
