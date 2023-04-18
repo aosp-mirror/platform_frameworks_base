@@ -77,6 +77,10 @@ public class SystemUiSystemPropertiesFlags {
         /** Gating the removal of sorting-notifications-by-interruptiveness. */
         public static final Flag NO_SORT_BY_INTERRUPTIVENESS =
                 devFlag("persist.sysui.notification.no_sort_by_interruptiveness");
+
+        /** Gating the logging of DND state change events. */
+        public static final Flag LOG_DND_STATE_EVENTS =
+                devFlag("persist.sysui.notification.log_dnd_state_events");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////
