@@ -262,7 +262,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     Rect getPipMenuContainerBounds(Rect pipBounds) {
         final Rect menuUiBounds = new Rect(pipBounds);
         menuUiBounds.inset(-mPipMenuOuterSpace, -mPipMenuOuterSpace);
-        menuUiBounds.bottom += mEduTextDrawer.getHeight();
+        menuUiBounds.bottom += mEduTextDrawer.getEduTextDrawerHeight();
         return menuUiBounds;
     }
 
