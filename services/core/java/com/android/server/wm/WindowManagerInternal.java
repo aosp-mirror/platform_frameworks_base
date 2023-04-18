@@ -848,6 +848,16 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+     * Sets by the {@link com.android.server.inputmethod.InputMethodManagerService} to monitor
+     * the visibility change of the IME targeted windows.
+     *
+     * @see ImeTargetChangeListener#onImeTargetOverlayVisibilityChanged
+     * @see ImeTargetChangeListener#onImeInputTargetVisibilityChanged
+     */
+    public abstract void setInputMethodTargetChangeListener(
+            @NonNull ImeTargetChangeListener listener);
+
+    /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.
      */
     public abstract void moveWindowTokenToDisplay(IBinder binder, int displayId);
