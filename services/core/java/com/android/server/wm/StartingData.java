@@ -41,6 +41,26 @@ public abstract class StartingData {
     /** Whether the starting window is drawn. */
     boolean mIsDisplayed;
 
+    /**
+     * For Shell transition.
+     * There will be a transition happen on attached activity, do not remove starting window during
+     * this period, because the transaction to show app window may not apply before remove starting
+     * window.
+     * Note this isn't equal to transition playing, the period should be
+     * Sync finishNow -> Start transaction apply.
+     */
+    boolean mWaitForSyncTransactionCommit;
+
+    /**
+     * For Shell transition.
+     * This starting window should be removed after applying the start transaction of transition,
+     * which ensures the app window has shown.
+     */
+    boolean mRemoveAfterTransaction;
+
+    /** Whether to prepare the removal animation. */
+    boolean mPrepareRemoveAnimation;
+
     protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
         mTypeParams = typeParams;
