@@ -17,50 +17,28 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.admin.BundlePolicyValue;
 import android.app.admin.PackagePolicyKey;
 import android.app.admin.PolicyKey;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Parcelable;
-import android.util.AtomicFile;
-import android.util.Slog;
-import android.util.Xml;
+import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
-// TODO(b/266704763): clean this up and stop creating separate files for each value, the code here
-//  is copied from UserManagerService, however it doesn't currently handle setting different
-//  restrictions for the same package in different users, it also will not remove the files for
-//  outdated restrictions, this will all get fixed when we save it as part of the policies file
-//  rather than in its own files.
 final class BundlePolicySerializer extends PolicySerializer<Bundle> {
 
     private static final String TAG = "BundlePolicySerializer";
 
-    private static final String ATTR_FILE_NAME = "file-name";
-
-    private static final String RESTRICTIONS_FILE_PREFIX = "AppRestrictions_";
-    private static final String XML_SUFFIX = ".xml";
-
-    private static final String TAG_RESTRICTIONS = "restrictions";
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String ATTR_KEY = "key";
@@ -83,62 +61,26 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
             throw new IllegalArgumentException("policyKey is not of type "
                     + "PackagePolicyKey");
         }
-        String packageName = ((PackagePolicyKey) policyKey).getPackageName();
-        String fileName = packageToRestrictionsFileName(packageName, value);
-        writeApplicationRestrictionsLAr(fileName, value);
-        serializer.attribute(/* namespace= */ null, ATTR_FILE_NAME, fileName);
+        writeBundle(value, serializer);
     }
 
-    @Nullable
     @Override
     BundlePolicyValue readFromXml(TypedXmlPullParser parser) {
-        String fileName = parser.getAttributeValue(/* namespace= */ null, ATTR_FILE_NAME);
-
-        return new BundlePolicyValue(readApplicationRestrictions(fileName));
-    }
-
-    private static String packageToRestrictionsFileName(String packageName, Bundle restrictions) {
-        return RESTRICTIONS_FILE_PREFIX + packageName + Objects.hash(restrictions) + XML_SUFFIX;
-    }
-
-    @GuardedBy("mAppRestrictionsLock")
-    private static Bundle readApplicationRestrictions(String fileName) {
-        AtomicFile restrictionsFile =
-                new AtomicFile(new File(Environment.getDataSystemDirectory(), fileName));
-        return readApplicationRestrictions(restrictionsFile);
-    }
-
-    @VisibleForTesting
-    @GuardedBy("mAppRestrictionsLock")
-    static Bundle readApplicationRestrictions(AtomicFile restrictionsFile) {
-        final Bundle restrictions = new Bundle();
-        final ArrayList<String> values = new ArrayList<>();
-        if (!restrictionsFile.getBaseFile().exists()) {
-            return restrictions;
-        }
-
-        FileInputStream fis = null;
+        Bundle bundle = new Bundle();
+        ArrayList<String> values = new ArrayList<>();
         try {
-            fis = restrictionsFile.openRead();
-            final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
-            XmlUtils.nextElement(parser);
-            if (parser.getEventType() != XmlPullParser.START_TAG) {
-                Slog.e(TAG, "Unable to read restrictions file "
-                        + restrictionsFile.getBaseFile());
-                return restrictions;
+            final int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                readBundle(bundle, values, parser);
             }
-            while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                readEntry(restrictions, values, parser);
-            }
-        } catch (IOException | XmlPullParserException e) {
-            Slog.w(TAG, "Error parsing " + restrictionsFile.getBaseFile(), e);
-        } finally {
-            IoUtils.closeQuietly(fis);
+        } catch (XmlPullParserException | IOException e) {
+            Log.e(TAG, "Error parsing Bundle policy.", e);
+            return null;
         }
-        return restrictions;
+        return new BundlePolicyValue(bundle);
     }
 
-    private static void readEntry(Bundle restrictions, ArrayList<String> values,
+    private static void readBundle(Bundle restrictions, ArrayList<String> values,
             TypedXmlPullParser parser) throws XmlPullParserException, IOException {
         int type = parser.getEventType();
         if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
@@ -186,35 +128,9 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
         Bundle childBundle = new Bundle();
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-            readEntry(childBundle, values, parser);
+            readBundle(childBundle, values, parser);
         }
         return childBundle;
-    }
-
-    private static void writeApplicationRestrictionsLAr(String fileName, Bundle restrictions) {
-        AtomicFile restrictionsFile = new AtomicFile(
-                new File(Environment.getDataSystemDirectory(), fileName));
-        writeApplicationRestrictionsLAr(restrictions, restrictionsFile);
-    }
-
-    static void writeApplicationRestrictionsLAr(Bundle restrictions, AtomicFile restrictionsFile) {
-        FileOutputStream fos = null;
-        try {
-            fos = restrictionsFile.startWrite();
-            final TypedXmlSerializer serializer = Xml.resolveSerializer(fos);
-            serializer.startDocument(null, true);
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-
-            serializer.startTag(null, TAG_RESTRICTIONS);
-            writeBundle(restrictions, serializer);
-            serializer.endTag(null, TAG_RESTRICTIONS);
-
-            serializer.endDocument();
-            restrictionsFile.finishWrite(fos);
-        } catch (Exception e) {
-            restrictionsFile.failWrite(fos);
-            Slog.e(TAG, "Error writing application restrictions list", e);
-        }
     }
 
     private static void writeBundle(Bundle restrictions, TypedXmlSerializer serializer)
