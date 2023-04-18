@@ -845,11 +845,7 @@ public class ScrollView extends FrameLayout {
 
                     // Calling overScrollBy will call onOverScrolled, which
                     // calls onScrollChanged if applicable.
-                    if (overScrollBy(0, deltaY, 0, mScrollY, 0, range, 0, mOverscrollDistance, true)
-                            && !hasNestedScrollingParent()) {
-                        // Break our velocity if we hit a scroll barrier.
-                        mVelocityTracker.clear();
-                    }
+                    overScrollBy(0, deltaY, 0, mScrollY, 0, range, 0, mOverscrollDistance, true);
 
                     final int scrolledDeltaY = mScrollY - oldY;
                     final int unconsumedY = deltaY - scrolledDeltaY;
@@ -894,6 +890,7 @@ public class ScrollView extends FrameLayout {
 
                     mActivePointerId = INVALID_POINTER;
                     endDrag();
+                    velocityTracker.clear();
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
