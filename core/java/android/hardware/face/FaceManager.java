@@ -342,6 +342,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             return;
         }
 
+        if (hardwareAuthToken == null) {
+            callback.onEnrollmentError(FACE_ERROR_UNABLE_TO_PROCESS,
+                    getErrorString(mContext, FACE_ERROR_UNABLE_TO_PROCESS,
+                    0 /* vendorCode */));
+            return;
+        }
+
         if (getEnrolledFaces(userId).size()
                 >= mContext.getResources().getInteger(R.integer.config_faceMaxTemplatesPerUser)) {
             callback.onEnrollmentError(FACE_ERROR_HW_UNAVAILABLE,
