@@ -2916,6 +2916,14 @@ public class Notification implements Parcelable
             }
         }
 
+        if (isStyle(CallStyle.class) & extras != null) {
+            Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON);
+            if (callPerson != null) {
+                visitor.accept(callPerson.getIconUri());
+            }
+            visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON));
+        }
+
         if (mBubbleMetadata != null) {
             visitIconUri(visitor, mBubbleMetadata.getIcon());
         }
