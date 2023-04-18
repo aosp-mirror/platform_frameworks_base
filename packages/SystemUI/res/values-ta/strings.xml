@@ -912,7 +912,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"வேறு நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"வைஃபை"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"இணைய நெட்வொர்க்கைத் தட்டுங்கள்"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"இணைக்க நெட்வொர்க்கைத் தட்டுங்கள்"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"நெட்வொர்க்குகளைப் பார்க்க அன்லாக் செய்யுங்கள்"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"நெட்வொர்க்குகளைத் தேடுகிறது…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>

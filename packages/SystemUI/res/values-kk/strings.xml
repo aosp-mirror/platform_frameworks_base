@@ -93,7 +93,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экран жазғыш бейнесін өңдеу"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды бейнеге жазудың ағымдағы хабарландыруы"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Жазу басталсын ба?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Android жүйесі экранда көрсетілетін немесе құрылғыда ойнатылатын құпия ақпаратты жазып алуы мүмкін. Ондай ақпаратқа құпия сөздер, төлем ақпараты, фотосуреттер, хабарлар және аудио жатады."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Android жүйесі экранда көрсетілетін немесе құрылғыда ойнатылатын құпия ақпаратты жазып алуы мүмкін. Ондай ақпаратқа құпия сөздер, төлем ақпараты, фотосуреттер, хабарлар және дыбыстар жатады."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жазу"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Құрылғыдан шығатын дыбыс"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Музыка, қоңыраулар және рингтондар сияқты құрылғыдан шығатын дыбыс"</string>
@@ -256,7 +256,7 @@
       <item quantity="other">%d құрылғы</item>
       <item quantity="one">%d құрылғы</item>
     </plurals>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Қалта шам"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Қолшам"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Камера қолданылып жатыр"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильдік интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Дерек шығыны"</string>

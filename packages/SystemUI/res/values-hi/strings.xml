@@ -222,7 +222,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ब्लूटूथ चालू हो रहा है…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ऑटो-रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रीन का अपने-आप दिशा बदलना (ऑटो-रोटेट)"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह की जानकारी"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"कैमरे का ऐक्सेस"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"माइक्रोफ़ोन का ऐक्सेस"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"उपलब्ध"</string>
@@ -354,7 +354,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपकी स्क्रीन पर दिख रही या आपके डिवाइस पर चलाई जा रही जानकारी ऐक्सेस कर सकता है. इसमें पासवर्ड, पैसे चुकाने का ब्यौरा, फ़ोटो, मैसेज, और चलाए गए ऑडियो जैसी जानकारी शामिल है."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"इस फ़ंक्शन को उपलब्ध कराने वाली सेवा, रिकॉर्ड या कास्ट करते समय, आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पैसे चुकाने से जुड़ी जानकारी, फ़ोटो, मैसेज, और चलाए जाने वाले ऑडियो शामिल हैं."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"इस फ़ंक्शन को उपलब्ध कराने वाली सेवा, रिकॉर्ड या कास्ट करते समय, आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पेमेंट के तरीके की जानकारी, फ़ोटो, मैसेज, और चलाए जाने वाले ऑडियो शामिल हैं."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रिकॉर्डिंग या कास्ट करना शुरू करें?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> का इस्तेमाल करके रिकॉर्ड और कास्ट करना शुरू करें?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सभी को हटाएं"</string>
@@ -557,7 +557,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"रोकें"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Next"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Previous"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rewind"</string>
