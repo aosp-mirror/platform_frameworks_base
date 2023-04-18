@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ਰੱਦ ਕਰੋ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ਜੋੜਾਬੱਧ ਕਰਨਾ ਕਨੈਕਟ ਕੀਤੇ ਜਾਣ ਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਅਤੇ ਕਾਲ ਇਤਿਹਾਸ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਪੇਅਰ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ਇੱਕ ਗਲਤ ਪਿੰਨ ਜਾਂ ਪਾਸਕੁੰਜੀ ਦੇ ਕਾਰਨ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਜੋੜਾਬੱਧ ਨਹੀਂ ਹੋ ਸਕਿਆ।"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ਗਲਤ ਪਿੰਨ ਜਾਂ ਪਾਸਕੀ ਦੇ ਕਾਰਨ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਜੋੜਾਬੱਧ ਨਹੀਂ ਹੋ ਸਕਿਆ।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਨਾਲ ਸੰਚਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"ਪੇਅਰਿੰਗ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਰੱਦ ਕੀਤੀ ਗਈ।"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"ਕੰਪਿਊਟਰ"</string>

@@ -117,8 +117,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ဖိုင်လွဲပြောင်းခြင်း"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ထည့်သွင်းသော စက်"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"အင်တာနက်ချိတ်ဆက်ခြင်း"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"အဆက်အသွယ်၊ ယခင်ခေါ်ဆိုမှုများ မျှဝေခြင်း"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"အဆက်အသွယ်နှင့် ယခင်ခေါ်ဆိုမှုများ မျှဝေရန် သုံးသည်"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"အဆက်အသွယ်၊ ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေခြင်း"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"အဆက်အသွယ်နှင့် ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေရန် သုံးသည်"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"မိုဘိုင်းမက်ဆေ့ဂျ်များ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM အသုံးပြုခြင်း"</string>
@@ -176,8 +176,8 @@
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB သုံး၍ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"ရွေ့လျားနိုင်သောဟော့စပေါ့"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ဘလူးတုသ်သုံးချိတ်ဆက်ခြင်း"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"မိုဘိုင်းသုံးတွဲချိတ်ခြင်း"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"တဆင့်ချိတ်ဆက်ခြင်း၊ ဟော့စပေါ့"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"မိုဘိုင်းသုံး၍ ချိတ်ဆက်ခြင်း"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"မိုဘိုင်းမိုဒမ်၊ ဟော့စပေါ့"</string>
     <string name="managed_user_title" msgid="449081789742645723">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>
     <string name="unknown" msgid="3544487229740637809">"မသိ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -230,7 +230,7 @@
     <string name="development_settings_summary" msgid="8718917813868735095">"အပလီကေးရှင်းတိုးတက်မှုအတွက် ရွေးချယ်မှုကိုသတ်မှတ်သည်"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ဤအသုံးပြုသူအတွက် ဆော့ဖ်ဝဲရေးသူ ရွေးစရာများ မရနိုင်ပါ"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"ဤ အသုံးပြုသူ အတွက် VPN ဆက်တင်များကို မရယူနိုင်"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"ဤ အသုံးပြုသူ အတွက် ချိတ်တွဲရေး ဆက်တင်များကို မရယူနိုင်"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"ဤအသုံးပြုသူအတွက် မိုဘိုင်းသုံး၍ ချိတ်ဆက်ခြင်း ဆက်တင်များ မရနိုင်ပါ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ဤ အသုံးပြုသူ အတွက် ဝင်လိုသည့် နေရာ အမည်၏ ဆက်တင်များကို မရယူနိုင်"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB အမှားရှာခြင်း"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB နှင့်ချိတ်ထားလျှင် အမှားရှာဖွေဖယ်ရှားမှုစနစ် စတင်ရန်"</string>
@@ -282,7 +282,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi ရှာဖွေခြင်း ထိန်းချုပ်မှု"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi ပြောင်းလဲသော MAC ကျပန်းပြုလုပ်ခြင်း"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"မိုဘိုင်းဒေတာကို အမြဲဖွင့်ထားရန်"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"ဖုန်းကို မိုဒမ်အဖြစ်အသုံးပြုမှု စက်ပစ္စည်းဖြင့် အရှိန်မြှင့်တင်ခြင်း"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"မိုဘိုင်းသုံး၍ ချိတ်ဆက်ရန် စက်ပစ္စည်း အရှိန်မြှင့်တင်ခြင်း"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ကို ဖွင့်ရန်"</string>
@@ -327,7 +327,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"ပုံစံတုတည်နေရာများကို ခွင့်ပြုရန်"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"ရည်ညွှန်းချက်စိစစ်ခြင်း မြင်ကွင်း"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi-Fi ဖွင့်ထားချိန်တွင်လည်း မိုဘိုင်းဒေတာ အမြဲတမ်းဖွင့်မည် (မြန်ဆန်သည့် ကွန်ရက် ပြောင်းခြင်းအတွက်)။"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"အရှိန်မြှင့်တင်ရန် မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း စက်ပစ္စည်းကို ရနိုင်လျှင် သုံးပါ"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"အရှိန်မြှင့်တင်ရန် မိုဘိုင်းသုံး၍ ချိတ်ဆက်သည့် စက်ပစ္စည်းကို ရနိုင်လျှင် သုံးပါ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ပြသနာရှာခြင်း ခွင့်ပြုပါမလား?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USBအမှားရှားခြင်းမှာ ဆော့ဝဲလ်ရေးသားရန်အတွက်သာ ရည်ရွယ်ပါသည်။ သင့်ကွန်ပြုတာနှင့်သင့်စက်ကြားတွင် ဒေတာများကိုကူးယူရန်၊ အကြောင်းမကြားပဲနှင့် သင့်စက်အတွင်းသို့ အပလီကေးရှင်းများထည့်သွင်းခြင်းနှင့် ဒေတာမှတ်တမ်းများဖတ်ရန်အတွက် အသုံးပြုပါ"</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ခွင့်ပြုမလား။"</string>

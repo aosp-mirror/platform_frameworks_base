@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"İptal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Eşleme işlemi, bağlantı kurulduğunda kişilerinize ve çağrı geçmişine erişim izni verir."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya şifre anahtarı yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile iletişim kurulamıyor."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Eşleme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tarafından reddedildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Bilgisayar"</string>
@@ -494,7 +494,7 @@
     <string name="disabled" msgid="8017887509554714950">"Devre dışı"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"İzin verildi"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"İzin verilmiyor"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Bilinmeyen uygulamaları yükle"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Bilinmeyen uygulamaları yükleme"</string>
     <string name="home" msgid="973834627243661438">"Ayarlar Ana Sayfası"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"%0"</item>
