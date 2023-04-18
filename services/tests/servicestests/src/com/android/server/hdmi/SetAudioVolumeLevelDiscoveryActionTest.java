@@ -152,11 +152,11 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
         mTestLooper.dispatchAll();
 
-        @DeviceFeatures.FeatureSupportStatus int avcSupport =
+        @DeviceFeatures.FeatureSupportStatus int savlSupport =
                 mHdmiControlServiceSpy.getHdmiCecNetwork().getCecDeviceInfo(Constants.ADDR_TV)
                         .getDeviceFeatures().getSetAudioVolumeLevelSupport();
 
-        assertThat(avcSupport).isEqualTo(FEATURE_SUPPORTED);
+        assertThat(savlSupport).isEqualTo(FEATURE_SUPPORTED);
         assertThat(mTestCallback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
@@ -172,11 +172,11 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
                 Constants.ABORT_UNRECOGNIZED_OPCODE));
         mTestLooper.dispatchAll();
 
-        @DeviceFeatures.FeatureSupportStatus int avcSupport =
+        @DeviceFeatures.FeatureSupportStatus int savlSupport =
                 mHdmiControlServiceSpy.getHdmiCecNetwork().getCecDeviceInfo(Constants.ADDR_TV)
                         .getDeviceFeatures().getSetAudioVolumeLevelSupport();
 
-        assertThat(avcSupport).isEqualTo(FEATURE_NOT_SUPPORTED);
+        assertThat(savlSupport).isEqualTo(FEATURE_NOT_SUPPORTED);
         assertThat(mTestCallback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
@@ -189,11 +189,11 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mPlaybackDevice.addAndStartAction(mAction);
         mTestLooper.dispatchAll();
 
-        @DeviceFeatures.FeatureSupportStatus int avcSupport =
+        @DeviceFeatures.FeatureSupportStatus int savlSupport =
                 mHdmiControlServiceSpy.getHdmiCecNetwork().getCecDeviceInfo(Constants.ADDR_TV)
                         .getDeviceFeatures().getSetAudioVolumeLevelSupport();
 
-        assertThat(avcSupport).isEqualTo(FEATURE_SUPPORT_UNKNOWN);
+        assertThat(savlSupport).isEqualTo(FEATURE_SUPPORT_UNKNOWN);
         assertThat(mTestCallback.getResult()).isEqualTo(
                 HdmiControlManager.RESULT_COMMUNICATION_FAILED);
     }

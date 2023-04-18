@@ -33,13 +33,13 @@ import org.junit.runners.JUnit4;
 import java.util.Arrays;
 
 /**
- * Tests for Absolute Volume Control where the local device is a Playback device and the
+ * Tests for absolute volume behavior where the local device is a Playback device and the
  * System Audio device is an Audio System.
  */
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
-public class PlaybackDeviceToAudioSystemAvcTest extends BaseAbsoluteVolumeControlTest {
+public class PlaybackDeviceToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
 
     @Override
     protected HdmiCecLocalDevice createLocalDevice(HdmiControlService hdmiControlService) {
@@ -72,15 +72,15 @@ public class PlaybackDeviceToAudioSystemAvcTest extends BaseAbsoluteVolumeContro
     }
 
     /**
-     * AVC is disabled if the Audio System disables System Audio mode, and the TV has unknown
+     * AVB is disabled if the Audio System disables System Audio mode, and the TV has unknown
      * support for <Set Audio Volume Level>. It is enabled once the TV confirms support for
      * <Set Audio Volume Level> and sends <Report Audio Status>.
      */
     @Test
     public void switchToTv_absoluteVolumeControlDisabledUntilAllConditionsMet() {
-        enableAbsoluteVolumeControl();
+        enableAbsoluteVolumeBehavior();
 
-        // Audio System disables System Audio Mode. AVC should be disabled.
+        // Audio System disables System Audio Mode. AVB should be disabled.
         receiveSetSystemAudioMode(false);
         verifyAbsoluteVolumeDisabled();
 

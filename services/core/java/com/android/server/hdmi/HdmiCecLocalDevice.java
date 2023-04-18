@@ -1012,17 +1012,17 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         action.start();
     }
 
-    void addAvcAudioStatusAction(int targetAddress) {
+    void addAvbAudioStatusAction(int targetAddress) {
         if (!hasAction(AbsoluteVolumeAudioStatusAction.class)) {
             addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress));
         }
     }
 
-    void removeAvcAudioStatusAction() {
+    void removeAvbAudioStatusAction() {
         removeAction(AbsoluteVolumeAudioStatusAction.class);
     }
 
-    void updateAvcVolume(int volumeIndex) {
+    void updateAvbVolume(int volumeIndex) {
         for (AbsoluteVolumeAudioStatusAction action :
                 getActions(AbsoluteVolumeAudioStatusAction.class)) {
             action.updateVolume(volumeIndex);
@@ -1035,7 +1035,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
      * and send <Set Audio Volume Level> (to see if it gets a <Feature Abort> in response).
      */
     @ServiceThreadOnly
-    void queryAvcSupport(int targetAddress) {
+    void querySetAudioVolumeLevelSupport(int targetAddress) {
         assertRunOnServiceThread();
 
         // Send <Give Features> if using CEC 2.0 or above.
@@ -1054,7 +1054,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
                             @Override
                             public void onComplete(int result) {
                                 if (result == HdmiControlManager.RESULT_SUCCESS) {
-                                    getService().checkAndUpdateAbsoluteVolumeControlState();
+                                    getService().checkAndUpdateAbsoluteVolumeBehavior();
                                 }
                             }
                         }));

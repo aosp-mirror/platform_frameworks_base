@@ -18,10 +18,10 @@ package com.android.server.hdmi;
 
 /**
  * Action to query and track the audio status of the System Audio device when enabling or using
- * Absolute Volume Control. Must be removed when AVC is disabled. Performs two main functions:
- * 1. When enabling AVC: queries the starting audio status of the System Audio device and
+ * absolute volume behavior. Must be removed when AVB is disabled. Performs two main functions:
+ * 1. When enabling AVB: queries the starting audio status of the System Audio device and
  *    enables the feature upon receiving a response.
- * 2. While AVC is enabled: monitors <Report Audio Status> messages from the System Audio device and
+ * 2. While AVB is enabled: monitors <Report Audio Status> messages from the System Audio device and
  *    notifies AudioService if the audio status changes.
  */
 final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
@@ -83,14 +83,14 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
 
         AudioStatus audioStatus = new AudioStatus(volume, mute);
         if (mState == STATE_WAIT_FOR_INITIAL_AUDIO_STATUS) {
-            localDevice().getService().enableAbsoluteVolumeControl(audioStatus);
+            localDevice().getService().enableAbsoluteVolumeBehavior(audioStatus);
             mState = STATE_MONITOR_AUDIO_STATUS;
         } else if (mState == STATE_MONITOR_AUDIO_STATUS) {
             if (audioStatus.getVolume() != mLastAudioStatus.getVolume()) {
-                localDevice().getService().notifyAvcVolumeChange(audioStatus.getVolume());
+                localDevice().getService().notifyAvbVolumeChange(audioStatus.getVolume());
             }
             if (audioStatus.getMute() != mLastAudioStatus.getMute()) {
-                localDevice().getService().notifyAvcMuteChange(audioStatus.getMute());
+                localDevice().getService().notifyAvbMuteChange(audioStatus.getMute());
             }
         }
         mLastAudioStatus = audioStatus;

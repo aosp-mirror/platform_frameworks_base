@@ -26,13 +26,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for Absolute Volume Control where the local device is a TV and the System Audio device
+ * Tests for absolute volume behavior where the local device is a TV and the System Audio device
  * is an Audio System. Assumes that the TV uses ARC (rather than eARC).
  */
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
-public class TvToAudioSystemAvcTest extends BaseAbsoluteVolumeControlTest {
+public class TvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
 
     @Override
     protected HdmiCecLocalDevice createLocalDevice(HdmiControlService hdmiControlService) {
