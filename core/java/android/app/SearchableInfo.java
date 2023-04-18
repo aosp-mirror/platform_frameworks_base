@@ -535,7 +535,7 @@ public final class SearchableInfo implements Parcelable {
      */
     public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo,
             int userId) {
-        Context userContext = null;
+        Context userContext;
         try {
             userContext = context.createPackageContextAsUser("system", 0,
                 new UserHandle(userId));
