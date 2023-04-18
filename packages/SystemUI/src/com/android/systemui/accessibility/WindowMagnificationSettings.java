@@ -559,7 +559,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         final LayoutParams params = new LayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT,
-                LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.START;
