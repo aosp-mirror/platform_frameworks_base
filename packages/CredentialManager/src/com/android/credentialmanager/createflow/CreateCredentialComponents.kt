@@ -139,12 +139,12 @@ fun CreateCredentialScreen(
                                 onRemoteEntrySelected = viewModel::createFlowOnEntrySelected,
                                 onLog = { viewModel.logUiEvent(it) },
                         )
-                        CreateScreenState.MORE_OPTIONS_ROW_INTRO -> {
+                        CreateScreenState.DEFAULT_PROVIDER_CONFIRMATION -> {
                             if (createCredentialUiState.activeEntry == null) {
                                 viewModel.onIllegalUiState("Expect active entry to be non-null" +
                                         " upon default provider dialog.")
                             } else {
-                                MoreOptionsRowIntroCard(
+                                DefaultProviderConfirmationCard(
                                         selectedEntry = createCredentialUiState.activeEntry,
                                         onIllegalScreenState = viewModel::onIllegalUiState,
                                         onChangeDefaultSelected =
@@ -420,7 +420,7 @@ fun MoreOptionsSelectionCard(
 }
 
 @Composable
-fun MoreOptionsRowIntroCard(
+fun DefaultProviderConfirmationCard(
         selectedEntry: ActiveEntry,
         onIllegalScreenState: (String) -> Unit,
         onChangeDefaultSelected: () -> Unit,
