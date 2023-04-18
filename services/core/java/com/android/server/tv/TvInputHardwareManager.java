@@ -491,6 +491,27 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return configsList;
     }
 
+    public boolean setTvMessageEnabled(String inputId, int type,
+            boolean enabled) {
+        synchronized (mLock) {
+            int deviceId = findDeviceIdForInputIdLocked(inputId);
+            if (deviceId < 0) {
+                Slog.e(TAG, "Invalid inputId : " + inputId);
+                return false;
+            }
+
+            Connection connection = mConnections.get(deviceId);
+            boolean success = true;
+            for (TvStreamConfig config : connection.getConfigsLocked()) {
+                success = success
+                        && mHal.setTvMessageEnabled(deviceId, config, type, enabled)
+                        == TvInputHal.SUCCESS;
+            }
+
+            return success;
+        }
+    }
+
     /**
      * Take a snapshot of the given TV input into the provided Surface.
      */
@@ -766,6 +787,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     + " mHardwareInfo: " + mHardwareInfo
                     + ", mInfo: " + mInfo
                     + ", mCallback: " + mCallback
+                    + ", mHardware: " + mHardware
                     + ", mConfigs: " + Arrays.toString(mConfigs)
                     + ", mCallingUid: " + mCallingUid
                     + ", mResolvedUserId: " + mResolvedUserId
@@ -1099,6 +1121,18 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 }
                 mSourceVolume = volume;
                 updateAudioConfigLocked();
+            }
+        }
+
+        private boolean setTvMessageEnabled(int deviceId, TvStreamConfig streamConfig, int type,
+                boolean enabled) {
+            synchronized (mImplLock) {
+                if (mReleased) {
+                    return false;
+                }
+
+                return mHal.setTvMessageEnabled(deviceId, streamConfig, type, enabled)
+                        == TvInputHal.SUCCESS;
             }
         }
 
