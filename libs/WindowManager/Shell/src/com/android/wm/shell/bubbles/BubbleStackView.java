@@ -1068,6 +1068,7 @@ public class BubbleStackView extends FrameLayout
                     // We need to be Z ordered on top in order for alpha animations to work.
                     mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(true);
                     mExpandedBubble.getExpandedView().setAnimating(true);
+                    mExpandedViewContainer.setVisibility(VISIBLE);
                 }
             }
 
@@ -3115,7 +3116,7 @@ public class BubbleStackView extends FrameLayout
                     mAnimatingOutBubbleBuffer.getColorSpace());
 
             mAnimatingOutSurfaceView.setAlpha(1f);
-            mExpandedViewContainer.setVisibility(View.GONE);
+            mExpandedViewContainer.setVisibility(View.INVISIBLE);
 
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
                 post(() -> {
@@ -3145,9 +3146,6 @@ public class BubbleStackView extends FrameLayout
         int[] paddings = mPositioner.getExpandedViewContainerPadding(
                 mStackAnimationController.isStackOnLeftSide(), isOverflowExpanded);
         mExpandedViewContainer.setPadding(paddings[0], paddings[1], paddings[2], paddings[3]);
-        if (mIsExpansionAnimating) {
-            mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
-        }
         if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
             PointF p = mPositioner.getExpandedBubbleXY(getBubbleIndex(mExpandedBubble),
                     getState());
