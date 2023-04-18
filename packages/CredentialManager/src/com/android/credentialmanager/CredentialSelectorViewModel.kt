@@ -18,6 +18,7 @@ package com.android.credentialmanager
 
 import android.app.Activity
 import android.os.IBinder
+import android.text.TextUtils
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -67,9 +68,9 @@ class CredentialSelectorViewModel(
 
     var uiMetrics: UIMetrics = UIMetrics()
 
-    init{
+    init {
         uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
-                credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.appPackageName)
     }
 
     /**************************************************************************/
@@ -100,7 +101,7 @@ class CredentialSelectorViewModel(
         if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
             this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
-                    credManRepo.requestInfo?.appPackageName)
+                credManRepo.requestInfo?.appPackageName)
         }
     }
 
@@ -174,7 +175,7 @@ class CredentialSelectorViewModel(
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
-                credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.appPackageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
@@ -314,10 +315,11 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState =
-                if (activeEntry.activeProvider.id ==
-                    userConfigRepo.getDefaultProviderId())
+                if (activeEntry.activeProvider.id == userConfigRepo.getDefaultProviderId() ||
+                    !TextUtils.isEmpty(uiState.createCredentialUiState?.requestDisplayInfo
+                        ?.appPreferredDefaultProviderId))
                     CreateScreenState.CREATION_OPTION_SELECTION
-                else CreateScreenState.MORE_OPTIONS_ROW_INTRO,
+                else CreateScreenState.DEFAULT_PROVIDER_CONFIRMATION,
                 activeEntry = activeEntry
             )
         )
