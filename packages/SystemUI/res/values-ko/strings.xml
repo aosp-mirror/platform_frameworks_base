@@ -747,8 +747,8 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>을(를) 통해 데이터 또는 인터넷에 액세스할 수 없게 됩니다. 인터넷은 Wi-Fi를 통해서만 사용할 수 있습니다."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"이동통신사"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"다시 <xliff:g id="CARRIER">%s</xliff:g>(으)로 전환할까요?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"모바일 데이터가 가용성에 따라 자동으로 전환하지 않습니다."</string>
-    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"나중에"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"모바일 데이터를 사용할 수 있어도 자동으로 전환되지 않습니다"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"아니요"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"예, 전환합니다"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"앱이 권한 요청을 가리고 있기 때문에 설정에서 내 응답을 확인할 수 없습니다."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하도록 허용하시겠습니까?"</string>

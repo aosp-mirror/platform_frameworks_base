@@ -245,8 +245,8 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ユーザー"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"インターネット"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"ネットワークが利用できます"</string>
-    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ネットワークは利用できません"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"利用できるネットワークがあります"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"利用できるネットワークがありません"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Wi-Fiネットワークを利用できません"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ON にしています…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"画面のキャスト"</string>
@@ -747,7 +747,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>でデータやインターネットにアクセスできなくなります。インターネットには Wi-Fi からのみ接続できます。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"携帯通信会社"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> に戻しますか？"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"利用可能な場合でも、モバイルデータを利用するよう自動的に切り替わることはありません"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"利用可能な場合でも、モバイルデータ通信に自動的に切り替わることはありません"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"キャンセル"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"切り替える"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>

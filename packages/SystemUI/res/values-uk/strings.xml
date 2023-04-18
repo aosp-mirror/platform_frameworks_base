@@ -749,7 +749,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Перейти на <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Пристрій не перемикатиметься на мобільний Інтернет автоматично"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Ні, дякую"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Так, перемикатися"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Так"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Не вдається підтвердити вашу відповідь у налаштуваннях, оскільки інший додаток заступає запит на дозвіл."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Дозволити додатку <xliff:g id="APP_0">%1$s</xliff:g> показувати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Має доступ до інформації з додатка <xliff:g id="APP">%1$s</xliff:g>"</string>

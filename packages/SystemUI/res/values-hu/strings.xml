@@ -974,7 +974,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"A Wi-Fi-re történő csatlakozás jelenleg nem automatikus"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Megtekintés"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Hálózatváltáshoz válassza le az ethernetet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Az eszközhasználati élmény javítása érdekében az alkalmazások és a szolgáltatások továbbra is bármikor kereshetnek Wi-Fi-hálózatokat, még akkor is, ha a Wi-Fi ki van kapcsolva. A funkciót a „Wi-Fi scanning settings” (Wi-Fi-keresési beállítások) részben módosíthatja. "<annotation id="link">"Módosítás"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Az eszközhasználati élmény javítása érdekében az alkalmazások és a szolgáltatások továbbra is bármikor kereshetnek Wi-Fi-hálózatokat, még akkor is, ha a Wi-Fi ki van kapcsolva. A funkciót a Wi-Fi-keresési beállításoknál módosíthatja. "<annotation id="link">"Módosítás"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Repülős üzemmód kikapcsolása"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> a következő mozaikot szeretné hozzáadni a Gyorsbeállításokhoz"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Mozaik hozzáadása"</string>

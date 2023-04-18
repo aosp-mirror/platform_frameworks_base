@@ -746,7 +746,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Ungependa kuzima data ya mtandao wa simu?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Hutaweza kufikia data au intaneti kupitia <xliff:g id="CARRIER">%s</xliff:g>. Intaneti itapatikana kupitia Wi-Fi pekee."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"mtoa huduma wako"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Ungependa kubadilisha ili utumie data ya mtandao wa <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Ungependa kubadili ili utumie <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Data ya mtandao wa simu haitabadilika kiotomatiki kulingana na upatikanaji"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Hapana"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ndiyo, badili"</string>
