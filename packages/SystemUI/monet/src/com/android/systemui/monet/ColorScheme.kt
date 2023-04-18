@@ -316,9 +316,9 @@ enum class Style(internal val coreSpec: CoreSpec) {
     ),
     CLOCK_VIBRANT(
         CoreSpec(
-            a1 = TonalSpec(HueSource(), ChromaBound(ChromaSource(), 30.0, Chroma.MAX_VALUE)),
-            a2 = TonalSpec(HueAdd(20.0), ChromaBound(ChromaSource(), 30.0, Chroma.MAX_VALUE)),
-            a3 = TonalSpec(HueAdd(60.0), ChromaBound(ChromaSource(), 30.0, Chroma.MAX_VALUE)),
+            a1 = TonalSpec(HueSource(), ChromaBound(ChromaSource(), 70.0, Chroma.MAX_VALUE)),
+            a2 = TonalSpec(HueAdd(20.0), ChromaBound(ChromaSource(), 70.0, Chroma.MAX_VALUE)),
+            a3 = TonalSpec(HueAdd(60.0), ChromaBound(ChromaSource(), 70.0, Chroma.MAX_VALUE)),
 
             // Not Used
             n1 = TonalSpec(HueSource(), ChromaConstant(0.0)),
