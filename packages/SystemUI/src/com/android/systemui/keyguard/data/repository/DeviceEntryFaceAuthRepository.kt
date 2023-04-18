@@ -347,11 +347,6 @@ constructor(
                     "nonStrongBiometricIsAllowed",
                     faceAuthLog
                 ),
-                logAndObserve(
-                    userRepository.selectedUserInfo.map { it.isPrimary },
-                    "userIsPrimaryUser",
-                    faceAuthLog
-                ),
             )
             .reduce(::and)
             .distinctUntilChanged()
