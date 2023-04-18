@@ -151,6 +151,10 @@ constructor(
         return featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)
     }
 
+    override fun onPrimaryBouncerUserInput() {
+        repository.cancel()
+    }
+
     /** Provide the status of face authentication */
     override val authenticationStatus = repository.authenticationStatus
 
