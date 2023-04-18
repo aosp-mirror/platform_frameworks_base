@@ -444,6 +444,11 @@ public abstract class WindowManagerInternal {
     public abstract IBinder getFocusedWindowTokenFromWindowStates();
 
     /**
+     * Moves the given display to the top.
+     */
+    public abstract void moveDisplayToTopIfAllowed(int displayId);
+
+    /**
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();
