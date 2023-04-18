@@ -4603,8 +4603,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean isRestrictedBackupMode = false;
             if (backupTarget != null && backupTarget.appInfo.packageName.equals(processName)) {
                 isRestrictedBackupMode = backupTarget.appInfo.uid >= FIRST_APPLICATION_UID
-                        && ((backupTarget.backupMode == BackupRecord.RESTORE)
-                                || (backupTarget.backupMode == BackupRecord.RESTORE_FULL)
+                        && ((backupTarget.backupMode == BackupRecord.RESTORE_FULL)
                                 || (backupTarget.backupMode == BackupRecord.BACKUP_FULL));
             }
 
@@ -13396,7 +13395,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             BackupRecord r = new BackupRecord(app, backupMode, targetUserId, backupDestination);
             ComponentName hostingName =
-                    (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
+                    (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
+                            || backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE)
                             ? new ComponentName(app.packageName, app.backupAgentName)
                             : new ComponentName("android", "FullBackupAgent");
 
