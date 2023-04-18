@@ -13601,7 +13601,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Nullable
     public AutofillValue getAutofillValue() {
         if (isTextEditable()) {
-            final CharSequence text = TextUtils.trimToParcelableSize(getText());
+            final CharSequence text =
+                    TextUtils.trimToParcelableSize(TextUtils.trimNoCopySpans(getText()));
             return AutofillValue.forText(text);
         }
         return null;
