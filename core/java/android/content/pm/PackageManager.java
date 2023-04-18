@@ -313,7 +313,7 @@ public abstract class PackageManager {
 
         /**
          * Returns the classname of the component where this property was defined.
-         * <p>If the property was defined within and &lt;application&gt; tag, retutrns
+         * <p>If the property was defined within and &lt;application&gt; tag, returns
          * {@code null}
          */
         @Nullable public String getClassName() {
