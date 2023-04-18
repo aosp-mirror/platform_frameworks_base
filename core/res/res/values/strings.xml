@@ -1452,7 +1452,8 @@
       without your intervention. This may result in unexpected charges or calls.
       Note that this doesn\'t allow the app to call emergency numbers.
       Malicious apps may cost you money by making calls without your
-      confirmation.</string>
+      confirmation, or dial carrier codes which cause incoming calls to be
+      automatically forwarded to another number.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessImsCallService">access IMS call service</string>
