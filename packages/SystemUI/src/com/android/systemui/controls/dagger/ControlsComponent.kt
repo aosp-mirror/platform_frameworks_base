@@ -19,11 +19,11 @@ package com.android.systemui.controls.dagger
 import android.content.Context
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
-import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsTileResourceConfiguration
 import com.android.systemui.controls.controller.ControlsTileResourceConfigurationImpl
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.UserTracker

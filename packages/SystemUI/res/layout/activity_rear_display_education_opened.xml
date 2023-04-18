@@ -31,6 +31,7 @@
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/rear_display_folded_animation"
+            android:importantForAccessibility="no"
             android:layout_width="@dimen/rear_display_animation_width"
             android:layout_height="@dimen/rear_display_animation_height"
             android:layout_gravity="center"
@@ -42,9 +43,10 @@
     </androidx.cardview.widget.CardView>
 
     <TextView
+        android:id="@+id/rear_display_title_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/rear_display_unfold_bottom_sheet_title"
+        android:text="@string/rear_display_unfolded_bottom_sheet_title"
         android:textAppearance="@style/TextAppearance.Dialog.Title"
         android:lineSpacingExtra="2sp"
         android:paddingTop="@dimen/rear_display_title_top_padding"
@@ -55,20 +57,10 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/rear_display_bottom_sheet_description"
+        android:text="@string/rear_display_unfolded_bottom_sheet_description"
         android:textAppearance="@style/TextAppearance.Dialog.Body"
         android:lineSpacingExtra="2sp"
         android:translationY="-1.24sp"
-        android:gravity="center_horizontal|top"
-    />
-
-    <TextView
-        android:id="@+id/rear_display_warning_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/rear_display_bottom_sheet_warning"
-        android:textAppearance="@style/TextAppearance.Dialog.Body"
-        android:lineSpacingExtra="2sp"
         android:gravity="center_horizontal|top"
     />
 

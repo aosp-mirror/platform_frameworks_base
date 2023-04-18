@@ -16,7 +16,7 @@
 
 package com.android.systemui.shade;
 
-import static android.os.Trace.TRACE_TAG_ALWAYS;
+import static android.os.Trace.TRACE_TAG_APP;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
@@ -58,6 +58,7 @@ import android.widget.FrameLayout;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.R;
+import com.android.systemui.compose.ComposeFacade;
 
 /**
  * Combined keyguard and notification panel view. Also holding backdrop and scrims.
@@ -149,6 +150,18 @@ public class NotificationShadeWindowView extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setWillNotDraw(!DEBUG);
+
+        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
+            ComposeFacade.INSTANCE.composeInitializer().onAttachedToWindow(this);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
+            ComposeFacade.INSTANCE.composeInitializer().onDetachedFromWindow(this);
+        }
     }
 
     @Override
@@ -315,7 +328,7 @@ public class NotificationShadeWindowView extends FrameLayout {
 
     @Override
     public void requestLayout() {
-        Trace.instant(TRACE_TAG_ALWAYS, "NotificationShadeWindowView#requestLayout");
+        Trace.instant(TRACE_TAG_APP, "NotificationShadeWindowView#requestLayout");
         super.requestLayout();
     }
 

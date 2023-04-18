@@ -19,7 +19,7 @@
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"Informes de errores"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Se está generando el informe de errores <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"Informe de errores <xliff:g id="ID">#%d</xliff:g> registrado"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Informe de errores <xliff:g id="ID">#%d</xliff:g> capturado"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Añadiendo detalles al informe de errores"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Espera…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"El informe de errores aparecerá en el teléfono en breve"</string>

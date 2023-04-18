@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Выключана"</item>
     <item msgid="460891964396502657">"Уключана"</item>
   </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"Недаступна"</item>
-    <item msgid="8014986104355098744">"Выключана"</item>
-    <item msgid="5966994759929723339">"Уключана"</item>
-  </string-array>
 </resources>

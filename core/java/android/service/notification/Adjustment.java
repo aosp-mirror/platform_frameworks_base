@@ -52,7 +52,7 @@ public final class Adjustment implements Parcelable {
     /** @hide */
     @StringDef (prefix = { "KEY_" }, value = {
             KEY_CONTEXTUAL_ACTIONS, KEY_GROUP_KEY, KEY_IMPORTANCE, KEY_PEOPLE, KEY_SNOOZE_CRITERIA,
-            KEY_TEXT_REPLIES, KEY_USER_SENTIMENT
+            KEY_TEXT_REPLIES, KEY_USER_SENTIMENT, KEY_IMPORTANCE_PROPOSAL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Keys {}
@@ -120,6 +120,19 @@ public final class Adjustment implements Parcelable {
      * </p>
      */
     public static final String KEY_IMPORTANCE = "key_importance";
+
+    /**
+     * Weaker than {@link #KEY_IMPORTANCE}, this adjustment suggests an importance rather than
+     * mandates an importance change.
+     *
+     * A notification listener can interpet this suggestion to show the user a prompt to change
+     * notification importance for the notification (or type, or app) moving forward.
+     *
+     * Data type: int, one of importance values e.g.
+     * {@link android.app.NotificationManager#IMPORTANCE_MIN}.
+     * @hide
+     */
+    public static final String KEY_IMPORTANCE_PROPOSAL = "key_importance_proposal";
 
     /**
      * Data type: float, a ranking score from 0 (lowest) to 1 (highest).

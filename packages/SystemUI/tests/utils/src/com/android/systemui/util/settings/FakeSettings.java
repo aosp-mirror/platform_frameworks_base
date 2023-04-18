@@ -23,6 +23,8 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.util.Pair;
 
+import com.android.systemui.settings.UserTracker;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +55,11 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
 
     @Override
     public ContentResolver getContentResolver() {
+        return null;
+    }
+
+    @Override
+    public UserTracker getUserTracker() {
         return null;
     }
 

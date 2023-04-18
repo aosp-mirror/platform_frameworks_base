@@ -27,15 +27,15 @@
     <string name="label_duplex" msgid="5370037254347072243">"Față-verso"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientare"</string>
     <string name="label_pages" msgid="7768589729282182230">"Pagini"</string>
-    <string name="destination_default_text" msgid="5422708056807065710">"Selectează imprimanta"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"Selectați imprimanta"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Toate cele <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"Intervalul de <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"de ex. 1-5, 8, 11-13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"Previzualizează printarea"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"Instalează PDF viewer pentru previzualizare"</string>
+    <string name="print_preview" msgid="8010217796057763343">"Previzualizați printarea"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"Instalați PDF viewer pentru previzualizare"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Aplicația de printare s-a blocat"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Se generează sarcină printare"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"Salvează ca PDF"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"Salvați ca PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Toate imprimantele..."</string>
     <string name="print_dialog" msgid="32628687461331979">"Caseta de dialog de printare"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
@@ -43,18 +43,18 @@
     <string name="summary_template" msgid="8899734908625669193">"Rezumat, copii <xliff:g id="COPIES">%1$s</xliff:g>, dimensiunea paginii <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"Ghidaj de extindere"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"Ghidaj de restrângere"</string>
-    <string name="print_button" msgid="645164566271246268">"Printează"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"Salvează în format PDF"</string>
+    <string name="print_button" msgid="645164566271246268">"Printați"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"Salvați în format PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Opțiuni de printare extinse"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"Opțiuni de printare restrânse"</string>
-    <string name="search" msgid="5421724265322228497">"Caută"</string>
+    <string name="search" msgid="5421724265322228497">"Căutați"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Toate imprimantele"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"Adaugă un serviciu"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Adăugați un serviciu"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Caseta de căutare este afișată"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Caseta de căutare este ascunsă"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"Adaugă o imprimantă"</string>
-    <string name="print_select_printer" msgid="7388760939873368698">"Selectează imprimanta"</string>
-    <string name="print_forget_printer" msgid="5035287497291910766">"Omite imprimanta"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"Adăugați o imprimantă"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Selectați imprimanta"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Omiteți imprimanta"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
       <item quantity="few"><xliff:g id="COUNT_1">%1$s</xliff:g> imprimante găsite</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> de imprimante găsite</item>
@@ -70,26 +70,26 @@
     <string name="print_no_print_services" msgid="8561247706423327966">"Niciun serviciu de printare activat"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Nu au fost găsite imprimante"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Nu pot fi adăugate imprimante"</string>
-    <string name="select_to_add_printers" msgid="3800709038689830974">"Selectează pentru a adăuga o imprimantă"</string>
-    <string name="enable_print_service" msgid="3482815747043533842">"Selectează pentru a activa"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"Selectați pentru a adăuga o imprimantă"</string>
+    <string name="enable_print_service" msgid="3482815747043533842">"Selectați pentru a activa"</string>
     <string name="enabled_services_title" msgid="7036986099096582296">"Servicii activate"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"Servicii recomandate"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Servicii dezactivate"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Toate serviciile"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
-      <item quantity="few">Instalează pentru a descoperi <xliff:g id="COUNT_1">%1$s</xliff:g> imprimante</item>
-      <item quantity="other">Instalează pentru a descoperi <xliff:g id="COUNT_1">%1$s</xliff:g> de imprimante</item>
-      <item quantity="one">Instalează pentru a descoperi <xliff:g id="COUNT_0">%1$s</xliff:g> imprimantă</item>
+      <item quantity="few">Instalați pentru a descoperi <xliff:g id="COUNT_1">%1$s</xliff:g> imprimante</item>
+      <item quantity="other">Instalați pentru a descoperi <xliff:g id="COUNT_1">%1$s</xliff:g> de imprimante</item>
+      <item quantity="one">Instalați pentru a descoperi <xliff:g id="COUNT_0">%1$s</xliff:g> imprimantă</item>
     </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Se printează <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Se anulează <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Eroare de printare: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printare blocată: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <string name="cancel" msgid="4373674107267141885">"Anulează"</string>
-    <string name="restart" msgid="2472034227037808749">"Repornește"</string>
+    <string name="cancel" msgid="4373674107267141885">"Anulați"</string>
+    <string name="restart" msgid="2472034227037808749">"Reporniți"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Nu există conexiune la o imprimantă"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"necunoscut"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"Folosești <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"Folosiți <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Documentul poate trece prin unul sau mai multe servere pe calea spre imprimantă."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Alb-negru"</item>
@@ -105,8 +105,8 @@
     <item msgid="3199660090246166812">"Peisaj"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Nu s-a putut scrie în fișier."</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"Ne pare rău, operațiunea nu a reușit. Încearcă din nou."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"Reîncearcă"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Ne pare rău, operațiunea nu a reușit. Încercați din nou."</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Reîncercați"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Această imprimantă nu este disponibilă momentan."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Previzualizarea nu se poate afișa"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Se pregătește previzualizarea..."</string>

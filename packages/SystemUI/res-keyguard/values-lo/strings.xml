@@ -26,21 +26,21 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ບັດບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ສາກເຕັມແລ້ວ."</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳ​ລັງ​ສາກ​ໄຟໄຮ້​ສາຍ"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກໄຟ"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກໄຟຜ່ານດັອກ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບດ່ວນ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບຊ້າ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ການສາກຖືກປັບໃຫ້ເໝາະສົມເພື່ອປົກປ້ອງແບັດເຕີຣີ"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ຈຳກັດການສາກໄຟຊົ່ວຄາວແລ້ວ"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ກົດ \"ເມນູ\" ເພື່ອປົດລັອກ."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ເຄືອຂ່າຍຖືກລັອກ"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ບໍ່ມີຊິມ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ເພີ່ມຊິມ."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ບໍ່ມີຊິມ ຫຼື ອ່ານຊິມບໍ່ໄດ້. ເພີ່ມຊິມ."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ຊິມໃຊ້ບໍ່ໄດ້."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ຊິມຂອງທ່ານຖືກປິດໃຊ້ຢ່າງຖາວອນແລ້ວ.\n ຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການໂທລະສັບໄຮ້ສາຍຂອງທ່ານເພື່ອຂໍຊິມໃໝ່."</string>
-    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ຊິມຖືກລັອກຢູ່."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ຊິມຖືກລັອກດ້ວຍ PUK."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"ກຳລັງປົດລັອກຊິມ…"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ບໍ່ມີຊິມກາດ"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ໃສ່ຊິມກາດ."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"ບໍ່ພົບເຫັນຊິມກາດ ຫຼືບໍ່ສາມາດອ່ານຊິມກາດໄດ້. ກະລຸນາໃສ່ຊິມກາດໃໝ່."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"SIM card ບໍ່ສາມາດໃຊ້ໄດ້."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"ຊິມກາດຂອງທ່ານຖືກປິດການນຳໃຊ້ຢ່າງຖາວອນແລ້ວ.\n ກະລຸນາຕິດຕໍ່ຜູ່ໃຫ້ບໍລິການໂທລະສັບຂອງທ່ານ ເພື່ອຂໍເອົາຊິມກາດໃໝ່."</string>
+    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"SIM card ຖືກລັອກ."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"ຊິມກາດຖືກລັອກດ້ວຍລະຫັດ PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"ປົດລັອກ SIM card..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"ພື້ນທີ່ PIN"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"ລະຫັດຜ່ານອຸປະກອນ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"ພື້ນທີ່ PIN ຂອງ SIM"</string>
@@ -61,16 +61,22 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"ດຽວນີ້ \"<xliff:g id="CARRIER">%1$s</xliff:g>\" SIM ປິດນຳໃຊ້. ປ້ອນລະຫັດ PUK ເພື່ອສືບຕໍ່. ຕິດຕໍ່ບໍລິສັດໃຫ້ບໍລິການ ເພື່ອຂໍລາຍລະອຽດ."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"ໃສ່ລະຫັດ PIN ທີ່ຕ້ອງການ."</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"ຢືນຢັນລະຫັດ PIN ທີ່ຕ້ອງການ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"ກຳລັງປົດລັອກຊິມ…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"ປົດລັອກ SIM card..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"ພິມລະຫັດ PIN ທີ່ມີ 4 ຫາ 8 ໂຕເລກ."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"ລະຫັດ PUK ຄວນມີຢ່າງໜ້ອຍ 8 ໂຕເລກ."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ທ່ານພິມລະຫັດ PIN ຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ທ່ານພິມລະຫັດຜ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nໃຫ້ລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ທ່ານແຕ້ມຮູບແບບປົດລັອກບໍ່ຖືກ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງທ່ານຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການ ເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{ລະຫັດ PIN ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ທ່ານຈະຕ້ອງຕິດຕໍ່ຫາຜູ້ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນທ່ານ.}other{ລະຫັດ PIN ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອ. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">ລະຫັດ SIM PIN ບໍ່ຖືກຕ້ອງ, ທ່ານຍັງພະຍາຍາມໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ຄັ້ງ.</item>
+      <item quantity="one">ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ທ່ານຈະຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການຂອງທ່ານ ເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM ໃຊ້ບໍ່ໄດ້ແລ້ວ. ກະລຸນາຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການຂອງທ່ານ."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ລະຫັດ PUK ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຂອງທ່ານຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ.}other{ລະຫັດ PUK ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຂອງທ່ານຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">ລະຫັດ PUK ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະໃຊ້ບໍ່ໄດ້ຢ່າງຖາວອນ.</item>
+      <item quantity="one">ລະຫັດ PUK ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຂອງທ່ານຈະໃຊ້ບໍ່ໄດ້ຢ່າງຖາວອນ.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"PIN ຂອງ SIM ເຮັດວຽກລົ້ມເຫຼວ!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK ຂອງ SIM ເຮັດວຽກລົ້ມເຫຼວ!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ສະລັບຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
@@ -78,17 +84,22 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ຈຳເປັນຕ້ອງມີແບບຮູບປົດລັອກຫຼັງຈາກອຸປະກອນເລີ່ມລະບົບໃໝ່"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ຈຳເປັນຕ້ອງມີ PIN ຫຼັງຈາກອຸປະກອນເລີ່ມລະບົບໃໝ່"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ຈຳເປັນຕ້ອງມີລະຫັດຜ່ານຫຼັງຈາກອຸປະກອນເລີ່ມລະບົບໃໝ່"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ, ໃຫ້ໃຊ້ຮູບແບບແທນ"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ, ໃຫ້ໃຊ້ PIN ແທນ"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ, ໃຫ້ໃຊ້ລະຫັດຜ່ານແທນ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"ຈຳເປັນຕ້ອງມີແບບຮູບເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"ຈຳເປັນຕ້ອງມີ PIN ເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"ຈຳເປັນຕ້ອງມີລະຫັດຜ່ານເພື່ອຄວາມປອດໄພເພີ່ມເຕີມ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ອຸປະກອນຖືກລັອກໂດຍຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ອຸປະກອນຖືກສັ່ງໃຫ້ລັອກ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ບໍ່ຮູ້ຈັກ"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ເພື່ອໃຊ້ການປົດລັອກດ້ວຍໜ້າ, ໃຫ້ເປີດໃຊ້ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບໃນການຕັ້ງຄ່າ"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ໃສ່ລະຫັດ PIN ຂອງຊິມ. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຈະຕ້ອງຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນທ່ານ.}other{ໃສ່ລະຫັດ PIN ຂອງຊິມ. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອ.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ຕອນນີ້ປິດການນຳໃຊ້ຊິມແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອສືບຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.}other{ຕອນນີ້ປິດການນຳໃຊ້ຊິມແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອສືບຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ເພື່ອໃຊ້ການປົດລັອກດ້ວຍໜ້າ, ກະລຸນາເປີດໃຊ້ "<b>"ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ"</b>" ໃນການຕັ້ງຄ່າ &gt; ຄວາມເປັນສ່ວນຕົວ"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">ລະຫັດ SIM PIN ບໍ່ຖືກຕ້ອງ. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ.</item>
+      <item quantity="one">ໃສ່ລະຫັດ SIM PIN. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ຈະຕ້ອງຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການເພື່ອປົດລັອກ.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_1">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
+      <item quantity="one">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"ຄ່າເລີ່ມຕົ້ນ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ຟອງ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ໂມງເຂັມ"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ປົດລັອກອຸປະກອນຂອງທ່ານເພື່ອສືບຕໍ່"</string>
 </resources>

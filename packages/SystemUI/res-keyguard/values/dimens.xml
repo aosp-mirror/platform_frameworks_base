@@ -29,9 +29,6 @@
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
 
-    <!-- Max Height of the sliding KeyguardSecurityContainer
-         (includes 2x keyguard_security_view_top_margin) -->
-
     <!-- pin/password field max height -->
     <dimen name="keyguard_password_height">80dp</dimen>
 
@@ -81,7 +78,7 @@
     <!-- The vertical margin between the date and the owner info. -->
 
     <!-- The translation for disappearing security views after having solved them. -->
-    <dimen name="disappear_y_translation">-32dp</dimen>
+    <dimen name="disappear_y_translation">-50dp</dimen>
 
     <!-- Dimens for animation for the Bouncer PIN view -->
     <dimen name="pin_view_trans_y_entry">120dp</dimen>
@@ -126,9 +123,7 @@
     <dimen name="bouncer_user_switcher_item_padding_vertical">10dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_horizontal">12dp</dimen>
     <dimen name="bouncer_user_switcher_header_padding_end">44dp</dimen>
-    <dimen name="bouncer_user_switcher_y_trans">0dp</dimen>
-    <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
-    <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>
+    <dimen name="bouncer_user_switcher_y_trans">80dp</dimen>
 
     <!-- 2 * the margin + size should equal the plus_margin -->
     <dimen name="user_switcher_icon_large_margin">16dp</dimen>

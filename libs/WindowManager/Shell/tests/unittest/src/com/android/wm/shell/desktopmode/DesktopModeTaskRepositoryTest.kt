@@ -141,6 +141,36 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun getVisibleTaskCount() {
+        // No tasks, count is 0
+        assertThat(repo.getVisibleTaskCount()).isEqualTo(0)
+
+        // New task increments count to 1
+        repo.updateVisibleFreeformTasks(taskId = 1, visible = true)
+        assertThat(repo.getVisibleTaskCount()).isEqualTo(1)
+
+        // Visibility update to same task does not increase count
+        repo.updateVisibleFreeformTasks(taskId = 1, visible = true)
+        assertThat(repo.getVisibleTaskCount()).isEqualTo(1)
+
+        // Second task visible increments count
+        repo.updateVisibleFreeformTasks(taskId = 2, visible = true)
+        assertThat(repo.getVisibleTaskCount()).isEqualTo(2)
+
+        // Hiding a task decrements count
+        repo.updateVisibleFreeformTasks(taskId = 1, visible = false)
+        assertThat(repo.getVisibleTaskCount()).isEqualTo(1)
+
+        // Hiding all tasks leaves count at 0
+        repo.updateVisibleFreeformTasks(taskId = 2, visible = false)
+        assertThat(repo.getVisibleTaskCount()).isEqualTo(0)
+
+        // Hiding a not existing task, count remains at 0
+        repo.updateVisibleFreeformTasks(taskId = 999, visible = false)
+        assertThat(repo.getVisibleTaskCount()).isEqualTo(0)
+    }
+
+    @Test
     fun addOrMoveFreeformTaskToTop_didNotExist_addsToTop() {
         repo.addOrMoveFreeformTaskToTop(5)
         repo.addOrMoveFreeformTaskToTop(6)

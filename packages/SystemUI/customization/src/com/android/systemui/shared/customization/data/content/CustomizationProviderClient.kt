@@ -20,12 +20,15 @@ package com.android.systemui.shared.customization.data.content
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.ContentObserver
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.DrawableRes
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
+import java.net.URISyntaxException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -169,6 +172,8 @@ interface CustomizationProviderClient {
          * If `null`, the button should not be shown.
          */
         val enablementActionComponentName: String? = null,
+        /** Optional [Intent] to use to start an activity to configure this affordance. */
+        val configureIntent: Intent? = null,
     )
 
     /** Models a selection of a quick affordance on a slot. */
@@ -337,6 +342,11 @@ class CustomizationProviderClientImpl(
                                 Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                                     .ENABLEMENT_COMPONENT_NAME
                             )
+                        val configureIntentColumnIndex =
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                                    .CONFIGURE_INTENT
+                            )
                         if (
                             idColumnIndex == -1 ||
                                 nameColumnIndex == -1 ||
@@ -344,15 +354,17 @@ class CustomizationProviderClientImpl(
                                 isEnabledColumnIndex == -1 ||
                                 enablementInstructionsColumnIndex == -1 ||
                                 enablementActionTextColumnIndex == -1 ||
-                                enablementComponentNameColumnIndex == -1
+                                enablementComponentNameColumnIndex == -1 ||
+                                configureIntentColumnIndex == -1
                         ) {
                             return@buildList
                         }
 
                         while (cursor.moveToNext()) {
+                            val affordanceId = cursor.getString(idColumnIndex)
                             add(
                                 CustomizationProviderClient.Affordance(
-                                    id = cursor.getString(idColumnIndex),
+                                    id = affordanceId,
                                     name = cursor.getString(nameColumnIndex),
                                     iconResourceId = cursor.getInt(iconColumnIndex),
                                     isEnabled = cursor.getInt(isEnabledColumnIndex) == 1,
@@ -367,6 +379,10 @@ class CustomizationProviderClientImpl(
                                         cursor.getString(enablementActionTextColumnIndex),
                                     enablementActionComponentName =
                                         cursor.getString(enablementComponentNameColumnIndex),
+                                    configureIntent =
+                                        cursor
+                                            .getString(configureIntentColumnIndex)
+                                            ?.toIntent(affordanceId = affordanceId),
                                 )
                             )
                         }
@@ -504,7 +520,19 @@ class CustomizationProviderClientImpl(
             .onStart { emit(Unit) }
     }
 
+    private fun String.toIntent(
+        affordanceId: String,
+    ): Intent? {
+        return try {
+            Intent.parseUri(this, 0)
+        } catch (e: URISyntaxException) {
+            Log.w(TAG, "Cannot parse Uri into Intent for affordance with ID \"$affordanceId\"!")
+            null
+        }
+    }
+
     companion object {
+        private const val TAG = "CustomizationProviderClient"
         private const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
     }
 }

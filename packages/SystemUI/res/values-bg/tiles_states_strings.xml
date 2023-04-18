@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Изкл."</item>
     <item msgid="460891964396502657">"Вкл."</item>
   </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"Не е налице"</item>
-    <item msgid="8014986104355098744">"Изкл."</item>
-    <item msgid="5966994759929723339">"Вкл."</item>
-  </string-array>
 </resources>

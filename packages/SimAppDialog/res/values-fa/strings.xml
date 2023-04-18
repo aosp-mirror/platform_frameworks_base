@@ -21,6 +21,6 @@
     <string name="install_carrier_app_title" msgid="334729104862562585">"سرویس دستگاه همراه را فعال کنید"</string>
     <string name="install_carrier_app_description" msgid="4014303558674923797">"برای اینکه سیم‌کارت جدیدتان به‌درستی کار کند، باید برنامه <xliff:g id="ID_1">%1$s</xliff:g> را نصب کنید"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"برای اینکه سیم‌کارت جدیدتان به‌درستی کار کند، باید برنامه شرکت مخابراتی را نصب کنید"</string>
-    <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"حالا نه"</string>
+    <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"الآن نه"</string>
     <string name="install_carrier_app_download_action" msgid="7859229305958538064">"بارگیری برنامه"</string>
 </resources>

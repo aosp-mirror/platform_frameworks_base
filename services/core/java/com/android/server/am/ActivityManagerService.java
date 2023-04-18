@@ -3832,8 +3832,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final int callingAppId = UserHandle.getAppId(callingUid);
 
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+        ProcessRecord proc;
+        synchronized (mPidsSelfLocked) {
+            proc = mPidsSelfLocked.get(callingPid);
+        }
+        final boolean hasKillAllPermission = PERMISSION_GRANTED == checkPermission(
+                android.Manifest.permission.FORCE_STOP_PACKAGES, callingPid, callingUid)
+                || UserHandle.isCore(callingUid)
+                || (proc != null && proc.info.isSystemApp());
+
+        userId = mUserController.handleIncomingUser(callingPid, callingUid,
                 userId, true, ALLOW_FULL_ONLY, "killBackgroundProcesses", null);
         final int[] userIds = mUserController.expandUserId(userId);
 
@@ -3848,7 +3860,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     targetUserId));
                 } catch (RemoteException e) {
                 }
-                if (appId == -1) {
+                if (appId == -1 || (!hasKillAllPermission && appId != callingAppId)) {
                     Slog.w(TAG, "Invalid packageName: " + packageName);
                     return;
                 }
@@ -3874,6 +3886,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + " requires " + android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+
+        ProcessRecord proc;
+        synchronized (mPidsSelfLocked) {
+            proc = mPidsSelfLocked.get(callingPid);
+        }
+        if (callingUid >= FIRST_APPLICATION_UID
+                && (proc == null || !proc.info.isSystemApp())) {
+            final String msg = "Permission Denial: killAllBackgroundProcesses() from pid="
+                    + callingPid + ", uid=" + callingUid + " is not allowed";
+            Slog.w(TAG, msg);
+            // Silently return to avoid existing apps from crashing.
+            return;
         }
 
         final long callingId = Binder.clearCallingIdentity();
@@ -12777,8 +12805,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         // restored. This distinction is important for system-process packages that live in the
         // system user's process but backup/restore data for non-system users.
         // TODO (b/123688746): Handle all system-process packages with singleton check.
-        final int instantiatedUserId =
-                PLATFORM_PACKAGE_NAME.equals(packageName) ? UserHandle.USER_SYSTEM : targetUserId;
+        boolean useSystemUser = PLATFORM_PACKAGE_NAME.equals(packageName)
+                || getPackageManagerInternal().getSystemUiServiceComponent().getPackageName()
+                        .equals(packageName);
+        final int instantiatedUserId = useSystemUser ? UserHandle.USER_SYSTEM : targetUserId;
 
         IPackageManager pm = AppGlobals.getPackageManager();
         ApplicationInfo app = null;
@@ -13100,12 +13130,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     public Intent registerReceiverWithFeature(IApplicationThread caller, String callerPackage,
             String callerFeatureId, String receiverId, IIntentReceiver receiver,
             IntentFilter filter, String permission, int userId, int flags) {
+        enforceNotIsolatedCaller("registerReceiver");
+
         // Allow Sandbox process to register only unexported receivers.
-        if ((flags & Context.RECEIVER_NOT_EXPORTED) != 0) {
-            enforceNotIsolatedCaller("registerReceiver");
-        } else if (mSdkSandboxSettings.isBroadcastReceiverRestrictionsEnforced()) {
-            enforceNotIsolatedOrSdkSandboxCaller("registerReceiver");
+        boolean unexported = (flags & Context.RECEIVER_NOT_EXPORTED) != 0;
+        if (mSdkSandboxSettings.isBroadcastReceiverRestrictionsEnforced()
+                && Process.isSdkSandboxUid(Binder.getCallingUid())
+                && !unexported) {
+            throw new SecurityException("SDK sandbox process not allowed to call "
+                + "registerReceiver");
         }
+
         ArrayList<Intent> stickyIntents = null;
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps
