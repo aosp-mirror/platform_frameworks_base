@@ -2821,6 +2821,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    @Override
+    void waitForSyncTransactionCommit(ArraySet<WindowContainer> wcAwaitingCommit) {
+        super.waitForSyncTransactionCommit(wcAwaitingCommit);
+        if (mStartingData != null) {
+            mStartingData.mWaitForSyncTransactionCommit = true;
+        }
+    }
+
+    @Override
+    void onSyncTransactionCommitted(SurfaceControl.Transaction t) {
+        super.onSyncTransactionCommitted(t);
+        if (mStartingData == null) {
+            return;
+        }
+        mStartingData.mWaitForSyncTransactionCommit = false;
+        if (mStartingData.mRemoveAfterTransaction) {
+            mStartingData.mRemoveAfterTransaction = false;
+            removeStartingWindowAnimation(mStartingData.mPrepareRemoveAnimation);
+        }
+    }
+
     void removeStartingWindowAnimation(boolean prepareAnimation) {
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
         if (task != null) {
@@ -2843,6 +2864,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final WindowState startingWindow = mStartingWindow;
         final boolean animate;
         if (mStartingData != null) {
+            if (mStartingData.mWaitForSyncTransactionCommit
+                    || mTransitionController.inCollectingTransition(startingWindow)) {
+                mStartingData.mRemoveAfterTransaction = true;
+                mStartingData.mPrepareRemoveAnimation = prepareAnimation;
+                return;
+            }
             animate = prepareAnimation && mStartingData.needRevealAnimation()
                     && mStartingWindow.isVisibleByPolicy();
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
@@ -2863,18 +2890,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     this);
             return;
         }
-
-        if (animate && mTransitionController.inCollectingTransition(startingWindow)) {
-            // Defer remove starting window after transition start.
-            // The surface of app window could really show after the transition finish.
-            startingWindow.mSyncTransaction.addTransactionCommittedListener(Runnable::run, () -> {
-                synchronized (mAtmService.mGlobalLock) {
-                    surface.remove(true);
-                }
-            });
-        } else {
-            surface.remove(animate);
-        }
+        surface.remove(animate);
     }
 
     /**
