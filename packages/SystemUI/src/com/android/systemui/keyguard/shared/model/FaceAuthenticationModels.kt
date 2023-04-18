@@ -50,6 +50,11 @@ data class ErrorAuthenticationStatus(val msgId: Int, val msg: String?) : Authent
      * was cancelled before it completed.
      */
     fun isCancellationError() = msgId == FaceManager.FACE_ERROR_CANCELED
+
+    /** Method that checks if [msgId] is a hardware error. */
+    fun isHardwareError() =
+        msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE ||
+            msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
 }
 
 /** Face detection success message. */

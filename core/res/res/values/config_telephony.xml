@@ -125,6 +125,10 @@
     <string name="config_satellite_service_package" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_service_package" />
 
+    <!-- Telephony satellite gateway service package name to bind to by default. -->
+    <string name="config_satellite_gateway_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_gateway_service_package" />
+
     <!-- Telephony pointing UI package name to be launched. -->
     <string name="config_pointing_ui_package" translatable="false"></string>
     <java-symbol type="string" name="config_pointing_ui_package" />

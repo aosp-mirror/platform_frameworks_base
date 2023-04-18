@@ -101,7 +101,8 @@ class ClockEventControllerTest : SysuiTestCase() {
         whenever(smallClockController.events).thenReturn(smallClockEvents)
         whenever(largeClockController.events).thenReturn(largeClockEvents)
         whenever(clock.events).thenReturn(events)
-        whenever(clock.animations).thenReturn(animations)
+        whenever(smallClockController.animations).thenReturn(animations)
+        whenever(largeClockController.animations).thenReturn(animations)
         whenever(smallClockController.config)
             .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
         whenever(largeClockController.config)
@@ -184,7 +185,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         keyguardCaptor.value.onKeyguardVisibilityChanged(true)
         batteryCaptor.value.onBatteryLevelChanged(10, false, true)
 
-        verify(animations).charge()
+        verify(animations, times(2)).charge()
     }
 
     @Test
@@ -198,7 +199,7 @@ class ClockEventControllerTest : SysuiTestCase() {
             batteryCaptor.value.onBatteryLevelChanged(10, false, true)
             batteryCaptor.value.onBatteryLevelChanged(10, false, true)
 
-            verify(animations, times(1)).charge()
+            verify(animations, times(2)).charge()
         }
 
     @Test
@@ -246,7 +247,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         verify(animations, never()).doze(0f)
 
         captor.value.onKeyguardVisibilityChanged(false)
-        verify(animations, times(1)).doze(0f)
+        verify(animations, times(2)).doze(0f)
     }
 
     @Test
@@ -284,7 +285,7 @@ class ClockEventControllerTest : SysuiTestCase() {
 
         yield()
 
-        verify(animations).doze(0.4f)
+        verify(animations, times(2)).doze(0.4f)
 
         job.cancel()
     }

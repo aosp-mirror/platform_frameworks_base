@@ -399,7 +399,7 @@ cc_defaults {
         "libharfbuzz_ng",
         "libimage_io",
         "libjpeg",
-        "libjpegrecoverymap",
+        "libultrahdr",
         "liblog",
         "libminikin",
         "libz",

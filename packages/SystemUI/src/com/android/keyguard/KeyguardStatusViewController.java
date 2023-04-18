@@ -349,7 +349,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
         ClockController clock = mKeyguardClockSwitchController.getClock();
         boolean customClockAnimation = clock != null
-                && clock.getConfig().getHasCustomPositionUpdatedAnimation();
+                && clock.getLargeClock().getConfig().getHasCustomPositionUpdatedAnimation();
 
         if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
             // Find the clock, so we can exclude it from this transition.
@@ -436,7 +436,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                     return;
                 }
 
-                clock.getAnimations().onPositionUpdated(from, to, animation.getAnimatedFraction());
+                clock.getLargeClock().getAnimations()
+                        .onPositionUpdated(from, to, animation.getAnimatedFraction());
             });
 
             return anim;

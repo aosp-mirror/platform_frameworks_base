@@ -26,8 +26,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import kotlin.Unit;
-
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
@@ -38,6 +36,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final long CLOCK_OUT_MILLIS = 150;
     private static final long CLOCK_IN_MILLIS = 200;
+    public static final long CLOCK_IN_START_DELAY_MILLIS = CLOCK_OUT_MILLIS / 2;
+    private static final long STATUS_AREA_START_DELAY_MILLIS = 50;
     private static final long STATUS_AREA_MOVE_MILLIS = 350;
 
     @IntDef({LARGE, SMALL})
@@ -173,7 +173,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 msg.setBool1(useLargeClock);
                 msg.setBool2(animate);
                 msg.setBool3(mChildrenAreLaidOut);
-                return Unit.INSTANCE;
+                return kotlin.Unit.INSTANCE;
             }, (msg) -> "updateClockViews"
                     + "; useLargeClock=" + msg.getBool1()
                     + "; animate=" + msg.getBool2()
@@ -235,7 +235,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockInAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         mClockInAnim.playTogether(ObjectAnimator.ofFloat(in, View.ALPHA, 1f),
                 ObjectAnimator.ofFloat(in, View.TRANSLATION_Y, direction * mClockSwitchYAmount, 0));
-        mClockInAnim.setStartDelay(CLOCK_OUT_MILLIS / 2);
+        mClockInAnim.setStartDelay(CLOCK_IN_START_DELAY_MILLIS);
         mClockInAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 mClockInAnim = null;
@@ -247,6 +247,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
         mStatusAreaAnim = ObjectAnimator.ofFloat(mStatusArea, View.TRANSLATION_Y,
                 statusAreaYTranslation);
+        mStatusAreaAnim.setStartDelay(useLargeClock ? STATUS_AREA_START_DELAY_MILLIS : 0L);
         mStatusAreaAnim.setDuration(STATUS_AREA_MOVE_MILLIS);
         mStatusAreaAnim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mStatusAreaAnim.addListener(new AnimatorListenerAdapter() {

@@ -84,6 +84,12 @@ public final class NetworkProviderInfo implements Parcelable {
     public @interface DeviceType {
     }
 
+    /**
+     * Key in extras bundle indicating that the device battery is charging.
+     * @hide
+     */
+    public static final String EXTRA_KEY_IS_BATTERY_CHARGING = "is_battery_charging";
+
     @DeviceType
     private final int mDeviceType;
     private final String mDeviceName;

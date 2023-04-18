@@ -50,9 +50,7 @@ import com.android.credentialmanager.getflow.TopBrandingContent
 import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreateCustomCredentialRequest
 import androidx.credentials.CreatePasswordRequest
-import androidx.credentials.CredentialOption
 import androidx.credentials.CreatePublicKeyCredentialRequest
-import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import androidx.credentials.provider.Action
 import androidx.credentials.provider.AuthenticationAction
@@ -194,20 +192,8 @@ class GetFlowUtils {
             originName: String?,
         ): com.android.credentialmanager.getflow.RequestDisplayInfo? {
             val getCredentialRequest = requestInfo?.getCredentialRequest ?: return null
-            val preferImmediatelyAvailableCredentials = getCredentialRequest.credentialOptions.any {
-                val credentialOptionJetpack = CredentialOption.createFrom(
-                    it.type,
-                    it.credentialRetrievalData,
-                    it.credentialRetrievalData,
-                    it.isSystemProviderRequired,
-                    it.allowedProviders,
-                )
-                if (credentialOptionJetpack is GetPublicKeyCredentialOption) {
-                    credentialOptionJetpack.preferImmediatelyAvailableCredentials
-                } else {
-                    false
-                }
-            }
+            val preferImmediatelyAvailableCredentials = getCredentialRequest.data.getBoolean(
+                "androidx.credentials.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS")
             val preferUiBrandingComponentName =
                 getCredentialRequest.data.getParcelable(
                     "androidx.credentials.BUNDLE_KEY_PREFER_UI_BRANDING_COMPONENT_NAME",

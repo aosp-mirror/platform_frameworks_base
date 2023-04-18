@@ -146,12 +146,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             t.apply();
 
             // execute the runnable if non-null after WCT is applied to finish resizing pip
-            if (mPipFinishResizeWCTRunnable != null) {
-                mPipFinishResizeWCTRunnable.run();
-                mPipFinishResizeWCTRunnable = null;
-            }
+            maybePerformFinishResizeCallback();
         }
     };
+
+    private void maybePerformFinishResizeCallback() {
+        if (mPipFinishResizeWCTRunnable != null) {
+            mPipFinishResizeWCTRunnable.run();
+            mPipFinishResizeWCTRunnable = null;
+        }
+    }
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -1007,6 +1011,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.onFixedRotationFinished();
             clearWaitForFixedRotation();
             return;
         }
@@ -1606,6 +1611,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
             mSplitScreenOptional.ifPresent(splitScreenController ->
                     splitScreenController.enterSplitScreen(mTaskInfo.taskId, wasPipTopLeft, wct));
+        } else if (direction == TRANSITION_DIRECTION_LEAVE_PIP) {
+            // when leaving PiP we can call the callback without sync
+            maybePerformFinishResizeCallback();
+            mTaskOrganizer.applyTransaction(wct);
         } else {
             mTaskOrganizer.applySyncTransaction(wct, mPipFinishResizeWCTCallback);
         }

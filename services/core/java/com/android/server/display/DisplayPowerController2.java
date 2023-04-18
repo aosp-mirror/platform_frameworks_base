@@ -399,6 +399,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private boolean mIsEnabled;
     private boolean mIsInTransition;
+    private boolean mIsDisplayInternal;
 
     // The id of the thermal brightness throttling policy that should be used.
     private String mThermalBrightnessThrottlingDataId;
@@ -431,6 +432,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 .getDisplayDeviceConfig();
         mIsEnabled = logicalDisplay.isEnabledLocked();
         mIsInTransition = logicalDisplay.isInTransitionLocked();
+        mIsDisplayInternal = logicalDisplay.getPrimaryDisplayDeviceLocked()
+                .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL;
         mWakelockController = mInjector.getWakelockController(mDisplayId, callbacks);
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
@@ -708,6 +711,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean isEnabled = mLogicalDisplay.isEnabledLocked();
         final boolean isInTransition = mLogicalDisplay.isInTransitionLocked();
+        final boolean isDisplayInternal = mLogicalDisplay.getPrimaryDisplayDeviceLocked() != null
+                && mLogicalDisplay.getPrimaryDisplayDeviceLocked()
+                .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL;
         final String thermalBrightnessThrottlingDataId =
                 mLogicalDisplay.getThermalBrightnessThrottlingDataIdLocked();
 
@@ -742,6 +748,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mIsInTransition = isInTransition;
             }
 
+            mIsDisplayInternal = isDisplayInternal;
             if (changed) {
                 updatePowerState();
             }
@@ -1449,10 +1456,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             // TODO(b/216365040): The decision to prevent HBM for HDR in low power mode should be
             // done in HighBrightnessModeController.
             if (mHbmController.getHighBrightnessMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
-                    && (mBrightnessReason.getModifier() & BrightnessReason.MODIFIER_DIMMED) == 0
-                    && (mBrightnessReason.getModifier() & BrightnessReason.MODIFIER_LOW_POWER)
+                    && (mBrightnessReasonTemp.getModifier() & BrightnessReason.MODIFIER_DIMMED) == 0
+                    && (mBrightnessReasonTemp.getModifier() & BrightnessReason.MODIFIER_LOW_POWER)
                     == 0) {
-                // We want to scale HDR brightness level with the SDR level
+                // We want to scale HDR brightness level with the SDR level, we also need to restore
+                // SDR brightness immediately when entering dim or low power mode.
                 animateValue = mHbmController.getHdrBrightnessValue();
             }
 
@@ -2217,6 +2225,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mSkipScreenOnBrightnessRamp=" + mSkipScreenOnBrightnessRamp);
         pw.println("  mColorFadeFadesConfig=" + mColorFadeFadesConfig);
         pw.println("  mColorFadeEnabled=" + mColorFadeEnabled);
+        pw.println("  mIsDisplayInternal=" + mIsDisplayInternal);
         synchronized (mCachedBrightnessInfo) {
             pw.println("  mCachedBrightnessInfo.brightness="
                     + mCachedBrightnessInfo.brightness.value);
@@ -2434,9 +2443,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         float appliedThermalCapNits =
                 event.getThermalMax() == PowerManager.BRIGHTNESS_MAX
                 ? -1f : mDisplayBrightnessController.convertToNits(event.getThermalMax());
-        if (mLogicalDisplay.getPrimaryDisplayDeviceLocked() != null
-                && mLogicalDisplay.getPrimaryDisplayDeviceLocked()
-                .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL) {
+        if (mIsDisplayInternal) {
             FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
                     mDisplayBrightnessController.convertToNits(event.getInitialBrightness()),
                     mDisplayBrightnessController.convertToNits(event.getBrightness()),

@@ -122,6 +122,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
         <permission name="android.permission.BIND_IMS_SERVICE"/>
+        <permission name="android.permission.BIND_SATELLITE_GATEWAY_SERVICE"/>
         <permission name="android.permission.BIND_SATELLITE_SERVICE"/>
         <permission name="android.permission.BIND_TELEPHONY_DATA_SERVICE"/>
         <permission name="android.permission.BIND_VISUAL_VOICEMAIL_SERVICE"/>
@@ -515,6 +516,8 @@ applications that come with the platform
         <permission name="android.permission.READ_RESTRICTED_STATS"/>
         <!-- Permission required for CTS test -->
         <permission name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
+        <!-- Permission required for CTS test - CtsVoiceInteractionTestCases -->
+        <permission name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
