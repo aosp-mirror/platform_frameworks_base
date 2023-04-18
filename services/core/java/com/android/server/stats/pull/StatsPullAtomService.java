@@ -3089,6 +3089,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     // read high watermark for section
+    @GuardedBy("mProcStatsLock")
     private long readProcStatsHighWaterMark(int atomTag) {
         try {
             File[] files =
