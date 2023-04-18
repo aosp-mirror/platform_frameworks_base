@@ -33,6 +33,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
+import android.app.KeyguardManager;
 import android.app.UiAutomation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +45,7 @@ import android.media.AudioManager;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -69,15 +71,19 @@ public class AccessibilityMenuServiceTest {
     private static final int CLICK_ID = AccessibilityNodeInfo.ACTION_CLICK;
 
     private static final int TIMEOUT_SERVICE_STATUS_CHANGE_S = 5;
-    private static final int TIMEOUT_UI_CHANGE_S = 10;
+    private static final int TIMEOUT_UI_CHANGE_S = 5;
     private static final int NO_GLOBAL_ACTION = -1;
     private static final String INPUT_KEYEVENT_KEYCODE_BACK = "input keyevent KEYCODE_BACK";
+    private static final String TEST_PIN = "1234";
 
     private static Instrumentation sInstrumentation;
     private static UiAutomation sUiAutomation;
     private static AtomicInteger sLastGlobalAction;
 
     private static AccessibilityManager sAccessibilityManager;
+    private static PowerManager sPowerManager;
+    private static KeyguardManager sKeyguardManager;
+    private static DisplayManager sDisplayManager;
 
     @BeforeClass
     public static void classSetup() throws Throwable {
@@ -85,8 +91,14 @@ public class AccessibilityMenuServiceTest {
         sInstrumentation = InstrumentationRegistry.getInstrumentation();
         sUiAutomation = sInstrumentation.getUiAutomation(
                 UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES);
+        sUiAutomation.adoptShellPermissionIdentity(
+                UiAutomation.ALL_PERMISSIONS.toArray(new String[0]));
+
         final Context context = sInstrumentation.getTargetContext();
         sAccessibilityManager = context.getSystemService(AccessibilityManager.class);
+        sPowerManager = context.getSystemService(PowerManager.class);
+        sKeyguardManager = context.getSystemService(KeyguardManager.class);
+        sDisplayManager = context.getSystemService(DisplayManager.class);
 
         // Disable all a11yServices if any are active.
         if (!sAccessibilityManager.getEnabledAccessibilityServiceList(
@@ -123,12 +135,16 @@ public class AccessibilityMenuServiceTest {
 
     @AfterClass
     public static void classTeardown() throws Throwable {
+        clearPin();
         Settings.Secure.putString(sInstrumentation.getTargetContext().getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "");
     }
 
     @Before
     public void setup() throws Throwable {
+        clearPin();
+        wakeUpScreen();
+        sUiAutomation.executeShellCommand("input keyevent KEYCODE_MENU");
         openMenu();
     }
 
@@ -138,9 +154,41 @@ public class AccessibilityMenuServiceTest {
         sLastGlobalAction.set(NO_GLOBAL_ACTION);
     }
 
+    private static void clearPin() throws Throwable {
+        sUiAutomation.executeShellCommand("locksettings clear --old " + TEST_PIN);
+        TestUtils.waitUntil("Device did not register as unlocked & insecure.",
+                TIMEOUT_SERVICE_STATUS_CHANGE_S,
+                () -> !sKeyguardManager.isDeviceSecure());
+    }
+
+    private static void setPin() throws Throwable {
+        sUiAutomation.executeShellCommand("locksettings set-pin " + TEST_PIN);
+        TestUtils.waitUntil("Device did not recognize as locked & secure.",
+                TIMEOUT_SERVICE_STATUS_CHANGE_S,
+                () -> sKeyguardManager.isDeviceSecure());
+    }
+
     private static boolean isMenuVisible() {
         AccessibilityNodeInfo root = sUiAutomation.getRootInActiveWindow();
         return root != null && root.getPackageName().toString().equals(PACKAGE_NAME);
+    }
+
+    private static void wakeUpScreen() throws Throwable {
+        sUiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP");
+        TestUtils.waitUntil("Screen did not wake up.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> sPowerManager.isInteractive());
+    }
+
+    private static void closeScreen() throws Throwable {
+        Display display = sDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        setPin();
+        sUiAutomation.performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
+        TestUtils.waitUntil("Screen did not close.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> !sPowerManager.isInteractive()
+                        && display.getState() == Display.STATE_OFF
+        );
     }
 
     private static void openMenu() throws Throwable {
@@ -381,23 +429,24 @@ public class AccessibilityMenuServiceTest {
 
     @Test
     public void testOnScreenLock_closesMenu() throws Throwable {
-        openMenu();
-        Context context = sInstrumentation.getTargetContext();
-        PowerManager powerManager = context.getSystemService(PowerManager.class);
-
-        assertThat(powerManager).isNotNull();
-        assertThat(powerManager.isInteractive()).isTrue();
-
-        sUiAutomation.performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
-        TestUtils.waitUntil("Screen did not become locked",
-                TIMEOUT_UI_CHANGE_S,
-                () -> !powerManager.isInteractive());
-
-        sUiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP");
-        TestUtils.waitUntil("Screen did not wake up",
-                TIMEOUT_UI_CHANGE_S,
-                () -> powerManager.isInteractive());
+        closeScreen();
+        wakeUpScreen();
 
         assertThat(isMenuVisible()).isFalse();
+    }
+
+    @Test
+    public void testOnScreenLock_cannotOpenMenu() throws Throwable {
+        closeScreen();
+        wakeUpScreen();
+
+        boolean timedOut = false;
+        try {
+            openMenu();
+        } catch (AssertionError e) {
+            // Expected
+            timedOut = true;
+        }
+        assertThat(timedOut).isTrue();
     }
 }
