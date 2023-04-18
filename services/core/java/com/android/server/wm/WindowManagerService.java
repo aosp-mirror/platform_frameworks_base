@@ -7692,6 +7692,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void moveDisplayToTopIfAllowed(int displayId) {
+            WindowManagerService.this.moveDisplayToTopIfAllowed(displayId);
+        }
+
+        @Override
         public boolean isKeyguardLocked() {
             return WindowManagerService.this.isKeyguardLocked();
         }
