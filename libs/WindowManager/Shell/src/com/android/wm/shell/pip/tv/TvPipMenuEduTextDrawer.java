@@ -23,6 +23,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -113,6 +114,10 @@ class TvPipMenuEduTextDrawer extends FrameLayout {
     void init() {
         ProtoLog.i(WM_SHELL_PICTURE_IN_PICTURE, "%s: init()", TAG);
         scheduleLifecycleEvents();
+    }
+
+    int getEduTextDrawerHeight() {
+        return getVisibility() == GONE ? 0 : getHeight();
     }
 
     private void scheduleLifecycleEvents() {
@@ -226,20 +231,40 @@ class TvPipMenuEduTextDrawer extends FrameLayout {
                 .start();
 
         // Start animation to close the drawer by animating its height to 0
-        final ValueAnimator heightAnimation = ValueAnimator.ofInt(getHeight(), 0);
-        heightAnimation.setDuration(eduTextSlideExitAnimationDuration);
-        heightAnimation.setInterpolator(TvPipInterpolators.BROWSE);
-        heightAnimation.addUpdateListener(animator -> {
+        final ValueAnimator heightAnimator = ValueAnimator.ofInt(getHeight(), 0);
+        heightAnimator.setDuration(eduTextSlideExitAnimationDuration);
+        heightAnimator.setInterpolator(TvPipInterpolators.BROWSE);
+        heightAnimator.addUpdateListener(animator -> {
             final ViewGroup.LayoutParams params = getLayoutParams();
             params.height = (int) animator.getAnimatedValue();
             setLayoutParams(params);
-            if (params.height == 0) {
-                setVisibility(GONE);
+        });
+        heightAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animator) {
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animator) {
+                onCloseEduTextAnimationEnd();
+            }
+
+            @Override
+            public void onAnimationCancel(@NonNull Animator animator) {
+                onCloseEduTextAnimationEnd();
+            }
+
+            @Override
+            public void onAnimationRepeat(@NonNull Animator animator) {
             }
         });
-        heightAnimation.start();
+        heightAnimator.start();
 
         mListener.onCloseEduText();
+    }
+
+    public void onCloseEduTextAnimationEnd() {
+        setVisibility(GONE);
     }
 
     /**
