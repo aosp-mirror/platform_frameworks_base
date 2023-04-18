@@ -601,6 +601,10 @@ final class SettingsState {
                 oldDefaultValue, oldDefaultValue, oldDefaultValue);
         checkNewMemoryUsagePerPackageLocked(setting.packageName, newSize);
 
+        int newSize = getNewMemoryUsagePerPackageLocked(setting.packageName, 0, oldValue,
+                oldDefaultValue, oldDefaultValue, oldDefaultValue);
+        checkNewMemoryUsagePerPackageLocked(setting.packageName, newSize);
+
         if (!setting.reset()) {
             return false;
         }
