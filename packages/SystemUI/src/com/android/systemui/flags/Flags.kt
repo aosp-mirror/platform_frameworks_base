@@ -577,16 +577,6 @@ object Flags {
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
 
-    // TODO(b/266982749) Tracking Bug
-    val SHARESHEET_RESELECTION_ACTION = releasedFlag(1502, "sharesheet_reselection_action")
-
-    // TODO(b/266983474) Tracking Bug
-    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = releasedFlag(1503, "sharesheet_image_text_preview")
-
-    // TODO(b/267355521) Tracking Bug
-    val SHARESHEET_SCROLLABLE_IMAGE_PREVIEW =
-        releasedFlag(1504, "sharesheet_scrollable_image_preview")
-
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
 
