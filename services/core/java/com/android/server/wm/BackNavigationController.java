@@ -227,6 +227,7 @@ class BackNavigationController {
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 }
                 infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
+                infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
                 mNavigationMonitor.startMonitor(window, navigationObserver);
             }
 
