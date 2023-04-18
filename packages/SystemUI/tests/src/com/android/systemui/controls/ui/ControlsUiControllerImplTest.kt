@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.testing.AndroidTestingRunner
@@ -69,6 +70,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -516,9 +518,9 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 name = componentName.className
             }
         return spy(ControlsServiceInfo(mContext, serviceInfo)).apply {
-            `when`(loadLabel()).thenReturn(label)
-            `when`(loadIcon()).thenReturn(mock())
-            `when`(panelActivity).thenReturn(panelComponentName)
+            doReturn(label).whenever(this).loadLabel()
+            doReturn(mock<Drawable>()).whenever(this).loadIcon()
+            doReturn(panelComponentName).whenever(this).panelActivity
         }
     }
 

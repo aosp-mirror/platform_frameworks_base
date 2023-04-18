@@ -26,9 +26,10 @@ import android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE
 import android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
+import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
-import androidx.annotation.VisibleForTesting
+import android.util.IconDrawableFactory
 import androidx.annotation.WorkerThread
 import com.android.settingslib.applications.DefaultAppInfo
 import com.android.systemui.R
@@ -47,7 +48,7 @@ open class ControlsServiceInfo(
 
     init {
         val metadata = serviceInfo.metaData
-                ?.getString(ControlsProviderService.META_DATA_PANEL_ACTIVITY) ?: ""
+            ?.getString(ControlsProviderService.META_DATA_PANEL_ACTIVITY) ?: ""
         val unflatenned = ComponentName.unflattenFromString(metadata)
         if (unflatenned != null && unflatenned.packageName == componentName.packageName) {
             _panelActivity = unflatenned
@@ -71,21 +72,21 @@ open class ControlsServiceInfo(
 
     @WorkerThread
     fun resolvePanelActivity(
-            allowAllApps: Boolean = false
+        allowAllApps: Boolean = false
     ) {
         if (resolved) return
         resolved = true
         val validPackages = context.resources
-                .getStringArray(R.array.config_controlsPreferredPackages)
+            .getStringArray(R.array.config_controlsPreferredPackages)
         if (componentName.packageName !in validPackages && !allowAllApps) return
         panelActivity = _panelActivity?.let {
             val resolveInfos = mPm.queryIntentActivitiesAsUser(
-                    Intent().setComponent(it),
-                    PackageManager.ResolveInfoFlags.of(
-                            MATCH_DIRECT_BOOT_AWARE.toLong() or
-                                    MATCH_DIRECT_BOOT_UNAWARE.toLong()
-                    ),
-                    UserHandle.of(userId)
+                Intent().setComponent(it),
+                PackageManager.ResolveInfoFlags.of(
+                    MATCH_DIRECT_BOOT_AWARE.toLong() or
+                            MATCH_DIRECT_BOOT_UNAWARE.toLong()
+                ),
+                UserHandle.of(userId)
             )
             if (resolveInfos.isNotEmpty() && verifyResolveInfo(resolveInfos[0])) {
                 it
@@ -116,6 +117,27 @@ open class ControlsServiceInfo(
             PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> activityInfo.enabled
             else -> false
         }
+    }
+
+    @WorkerThread
+    override fun loadLabel(): CharSequence {
+        return componentName?.let {
+            val appInfo = mPm.getApplicationInfoAsUser(componentName.packageName, 0, userId)
+            appInfo.loadLabel(mPm)
+        }
+            ?: packageItemInfo?.loadLabel(mPm)
+            ?: throw IllegalArgumentException("Package info is missing")
+    }
+
+    @WorkerThread
+    override fun loadIcon(): Drawable {
+        val packageName =
+            componentName?.packageName
+                ?: packageItemInfo?.packageName
+                ?: throw IllegalArgumentException("Package info is missing")
+        val factory = IconDrawableFactory.newInstance(context)
+        val appInfo = mPm.getApplicationInfoAsUser(packageName, 0, userId)
+        return factory.getBadgedIcon(appInfo)
     }
 
     override fun equals(other: Any?): Boolean {
