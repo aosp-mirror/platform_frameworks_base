@@ -43,7 +43,7 @@ public class IntArray implements Cloneable {
      * Creates an empty IntArray with the default initial capacity.
      */
     public IntArray() {
-        this(10);
+        this(0);
     }
 
     /**
