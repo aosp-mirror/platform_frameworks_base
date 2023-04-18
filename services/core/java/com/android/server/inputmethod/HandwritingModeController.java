@@ -16,8 +16,6 @@
 
 package com.android.server.inputmethod;
 
-import static android.view.InputDevice.SOURCE_STYLUS;
-
 import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
@@ -93,15 +91,6 @@ final class HandwritingModeController {
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mCurrentRequestId = 0;
         mInkWindowInitRunnable = inkWindowInitRunnable;
-    }
-
-    // TODO(b/210039666): Consider moving this to MotionEvent
-    private static boolean isStylusEvent(MotionEvent event) {
-        if (!event.isFromSource(SOURCE_STYLUS)) {
-            return false;
-        }
-        final int tool = event.getToolType(0);
-        return tool == MotionEvent.TOOL_TYPE_STYLUS || tool == MotionEvent.TOOL_TYPE_ERASER;
     }
 
     /**
@@ -329,7 +318,7 @@ final class HandwritingModeController {
             return false;
         }
         final MotionEvent event = (MotionEvent) ev;
-        if (!isStylusEvent(event)) {
+        if (!event.isStylusPointer()) {
             return false;
         }
         if (event.getDisplayId() != mCurrentDisplayId) {
