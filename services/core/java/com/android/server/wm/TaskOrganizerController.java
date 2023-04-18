@@ -681,6 +681,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
         removalInfo.taskId = task.mTaskId;
         removalInfo.playRevealAnimation = prepareAnimation
+                && task.getDisplayContent() != null
                 && task.getDisplayInfo().state == Display.STATE_ON;
         final boolean playShiftUpAnimation = !task.inMultiWindowMode();
         final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
