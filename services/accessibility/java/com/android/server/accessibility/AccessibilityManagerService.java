@@ -194,7 +194,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         AccessibilityUserState.ServiceInfoChangeListener,
         AccessibilityWindowManager.AccessibilityEventSender,
         AccessibilitySecurityPolicy.AccessibilityUserManager,
-        SystemActionPerformer.SystemActionsChangedListener, ProxyManager.SystemSupport{
+        SystemActionPerformer.SystemActionsChangedListener,
+        SystemActionPerformer.DisplayUpdateCallBack, ProxyManager.SystemSupport {
 
     private static final boolean DEBUG = false;
 
@@ -1219,7 +1220,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private SystemActionPerformer getSystemActionPerformer() {
         if (mSystemActionPerformer == null) {
             mSystemActionPerformer =
-                    new SystemActionPerformer(mContext, mWindowManagerService, null, this);
+                    new SystemActionPerformer(mContext, mWindowManagerService, null, this, this);
         }
         return mSystemActionPerformer;
     }
@@ -1617,6 +1618,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityUserState state = getCurrentUserStateLocked();
             notifySystemActionsChangedLocked(state);
         }
+    }
+
+    @Override
+    // TODO(b/276459590): Remove when this is resolved at the virtual device/input level.
+    public void moveNonProxyTopFocusedDisplayToTopIfNeeded() {
+        mA11yWindowManager.moveNonProxyTopFocusedDisplayToTopIfNeeded();
+    }
+
+    @Override
+    // TODO(b/276459590): Remove when this is resolved at the virtual device/input level.
+    public int getLastNonProxyTopFocusedDisplayId() {
+        return mA11yWindowManager.getLastNonProxyTopFocusedDisplayId();
     }
 
     @VisibleForTesting

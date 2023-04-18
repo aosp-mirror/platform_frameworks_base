@@ -72,6 +72,13 @@ public class SystemActionPerformer {
     }
     private final SystemActionsChangedListener mListener;
 
+    interface DisplayUpdateCallBack {
+        void moveNonProxyTopFocusedDisplayToTopIfNeeded();
+
+        int getLastNonProxyTopFocusedDisplayId();
+    }
+    private final DisplayUpdateCallBack mDisplayUpdateCallBack;
+
     private final Object mSystemActionLock = new Object();
     // Resource id based ActionId -> RemoteAction
     @GuardedBy("mSystemActionLock")
@@ -94,7 +101,7 @@ public class SystemActionPerformer {
     public SystemActionPerformer(
             Context context,
             WindowManagerInternal windowManagerInternal) {
-      this(context, windowManagerInternal, null, null);
+      this(context, windowManagerInternal, null, null, null);
     }
 
     // Used to mock ScreenshotHelper
@@ -103,17 +110,19 @@ public class SystemActionPerformer {
             Context context,
             WindowManagerInternal windowManagerInternal,
             Supplier<ScreenshotHelper> screenshotHelperSupplier) {
-        this(context, windowManagerInternal, screenshotHelperSupplier, null);
+        this(context, windowManagerInternal, screenshotHelperSupplier, null, null);
     }
 
     public SystemActionPerformer(
             Context context,
             WindowManagerInternal windowManagerInternal,
             Supplier<ScreenshotHelper> screenshotHelperSupplier,
-            SystemActionsChangedListener listener) {
+            SystemActionsChangedListener listener,
+            DisplayUpdateCallBack callback) {
         mContext = context;
         mWindowManagerService = windowManagerInternal;
         mListener = listener;
+        mDisplayUpdateCallBack = callback;
         mScreenshotHelperSupplier = screenshotHelperSupplier;
 
         mLegacyHomeAction = new AccessibilityAction(
@@ -245,6 +254,7 @@ public class SystemActionPerformer {
         final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mSystemActionLock) {
+                mDisplayUpdateCallBack.moveNonProxyTopFocusedDisplayToTopIfNeeded();
                 // If a system action is registered with the given actionId, call the corresponding
                 // RemoteAction.
                 RemoteAction registeredAction = mRegisteredSystemActions.get(actionId);
@@ -341,7 +351,7 @@ public class SystemActionPerformer {
             int source) {
         KeyEvent event = KeyEvent.obtain(downTime, time, action, keyCode, 0, 0,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM,
-                source, null);
+                source, mDisplayUpdateCallBack.getLastNonProxyTopFocusedDisplayId(), null);
         mContext.getSystemService(InputManager.class)
                 .injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         event.recycle();
