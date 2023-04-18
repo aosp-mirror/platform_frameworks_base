@@ -44,6 +44,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.util.Collections.emptySet;
+
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
 import android.app.Notification;
@@ -147,6 +149,7 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -450,6 +453,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mock(FragmentService.class),
                 mLightBarController,
                 mAutoHideController,
+                new StatusBarInitializer(mStatusBarWindowController, emptySet()),
                 mStatusBarWindowController,
                 mStatusBarWindowStateController,
                 mKeyguardUpdateMonitor,
