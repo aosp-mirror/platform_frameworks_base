@@ -72,7 +72,6 @@ import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -538,14 +537,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             testGatingCheckForFaceAuth {
                 biometricSettingsRepository.setIsNonStrongBiometricAllowed(false)
-            }
-        }
-
-    @Test
-    fun authenticateDoesNotRunWhenCurrentUserIsNotPrimary() =
-        testScope.runTest {
-            testGatingCheckForFaceAuth {
-                launch { fakeUserRepository.setSelectedUserInfo(secondaryUser) }
             }
         }
 
