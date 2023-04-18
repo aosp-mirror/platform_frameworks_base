@@ -36,6 +36,8 @@ class NotificationInterruptStateProviderWrapper(
         SHOULD_INTERRUPT(shouldInterrupt = true),
         SHOULD_NOT_INTERRUPT(shouldInterrupt = false);
 
+        override val logReason = "unknown"
+
         companion object {
             fun of(booleanDecision: Boolean) =
                 if (booleanDecision) SHOULD_INTERRUPT else SHOULD_NOT_INTERRUPT
@@ -49,6 +51,7 @@ class NotificationInterruptStateProviderWrapper(
     ) : FullScreenIntentDecision {
         override val shouldInterrupt = originalDecision.shouldLaunch
         override val wouldInterruptWithoutDnd = originalDecision == NO_FSI_SUPPRESSED_ONLY_BY_DND
+        override val logReason = originalDecision.name
     }
 
     override fun addSuppressor(suppressor: NotificationInterruptSuppressor) {
