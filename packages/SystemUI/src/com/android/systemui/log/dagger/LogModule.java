@@ -136,6 +136,14 @@ public class LogModule {
         return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to unseen notifications. */
+    @Provides
+    @SysUISingleton
+    @UnseenNotificationLog
+    public static LogBuffer provideUnseenNotificationLogBuffer(LogBufferFactory factory) {
+        return factory.create("UnseenNotifLog", 20 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
     @Provides
     @SysUISingleton
