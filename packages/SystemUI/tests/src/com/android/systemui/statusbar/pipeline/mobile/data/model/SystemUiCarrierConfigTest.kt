@@ -39,7 +39,7 @@ class SystemUiCarrierConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `process new config - reflected by isUsingDefault`() {
+    fun processNewConfig_reflectedByIsUsingDefault() {
         // Starts out using the defaults
         assertThat(underTest.isUsingDefault).isTrue()
 
@@ -50,7 +50,7 @@ class SystemUiCarrierConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `process new config - updates all flows`() {
+    fun processNewConfig_updatesAllFlows() {
         assertThat(underTest.shouldInflateSignalStrength.value).isFalse()
         assertThat(underTest.showOperatorNameInStatusBar.value).isFalse()
 
@@ -66,7 +66,7 @@ class SystemUiCarrierConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `process new config - defaults to false for config overrides`() {
+    fun processNewConfig_defaultsToFalseForConfigOverrides() {
         // This case is only apparent when:
         //   1. The default is true
         //   2. The override config has no value for a given key

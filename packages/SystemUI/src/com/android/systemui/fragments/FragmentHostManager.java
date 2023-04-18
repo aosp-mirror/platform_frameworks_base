@@ -39,15 +39,16 @@ import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.util.leak.LeakDetector;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.inject.Provider;
 
 public class FragmentHostManager {
 
@@ -322,25 +323,17 @@ public class FragmentHostManager {
             return instantiateWithInjections(context, className, arguments);
         }
 
-        private Fragment instantiateWithInjections(
-                Context context, String className, Bundle args) {
-            FragmentService.FragmentInstantiationInfo fragmentInstantiationInfo =
+        private Fragment instantiateWithInjections(Context context, String className, Bundle args) {
+            Provider<? extends Fragment> fragmentProvider =
                     mManager.getInjectionMap().get(className);
-            if (fragmentInstantiationInfo != null) {
-                try {
-                    Fragment f = (Fragment) fragmentInstantiationInfo
-                            .mMethod
-                            .invoke(fragmentInstantiationInfo.mDaggerComponent);
-                    // Setup the args, taken from Fragment#instantiate.
-                    if (args != null) {
-                        args.setClassLoader(f.getClass().getClassLoader());
-                        f.setArguments(args);
-                    }
-                    return f;
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new Fragment.InstantiationException("Unable to instantiate " + className,
-                            e);
+            if (fragmentProvider != null) {
+                Fragment f = fragmentProvider.get();
+                // Setup the args, taken from Fragment#instantiate.
+                if (args != null) {
+                    args.setClassLoader(f.getClass().getClassLoader());
+                    f.setArguments(args);
                 }
+                return f;
             }
             return Fragment.instantiate(context, className, args);
         }

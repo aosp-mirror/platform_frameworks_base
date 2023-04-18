@@ -195,7 +195,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun `quickAffordance - bottom start affordance is visible`() =
+    fun quickAffordance_bottomStartAffordanceIsVisible() =
         testScope.runTest {
             val configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
             homeControls.setState(
@@ -221,7 +221,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - bottom end affordance is visible`() =
+    fun quickAffordance_bottomEndAffordanceIsVisible() =
         testScope.runTest {
             val configKey = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
             quickAccessWallet.setState(
@@ -246,7 +246,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - hidden when all features are disabled by device policy`() =
+    fun quickAffordance_hiddenWhenAllFeaturesAreDisabledByDevicePolicy() =
         testScope.runTest {
             whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
@@ -265,7 +265,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - hidden when shortcuts feature is disabled by device policy`() =
+    fun quickAffordance_hiddenWhenShortcutsFeatureIsDisabledByDevicePolicy() =
         testScope.runTest {
             whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
@@ -284,7 +284,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - hidden when quick settings is visible`() =
+    fun quickAffordance_hiddenWhenQuickSettingsIsVisible() =
         testScope.runTest {
             repository.setQuickSettingsVisible(true)
             quickAccessWallet.setState(
@@ -302,7 +302,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - bottom start affordance hidden while dozing`() =
+    fun quickAffordance_bottomStartAffordanceHiddenWhileDozing() =
         testScope.runTest {
             repository.setDozing(true)
             homeControls.setState(
@@ -319,7 +319,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - bottom start affordance hidden when lockscreen is not showing`() =
+    fun quickAffordance_bottomStartAffordanceHiddenWhenLockscreenIsNotShowing() =
         testScope.runTest {
             repository.setKeyguardShowing(false)
             homeControls.setState(
@@ -336,7 +336,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordanceAlwaysVisible - even when lock screen not showing and dozing`() =
+    fun quickAffordanceAlwaysVisible_evenWhenLockScreenNotShowingAndDozing() =
         testScope.runTest {
             repository.setKeyguardShowing(false)
             repository.setDozing(true)
@@ -511,7 +511,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `unselect - one`() =
+    fun unselect_one() =
         testScope.runTest {
             featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(
@@ -588,7 +588,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `unselect - all`() =
+    fun unselect_all() =
         testScope.runTest {
             featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(

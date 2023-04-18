@@ -48,7 +48,6 @@ import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagsModule;
-import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyguard.data.BouncerViewModule;
 import com.android.systemui.log.dagger.LogModule;
@@ -64,6 +63,7 @@ import com.android.systemui.privacy.PrivacyModule;
 import com.android.systemui.qrcodescanner.dagger.QRCodeScannerModule;
 import com.android.systemui.qs.FgsManagerController;
 import com.android.systemui.qs.FgsManagerControllerImpl;
+import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenrecord.ScreenRecordModule;
@@ -169,6 +169,7 @@ import javax.inject.Named;
             PolicyModule.class,
             PrivacyModule.class,
             QRCodeScannerModule.class,
+            QSFragmentStartableModule.class,
             ScreenshotModule.class,
             SensorModule.class,
             SecurityRepositoryModule.class,
@@ -198,8 +199,7 @@ import javax.inject.Named;
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,
             KeyguardBouncerComponent.class,
-            NotificationShelfComponent.class,
-            FragmentService.FragmentCreator.class
+            NotificationShelfComponent.class
         })
 public abstract class SystemUIModule {
 
