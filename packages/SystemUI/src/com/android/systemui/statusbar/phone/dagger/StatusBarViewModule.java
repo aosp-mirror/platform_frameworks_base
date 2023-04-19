@@ -50,14 +50,12 @@ import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
-import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
-import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -242,12 +240,6 @@ public abstract class StatusBarViewModule {
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.notification_container_parent);
     }
-
-    @Binds
-    @IntoSet
-    abstract OnStatusBarViewInitializedListener statusBarInitializedListener(
-            LetterboxAppearanceCalculator letterboxAppearanceCalculator
-    );
 
     @Binds
     @IntoSet
