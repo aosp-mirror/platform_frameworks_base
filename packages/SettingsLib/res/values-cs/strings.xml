@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Delší doba"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kratší doba"</string>
     <string name="cancel" msgid="5665114069455378395">"Zrušit"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Hotovo"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Budíky a připomenutí"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Přidat nového uživatele?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvořením dalších uživatelů můžete toto zařízení sdílet s jinými lidmi. Každý uživatel má svůj prostor, který si může přizpůsobit instalací aplikací, přidáním tapety apod. Uživatelé také mohou upravit nastavení zařízení (např. Wi-Fi), která ovlivní všechny uživatele.\n\nKaždý nově přidaný uživatel si musí nastavit vlastní prostor.\n\nKaždý uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Když přidáte nového uživatele, musí si nastavit vlastní prostor.\n\nJakýkoli uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Udělit tomuto uživateli administrátorská práva?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Jako administrátor bude moci spravovat ostatní uživatele, upravovat nastavení zařízení a resetovat zařízení do továrního nastavení."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nastavit uživatele?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ujistěte se, že je uživatel k dispozici a může si v zařízení nastavit svůj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Nastavit profil?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tímto zahájíte novou relaci hosta a smažete všechny aplikace a data z aktuální relace"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Ukončit režim hosta?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tímto smažete aplikace a data z aktuální relace hosta"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Udělit tomuto uživateli administrátorská práva"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Neudělovat uživateli administrátorská práva"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ukončit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Uložit aktivitu hosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Aktivitu z aktuální relace můžete uložit, nebo všechny aplikace a data smazat"</string>
@@ -665,7 +677,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fyzická klávesnice"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Zvolte rozložení klávesnice"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Výchozí"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínat obrazovku"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínání obrazovky"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolit zapínání obrazovky"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez explicitního intentu."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zastavit vysílání v aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

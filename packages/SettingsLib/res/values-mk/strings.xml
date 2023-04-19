@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Повеќе време."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Помалку време."</string>
     <string name="cancel" msgid="5665114069455378395">"Откажи"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"Во ред"</string>
     <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Аларми и потсетници"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Да се додаде нов корисник?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Уредов може да го споделувате со други лица ако додадете дополнителни корисници. Секој корисник има сопствен простор што може да го приспособува со апликации, тапети и слично. Корисниците може да приспособуваат и поставки за уредот, како на пр., Wi‑Fi, што важат за сите.\n\nКога додавате нов корисник, тоа лице треба да го постави својот простор.\n\nСекој корисник може да ажурира апликации за сите други корисници. Поставките и услугите за пристапност не може да се префрлат на новиот корисник."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Кога додавате нов корисник, тоа лице треба да го постави својот простор.\n\nСекој корисник може да ажурира апликации за сите други корисници."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Да му се дадат привилегии на администратор на корисников?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Како администратор, корисникот ќе може да управува со другите корисници, да ги менува поставките за уредот и да го ресетира уредот на фабрички поставки."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Ќе поставите корисник сега?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Проверете дали лицето е достапно да го земе уредот и да го постави својот простор"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Постави профил сега?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Ова ќе започне нова гостинска сесија и ќе ги избрише сите апликации и податоци од тековната сесија"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Да се излезе од режим на гостин?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ова ќе ги избрише сите апликации и податоци од тековната гостинска сесија"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Дајте му привилегии на администратор на корисников"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Не давајте му привилегии на администратор на корисников"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Излези"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Да се зачува активност на гостин?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Може да зачувате активност од тековната сесија или да ги избришете сите апликации и податоци"</string>

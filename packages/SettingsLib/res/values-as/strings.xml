@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"সংযোগ বিচ্ছিন্ন কৰি থকা হৈছে…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"সংযোগ কৰি থকা হৈছে…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> সংযোগ কৰা হ’ল"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"যোৰা লগোৱা হৈছে…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"পেয়াৰ কৰি থকা হৈছে…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"সংযোগ কৰা হ’ল (ফ\'ন নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"সংযোগ কৰা হ’ল (মিডিয়া নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"সংযোগ কৰা হ’ল (কোনো ফ\'ন বা মিডিয়া নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -386,7 +386,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্ৰাঞ্জিশ্বন এনিমেশ্বন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"এনিমেটৰ কালদৈৰ্ঘ্য স্কেল"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"গৌণ প্ৰদৰ্শনৰ নকল বনাওক"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"এপসমূহ"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"এপ্‌সমূহ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"কাৰ্যকলাপসমূহ নাৰাখিব"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যৱহাৰকাৰী ওলোৱাৰ লগে লগে সকলো কাৰ্যকলাপ মচক"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"নেপথ্যত চলা প্ৰক্ৰিয়াৰ সীমা"</string>
@@ -418,7 +418,7 @@
     <item msgid="4548987861791236754">"চকুৱে দেখা পোৱা ধৰণৰ প্ৰাকৃতিক ৰং"</item>
     <item msgid="1282170165150762976">"ডিজিটেল সমলৰ বাবে ৰং অপ্টিমাইজ কৰা হৈছে"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="5372523625297212320">"ষ্টেণ্ডবাইত থকা এপসমূহ"</string>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"ষ্টেণ্ডবাইত থকা এপ্‌সমূহ"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"নিষ্ক্ৰিয়। ট\'গল কৰিবলৈ টিপক।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"সক্ৰিয়। ট\'গল কৰিবলৈ টিপক।"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"এপ্ ষ্টেণ্ডবাই অৱস্থাত আছে:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
@@ -519,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"অধিক সময়।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"কম সময়।"</string>
     <string name="cancel" msgid="5665114069455378395">"বাতিল কৰক"</string>
+    <string name="next" msgid="2699398661093607009">"পৰৱৰ্তী"</string>
+    <string name="back" msgid="5554327870352703710">"উভতি যাওক"</string>
+    <string name="save" msgid="3745809743277153149">"ছেভ কৰক"</string>
     <string name="okay" msgid="949938843324579502">"ঠিক"</string>
     <string name="done" msgid="381184316122520313">"হ’ল"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"এলাৰ্ম আৰু ৰিমাইণ্ডাৰ"</string>
@@ -573,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"আপুনি অতিৰিক্ত ব্যৱহাৰকাৰীক যোগ কৰি এই ডিভাইচটো অন্য় ব্য়ক্তিৰ সৈতে শ্বেয়াৰ কৰিব পাৰে। প্ৰতিজন ব্যৱহাৰকাৰীৰ বাবে নিজাকৈ ঠাই আছে যাক তেওঁলোকে এপ্, ৱালপেপাৰ আৰু অন্য়ান্য় বস্তুৰ বাবে নিজৰ উপযোগিতা অনুযায়ী ব্যৱহাৰ কৰিব পাৰে। ব্যৱহাৰকাৰীসকলে সকলোকে প্ৰভাৱান্বিত কৰা ৱাই-ফাইৰ নিচিনা ডিভাইচৰ ছেটিং সাল-সলনি কৰিবও পাৰে।\n\nআপুনি যেতিয়া কোনো নতুন ব্যৱহাৰকাৰীক যোগ কৰে সেই ব্য়ক্তিজনে নিজেই নিজৰ বাবে ঠাই ছেট আপ কৰিব লাগিব।\n\nসকলো ব্যৱহাৰকাৰীয়ে অন্য় ব্যৱহাৰকাৰীৰ বাবে এপ্‌সমূহ আপডে’ট কৰিব পাৰে। সাধ্য় সুবিধাসমূহৰ ছেটিং আৰু সেৱাসমূহ নতুন ব্যৱহাৰকাৰীলৈ স্থানান্তৰ নহ\'বও পাৰে।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ ঠাই ছেট আপ কৰাৰ প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে অন্য সকলো ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডে\'ট কৰিব পাৰে।"</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"এই ব্যৱহাৰকাৰীগৰাকীক প্ৰশাসকৰ বিশেষাধিকাৰ প্ৰদান কৰিবনে?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"এগৰাকী প্ৰশাসক হিচাপে, তেওঁ অন্য ব্যৱহাৰকাৰীক পৰিচালনা কৰিব, ডিভাইচৰ ছেটিং সংশোধন কৰিব আৰু ডিভাইচটো ফেক্টৰী ৰিছেট কৰিব পাৰিব।"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"এই ব্যৱহাৰকাৰীগৰাকীক এগৰাকী প্ৰশাসক বনাবনে?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"প্ৰশাসকৰ ওচৰত কিছুমান বিশেষাধিকাৰ আছে, যিবোৰ অন্য ব্যৱহাৰকাৰীৰ নাই। এগৰাকী প্ৰশাসকে সকলো ব্যৱহাৰকাৰীক পৰিচালনা কৰিব, এই ডিভাইচটো আপডে’ট অথবা ৰিছেট কৰিব, ছেটিং সংশোধন কৰিব, ইনষ্টল কৰি থোৱা আটাইবোৰ এপ্ চাব আৰু অন্য লোকৰ বাবে প্ৰশাসকৰ বিশেষাধিকাৰ প্ৰদান কৰিব অথবা প্ৰত্যাহাৰ কৰিব পাৰে।"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"প্ৰশাসকৰ বনাওক"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ব্যৱহাৰকাৰী এতিয়া ছেট আপ কৰিবনে?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ডিভাইচটো লৈ নিজৰ ঠাই ছেটআপ কৰিবলৈ নতুন ব্যৱহাৰকাৰী উপলব্ধ থকাটো নিশ্চিত কৰক"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"এতিয়া প্ৰ\'ফাইল ছেট আপ কৰিবনে?"</string>
@@ -606,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"এইটোৱে এটা অতিথিৰ ছেশ্বন আৰম্ভ কৰিব আৰু বৰ্তমানৰ ছেশ্বনটোৰ পৰা আটাইবোৰ এপ্ আৰু ডেটা মচিব"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"অতিথি ম’ডৰ পৰা বাহিৰ হ’বনে?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"এইটোৱে বৰ্তমানৰ অতিথিৰ ছেশ্বনটোৰ পৰা এপ্ আৰু ডেটা মচিব"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"ব্যৱহাৰকাৰীগৰাকীক প্ৰশাসকৰ বিশেষাধিকাৰ দিয়ক"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"ব্যৱহাৰকাৰীক প্ৰশাসকৰ বিশেষাধিকাৰ প্ৰদান নকৰিব"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"হয়, তেওঁক এগৰাকী প্ৰশাসক বনাওক"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"নহয়, তেওঁক এগৰাকী প্ৰশাসক নবনাব"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"বাহিৰ হওক"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"অতিথিৰ কাৰ্যকলাপ ছেভ কৰিবনে?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"আপুনি বৰ্তমানৰ ছেশ্বনটোৰ পৰা কাৰ্যকলাপ ছেভ কৰিব পাৰে অথবা আটাইবোৰ এপ্ আৰু ডেটা মচিব পাৰে"</string>

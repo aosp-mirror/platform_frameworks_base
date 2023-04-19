@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Жок"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жупташканда байланыштарыңыз менен чалуу таржымалыңызды пайдалана аласыз."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> түзмөгүнө туташуу мүмкүн болгон жок."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN-код же сырсөз туура эмес болгондуктан, \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" түзмөгүнө туташуу мүмкүн болгон жок."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN-код же сырсөз туура эмес болгондуктан, \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" туташпай калды."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен байланышуу мүмкүн эмес."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Жупташтырууну <xliff:g id="DEVICE_NAME">%1$s</xliff:g> четке какты."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Көбүрөөк убакыт."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Азыраак убакыт."</string>
     <string name="cancel" msgid="5665114069455378395">"Жок"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Бүттү"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ойготкучтар жана эстеткичтер"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңы колдонуучу кошосузбу?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай тууралап, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы параметрлерин өзгөртө алышат.\n\nПрофиль түзүлгөндөн кийин, аны тууралап алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңы колдонуучу кошулганда, ал өз мейкиндигин түзүп алышы керек.\n\nКолдонмолорду бир колдонуучу жаңыртканда, ал калган бардык колдонуучулар үчүн да жаңырат."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Бул колдонуучуга админ укуктарын бересизби?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Админ катары ал башка колдонуучуларды башкарып, түзмөктүн параметрлерин өзгөртүп жана түзмөктү баштапкы абалга кайтара алат."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профилди жөндөйсүзбү?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн, түзмөктү колдонуучуга беришиңиз керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл азыр түзүлсүнбү?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Учурдагы конок сеансындагы бардык колдонмолор менен алардагы нерселер өчүп калат"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Бул колдонуучуга админ укуктарын берүү"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Колдонуучуга админ укуктары берилбесин"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Чыгуу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттерин сактайсызбы?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана алардагы нерселерди жок кылсаңыз болот"</string>
