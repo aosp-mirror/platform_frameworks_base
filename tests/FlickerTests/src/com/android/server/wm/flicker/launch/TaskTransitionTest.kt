@@ -118,7 +118,7 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     }
 
     /** Checks that a color background is visible while the task transition is occurring. */
-    @Presubmit
+    @FlakyTest(bugId = 265007895)
     @Test
     fun transitionHasColorBackground() {
         val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
