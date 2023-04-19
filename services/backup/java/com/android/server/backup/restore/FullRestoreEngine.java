@@ -397,7 +397,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             setUpPipes();
                             mAgent = mBackupManagerService.bindToAgentSynchronous(mTargetApp,
                                     FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
-                                            ? ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
+                                            ? ApplicationThreadConstants.BACKUP_MODE_RESTORE
                                             : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL,
                                     mBackupEligibilityRules.getBackupDestination());
                             mAgentPackage = pkg;

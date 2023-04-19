@@ -444,6 +444,11 @@ public abstract class WindowManagerInternal {
     public abstract IBinder getFocusedWindowTokenFromWindowStates();
 
     /**
+     * Moves the given display to the top.
+     */
+    public abstract void moveDisplayToTopIfAllowed(int displayId);
+
+    /**
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();
@@ -846,6 +851,16 @@ public abstract class WindowManagerInternal {
             this.imeSurfaceParentName = imeSurfaceParentName;
         }
     }
+
+    /**
+     * Sets by the {@link com.android.server.inputmethod.InputMethodManagerService} to monitor
+     * the visibility change of the IME targeted windows.
+     *
+     * @see ImeTargetChangeListener#onImeTargetOverlayVisibilityChanged
+     * @see ImeTargetChangeListener#onImeInputTargetVisibilityChanged
+     */
+    public abstract void setInputMethodTargetChangeListener(
+            @NonNull ImeTargetChangeListener listener);
 
     /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.

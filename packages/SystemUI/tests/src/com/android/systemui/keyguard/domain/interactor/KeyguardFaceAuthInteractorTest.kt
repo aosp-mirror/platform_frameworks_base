@@ -279,6 +279,23 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun faceAuthIsCancelledWhenUserInputOnPrimaryBouncer() =
+        testScope.runTest {
+            underTest.start()
+
+            underTest.onSwipeUpOnBouncer()
+
+            runCurrent()
+            assertThat(faceAuthRepository.isAuthRunning.value).isTrue()
+
+            underTest.onPrimaryBouncerUserInput()
+
+            runCurrent()
+
+            assertThat(faceAuthRepository.isAuthRunning.value).isFalse()
+        }
+
+    @Test
     fun faceAuthIsRequestedWhenSwipeUpOnBouncer() =
         testScope.runTest {
             underTest.start()

@@ -146,12 +146,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             t.apply();
 
             // execute the runnable if non-null after WCT is applied to finish resizing pip
-            if (mPipFinishResizeWCTRunnable != null) {
-                mPipFinishResizeWCTRunnable.run();
-                mPipFinishResizeWCTRunnable = null;
-            }
+            maybePerformFinishResizeCallback();
         }
     };
+
+    private void maybePerformFinishResizeCallback() {
+        if (mPipFinishResizeWCTRunnable != null) {
+            mPipFinishResizeWCTRunnable.run();
+            mPipFinishResizeWCTRunnable = null;
+        }
+    }
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -619,11 +623,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Removes PiP immediately.
      */
     public void removePip() {
-        if (!mPipTransitionState.isInPip() || mToken == null) {
+        if (!mPipTransitionState.isInPip() || mToken == null || mLeash == null) {
             ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Not allowed to removePip in current state"
-                            + " mState=%d mToken=%s", TAG, mPipTransitionState.getTransitionState(),
-                    mToken);
+                            + " mState=%d mToken=%s mLeash=%s", TAG,
+                    mPipTransitionState.getTransitionState(), mToken, mLeash);
             return;
         }
 
@@ -1528,6 +1532,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             if (snapshotSurface != null) {
                 mSyncTransactionQueue.queue(wct);
                 mSyncTransactionQueue.runInSync(t -> {
+                    // reset the pinch gesture
+                    maybePerformFinishResizeCallback();
+
                     // Scale the snapshot from its pre-resize bounds to the post-resize bounds.
                     mSurfaceTransactionHelper.scale(t, snapshotSurface, preResizeBounds,
                             snapshotDest);
@@ -1607,6 +1614,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
             mSplitScreenOptional.ifPresent(splitScreenController ->
                     splitScreenController.enterSplitScreen(mTaskInfo.taskId, wasPipTopLeft, wct));
+        } else if (direction == TRANSITION_DIRECTION_LEAVE_PIP) {
+            // when leaving PiP we can call the callback without sync
+            maybePerformFinishResizeCallback();
+            mTaskOrganizer.applyTransaction(wct);
         } else {
             mTaskOrganizer.applySyncTransaction(wct, mPipFinishResizeWCTCallback);
         }

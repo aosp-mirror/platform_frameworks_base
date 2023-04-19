@@ -165,6 +165,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
             t.remove(mGapBackgroundLeash);
             mGapBackgroundLeash = null;
         }
+        if (mScreenshot != null) {
+            t.remove(mScreenshot);
+            mScreenshot = null;
+        }
         mHostLeash = null;
         mIcon = null;
         mResizingIconView = null;
@@ -324,6 +328,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
             if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
                 mScreenshotAnimator.cancel();
+            } else if (mScreenshot != null) {
+                t.remove(mScreenshot);
             }
 
             mTempRect.set(mOldBounds);
@@ -340,6 +346,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
             if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
                 mScreenshotAnimator.cancel();
+            } else if (mScreenshot != null) {
+                t.remove(mScreenshot);
             }
 
             mScreenshot = screenshot;

@@ -72,7 +72,6 @@ import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -542,14 +541,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun authenticateDoesNotRunWhenCurrentUserIsNotPrimary() =
-        testScope.runTest {
-            testGatingCheckForFaceAuth {
-                launch { fakeUserRepository.setSelectedUserInfo(secondaryUser) }
-            }
-        }
-
-    @Test
     fun authenticateDoesNotRunWhenSecureCameraIsActive() =
         testScope.runTest {
             testGatingCheckForFaceAuth {
@@ -648,6 +639,58 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             assertThat(authenticated()).isTrue()
 
             keyguardRepository.setKeyguardGoingAway(true)
+
+            assertThat(authenticated()).isFalse()
+        }
+
+    @Test
+    fun isAuthenticatedIsResetToFalseWhenDeviceStartsGoingToSleep() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+
+            triggerFaceAuth(false)
+
+            authenticationCallback.value.onAuthenticationSucceeded(
+                mock(FaceManager.AuthenticationResult::class.java)
+            )
+
+            assertThat(authenticated()).isTrue()
+
+            keyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.STARTING_TO_SLEEP,
+                    isWakingUpOrAwake = false,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.POWER_BUTTON
+                )
+            )
+
+            assertThat(authenticated()).isFalse()
+        }
+
+    @Test
+    fun isAuthenticatedIsResetToFalseWhenDeviceGoesToSleep() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+
+            triggerFaceAuth(false)
+
+            authenticationCallback.value.onAuthenticationSucceeded(
+                mock(FaceManager.AuthenticationResult::class.java)
+            )
+
+            assertThat(authenticated()).isTrue()
+
+            keyguardRepository.setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.ASLEEP,
+                    isWakingUpOrAwake = false,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.POWER_BUTTON
+                )
+            )
 
             assertThat(authenticated()).isFalse()
         }

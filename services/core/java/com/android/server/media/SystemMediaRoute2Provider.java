@@ -392,6 +392,15 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         mCallback.onSessionUpdated(this, sessionInfo);
     }
 
+    @Override
+    protected String getDebugString() {
+        return TextUtils.formatSimple(
+                "SystemMR2Provider - package: %s, selected route id: %s, bluetooth impl: %s",
+                mComponentName.getPackageName(),
+                mSelectedRouteId,
+                mBluetoothRouteController.getClass().getSimpleName());
+    }
+
     private static class SessionCreationRequest {
         final long mRequestId;
         final String mRouteId;

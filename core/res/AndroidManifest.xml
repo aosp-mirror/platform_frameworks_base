@@ -1036,9 +1036,9 @@
         android:protectionLevel="dangerous" />
 
     <!-- @SystemApi @hide Allows an application to communicate over satellite.
-         Only granted if the application is a system app. -->
+         Only granted if the application is a system app or privileged app. -->
     <permission android:name="android.permission.SATELLITE_COMMUNICATION"
-                android:protectionLevel="internal|role" />
+                android:protectionLevel="role|signature|privileged" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
@@ -1466,6 +1466,9 @@
 
     <!-- Allows an application to initiate a phone call without going through
         the Dialer user interface for the user to confirm the call.
+        <p>
+        <em>Note: An app holding this permission can also call carrier MMI codes to change settings
+        such as call forwarding or call waiting preferences.
         <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.CALL_PHONE"

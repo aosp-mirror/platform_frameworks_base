@@ -298,39 +298,39 @@ void Yuv422IToJpegEncoder::configSamplingFactors(jpeg_compress_struct* cinfo) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-using namespace android::jpegrecoverymap;
+using namespace android::ultrahdr;
 
-jpegr_color_gamut P010Yuv420ToJpegREncoder::findColorGamut(JNIEnv* env, int aDataSpace) {
+ultrahdr_color_gamut P010Yuv420ToJpegREncoder::findColorGamut(JNIEnv* env, int aDataSpace) {
     switch (aDataSpace & ADataSpace::STANDARD_MASK) {
         case ADataSpace::STANDARD_BT709:
-            return jpegr_color_gamut::JPEGR_COLORGAMUT_BT709;
+            return ultrahdr_color_gamut::ULTRAHDR_COLORGAMUT_BT709;
         case ADataSpace::STANDARD_DCI_P3:
-            return jpegr_color_gamut::JPEGR_COLORGAMUT_P3;
+            return ultrahdr_color_gamut::ULTRAHDR_COLORGAMUT_P3;
         case ADataSpace::STANDARD_BT2020:
-            return jpegr_color_gamut::JPEGR_COLORGAMUT_BT2100;
+            return ultrahdr_color_gamut::ULTRAHDR_COLORGAMUT_BT2100;
         default:
             jclass IllegalArgumentException = env->FindClass("java/lang/IllegalArgumentException");
             env->ThrowNew(IllegalArgumentException,
                     "The requested color gamut is not supported by JPEG/R.");
     }
 
-    return jpegr_color_gamut::JPEGR_COLORGAMUT_UNSPECIFIED;
+    return ultrahdr_color_gamut::ULTRAHDR_COLORGAMUT_UNSPECIFIED;
 }
 
-jpegr_transfer_function P010Yuv420ToJpegREncoder::findHdrTransferFunction(JNIEnv* env,
+ultrahdr_transfer_function P010Yuv420ToJpegREncoder::findHdrTransferFunction(JNIEnv* env,
         int aDataSpace) {
     switch (aDataSpace & ADataSpace::TRANSFER_MASK) {
         case ADataSpace::TRANSFER_ST2084:
-            return jpegr_transfer_function::JPEGR_TF_PQ;
+            return ultrahdr_transfer_function::ULTRAHDR_TF_PQ;
         case ADataSpace::TRANSFER_HLG:
-            return jpegr_transfer_function::JPEGR_TF_HLG;
+            return ultrahdr_transfer_function::ULTRAHDR_TF_HLG;
         default:
             jclass IllegalArgumentException = env->FindClass("java/lang/IllegalArgumentException");
             env->ThrowNew(IllegalArgumentException,
                     "The requested HDR transfer function is not supported by JPEG/R.");
     }
 
-    return jpegr_transfer_function::JPEGR_TF_UNSPECIFIED;
+    return ultrahdr_transfer_function::ULTRAHDR_TF_UNSPECIFIED;
 }
 
 bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
@@ -344,13 +344,13 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
         return false;
     }
 
-    jpegr_color_gamut hdrColorGamut = findColorGamut(env, hdrColorSpace);
-    jpegr_color_gamut sdrColorGamut = findColorGamut(env, sdrColorSpace);
-    jpegr_transfer_function hdrTransferFunction = findHdrTransferFunction(env, hdrColorSpace);
+    ultrahdr_color_gamut hdrColorGamut = findColorGamut(env, hdrColorSpace);
+    ultrahdr_color_gamut sdrColorGamut = findColorGamut(env, sdrColorSpace);
+    ultrahdr_transfer_function hdrTransferFunction = findHdrTransferFunction(env, hdrColorSpace);
 
-    if (hdrColorGamut == jpegr_color_gamut::JPEGR_COLORGAMUT_UNSPECIFIED
-            || sdrColorGamut == jpegr_color_gamut::JPEGR_COLORGAMUT_UNSPECIFIED
-            || hdrTransferFunction == jpegr_transfer_function::JPEGR_TF_UNSPECIFIED) {
+    if (hdrColorGamut == ultrahdr_color_gamut::ULTRAHDR_COLORGAMUT_UNSPECIFIED
+            || sdrColorGamut == ultrahdr_color_gamut::ULTRAHDR_COLORGAMUT_UNSPECIFIED
+            || hdrTransferFunction == ultrahdr_transfer_function::ULTRAHDR_TF_UNSPECIFIED) {
         return false;
     }
 

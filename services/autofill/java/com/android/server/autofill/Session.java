@@ -56,6 +56,10 @@ import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.toArray;
+import static com.android.server.autofill.PresentationStatsEventLogger.AUTHENTICATION_RESULT_FAILURE;
+import static com.android.server.autofill.PresentationStatsEventLogger.AUTHENTICATION_RESULT_SUCCESS;
+import static com.android.server.autofill.PresentationStatsEventLogger.AUTHENTICATION_TYPE_DATASET_AUTHENTICATION;
+import static com.android.server.autofill.PresentationStatsEventLogger.AUTHENTICATION_TYPE_FULL_AUTHENTICATION;
 import static com.android.server.autofill.PresentationStatsEventLogger.NOT_SHOWN_REASON_NO_FOCUS;
 import static com.android.server.autofill.PresentationStatsEventLogger.NOT_SHOWN_REASON_REQUEST_FAILED;
 import static com.android.server.autofill.PresentationStatsEventLogger.NOT_SHOWN_REASON_REQUEST_TIMEOUT;
@@ -75,6 +79,12 @@ import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_O
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_REQUIRED_ID_CHANGE;
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_TRIGGER_ID_SET;
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_UNKNOWN;
+import static com.android.server.autofill.SessionCommittedEventLogger.CommitReason;
+import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_ACTIVITY_FINISHED;
+import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_VIEW_CHANGED;
+import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_VIEW_CLICKED;
+import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_VIEW_COMMITTED;
+import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_SESSION_DESTROYED;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
@@ -362,6 +372,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * When the session started (using elapsed time since boot).
      */
     private final long mStartTime;
+
+    /**
+     * Count of FillRequests in the session.
+     */
+    private int mRequestCount;
 
     /**
      * Starting timestamp of latency logger.
@@ -1132,6 +1147,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             int flags) {
         final FillResponse existingResponse = viewState.getResponse();
         mFillRequestEventLogger.startLogForNewRequest();
+        mRequestCount++;
         mFillRequestEventLogger.maybeSetAppPackageUid(uid);
         mFillRequestEventLogger.maybeSetFlags(mFlags);
         if(mPreviouslyFillDialogPotentiallyStarted) {
@@ -1330,8 +1346,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         this.userId = userId;
         this.taskId = taskId;
         this.uid = uid;
-        mStartTime = SystemClock.elapsedRealtime();
-        mLatencyBaseTime = mStartTime;
         mService = service;
         mLock = lock;
         mUi = ui;
@@ -1347,11 +1361,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mComponentName = componentName;
         mCompatMode = compatMode;
         mSessionState = STATE_ACTIVE;
+        // Initiate all loggers & counters.
+        mStartTime = SystemClock.elapsedRealtime();
+        mLatencyBaseTime = mStartTime;
+        mRequestCount = 0;
         mPresentationStatsEventLogger = PresentationStatsEventLogger.forSessionId(sessionId);
         mFillRequestEventLogger = FillRequestEventLogger.forSessionId(sessionId);
         mFillResponseEventLogger = FillResponseEventLogger.forSessionId(sessionId);
         mSessionCommittedEventLogger = SessionCommittedEventLogger.forSessionId(sessionId);
+        mSessionCommittedEventLogger.maybeSetComponentPackageUid(uid);
         mSaveEventLogger = SaveEventLogger.forSessionId(sessionId);
+
         synchronized (mLock) {
             mSessionFlags = new SessionFlags();
             mSessionFlags.mAugmentedAutofillOnly = forAugmentedAutofillOnly;
@@ -1971,6 +1991,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Start a new FillRequest logger for client suggestion fallback.
         mFillRequestEventLogger.startLogForNewRequest();
+        mRequestCount++;
         mFillRequestEventLogger.maybeSetAppPackageUid(uid);
         mFillRequestEventLogger.maybeSetFlags(
             flags & ~FLAG_ENABLED_CLIENT_SUGGESTIONS);
@@ -2187,6 +2208,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         final Intent fillInIntent;
         synchronized (mLock) {
+            mPresentationStatsEventLogger.maybeSetAuthenticationType(
+                AUTHENTICATION_TYPE_FULL_AUTHENTICATION);
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#authenticate() rejected - session: "
                         + id + " destroyed");
@@ -2231,7 +2254,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#save() rejected - session: "
                         + id + " destroyed");
-                mSaveEventLogger.logAndEndEvent();
                 return;
             }
         }
@@ -2251,7 +2273,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#cancelSave() rejected - session: "
                         + id + " destroyed");
-                mSaveEventLogger.logAndEndEvent();
                 return;
             }
         }
@@ -2438,18 +2459,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
         if (requestId == AUGMENTED_AUTOFILL_REQUEST_ID) {
             setAuthenticationResultForAugmentedAutofillLocked(data, authenticationId);
+            // Augmented autofill is not logged.
+            mPresentationStatsEventLogger.logAndEndEvent();
             return;
         }
         if (mResponses == null) {
             // Typically happens when app explicitly called cancel() while the service was showing
             // the auth UI.
             Slog.w(TAG, "setAuthenticationResultLocked(" + authenticationId + "): no responses");
+            mPresentationStatsEventLogger.maybeSetAuthenticationResult(
+                AUTHENTICATION_RESULT_FAILURE);
+            mPresentationStatsEventLogger.logAndEndEvent();
             removeFromService();
             return;
         }
         final FillResponse authenticatedResponse = mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
             Slog.w(TAG, "no authenticated response");
+            mPresentationStatsEventLogger.maybeSetAuthenticationResult(
+                AUTHENTICATION_RESULT_FAILURE);
+            mPresentationStatsEventLogger.logAndEndEvent();
             removeFromService();
             return;
         }
@@ -2461,6 +2490,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             final Dataset dataset = authenticatedResponse.getDatasets().get(datasetIdx);
             if (dataset == null) {
                 Slog.w(TAG, "no dataset with index " + datasetIdx + " on fill response");
+                mPresentationStatsEventLogger.maybeSetAuthenticationResult(
+                    AUTHENTICATION_RESULT_FAILURE);
+                mPresentationStatsEventLogger.logAndEndEvent();
                 removeFromService();
                 return;
             }
@@ -2477,11 +2509,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         if (result instanceof FillResponse) {
             logAuthenticationStatusLocked(requestId, MetricsEvent.AUTOFILL_AUTHENTICATED);
+            mPresentationStatsEventLogger.maybeSetAuthenticationResult(
+                AUTHENTICATION_RESULT_SUCCESS);
             replaceResponseLocked(authenticatedResponse, (FillResponse) result, newClientState);
         } else if (result instanceof Dataset) {
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED);
+                mPresentationStatsEventLogger.maybeSetAuthenticationResult(
+                    AUTHENTICATION_RESULT_SUCCESS);
                 if (newClientState != null) {
                     if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
                     mClientState = newClientState;
@@ -2497,6 +2533,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + authenticationId);
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_INVALID_DATASET_AUTHENTICATION);
+                mPresentationStatsEventLogger.maybeSetAuthenticationResult(
+                    AUTHENTICATION_RESULT_FAILURE);
             }
         } else {
             if (result != null) {
@@ -2504,6 +2542,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             logAuthenticationStatusLocked(requestId,
                     MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
+            mPresentationStatsEventLogger.maybeSetAuthenticationResult(
+                AUTHENTICATION_RESULT_FAILURE);
             processNullResponseLocked(requestId, 0);
         }
     }
@@ -4790,6 +4830,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         // Log FillRequest for Augmented Autofill.
         mFillRequestEventLogger.startLogForNewRequest();
+        mRequestCount++;
         mFillRequestEventLogger.maybeSetAppPackageUid(uid);
         mFillRequestEventLogger.maybeSetFlags(mFlags);
         mFillRequestEventLogger.maybeSetRequestId(AUGMENTED_AUTOFILL_REQUEST_ID);
@@ -5036,6 +5077,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (dataset.getAuthentication() == null) {
                 if (generateEvent) {
                     mService.logDatasetSelected(dataset.getId(), id, mClientState, uiType);
+                    mPresentationStatsEventLogger.maybeSetSelectedDatasetId(datasetIndex);
                 }
                 if (mCurrentViewId != null) {
                     mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
@@ -5046,6 +5088,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
             // ...or handle authentication.
             mService.logDatasetAuthenticationSelected(dataset.getId(), id, mClientState, uiType);
+            mPresentationStatsEventLogger.maybeSetAuthenticationType(
+                AUTHENTICATION_TYPE_DATASET_AUTHENTICATION);
             setViewStatesLocked(null, dataset, ViewState.STATE_WAITING_DATASET_AUTH, false);
             final Intent fillInIntent = createAuthFillInIntentLocked(requestId, mClientState);
             if (fillInIntent == null) {
@@ -5639,6 +5683,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     RemoteFillService destroyLocked() {
+        // Log unlogged events.
+        mSessionCommittedEventLogger.maybeSetCommitReason(COMMIT_REASON_SESSION_DESTROYED);
+        mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
+        mSessionCommittedEventLogger.maybeSetSessionDurationMillis(
+            SystemClock.elapsedRealtime() - mStartTime);
+        mSessionCommittedEventLogger.logAndEndEvent();
+        mPresentationStatsEventLogger.logAndEndEvent();
+        mSaveEventLogger.logAndEndEvent();
+        mFillResponseEventLogger.logAndEndEvent();
+        mFillRequestEventLogger.logAndEndEvent();
+
         if (mDestroyed) {
             return null;
         }
