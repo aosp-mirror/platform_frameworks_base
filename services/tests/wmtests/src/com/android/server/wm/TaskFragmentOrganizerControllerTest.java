@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
@@ -1588,6 +1589,46 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         taskBounds.set(0, 0, 750, 1000);
         task.setBoundsUnchecked(taskBounds);
         assertEquals(taskFragmentBounds, mTaskFragment.getBounds());
+    }
+
+    @Test
+    public void testApplyTransaction_reorderTaskFragmentToFront() {
+        final Task task = createTask(mDisplayContent);
+        // Create a TaskFragment.
+        final IBinder token0 = new Binder();
+        final TaskFragment tf0 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(token0)
+                .setOrganizer(mOrganizer)
+                .createActivityCount(1)
+                .build();
+        // Create another TaskFragment
+        final IBinder token1 = new Binder();
+        final TaskFragment tf1 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(token1)
+                .setOrganizer(mOrganizer)
+                .createActivityCount(1)
+                .build();
+        // Create a non-embedded Activity on top.
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm)
+                .setTask(task)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(token0, tf0);
+        mWindowOrganizerController.mLaunchTaskFragments.put(token1, tf1);
+
+        // Reorder TaskFragment to front
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_REORDER_TO_FRONT).build();
+        mTransaction.addTaskFragmentOperation(token0, operation);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // Ensure the non-embedded activity still on top.
+        assertEquals(topActivity, task.getTopChild().asActivityRecord());
+
+        // Ensure the TaskFragment is moved to front.
+        final TaskFragment frontMostTaskFragment = task.getTaskFragment(tf -> tf.asTask() == null);
+        assertEquals(frontMostTaskFragment, tf0);
     }
 
     /**

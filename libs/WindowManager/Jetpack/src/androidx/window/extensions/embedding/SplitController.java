@@ -1621,6 +1621,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // background.
             return;
         }
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
+        if (splitContainer instanceof SplitPinContainer
+                && updateSplitContainerIfNeeded(splitContainer, wct, null /* splitAttributes */)) {
+            // A SplitPinContainer exists and is updated.
+            return;
+        }
         if (launchPlaceholderIfNecessary(wct, container)) {
             // Placeholder was launched, the positions will be updated when the activity is added
             // to the secondary container.
@@ -1633,7 +1639,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // If the info is not available yet the task fragment will be expanded when it's ready
             return;
         }
-        SplitContainer splitContainer = getActiveSplitForContainer(container);
         if (splitContainer == null) {
             return;
         }

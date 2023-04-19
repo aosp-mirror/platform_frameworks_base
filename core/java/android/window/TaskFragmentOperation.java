@@ -73,6 +73,13 @@ public final class TaskFragmentOperation implements Parcelable {
     /** Sets the relative bounds with {@link WindowContainerTransaction#setRelativeBounds}. */
     public static final int OP_TYPE_SET_RELATIVE_BOUNDS = 9;
 
+    /**
+     * Reorders the TaskFragment to be the front-most TaskFragment in the Task.
+     * Note that there could still have other WindowContainer on top of the front-most
+     * TaskFragment, such as a non-embedded Activity.
+     */
+    public static final int OP_TYPE_REORDER_TO_FRONT = 10;
+
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
             OP_TYPE_CREATE_TASK_FRAGMENT,
@@ -84,7 +91,8 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT,
             OP_TYPE_SET_COMPANION_TASK_FRAGMENT,
             OP_TYPE_SET_ANIMATION_PARAMS,
-            OP_TYPE_SET_RELATIVE_BOUNDS
+            OP_TYPE_SET_RELATIVE_BOUNDS,
+            OP_TYPE_REORDER_TO_FRONT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationType {}

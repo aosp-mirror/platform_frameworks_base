@@ -307,14 +307,14 @@ class TaskContainer {
         }
 
         final TaskFragmentContainer pinnedContainer = mSplitPinContainer.getSecondaryContainer();
-        final int index = mContainers.indexOf(pinnedContainer);
-        if (index <= 0) {
+        final int pinnedContainerIndex = mContainers.indexOf(pinnedContainer);
+        if (pinnedContainerIndex <= 0) {
             removeSplitPinContainer();
             return;
         }
 
         // Ensure the pinned container is top-most.
-        if (index != mContainers.size() - 1) {
+        if (pinnedContainerIndex != mContainers.size() - 1) {
             mContainers.remove(pinnedContainer);
             mContainers.add(pinnedContainer);
         }
