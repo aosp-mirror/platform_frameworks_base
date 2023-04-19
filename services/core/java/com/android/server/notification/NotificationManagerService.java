@@ -7205,12 +7205,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         if (n.isStyle(Notification.CallStyle.class)) {
-            boolean isForegroundService = (n.flags & FLAG_FOREGROUND_SERVICE) != 0;
             boolean hasFullScreenIntent = n.fullScreenIntent != null;
-            if (!isForegroundService && !hasFullScreenIntent) {
+            boolean requestedFullScreenIntent = (n.flags & FLAG_FSI_REQUESTED_BUT_DENIED) != 0;
+            if (!n.isFgsOrUij() && !hasFullScreenIntent && !requestedFullScreenIntent) {
                 throw new IllegalArgumentException(r.getKey() + " Not posted."
-                        + " CallStyle notifications must either be for a foreground Service or"
-                        + " use a fullScreenIntent.");
+                        + " CallStyle notifications must be for a foreground service or"
+                        + " user initated job or use a fullScreenIntent.");
             }
         }
 
