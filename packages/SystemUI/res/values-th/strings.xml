@@ -237,10 +237,10 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"หมุนอัตโนมัติ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ตำแหน่ง"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"โปรแกรมรักษาหน้าจอ"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"ภาพพักหน้าจอ"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"สิทธิ์เข้าถึงกล้อง"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"สิทธิ์เข้าถึงไมโครโฟน"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"พร้อมให้ใช้งาน"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"สิทธิ์เข้าถึงไมค์"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"พร้อมใช้งาน"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ถูกบล็อก"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"อุปกรณ์สื่อ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ผู้ใช้"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"นำออกจากรายการโปรด"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ย้ายไปที่ตำแหน่ง <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"การควบคุม"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"เลือกตัวควบคุมที่ต้องการให้เข้าถึงได้จากการตั้งค่าด่วน"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะตัวควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"นำตัวควบคุมทั้งหมดออกแล้ว"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ยังไม่ได้บันทึกการเปลี่ยนแปลง"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"นโยบายการทำงานอนุญาตให้คุณโทรออกได้จากโปรไฟล์งานเท่านั้น"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"สลับไปใช้โปรไฟล์งาน"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"ปิด"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"ปรับแต่งหน้าจอล็อก"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ไม่พร้อมใช้งาน"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"กล้องถูกบล็อกอยู่"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ไมโครโฟนถูกบล็อกอยู่"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"โหมดลำดับความสำคัญเปิดอยู่"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"การเรียกใช้งาน Assistant เปิดอยู่"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

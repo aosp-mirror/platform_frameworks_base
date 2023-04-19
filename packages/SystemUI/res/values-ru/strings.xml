@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Начать"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Остановить"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим управления одной рукой"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Контрастность"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартная"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Средняя"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Высокая"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблокировать микрофон устройства?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблокировать камеру устройства?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Разблокировать камеру и микрофон устройства?"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"удалить из избранного"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Переместить на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Элементы управления"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Выберите виджеты управления, которые будут доступны в меню \"Быстрые настройки\"."</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок виджетов, перетащите их."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Все виджеты управления удалены."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Изменения не сохранены."</string>
@@ -1126,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Согласно правилам вашей организации вы можете совершать телефонные звонки только из рабочего профиля."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Перейти в рабочий профиль"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Закрыть"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Настройки заблок. экрана"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Функция Wi-Fi недоступна"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера заблокирована"</string>
@@ -1134,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон заблокирован"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Режим \"Только важные\" включен"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Ассистент готов слушать"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

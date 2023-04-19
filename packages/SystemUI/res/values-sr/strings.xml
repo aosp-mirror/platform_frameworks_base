@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"уклонили из омиљених"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Преместите на <xliff:g id="NUMBER">%d</xliff:g>. позицију"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроле"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Одаберите контроле да бисте им приступили из Брзих подешавања"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржите и превуците да бисте променили распоред контрола"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Све контроле су уклоњене"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промене нису сачуване"</string>
@@ -1046,7 +1047,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Да бисте променили мрежу, прекините етернет везу"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Ради бољег доживљаја уређаја, апликације и услуге и даље могу да траже WiFi мреже у било ком тренутку, чак и када је WiFi искључен. То можете да промените у подешавањима WiFi скенирања. "<annotation id="link">"Промените"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Искључите режим рада у авиону"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Искључи режим рада у авиону"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> жели да дода следећу плочицу у Брза подешавања"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Додај плочицу"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не додај плочицу"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Смернице за посао вам омогућавају да телефонирате само са пословног профила"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Пређи на пословни профил"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Затвори"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Прилагоди закључани екран"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi није доступан"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера је блокирана"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон је блокиран"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Приоритетни режим је укључен"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Помоћник је у активном стању"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>
