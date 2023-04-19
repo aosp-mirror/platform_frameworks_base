@@ -43,4 +43,9 @@ public interface AppOpMigrationHelper {
      * @return AppOps file version, the version is same for all the user.
      */
     int getLegacyAppOpVersion();
+
+    /**
+     * @return Whether app-op state exists or not.
+     */
+    boolean hasLegacyAppOpState();
 }

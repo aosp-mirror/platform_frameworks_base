@@ -16,56 +16,54 @@
 
 package com.android.server.permission.access.util
 
-import android.util.Log
 import com.android.server.LocalServices
 import com.android.server.appop.AppOpMigrationHelper
-import com.android.server.permission.access.AccessPolicy
 import com.android.server.pm.permission.PermissionMigrationHelper
 
 object PackageVersionMigration {
     /**
-     * This function returns a unified version for permissions and app-ops, this
-     * version is assigned to all migrated packages during OTA upgrade. Later this version is used
-     * in determining the upgrade steps for a package.
+     * Maps existing permission and app-op version to a unified version during OTA upgrade. The
+     * new unified version is used in determining the upgrade steps for a package (for both
+     * permission and app-ops).
+     *
+     * @return unified permission/app-op version
+     * @throws IllegalStateException if the method is called when there is nothing to migrate i.e.
+     * permission and app-op file does not exist.
      */
     internal fun getVersion(userId: Int): Int {
         val permissionMigrationHelper =
             LocalServices.getService(PermissionMigrationHelper::class.java)
-        val permissionVersion = permissionMigrationHelper.getLegacyPermissionsVersion(userId)
+        val permissionVersion = permissionMigrationHelper.getLegacyPermissionStateVersion(userId)
 
         val appOpMigrationHelper = LocalServices.getService(AppOpMigrationHelper::class.java)
         val appOpVersion = appOpMigrationHelper.legacyAppOpVersion
 
         return when {
             // Both files don't exist.
-            permissionVersion == 0 && appOpVersion == -2 -> 0
-            // Permission file doesn't exit, app op file exist w/o version.
-            permissionVersion == 0 && appOpVersion == -1 -> 1
-            // Both file exist but w/o any version.
-            permissionVersion == -1 && appOpVersion == -1 -> 2
-            // Permission file exist w/o version, app op file has version as 1.
-            permissionVersion == -1 && appOpVersion == 1 -> 3
+            permissionVersion == -1 && appOpVersion == -1 ->
+                error("getVersion() called when there are no legacy files")
             // merging combination of versions based on released android version
             // permissions version 1-8 were released in Q, 9 in S and 10 in T
             // app ops version 1 was released in P, 3 in U.
-            permissionVersion == 1 && appOpVersion == 1 -> 4
-            permissionVersion == 2 && appOpVersion == 1 -> 5
-            permissionVersion == 3 && appOpVersion == 1 -> 6
-            permissionVersion == 4 && appOpVersion == 1 -> 7
-            permissionVersion == 5 && appOpVersion == 1 -> 8
-            permissionVersion == 6 && appOpVersion == 1 -> 9
-            permissionVersion == 7 && appOpVersion == 1 -> 10
-            permissionVersion == 8 && appOpVersion == 1 -> 11
-            permissionVersion == 9 && appOpVersion == 1 -> 12
-            permissionVersion == 10 && appOpVersion == 1 -> 13
-            permissionVersion == 10 && appOpVersion == 3 -> AccessPolicy.VERSION_LATEST
-            else -> {
-                Log.w(
-                    "PackageVersionMigration", "Version combination not recognized, permission" +
-                        "version: $permissionVersion, app-op version: $appOpVersion"
-                )
-                AccessPolicy.VERSION_LATEST
-            }
+            permissionVersion >= 10 && appOpVersion >= 3 -> 14
+            permissionVersion >= 10 && appOpVersion >= 1 -> 13
+            permissionVersion >= 9 && appOpVersion >= 1 -> 12
+            permissionVersion >= 8 && appOpVersion >= 1 -> 11
+            permissionVersion >= 7 && appOpVersion >= 1 -> 10
+            permissionVersion >= 6 && appOpVersion >= 1 -> 9
+            permissionVersion >= 5 && appOpVersion >= 1 -> 8
+            permissionVersion >= 4 && appOpVersion >= 1 -> 7
+            permissionVersion >= 3 && appOpVersion >= 1 -> 6
+            permissionVersion >= 2 && appOpVersion >= 1 -> 5
+            permissionVersion >= 1 && appOpVersion >= 1 -> 4
+            // Permission file exist w/o version, app op file has version as 1.
+            permissionVersion >= 0 && appOpVersion >= 1 -> 3
+            // Both file exist but w/o any version.
+            permissionVersion >= 0 && appOpVersion >= 0 -> 2
+            // Permission file doesn't exit, app op file exist w/o version.
+            permissionVersion >= -1 && appOpVersion >= 0 -> 1
+            // Re-run all upgrades to be safe.
+            else -> 0
         }
     }
 }
