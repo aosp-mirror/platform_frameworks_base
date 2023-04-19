@@ -35,6 +35,7 @@
 #include <SkTypeface.h>
 #include <dlfcn.h>
 #include <gui/TraceUtils.h>
+#include <include/encode/SkPngEncoder.h>
 #include <inttypes.h>
 #include <media/NdkImage.h>
 #include <media/NdkImageReader.h>
@@ -54,6 +55,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <log/log.h>
 #include <vector>
 
 #include "JvmErrorReporter.h"
@@ -520,7 +522,16 @@ public:
         if (iter != context->mTextureMap.end()) {
             img = iter->second.get();
         }
-        return img->encodeToData();
+        if (!img) {
+            return nullptr;
+        }
+        // The following encode (specifically the pixel readback) will fail on a
+        // texture-backed image. They should already be raster images, but on
+        // the off-chance they aren't, we will just serialize it as nothing.
+        if (img->isTextureBacked()) {
+            return SkData::MakeEmpty();
+        }
+        return SkPngEncoder::Encode(nullptr, img, {});
     }
 
     void serialize(SkWStream* stream) const override {
