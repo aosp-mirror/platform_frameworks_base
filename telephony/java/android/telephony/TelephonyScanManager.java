@@ -153,8 +153,9 @@ public final class TelephonyScanManager {
                     nsi = mScanInfo.get(message.arg2);
                 }
                 if (nsi == null) {
-                    throw new RuntimeException(
-                        "Failed to find NetworkScanInfo with id " + message.arg2);
+                    Rlog.e(TAG, "Unexpceted message " + message.what
+                            + " as there is no NetworkScanInfo with id " + message.arg2);
+                    return;
                 }
 
                 final NetworkScanCallback callback = nsi.mCallback;
