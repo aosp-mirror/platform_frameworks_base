@@ -5036,11 +5036,9 @@
   <java-symbol name="materialColorOnTertiary" type="attr"/>
   <java-symbol name="materialColorSurfaceDim" type="attr"/>
   <java-symbol name="materialColorSurfaceBright" type="attr"/>
-  <java-symbol name="materialColorSecondary" type="attr"/>
   <java-symbol name="materialColorOnError" type="attr"/>
   <java-symbol name="materialColorSurface" type="attr"/>
   <java-symbol name="materialColorSurfaceContainerHigh" type="attr"/>
-  <java-symbol name="materialColorTertiary" type="attr"/>
   <java-symbol name="materialColorSurfaceContainerHighest" type="attr"/>
   <java-symbol name="materialColorOnSurfaceVariant" type="attr"/>
   <java-symbol name="materialColorOutline" type="attr"/>
@@ -5048,7 +5046,9 @@
   <java-symbol name="materialColorOnPrimary" type="attr"/>
   <java-symbol name="materialColorOnSurface" type="attr"/>
   <java-symbol name="materialColorSurfaceContainer" type="attr"/>
-  <java-symbol name="materialColorSurfaceContainer" type="attr"/>
+  <java-symbol name="materialColorPrimary" type="attr"/>
+  <java-symbol name="materialColorSecondary" type="attr"/>
+  <java-symbol name="materialColorTertiary" type="attr"/>
 
   <java-symbol type="attr" name="actionModeUndoDrawable" />
   <java-symbol type="attr" name="actionModeRedoDrawable" />
