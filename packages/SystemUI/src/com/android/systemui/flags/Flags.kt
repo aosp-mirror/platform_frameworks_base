@@ -617,7 +617,8 @@ object Flags {
     @JvmField
     val ENABLE_USI_BATTERY_NOTIFICATIONS =
         unreleasedFlag(2302, "enable_usi_battery_notifications", teamfood = true)
-    @JvmField val ENABLE_STYLUS_EDUCATION = unreleasedFlag(2303, "enable_stylus_education")
+    @JvmField val ENABLE_STYLUS_EDUCATION =
+        unreleasedFlag(2303, "enable_stylus_education", teamfood = true)
 
     // 2400 - performance tools and debugging info
     // TODO(b/238923086): Tracking Bug
