@@ -5602,7 +5602,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void dropBufferFrom(Transaction t) {
         SurfaceControl viewSurface = getClientViewRootSurface();
         if (viewSurface == null) return;
-        t.setBuffer(viewSurface, (android.hardware.HardwareBuffer) null);
+        t.unsetBuffer(viewSurface);
     }
 
     @Override
