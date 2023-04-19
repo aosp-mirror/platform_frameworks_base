@@ -225,10 +225,17 @@ constructor(
     }
 
     private fun observeFaceAuthResettingConditions() {
-        // Clear auth status when keyguard is going away or when the user is switching.
-        merge(keyguardRepository.isKeyguardGoingAway, userRepository.userSwitchingInProgress)
-            .onEach { goingAwayOrUserSwitchingInProgress ->
-                if (goingAwayOrUserSwitchingInProgress) {
+        // Clear auth status when keyguard is going away or when the user is switching or device
+        // starts going to sleep.
+        merge(
+                keyguardRepository.wakefulness.map {
+                    WakefulnessModel.isSleepingOrStartingToSleep(it)
+                },
+                keyguardRepository.isKeyguardGoingAway,
+                userRepository.userSwitchingInProgress
+            )
+            .onEach { anyOfThemIsTrue ->
+                if (anyOfThemIsTrue) {
                     _isAuthenticated.value = false
                     retryCount = 0
                     halErrorRetryJob?.cancel()
@@ -248,8 +255,8 @@ constructor(
                     "nonStrongBiometricIsNotAllowed",
                     faceDetectLog
                 ),
-                // We don't want to run face detect if it's not possible to authenticate with FP
-                // from the bouncer. UDFPS is the only fp sensor type that won't support this.
+                // We don't want to run face detect if fingerprint can be used to unlock the device
+                // but it's not possible to authenticate with FP from the bouncer (UDFPS)
                 logAndObserve(
                     and(isUdfps(), deviceEntryFingerprintAuthRepository.isRunning).isFalse(),
                     "udfpsAuthIsNotPossibleAnymore",
@@ -306,7 +313,7 @@ constructor(
                 logAndObserve(
                     combine(
                         keyguardInteractor.isSecureCameraActive,
-                        alternateBouncerInteractor.isVisible,
+                        alternateBouncerInteractor.isVisible
                     ) { a, b ->
                         !a || b
                     },
@@ -334,22 +341,17 @@ constructor(
                 logAndObserve(isLockedOut.isFalse(), "isNotInLockOutState", faceAuthLog),
                 logAndObserve(
                     deviceEntryFingerprintAuthRepository.isLockedOut.isFalse(),
-                    "fpLockedOut",
+                    "fpIsNotLockedOut",
                     faceAuthLog
                 ),
                 logAndObserve(
                     trustRepository.isCurrentUserTrusted.isFalse(),
-                    "currentUserTrusted",
+                    "currentUserIsNotTrusted",
                     faceAuthLog
                 ),
                 logAndObserve(
                     biometricSettingsRepository.isNonStrongBiometricAllowed,
                     "nonStrongBiometricIsAllowed",
-                    faceAuthLog
-                ),
-                logAndObserve(
-                    userRepository.selectedUserInfo.map { it.isPrimary },
-                    "userIsPrimaryUser",
                     faceAuthLog
                 ),
             )

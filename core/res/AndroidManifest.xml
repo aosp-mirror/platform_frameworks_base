@@ -1036,9 +1036,9 @@
         android:protectionLevel="dangerous" />
 
     <!-- @SystemApi @hide Allows an application to communicate over satellite.
-         Only granted if the application is a system app. -->
+         Only granted if the application is a system app or privileged app. -->
     <permission android:name="android.permission.SATELLITE_COMMUNICATION"
-                android:protectionLevel="internal|role" />
+                android:protectionLevel="role|signature|privileged" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
