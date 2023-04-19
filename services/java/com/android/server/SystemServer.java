@@ -336,6 +336,8 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.time.WearTimeService";
     private static final String WEAR_GLOBAL_ACTIONS_SERVICE_CLASS =
             "com.android.clockwork.globalactions.GlobalActionsService";
+    private static final String WEAR_SETTINGS_SERVICE_CLASS =
+            "com.android.clockwork.settings.WearSettingsService";
     private static final String ACCOUNT_SERVICE_CLASS =
             "com.android.server.accounts.AccountManagerService$Lifecycle";
     private static final String CONTENT_SERVICE_CLASS =
@@ -2603,6 +2605,10 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartWearGlobalActionsService");
             mSystemServiceManager.startService(WEAR_GLOBAL_ACTIONS_SERVICE_CLASS);
+            t.traceEnd();
+
+            t.traceBegin("StartWearSettingsService");
+            mSystemServiceManager.startService(WEAR_SETTINGS_SERVICE_CLASS);
             t.traceEnd();
         }
 
