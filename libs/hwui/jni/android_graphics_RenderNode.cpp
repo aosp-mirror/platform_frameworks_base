@@ -584,13 +584,15 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             uirenderer::Rect bounds(props.getWidth(), props.getHeight());
             bool useStretchShader =
                     Properties::getStretchEffectBehavior() != StretchEffectBehavior::UniformScale;
-            if (useStretchShader && info.stretchEffectCount) {
+            // Compute the transform bounds first before calculating the stretch
+            transform.mapRect(bounds);
+
+            bool hasStretch = useStretchShader && info.stretchEffectCount;
+            if (hasStretch) {
                 handleStretchEffect(info, bounds);
             }
 
-            transform.mapRect(bounds);
-
-            if (CC_LIKELY(transform.isPureTranslate())) {
+            if (CC_LIKELY(transform.isPureTranslate()) && !hasStretch) {
                 // snap/round the computed bounds, so they match the rounding behavior
                 // of the clear done in SurfaceView#draw().
                 bounds.snapGeometryToPixelBoundaries(false);
@@ -665,44 +667,41 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             return env;
         }
 
-        void stretchTargetBounds(const StretchEffect& stretchEffect,
-                                 float width, float height,
-                                 const SkRect& childRelativeBounds,
-                                 uirenderer::Rect& bounds) {
-              float normalizedLeft = childRelativeBounds.left() / width;
-              float normalizedTop = childRelativeBounds.top() / height;
-              float normalizedRight = childRelativeBounds.right() / width;
-              float normalizedBottom = childRelativeBounds.bottom() / height;
-              float reverseLeft = width *
-                  (stretchEffect.computeStretchedPositionX(normalizedLeft) -
-                    normalizedLeft);
-              float reverseTop = height *
-                  (stretchEffect.computeStretchedPositionY(normalizedTop) -
-                    normalizedTop);
-              float reverseRight = width *
-                  (stretchEffect.computeStretchedPositionX(normalizedRight) -
-                    normalizedLeft);
-              float reverseBottom = height *
-                  (stretchEffect.computeStretchedPositionY(normalizedBottom) -
-                    normalizedTop);
-              bounds.left = reverseLeft;
-              bounds.top = reverseTop;
-              bounds.right = reverseRight;
-              bounds.bottom = reverseBottom;
-        }
-
         void handleStretchEffect(const TreeInfo& info, uirenderer::Rect& targetBounds) {
             // Search up to find the nearest stretcheffect parent
             const DamageAccumulator::StretchResult result =
                 info.damageAccumulator->findNearestStretchEffect();
             const StretchEffect* effect = result.stretchEffect;
-            if (!effect) {
+            if (effect) {
+                // Compute the number of pixels that the stretching container
+                // scales by.
+                // Then compute the scale factor that the child would need
+                // to scale in order to occupy the same pixel bounds.
+                auto& parentBounds = result.parentBounds;
+                auto parentWidth = parentBounds.width();
+                auto parentHeight = parentBounds.height();
+                auto& stretchDirection = effect->getStretchDirection();
+                auto stretchX = stretchDirection.x();
+                auto stretchY = stretchDirection.y();
+                auto stretchXPixels = parentWidth * std::abs(stretchX);
+                auto stretchYPixels = parentHeight * std::abs(stretchY);
+                SkMatrix stretchMatrix;
+
+                auto childScaleX = 1 + (stretchXPixels / targetBounds.getWidth());
+                auto childScaleY = 1 + (stretchYPixels / targetBounds.getHeight());
+                auto pivotX = stretchX > 0 ? targetBounds.left : targetBounds.right;
+                auto pivotY = stretchY > 0 ? targetBounds.top : targetBounds.bottom;
+                stretchMatrix.setScale(childScaleX, childScaleY, pivotX, pivotY);
+                SkRect rect = SkRect::MakeLTRB(targetBounds.left, targetBounds.top,
+                                               targetBounds.right, targetBounds.bottom);
+                SkRect dst = stretchMatrix.mapRect(rect);
+                targetBounds.left = dst.left();
+                targetBounds.top = dst.top();
+                targetBounds.right = dst.right();
+                targetBounds.bottom = dst.bottom();
+            } else {
                 return;
             }
-
-            const auto& childRelativeBounds = result.childRelativeBounds;
-            stretchTargetBounds(*effect, result.width, result.height,
-                                childRelativeBounds,targetBounds);
 
             if (Properties::getStretchEffectBehavior() ==
                 StretchEffectBehavior::Shader) {
@@ -714,9 +713,8 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                         gPositionListener.clazz, gPositionListener.callApplyStretch, mListener,
                         info.canvasContext.getFrameNumber(), result.width, result.height,
                         stretchDirection.fX, stretchDirection.fY, effect->maxStretchAmountX,
-                        effect->maxStretchAmountY, childRelativeBounds.left(),
-                        childRelativeBounds.top(), childRelativeBounds.right(),
-                        childRelativeBounds.bottom());
+                        effect->maxStretchAmountY, targetBounds.left, targetBounds.top,
+                        targetBounds.right, targetBounds.bottom);
                 if (!keepListening) {
                     env->DeleteGlobalRef(mListener);
                     mListener = nullptr;
