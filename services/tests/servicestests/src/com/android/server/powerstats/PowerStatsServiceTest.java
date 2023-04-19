@@ -99,6 +99,7 @@ public class PowerStatsServiceTest {
     private static final int POWER_ENTITY_COUNT = 3;
     private static final int STATE_INFO_COUNT = 5;
     private static final int STATE_RESIDENCY_COUNT = 4;
+    private static final int APP_UID = 10042;
 
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
     private PowerStatsService mService;
@@ -109,6 +110,7 @@ public class PowerStatsServiceTest {
     private PowerStatsLogger mPowerStatsLogger;
     private MockClock mMockClock = new MockClock();
     private DeviceConfigInterface mMockDeviceConfig = new FakeDeviceConfigInterface();
+    private IntervalRandomNoiseGenerator mMockNoiseGenerator = new IntervalRandomNoiseGenerator(42);
 
     private class MockClock extends Clock {
         public long realtime;
@@ -204,6 +206,11 @@ public class PowerStatsServiceTest {
 
         DeviceConfigInterface getDeviceConfig() {
             return mMockDeviceConfig;
+        }
+
+        @Override
+        IntervalRandomNoiseGenerator createIntervalRandomNoiseGenerator() {
+            return mMockNoiseGenerator;
         }
     };
 
@@ -1102,6 +1109,7 @@ public class PowerStatsServiceTest {
     @Test
     public void getPowerMonitors() {
         mMockClock.realtime = 10 * 60_000;
+        mMockNoiseGenerator.reseed(314);
 
         mPowerStatsHALWrapper.buildEnergyConsumerResult();
         EnergyConsumerResult[] energyConsumerResults = mPowerStatsHALWrapper.energyConsumerResults;
@@ -1131,7 +1139,7 @@ public class PowerStatsServiceTest {
         GetPowerMonitorsResult result = new GetPowerMonitorsResult();
         mService.getPowerMonitorReadingsImpl(
                 new int[]{consumer1.index, consumer2.index, measurement1.index,
-                        measurement2.index}, result);
+                        measurement2.index}, result, APP_UID);
 
         assertThat(result.energyUws).isEqualTo(new long[]{42, 142, 314, 514});
         assertThat(result.timestamps).isEqualTo(new long[]{600_000, 600_100, 600_000, 600_200});
@@ -1150,7 +1158,7 @@ public class PowerStatsServiceTest {
         }
 
         mService.getPowerMonitorReadingsImpl(new int[]{consumer1.index, measurement1.index},
-                result);
+                result, APP_UID);
 
         assertThat(result.energyUws).isEqualTo(new long[]{42, 314});
         assertThat(result.timestamps).isEqualTo(new long[]{600_000, 600_000});
@@ -1158,9 +1166,10 @@ public class PowerStatsServiceTest {
         mMockClock.realtime += 10 * 60000;
 
         mService.getPowerMonitorReadingsImpl(new int[]{consumer1.index, measurement1.index},
-                result);
+                result, APP_UID);
 
-        assertThat(result.energyUws).isEqualTo(new long[]{300, 400});
+        // This time, random noise is added
+        assertThat(result.energyUws).isEqualTo(new long[]{298, 399});
         assertThat(result.timestamps).isEqualTo(new long[]{600_301, 600_401});
     }
 
@@ -1178,7 +1187,7 @@ public class PowerStatsServiceTest {
         assertThat(supportedPowerMonitorsResult.powerMonitors).isEmpty();
 
         GetPowerMonitorsResult getPowerMonitorsResult = new GetPowerMonitorsResult();
-        mService.getPowerMonitorReadingsImpl(new int[]{0}, getPowerMonitorsResult);
+        mService.getPowerMonitorReadingsImpl(new int[]{0}, getPowerMonitorsResult, APP_UID);
         assertThat(getPowerMonitorsResult.resultCode).isEqualTo(
                 IPowerStatsService.RESULT_UNSUPPORTED_POWER_MONITOR);
 
