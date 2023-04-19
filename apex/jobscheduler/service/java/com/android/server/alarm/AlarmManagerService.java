@@ -45,7 +45,6 @@ import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.SystemClockTime.TIME_CONFIDENCE_HIGH;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
-import static com.android.server.SystemTimeZone.getTimeZoneId;
 import static com.android.server.alarm.Alarm.APP_STANDBY_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.BATTERY_SAVER_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.DEVICE_IDLE_POLICY_INDEX;
@@ -139,7 +138,6 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.Keep;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
@@ -228,19 +226,6 @@ public class AlarmManagerService extends SystemService {
     static final int NEVER_INDEX = 4;
 
     private static final long TEMPORARY_QUOTA_DURATION = INTERVAL_DAY;
-
-    /*
-     * b/246256335: This compile-time constant controls whether Android attempts to sync the Kernel
-     * time zone offset via settimeofday(null, tz). For <= Android T behavior is the same as
-     * {@code true}, the state for future releases is the same as {@code false}.
-     * It is unlikely anything depends on this, but a compile-time constant has been used to limit
-     * the size of the revert if this proves to be invorrect. The guarded code and associated
-     * methods / native code can be removed after release testing has proved that removing the
-     * behavior doesn't break anything.
-     * TODO(b/246256335): After this change has soaked for a release, remove this constant and
-     * everything it affects.
-     */
-    private static final boolean KERNEL_TIME_ZONE_SYNC_ENABLED = false;
 
     private final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
@@ -1955,13 +1940,6 @@ public class AlarmManagerService extends SystemService {
 
             mNextWakeup = mNextNonWakeup = 0;
 
-            if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                // We set the current offset in kernel because the kernel doesn't keep this after a
-                // reboot. Keeping the kernel time zone in sync is "best effort" and can be wrong
-                // for a period after daylight savings transitions.
-                mInjector.syncKernelTimeZoneOffset();
-            }
-
             // Ensure that we're booting with a halfway sensible current time.
             mInjector.initializeTimeIfRequired();
 
@@ -2196,19 +2174,7 @@ public class AlarmManagerService extends SystemService {
             @CurrentTimeMillisLong long newSystemClockTimeMillis, @TimeConfidence int confidence,
             @NonNull String logMsg) {
         synchronized (mLock) {
-            final long oldSystemClockTimeMillis = mInjector.getCurrentTimeMillis();
             mInjector.setCurrentTimeMillis(newSystemClockTimeMillis, confidence, logMsg);
-
-            if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                // Changing the time may cross a DST transition; sync the kernel offset if needed.
-                final TimeZone timeZone = TimeZone.getTimeZone(SystemTimeZone.getTimeZoneId());
-                final int currentTzOffset = timeZone.getOffset(oldSystemClockTimeMillis);
-                final int newTzOffset = timeZone.getOffset(newSystemClockTimeMillis);
-                if (currentTzOffset != newTzOffset) {
-                    Slog.i(TAG, "Timezone offset has changed, updating kernel timezone");
-                    mInjector.setKernelTimeZoneOffset(newTzOffset);
-                }
-            }
 
             // The native implementation of setKernelTime can return -1 even when the kernel
             // time was set correctly, so assume setting kernel time was successful and always
@@ -2231,12 +2197,6 @@ public class AlarmManagerService extends SystemService {
             // "GMT" if the ID is unrecognized). The parameter ID is used here rather than
             // newZone.getId(). It will be rejected if it is invalid.
             timeZoneWasChanged = SystemTimeZone.setTimeZoneId(tzId, confidence, logInfo);
-
-            if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                // Update the kernel timezone information
-                int utcOffsetMillis = newZone.getOffset(mInjector.getCurrentTimeMillis());
-                mInjector.setKernelTimeZoneOffset(utcOffsetMillis);
-            }
         }
 
         // Clear the default time zone in the system server process. This forces the next call
@@ -4386,16 +4346,6 @@ public class AlarmManagerService extends SystemService {
     private static native void close(long nativeData);
     private static native int set(long nativeData, int type, long seconds, long nanoseconds);
     private static native int waitForAlarm(long nativeData);
-
-    /*
-     * b/246256335: The @Keep ensures that the native definition is kept even when the optimizer can
-     * tell no calls will be made due to a compile-time constant. Allowing this definition to be
-     * optimized away breaks loadLibrary("alarm_jni") at boot time.
-     * TODO(b/246256335): Remove this native method and the associated native code when it is no
-     * longer needed.
-     */
-    @Keep
-    private static native int setKernelTimezone(long nativeData, int minuteswest);
     private static native long getNextAlarm(long nativeData, int type);
 
     @GuardedBy("mLock")
@@ -4662,20 +4612,6 @@ public class AlarmManagerService extends SystemService {
 
         long getNextAlarm(int type) {
             return AlarmManagerService.getNextAlarm(mNativeData, type);
-        }
-
-        void setKernelTimeZoneOffset(int utcOffsetMillis) {
-            // Kernel tracks time offsets as 'minutes west of GMT'
-            AlarmManagerService.setKernelTimezone(mNativeData, -(utcOffsetMillis / 60000));
-        }
-
-        void syncKernelTimeZoneOffset() {
-            long currentTimeMillis = getCurrentTimeMillis();
-            TimeZone currentTimeZone = TimeZone.getTimeZone(getTimeZoneId());
-            // If the time zone ID is invalid, GMT will be returned and this will set a kernel
-            // offset of zero.
-            int utcOffsetMillis = currentTimeZone.getOffset(currentTimeMillis);
-            setKernelTimeZoneOffset(utcOffsetMillis);
         }
 
         void initializeTimeIfRequired() {
@@ -5200,12 +5136,6 @@ public class AlarmManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_DATE_CHANGED)) {
-                if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                    // Since the kernel does not keep track of DST, we reset the TZ information at
-                    // the beginning of each day. This may miss a DST transition, but it will
-                    // correct itself within 24 hours.
-                    mInjector.syncKernelTimeZoneOffset();
-                }
                 scheduleDateChangedEvent();
             }
         }
