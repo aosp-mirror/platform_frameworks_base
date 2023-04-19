@@ -1579,6 +1579,14 @@
   <java-symbol type="string" name="miniresolver_open_work" />
   <java-symbol type="string" name="miniresolver_use_personal_browser" />
   <java-symbol type="string" name="miniresolver_use_work_browser" />
+  <java-symbol type="string" name="miniresolver_call_in_work" />
+  <java-symbol type="string" name="miniresolver_switch_to_work" />
+  <java-symbol type="string" name="miniresolver_call" />
+  <java-symbol type="string" name="miniresolver_switch" />
+  <java-symbol type="string" name="miniresolver_call_information" />
+  <java-symbol type="string" name="miniresolver_sms_information" />
+  <java-symbol type="id" name="miniresolver_info_section" />
+  <java-symbol type="id" name="miniresolver_info_section_text" />
   <java-symbol type="id" name="button_open" />
   <java-symbol type="id" name="use_same_profile_browser" />
 

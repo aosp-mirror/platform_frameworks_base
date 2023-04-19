@@ -861,10 +861,10 @@
     <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
     <string name="managed_profile_label">Switch to work profile</string>
 
-    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <!-- "Switch" is a verb; it means to change user profile by switching to an app in the personal profile. -->
     <string name="user_owner_app_label">Switch to personal <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
 
-    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <!-- "Switch" is a verb; it means to change user profile by switching to an app in the work profile. -->
     <string name="managed_profile_app_label">Switch to work <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -5918,10 +5918,24 @@
     <string name="miniresolver_open_in_personal">Open in personal <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_open_in_work">Open in work <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
+    <!-- Dialog title. User must place the phone call in the other profile, or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_call_in_work">Call from work app?</string>
+    <!-- Dialog title. User much choose between opening content in a cross-profile app or cancelling. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_switch_to_work">Switch to work app?</string>
+    <!-- Dialog text.  Shown when the user is unable to make a phone call from a personal app due to restrictions set
+         by their organization, and so must switch to a work app or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_call_information">Your organization only allows you to make calls from work apps</string>
+    <!-- Dialog text.  Shown when the user is unable to send a text message from a personal app due to restrictions set
+         by their organization, and so must switch to a work app or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_sms_information">Your organization only allows you to send messages from work apps</string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_work_browser">Use work browser</string>
+    <!-- Button option. Action to place a phone call. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_call">Call</string>
+    <!-- Button option. Action to open an app in the work profile. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_switch">Switch</string>
 
     <!-- Icc depersonalization related strings -->
     <!-- Label text for PIN entry widget on SIM Network Depersonalization panel [CHAR LIMIT=none] -->

@@ -3093,17 +3093,20 @@
     <!-- Switch to work profile dialer app for placing a call dialog. -->
     <!-- Text for Switch to work profile dialog's Title. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=60] -->
-    <string name="call_from_work_profile_title">Can\'t call from this profile</string>
+    <string name="call_from_work_profile_title">Can\'t call from a personal app</string>
     <!-- Text for switch to work profile for call dialog to guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=NONE]
     -->
-    <string name="call_from_work_profile_text">Your work policy allows you to make phone calls only from the work profile</string>
+    <string name="call_from_work_profile_text">Your organization only allows you to make calls from work apps</string>
     <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
     <string name="call_from_work_profile_action">Switch to work profile</string>
+    <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
+    <string name="install_dialer_on_work_profile_action">Install a work phone app</string>
     <!-- Label for the close button on switch to work profile dialog. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
-    <string name="call_from_work_profile_close">Close</string>
+    <string name="call_from_work_profile_close">Cancel</string>
 
     <!--
     Label for a menu item in a menu that is shown when the user wishes to customize the lock screen.

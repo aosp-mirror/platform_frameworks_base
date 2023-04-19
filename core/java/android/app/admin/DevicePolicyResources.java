@@ -1851,9 +1851,54 @@ public final class DevicePolicyResources {
             public static final String WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON =
                     PREFIX + "TURN_ON_WORK_PROFILE_BUTTON_TEXT";
 
+            /**
+             * Information section shown on a dialog when the user is unable to place a call in
+             * the personal profile due to admin restrictions, and must choose whether to place
+             * the call from the work profile or cancel.
+             */
+            public static final String MINIRESOLVER_WORK_TELEPHONY_CALL_BLOCKED_INFORMATION =
+                    PREFIX + "MINIRESOLVER_WORK_TELEPHONY_INFORMATION";
+
+            /**
+             * Information section shown on a dialog when the user is unable to send a text in
+             * the personal profile due to admin restrictions, and must choose whether to place
+             * the call from the work profile or cancel.
+             */
+            public static final String MINIRESOLVER_WORK_TELEPHONY_TEXT_BLOCKED_INFORMATION =
+                    PREFIX + "MINIRESOLVER_WORK_TELEPHONY_INFORMATION";
+
+
+            /**
+             * Button for a dialog shown when the user is unable to place a call in the personal
+             * profile due to admin restrictions, and must choose whether to place the call from
+             * the work profile or cancel.
+             */
+            public static final String MINIRESOLVER_CALL_FROM_WORK =
+                    PREFIX + "MINIRESOLVER_CALL_FROM_WORK";
+
+            /**
+             * Button for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the work profile, or cancel.
+             */
+            public static final String MINIRESOLVER_SWITCH_TO_WORK =
+                    PREFIX + "MINIRESOLVER_SWITCH_TO_WORK";
+
+            /**
+             * Title for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the work profile, or open in the same profile browser. Accepts
+             * the app name as a param.
+             */
             public static final String MINIRESOLVER_OPEN_IN_WORK =
                     PREFIX + "MINIRESOLVER_OPEN_IN_WORK";
 
+            /**
+             * Title for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the personal profile, or open in the same profile browser.
+             * Accepts the app name as a param.
+             */
             public static final String MINIRESOLVER_OPEN_IN_PERSONAL =
                     PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
 
