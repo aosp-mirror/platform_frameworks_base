@@ -48,9 +48,9 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTA
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
-import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
@@ -236,7 +236,7 @@ final class LetterboxUiController {
     private final Boolean mBooleanPropertyIgnoreRequestedOrientation;
 
     @Nullable
-    private final Boolean mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected;
+    private final Boolean mBooleanPropertyAllowIgnoringOrientationRequestWhenLoopDetected;
 
     @Nullable
     private final Boolean mBooleanPropertyFakeFocus;
@@ -259,10 +259,10 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
                         PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
-        mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected =
+        mBooleanPropertyAllowIgnoringOrientationRequestWhenLoopDetected =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
-                        PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
+                        PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
         mBooleanPropertyFakeFocus =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isCompatFakeFocusEnabled,
@@ -445,7 +445,7 @@ final class LetterboxUiController {
                 /* gatingCondition */ mLetterboxConfiguration
                     ::isPolicyForIgnoringRequestedOrientationEnabled,
                 mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled,
-                mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected)) {
+                mBooleanPropertyAllowIgnoringOrientationRequestWhenLoopDetected)) {
             return false;
         }
 
