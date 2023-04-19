@@ -74,7 +74,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN କାମ ବିଫଳ ହେଲା!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUKର କାମ ବିଫଳ ହେଲା!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ଇନପୁଟ୍‌ ପଦ୍ଧତି ବଦଳାନ୍ତୁ"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"ଏରୋପ୍ଲେନ ମୋଡ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାଟର୍ନ ଆବଶ୍ୟକ ଅଟେ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବାପରେ ପାସ୍‌ୱର୍ଡ ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାସୱର୍ଡ ଆବଶ୍ୟକ ଅଟେ"</string>
