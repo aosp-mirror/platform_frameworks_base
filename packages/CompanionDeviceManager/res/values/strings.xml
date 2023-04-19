@@ -120,11 +120,8 @@
     <!-- Text of the permission sync explanation in the confirmation dialog. [CHAR LIMIT=NONE] -->
     <string name="permission_sync_summary">This may include &lt;strong&gt;Microphone&lt;/strong&gt;, &lt;strong&gt;Camera&lt;/strong&gt;, and &lt;strong&gt;Location access&lt;/strong&gt;, and other sensitive permissions on &lt;strong&gt;<xliff:g id="companion_device_name" example="My Watch">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;You can change these permissions any time in your Settings on &lt;strong&gt;<xliff:g id="companion_device_name" example="My Watch">%1$s</xliff:g>&lt;/strong&gt;.</string>
 
-    <!--Description for vendor icon [CHAR LIMIT=30]-->
-    <string name="vendor_icon_description">App Icon</string>
-
     <!--Description for information icon [CHAR LIMIT=30]-->
-    <string name="vendor_header_button_description">More Information Button</string>
+    <string name="vendor_header_button_description">More Information</string>
 
     <!-- ================= Permissions ================= -->
 
