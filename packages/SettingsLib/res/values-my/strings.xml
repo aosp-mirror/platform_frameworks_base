@@ -107,8 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ဖိုင်လွဲပြောင်းခြင်း"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ထည့်သွင်းသော စက်"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"အင်တာနက်ချိတ်ဆက်ခြင်း"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"အဆက်အသွယ်၊ ယခင်ခေါ်ဆိုမှုများ မျှဝေခြင်း"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"အဆက်အသွယ်နှင့် ယခင်ခေါ်ဆိုမှုများ မျှဝေရန် သုံးသည်"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"အဆက်အသွယ်၊ ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေခြင်း"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"အဆက်အသွယ်နှင့် ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေရန် သုံးသည်"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"မိုဘိုင်းမက်ဆေ့ဂျ်များ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM အသုံးပြုခြင်း"</string>
@@ -166,8 +166,8 @@
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB သုံး၍ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"ရွေ့လျားနိုင်သောဟော့စပေါ့"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ဘလူးတုသ်သုံးချိတ်ဆက်ခြင်း"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"မိုဘိုင်းသုံးတွဲချိတ်ခြင်း"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"တဆင့်ချိတ်ဆက်ခြင်း၊ ဟော့စပေါ့"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"မိုဘိုင်းသုံး၍ ချိတ်ဆက်ခြင်း"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"မိုဘိုင်းမိုဒမ်၊ ဟော့စပေါ့"</string>
     <string name="managed_user_title" msgid="449081789742645723">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>
     <string name="unknown" msgid="3544487229740637809">"မသိ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -220,7 +220,7 @@
     <string name="development_settings_summary" msgid="8718917813868735095">"အပလီကေးရှင်းတိုးတက်မှုအတွက် ရွေးချယ်မှုကိုသတ်မှတ်သည်"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ဤအသုံးပြုသူအတွက် ဆော့ဖ်ဝဲရေးသူ ရွေးစရာများ မရနိုင်ပါ"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"ဤ အသုံးပြုသူ အတွက် VPN ဆက်တင်များကို မရယူနိုင်"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"ဤ အသုံးပြုသူ အတွက် ချိတ်တွဲရေး ဆက်တင်များကို မရယူနိုင်"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"ဤအသုံးပြုသူအတွက် မိုဘိုင်းသုံး၍ ချိတ်ဆက်ခြင်း ဆက်တင်များ မရနိုင်ပါ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ဤ အသုံးပြုသူ အတွက် ဝင်လိုသည့် နေရာ အမည်၏ ဆက်တင်များကို မရယူနိုင်"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB အမှားရှာခြင်း"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB နှင့်ချိတ်ထားလျှင် အမှားရှာဖွေဖယ်ရှားမှုစနစ် စတင်ရန်"</string>
@@ -272,7 +272,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi ရှာဖွေခြင်း ထိန်းချုပ်မှု"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi ပြောင်းလဲသော MAC ကျပန်းပြုလုပ်ခြင်း"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"မိုဘိုင်းဒေတာကို အမြဲဖွင့်ထားရန်"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"ဖုန်းကို မိုဒမ်အဖြစ်အသုံးပြုမှု စက်ပစ္စည်းဖြင့် အရှိန်မြှင့်တင်ခြင်း"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"မိုဘိုင်းသုံး၍ ချိတ်ဆက်ရန် စက်ပစ္စည်း အရှိန်မြှင့်တင်ခြင်း"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ကို ဖွင့်ရန်"</string>
@@ -317,7 +317,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"ပုံစံတုတည်နေရာများကို ခွင့်ပြုရန်"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"ရည်ညွှန်းချက်စိစစ်ခြင်း မြင်ကွင်း"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi-Fi ဖွင့်ထားချိန်တွင်လည်း မိုဘိုင်းဒေတာ အမြဲတမ်းဖွင့်မည် (မြန်ဆန်သည့် ကွန်ရက် ပြောင်းခြင်းအတွက်)။"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"အရှိန်မြှင့်တင်ရန် မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း စက်ပစ္စည်းကို ရနိုင်လျှင် သုံးပါ"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"အရှိန်မြှင့်တင်ရန် မိုဘိုင်းသုံး၍ ချိတ်ဆက်သည့် စက်ပစ္စည်းကို ရနိုင်လျှင် သုံးပါ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ပြသနာရှာခြင်း ခွင့်ပြုပါမလား?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USBအမှားရှားခြင်းမှာ ဆော့ဝဲလ်ရေးသားရန်အတွက်သာ ရည်ရွယ်ပါသည်။ သင့်ကွန်ပြုတာနှင့်သင့်စက်ကြားတွင် ဒေတာများကိုကူးယူရန်၊ အကြောင်းမကြားပဲနှင့် သင့်စက်အတွင်းသို့ အပလီကေးရှင်းများထည့်သွင်းခြင်းနှင့် ဒေတာမှတ်တမ်းများဖတ်ရန်အတွက် အသုံးပြုပါ"</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ခွင့်ပြုမလား။"</string>
@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"အချိန်တိုးရန်။"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"အချိန်လျှော့ရန်။"</string>
     <string name="cancel" msgid="5665114069455378395">"မလုပ်တော့"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"ပြီးပြီ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"အသုံးပြုသူအသစ် ထည့်မလား။"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"နောက်ထပ် အသုံးပြုသူများ ထည့်သွင်းခြင်းဖြင့် ဤစက်ပစ္စည်းကို အခြားသူများနှင့် မျှဝေအသုံးပြုနိုင်သည်။ အသုံးပြုသူတိုင်းသည် မိမိတို့ကိုယ်ပိုင်နေရာ ရရှိမည်ဖြစ်ပြီး အက်ပ်၊ နောက်ခံပုံနှင့် အခြားအရာတို့ဖြင့် စိတ်ကြိုက်ပြင်ဆင်နိုင်ပါမည်။ အားလုံးကို အကျိုးသက်ရောက်မှု ရှိစေနိုင်သည့် Wi-Fi ကဲ့သို့ ဆက်တင်များကိုလည်း ချိန်ညှိနိုင်ပါမည်။\n\nအသုံးပြုသူအသစ် ထည့်သည့်အခါ ထိုသူသည် မိမိ၏ကိုယ်ပိုင်နေရာကို သတ်မှတ်ရပါမည်။\n\nအသုံးပြုသူ မည်သူမဆို အခြားအသုံးပြုသူများအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်နိုင်သည်။ အများသုံးစွဲနိုင်မှုဆက်တင်များနှင့် ဝန်ဆောင်မှုများကို အသုံးပြုသူအသစ်ထံသို့ လွှဲပြောင်းပေးမည် မဟုတ်ပါ။"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်ပေးနိုင်သည်။"</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"အသုံးပြုသူကို စီမံသူလုပ်ပိုင်ခွင့်ပေးမလား။"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"စီမံခန့်ခွဲသူအနေဖြင့် အခြားအသုံးပြုသူများကို စီမံခြင်း၊ စက်ပစ္စည်းဆက်တင်များကို ပြင်ဆင်ခြင်းနှင့် စက်ပစ္စည်းကို စက်ရုံထုတ်အတိုင်း ပြင်ဆင်သတ်မှတ်ခြင်းတို့ ပြုလုပ်နိုင်ပါမည်။"</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"အသုံးပြုသူကို ယခုသတ်မှတ်မလား။"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ထိုသူသည် ကိရိယာကိုယူ၍ ၎င်းတို့၏နေရာများကို ယခုသတ်မှတ်နိုင်ရမည်"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ယခု ကိုယ်ရေးအချက်အလက်ကို အစီအမံလုပ်မည်လား?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"၎င်းသည် ဧည့်သည် စက်ရှင်အသစ်ကို စတင်မည်ဖြစ်ပြီး လက်ရှိစက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်ပါမည်"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ဧည့်သည်မုဒ်မှ ထွက်မလား။"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"၎င်းသည် လက်ရှိဧည့်သည် စက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်လိုက်ပါမည်"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"ဤအသုံးပြုသူကို စီမံသူလုပ်ပိုင်ခွင့်များ ပေးပါ"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"အသုံးပြုသူကို စီမံသူလုပ်ပိုင်ခွင့်များ မပေးပါနှင့်"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ထွက်ရန်"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ဧည့်သည်လုပ်ဆောင်ချက် သိမ်းမလား။"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"လက်ရှိစက်ရှင်မှ လုပ်ဆောင်ချက် သိမ်းနိုင်သည် (သို့) အက်ပ်နှင့် ဒေတာအားလုံး ဖျက်နိုင်သည်"</string>
