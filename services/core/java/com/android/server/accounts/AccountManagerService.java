@@ -3018,7 +3018,7 @@ public class AccountManagerService
         final long identityToken = clearCallingIdentity();
         try {
             // Distill the caller's package signatures into a single digest.
-            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg);
+            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg, userId);
 
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
@@ -3182,12 +3182,12 @@ public class AccountManagerService
                 .write();
     }
 
-    private byte[] calculatePackageSignatureDigest(String callerPkg) {
+    private byte[] calculatePackageSignatureDigest(String callerPkg, int userId) {
         MessageDigest digester;
         try {
             digester = MessageDigest.getInstance("SHA-256");
-            PackageInfo pkgInfo = mPackageManager.getPackageInfo(
-                    callerPkg, PackageManager.GET_SIGNATURES);
+            PackageInfo pkgInfo = mPackageManager.getPackageInfoAsUser(
+                    callerPkg, PackageManager.GET_SIGNATURES, userId);
             for (Signature sig : pkgInfo.signatures) {
                 digester.update(sig.toByteArray());
             }
