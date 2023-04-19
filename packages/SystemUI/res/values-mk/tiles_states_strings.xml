@@ -88,7 +88,7 @@
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"Недостапна"</item>
-    <item msgid="1909756493418256167">"Исклучена"</item>
+    <item msgid="1909756493418256167">"Исклучено"</item>
     <item msgid="4531508423703413340">"Вклучена"</item>
   </string-array>
   <string-array name="tile_states_inversion">
