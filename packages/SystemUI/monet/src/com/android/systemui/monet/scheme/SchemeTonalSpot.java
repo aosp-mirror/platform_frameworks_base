@@ -32,7 +32,7 @@ public class SchemeTonalSpot extends DynamicScheme {
                 TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 16.0),
                 TonalPalette.fromHueAndChroma(
                         MathUtils.sanitizeDegreesDouble(sourceColorHct.getHue() + 60.0), 24.0),
-                TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 4.0),
+                TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 6.0),
                 TonalPalette.fromHueAndChroma(sourceColorHct.getHue(), 8.0));
     }
 }
