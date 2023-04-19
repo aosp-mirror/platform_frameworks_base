@@ -66,7 +66,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private static final long INVALID_ID = -1;
     public static final int NANOS_IN_MILLISECOND = 1_000_000;
 
-    private static final int MAX_LENGTH_EVENT_DESC = 20;
+    private static final int MAX_LENGTH_EVENT_DESC = 127;
 
     private static final int MAX_FLUSH_ATTEMPTS = 3;
     private static final int FLUSH_DELAY_MILLISECOND = 60;
@@ -295,7 +295,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                         + ", defer=" + mDeferMonitoring + ", current=" + currentVsync);
             }
             if (mDeferMonitoring && currentVsync < mBeginVsyncId) {
-                markEvent("FT#deferMonitoring");
+                markEvent("FT#deferMonitoring", 0);
                 // Normal case, we begin the instrument from the very beginning,
                 // will exclude the first frame.
                 postTraceStartMarker(this::beginInternal);
@@ -326,9 +326,10 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             return;
         }
         mTracingStarted = true;
-        markEvent("FT#begin");
-        Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
-        markEvent("FT#layerId#" + mSurfaceControl.getLayerId());
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, mSession.getName(), mSession.getName(),
+                (int) mBeginVsyncId);
+        markEvent("FT#beginVsync", mBeginVsyncId);
+        markEvent("FT#layerId", mSurfaceControl.getLayerId());
         mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
         if (!mSurfaceOnly) {
             mRendererWrapper.addObserver(mObserver);
@@ -354,8 +355,10 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 Log.d(TAG, "end: " + mSession.getName()
                         + ", end=" + mEndVsyncId + ", reason=" + reason);
             }
-            markEvent("FT#end#" + reason);
-            Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+            markEvent("FT#end", reason);
+            markEvent("FT#endVsync", mEndVsyncId);
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, mSession.getName(),
+                    (int) mBeginVsyncId);
             mSession.setReason(reason);
 
             // We don't remove observer here,
@@ -405,10 +408,11 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 reason == REASON_CANCEL_NOT_BEGUN || reason == REASON_CANCEL_SAME_VSYNC;
         if (mCancelled || (mEndVsyncId != INVALID_ID && !cancelFromEnd)) return false;
         mCancelled = true;
-        markEvent("FT#cancel#" + reason);
+        markEvent("FT#cancel", reason);
         // We don't need to end the trace section if it has never begun.
         if (mTracingStarted) {
-            Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, mSession.getName(),
+                    (int) mBeginVsyncId);
         }
 
         // Always remove the observers in cancel call to avoid leakage.
@@ -429,18 +433,19 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     /**
      * Mark the FrameTracker events in the trace.
      *
-     * @param desc The description of the trace event,
-     *            shouldn't exceed {@link #MAX_LENGTH_EVENT_DESC}.
+     * @param eventName  The description of the trace event,
+     * @param eventValue The value of the related trace event
+     *                   Both shouldn't exceed {@link #MAX_LENGTH_EVENT_DESC}.
      */
-    private void markEvent(@NonNull String desc) {
-        if (desc.length() > MAX_LENGTH_EVENT_DESC) {
-            throw new IllegalArgumentException(TextUtils.formatSimple(
-                    "The length of the trace event description <%s> exceeds %d",
-                    desc, MAX_LENGTH_EVENT_DESC));
-        }
+    private void markEvent(@NonNull String eventName, long eventValue) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
-            Trace.instant(Trace.TRACE_TAG_APP,
-                    TextUtils.formatSimple("%s#%s", mSession.getName(), desc));
+            String event = TextUtils.formatSimple("%s#%s", eventName, eventValue);
+            if (event.length() > MAX_LENGTH_EVENT_DESC) {
+                throw new IllegalArgumentException(TextUtils.formatSimple(
+                        "The length of the trace event description <%s> exceeds %d",
+                        event, MAX_LENGTH_EVENT_DESC));
+            }
+            Trace.instantForTrack(Trace.TRACE_TAG_APP, mSession.getName(), event);
         }
     }
 
@@ -572,7 +577,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
         getHandler().removeCallbacks(mWaitForFinishTimedOut);
         mWaitForFinishTimedOut = null;
-        markEvent("FT#finish#" + mJankInfos.size());
+        markEvent("FT#finish", mJankInfos.size());
 
         // The tracing has been ended, remove the observer, see if need to trigger perfetto.
         removeObservers();
@@ -622,6 +627,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 // TODO (b/174755489): Early latch currently gets fired way too often, so we have
                 // to ignore it for now.
                 if (!mSurfaceOnly && !info.hwuiCallbackFired) {
+                    markEvent("FT#MissedHWUICallback", info.frameVsyncId);
                     Log.w(TAG, "Missing HWUI jank callback for vsyncId: " + info.frameVsyncId
                             + ", CUJ=" + mSession.getName());
                 }
@@ -629,6 +635,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             if (!mSurfaceOnly && info.hwuiCallbackFired) {
                 maxFrameTimeNanos = Math.max(info.totalDurationNanos, maxFrameTimeNanos);
                 if (!info.surfaceControlCallbackFired) {
+                    markEvent("FT#MissedSFCallback", info.frameVsyncId);
                     Log.w(TAG, "Missing SF jank callback for vsyncId: " + info.frameVsyncId
                             + ", CUJ=" + mSession.getName());
                 }
