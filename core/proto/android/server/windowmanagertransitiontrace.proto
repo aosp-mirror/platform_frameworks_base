@@ -64,30 +64,3 @@ message Target {
   optional int32 window_id = 3;  // Not dumped in always on tracing
   optional int32 flags = 4;
 }
-
-message TransitionState {
-  enum State {
-    COLLECTING = 0;
-    PENDING = -1;
-    STARTED = 1;
-    PLAYING = 2;
-    ABORT = 3;
-    FINISHED = 4;
-  }
-
-  required int64 time_ns = 1;
-  required int32 transition_id = 2;
-  required int32 transition_type = 3;
-  required State state = 4;
-  required int32 flags = 5;
-  repeated ChangeInfo change = 6;
-  repeated com.android.server.wm.IdentifierProto participants = 7;
-}
-
-message ChangeInfo {
-  required com.android.server.wm.IdentifierProto window_identifier = 1;
-  required int32 transit_mode = 2;
-  required bool has_changed = 3;
-  required int32 change_flags = 4;
-  required int32 windowing_mode = 5;
-}
