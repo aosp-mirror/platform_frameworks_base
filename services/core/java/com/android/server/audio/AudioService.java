@@ -12475,20 +12475,16 @@ public class AudioService extends IAudioService.Stub
         }
 
         int addMixes(@NonNull ArrayList<AudioMix> mixes) {
-            // TODO optimize to not have to unregister the mixes already in place
             synchronized (mMixes) {
-                mAudioSystem.registerPolicyMixes(mMixes, false);
                 this.add(mixes);
-                return mAudioSystem.registerPolicyMixes(mMixes, true);
+                return mAudioSystem.registerPolicyMixes(mixes, true);
             }
         }
 
         int removeMixes(@NonNull ArrayList<AudioMix> mixes) {
-            // TODO optimize to not have to unregister the mixes already in place
             synchronized (mMixes) {
-                mAudioSystem.registerPolicyMixes(mMixes, false);
                 this.remove(mixes);
-                return mAudioSystem.registerPolicyMixes(mMixes, true);
+                return mAudioSystem.registerPolicyMixes(mixes, false);
             }
         }
 
