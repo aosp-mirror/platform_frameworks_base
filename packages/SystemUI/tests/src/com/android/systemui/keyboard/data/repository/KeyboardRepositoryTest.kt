@@ -18,9 +18,12 @@
 package com.android.systemui.keyboard.data.repository
 
 import android.hardware.input.InputManager
+import android.hardware.input.InputManager.KeyboardBacklightListener
+import android.hardware.input.KeyboardBacklightState
 import android.view.InputDevice
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -29,9 +32,11 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -50,6 +55,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
 
     @Captor
     private lateinit var deviceListenerCaptor: ArgumentCaptor<InputManager.InputDeviceListener>
+    @Captor private lateinit var backlightListenerCaptor: ArgumentCaptor<KeyboardBacklightListener>
     @Mock private lateinit var inputManager: InputManager
 
     private lateinit var underTest: KeyboardRepository
@@ -164,7 +170,71 @@ class KeyboardRepositoryTest : SysuiTestCase() {
 
     @Test
     fun passesKeyboardBacklightValues_fromBacklightListener() {
-        // TODO(b/268645734): implement when implementing backlight listener
+        testScope.runTest {
+            // we want to capture backlight listener but this can only be done after Flow is
+            // subscribed to and listener is actually registered in inputManager
+            val backlight by collectLastValueImmediately(underTest.backlight)
+
+            verify(inputManager)
+                .registerKeyboardBacklightListener(any(), backlightListenerCaptor.capture())
+
+            backlightListenerCaptor.value.onBacklightChanged(current = 1, max = 5)
+
+            assertThat(backlight?.level).isEqualTo(1)
+            assertThat(backlight?.maxLevel).isEqualTo(5)
+        }
+    }
+
+    private fun <T> TestScope.collectLastValueImmediately(flow: Flow<T>): FlowValue<T?> {
+        val lastValue = collectLastValue(flow)
+        // runCurrent() makes us wait for collect that happens in collectLastValue and ensures
+        // Flow is initialized
+        runCurrent()
+        return lastValue
+    }
+
+    @Test
+    fun keyboardBacklightValuesNotPassed_fromBacklightListener_whenNotTriggeredByKeyPress() {
+        testScope.runTest() {
+            val backlight by collectLastValueImmediately(underTest.backlight)
+            verify(inputManager)
+                .registerKeyboardBacklightListener(any(), backlightListenerCaptor.capture())
+
+            backlightListenerCaptor.value.onBacklightChanged(
+                current = 1,
+                max = 5,
+                triggeredByKeyPress = false
+            )
+            assertThat(backlight).isNull()
+        }
+    }
+
+    @Test
+    fun passesKeyboardBacklightValues_fromBacklightListener_whenTriggeredByKeyPress() {
+        testScope.runTest() {
+            val backlight by collectLastValueImmediately(underTest.backlight)
+            verify(inputManager)
+                .registerKeyboardBacklightListener(any(), backlightListenerCaptor.capture())
+
+            backlightListenerCaptor.value.onBacklightChanged(
+                current = 1,
+                max = 5,
+                triggeredByKeyPress = true
+            )
+            assertThat(backlight).isNotNull()
+        }
+    }
+
+    private fun KeyboardBacklightListener.onBacklightChanged(
+        current: Int,
+        max: Int,
+        triggeredByKeyPress: Boolean = true
+    ) {
+        onKeyboardBacklightChanged(
+            /* deviceId= */ 0,
+            TestBacklightState(current, max),
+            triggeredByKeyPress
+        )
     }
 
     private companion object {
@@ -187,5 +257,13 @@ class KeyboardRepositoryTest : SysuiTestCase() {
                 whenever(it.isVirtual).thenReturn(virtual)
                 whenever(it.isFullKeyboard).thenReturn(fullKeyboard)
             }
+    }
+
+    private class TestBacklightState(
+        private val brightnessLevel: Int,
+        private val maxBrightnessLevel: Int
+    ) : KeyboardBacklightState() {
+        override fun getBrightnessLevel() = brightnessLevel
+        override fun getMaxBrightnessLevel() = maxBrightnessLevel
     }
 }
