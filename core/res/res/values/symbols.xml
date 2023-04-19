@@ -5054,4 +5054,65 @@
 
   <java-symbol type="attr" name="actionModeUndoDrawable" />
   <java-symbol type="attr" name="actionModeRedoDrawable" />
+
+  <!-- Remaining symbols for Themes -->
+  <java-symbol type="style" name="Theme.DeviceDefault.Autofill.Save" />
+  <java-symbol type="style" name="Theme.DeviceDefault.AutofillHalfScreenDialogButton" />
+  <java-symbol type="style" name="Theme.DeviceDefault.AutofillHalfScreenDialogList" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DayNight" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.Alert.DayNight" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoActionBar.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.Presentation" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DialogWhenLarge" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DocumentsUI" />
+  <java-symbol type="style" name="Theme.DeviceDefault.InputMethod" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.DarkActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.Presentation" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar.Overscan" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Panel" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.SearchBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Voice" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar.Fullscreen" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar.Overscan" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Notification" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Panel" />
+  <java-symbol type="style" name="Theme.DeviceDefault.ResolverCommon" />
+  <java-symbol type="style" name="Theme.DeviceDefault.SearchBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dark.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dialog.Alert" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dialog.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.DialogBase" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.DialogWhenLarge" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings" />
+  <java-symbol type="style" name="Theme.DeviceDefault.System.Dialog.Alert" />
+  <java-symbol type="style" name="Theme.DeviceDefault.System.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.SystemUI.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Wallpaper.NoTitleBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Wallpaper" />
+  <java-symbol type="style" name="Theme.DeviceDefault" />
+  <java-symbol type="style" name="Theme.DeviceDefaultBase" />
+  <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Accent" />
+  <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Accent.Light" />
+  <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" />
 </resources>
