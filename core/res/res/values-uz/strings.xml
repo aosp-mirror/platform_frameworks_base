@@ -310,7 +310,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"qurilmangizdagi fayllarga kirish"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiqa va audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"qurilmadagi musiqa va audioga ruxsat"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Video va suratlar"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Suratlar va videolar"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"qurilmadagi rasm va videolarga ruxsat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ovoz yozib olish"</string>

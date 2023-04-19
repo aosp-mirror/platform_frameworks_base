@@ -635,7 +635,7 @@
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Поставете уште начини за отклучување"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Допрете за да додадете отпечаток"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток на прст"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не може да се користи сензорот за отпечатоци"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Однесете го на поправка."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не може да создаде модел на лик. Обидете се пак."</string>
@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа лицето. Држете го телефонот во висина на очите."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа ликот. Држете го телефонот во висина на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно регистрирајте го лицето."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Не се препознава ликот. Обидете се пак."</string>

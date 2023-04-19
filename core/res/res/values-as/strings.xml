@@ -379,7 +379,7 @@
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"এই এপ্‌টোৱে আপোনাৰ ফ\'নত সংৰক্ষিত আটাইবোৰ এছএমএছ (পাঠ) বাৰ্তা পঢ়িব পাৰে।"</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"পাঠ বার্তা (WAP) বোৰ লাভ কৰক"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"এপ্‌টোক WAP বাৰ্তাবোৰ পাবলৈ আৰু প্ৰক্ৰিয়া সম্পন্ন কৰিবলৈ অনুমতি দিয়ে৷ এই অনুমতিত আপোনালৈ পঠিওৱা বাৰ্তাবোৰ আপোনাক নেদেখুৱাকৈয়ে নিৰীক্ষণ বা মচাৰ সক্ষমতা অন্তৰ্ভুক্ত থাকে৷"</string>
-    <string name="permlab_getTasks" msgid="7460048811831750262">"চলি থকা এপসমূহ বিচাৰি উলিয়াওক"</string>
+    <string name="permlab_getTasks" msgid="7460048811831750262">"চলি থকা এপ্‌সমূহ বিচাৰি উলিয়াওক"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"এপ্‌টোক বৰ্তমানে আৰু শেহতীয়াভাৱে চলি থকা কাৰ্যসমূহৰ বিষয়ে তথ্য পুনৰুদ্ধাৰ কৰিবলৈ অনুমতি দিয়ে৷ এইটোৱে এপ্‌টোক ডিভাইচটোত কোনবোৰ এপ্লিকেশ্বন ব্যৱহাৰ হৈ আছে তাৰ বিষয়ে তথ্য বিচাৰি উলিয়াবলৈ অনুমতি দিব পাৰে৷"</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"প্ৰ\'ফাইল আৰু ডিভাইচৰ গৰাকীসকলক পৰিচালনা কৰিব পাৰে"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="7304240671781989283">"প্ৰ\'ফাইলৰ গৰাকী আৰু ডিভাইচৰ গৰাকী ছেট কৰিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
@@ -387,8 +387,8 @@
     <string name="permdesc_reorderTasks" msgid="8796089937352344183">"গতিবিধিক অগ্ৰভাগ আৰু নেপথ্যলৈ নিবলৈ এপক অনুমতি দিয়ে। এপে এই কার্য আপোনাৰ ইনপুট অবিহনেই কৰিব পাৰে।"</string>
     <string name="permlab_enableCarMode" msgid="893019409519325311">"গাড়ীৰ ম\'ড সক্ষম কৰক"</string>
     <string name="permdesc_enableCarMode" msgid="56419168820473508">"গাড়ী ম\'ড সক্ষম কৰিবলৈ এপ্‌টোক অনুমতি দিয়ে৷"</string>
-    <string name="permlab_killBackgroundProcesses" msgid="6559320515561928348">"অন্য এপবোৰ বন্ধ কৰক"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"এপ্‌টোক অন্য এপসমূহৰ নেপথ্যৰ প্ৰক্ৰিয়াসমূহ শেষ কৰিবলৈ অনুমতি দিয়ে৷ এই কার্যৰ বাবে অন্য এপসমূহ চলাটো বন্ধ হ\'ব পাৰে৷"</string>
+    <string name="permlab_killBackgroundProcesses" msgid="6559320515561928348">"অন্য এপ্‌বোৰ বন্ধ কৰক"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"এপ্‌টোক অন্য এপ্‌সমূহৰ নেপথ্যৰ প্ৰক্ৰিয়াসমূহ শেষ কৰিবলৈ অনুমতি দিয়ে৷ এই কার্যৰ বাবে অন্য এপ্‌সমূহ চলাটো বন্ধ হ\'ব পাৰে৷"</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"এই এপ্‌টো অইন এপৰ ওপৰত প্ৰদৰ্শিত হ\'ব পাৰে"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"এই এপ্‌টো অন্য এপৰ ওপৰত বা স্ক্ৰীনৰ অন্য অংশত প্ৰদৰ্শিত হ\'ব পাৰে। এই কাৰ্যই এপৰ স্বাভাৱিক ব্যৱহাৰত ব্যাঘাত জন্মাব পাৰে আৰু অন্য এপ্‌সমূহক স্ক্ৰীনত কেনেকৈ দেখা পোৱা যায় সেইটো সলনি কৰিব পাৰে।"</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"নেপথ্যত চলিব পাৰে"</string>
@@ -1250,7 +1250,7 @@
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক আপগ্ৰেড কৰি থকা হৈছে…"</string>
     <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g>ৰ ভিতৰত <xliff:g id="NUMBER_0">%1$d</xliff:g> এপ্ অপ্টিমাইজ কৰি থকা হৈছে৷"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>সাজু কৰি থকা হৈছে।"</string>
-    <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"আৰম্ভ হৈ থকা এপসমূহ।"</string>
+    <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"আৰম্ভ হৈ থকা এপ্‌সমূহ।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"বুট কাৰ্য সমাপ্ত কৰিছে।"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"আপুনি পাৱাৰ বুটামটো টিপিছে — এইটোৱে সাধাৰণতে স্ক্ৰীনখন অফ কৰে।\n\nআপোনাৰ ফিংগাৰপ্ৰিণ্টটো ছেট আপ কৰাৰ সময়ত লাহেকৈ টিপি চাওক।"</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ছেটআপ সমাপ্ত কৰিবলৈ স্ক্ৰীন অফ কৰক"</string>

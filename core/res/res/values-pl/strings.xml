@@ -306,7 +306,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"dostęp do informacji o lokalizacji tego urządzenia"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostęp do kalendarza"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"SMS-y"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"wysyłanie i wyświetlanie SMS‑ów"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Pliki"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"dostęp do plików na urządzeniu"</string>
@@ -1368,7 +1368,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Wykryto analogowe urządzenie audio"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Podłączone urządzenie nie jest zgodne z tym telefonem. Kliknij, by dowiedzieć się więcej."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Podłączono moduł debugowania USB"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Kliknij, by wyłączyć debugowanie USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Kliknij, żeby wyłączyć debugowanie USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Wybierz, aby wyłączyć debugowanie USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Podłączono debugowanie bezprzewodowe"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Kliknij, by wyłączyć debugowanie bezprzewodowe"</string>
@@ -2088,7 +2088,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Wyłącz"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"W Androidzie 12 ulepszone powiadomienia zastąpiły dotychczasowe powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać całą zawartość powiadomień, w tym informacje osobiste takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"W Androidzie 12 ulepszone powiadomienia zastąpiły dotychczasowe powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia. \n\nUlepszone powiadomienia mogą czytać całą zawartość powiadomień, w tym informacje prywatne, takie jak nazwy kontaktów i treść wiadomości. Funkcja ta może też zamykać powiadomienia oraz na nie reagować, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>

@@ -1358,7 +1358,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Жалғанған құрылғы USB арқылы зарядталуда"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB арқылы файл жіберу мүмкіндігі қосылды"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP режимі USB арқылы қосылды"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB тетеринг режимі қосылды"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-тетеринг режимі қосылды"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI режимі USB арқылы қосылды"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB жабдығы жалғанған"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Қосымша опциялар үшін түртіңіз."</string>
@@ -1624,7 +1624,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляциялау"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Құрылғыға жалғау"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Экран трансляциясы"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғылар ізделуде…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғылар ізделіп жатыр…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Параметрлер"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Ажырату"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Тексеруде..."</string>
@@ -1863,7 +1863,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Бір минут ({formattedTime} дейін)}other{# минут ({formattedTime} дейін)}}"</string>

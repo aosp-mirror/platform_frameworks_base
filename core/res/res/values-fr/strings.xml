@@ -317,7 +317,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder aux données d\'activité physique"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Caméra"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"détecter des appareils à proximité et s\'y connecter"</string>
@@ -1355,7 +1355,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Aucune autorisation requise"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"Cela peut engendrer des frais"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Appareil en charge via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Recharge de cet appareil via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Recharge via USB de l\'appareil connecté"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transfert de fichiers via USB activé"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB activé"</string>
@@ -1862,7 +1862,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive l\'activité en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'Économiseur de données ?"</string>
@@ -2087,7 +2087,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées remplacent les notifications intelligentes dans Android 12. Cette fonctionnalité affiche les suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris aux informations personnelles tels que les noms des contacts et les messages. Elle peut aussi fermer les notifications ou effectuer des actions comme répondre à un appel téléphonique et contrôler le mode Ne pas déranger."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications intelligentes dans Android 12. Cette fonctionnalité affiche des suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris à des infos personnelles tels que les noms et les messages des contacts. Elle peut aussi fermer les notifications, ou y répondre (répondre aux appels téléphoniques, par exemple), et contrôler Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>

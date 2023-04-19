@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонду солго жылдырыңыз"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонду оңго жылдырыңыз"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Түзмөгүңүзгө түз караңыз."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Жүзүңүз көрүнбөй жатат. Телефонду көздөрүңүздүн деңгээлинде кармаңыз."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Жүзүңүз көрүнбөй жатат. Телефонду маңдайыңызга кармаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Кыймылдап жибердиңиз. Телефонду түз кармаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Жүзүңүздү кайра таанытыңыз."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Жүз таанылбай жатат. Кайталаңыз."</string>
@@ -1077,7 +1077,7 @@
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"боштук"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"жок кылуу"</string>
+    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"өчүрүү"</string>
     <string name="search_go" msgid="2141477624421347086">"Издөө"</string>
     <string name="search_hint" msgid="455364685740251925">"Издөө…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"Издөө"</string>
@@ -1143,7 +1143,7 @@
     <string name="paste" msgid="461843306215520225">"Чаптоо"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Жөнөкөй текст катары чаптоо"</string>
     <string name="replace" msgid="7842675434546657444">"Алмаштыруу…"</string>
-    <string name="delete" msgid="1514113991712129054">"Жок кылуу"</string>
+    <string name="delete" msgid="1514113991712129054">"Өчүрүү"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL көчүрмөлөө"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"Текст тандоо"</string>
     <string name="undo" msgid="3175318090002654673">"Артка кайтаруу"</string>
@@ -1151,7 +1151,7 @@
     <string name="autofill" msgid="511224882647795296">"Автотолтуруу"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Текст тандоо"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Сөздүккө кошуу"</string>
-    <string name="deleteText" msgid="4200807474529938112">"Жок кылуу"</string>
+    <string name="deleteText" msgid="4200807474529938112">"Өчүрүү"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст боюнча иштер"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артка"</string>
@@ -1552,7 +1552,7 @@
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Кийинки ай"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Айнуу"</string>
-    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Жок кылуу"</string>
+    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Өчүрүү"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Даяр"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Режимди өзгөртүү"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift"</string>
@@ -1707,7 +1707,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Түстөрдү инверсиялоо"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Түстөрдү тууралоо"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Бир кол режими"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Кошумча караңгылатуу"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дагы караңгы"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын колдонуу үчүн үнүн чоңойтуп/кичирейтүү баскычтарын үч секунд коё бербей басып туруңуз"</string>

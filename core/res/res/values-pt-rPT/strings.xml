@@ -649,7 +649,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Mova o telemóvel para a sua esquerda"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Mova o telemóvel para a sua direita"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Olhe mais diretamente para o dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Não é possível ver o seu rosto. Mantenha o telemóvel ao nível dos olhos."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Rosto não detetado. Segure o telemóvel ao nível dos olhos."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Demasiado movimento. Mantenha o telemóvel firme."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Volte a inscrever o rosto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossível reconhecer o rosto. Tente novamente."</string>

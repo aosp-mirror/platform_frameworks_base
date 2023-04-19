@@ -70,7 +70,7 @@
     <string name="CnirMmi" msgid="885292039284503036">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ಮೂರು ಮಾರ್ಗದಲ್ಲಿ ಕರೆ ಮಾಡುವಿಕೆ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ಅನಪೇಕ್ಷಿತ ಕಿರಿಕಿರಿ ಮಾಡುವ ಕರೆಗಳ ತಿರಸ್ಕಾರ"</string>
-    <string name="CndMmi" msgid="185136449405618437">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯ ವಿತರಣೆ"</string>
+    <string name="CndMmi" msgid="185136449405618437">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯ ಡೆಲಿವರಿ"</string>
     <string name="DndMmi" msgid="8797375819689129800">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಿಲ್ಲ"</string>
