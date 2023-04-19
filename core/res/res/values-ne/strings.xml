@@ -446,9 +446,9 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"एपलाई प्रसारण समाप्त भइसकेपछि पनि रहिरहने स्टिकी प्रसारणहरू पठाउने अनुमति दिन्छ। यो सुविधाको अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग हुने भएकाले तपाईंको Android टिभी यन्त्र सुस्त वा अस्थिर हुन सक्छ।"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"औपचारिक प्रसारणलाई पठाउनको लागि एक एपलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले फोनलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"तपाईँका सम्पर्कहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको ट्याब्लेटमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा पढ्न अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"एपलाई तपाईंको फोनमा भण्डारण गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको फोनमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका कन्ट्याक्टहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले कन्ट्याक्टहरू बनाउने तपाईंको ट्याब्लेटमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा पढ्न अनुमति दिन्छ। एपहरूले कन्ट्याक्टहरू बनाउने तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"एपलाई तपाईंको फोनमा भण्डारण गरिएका कन्ट्याक्टहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले कन्ट्याक्टहरू बनाउने तपाईंको फोनमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"तपाईँका सम्पर्कहरू परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"यसले यो एप प्रयोग गरिँदै गरेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ब्याकग्राउन्डमा चलेका बेला हृदयको गति जस्ता बडी सेन्सरसम्बन्धी डेटा हेरियोस् र प्रयोग गरियोस्"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"यसले यो एप ब्याकग्राउन्डमा चलेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"यो एप प्रयोग भइरहेका बेला बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति।"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"यसले यो एप प्रयोग भइरहेका बेला यो एपलाई बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति दिन्छ।"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"यो एप ब्याकग्राउन्डमा चलिरहेका बेला बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति।"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"यसले यो एप ब्याकग्राउन्डमा चलिरहेका बेला यो एपलाई बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"अनुहार पहिचान रद्द गरियो।"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"प्रयोगकर्ताले फेस अनलक सेटअप गर्ने कार्य रद्द गर्नुभयो"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"धेरैपटक प्रयासहरू भए। पछि फेरि प्रयास गर्नुहोस्‌।"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"निकै धेरै प्रयासहरू भए। फेस अनलक अफ गरिएको छ।"</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"निकै धेरै प्रयासहरू भए। यसको साटो स्क्रिन लक प्रयोग गर्नुहोस्।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"अनुहार पुष्टि गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"तपाईंले फेस अनलक सेटअप गर्नुभएको छैन"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"होल्डरलाई एपका सुविधासम्बन्धी जानकारी हेर्न दिन्छ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"नमुना लिने उच्च दरमा सेन्सरसम्बन्धी डेटा प्रयोग गर्ने"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यो अनुमति दिइएमा एपले २०० हर्जभन्दा बढी दरमा सेन्सरसम्बन्धी डेटाको नमुना लिन सक्छ"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"एप स्वतः अपडेट गरियोस्"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"तपाईंले यो अनुमति दिनुभयो भने होल्डरले पहिले नै इन्स्टल गरेको एप स्वतः अपडेट गर्न पाउँछ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
@@ -1288,13 +1283,13 @@
     <string name="volume_call" msgid="7625321655265747433">"इन-कल भोल्युम"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ब्लुटुथ भित्री-कल मात्रा"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"आलर्मको भोल्युम"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"सूचना मात्रा"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"सूचनाको भोल्युम"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"मात्रा"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ब्लुटुथ भोल्युम"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"घन्टिको आवाज मात्रा"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"कला मात्रा"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"मिडियाको भोल्युम"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचना भोल्युम"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचनाको भोल्युम"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"डिफल्ट रिङटोन"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"डिफल्ट (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"कुनै पनि होइन"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> अहिले उपलब्ध छैन। यो <xliff:g id="APP_NAME_1">%2$s</xliff:g> द्वारा व्यवस्थित छ।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"थप जान्नुहोस्"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"एपको पज हटाउनुहोस्"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"कामसम्बन्धी एपहरू अन गर्ने हो?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"कामसम्बन्धी एप चलाउने र सूचना प्राप्त गर्ने सुविधा अन गर्नुहोस्"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"अन गर्नुहोस्"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"कामसम्बन्धी एपहरू अनपज गर्ने हो?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"अनपज गर्नुहोस्"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आपत्‌कालीन"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"कामसम्बन्धी एप चलाउने र कल प्राप्त गर्ने सुविधा अन गर्नुहोस्"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध छैन"</string>
@@ -2095,11 +2088,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"यस सूचनालाई धेरै महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"यस सूचनालाई कम महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"परिष्कृत सूचनाहरू"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"अब परिष्कृत सूचनाहरू नामक सुविधाले कारबाही तथा जवाफहरूसम्बन्धी सुझाव देखाउँछ। Android को अनुकूल पार्न मिल्ने सूचनाहरू नामक सुविधाले अब उप्रान्त काम गर्दैन।"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"अब परिष्कृत सूचनाहरू नामक सुविधाले कारबाही तथा जवाफहरूसम्बन्धी सुझाव देखाउँछ। Android को एड्याप्टिभ सूचनाहरू नामक सुविधाले अब उप्रान्त काम गर्दैन।"</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ठिक छ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"अफ गर्नुहोस्"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"थप जान्नुहोस्"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android १२ मा Android को अनुकूल पार्न मिल्ने सूचनाहरू नामक सुविधालाई परिष्कृत सूचनाहरू नामक सुविधाले प्रतिस्थापन गरेको छ। यो सुविधाले कारबाही तथा जवाफसम्बन्धी सुझाव देखाउँछ र तपाईंका सूचनाहरू व्यवस्थित गर्छ।\n\nपरिष्कृत सूचनाहरू नामक सुविधाले सूचनामा उल्लिखित सम्पर्क व्यक्तिको नाम र म्यासेज जस्ता व्यक्तिगत जानकारीलगायतका सामग्री हेर्न तथा प्रयोग गर्न सक्छ। यो सुविधाले फोन उठाउने तथा \'बाधा नपुऱ्याउनुहोस्\' मोड नियन्त्रण गर्ने कार्यसहित सूचनाहरू हटाउने वा सूचनाहरूको जवाफ दिने कार्य पनि गर्न सक्छ।"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android १२ मा Android को एड्याप्टिभ सूचनाहरू नामक सुविधालाई परिष्कृत सूचनाहरू नामक सुविधाले प्रतिस्थापन गरेको छ। यो सुविधाले कारबाही तथा जवाफसम्बन्धी सुझाव देखाउँछ र तपाईंका सूचनाहरू व्यवस्थित गर्छ।\n\nपरिष्कृत सूचनाहरू नामक सुविधाले सूचनामा उल्लिखित सम्पर्क व्यक्तिको नाम र म्यासेज जस्ता व्यक्तिगत जानकारीलगायतका सामग्री हेर्न तथा प्रयोग गर्न सक्छ। यो सुविधाले फोन उठाउने तथा \'बाधा नपुऱ्याउनुहोस्\' मोड नियन्त्रण गर्ने कार्यसहित सूचनाहरू हटाउने वा सूचनाहरूको जवाफ दिने कार्य पनि गर्न सक्छ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ब्याट्री सेभर अन गरिएको छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ब्याट्रीको आयु बढाउन ब्याट्रीको खपत कम गरिँदै छ"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"अन गर्न ट्याप गर्नुहोस्"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यो सामग्री खोल्न मिल्ने कुनै पनि कामसम्बन्धी एप छैन"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यो सामग्री खोल्न मिल्ने कुनै पनि व्यक्तिगत एप छैन"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> तपाईंको व्यक्तिगत प्रोफाइलमा खोल्ने हो?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> तपाईंको कार्य प्रोफाइलमा खोल्ने हो?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"व्यक्तिगत ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM को नेटवर्क अनलक गर्ने PIN"</string>

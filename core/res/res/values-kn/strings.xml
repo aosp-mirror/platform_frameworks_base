@@ -65,7 +65,7 @@
     <string name="CnirMmi" msgid="885292039284503036">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ಮೂರು ಮಾರ್ಗದಲ್ಲಿ ಕರೆ ಮಾಡುವಿಕೆ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ಅನಪೇಕ್ಷಿತ ಕಿರಿಕಿರಿ ಮಾಡುವ ಕರೆಗಳ ತಿರಸ್ಕಾರ"</string>
-    <string name="CndMmi" msgid="185136449405618437">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯ ವಿತರಣೆ"</string>
+    <string name="CndMmi" msgid="185136449405618437">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯ ಡೆಲಿವರಿ"</string>
     <string name="DndMmi" msgid="8797375819689129800">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಿಲ್ಲ"</string>
@@ -209,7 +209,7 @@
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳನ್ನು <xliff:g id="DATE">%1$s</xliff:g> ರಂದು <xliff:g id="TIME">%2$s</xliff:g> ಸಮಯಕ್ಕೆ ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಐಟಿ ನಿರ್ವಾಹಕರು ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು <xliff:g id="NUMBER">%3$d</xliff:g> ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಉಳಿಯಲು ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ಆನ್"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ಕರೆಗಳು ಮತ್ತು ಸಂದೇಶಗಳು ಆಫ್ ಆಗಿವೆ"</string>
-    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ನೀವು ವಿರಾಮಗೊಳಿಸಿದ್ದೀರಿ ನೀವು ಫೋನ್ ಕರೆಗಳು ಅಥವಾ ಪಠ್ಯ ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ."</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ನೀವು ವಿರಾಮಗೊಳಿಸಿದ್ದೀರಿ. ನೀವು ಫೋನ್ ಕರೆಗಳು ಅಥವಾ ಪಠ್ಯ ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ."</string>
     <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್ ವಿರಾಮ ರದ್ದುಮಾಡಿ"</string>
     <string name="me" msgid="6207584824693813140">"ನಾನು"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ಟ್ಯಾಬ್ಲೆಟ್ ಆಯ್ಕೆಗಳು"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ಹೃದಯ ಬಡಿತ, ತಾಪಮಾನ ಮತ್ತು ರಕ್ತದ ಆಮ್ಲಜನಕದ ಶೇಕಡಾವಾರು ಎಂಬಂತಹ ದೇಹದ ಸೆನ್ಸರ್‌ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ಹಿನ್ನಲೆಯಲ್ಲಿರುವಾಗ ಹೃದಯ ಬಡಿತದಂತಹ ದೇಹದ ಸೆನ್ಸರ್‌ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ಆ್ಯಪ್ ಹಿನ್ನಲೆಯಲ್ಲಿರುವಾಗ ಹೃದಯ ಬಡಿತ, ತಾಪಮಾನ ಮತ್ತು ರಕ್ತದ ಆಮ್ಲಜನಕದ ಶೇಕಡಾವಾರು ಎಂಬಂತಹ ದೇಹದ ಸೆನ್ಸರ್‌ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ದೇಹದ ಸೆನ್ಸರ್‌ನಿಂದ ಮಣಿಕಟ್ಟಿನ ತಾಪಮಾನದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ದೇಹದ ಸೆನ್ಸರ್‌ನಿಂದ ಮಣಿಕಟ್ಟಿನ ತಾಪಮಾನದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ಆ್ಯಪ್ ಹಿನ್ನೆಲೆಯಲ್ಲಿರುವಾಗ ದೇಹದ ಸೆನ್ಸರ್‌ನಿಂದ ಮಣಿಕಟ್ಟಿನ ತಾಪಮಾನದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ಆ್ಯಪ್ ಹಿನ್ನೆಲೆಯಲ್ಲಿರುವಾಗ ದೇಹದ ಸೆನ್ಸರ್‌ನಿಂದ ಮಣಿಕಟ್ಟಿನ ತಾಪಮಾನದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳು ಮತ್ತು ವಿವರಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಂಗ್ರಹವಾಗಿರುವ ಎಲ್ಲಾ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಓದಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು ಅಥವಾ ಉಳಿಸಬಹುದು."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹವಾಗಿರುವ ಎಲ್ಲಾ ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್‌ಗಳನ್ನು ಓದಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು ಅಥವಾ ಉಳಿಸಬಹುದು."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ಮುಖದ ಕಾರ್ಯಚರಣೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಕೆದಾರರು ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಬದಲಾಗಿ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ನಮೂದಿಸಿ."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ನೀವು ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿಲ್ಲ"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ಆ್ಯಪ್‌ನ ವೈಶಿಷ್ಟ್ಯಗಳ ಮಾಹಿತಿಯನ್ನು ವೀಕ್ಷಿಸಲು ಬಳಕೆದಾರರನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ಹೆಚ್ಚಿನ ನಮೂನೆ ದರದಲ್ಲಿ ಸೆನ್ಸಾರ್ ಡೇಟಾ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ಗಿಂತಲೂ ಹೆಚ್ಚಿನ ವೇಗದಲ್ಲಿ ಸೆನ್ಸಾರ್ ಡೇಟಾದ ಮಾದರಿ ಪರೀಕ್ಷಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಿ"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ಬಳಕೆದಾರರ ಕ್ರಿಯೆಯಿಲ್ಲದೆ ಆ್ಯಪ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಿ"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ಬಳಕೆದಾರರ ಕ್ರಿಯೆಯಿಲ್ಲದೆ ಈ ಹಿಂದೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಲು ಹೋಲ್ಡರ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ಪರದೆ ಲಾಕ್‌ನಲ್ಲಿನ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಿನ್‌ಗಳ ಅನುಮತಿಸಲಾದ ಅಕ್ಷರಗಳ ಪ್ರಮಾಣವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ಪರದೆಯ ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"</string>
@@ -1406,7 +1401,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"‍ಇತರ ಆ್ಯಪ್‍ಗಳ ಮೇಲೆ ಪ್ರದರ್ಶಿಸುವಿಕೆ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> ಇತರೆ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> ಇತರೆ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> ಈ ಫೀಚರ್ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"ಪ್ರಸ್ತುತ ವಿಷಯವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ ಸದ್ಯಕ್ಕೆ ಲಭ್ಯವಿಲ್ಲ. ಇದನ್ನು <xliff:g id="APP_NAME_1">%2$s</xliff:g> ನಲ್ಲಿ ನಿರ್ವಹಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ಆ್ಯಪ್ ವಿರಾಮ ನಿಲ್ಲಿಸಿ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ಕೆಲಸ ಆ್ಯಪ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಬೇಕೆ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ನಿಮ್ಮ ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳಿಗೆ ಪ್ರವೇಶವನ್ನು ಪಡೆಯಿರಿ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ಆನ್‌ ಮಾಡಿ"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ಕೆಲಸದ ಆ್ಯಪ್ ವಿರಾಮ ರದ್ದುಮಾಡಬೇಕೇ"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ವಿರಾಮವನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ತುರ್ತು"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"ನಿಮ್ಮ ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಕರೆಗಳಿಗೆ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಪಡೆಯಿರಿ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಇದೀಗ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -2124,8 +2117,8 @@
     <string name="mime_type_document_ext" msgid="2398002765046677311">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಡಾಕ್ಯುಮೆಂಟ್"</string>
     <string name="mime_type_spreadsheet" msgid="8188407519131275838">"ಸ್ಪ್ರೆಡ್‌ಶೀಟ್"</string>
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಸ್ಪ್ರೆಡ್‌ಶೀಟ್"</string>
-    <string name="mime_type_presentation" msgid="1145384236788242075">"ಪ್ರಸ್ತುತಿ"</string>
-    <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಪ್ರಸ್ತುತಿ"</string>
+    <string name="mime_type_presentation" msgid="1145384236788242075">"ಪ್ರೆಸೆಂಟೇಷನ್"</string>
+    <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ಪ್ರೆಸೆಂಟೇಷನ್"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್‌ನಲ್ಲಿರುವಾಗಲೂ ಬ್ಲೂಟೂತ್ ಆನ್ ಆಗಿರುತ್ತದೆ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ಲೋಡ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ಫೈಲ್}one{{file_name} + # ಫೈಲ್‌ಗಳು}other{{file_name} + # ಫೈಲ್‌ಗಳು}}"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ಆನ್‌‌‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ಯಾವುದೇ ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳಿಲ್ಲ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳಿಲ್ಲ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ <xliff:g id="APP">%s</xliff:g> ಅನ್ನು ತೆರೆಯಬೇಕೆ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ <xliff:g id="APP">%s</xliff:g> ಅನ್ನು ತೆರೆಯಬೇಕೆ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ವೈಯಕ್ತಿಕ ಬ್ರೌಸರ್ ಬಳಸಿ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ಉದ್ಯೋಗ ಬ್ರೌಸರ್ ಬಳಸಿ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ನೆಟ್‌ವರ್ಕ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಪಿನ್‌"</string>

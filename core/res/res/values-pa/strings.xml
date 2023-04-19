@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ਜਦੋਂ ਐਪ ਵਰਤੋਂ ਵਿੱਚ ਹੋਵੇ, ਤਾਂ ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ \'ਤੇ ਦਿਲ ਦੀ ਧੜਕਣ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ਜਦੋਂ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀ ਹੋਵੇ, ਤਾਂ ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ਐਪ ਦੇ ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ \'ਤੇ, ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਵੱਲੋਂ ਤੁਹਾਡੇ ਸੌਣ ਵੇਲੇ ਰਿਕਾਰਡ ਕੀਤੇ ਜਾਣ ਵਾਲੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ਐਪ ਦੇ ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ \'ਤੇ, ਐਪ ਨੂੰ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਵੱਲੋਂ ਤੁਹਾਡੇ ਸੌਣ ਵੇਲੇ ਰਿਕਾਰਡ ਕੀਤੇ ਜਾਣ ਵਾਲੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ਐਪ ਦੇ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਦੇ ਹੋਣ \'ਤੇ, ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਵੱਲੋਂ ਤੁਹਾਡੇ ਸੌਣ ਵੇਲੇ ਰਿਕਾਰਡ ਕੀਤੇ ਜਾਣ ਵਾਲੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ਐਪ ਦੇ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਦੇ ਹੋਣ \'ਤੇ, ਐਪ ਨੂੰ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਵੱਲੋਂ ਤੁਹਾਡੇ ਸੌਣ ਵੇਲੇ ਰਿਕਾਰਡ ਕੀਤੇ ਜਾਣ ਵਾਲੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਅਤੇ ਵੇਰਵਿਆਂ ਨੂੰ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ਇਹ ਐਪ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ।"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ਵਰਤੋਂਕਾਰ ਨੇ ਫ਼ੇਸ ਅਣਲਾਕ ਰੱਦ ਕੀਤਾ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਫ਼ੇਸ ਅਣਲਾਕ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸਦੀ ਬਜਾਏ ਸਕ੍ਰੀਨ ਲਾਕ ਦਾਖਲ ਕਰੋ।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ਤੁਸੀਂ ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਹੈ।"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ਇਸ ਨਾਲ ਹੋਲਡਰ ਨੂੰ ਕਿਸੇ ਐਪ ਦੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਬਾਰੇ ਜਾਣਕਾਰੀ ਦੇਖਣ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ਉੱਚ ਸੈਂਪਲਿੰਗ ਰੇਟ \'ਤੇ ਸੈਂਸਰ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ਐਪ ਨੂੰ 200 Hz ਤੋਂ ਵੱਧ ਦੀ ਦਰ \'ਤੇ ਸੈਂਸਰ ਡਾਟੇ ਦਾ ਨਮੂਨਾ ਲੈਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ਵਰਤੋਂਕਾਰ ਕਾਰਵਾਈ ਤੋਂ ਬਿਨਾਂ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰੋ"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ਧਾਰਕ ਨੂੰ ਵਰਤੋਂਕਾਰ ਕਾਰਵਾਈ ਤੋਂ ਬਿਨਾਂ ਪਹਿਲਾਂ ਸਥਾਪਤ ਕੀਤੀ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ਪਾਸਵਰਡ ਨਿਯਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ਸਕ੍ਰੀਨ ਲਾਕ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਿੰਨ ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
@@ -1288,13 +1283,13 @@
     <string name="volume_call" msgid="7625321655265747433">"ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ਬਲੂਟੁੱਥ ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ਅਲਾਰਮ ਦੀ ਅਵਾਜ਼"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"ਸੂਚਨਾ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ਰਿੰਗਟੋਨ ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਦੀ ਅਵਾਜ਼"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ਕੋਈ ਨਹੀਂ"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਐਪ ਫਿਲਹਾਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਇਸਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ਐਪ ਤੋਂ ਰੋਕ ਹਟਾਓ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਚਾਲੂ ਕਰਨੀਆਂ ਹਨ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ਆਪਣੀਆਂ ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ਚਾਲੂ ਕਰੋ"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਤੋਂ ਰੋਕ ਹਟਾਈਏ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ਰੋਕ ਹਟਾਓ"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ਐਮਰਜੈਂਸੀ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"ਆਪਣੀਆਂ ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਅਤੇ ਕਾਲਾਂ ਤੱਕ ਪਹੁੰਚ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਇਸ ਵੇਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ਚਾਲੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ਕੋਈ ਕੰਮ ਸੰਬੰਧੀ ਐਪ ਨਹੀਂ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ਕੋਈ ਨਿੱਜੀ ਐਪ ਨਹੀਂ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"ਕੀ ਆਪਣੇ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ <xliff:g id="APP">%s</xliff:g> ਨੂੰ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"ਕੀ ਆਪਣੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ <xliff:g id="APP">%s</xliff:g> ਨੂੰ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ਨਿੱਜੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ਕੰਮ ਸੰਬੰਧੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ਸਿਮ ਨੈੱਟਵਰਕ ਅਣਲਾਕ ਪਿੰਨ"</string>

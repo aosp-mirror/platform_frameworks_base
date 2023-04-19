@@ -211,7 +211,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activar"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Llamadas y mensajes desactivados"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Has pausado las aplicaciones de trabajo. No recibirás llamadas ni mensajes de texto."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Reactivar apps de trabajo"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Reanudar aplicaciones de trabajo"</string>
     <string name="me" msgid="6207584824693813140">"Yo"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opciones del tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opciones de Android TV"</string>
@@ -464,10 +464,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite que la aplicación acceda a datos del sensor corporal, como la frecuencia cardiaca, la temperatura y el porcentaje de oxígeno en sangre, mientras se usa."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Acceso en segundo plano a datos del sensor corporal, como la frecuencia cardiaca"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite que la aplicación acceda a datos del sensor corporal, como la frecuencia cardiaca, la temperatura y el porcentaje de oxígeno en sangre, mientras está en segundo plano."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Acceder a los datos de temperatura de la muñeca del sensor corporal mientras la aplicación está en uso."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite que la aplicación acceda a los datos de temperatura de la muñeca del sensor corporal mientras está en uso."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Acceder a los datos de temperatura de la muñeca del sensor corporal mientras la aplicación está en segundo plano."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite que la aplicación acceda a los datos de temperatura de la muñeca del sensor corporal mientras está en segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Leer eventos y detalles del calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta aplicación puede leer los eventos de calendario almacenados en tu tablet y compartir o guardar los datos de tu calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta aplicación puede ver los eventos de calendario almacenados en tu dispositivo Android TV y compartir o guardar los datos de tu calendario."</string>
@@ -576,7 +572,7 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Permite que la aplicación active y desactive la conexión entre tu dispositivo Android TV y las redes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Permite que la aplicación conecte el teléfono a redes WiMAX y lo desconecte de ellas."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"emparejar con dispositivos Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que la aplicación acceda a la configuración de Bluetooth del tablet y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que la aplicación acceda a la configuración de Bluetooth de la tablet y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que la aplicación vea la configuración de Bluetooth de tu dispositivo Android TV y que cree y acepte conexiones con los dispositivos vinculados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite que la aplicación acceda a la configuración de Bluetooth del teléfono y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"detectar y emparejar dispositivos Bluetooth cercanos"</string>
@@ -628,11 +624,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"No se ha podido autenticar"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueo de pantalla"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduce tu bloqueo de pantalla para continuar"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Mantén pulsado firmemente el sensor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pulsa firmemente el sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"No se puede reconocer la huella digital. Inténtalo de nuevo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpia el sensor de huellas digitales e inténtalo de nuevo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpia el sensor e inténtalo de nuevo"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Mantén pulsado firmemente el sensor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pulsa firmemente el sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Has movido el dedo demasiado despacio. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prueba con otra huella digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Demasiada luz"</string>
@@ -714,7 +710,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Se ha cancelado el reconocimiento facial."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"El usuario ha cancelado Desbloqueo facial"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Demasiados intentos. Desbloqueo facial inhabilitado."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Demasiados intentos. Usa el bloqueo de pantalla."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se ha verificado tu cara. Vuelve a intentarlo."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"No has configurado Desbloqueo facial"</string>
@@ -801,10 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que el titular vea la información de las funciones de una aplicación."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acceder a datos de sensores a una frecuencia de muestreo alta"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que la aplicación consulte datos de sensores a una frecuencia superior a 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"actualizar la aplicación sin la acción del usuario"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite que una aplicación instalada previamente se actualice sin la acción del usuario"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecimiento de reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controla la longitud y los caracteres permitidos en los PIN y en las contraseñas de bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar los intentos de desbloqueo de pantalla"</string>
@@ -1957,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> no está disponible en este momento. Esta opción se administra en <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Más información"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anular pausa de aplicación"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"¿Activar aplicaciones de trabajo?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Accede a tus aplicaciones y notificaciones de trabajo"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"¿Reactivar apps de trabajo?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Reactivar"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergencia"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Solicita acceso a tus aplicaciones y llamadas de trabajo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"La aplicación no está disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"En estos momentos, <xliff:g id="APP_NAME">%1$s</xliff:g> no está disponible."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no disponible"</string>
@@ -2100,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas sustituyeron las notificaciones adaptativas en Android 12. Esta función te muestra acciones y respuestas sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder al contenido de tus notificaciones, incluida información personal, como nombres de contactos y mensajes. También permiten descartar o responder a notificaciones; por ejemplo, es posible contestar llamadas telefónicas y controlar el modo No molestar."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas sustituyeron las notificaciones adaptativas en Android 12. Esta función te muestra acciones y respuestas sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder al contenido de tus notificaciones, incluida información personal, como nombres de contactos y mensajes. También permiten descartar o responder a notificaciones (por ejemplo, puedes contestar llamadas telefónicas) y controlar el modo No molestar."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ahorro de batería activado"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduciendo el uso de batería para prolongar su duración"</string>
@@ -2171,8 +2164,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Toca para activar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ninguna aplicación de trabajo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ninguna aplicación personal"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"¿Abrir <xliff:g id="APP">%s</xliff:g> en tu perfil personal?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"¿Abrir <xliff:g id="APP">%s</xliff:g> en tu perfil de trabajo?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar navegador de trabajo"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo de red de tarjeta SIM"</string>
