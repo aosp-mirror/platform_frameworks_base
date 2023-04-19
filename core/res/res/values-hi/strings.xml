@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"इससे ऐप्लिकेशन को इस्तेमाल करने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"बैकग्राउंड में चलने के दौरान, धड़कन की दर जैसे बॉडी सेंसर डेटा का ऐक्सेस दें"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"इससे ऐप्लिकेशन के बैकग्राउंड में चलने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ऐप्लिकेशन को यह अनुमति दें कि जब उसे इस्तेमाल किया जा रहा हो, तब वह आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाए जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"इससे ऐप्लिकेशन, आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाएगा जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है. इस डेटा का ऐक्सेस उस समय मिलेगा जब ऐप्लिकेशन का इस्तेमाल किया जा रहा हो."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ऐप्लिकेशन को यह अनुमति दें कि बैकग्राउंड में चलते समय, वह आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाए जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"इससे ऐप्लिकेशन, आपके शरीर के उस तापमान का डेटा ऐक्सेस कर पाएगा जो बॉडी सेंसर ने सोते समय रिकॉर्ड किया है. इस डेटा का ऐक्सेस उस समय मिलेगा जब ऐप्लिकेशन बैकग्राउंड में चल रहा होगा."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कैलेंडर इवेंट और विवरण पढ़ें"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यह ऐप्लिकेशन आपके टैबलेट पर संग्रहित सभी कैलेंडर इवेंट पढ़ सकता है और आपका कैलेंडर डेटा शेयर कर सकता है या सहेज सकता है."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यह ऐप्लिकेशन आपके टीवी पर सेव किए गए सभी कैलेंडर इवेंट को पढ़ सकता है. इसके अलावा यह आपके कैलेंडर का डेटा शेयर कर सकता है या सेव कर सकता है."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"चेहरा पहचानने की कार्रवाई रद्द की गई."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"उपयोगकर्ता ने फ़ेस अनलॉक को रद्द किया"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"कई बार कोशिश की गई. बाद में कोशिश करें."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"कई बार कोशिश की जा चुकी है. फ़ेस अनलॉक को बंद कर दिया गया है."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"कई बार कोशिश की जा चुकी है. इसके बजाय, स्क्रीन लॉक का इस्तेमाल करें."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा नहीं पहचान पा रहे. फिर से कोशिश करें."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"आपने फ़ेस अनलॉक सेट अप नहीं किया है"</string>
@@ -1371,8 +1368,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"जोड़ा गया डिवाइस चार्ज हो रहा है. ज़्यादा विकल्पों के लिए टैप करें."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"एनालॉग ऑडियो एक्सेसरी का पता चला"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"अटैच किया गया डिवाइस इस फ़ोन से संगत नहीं है. ज़्यादा जानने के लिए टैप करें."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"यूएसबी डीबग करने के लिए एडीबी कनेक्ट किया गया"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"यूएसबी को डीबग करने की सुविधा बंद करने के लिए टैप करें"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"यूएसबी डीबग करने के लिए adb कनेक्ट किया गया"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"यूएसबी डीबग करने की सुविधा बंद करने के लिए टैप करें"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB डीबग करना अक्षम करने के लिए चुनें."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"वॉयरलेस डीबगिंग कनेक्ट है"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"वॉयरलेस डीबगिंग की सुविधा बंद करने के लिए टैप करें"</string>
@@ -1876,8 +1873,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठीक है"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, इस मोड में बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और कुछ खास सुविधाएं कम या बंद हो जाती हैं. कुछ इंटरनेट कनेक्शन भी पूरी तरह काम नहीं करते."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, इस मोड में बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और कुछ सुविधाएं सीमित या बंद हो जाती हैं. कुछ इंटरनेट कनेक्शन भी पूरी तरह काम नहीं करते."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, जिस ऐप्लिकेशन का इस्तेमाल किया जा रहा है वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी, जब तक उन पर टैप नहीं किया जाएगा."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा बचाने की सेटिंग चालू करें?"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, जिस ऐप्लिकेशन का इस्तेमाल किया जा रहा है वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक नहीं दिखेंगी, जब तक उन पर टैप नहीं किया जाएगा."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा बचाने की सेटिंग चालू करनी है?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"चालू करें"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{एक मिनट के लिए ({formattedTime} तक)}one{# मिनट के लिए ({formattedTime} तक)}other{# मिनट के लिए ({formattedTime} तक)}}"</string>
     <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 मिनट के लिए ({formattedTime} तक)}one{# मिनट के लिए ({formattedTime} तक)}other{# मिनट के लिए ({formattedTime} तक)}}"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"फ़िलहाल <xliff:g id="APP_NAME_0">%1$s</xliff:g> उपलब्ध नहीं है. इसे <xliff:g id="APP_NAME_1">%2$s</xliff:g> के ज़रिए प्रबंधित किया जाता है."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ज़्यादा जानें"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ऐप्लिकेशन पर लगी रोक हटाएं"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करने हैं?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"अपने ऑफ़िस के काम से जुड़े ऐप्लिकेशन और सूचनाओं का ऐक्सेस पाएं"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"चालू करें"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"वर्क ऐप्लिकेशन चालू करने हैं?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"चालू करें"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आपातकालीन कॉल"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"अपने वर्क ऐप्लिकेशन और कॉल का ऐक्सेस पाएं"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> इस समय उपलब्ध नहीं है."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नहीं है"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"वर्क प्रोफ़ाइल चालू करने के लिए टैप करें"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यह कॉन्टेंट, ऑफ़िस के काम से जुड़े आपके किसी भी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यह कॉन्टेंट आपके किसी भी निजी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"क्या <xliff:g id="APP">%s</xliff:g> को निजी प्रोफ़ाइल में खोलना है?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"क्या <xliff:g id="APP">%s</xliff:g> को वर्क प्रोफ़ाइल में खोलना है?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"निजी ब्राउज़र का इस्तेमाल करें"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ऑफ़िस के काम से जुड़े ब्राउज़र का इस्तेमाल करें"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क को अनलॉक करने का पिन"</string>
