@@ -21,12 +21,8 @@ import androidx.annotation.NonNull;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.SourceType;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.logging.NotificationRoundnessLogger;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
 import java.io.PrintWriter;
@@ -43,17 +39,8 @@ public class NotificationRoundnessManager implements Dumpable {
     private static final String TAG = "NotificationRoundnessManager";
     private static final SourceType DISMISS_ANIMATION = SourceType.from("DismissAnimation");
 
-    private final ExpandableView[] mFirstInSectionViews;
-    private final ExpandableView[] mLastInSectionViews;
-    private final ExpandableView[] mTmpFirstInSectionViews;
-    private final ExpandableView[] mTmpLastInSectionViews;
-    private final NotificationRoundnessLogger mNotifLogger;
     private final DumpManager mDumpManager;
-    private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
-    private Runnable mRoundingChangedCallback;
-    private ExpandableNotificationRow mTrackedHeadsUp;
-    private float mAppearFraction;
     private boolean mRoundForPulsingViews;
     private boolean mIsClearAllInProgress;
 
@@ -62,35 +49,15 @@ public class NotificationRoundnessManager implements Dumpable {
     private Roundable mViewAfterSwipedView = null;
 
     @Inject
-    NotificationRoundnessManager(
-            NotificationSectionsFeatureManager sectionsFeatureManager,
-            NotificationRoundnessLogger notifLogger,
-            DumpManager dumpManager) {
-        int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
-        mFirstInSectionViews = new ExpandableView[numberOfSections];
-        mLastInSectionViews = new ExpandableView[numberOfSections];
-        mTmpFirstInSectionViews = new ExpandableView[numberOfSections];
-        mTmpLastInSectionViews = new ExpandableView[numberOfSections];
-        mNotifLogger = notifLogger;
+    NotificationRoundnessManager(DumpManager dumpManager) {
         mDumpManager = dumpManager;
-
         mDumpManager.registerDumpable(TAG, this);
     }
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("mFirstInSectionViews: length=" + mFirstInSectionViews.length);
-        pw.println(dumpViews(mFirstInSectionViews));
-        pw.println("mLastInSectionViews: length=" + mLastInSectionViews.length);
-        pw.println(dumpViews(mFirstInSectionViews));
-        if (mTrackedHeadsUp != null) {
-            pw.println("trackedHeadsUp=" + mTrackedHeadsUp.getEntry());
-        }
         pw.println("roundForPulsingViews=" + mRoundForPulsingViews);
         pw.println("isClearAllInProgress=" + mIsClearAllInProgress);
-    }
-
-    public void updateView(ExpandableView view, boolean animate) {
     }
 
     public boolean isViewAffectedBySwipe(ExpandableView expandableView) {
@@ -98,20 +65,6 @@ public class NotificationRoundnessManager implements Dumpable {
                 && (expandableView == mSwipedView
                 || expandableView == mViewBeforeSwipedView
                 || expandableView == mViewAfterSwipedView);
-    }
-
-    boolean updateViewWithoutCallback(
-            ExpandableView view,
-            boolean animate) {
-        return false;
-    }
-
-    private boolean isFirstInSection(ExpandableView view) {
-        return false;
-    }
-
-    private boolean isLastInSection(ExpandableView view) {
-        return false;
     }
 
     void setViewsAffectedBySwipe(
@@ -169,31 +122,6 @@ public class NotificationRoundnessManager implements Dumpable {
         return mRoundForPulsingViews;
     }
 
-    private float getRoundnessDefaultValue(Roundable view, boolean top) {
-        return 0f;
-
-    }
-
-    public void setExpanded(float expandedHeight, float appearFraction) {
-    }
-
-    public void updateRoundedChildren(NotificationSection[] sections) {
-    }
-
-    private boolean handleRemovedOldViews(
-            NotificationSection[] sections,
-            ExpandableView[] oldViews,
-            boolean first) {
-        return false;
-    }
-
-    private boolean handleAddedNewViews(
-            NotificationSection[] sections,
-            ExpandableView[] oldViews,
-            boolean first) {
-        return false;
-    }
-
     public void setAnimatedChildren(HashSet<ExpandableView> animatedChildren) {
         mAnimatedChildren = animatedChildren;
     }
@@ -207,51 +135,7 @@ public class NotificationRoundnessManager implements Dumpable {
         return mAnimatedChildren.contains(view);
     }
 
-    public void setOnRoundingChangedCallback(Runnable roundingChangedCallback) {
-        mRoundingChangedCallback = roundingChangedCallback;
-    }
-
-    public void setTrackingHeadsUp(ExpandableNotificationRow row) {
-        ExpandableNotificationRow previous = mTrackedHeadsUp;
-        mTrackedHeadsUp = row;
-        if (previous != null) {
-            updateView(previous, true /* animate */);
-        }
-    }
-
     public void setShouldRoundPulsingViews(boolean shouldRoundPulsingViews) {
         mRoundForPulsingViews = shouldRoundPulsingViews;
-    }
-
-    private String dumpViews(ExpandableView[] views) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] == null) continue;
-
-            sb.append("\t")
-                    .append("[").append(i).append("] ")
-                    .append("isPinned=").append(views[i].isPinned()).append(" ")
-                    .append("isFirstInSection=").append(views[i].isFirstInSection()).append(" ")
-                    .append("isLastInSection=").append(views[i].isLastInSection()).append(" ");
-
-            if (views[i] instanceof ExpandableNotificationRow) {
-                sb.append("entry=");
-                dumpEntry(((ExpandableNotificationRow) views[i]).getEntry(), sb);
-            }
-
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
-
-    private void dumpEntry(NotificationEntry entry, StringBuilder sb) {
-        sb.append("NotificationEntry{key=").append(entry.getKey()).append(" ");
-
-        if (entry.getSection() != null) {
-            sb.append(" section=")
-                    .append(entry.getSection().getLabel());
-        }
-
-        sb.append("}");
     }
 }

@@ -927,7 +927,6 @@ public class NotificationStackScrollLayoutController {
 
     public void setTrackingHeadsUp(ExpandableNotificationRow expandableNotificationRow) {
         mView.setTrackingHeadsUp(expandableNotificationRow);
-        mNotificationRoundnessManager.setTrackingHeadsUp(expandableNotificationRow);
     }
 
     public void wakeUpFromPulse() {
