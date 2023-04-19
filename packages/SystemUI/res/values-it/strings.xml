@@ -746,7 +746,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Disattivare i dati mobili?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Non avrai accesso ai dati o a Internet tramite <xliff:g id="CARRIER">%s</xliff:g>. Internet sarà disponibile soltanto tramite Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"il tuo operatore"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Vuoi passare nuovamente all\'operatore <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Vuoi tornare a <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"I dati mobili non passeranno automaticamente all\'operatore in base alla disponibilità"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"No, grazie"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Sì, confermo"</string>

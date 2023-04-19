@@ -235,12 +235,12 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ચાલુ કરી રહ્યાં છીએ…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ઑટો રોટેટ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ઑટો રોટેટ સ્ક્રીન"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"સ્થાન"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"લોકેશન"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"સ્ક્રીન સેવર"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"કૅમેરાનો ઍક્સેસ"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"માઇકનો ઍક્સેસ"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ઉપલબ્ધ છે"</string>
-    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"બ્લૉક કરેલું છે"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"બ્લૉક કરેલો છે"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"મીડિયા ઉપકરણ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"વપરાશકર્તા"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"વાઇ-ફાઇ"</string>

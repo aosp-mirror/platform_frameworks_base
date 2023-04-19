@@ -505,7 +505,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Déverrouiller pour utiliser"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Un problème est survenu lors de la récupération de vos cartes, veuillez réessayer plus tard"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Paramètres de l\'écran de verrouillage"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"lecteur de code QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Lecteur de code QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Mise à jour en cours…"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil professionnel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode Avion"</string>

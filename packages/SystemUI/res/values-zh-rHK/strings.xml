@@ -20,14 +20,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"系統使用者介面"</string>
-    <string name="battery_low_title" msgid="5319680173344341779">"要開啟「省電模式」嗎？"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g> 電量。「省電模式」會開啟深色主題背景、限制背景活動，並延遲顯示通知。"</string>
-    <string name="battery_low_intro" msgid="5148725009653088790">"「省電模式」會開啟深色主題背景、限制背景活動，並延遲顯示通知。"</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"要開啟「慳電模式」嗎？"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g> 電量。「慳電模式」會開啟深色主題背景、限制背景活動，並延遲顯示通知。"</string>
+    <string name="battery_low_intro" msgid="5148725009653088790">"「慳電模式」會開啟深色主題背景、限制背景活動，並延遲顯示通知。"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"無法透過 USB 充電"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"使用裝置隨附的充電器"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"要開啟省電模式嗎？"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"關於「省電模式」"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"要開啟慳電模式嗎？"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"關於「慳電模式」"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"開啟"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"開啟"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"不用了，謝謝"</string>
@@ -284,7 +284,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> 開啟"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"直到<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"深色主題背景"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"省電模式"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"慳電模式"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"在日落時開啟"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"在日出時關閉"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"於<xliff:g id="TIME">%s</xliff:g>開啟"</string>
@@ -573,7 +573,7 @@
     <string name="snoozed_for_time" msgid="7586689374860469469">"已延後 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# 小時}=2{# 小時}other{# 小時}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# 分鐘}other{# 分鐘}}"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"省電模式"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"慳電模式"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> 鍵"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"返回"</string>
@@ -749,7 +749,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"要切換回「<xliff:g id="CARRIER">%s</xliff:g>」嗎？"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"流動數據不會根據可用性自動切換"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"不用了，謝謝"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"是，切換回 DDS 對話框"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"是，請切換"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"由於某個應用程式已阻擋權限要求畫面，因此「設定」應用程式無法驗證您的回應。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊嗎？"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- 可以讀取「<xliff:g id="APP">%1$s</xliff:g>」中的資料"</string>
@@ -757,8 +757,8 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"允許「<xliff:g id="APP">%1$s</xliff:g>」顯示任何應用程式的快訊"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"允許"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"拒絕"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"輕按即可預定省電模式自動開啟時間"</string>
-    <string name="auto_saver_text" msgid="3214960308353838764">"在電池電量可能耗盡前啟用「省電模式」"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"輕按即可預定慳電模式自動開啟時間"</string>
+    <string name="auto_saver_text" msgid="3214960308353838764">"在電池電量可能耗盡前啟用「慳電模式」"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"不用了，謝謝"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"使用中"</string>

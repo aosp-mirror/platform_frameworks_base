@@ -508,7 +508,7 @@
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"ຕົວສະແກນລະຫັດ QR"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"ກຳລັງອັບເດດ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"ໂໝດເຮືອ​ບິນ"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"ໂໝດຢູ່ໃນຍົນ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ທ່ານ​ຈະ​ບໍ່​ໄດ້​ຍິນ​ສຽງ​ໂມງ​ປ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"ເວ​ລາ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"ວັນ <xliff:g id="WHEN">%1$s</xliff:g>"</string>

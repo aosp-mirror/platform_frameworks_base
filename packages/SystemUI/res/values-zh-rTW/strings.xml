@@ -749,7 +749,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"要切換回「<xliff:g id="CARRIER">%s</xliff:g>」嗎？"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"行動數據不會依據可用性自動切換"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"不用了，謝謝"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"是，切換回 DDS 對話方塊"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"是，請切換"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"由於某個應用程式覆蓋了權限要求畫面，因此「設定」應用程式無法驗證你的回應。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊嗎？"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- 它可以讀取「<xliff:g id="APP">%1$s</xliff:g>」的資訊"</string>
@@ -983,7 +983,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 個應用程式正在運作}other{# 個應用程式正在運作}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資訊"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"運作中的應用程式"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"即使您並未使用，這些應用程式仍會持續運作。這可提升應用程式效能，但也可能影響電池續航力。"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"即使你並未使用，這些應用程式仍會持續運作。這可提升應用程式效能，但也可能影響電池續航力。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>

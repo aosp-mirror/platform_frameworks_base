@@ -975,7 +975,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Да бисте променили мрежу, прекините етернет везу"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Ради бољег доживљаја уређаја, апликације и услуге и даље могу да траже WiFi мреже у било ком тренутку, чак и када је WiFi искључен. То можете да промените у подешавањима WiFi скенирања. "<annotation id="link">"Промените"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Искључите режим рада у авиону"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Искључи режим рада у авиону"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> жели да дода следећу плочицу у Брза подешавања"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Додај плочицу"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не додај плочицу"</string>

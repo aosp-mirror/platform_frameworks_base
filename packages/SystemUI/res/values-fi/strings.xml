@@ -749,7 +749,7 @@
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Palauta käyttöön <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobiilidata ei vaihdu automaattisesti saatavuuden perusteella"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Ei kiitos"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Kyllä, vaihda"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Kyllä, palauta"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Sovellus peittää käyttöoikeuspyynnön, joten Asetukset ei voi vahvistaa valintaasi."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Saako <xliff:g id="APP_0">%1$s</xliff:g> näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"– Se voi lukea tietoja sovelluksesta <xliff:g id="APP">%1$s</xliff:g>."</string>

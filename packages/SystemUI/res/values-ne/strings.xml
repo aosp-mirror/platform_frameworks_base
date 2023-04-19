@@ -253,7 +253,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"प्रसारण गर्दै"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"बेनाम उपकरण"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कुनै उपकरणहरू उपलब्ध छैन"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi जडान गरिएको छैन"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi कनेक्ट गरिएको छैन"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"उज्यालपन"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्भर्सन"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"कलर करेक्सन"</string>
@@ -739,8 +739,8 @@
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Do Not Disturb अन छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"कुनै अनुप्रयोगले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"कुनै स्वचालित नियम वा अनुप्रयोगले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो।"</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"कुनै एपले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"कुनै स्वचालित नियम वा एपले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो।"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"पृष्ठभूमिमा चल्ने एपहरू"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा निष्क्रिय पार्ने हो?"</string>

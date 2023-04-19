@@ -237,7 +237,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ଅଟୋ-ରୋଟେଟ ସ୍କ୍ରିନ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ଲୋକେସନ"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"ସ୍କ୍ରିନ ସେଭର"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"କ୍ୟାମେରା ଆକ୍ସେସ"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"କେମେରା ଆକ୍ସେସ"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"ମାଇକ ଆକ୍ସେସ"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ଉପଲବ୍ଧ"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ବ୍ଲକ୍ କରାଯାଇଛି"</string>
@@ -654,7 +654,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ବାମ ଆଇକନ୍‍"</string>
     <string name="right_icon" msgid="1103955040645237425">"ଡାହାଣ ଆଇକନ୍"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଗ କରିବା ପାଇଁ ଦାବିଧରି ଡ୍ରାଗ କରନ୍ତୁ"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ଟାଇଲ୍‍ ପୁଣି ସଜାଇବାକୁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ଟାଇଲ ପୁଣି ସଜାଇବାକୁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ବାହାର କରିବାକୁ ଏଠାକୁ ଡ୍ରାଗ୍‍ କରନ୍ତୁ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"ଆପଣଙ୍କର ଅତିକମ୍‌ରେ <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>ଟି ଟାଇଲ୍ ଆବଶ୍ୟକ"</string>
     <string name="qs_edit" msgid="5583565172803472437">"ଏଡିଟ କରନ୍ତୁ"</string>
@@ -747,7 +747,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"ଡାଟା କିମ୍ବା ଇଣ୍ଟରନେଟ୍‌କୁ <xliff:g id="CARRIER">%s</xliff:g> ଦ୍ଵାରା ଆପଣଙ୍କର  ଆକ୍ସେସ୍ ରହିବ ନାହିଁ। ଇଣ୍ଟରନେଟ୍‌ କେବଳ ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ ଉପଲବ୍ଧ ହେବ।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ଆପଣଙ୍କ କେରିଅର୍"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g>କୁ ପୁଣି ସ୍ୱିଚ କରିବେ?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"ଉପଲବ୍ଧତା ଆଧାରରେ ମୋବାଇଲ ଡାଟା ସ୍ୱଚାଳିତ ଭାବେ ସ୍ୱିଚ ହେବ ନାହିଁ"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"ଉପଲବ୍ଧତା ଆଧାରରେ ମୋବାଇଲ ଡାଟା ସ୍ୱତଃ ସ୍ୱିଚ ହେବ ନାହିଁ"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"ନା, ଧନ୍ୟବାଦ"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"ହଁ, ସ୍ୱିଚ କରନ୍ତୁ"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"ଗୋଟିଏ ଆପ୍‍ ଏକ ଅନୁମତି ଅନୁରୋଧକୁ ଦେଖିବାରେ ବାଧା ଦେଉଥିବାରୁ, ସେଟିଙ୍ଗ ଆପଣଙ୍କ ଉତ୍ତରକୁ ଯାଞ୍ଚ କରିପାରିବ ନାହିଁ।"</string>
@@ -950,7 +950,7 @@
     <string name="person_available" msgid="2318599327472755472">"ଉପଲବ୍ଧ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ଆପଣଙ୍କ ବ୍ୟାଟେରୀ ମିଟର୍ ପଢ଼ିବାରେ ସମସ୍ୟା ହେଉଛି"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ଆଲାରାମ ସେଟ୍ ହୋଇନାହିଁ"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ଆଲାରାମ ସେଟ ହୋଇନାହିଁ"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ଟିପଚିହ୍ନ ସେନ୍ସର୍"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ପ୍ରମାଣୀକରଣ କରନ୍ତୁ"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ଡିଭାଇସ୍ ବିଷୟରେ ସୂଚନା ଲେଖନ୍ତୁ"</string>
@@ -967,7 +967,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ଅନ୍ୟ କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"କୌଣସି ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"ୱାଇ-ଫାଇ"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"ସଂଯୋଗ କରିବାକୁ ଏକ ନେଟୱାର୍କରେ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"କନେକ୍ଟ କରିବାକୁ ଏକ ନେଟୱାର୍କରେ ଟାପ କରନ୍ତୁ"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ନେଟୱାର୍କଗୁଡ଼ିକୁ ଦେଖିବା ପାଇଁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ନେଟୱାର୍କଗୁଡ଼ିକ ସନ୍ଧାନ କରାଯାଉଛି…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ନେଟୱାର୍କକୁ ସଂଯୋଗ କରିବାରେ ବିଫଳ ହୋଇଛି"</string>

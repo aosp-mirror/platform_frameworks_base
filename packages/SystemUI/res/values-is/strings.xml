@@ -99,7 +99,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Vinnur úr skjáupptöku"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Hefja upptöku?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu. Þar á meðal eru upplýsingar á borð við aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android-kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu, þar á meðal aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Taka upp allan skjáinn"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Taka upp eitt forrit"</string>
     <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Þegar þú tekur upp hefur Android aðgang að öllu sem sést á skjánum eða spilast í tækinu. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð eða aðrar viðkvæmar upplýsingar."</string>

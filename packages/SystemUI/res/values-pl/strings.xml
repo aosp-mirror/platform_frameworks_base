@@ -653,8 +653,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Prawy klawisz"</string>
     <string name="left_icon" msgid="5036278531966897006">"Lewa ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Prawa ikona"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Przytrzymaj i przeciągnij, by dodać kafelki"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Przytrzymaj i przeciągnij, by przestawić kafelki"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Aby dodać kafelki, przytrzymaj je i przeciągnij"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Aby przestawić kafelki, przytrzymaj je i przeciągnij"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Przeciągnij tutaj, by usunąć"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Minimalna liczba kafelków to <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Edytuj"</string>
@@ -746,7 +746,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Wyłączyć mobilną transmisję danych?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nie będziesz mieć dostępu do transmisji danych ani internetu w <xliff:g id="CARRIER">%s</xliff:g>. Internet będzie dostępny tylko przez Wi‑Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Twój operator"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Wrócić do operatora <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Wrócić do <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobilna transmisja danych nie będzie automatycznie przełączana na podstawie dostępności"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Nie, dziękuję"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Tak, wróć"</string>
@@ -967,7 +967,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Brak innych dostępnych sieci"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Brak dostępnych sieci"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Kliknij sieć, aby połączyć"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Aby się połączyć, kliknij sieć"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Odblokuj, by wyświetlić sieci"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Szukam sieci…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Nie udało się połączyć z siecią"</string>

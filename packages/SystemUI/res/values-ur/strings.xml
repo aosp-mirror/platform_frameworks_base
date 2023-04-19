@@ -746,7 +746,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"موبائل ڈیٹا آف کریں؟"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏آپ کو <xliff:g id="CARRIER">%s</xliff:g> کے ذریعے ڈیٹا یا انٹرنیٹ تک رسائی حاصل نہیں ہوگی۔ انٹرنیٹ صرف Wi-Fi کے ذریعے دستیاب ہوگا۔"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"آپ کا کریئر"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> پر واپس سوئچ کریں؟"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"‫<xliff:g id="CARRIER">%s</xliff:g> پر واپس سوئچ کریں؟"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"دستیابی کی بنیاد پر موبائل ڈیٹا خودکار طور پر تبدیل نہیں ہوگا"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"نہیں شکریہ"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"ہاں، سوئچ کریں"</string>
