@@ -16,9 +16,9 @@
   -->
 
 <resources>
-    <dimen name="text_size_normal">24dp</dimen>
+    <dimen name="text_size_normal">20dp</dimen>
     <dimen name="text_size_symbol">14dp</dimen>
 
-    <dimen name="keyboard_header_height">40dp</dimen>
-    <dimen name="keyboard_row_height">50dp</dimen>
+    <dimen name="keyboard_header_height">30dp</dimen>
+    <dimen name="keyboard_row_height">40dp</dimen>
 </resources>
