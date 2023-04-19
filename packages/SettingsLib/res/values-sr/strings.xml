@@ -662,7 +662,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Физичка тастатура"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Одаберите распоред тастатуре"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Подразумевано"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Укључите екран"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Укључивање екрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи укључивање екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвољава апликацији да укључи екран. Ако се омогући, апликација може да укључи екран у било ком тренутку без ваше експлицитне намере."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Желите да зауставите емитовање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
