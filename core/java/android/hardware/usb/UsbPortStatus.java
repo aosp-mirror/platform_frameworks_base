@@ -588,10 +588,10 @@ public final class UsbPortStatus implements Parcelable {
      * Returns non compliant reasons, if any, for the connected
      * charger/cable/accessory/USB port.
      *
-     * @return array including {@link #NON_COMPLIANT_REASON_DEBUG_ACCESSORY},
-     *         {@link #NON_COMPLIANT_REASON_BC12},
-     *         {@link #NON_COMPLIANT_REASON_MISSING_RP},
-     *         or {@link #NON_COMPLIANT_REASON_TYPEC}
+     * @return array including {@link #COMPLIANCE_WARNING_OTHER},
+     *         {@link #COMPLIANCE_WARNING_DEBUG_ACCESSORY},
+     *         {@link #COMPLIANCE_WARNING_BC_1_2},
+     *         or {@link #COMPLIANCE_WARNING_MISSING_RP}
      */
     @CheckResult
     @NonNull
