@@ -1021,9 +1021,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 userAvatarContainer,
                 keyguardUserSwitcherView);
 
-        NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
-                R.id.notification_stack_scroller);
-        mNotificationStackScrollLayoutController.attach(stackScrollLayout);
         mNotificationStackScrollLayoutController.setOnHeightChangedListener(
                 new NsslHeightChangedListener());
         mNotificationStackScrollLayoutController.setOnEmptySpaceClickListener(
