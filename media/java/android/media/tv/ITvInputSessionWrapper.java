@@ -223,7 +223,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_TIME_SHIFT_SET_MODE: {
-                mTvInputSessionImpl.timeShiftSetMode((Integer) msg.obj);
+                mTvInputSessionImpl.timeShiftSetMode(msg.arg1);
+                break;
             }
             case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
                 mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
