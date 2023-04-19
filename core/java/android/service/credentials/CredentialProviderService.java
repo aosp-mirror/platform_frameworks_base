@@ -178,8 +178,8 @@ public abstract class CredentialProviderService extends Service {
       *          <capability>@string/passwords</capability>
       *          <capability>@string/passkeys</capability>
       *      </capabilities>
-      *      <string name="passwords">android.credentials.TYPE_PASSWORD_CREDENTIAL</string>
-      *      <string name="passkeys">android.credentials.TYPE_PUBLIC_KEY_CREDENTIAL</string>
+      *      <capability name="android.credentials.TYPE_PASSWORD_CREDENTIAL" />
+      *      <capability name="android.credentials.TYPE_PUBLIC_KEY_CREDENTIAL" />
       *  </credential-provider>
       * </code>
       */
