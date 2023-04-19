@@ -175,15 +175,17 @@ public class AudioServiceEvents {
         final String mDeviceAddress;
         final String mCaller;
         final int mDeviceForStream;
+        final boolean mSkipped;
 
         DeviceVolumeEvent(int streamType, int index, @NonNull AudioDeviceAttributes device,
-                int deviceForStream, String callingPackage) {
+                int deviceForStream, String callingPackage, boolean skipped) {
             mStream = streamType;
             mVolIndex = index;
             mDeviceNativeType = "0x" + Integer.toHexString(device.getInternalType());
             mDeviceAddress = device.getAddress();
             mDeviceForStream = deviceForStream;
             mCaller = callingPackage;
+            mSkipped = skipped;
             // log metrics
             new MediaMetrics.Item(MediaMetrics.Name.AUDIO_VOLUME_EVENT)
                     .set(MediaMetrics.Property.EVENT, "setDeviceVolume")
@@ -198,14 +200,18 @@ public class AudioServiceEvents {
 
         @Override
         public String eventToString() {
-            return new StringBuilder("setDeviceVolume(stream:")
+            final StringBuilder sb = new StringBuilder("setDeviceVolume(stream:")
                     .append(AudioSystem.streamToString(mStream))
                     .append(" index:").append(mVolIndex)
                     .append(" device:").append(mDeviceNativeType)
                     .append(" addr:").append(mDeviceAddress)
-                    .append(") from ").append(mCaller)
-                    .append(" currDevForStream:Ox").append(Integer.toHexString(mDeviceForStream))
-                    .toString();
+                    .append(") from ").append(mCaller);
+            if (mSkipped) {
+                sb.append(" skipped [device in use]");
+            } else {
+                sb.append(" currDevForStream:Ox").append(Integer.toHexString(mDeviceForStream));
+            }
+            return sb.toString();
         }
     }
 
