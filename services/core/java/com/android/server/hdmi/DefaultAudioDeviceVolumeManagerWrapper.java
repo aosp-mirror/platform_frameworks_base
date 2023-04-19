@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,44 +16,45 @@
 
 package com.android.server.hdmi;
 
-import static android.media.AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener;
-import static android.media.AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener;
-
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.content.Context;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceVolumeManager;
-import android.media.AudioManager;
 import android.media.VolumeInfo;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
- * Wrapper for {@link AudioDeviceVolumeManager} that stubs its methods. Useful for testing.
+ * "Default" wrapper for {@link AudioDeviceVolumeManager}, as opposed to a "Fake" wrapper for
+ * testing - see {@link FakeAudioFramework.FakeAudioDeviceVolumeManagerWrapper}.
+ *
+ * Creates an instance of {@link AudioDeviceVolumeManager} and directly passes method calls
+ * to that instance.
  */
-public class FakeAudioDeviceVolumeManagerWrapper implements
-        AudioDeviceVolumeManagerWrapperInterface {
+public class DefaultAudioDeviceVolumeManagerWrapper
+        implements AudioDeviceVolumeManagerWrapper {
 
-    private final Set<OnDeviceVolumeBehaviorChangedListener> mVolumeBehaviorListeners;
+    private static final String TAG = "AudioDeviceVolumeManagerWrapper";
 
-    public FakeAudioDeviceVolumeManagerWrapper() {
-        mVolumeBehaviorListeners = new HashSet<>();
+    private final AudioDeviceVolumeManager mAudioDeviceVolumeManager;
+
+    public DefaultAudioDeviceVolumeManagerWrapper(Context context) {
+        mAudioDeviceVolumeManager = new AudioDeviceVolumeManager(context);
     }
 
     @Override
     public void addOnDeviceVolumeBehaviorChangedListener(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnDeviceVolumeBehaviorChangedListener listener)
+            @NonNull AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener listener)
             throws SecurityException {
-        mVolumeBehaviorListeners.add(listener);
+        mAudioDeviceVolumeManager.addOnDeviceVolumeBehaviorChangedListener(executor, listener);
     }
 
     @Override
     public void removeOnDeviceVolumeBehaviorChangedListener(
-            @NonNull OnDeviceVolumeBehaviorChangedListener listener) {
-        mVolumeBehaviorListeners.remove(listener);
+            @NonNull AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener listener) {
+        mAudioDeviceVolumeManager.removeOnDeviceVolumeBehaviorChangedListener(listener);
     }
 
     @Override
@@ -61,12 +62,9 @@ public class FakeAudioDeviceVolumeManagerWrapper implements
             @NonNull AudioDeviceAttributes device,
             @NonNull VolumeInfo volume,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnAudioDeviceVolumeChangedListener vclistener,
+            @NonNull AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener vclistener,
             boolean handlesVolumeAdjustment) {
-        // Notify all volume behavior listeners that the device adopted absolute volume behavior
-        for (OnDeviceVolumeBehaviorChangedListener listener : mVolumeBehaviorListeners) {
-            listener.onDeviceVolumeBehaviorChanged(device,
-                    AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
-        }
+        mAudioDeviceVolumeManager.setDeviceAbsoluteVolumeBehavior(device, volume, executor,
+                vclistener, handlesVolumeAdjustment);
     }
 }

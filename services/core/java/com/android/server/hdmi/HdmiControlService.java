@@ -491,10 +491,10 @@ public class HdmiControlService extends SystemService {
     private PowerManagerInternalWrapper mPowerManagerInternal;
 
     @Nullable
-    private AudioManager mAudioManager;
+    private AudioManagerWrapper mAudioManager;
 
     @Nullable
-    private AudioDeviceVolumeManagerWrapperInterface mAudioDeviceVolumeManager;
+    private AudioDeviceVolumeManagerWrapper mAudioDeviceVolumeManager;
 
     @Nullable
     private Looper mIoLooper;
@@ -528,18 +528,20 @@ public class HdmiControlService extends SystemService {
     /**
      * Constructor for testing.
      *
-     * It's critical to use a fake AudioDeviceVolumeManager because a normally instantiated
-     * AudioDeviceVolumeManager can access the "real" AudioService on the DUT.
+     * Takes fakes for AudioManager and AudioDeviceVolumeManager.
      *
-     * @see FakeAudioDeviceVolumeManagerWrapper
+     * This is especially important for AudioDeviceVolumeManager because a normally instantiated
+     * AudioDeviceVolumeManager can access the "real" AudioService on the DUT.
      */
     @VisibleForTesting HdmiControlService(Context context, List<Integer> deviceTypes,
-            AudioDeviceVolumeManagerWrapperInterface audioDeviceVolumeManager) {
+            AudioManagerWrapper audioManager,
+            AudioDeviceVolumeManagerWrapper audioDeviceVolumeManager) {
         super(context);
         mCecLocalDevices = deviceTypes;
         mSettingsObserver = new SettingsObserver(mHandler);
         mHdmiCecConfig = new HdmiCecConfig(context);
         mDeviceConfig = new DeviceConfigWrapper();
+        mAudioManager = audioManager;
         mAudioDeviceVolumeManager = audioDeviceVolumeManager;
     }
 
@@ -934,11 +936,6 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting
-    void setAudioManager(AudioManager audioManager) {
-        mAudioManager = audioManager;
-    }
-
-    @VisibleForTesting
     void setCecController(HdmiCecController cecController) {
         mCecController = cecController;
     }
@@ -975,11 +972,13 @@ public class HdmiControlService extends SystemService {
                     Context.TV_INPUT_SERVICE);
             mPowerManager = new PowerManagerWrapper(getContext());
             mPowerManagerInternal = new PowerManagerInternalWrapper();
-            mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+            if (mAudioManager == null) {
+                mAudioManager = new DefaultAudioManagerWrapper(getContext());
+            }
             mStreamMusicMaxVolume = getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
             if (mAudioDeviceVolumeManager == null) {
                 mAudioDeviceVolumeManager =
-                        new AudioDeviceVolumeManagerWrapper(getContext());
+                        new DefaultAudioDeviceVolumeManagerWrapper(getContext());
             }
             getAudioDeviceVolumeManager().addOnDeviceVolumeBehaviorChangedListener(
                     mServiceThreadExecutor, this::onDeviceVolumeBehaviorChanged);
@@ -1773,7 +1772,7 @@ public class HdmiControlService extends SystemService {
                 == HdmiControlManager.VOLUME_CONTROL_DISABLED) {
             return;
         }
-        AudioManager audioManager = getAudioManager();
+        AudioManagerWrapper audioManager = getAudioManager();
         boolean muted = audioManager.isStreamMute(AudioManager.STREAM_MUSIC);
         if (mute) {
             if (!muted) {
@@ -3485,7 +3484,7 @@ public class HdmiControlService extends SystemService {
      * Returns null before the boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}.
      */
     @Nullable
-    AudioManager getAudioManager() {
+    AudioManagerWrapper getAudioManager() {
         return mAudioManager;
     }
 
@@ -3493,7 +3492,7 @@ public class HdmiControlService extends SystemService {
      * Returns null before the boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}.
      */
     @Nullable
-    private AudioDeviceVolumeManagerWrapperInterface getAudioDeviceVolumeManager() {
+    private AudioDeviceVolumeManagerWrapper getAudioDeviceVolumeManager() {
         return mAudioDeviceVolumeManager;
     }
 

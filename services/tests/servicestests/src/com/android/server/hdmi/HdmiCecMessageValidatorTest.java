@@ -51,9 +51,11 @@ public class HdmiCecMessageValidatorTest {
 
     @Before
     public void setUp() throws Exception {
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         HdmiControlService mHdmiControlService = new HdmiControlService(
                 InstrumentationRegistry.getTargetContext(), Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper());
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager());
 
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
     }

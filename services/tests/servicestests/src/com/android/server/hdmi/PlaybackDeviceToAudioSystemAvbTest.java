@@ -16,10 +16,13 @@
 
 package com.android.server.hdmi;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -82,7 +85,8 @@ public class PlaybackDeviceToAudioSystemAvbTest extends BaseAbsoluteVolumeBehavi
 
         // Audio System disables System Audio Mode. AVB should be disabled.
         receiveSetSystemAudioMode(false);
-        verifyAbsoluteVolumeDisabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
 
         // TV reports support for <Set Audio Volume Level>
         mNativeWrapper.onCecMessage(ReportFeaturesMessage.build(
@@ -102,6 +106,7 @@ public class PlaybackDeviceToAudioSystemAvbTest extends BaseAbsoluteVolumeBehavi
                 false));
         mTestLooper.dispatchAll();
 
-        verifyAbsoluteVolumeEnabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
     }
 }

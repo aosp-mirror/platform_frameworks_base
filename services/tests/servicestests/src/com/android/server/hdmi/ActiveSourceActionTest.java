@@ -26,7 +26,6 @@ import static org.mockito.Mockito.spy;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -61,19 +60,9 @@ public class ActiveSourceActionTest {
     public void setUp() throws Exception {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
         mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()) {
-            @Override
-            AudioManager getAudioManager() {
-                return new AudioManager() {
-                    @Override
-                    public void setWiredDeviceConnectionState(
-                            int type, int state, String address, String name) {
-                        // Do nothing.
-                    }
-                };
-            }
-
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()) {
             @Override
             boolean isPowerStandby() {
                 return false;

@@ -31,7 +31,6 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -88,20 +87,11 @@ public class OneTouchPlayActionTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mHdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlService = new HdmiControlService(mContextSpy,
                 Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
-                new FakeAudioDeviceVolumeManagerWrapper()) {
-            @Override
-            AudioManager getAudioManager() {
-                return new AudioManager() {
-                    @Override
-                    public void setWiredDeviceConnectionState(
-                            int type, int state, String address, String name) {
-                        // Do nothing.
-                    }
-                };
-            }
-
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()) {
             @Override
             boolean isPowerStandby() {
                 return false;

@@ -146,10 +146,13 @@ public class RoutingControlActionTest {
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        audioFramework.getAudioManager(),
+                        audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     boolean isCecControlEnabled() {
                         return true;

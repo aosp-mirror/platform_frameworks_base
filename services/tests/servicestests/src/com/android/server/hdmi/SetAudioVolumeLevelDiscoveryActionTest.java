@@ -80,9 +80,11 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy,
                 Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
-                new FakeAudioDeviceVolumeManagerWrapper()));
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
 
