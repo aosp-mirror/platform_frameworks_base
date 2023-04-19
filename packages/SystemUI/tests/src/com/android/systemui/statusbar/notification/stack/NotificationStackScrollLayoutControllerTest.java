@@ -152,8 +152,270 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
+    }
+
+    @Test
+    public void testAttach_viewAlreadyAttached() {
+        initController(/* viewIsAttached= */ true);
+
+        verify(mConfigurationController).addCallback(
+                any(ConfigurationController.ConfigurationListener.class));
+    }
+    @Test
+    public void testAttach_viewAttachedAfterInit() {
+        initController(/* viewIsAttached= */ false);
+        verify(mConfigurationController, never()).addCallback(
+                any(ConfigurationController.ConfigurationListener.class));
+
+        mController.mOnAttachStateChangeListener.onViewAttachedToWindow(
+                mNotificationStackScrollLayout);
+
+        verify(mConfigurationController).addCallback(
+                any(ConfigurationController.ConfigurationListener.class));
+    }
+
+    @Test
+    public void testOnDensityOrFontScaleChanged_reInflatesFooterViews() {
+        initController(/* viewIsAttached= */ true);
+
+        mController.mConfigurationListener.onDensityOrFontScaleChanged();
+        verify(mNotificationStackScrollLayout).reinflateViews();
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_notificationsVisible_zenHiding() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
+        initController(/* viewIsAttached= */ true);
+
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* notifVisibleInShade= */ true);
+
+        setupShowEmptyShadeViewState(false);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ false,
+                /* notifVisibleInShade= */ true);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_notificationsHidden_zenNotHiding() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* notifVisibleInShade= */ false);
+
+        setupShowEmptyShadeViewState(false);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ false,
+                /* notifVisibleInShade= */ false);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_splitShadeMode_alwaysShowEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        verify(mSysuiStatusBarStateController).addCallback(
+                mStateListenerArgumentCaptor.capture(), anyInt());
+        StatusBarStateController.StateListener stateListener =
+                mStateListenerArgumentCaptor.getValue();
+        stateListener.onStateChanged(SHADE);
+        mController.getView().removeAllViews();
+
+        mController.setQsFullScreen(false);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* notifVisibleInShade= */ false);
+
+        mController.setQsFullScreen(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* notifVisibleInShade= */ false);
+    }
+
+    @Test
+    public void testOnUserChange_verifySensitiveProfile() {
+        when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
+        initController(/* viewIsAttached= */ true);
+
+        ArgumentCaptor<UserChangedListener> userChangedCaptor = ArgumentCaptor
+                .forClass(UserChangedListener.class);
+
+        verify(mNotificationLockscreenUserManager)
+                .addUserChangedListener(userChangedCaptor.capture());
+        reset(mNotificationStackScrollLayout);
+
+        UserChangedListener changedListener = userChangedCaptor.getValue();
+        changedListener.onUserChanged(0);
+        verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
+    }
+
+    @Test
+    public void testOnStatePostChange_verifyIfProfileIsPublic() {
+        when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
+
+        initController(/* viewIsAttached= */ true);
+        verify(mSysuiStatusBarStateController).addCallback(
+                mStateListenerArgumentCaptor.capture(), anyInt());
+
+        StatusBarStateController.StateListener stateListener =
+                mStateListenerArgumentCaptor.getValue();
+
+        stateListener.onStatePostChange();
+        verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
+    }
+
+    @Test
+    public void testOnMenuShownLogging() {
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
+        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
+                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
+
+        ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
+                ArgumentCaptor.forClass(OnMenuEventListener.class);
+
+        initController(/* viewIsAttached= */ true);
+        verify(mNotificationSwipeHelperBuilder).setOnMenuEventListener(
+                onMenuEventListenerArgumentCaptor.capture());
+
+        OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
+
+        onMenuEventListener.onMenuShown(row);
+        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
+        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_REVEAL_GEAR,
+                MetricsProto.MetricsEvent.TYPE_ACTION));
+    }
+
+    @Test
+    public void testOnMenuClickedLogging() {
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
+        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
+                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
+
+        ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
+                ArgumentCaptor.forClass(OnMenuEventListener.class);
+
+        initController(/* viewIsAttached= */ true);
+        verify(mNotificationSwipeHelperBuilder).setOnMenuEventListener(
+                onMenuEventListenerArgumentCaptor.capture());
+
+        OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
+
+        onMenuEventListener.onMenuClicked(row, 0, 0, mock(
+                NotificationMenuRowPlugin.MenuItem.class));
+        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
+        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_TOUCH_GEAR,
+                MetricsProto.MetricsEvent.TYPE_ACTION));
+    }
+
+    @Test
+    public void testDismissListener() {
+        ArgumentCaptor<NotificationStackScrollLayout.ClearAllListener>
+                dismissListenerArgumentCaptor = ArgumentCaptor.forClass(
+                NotificationStackScrollLayout.ClearAllListener.class);
+
+        initController(/* viewIsAttached= */ true);
+
+        verify(mNotificationStackScrollLayout).setClearAllListener(
+                dismissListenerArgumentCaptor.capture());
+        NotificationStackScrollLayout.ClearAllListener dismissListener =
+                dismissListenerArgumentCaptor.getValue();
+
+        dismissListener.onClearAll(ROWS_ALL);
+        verify(mUiEventLogger).log(NotificationPanelEvent.fromSelection(ROWS_ALL));
+    }
+
+    @Test
+    public void testUpdateFooter_remoteInput() {
+        ArgumentCaptor<RemoteInputController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(RemoteInputController.Callback.class);
+        doNothing().when(mRemoteInputManager).addControllerCallback(callbackCaptor.capture());
+        when(mRemoteInputManager.isRemoteInputActive()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(false);
+        RemoteInputController.Callback callback = callbackCaptor.getValue();
+        callback.onRemoteInputActive(true);
+        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(true);
+    }
+
+    @Test
+    public void testSetNotifStats_updatesHasFilteredOutSeenNotifications() {
+        initController(/* viewIsAttached= */ true);
+        mSeenNotificationsProvider.setHasFilteredOutSeenNotifications(true);
+        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
+        verify(mNotificationStackScrollLayout).setHasFilteredOutSeenNotifications(true);
+        verify(mNotificationStackScrollLayout).updateFooter();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testAttach_updatesViewStatusBarState() {
+        // GIVEN: Controller is attached
+        initController(/* viewIsAttached= */ true);
+        ArgumentCaptor<StatusBarStateController.StateListener> captor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mSysuiStatusBarStateController).addCallback(captor.capture(), anyInt());
+        StatusBarStateController.StateListener stateListener = captor.getValue();
+
+        // WHEN: StatusBarState changes to SHADE
+        when(mSysuiStatusBarStateController.getState()).thenReturn(SHADE);
+        stateListener.onStateChanged(SHADE);
+
+        // THEN: NSSL is updated with the current state
+        verify(mNotificationStackScrollLayout).setStatusBarState(SHADE);
+
+        // WHEN: Controller is detached
+        mController.mOnAttachStateChangeListener
+                .onViewDetachedFromWindow(mNotificationStackScrollLayout);
+
+        // WHEN: StatusBarState changes to KEYGUARD
+        when(mSysuiStatusBarStateController.getState()).thenReturn(KEYGUARD);
+
+        // WHEN: Controller is re-attached
+        mController.mOnAttachStateChangeListener
+                .onViewAttachedToWindow(mNotificationStackScrollLayout);
+
+        // THEN: NSSL is updated with the current state
+        verify(mNotificationStackScrollLayout).setStatusBarState(KEYGUARD);
+    }
+
+    private LogMaker logMatcher(int category, int type) {
+        return argThat(new LogMatcher(category, type));
+    }
+
+    private void setupShowEmptyShadeViewState(boolean toShow) {
+        if (toShow) {
+            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(SHADE);
+            mController.setQsFullScreen(false);
+            mController.getView().removeAllViews();
+        } else {
+            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+            mController.setQsFullScreen(true);
+            mController.getView().addContainerView(mock(ExpandableNotificationRow.class));
+        }
+    }
+
+    private void initController(boolean viewIsAttached) {
+        when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(viewIsAttached);
 
         mController = new NotificationStackScrollLayoutController(
+                mNotificationStackScrollLayout,
                 true,
                 mNotificationGutsManager,
                 mVisibilityProvider,
@@ -196,266 +458,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mSecureSettings,
                 mock(NotificationDismissibilityProvider.class)
         );
-
-        when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
-    }
-
-    @Test
-    public void testAttach_viewAlreadyAttached() {
-        mController.attach(mNotificationStackScrollLayout);
-
-        verify(mConfigurationController).addCallback(
-                any(ConfigurationController.ConfigurationListener.class));
-    }
-    @Test
-    public void testAttach_viewAttachedAfterInit() {
-        when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(false);
-
-        mController.attach(mNotificationStackScrollLayout);
-
-        verify(mConfigurationController, never()).addCallback(
-                any(ConfigurationController.ConfigurationListener.class));
-
-        mController.mOnAttachStateChangeListener.onViewAttachedToWindow(
-                mNotificationStackScrollLayout);
-
-        verify(mConfigurationController).addCallback(
-                any(ConfigurationController.ConfigurationListener.class));
-    }
-
-    @Test
-    public void testOnDensityOrFontScaleChanged_reInflatesFooterViews() {
-        mController.attach(mNotificationStackScrollLayout);
-        mController.mConfigurationListener.onDensityOrFontScaleChanged();
-        verify(mNotificationStackScrollLayout).reinflateViews();
-    }
-
-    @Test
-    public void testUpdateEmptyShadeView_notificationsVisible_zenHiding() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
-        mController.attach(mNotificationStackScrollLayout);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ true);
-
-        setupShowEmptyShadeViewState(false);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ false,
-                /* notifVisibleInShade= */ true);
-    }
-
-    @Test
-    public void testUpdateEmptyShadeView_notificationsHidden_zenNotHiding() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        mController.attach(mNotificationStackScrollLayout);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ false);
-
-        setupShowEmptyShadeViewState(false);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ false,
-                /* notifVisibleInShade= */ false);
-    }
-
-    @Test
-    public void testUpdateEmptyShadeView_splitShadeMode_alwaysShowEmptyView() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
-        StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
-        stateListener.onStateChanged(SHADE);
-        mController.getView().removeAllViews();
-
-        mController.setQsFullScreen(false);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ false);
-
-        mController.setQsFullScreen(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ false);
-    }
-
-    @Test
-    public void testOnUserChange_verifySensitiveProfile() {
-        when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
-
-        ArgumentCaptor<UserChangedListener> userChangedCaptor = ArgumentCaptor
-                .forClass(UserChangedListener.class);
-
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationLockscreenUserManager)
-                .addUserChangedListener(userChangedCaptor.capture());
-        reset(mNotificationStackScrollLayout);
-
-        UserChangedListener changedListener = userChangedCaptor.getValue();
-        changedListener.onUserChanged(0);
-        verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
-    }
-
-    @Test
-    public void testOnStatePostChange_verifyIfProfileIsPublic() {
-        when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
-
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
-
-        StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
-
-        stateListener.onStatePostChange();
-        verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
-    }
-
-    @Test
-    public void testOnMenuShownLogging() {
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
-        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
-                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
-
-        ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
-                ArgumentCaptor.forClass(OnMenuEventListener.class);
-
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationSwipeHelperBuilder).setOnMenuEventListener(
-                onMenuEventListenerArgumentCaptor.capture());
-
-        OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
-
-        onMenuEventListener.onMenuShown(row);
-        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
-        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_REVEAL_GEAR,
-                MetricsProto.MetricsEvent.TYPE_ACTION));
-    }
-
-    @Test
-    public void testOnMenuClickedLogging() {
-        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
-        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
-                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
-
-        ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
-                ArgumentCaptor.forClass(OnMenuEventListener.class);
-
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationSwipeHelperBuilder).setOnMenuEventListener(
-                onMenuEventListenerArgumentCaptor.capture());
-
-        OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
-
-        onMenuEventListener.onMenuClicked(row, 0, 0, mock(
-                NotificationMenuRowPlugin.MenuItem.class));
-        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
-        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_TOUCH_GEAR,
-                MetricsProto.MetricsEvent.TYPE_ACTION));
-    }
-
-    @Test
-    public void testDismissListener() {
-        ArgumentCaptor<NotificationStackScrollLayout.ClearAllListener>
-                dismissListenerArgumentCaptor = ArgumentCaptor.forClass(
-                NotificationStackScrollLayout.ClearAllListener.class);
-
-        mController.attach(mNotificationStackScrollLayout);
-
-        verify(mNotificationStackScrollLayout).setClearAllListener(
-                dismissListenerArgumentCaptor.capture());
-        NotificationStackScrollLayout.ClearAllListener dismissListener =
-                dismissListenerArgumentCaptor.getValue();
-
-        dismissListener.onClearAll(ROWS_ALL);
-        verify(mUiEventLogger).log(NotificationPanelEvent.fromSelection(ROWS_ALL));
-    }
-
-    @Test
-    public void testUpdateFooter_remoteInput() {
-        ArgumentCaptor<RemoteInputController.Callback> callbackCaptor =
-                ArgumentCaptor.forClass(RemoteInputController.Callback.class);
-        doNothing().when(mRemoteInputManager).addControllerCallback(callbackCaptor.capture());
-        when(mRemoteInputManager.isRemoteInputActive()).thenReturn(false);
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(false);
-        RemoteInputController.Callback callback = callbackCaptor.getValue();
-        callback.onRemoteInputActive(true);
-        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(true);
-    }
-
-    @Test
-    public void testSetNotifStats_updatesHasFilteredOutSeenNotifications() {
-        mSeenNotificationsProvider.setHasFilteredOutSeenNotifications(true);
-        mController.attach(mNotificationStackScrollLayout);
-        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
-        verify(mNotificationStackScrollLayout).setHasFilteredOutSeenNotifications(true);
-        verify(mNotificationStackScrollLayout).updateFooter();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(anyBoolean(), anyBoolean());
-    }
-
-    @Test
-    public void testAttach_updatesViewStatusBarState() {
-        // GIVEN: Controller is attached
-        mController.attach(mNotificationStackScrollLayout);
-        ArgumentCaptor<StatusBarStateController.StateListener> captor =
-                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
-        verify(mSysuiStatusBarStateController).addCallback(captor.capture(), anyInt());
-        StatusBarStateController.StateListener stateListener = captor.getValue();
-
-        // WHEN: StatusBarState changes to SHADE
-        when(mSysuiStatusBarStateController.getState()).thenReturn(SHADE);
-        stateListener.onStateChanged(SHADE);
-
-        // THEN: NSSL is updated with the current state
-        verify(mNotificationStackScrollLayout).setStatusBarState(SHADE);
-
-        // WHEN: Controller is detached
-        mController.mOnAttachStateChangeListener
-                .onViewDetachedFromWindow(mNotificationStackScrollLayout);
-
-        // WHEN: StatusBarState changes to KEYGUARD
-        when(mSysuiStatusBarStateController.getState()).thenReturn(KEYGUARD);
-
-        // WHEN: Controller is re-attached
-        mController.mOnAttachStateChangeListener
-                .onViewAttachedToWindow(mNotificationStackScrollLayout);
-
-        // THEN: NSSL is updated with the current state
-        verify(mNotificationStackScrollLayout).setStatusBarState(KEYGUARD);
-    }
-
-    private LogMaker logMatcher(int category, int type) {
-        return argThat(new LogMatcher(category, type));
-    }
-
-    private void setupShowEmptyShadeViewState(boolean toShow) {
-        if (toShow) {
-            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(SHADE);
-            mController.setQsFullScreen(false);
-            mController.getView().removeAllViews();
-        } else {
-            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
-            mController.setQsFullScreen(true);
-            mController.getView().addContainerView(mock(ExpandableNotificationRow.class));
-        }
     }
 
     static class LogMatcher implements ArgumentMatcher<LogMaker> {
