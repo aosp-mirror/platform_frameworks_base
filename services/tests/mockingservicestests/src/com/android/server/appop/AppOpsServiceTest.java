@@ -40,6 +40,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -163,6 +164,8 @@ public class AppOpsServiceTest {
         when(mockPackageManagerInternal.getPackageStateInternal(sMyPackageName))
                 .thenReturn(mockMyPSInternal);
         when(mockPackageManagerInternal.getPackage(sMyPackageName)).thenReturn(mockMyPkg);
+        when(mockPackageManagerInternal.getPackageUid(eq(sMyPackageName), anyLong(),
+                eq(getUserId(mMyUid)))).thenReturn(mMyUid);
         doReturn(mockPackageManagerInternal).when(
                 () -> LocalServices.getService(PackageManagerInternal.class));
 
