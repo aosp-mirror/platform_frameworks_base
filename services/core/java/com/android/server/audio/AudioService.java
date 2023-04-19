@@ -4993,8 +4993,8 @@ public class AudioService extends IAudioService.Stub
 
         int streamType = vi.getStreamType();
         final VolumeInfo.Builder vib = new VolumeInfo.Builder(vi);
-        vib.setMinVolumeIndex(mStreamStates[streamType].mIndexMin);
-        vib.setMaxVolumeIndex(mStreamStates[streamType].mIndexMax);
+        vib.setMinVolumeIndex((mStreamStates[streamType].mIndexMin + 5) / 10);
+        vib.setMaxVolumeIndex((mStreamStates[streamType].mIndexMax + 5) / 10);
         synchronized (VolumeStreamState.class) {
             final int index;
             if (isFixedVolumeDevice(ada.getInternalType())) {
@@ -5003,7 +5003,11 @@ public class AudioService extends IAudioService.Stub
                 index = (mStreamStates[streamType].getIndex(ada.getInternalType()) + 5) / 10;
             }
             vib.setVolumeIndex(index);
-            return vib.setMuted(mStreamStates[streamType].mIsMuted).build();
+            // only set as a mute command if stream muted
+            if (mStreamStates[streamType].mIsMuted) {
+                vib.setMuted(true);
+            }
+            return vib.build();
         }
     }
 
