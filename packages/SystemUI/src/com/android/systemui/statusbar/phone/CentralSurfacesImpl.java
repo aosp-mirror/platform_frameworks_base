@@ -1514,13 +1514,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean tracking = event.getTracking();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
 
-        if (getShadeViewController() != null) {
-            getShadeViewController().updateSystemUiStateFlags();
-        }
-
         if (fraction == 0 || fraction == 1) {
             if (getNavigationBarView() != null) {
                 getNavigationBarView().onStatusBarPanelStateChanged();
+            }
+            if (getShadeViewController() != null) {
+                // Needed to update SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED and
+                // SYSUI_STATE_QUICK_SETTINGS_EXPANDED
+                getShadeViewController().updateSystemUiStateFlags();
             }
         }
     }
@@ -1529,6 +1530,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     void onShadeExpansionFullyChanged(Boolean isExpanded) {
         if (mPanelExpanded != isExpanded) {
             mPanelExpanded = isExpanded;
+            if (getShadeViewController() != null) {
+                // Needed to update SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
+                getShadeViewController().updateSystemUiStateFlags();
+            }
             if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
                 if (DEBUG) {
                     Log.v(TAG, "clearing notification effects from Height");
