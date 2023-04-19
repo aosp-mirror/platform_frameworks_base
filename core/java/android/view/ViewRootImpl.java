@@ -647,11 +647,18 @@ public final class ViewRootImpl implements ViewParent,
     boolean mForceNextWindowRelayout;
     CountDownLatch mWindowDrawCountDown;
 
-    // Whether we have used applyTransactionOnDraw to schedule an RT
-    // frame callback consuming a passed in transaction. In this case
-    // we also need to schedule a commit callback so we can observe
-    // if the draw was skipped, and the BBQ pending transactions.
+    /**
+     * Value to indicate whether someone has called {@link #applyTransactionOnDraw}before the
+     * traversal. This is used to determine whether a RT frame callback needs to be registered to
+     * merge the transaction with the next frame. The value is cleared after the VRI has run a
+     * traversal pass.
+     */
     boolean mHasPendingTransactions;
+    /**
+     * The combined transactions passed in from {@link #applyTransactionOnDraw}
+     */
+    private Transaction mPendingTransaction = new Transaction();
+
 
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
@@ -4538,9 +4545,13 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void registerCallbackForPendingTransactions() {
+        Transaction t = new Transaction();
+        t.merge(mPendingTransaction);
+
         registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
             public HardwareRenderer.FrameCommitCallback onFrameDraw(int syncResult, long frame) {
+                mergeWithNextTransaction(t, frame);
                 if ((syncResult
                         & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
                     mBlastBufferQueue.applyPendingTransactions(frame);
@@ -8770,6 +8781,9 @@ public final class ViewRootImpl implements ViewParent,
             mActiveSurfaceSyncGroup.markSyncReady();
             mActiveSurfaceSyncGroup = null;
         }
+        if (mHasPendingTransactions) {
+            mPendingTransaction.apply();
+        }
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
@@ -11104,12 +11118,11 @@ public final class ViewRootImpl implements ViewParent,
         } else {
             // Copy and clear the passed in transaction for thread safety. The new transaction is
             // accessed on the render thread.
-            var localTransaction = new Transaction();
-            localTransaction.merge(t);
+            mPendingTransaction.merge(t);
             mHasPendingTransactions = true;
-            registerRtFrameCallback(frame -> {
-                mergeWithNextTransaction(localTransaction, frame);
-            });
+            // Schedule the traversal to ensure there's an attempt to draw a frame and apply the
+            // pending transactions. This is also where the registerFrameCallback will be scheduled.
+            scheduleTraversals();
         }
         return true;
     }
@@ -11250,6 +11263,10 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_BLAST) {
             Log.d(mTag, "registerCallbacksForSync syncBuffer=" + syncBuffer);
         }
+
+        Transaction t = new Transaction();
+        t.merge(mPendingTransaction);
+
         mAttachInfo.mThreadedRenderer.registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
             public void onFrameDraw(long frame) {
@@ -11263,6 +11280,7 @@ public final class ViewRootImpl implements ViewParent,
                                     + frame + ".");
                 }
 
+                mergeWithNextTransaction(t, frame);
                 // If the syncResults are SYNC_LOST_SURFACE_REWARD_IF_FOUND or
                 // SYNC_CONTEXT_IS_STOPPED it means nothing will draw. There's no need to set up
                 // any blast sync or commit callback, and the code should directly call
