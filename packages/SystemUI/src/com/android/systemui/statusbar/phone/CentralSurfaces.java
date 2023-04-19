@@ -75,7 +75,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     boolean DEBUG_WAKEUP_DELAY = Compile.IS_DEBUG;
     // additional instrumentation for testing purposes; intended to be left on during development
     boolean CHATTY = DEBUG;
-    boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = false;
+    boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
     String ACTION_FAKE_ARTWORK = "fake_artwork";
     int FADE_KEYGUARD_START_DELAY = 100;
     int FADE_KEYGUARD_DURATION = 300;
