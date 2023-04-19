@@ -17,7 +17,6 @@
 package android.service.credentials;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
 /**
@@ -32,22 +31,6 @@ public class PermissionUtils {
     public static boolean hasPermission(Context context, String packageName, String permission) {
         return context.getPackageManager().checkPermission(permission, packageName)
                 == PackageManager.PERMISSION_GRANTED;
-    }
-
-    /** Checks whether the given package name is a system app on the device **/
-    public static boolean isSystemApp(Context context, String packageName) {
-        try {
-            ApplicationInfo appInfo =
-                    context.getPackageManager()
-                            .getApplicationInfo(packageName,
-                                    PackageManager.ApplicationInfoFlags.of(
-                                            PackageManager.MATCH_SYSTEM_ONLY));
-            if (appInfo != null) {
-                return true;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-        }
-        return false;
     }
 }
 
