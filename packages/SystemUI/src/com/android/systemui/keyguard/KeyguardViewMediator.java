@@ -1957,11 +1957,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         if (mShowing && mKeyguardStateController.isShowing()) {
             if (mPM.isInteractive() && !mHiding) {
                 // It's already showing, and we're not trying to show it while the screen is off.
-                // We can simply reset all of the views.
+                // We can simply reset all of the views, but don't hide the bouncer in case the user
+                // is currently interacting with it.
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing (instead, resetting) because it is "
                         + "already showing, we're interactive, and we were not previously hiding. "
                         + "It should be safe to short-circuit here.");
-                resetStateLocked();
+                resetStateLocked(/* hideBouncer= */ false);
                 return;
             } else {
                 // We are trying to show the keyguard while the screen is off or while we were in
@@ -2035,8 +2036,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * @see #handleReset
      */
     private void resetStateLocked() {
+        resetStateLocked(/* hideBouncer= */ true);
+    }
+
+    private void resetStateLocked(boolean hideBouncer) {
         if (DEBUG) Log.e(TAG, "resetStateLocked");
-        Message msg = mHandler.obtainMessage(RESET);
+        Message msg = mHandler.obtainMessage(RESET, hideBouncer ? 1 : 0, 0);
         mHandler.sendMessage(msg);
     }
 
@@ -2226,7 +2231,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     handleHide();
                     break;
                 case RESET:
-                    handleReset();
+                    handleReset(msg.arg1 != 0);
                     break;
                 case VERIFY_UNLOCK:
                     Trace.beginSection("KeyguardViewMediator#handleMessage VERIFY_UNLOCK");
@@ -3008,10 +3013,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * Handle message sent by {@link #resetStateLocked}
      * @see #RESET
      */
-    private void handleReset() {
+    private void handleReset(boolean hideBouncer) {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleReset");
-            mKeyguardViewControllerLazy.get().reset(true /* hideBouncerWhenShowing */);
+            mKeyguardViewControllerLazy.get().reset(hideBouncer);
         }
 
         scheduleNonStrongBiometricIdleTimeout();

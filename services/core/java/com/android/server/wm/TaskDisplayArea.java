@@ -1081,12 +1081,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             if (sourceTask != null && sourceTask == candidateTask) {
                 // Do nothing when task that is getting opened is same as the source.
             } else if (sourceTask != null
-                    && mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment() != null
+                    && mLaunchAdjacentFlagRootTask.getAdjacentTask() != null
                     && (sourceTask == mLaunchAdjacentFlagRootTask
                     || sourceTask.isDescendantOf(mLaunchAdjacentFlagRootTask))) {
                 // If the adjacent launch is coming from the same root, launch to
                 // adjacent root instead.
-                return mLaunchAdjacentFlagRootTask.getAdjacentTaskFragment().asTask();
+                return mLaunchAdjacentFlagRootTask.getAdjacentTask();
             } else {
                 return mLaunchAdjacentFlagRootTask;
             }
@@ -1095,10 +1095,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
             if (mLaunchRootTasks.get(i).contains(windowingMode, activityType)) {
                 final Task launchRootTask = mLaunchRootTasks.get(i).task;
-                final TaskFragment adjacentTaskFragment = launchRootTask != null
-                        ? launchRootTask.getAdjacentTaskFragment() : null;
-                final Task adjacentRootTask =
-                        adjacentTaskFragment != null ? adjacentTaskFragment.asTask() : null;
+                final Task adjacentRootTask = launchRootTask != null
+                        ? launchRootTask.getAdjacentTask() : null;
                 if (sourceTask != null && adjacentRootTask != null
                         && (sourceTask == adjacentRootTask
                         || sourceTask.isDescendantOf(adjacentRootTask))) {
@@ -1116,16 +1114,14 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 // A pinned task relaunching should be handled by its task organizer. Skip fallback
                 // launch target of a pinned task from source task.
                 || candidateTask.getWindowingMode() != WINDOWING_MODE_PINNED)) {
-            Task launchTarget = sourceTask.getCreatedByOrganizerTask();
-            if (launchTarget != null && launchTarget.getAdjacentTaskFragment() != null) {
-                if (candidateTask != null) {
-                    final Task candidateRoot = candidateTask.getCreatedByOrganizerTask();
-                    if (candidateRoot != null && candidateRoot != launchTarget
-                            && launchTarget == candidateRoot.getAdjacentTaskFragment()) {
-                        launchTarget = candidateRoot;
-                    }
+            final Task adjacentTarget = sourceTask.getAdjacentTask();
+            if (adjacentTarget != null) {
+                if (candidateTask != null
+                        && (candidateTask == adjacentTarget
+                        || candidateTask.isDescendantOf(adjacentTarget))) {
+                    return adjacentTarget;
                 }
-                return launchTarget;
+                return sourceTask.getCreatedByOrganizerTask();
             }
         }
 

@@ -60,6 +60,10 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
         const val DEFAULT_CENTER_FILL_FADE_OUT_START = 0f
         const val DEFAULT_CENTER_FILL_FADE_OUT_END = 0.6f
 
+        const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
+        const val RIPPLE_DEFAULT_COLOR: Int = 0xffffffff.toInt()
+        const val RIPPLE_DEFAULT_ALPHA: Int = 115 // full opacity is 255.
+
         private const val SHADER_UNIFORMS =
             """
             uniform vec2 in_center;

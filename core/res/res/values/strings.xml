@@ -1452,7 +1452,8 @@
       without your intervention. This may result in unexpected charges or calls.
       Note that this doesn\'t allow the app to call emergency numbers.
       Malicious apps may cost you money by making calls without your
-      confirmation.</string>
+      confirmation, or dial carrier codes which cause incoming calls to be
+      automatically forwarded to another number.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessImsCallService">access IMS call service</string>
@@ -5896,9 +5897,9 @@
     <string name="resolver_cant_access_personal_apps_explanation">This content can\u2019t be opened with personal apps</string>
 
     <!-- Error message. This text lets the user know that they need to turn on work apps in order to share or open content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_turn_on_work_apps">Work profile is paused</string>
-    <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
-    <string name="resolver_switch_on_work">Tap to turn on</string>
+    <string name="resolver_turn_on_work_apps">Work apps are paused</string>
+    <!-- Button text. This button unpauses a user's work apps and data. [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Unpause</string>
 
     <!-- Error message. This text lets the user know that their current work apps don't support the specific content. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_work_apps_available">No work apps</string>
