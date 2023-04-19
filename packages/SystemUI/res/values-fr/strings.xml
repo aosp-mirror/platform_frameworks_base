@@ -238,7 +238,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotation automatique de l\'écran"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localisation"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Économiseur d\'écran"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à l\'appareil photo"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à la caméra"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accès au micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqué"</string>
@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Démarrer"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode une main"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contraste"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Moyen"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Élevé"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le micro de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer l\'appareil photo de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le micro de l\'appareil ?"</string>
@@ -406,7 +402,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nouvelles notifications"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Notifications silencieuses"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silencieux"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notifications"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
@@ -828,7 +824,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"enregistrement écran"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sans titre"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Taille de police"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Taille de la police"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"Réduire"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"Agrandir"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"supprimer des favoris"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Déplacer l\'élément à la position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Sélectionnez les commandes qui seront accessibles depuis Réglages rapides"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Faites glisser les commandes pour les réorganiser"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Les modifications n\'ont pas été enregistrées"</string>
@@ -1126,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre règle professionnelle ne vous permet de passer des appels que depuis le profil professionnel"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fermer"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Personnaliser écran verrouillage"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi non disponible"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Caméra bloquée"</string>
@@ -1134,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Micro bloqué"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Mode Prioritaire activé"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant à l\'écoute"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

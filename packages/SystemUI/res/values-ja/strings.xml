@@ -246,8 +246,8 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ユーザー"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"インターネット"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"ネットワークが利用できます"</string>
-    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ネットワークは利用できません"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"利用できるネットワークがあります"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"利用できるネットワークがありません"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Wi-Fiネットワークを利用できません"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ON にしています…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"画面のキャスト"</string>
@@ -793,7 +793,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>でデータやインターネットにアクセスできなくなります。インターネットには Wi-Fi からのみ接続できます。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"携帯通信会社"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> に戻しますか？"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"利用可能な場合でも、モバイルデータを利用するよう自動的に切り替わることはありません"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"利用可能な場合でも、モバイルデータ通信に自動的に切り替わることはありません"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"キャンセル"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"切り替える"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"クイック設定からアクセスするコントロールを選択してください"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>
@@ -1122,12 +1123,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"仕事用ポリシーでは、通話の発信を仕事用プロファイルからのみに制限できます"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"仕事用プロファイルに切り替える"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"閉じる"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="6152703934761402399">"ロック画面のカスタマイズ"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ロック画面をカスタマイズするにはロックを解除してください"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi は利用できません"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"カメラはブロックされています"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"カメラとマイクはブロックされています"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"マイクはブロックされています"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"優先モードは ON です"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"アシスタントは起動済みです"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"[設定] でデフォルトのメモアプリを設定してください"</string>
 </resources>
