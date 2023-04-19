@@ -16,21 +16,19 @@
 
 package com.android.wm.shell.compatui;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.transition.Transitions;
 
 import junit.framework.Assert;
 
@@ -40,31 +38,31 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Consumer;
+
 /**
- * Tests for {@link ReachabilityEduWindowManager}.
+ * Tests for {@link RestartDialogWindowManager}.
  *
  * Build/Install/Run:
- * atest WMShellUnitTests:ReachabilityEduWindowManagerTest
+ *  atest WMShellUnitTests:RestartDialogWindowManagerTest
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class ReachabilityEduWindowManagerTest extends ShellTestCase {
+public class RestartDialogWindowManagerTest extends ShellTestCase {
+
     @Mock
     private SyncTransactionQueue mSyncTransactionQueue;
-    @Mock
-    private ShellTaskOrganizer.TaskListener mTaskListener;
-    @Mock
-    private CompatUIConfiguration mCompatUIConfiguration;
-    @Mock
-    private DisplayLayout mDisplayLayout;
-    private TestShellExecutor mExecutor;
+    @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
+    @Mock private CompatUIConfiguration mCompatUIConfiguration;
+    @Mock private Transitions mTransitions;
+    @Mock private  Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnRestartCallback;
+    @Mock private  Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnDismissCallback;
+    private RestartDialogWindowManager mWindowManager;
     private TaskInfo mTaskInfo;
-    private ReachabilityEduWindowManager mWindowManager;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mExecutor = new TestShellExecutor();
         mTaskInfo = new ActivityManager.RunningTaskInfo();
         mTaskInfo.configuration.uiMode =
                 (mTaskInfo.configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK)
@@ -72,14 +70,9 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
         mTaskInfo.configuration.uiMode =
                 (mTaskInfo.configuration.uiMode & ~Configuration.UI_MODE_TYPE_MASK)
                         | Configuration.UI_MODE_TYPE_NORMAL;
-        mWindowManager = createReachabilityEduWindowManager(mTaskInfo);
-    }
-
-    @Test
-    public void testCreateLayout_notEligible_doesNotCreateLayout() {
-        assertFalse(mWindowManager.createLayout(/* canShow= */ true));
-
-        assertNull(mWindowManager.mLayout);
+        mWindowManager = new RestartDialogWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
+                mTaskListener, new DisplayLayout(), mTransitions, mOnRestartCallback,
+                mOnDismissCallback, mCompatUIConfiguration);
     }
 
     @Test
@@ -100,10 +93,5 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
                         | Configuration.UI_MODE_NIGHT_YES;
 
         Assert.assertTrue(mWindowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
-    }
-
-    private ReachabilityEduWindowManager createReachabilityEduWindowManager(TaskInfo taskInfo) {
-        return new ReachabilityEduWindowManager(mContext, taskInfo, mSyncTransactionQueue,
-                mTaskListener, mDisplayLayout, mCompatUIConfiguration, mExecutor);
     }
 }

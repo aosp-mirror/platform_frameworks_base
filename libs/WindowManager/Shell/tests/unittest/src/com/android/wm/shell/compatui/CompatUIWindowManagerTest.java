@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
@@ -455,12 +456,21 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         verify(mLayout).setCameraCompatHintVisibility(/* show= */ true);
     }
 
+    @Test
+    public void testWhenDockedStateHasChanged_needsToBeRecreated() {
+        ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
+        newTaskInfo.configuration.uiMode |= Configuration.UI_MODE_TYPE_DESK;
+
+        Assert.assertTrue(mWindowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
+    }
+
     private static TaskInfo createTaskInfo(boolean hasSizeCompat,
             @TaskInfo.CameraCompatControlState int cameraCompatControlState) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
         taskInfo.topActivityInSizeCompat = hasSizeCompat;
         taskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
         return taskInfo;
     }
 }

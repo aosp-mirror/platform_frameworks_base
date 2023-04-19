@@ -19,7 +19,6 @@ package com.android.wm.shell.compatui;
 import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -69,9 +68,6 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     @VisibleForTesting
     LetterboxEduDialogLayout mLayout;
 
-    @NonNull
-    private TaskInfo mTaskInfo;
-
     /**
      * The vertical margin between the dialog container and the task stable bounds (excluding
      * insets).
@@ -99,7 +95,6 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
             DialogAnimationController<LetterboxEduDialogLayout> animationController,
             DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
-        mTaskInfo = taskInfo;
         mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
         mAnimationController = animationController;
@@ -197,7 +192,7 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         mLayout.setDismissOnClickListener(null);
         mAnimationController.startExitAnimation(mLayout, () -> {
             release();
-            mOnDismissCallback.accept(Pair.create(mTaskInfo, getTaskListener()));
+            mOnDismissCallback.accept(Pair.create(getLastTaskInfo(), getTaskListener()));
         });
     }
 
@@ -210,7 +205,6 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
-        mTaskInfo = taskInfo;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
 
         return super.updateCompatInfo(taskInfo, taskListener, canShow);
