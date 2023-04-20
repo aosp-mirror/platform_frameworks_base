@@ -393,7 +393,7 @@ public final class BroadcastHelper {
     public static boolean isPrivacySafetyLabelChangeNotificationsEnabled(Context context) {
         PackageManager packageManager = context.getPackageManager();
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED, false)
+                SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED, true)
             && !packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
             && !packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
             && !packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH);
