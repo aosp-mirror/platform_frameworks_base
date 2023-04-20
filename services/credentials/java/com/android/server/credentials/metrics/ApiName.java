@@ -57,7 +57,7 @@ CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_IS_ENABLED_CREDENT
     );
 
     ApiName(int innerMetricCode) {
-        this.mInnerMetricCode = innerMetricCode;
+        mInnerMetricCode = innerMetricCode;
     }
 
     /**
@@ -66,7 +66,7 @@ CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_IS_ENABLED_CREDENT
      * @return a code corresponding to the west world metric name
      */
     public int getMetricCode() {
-        return this.mInnerMetricCode;
+        return mInnerMetricCode;
     }
 
     /**
