@@ -168,14 +168,13 @@ class BLASTSyncEngine {
             class CommitCallback implements Runnable {
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
-                public void onCommitted() {
+                public void onCommitted(SurfaceControl.Transaction t) {
                     synchronized (mWm.mGlobalLock) {
                         if (ran) {
                             return;
                         }
                         mHandler.removeCallbacks(this);
                         ran = true;
-                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
                         for (WindowContainer wc : wcAwaitingCommit) {
                             wc.onSyncTransactionCommitted(t);
                         }
@@ -194,12 +193,12 @@ class BLASTSyncEngine {
                     Slog.e(TAG, "WM sent Transaction to organized, but never received" +
                            " commit callback. Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                    onCommitted();
-
+                    onCommitted(merged);
                 }
             };
             CommitCallback callback = new CommitCallback();
-            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::onCommitted);
+            merged.addTransactionCommittedListener(Runnable::run,
+                    () -> callback.onCommitted(new SurfaceControl.Transaction()));
             mHandler.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
