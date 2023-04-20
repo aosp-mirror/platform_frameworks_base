@@ -27,6 +27,7 @@ import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -121,6 +122,10 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         if (viewHolder.mExpandButton.getTag() == null) {
             viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
         }
+
+        setAccessibility(view, viewType,
+                AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_expand);
+
         // Add expand buttons if the permissions are more than PERMISSION_SIZE in this list also
         // make the summary invisible by default.
         if (mPermissions.size() > PERMISSION_SIZE) {
@@ -132,10 +137,18 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
                     viewHolder.mExpandButton.setImageResource(R.drawable.btn_expand_less);
                     viewHolder.mPermissionSummary.setVisibility(View.VISIBLE);
                     viewHolder.mExpandButton.setTag(R.drawable.btn_expand_less);
+                    view.setContentDescription(mContext.getString(R.string.permission_expanded));
+                    setAccessibility(view, viewType,
+                            AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_collapse);
+                    viewHolder.mPermissionSummary.setFocusable(true);
                 } else {
                     viewHolder.mExpandButton.setImageResource(R.drawable.btn_expand_more);
                     viewHolder.mPermissionSummary.setVisibility(View.GONE);
                     viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
+                    view.setContentDescription(mContext.getString(R.string.permission_collapsed));
+                    setAccessibility(view, viewType,
+                            AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_expanded);
+                    viewHolder.mPermissionSummary.setFocusable(false);
                 }
             });
         } else {
@@ -185,6 +198,18 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
             mPermissionIcon = itemView.findViewById(R.id.permission_icon);
             mExpandButton = itemView.findViewById(R.id.permission_expand_button);
         }
+    }
+
+    private void setAccessibility(View view, int viewType, int action, int resourceId) {
+        final String actionString = mContext.getString(resourceId);
+        final String permission = mContext.getString(sTitleMap.get(viewType));
+        view.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(action,
+                        actionString + permission));
+            }
+        });
     }
 
     void setPermissionType(List<Integer> permissions) {
