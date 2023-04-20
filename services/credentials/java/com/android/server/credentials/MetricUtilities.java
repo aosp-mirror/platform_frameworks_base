@@ -178,9 +178,11 @@ public class MetricUtilities {
      *
      * @param providers      a map with known providers and their held metric objects
      * @param emitSequenceId an emitted sequence id for the current session
+     * @param initialPhaseMetric contains initial phase data to avoid repetition for candidate
+     *                           phase, track 2, logging
      */
     public static void logApiCalledCandidatePhase(Map<String, ProviderSession> providers,
-            int emitSequenceId) {
+            int emitSequenceId, InitialPhaseMetric initialPhaseMetric) {
         try {
             if (!LOG_FLAG) {
                 return;
@@ -200,6 +202,7 @@ public class MetricUtilities {
             int[] candidateActionEntryCountList = new int[providerSize];
             int[] candidateAuthEntryCountList = new int[providerSize];
             int[] candidateRemoteEntryCountList = new int[providerSize];
+            String[] frameworkExceptionList = new String[providerSize];
             int index = 0;
             for (var session : providerSessions) {
                 CandidatePhaseMetric metric = session.mProviderSessionMetric
@@ -225,7 +228,7 @@ public class MetricUtilities {
                 candidateActionEntryCountList[index] = metric.getActionEntryCount();
                 candidateAuthEntryCountList[index] = metric.getAuthenticationEntryCount();
                 candidateRemoteEntryCountList[index] = metric.getRemoteEntryCount();
-                // frameworkExceptionList[index] = metric.getFrameworkException();
+                frameworkExceptionList[index] = metric.getFrameworkException();
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE_REPORTED,
@@ -246,11 +249,16 @@ public class MetricUtilities {
                     /* candidate_provider_credential_entry_type_count */
                     candidateCredentialTypeCountList,
                     /* candidate_provider_remote_entry_count */ candidateRemoteEntryCountList,
-                    /* candidate_provider_authentication_entry_count */ candidateAuthEntryCountList,
-                    DEFAULT_REPEATED_STR,
-                    false,
-                    DEFAULT_REPEATED_STR,
-                    DEFAULT_REPEATED_INT_32
+                    /* candidate_provider_authentication_entry_count */
+                    candidateAuthEntryCountList,
+                    /* framework_exception_per_provider */
+                    frameworkExceptionList,
+                    /* origin_specified originSpecified */
+                    initialPhaseMetric.isOriginSpecified(),
+                    /* request_unique_classtypes */
+                    initialPhaseMetric.getUniqueRequestStrings(),
+                    /* per_classtype_counts */
+                    initialPhaseMetric.getUniqueRequestCounts()
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);

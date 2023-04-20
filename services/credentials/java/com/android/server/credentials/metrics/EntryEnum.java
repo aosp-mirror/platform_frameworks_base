@@ -56,7 +56,7 @@ public enum EntryEnum {
     );
 
     EntryEnum(int innerMetricCode) {
-        this.mInnerMetricCode = innerMetricCode;
+        mInnerMetricCode = innerMetricCode;
     }
 
     /**
@@ -65,7 +65,7 @@ public enum EntryEnum {
      * @return a code corresponding to the west world metric name
      */
     public int getMetricCode() {
-        return this.mInnerMetricCode;
+        return mInnerMetricCode;
     }
 
     /**

@@ -38,7 +38,7 @@ public enum ProviderStatusForMetrics {
     private final int mInnerMetricCode;
 
     ProviderStatusForMetrics(int innerMetricCode) {
-        this.mInnerMetricCode = innerMetricCode;
+        mInnerMetricCode = innerMetricCode;
     }
 
     /**
@@ -47,6 +47,6 @@ public enum ProviderStatusForMetrics {
      * @return a code corresponding to the west world metric name
      */
     public int getMetricCode() {
-        return this.mInnerMetricCode;
+        return mInnerMetricCode;
     }
 }
