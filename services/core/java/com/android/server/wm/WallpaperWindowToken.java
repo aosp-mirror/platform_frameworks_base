@@ -129,26 +129,10 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     void updateWallpaperWindows(boolean visible) {
-        boolean changed = false;
         if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
                     token, visible);
             setVisibility(visible);
-            changed = true;
-        }
-        if (mTransitionController.isShellTransitionsEnabled()) {
-            // Apply legacy fixed rotation to wallpaper if it is becoming visible
-            if (!mTransitionController.useShellTransitionsRotation() && changed && visible) {
-                final WindowState wallpaperTarget =
-                        mDisplayContent.mWallpaperController.getWallpaperTarget();
-                if (wallpaperTarget != null && wallpaperTarget.mToken.hasFixedRotationTransform()) {
-                    linkFixedRotationTransform(wallpaperTarget.mToken);
-                }
-            }
-            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
-            // when finishing transition. Otherwise commitVisibility() is already called from above
-            // setVisibility().
-            return;
         }
 
         final WindowState wallpaperTarget =
@@ -171,6 +155,12 @@ class WallpaperWindowToken extends WindowToken {
                 // rotation
                 linkFixedRotationTransform(wallpaperTarget.mToken);
             }
+        }
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
+            // when finishing transition. Otherwise commitVisibility() is already called from above
+            // setVisibility().
+            return;
         }
 
         setVisible(visible);
