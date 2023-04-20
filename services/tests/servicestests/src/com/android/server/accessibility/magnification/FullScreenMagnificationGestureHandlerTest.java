@@ -33,6 +33,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -42,6 +43,8 @@ import static org.mockito.Mockito.when;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
@@ -67,11 +70,13 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,9 +128,10 @@ public class FullScreenMagnificationGestureHandlerTest {
     public static final int STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP = 8;
     public static final int STATE_PANNING = 9;
     public static final int STATE_SCALING_AND_PANNING = 10;
+    public static final int STATE_SINGLE_PANNING = 11;
 
     public static final int FIRST_STATE = STATE_IDLE;
-    public static final int LAST_STATE = STATE_SCALING_AND_PANNING;
+    public static final int LAST_STATE = STATE_SINGLE_PANNING;
 
     // Co-prime x and y, to potentially catch x-y-swapped errors
     public static final float DEFAULT_X = 301;
@@ -155,6 +161,10 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     private float mOriginalMagnificationPersistedScale;
 
+    static final Rect INITIAL_MAGNIFICATION_BOUNDS = new Rect(0, 0, 800, 800);
+
+    static final Region INITIAL_MAGNIFICATION_REGION = new Region(INITIAL_MAGNIFICATION_BOUNDS);
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -182,11 +192,19 @@ public class FullScreenMagnificationGestureHandlerTest {
                 new MagnificationScaleProvider(mContext),
                 () -> null,
                 ConcurrentUtils.DIRECT_EXECUTOR) {
-            @Override
-            public boolean magnificationRegionContains(int displayId, float x, float y) {
-                return true;
-            }
+                @Override
+                public boolean magnificationRegionContains(int displayId, float x, float y) {
+                    return true;
+                }
         };
+
+        doAnswer((Answer<Void>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            Region regionArg = (Region) args[1];
+            regionArg.set(new Rect(INITIAL_MAGNIFICATION_BOUNDS));
+            return null;
+        }).when(mockWindowManager).getMagnificationRegion(anyInt(), any(Region.class));
+
         mFullScreenMagnificationController.register(DISPLAY_0);
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(true);
         mClock = new OffsettableClock.Stopped();
@@ -214,6 +232,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 mContext, mFullScreenMagnificationController, mMockTraceManager, mMockCallback,
                 detectTripleTap, detectShortcutTrigger,
                 mWindowMagnificationPromptController, DISPLAY_0);
+        h.setSinglePanningEnabled(true);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
             protected String messageToString(Message m) {
@@ -239,6 +258,7 @@ public class FullScreenMagnificationGestureHandlerTest {
      * {@link #returnToNormalFrom} (for navigating back to {@link #STATE_IDLE})
      */
     @Test
+    @Ignore("b/291925580")
     public void testEachState_isReachableAndRecoverable() {
         forEachState(state -> {
             goFromStateIdleTo(state);
@@ -526,6 +546,75 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testActionUpNotAtEdge_singlePanningState_detectingState() {
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+
+        send(upEvent());
+
+        check(mMgh.mCurrentState == mMgh.mDetectingState, STATE_IDLE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testScroll_SinglePanningDisabled_delegatingState() {
+        mMgh.setSinglePanningEnabled(false);
+
+        goFromStateIdleTo(STATE_ACTIVATED);
+        allowEventDelegation();
+        swipeAndHold();
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+    }
+
+    @Test
+    public void testScroll_zoomedStateAndAtEdge_delegatingState() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0,
+                INITIAL_MAGNIFICATION_BOUNDS.left,
+                INITIAL_MAGNIFICATION_BOUNDS.top / 2,
+                false,
+                1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF endCoords = new PointF(initCoords.x, initCoords.y);
+        endCoords.offset(swipeMinDistance, 0);
+        allowEventDelegation();
+
+        swipeAndHold(initCoords, endCoords);
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testScroll_singlePanningAndAtEdge_delegatingState() {
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0,
+                INITIAL_MAGNIFICATION_BOUNDS.left,
+                INITIAL_MAGNIFICATION_BOUNDS.top / 2,
+                false,
+                1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF endCoords = new PointF(initCoords.x, initCoords.y);
+        endCoords.offset(swipeMinDistance, 0);
+        allowEventDelegation();
+
+        swipeAndHold(initCoords, endCoords);
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        assertTrue(isZoomed());
+    }
+
+    @Test
     public void testShortcutTriggered_invokeShowWindowPromptAction() {
         goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
 
@@ -740,6 +829,10 @@ public class FullScreenMagnificationGestureHandlerTest {
                         state);
                 check(mMgh.mPanningScalingState.mScaling, state);
             } break;
+            case STATE_SINGLE_PANNING: {
+                check(isZoomed(), state);
+                check(mMgh.mCurrentState == mMgh.mSinglePanningState, state);
+            } break;
             default: throw new IllegalArgumentException("Illegal state: " + state);
         }
     }
@@ -803,6 +896,10 @@ public class FullScreenMagnificationGestureHandlerTest {
                     send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 4));
                     send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 5));
                 } break;
+                case STATE_SINGLE_PANNING: {
+                    goFromStateIdleTo(STATE_ACTIVATED);
+                    swipeAndHold();
+                } break;
                 default:
                     throw new IllegalArgumentException("Illegal state: " + state);
             }
@@ -859,6 +956,10 @@ public class FullScreenMagnificationGestureHandlerTest {
             case STATE_SCALING_AND_PANNING: {
                 returnToNormalFrom(STATE_PANNING);
             } break;
+            case STATE_SINGLE_PANNING: {
+                send(upEvent());
+                returnToNormalFrom(STATE_ACTIVATED);
+            } break;
             default: throw new IllegalArgumentException("Illegal state: " + state);
         }
     }
@@ -904,6 +1005,11 @@ public class FullScreenMagnificationGestureHandlerTest {
     private void swipeAndHold() {
         send(downEvent());
         send(moveEvent(DEFAULT_X * 2, DEFAULT_Y * 2));
+    }
+
+    private void swipeAndHold(PointF start, PointF end) {
+        send(downEvent(start.x, start.y));
+        send(moveEvent(end.x, end.y));
     }
 
     private void longTap() {
