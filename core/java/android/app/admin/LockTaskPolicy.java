@@ -38,6 +38,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     /**
      * @hide
      */
+    // We default on the power button menu, in order to be consistent with pre-P behaviour
     public static final int DEFAULT_LOCK_TASK_FLAG =
             DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS;
 
@@ -72,18 +73,28 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     /**
      * @hide
      */
-    public LockTaskPolicy(@NonNull Set<String> packages) {
-        Objects.requireNonNull(packages);
-        mPackages.addAll(packages);
+    public LockTaskPolicy(@Nullable Set<String> packages) {
+        if (packages != null) {
+            mPackages.addAll(packages);
+        }
         setValue(this);
     }
 
     /**
      * @hide
      */
-    public LockTaskPolicy(@NonNull Set<String> packages, int flags) {
-        Objects.requireNonNull(packages);
-        mPackages = new HashSet<>(packages);
+    public LockTaskPolicy(int flags) {
+        mFlags = flags;
+        setValue(this);
+    }
+
+    /**
+     * @hide
+     */
+    public LockTaskPolicy(@Nullable Set<String> packages, int flags) {
+        if (packages != null) {
+            mPackages.addAll(packages);
+        }
         mFlags = flags;
         setValue(this);
     }

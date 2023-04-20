@@ -42,10 +42,6 @@ final class LockTaskPolicySerializer extends PolicySerializer<LockTaskPolicy> {
     void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
             @NonNull LockTaskPolicy value) throws IOException {
         Objects.requireNonNull(value);
-        if (value.getPackages() == null || value.getPackages().isEmpty()) {
-            throw new IllegalArgumentException("Error saving LockTaskPolicy to file, lock task "
-                    + "packages must be present");
-        }
         serializer.attribute(
                 /* namespace= */ null,
                 ATTR_PACKAGES,
