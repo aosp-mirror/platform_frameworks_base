@@ -1917,7 +1917,8 @@
     <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
 
     <!-- The package name of the default search selector app. Must be granted the POST_NOTIFICATIONS
-         permission.
+         permission, and notifications from this app must be given the notification flag
+         FLAG_NO_DISMISS if the notification requests FLAG_ONGOING_EVENT.
     -->
     <string name="config_defaultSearchSelectorPackageName" translatable="false"></string>
 
