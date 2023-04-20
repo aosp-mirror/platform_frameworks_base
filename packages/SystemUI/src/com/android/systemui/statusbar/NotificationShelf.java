@@ -44,7 +44,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -1080,15 +1079,6 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     public void requestRoundnessResetFor(ExpandableView child) {
         if (!checkRefactorFlagEnabled()) return;
         child.requestRoundnessReset(SHELF_SCROLL);
-    }
-
-    /**
-     * This method resets the OnScroll roundness of a view to 0f
-     * <p>
-     * Note: This should be the only class that handles roundness {@code SourceType.OnScroll}
-     */
-    public static void resetLegacyOnScrollRoundness(ExpandableView expandableView) {
-        expandableView.requestRoundnessReset(LegacySourceType.OnScroll);
     }
 
     @Override

@@ -448,10 +448,3 @@ interface SourceType {
             }
     }
 }
-
-@Deprecated("Use SourceType.from() instead", ReplaceWith("SourceType.from()"))
-enum class LegacySourceType : SourceType {
-    DefaultValue,
-    OnDismissAnimation,
-    OnScroll,
-}
