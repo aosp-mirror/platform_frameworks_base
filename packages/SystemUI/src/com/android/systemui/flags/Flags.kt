@@ -68,8 +68,6 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
         unreleasedFlag(119, "notification_memory_logging_enabled")
 
-    @JvmField val USE_ROUNDNESS_SOURCETYPES = releasedFlag(116, "use_roundness_sourcetype")
-
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
         releasedFlag(259395680, "simplified_appear_fraction")
