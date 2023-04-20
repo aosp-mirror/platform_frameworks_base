@@ -1967,20 +1967,7 @@ public final class DisplayManagerService extends SystemService {
         final Point userPreferredResolution =
                 mPersistentDataStore.getUserPreferredResolution(device);
         final float refreshRate = mPersistentDataStore.getUserPreferredRefreshRate(device);
-        // If value in persistentDataStore is null, preserving the mode from systemPreferredMode.
-        // This is required because in some devices, user-preferred mode was not stored in
-        // persistentDataStore, but was stored in a config which is returned through
-        // systemPreferredMode.
-        if ((userPreferredResolution == null && Float.isNaN(refreshRate))
-                || (userPreferredResolution.equals(0, 0) && refreshRate == 0.0f)) {
-            Display.Mode systemPreferredMode = device.getSystemPreferredDisplayModeLocked();
-            if (systemPreferredMode == null) {
-                return;
-            }
-            storeModeInPersistentDataStoreLocked(
-                    display.getDisplayIdLocked(), systemPreferredMode.getPhysicalWidth(),
-                    systemPreferredMode.getPhysicalHeight(), systemPreferredMode.getRefreshRate());
-            device.setUserPreferredDisplayModeLocked(systemPreferredMode);
+        if (userPreferredResolution == null && Float.isNaN(refreshRate)) {
             return;
         }
         Display.Mode.Builder modeBuilder = new Display.Mode.Builder();
