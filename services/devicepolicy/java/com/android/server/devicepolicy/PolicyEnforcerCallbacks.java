@@ -84,6 +84,7 @@ final class PolicyEnforcerCallbacks {
                     ? DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT
                     : grantState;
 
+            // TODO(b/278710449): stop blocking in the main thread
             BlockingCallback callback = new BlockingCallback();
             // TODO: remove canAdminGrantSensorPermissions once we expose a new method in
             //  permissionController that doesn't need it.
