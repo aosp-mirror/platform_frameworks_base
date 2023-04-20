@@ -17,12 +17,14 @@
 package android.hardware.fingerprint;
 
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_UNABLE_TO_PROCESS;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -70,6 +72,8 @@ public class FingerprintManagerTest {
     private IFingerprintService mService;
     @Mock
     private FingerprintManager.AuthenticationCallback mAuthCallback;
+    @Mock
+    private FingerprintManager.EnrollmentCallback mEnrollCallback;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mCaptor;
@@ -148,5 +152,18 @@ public class FingerprintManagerTest {
                 new FingerprintAuthenticateOptions.Builder().build());
 
         verify(mAuthCallback).onAuthenticationError(eq(FINGERPRINT_ERROR_HW_UNAVAILABLE), any());
+    }
+
+    @Test
+    public void enrollment_errorWhenHardwareAuthTokenIsNull() throws RemoteException {
+        verify(mService).addAuthenticatorsRegisteredCallback(mCaptor.capture());
+
+        mCaptor.getValue().onAllAuthenticatorsRegistered(mProps);
+        mFingerprintManager.enroll(null, new CancellationSignal(), USER_ID,
+                mEnrollCallback, FingerprintManager.ENROLL_ENROLL);
+
+        verify(mEnrollCallback).onEnrollmentError(eq(FINGERPRINT_ERROR_UNABLE_TO_PROCESS),
+                anyString());
+        verify(mService, never()).enroll(any(), any(), anyInt(), any(), anyString(), anyInt());
     }
 }
