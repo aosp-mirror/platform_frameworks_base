@@ -693,6 +693,7 @@ public class NotificationManagerService extends SystemService {
     private NotificationRecordLogger mNotificationRecordLogger;
     private InstanceIdSequence mNotificationInstanceIdSequence;
     private Set<String> mMsgPkgsAllowedAsConvos = new HashSet();
+    private String mDefaultSearchSelectorPkg;
 
     // Broadcast intent receiver for notification permissions review-related intents
     private ReviewNotificationPermissionsReceiver mReviewNotificationPermissionsReceiver;
@@ -2435,6 +2436,8 @@ public class NotificationManagerService extends SystemService {
 
         mMsgPkgsAllowedAsConvos = Set.of(getStringArrayResource(
                 com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
+        mDefaultSearchSelectorPkg = getContext().getString(getContext().getResources()
+                .getIdentifier("config_defaultSearchSelectorPackageName", "string", "android"));
 
         mFlagResolver = flagResolver;
 
@@ -6934,7 +6937,12 @@ public class NotificationManagerService extends SystemService {
      */
     private boolean canBeNonDismissible(ApplicationInfo ai, Notification notification) {
         return notification.isMediaNotification() || isEnterpriseExempted(ai)
-                || isCallNotification(ai.packageName, ai.uid, notification);
+                || isCallNotification(ai.packageName, ai.uid, notification)
+                || isDefaultSearchSelectorPackage(ai.packageName);
+    }
+
+    private boolean isDefaultSearchSelectorPackage(String pkg) {
+        return Objects.equals(mDefaultSearchSelectorPkg, pkg);
     }
 
     private boolean isEnterpriseExempted(ApplicationInfo ai) {
