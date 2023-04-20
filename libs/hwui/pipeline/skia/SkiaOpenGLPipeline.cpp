@@ -53,6 +53,8 @@ SkiaOpenGLPipeline::~SkiaOpenGLPipeline() {
 }
 
 MakeCurrentResult SkiaOpenGLPipeline::makeCurrent() {
+    bool wasSurfaceless = mEglManager.isCurrent(EGL_NO_SURFACE);
+
     // In case the surface was destroyed (e.g. a previous trimMemory call) we
     // need to recreate it here.
     if (!isSurfaceReady() && mNativeWindow) {
@@ -63,6 +65,37 @@ MakeCurrentResult SkiaOpenGLPipeline::makeCurrent() {
     if (!mEglManager.makeCurrent(mEglSurface, &error)) {
         return MakeCurrentResult::AlreadyCurrent;
     }
+
+    // Make sure read/draw buffer state of default framebuffer is GL_BACK. Vendor implementations
+    // disagree on the draw/read buffer state if the default framebuffer transitions from a surface
+    // to EGL_NO_SURFACE and vice-versa. There was a related discussion within Khronos on this topic.
+    // See https://cvs.khronos.org/bugzilla/show_bug.cgi?id=13534.
+    // The discussion was not resolved with a clear consensus
+    if (error == 0 && wasSurfaceless && mEglSurface != EGL_NO_SURFACE) {
+        GLint curReadFB = 0;
+        GLint curDrawFB = 0;
+        glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &curReadFB);
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &curDrawFB);
+
+        GLint buffer = GL_NONE;
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glGetIntegerv(GL_DRAW_BUFFER0, &buffer);
+        if (buffer == GL_NONE) {
+            const GLenum drawBuffer = GL_BACK;
+            glDrawBuffers(1, &drawBuffer);
+        }
+
+        glGetIntegerv(GL_READ_BUFFER, &buffer);
+        if (buffer == GL_NONE) {
+            glReadBuffer(GL_BACK);
+        }
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, curReadFB);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, curDrawFB);
+
+        GL_CHECKPOINT(LOW);
+    }
+
     return error ? MakeCurrentResult::Failed : MakeCurrentResult::Succeeded;
 }
 

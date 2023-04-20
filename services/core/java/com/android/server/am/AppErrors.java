@@ -553,6 +553,15 @@ class AppErrors {
         }
     }
 
+    void sendRecoverableCrashToAppExitInfo(
+            ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
+        if (r == null || crashInfo == null
+                || !"Native crash".equals(crashInfo.exceptionClassName)) return;
+        synchronized (mService) {
+            mService.mProcessList.noteAppRecoverableCrash(r);
+        }
+    }
+
     /**
      * Bring up the "unexpected error" dialog box for a crashing app.
      * Deal with edge cases (intercepts from instrumented applications,

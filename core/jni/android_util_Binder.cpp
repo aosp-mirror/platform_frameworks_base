@@ -413,9 +413,13 @@ protected:
 
         if (env->ExceptionCheck()) {
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-            binder_report_exception(env, excep.get(),
-                                    "*** Uncaught remote exception!  "
-                                    "(Exceptions are not yet supported across processes.)");
+
+            auto state = IPCThreadState::self();
+            String8 msg;
+            msg.appendFormat("*** Uncaught remote exception! Exceptions are not yet supported "
+                             "across processes. Client PID %d UID %d.",
+                             state->getCallingPid(), state->getCallingUid());
+            binder_report_exception(env, excep.get(), msg.c_str());
             res = JNI_FALSE;
         }
 
@@ -431,6 +435,7 @@ protected:
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
             binder_report_exception(env, excep.get(),
                                     "*** Uncaught exception in onBinderStrictModePolicyChange");
+            // TODO: should turn this to fatal?
         }
 
         // Need to always call through the native implementation of

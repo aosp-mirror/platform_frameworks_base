@@ -160,6 +160,10 @@ public class SubscriptionManager {
     private static final String CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY =
             "cache_key.telephony.subscription_manager_service";
 
+    /** The temporarily cache key to indicate whether subscription manager service is enabled. */
+    private static final String CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_ENABLED_PROPERTY =
+            "cache_key.telephony.subscription_manager_service_enabled";
+
     /** @hide */
     public static final String GET_SIM_SPECIFIC_SETTINGS_METHOD_NAME = "getSimSpecificSettings";
 
@@ -316,6 +320,12 @@ public class SubscriptionManager {
             new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
                     CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_PHONE_INDEX);
+
+    //TODO: Removed before U AOSP public release.
+    private static VoidPropertyInvalidatedCache<Boolean> sIsSubscriptionManagerServiceEnabled =
+            new VoidPropertyInvalidatedCache<>(ISub::isSubscriptionManagerServiceEnabled,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_ENABLED_PROPERTY,
+                    false);
 
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
@@ -1116,6 +1126,14 @@ public class SubscriptionManager {
      */
     public static final String USER_HANDLE = SimInfo.COLUMN_USER_HANDLE;
 
+    /**
+     * TelephonyProvider column name for satellite enabled.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String SATELLITE_ENABLED = SimInfo.COLUMN_SATELLITE_ENABLED;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
@@ -1327,8 +1345,6 @@ public class SubscriptionManager {
 
     private final Context mContext;
 
-    private static boolean sIsSubscriptionManagerServiceEnabled = false;
-
     // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
     // the Context and subId.
     private static final Map<Pair<Context, Integer>, Resources> sResourcesCache =
@@ -1414,9 +1430,6 @@ public class SubscriptionManager {
     public SubscriptionManager(Context context) {
         if (DBG) logd("SubscriptionManager created");
         mContext = context;
-
-        sIsSubscriptionManagerServiceEnabled = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_using_subscription_manager_service);
     }
 
     /**
@@ -1425,8 +1438,9 @@ public class SubscriptionManager {
      *
      * @hide
      */
+    //TODO: Removed before U AOSP public release.
     public static boolean isSubscriptionManagerServiceEnabled() {
-        return sIsSubscriptionManagerServiceEnabled;
+        return sIsSubscriptionManagerServiceEnabled.query(null);
     }
 
     private NetworkPolicyManager getNetworkPolicyManager() {
@@ -3939,6 +3953,13 @@ public class SubscriptionManager {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY);
     }
 
+    /** @hide */
+    //TODO: Removed before U AOSP public release.
+    public static void invalidateSubscriptionManagerServiceEnabledCaches() {
+        PropertyInvalidatedCache.invalidateCache(
+                CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_ENABLED_PROPERTY);
+    }
+
     /**
      * Allows a test process to disable client-side caching operations.
      *
@@ -3960,6 +3981,8 @@ public class SubscriptionManager {
         sGetSlotIndexCache.disableLocal();
         sGetSubIdCache.disableLocal();
         sGetPhoneIdCache.disableLocal();
+
+        sIsSubscriptionManagerServiceEnabled.disableLocal();
     }
 
     /**
@@ -3982,6 +4005,8 @@ public class SubscriptionManager {
         sGetSlotIndexCache.clear();
         sGetSubIdCache.clear();
         sGetPhoneIdCache.clear();
+
+        sIsSubscriptionManagerServiceEnabled.clear();
     }
 
     /**
@@ -4393,6 +4418,71 @@ public class SubscriptionManager {
             ex.rethrowAsRuntimeException();
         }
         return null;
+    }
+
+    /**
+     * Check if subscription and user are associated with each other.
+     *
+     * @param subscriptionId the subId of the subscription
+     * @param userHandle user handle of the user
+     * @return {@code true} if subscription is associated with user
+     * {code true} if there are no subscriptions on device
+     * else {@code false} if subscription is not associated with user.
+     *
+     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
+    public boolean isSubscriptionAssociatedWithUser(int subscriptionId,
+            @NonNull UserHandle userHandle) {
+        if (!isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("[isSubscriptionAssociatedWithUser]: "
+                    + "Invalid subscriptionId: " + subscriptionId);
+        }
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                return iSub.isSubscriptionAssociatedWithUser(subscriptionId, userHandle);
+            } else {
+                throw new IllegalStateException("[isSubscriptionAssociatedWithUser]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+
+    /**
+     * Get list of subscriptions associated with user.
+     *
+     * @param userHandle user handle of the user
+     * @return list of subscriptionInfo associated with the user.
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
+    public @NonNull List<SubscriptionInfo> getSubscriptionInfoListAssociatedWithUser(
+            @NonNull UserHandle userHandle) {
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                return iSub.getSubscriptionInfoListAssociatedWithUser(userHandle);
+            } else {
+                throw new IllegalStateException("[getSubscriptionInfoListAssociatedWithUser]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return new ArrayList<>();
     }
 }
 
