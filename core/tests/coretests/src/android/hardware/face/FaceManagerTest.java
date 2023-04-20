@@ -17,6 +17,7 @@
 package android.hardware.face;
 
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -176,6 +177,18 @@ public class FaceManagerTest {
         verify(mService, atMost(1 /* maxNumberOfInvocations */)).enroll(eq(USER_ID), any(), any(),
                 any(), anyString(), any(), any(), anyBoolean());
         verify(mEnrollmentCallback).onEnrollmentError(eq(FACE_ERROR_HW_UNAVAILABLE), anyString());
+    }
+
+    @Test
+    public void enrollment_errorWhenHardwareAuthTokenIsNull() throws RemoteException {
+        initializeProperties();
+        mFaceManager.enroll(USER_ID, null,
+                new CancellationSignal(), mEnrollmentCallback, null /* disabledFeatures */);
+
+        verify(mEnrollmentCallback).onEnrollmentError(eq(FACE_ERROR_UNABLE_TO_PROCESS),
+                anyString());
+        verify(mService, never()).enroll(eq(USER_ID), any(), any(),
+                any(), anyString(), any(), any(), anyBoolean());
     }
 
     private void initializeProperties() throws RemoteException {

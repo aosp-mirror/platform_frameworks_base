@@ -36,6 +36,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
@@ -57,7 +58,8 @@ constructor(
 ) {
     private val cardsReceivedCallbacks: MutableSet<(List<WalletCard>) -> Unit> = mutableSetOf()
 
-    private val allWalletCards: Flow<List<WalletCard>> =
+    /** All potential cards. */
+    val allWalletCards: StateFlow<List<WalletCard>> =
         if (featureFlags.isEnabled(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS)) {
             // TODO(b/237409756) determine if we should debounce this so we don't call the service
             // too frequently. Also check if the list actually changed before calling callbacks.
@@ -107,12 +109,13 @@ constructor(
                     emptyList()
                 )
         } else {
-            emptyFlow()
+            MutableStateFlow<List<WalletCard>>(emptyList()).asStateFlow()
         }
 
     private val _suggestionCardIds: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     private val contextualSuggestionsCardIds: Flow<Set<String>> = _suggestionCardIds.asStateFlow()
 
+    /** Contextually-relevant cards. */
     val contextualSuggestionCards: Flow<List<WalletCard>> =
         combine(allWalletCards, contextualSuggestionsCardIds) { cards, ids ->
                 val ret =

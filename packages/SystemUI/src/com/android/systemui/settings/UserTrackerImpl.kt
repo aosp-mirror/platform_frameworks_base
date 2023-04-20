@@ -103,7 +103,7 @@ open class UserTrackerImpl internal constructor(
     @GuardedBy("callbacks")
     private val callbacks: MutableList<DataItem> = ArrayList()
 
-    fun initialize(startingUser: Int) {
+    open fun initialize(startingUser: Int) {
         if (initialized) {
             return
         }

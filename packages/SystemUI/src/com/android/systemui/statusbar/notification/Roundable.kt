@@ -383,11 +383,11 @@ class RoundableState(
     }
 
     fun debugString() = buildString {
-        append("TargetView: ${targetView.hashCode()} ")
-        append("Top: $topRoundness ")
-        append(topRoundnessMap.map { "${it.key} ${it.value}" })
-        append(" Bottom: $bottomRoundness ")
-        append(bottomRoundnessMap.map { "${it.key} ${it.value}" })
+        append("Roundable { ")
+        append("top: { value: $topRoundness, requests: $topRoundnessMap}")
+        append(", ")
+        append("bottom: { value: $bottomRoundness, requests: $bottomRoundnessMap}")
+        append("}")
     }
 
     companion object {

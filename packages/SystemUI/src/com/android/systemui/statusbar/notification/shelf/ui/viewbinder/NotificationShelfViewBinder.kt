@@ -33,12 +33,9 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
-import com.android.systemui.util.kotlin.getValue
-import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 /**
  * Controller class for [NotificationShelf]. This implementation serves as a temporary wrapper
@@ -47,38 +44,11 @@ import kotlinx.coroutines.flow.onEach
  * removed, this class can go away and the ViewBinder can be used directly.
  */
 @CentralSurfacesScope
-class NotificationShelfViewBinderWrapperControllerImpl
-@Inject
-constructor(
-    private val shelf: NotificationShelf,
-    private val viewModel: NotificationShelfViewModel,
-    featureFlags: FeatureFlags,
-    private val falsingManager: FalsingManager,
-    hostControllerLazy: Lazy<NotificationStackScrollLayoutController>,
-    private val notificationIconAreaController: NotificationIconAreaController,
-) : NotificationShelfController {
-
-    private val hostController: NotificationStackScrollLayoutController by hostControllerLazy
+class NotificationShelfViewBinderWrapperControllerImpl @Inject constructor() :
+    NotificationShelfController {
 
     override val view: NotificationShelf
         get() = unsupported
-
-    init {
-        shelf.apply {
-            setRefactorFlagEnabled(featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR))
-            useRoundnessSourceTypes(featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES))
-            setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM))
-        }
-    }
-
-    fun init() {
-        NotificationShelfViewBinder.bind(viewModel, shelf, falsingManager)
-        hostController.setShelf(shelf)
-        hostController.setOnNotificationRemovedListener { child, _ ->
-            view.requestRoundnessResetFor(child)
-        }
-        notificationIconAreaController.setShelfIcons(shelf.shelfIcons)
-    }
 
     override val intrinsicHeight: Int
         get() = unsupported
@@ -99,21 +69,32 @@ constructor(
         get() = NotificationShelfController.throwIllegalFlagStateError(expected = true)
 }
 
-/** Binds a [NotificationShelf] to its backend. */
+/** Binds a [NotificationShelf] to its [view model][NotificationShelfViewModel]. */
 object NotificationShelfViewBinder {
     fun bind(
-        viewModel: NotificationShelfViewModel,
         shelf: NotificationShelf,
+        viewModel: NotificationShelfViewModel,
         falsingManager: FalsingManager,
+        featureFlags: FeatureFlags,
+        notificationIconAreaController: NotificationIconAreaController,
     ) {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
-        shelf.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.canModifyColorOfNotifications
-                    .onEach(shelf::setCanModifyColorOfNotifications)
-                    .launchIn(this)
-                viewModel.isClickable.onEach(shelf::setCanInteract).launchIn(this)
-                registerViewListenersWhileAttached(shelf, viewModel)
+        shelf.apply {
+            setRefactorFlagEnabled(true)
+            useRoundnessSourceTypes(featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES))
+            setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM))
+            // TODO(278765923): Replace with eventual NotificationIconContainerViewBinder#bind()
+            notificationIconAreaController.setShelfIcons(shelfIcons)
+            repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    launch {
+                        viewModel.canModifyColorOfNotifications.collect(
+                            ::setCanModifyColorOfNotifications
+                        )
+                    }
+                    launch { viewModel.isClickable.collect(::setCanInteract) }
+                    registerViewListenersWhileAttached(shelf, viewModel)
+                }
             }
         }
     }

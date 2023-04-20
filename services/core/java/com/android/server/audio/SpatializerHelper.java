@@ -77,7 +77,7 @@ public class SpatializerHelper {
 
     //------------------------------------------------------------
 
-    private static final SparseIntArray SPAT_MODE_FOR_DEVICE_TYPE = new SparseIntArray(15) {
+    private static final SparseIntArray SPAT_MODE_FOR_DEVICE_TYPE = new SparseIntArray(14) {
         {
             append(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, SpatializationMode.SPATIALIZER_TRANSAURAL);
             append(AudioDeviceInfo.TYPE_WIRED_HEADSET, SpatializationMode.SPATIALIZER_BINAURAL);
@@ -91,7 +91,6 @@ public class SpatializerHelper {
             append(AudioDeviceInfo.TYPE_LINE_ANALOG, SpatializationMode.SPATIALIZER_TRANSAURAL);
             append(AudioDeviceInfo.TYPE_LINE_DIGITAL, SpatializationMode.SPATIALIZER_TRANSAURAL);
             append(AudioDeviceInfo.TYPE_AUX_LINE, SpatializationMode.SPATIALIZER_TRANSAURAL);
-            append(AudioDeviceInfo.TYPE_HEARING_AID, SpatializationMode.SPATIALIZER_BINAURAL);
             append(AudioDeviceInfo.TYPE_BLE_HEADSET, SpatializationMode.SPATIALIZER_BINAURAL);
             append(AudioDeviceInfo.TYPE_BLE_SPEAKER, SpatializationMode.SPATIALIZER_TRANSAURAL);
             // assumption that BLE broadcast would be mostly consumed on headsets

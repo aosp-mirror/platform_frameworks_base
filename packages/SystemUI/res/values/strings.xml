@@ -404,7 +404,34 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile">If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted.</string>
     <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the work profile is removed. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile">If you enter an incorrect password on the next attempt, your work profile and its data will be deleted.</string>
-
+    <!-- Confirmation button label for a dialog shown when the system requires the user to re-enroll their biometrics. [CHAR LIMIT=20] -->
+    <string name="biometric_re_enroll_dialog_confirm">Set up</string>
+    <!-- Cancel button label for a dialog shown when the system requires the user to re-enroll their biometric. [CHAR LIMIT=20] -->
+    <string name="biometric_re_enroll_dialog_cancel">Not now</string>
+    <!-- Notification content shown when the system requires the user to re-enroll their biometrics. [CHAR LIMIT=NONE] -->
+    <string name="biometric_re_enroll_notification_content">This is required to improve security and performance</string>
+    <!-- Notification title shown when the system requires the user to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_notification_title">Set up Fingerprint Unlock again</string>
+    <!-- Name shown for system notifications related to the fingerprint unlock feature. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_notification_name">Fingerprint Unlock</string>
+    <!-- Title for a dialog shown when the system requires the user to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_dialog_title">Set up Fingerprint Unlock</string>
+    <!-- Content for a dialog shown when the system requires the user to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_dialog_content">To set up Fingerprint Unlock again, your current fingerprint images and models will be deleted.\n\nAfter they\’re deleted, you\’ll need to set up Fingerprint Unlock again to use your fingerprint to unlock your phone or verify it\’s you.</string>
+    <!-- Content for a dialog shown when the system requires the user to re-enroll their fingerprint (singular). [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_dialog_content_singular">To set up Fingerprint Unlock again, your current fingerprint images and model will be deleted.\n\nAfter they\’re deleted, you\’ll need to set up Fingerprint Unlock again to use your fingerprint to unlock your phone or verify it\’s you.</string>
+    <!-- Content for a dialog shown when an error occurs while the user is trying to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_reenroll_failure_dialog_content">Couldn\u2019t set up fingerprint unlock. Go to Settings to try again.</string>
+    <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_notification_title">Set up Face Unlock again</string>
+    <!-- Name shown for system notifications related to the face unlock feature. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_notification_name">Face Unlock</string>
+    <!-- Title for a dialog shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_dialog_title">Set up Face Unlock</string>
+    <!-- Content for a dialog shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_dialog_content">To set up Face Unlock again, your current face model will be deleted.\n\nYou\’ll need to set up this feature again to use your face to unlock your phone.</string>
+    <!-- Content for a dialog shown when an error occurs while the user is trying to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_reenroll_failure_dialog_content">Couldn\u2019t set up face unlock. Go to Settings to try again.</string>
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->

@@ -32,9 +32,12 @@ interface VisualInterruptionDecisionProvider {
      * full-screen intent decisions.
      *
      * @property[shouldInterrupt] whether a visual interruption should be triggered
+     * @property[logReason] a log-friendly string explaining the reason for the decision; should be
+     *   used *only* for logging, not decision-making
      */
     interface Decision {
         val shouldInterrupt: Boolean
+        val logReason: String
     }
 
     /**

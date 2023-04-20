@@ -3805,6 +3805,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "1463355909": {
+      "message": "Queueing legacy sync-set: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "1469310004": {
       "message": "          SKIP: common mode mismatch. was %s",
       "level": "VERBOSE",

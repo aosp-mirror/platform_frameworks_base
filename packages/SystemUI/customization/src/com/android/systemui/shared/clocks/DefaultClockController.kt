@@ -263,6 +263,13 @@ class DefaultClockController(
                 view.animateDoze(dozeState.isActive, !hasJumped)
             }
         }
+
+        override fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {
+            // TODO(b/278936436): refactor this part when we change recomputePadding
+            // when on the side, swipingFraction = 0, translationY should offset
+            // the top margin change in recomputePadding to make clock be centered
+            view.translationY = 0.5f * view.bottom * (1 - swipingFraction)
+        }
     }
 
     inner class LargeClockAnimations(

@@ -93,6 +93,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     private final SparseArray<DisableMagnificationCallback>
             mMagnificationEndRunnableSparseArray = new SparseArray();
 
+    private final AlwaysOnMagnificationFeatureFlag mAlwaysOnMagnificationFeatureFlag;
     private final MagnificationScaleProvider mScaleProvider;
     private FullScreenMagnificationController mFullScreenMagnificationController;
     private WindowMagnificationManager mWindowMagnificationMgr;
@@ -151,7 +152,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
                 FEATURE_WINDOW_MAGNIFICATION);
 
-        AlwaysOnMagnificationFeatureFlag.addOnChangedListener(
+        mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag();
+        mAlwaysOnMagnificationFeatureFlag.addOnChangedListener(
                 ConcurrentUtils.DIRECT_EXECUTOR, mAms::updateAlwaysOnMagnification);
     }
 
@@ -710,7 +712,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     }
 
     public boolean isAlwaysOnMagnificationFeatureFlagEnabled() {
-        return AlwaysOnMagnificationFeatureFlag.isAlwaysOnMagnificationEnabled();
+        return mAlwaysOnMagnificationFeatureFlag.isFeatureFlagEnabled();
     }
 
     private DisableMagnificationCallback getDisableMagnificationEndRunnableLocked(

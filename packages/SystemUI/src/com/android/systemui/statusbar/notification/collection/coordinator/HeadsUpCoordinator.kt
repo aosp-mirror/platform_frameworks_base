@@ -38,8 +38,7 @@ import com.android.systemui.statusbar.notification.collection.provider.LaunchFul
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -69,12 +68,12 @@ class HeadsUpCoordinator @Inject constructor(
     private val mSystemClock: SystemClock,
     private val mHeadsUpManager: HeadsUpManager,
     private val mHeadsUpViewBinder: HeadsUpViewBinder,
-    private val mNotificationInterruptStateProvider: NotificationInterruptStateProvider,
+    private val mVisualInterruptionDecisionProvider: VisualInterruptionDecisionProvider,
     private val mRemoteInputManager: NotificationRemoteInputManager,
     private val mLaunchFullScreenIntentProvider: LaunchFullScreenIntentProvider,
     private val mFlags: NotifPipelineFlags,
     @IncomingHeader private val mIncomingHeaderController: NodeController,
-    @Main private val mExecutor: DelayableExecutor,
+    @Main private val mExecutor: DelayableExecutor
 ) : Coordinator {
     private val mEntriesBindingUntil = ArrayMap<String, Long>()
     private val mEntriesUpdateTimes = ArrayMap<String, Long>()
@@ -388,18 +387,21 @@ class HeadsUpCoordinator @Inject constructor(
         override fun onEntryAdded(entry: NotificationEntry) {
             // First check whether this notification should launch a full screen intent, and
             // launch it if needed.
-            val fsiDecision = mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry)
-            mNotificationInterruptStateProvider.logFullScreenIntentDecision(entry, fsiDecision)
-            if (fsiDecision.shouldLaunch) {
+            val fsiDecision =
+                mVisualInterruptionDecisionProvider.makeUnloggedFullScreenIntentDecision(entry)
+            mVisualInterruptionDecisionProvider.logFullScreenIntentDecision(fsiDecision)
+            if (fsiDecision.shouldInterrupt) {
                 mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
-            } else if (fsiDecision == FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND) {
+            } else if (fsiDecision.wouldInterruptWithoutDnd) {
                 // If DND was the only reason this entry was suppressed, note it for potential
                 // reconsideration on later ranking updates.
                 addForFSIReconsideration(entry, mSystemClock.currentTimeMillis())
             }
 
-            // shouldHeadsUp includes check for whether this notification should be filtered
-            val shouldHeadsUpEver = mNotificationInterruptStateProvider.shouldHeadsUp(entry)
+            // makeAndLogHeadsUpDecision includes check for whether this notification should be
+            // filtered
+            val shouldHeadsUpEver =
+                mVisualInterruptionDecisionProvider.makeAndLogHeadsUpDecision(entry).shouldInterrupt
             mPostedEntries[entry.key] = PostedEntry(
                 entry,
                 wasAdded = true,
@@ -420,7 +422,8 @@ class HeadsUpCoordinator @Inject constructor(
          * up again.
          */
         override fun onEntryUpdated(entry: NotificationEntry) {
-            val shouldHeadsUpEver = mNotificationInterruptStateProvider.shouldHeadsUp(entry)
+            val shouldHeadsUpEver =
+                mVisualInterruptionDecisionProvider.makeAndLogHeadsUpDecision(entry).shouldInterrupt
             val shouldHeadsUpAgain = shouldHunAgain(entry)
             val isAlerting = mHeadsUpManager.isAlerting(entry.key)
             val isBinding = isEntryBinding(entry)
@@ -510,26 +513,26 @@ class HeadsUpCoordinator @Inject constructor(
                 // If any of these entries are no longer suppressed, launch the FSI now.
                 if (isCandidateForFSIReconsideration(entry)) {
                     val decision =
-                        mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry)
-                    if (decision.shouldLaunch) {
+                        mVisualInterruptionDecisionProvider.makeUnloggedFullScreenIntentDecision(
+                            entry
+                        )
+                    if (decision.shouldInterrupt) {
                         // Log both the launch of the full screen and also that this was via a
                         // ranking update, and finally revoke candidacy for FSI reconsideration
-                        mLogger.logEntryUpdatedToFullScreen(entry.key, decision.name)
-                        mNotificationInterruptStateProvider.logFullScreenIntentDecision(
-                            entry, decision)
+                        mLogger.logEntryUpdatedToFullScreen(entry.key, decision.logReason)
+                        mVisualInterruptionDecisionProvider.logFullScreenIntentDecision(decision)
                         mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
                         mFSIUpdateCandidates.remove(entry.key)
 
                         // if we launch the FSI then this is no longer a candidate for HUN
                         continue
-                    } else if (decision == FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND) {
+                    } else if (decision.wouldInterruptWithoutDnd) {
                         // decision has not changed; no need to log
                     } else {
                         // some other condition is now blocking FSI; log that and revoke candidacy
                         // for FSI reconsideration
-                        mLogger.logEntryDisqualifiedFromFullScreen(entry.key, decision.name)
-                        mNotificationInterruptStateProvider.logFullScreenIntentDecision(
-                            entry, decision)
+                        mLogger.logEntryDisqualifiedFromFullScreen(entry.key, decision.logReason)
+                        mVisualInterruptionDecisionProvider.logFullScreenIntentDecision(decision)
                         mFSIUpdateCandidates.remove(entry.key)
                     }
                 }
@@ -539,13 +542,18 @@ class HeadsUpCoordinator @Inject constructor(
                 //   state
                 // - if it is present in PostedEntries and the previous state of shouldHeadsUp
                 //   differs from the updated one
-                val shouldHeadsUpEver = mNotificationInterruptStateProvider.checkHeadsUp(entry,
-                                /* log= */ false)
+                val decision =
+                    mVisualInterruptionDecisionProvider.makeUnloggedHeadsUpDecision(entry)
+                val shouldHeadsUpEver = decision.shouldInterrupt
                 val postedShouldHeadsUpEver = mPostedEntries[entry.key]?.shouldHeadsUpEver ?: false
                 val shouldUpdateEntry = postedShouldHeadsUpEver != shouldHeadsUpEver
 
                 if (shouldUpdateEntry) {
-                    mLogger.logEntryUpdatedByRanking(entry.key, shouldHeadsUpEver)
+                    mLogger.logEntryUpdatedByRanking(
+                        entry.key,
+                        shouldHeadsUpEver,
+                        decision.logReason
+                    )
                     onEntryUpdated(entry)
                 }
             }
