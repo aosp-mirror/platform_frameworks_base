@@ -96,6 +96,16 @@ class KeyboardRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun emitsDisconnected_whenDeviceWithIdDoesNotExist() =
+        testScope.runTest {
+            val deviceListener = captureDeviceListener()
+            val isKeyboardConnected by collectLastValue(underTest.keyboardConnected)
+
+            deviceListener.onInputDeviceAdded(NULL_DEVICE_ID)
+            assertThat(isKeyboardConnected).isFalse()
+        }
+
+    @Test
     fun emitsDisconnected_whenKeyboardDisconnects() =
         testScope.runTest {
             val deviceListener = captureDeviceListener()
@@ -172,6 +182,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
         private const val VIRTUAL_FULL_KEYBOARD_ID = 2
         private const val PHYSICAL_NOT_FULL_KEYBOARD_ID = 3
         private const val ANOTHER_PHYSICAL_FULL_KEYBOARD_ID = 4
+        private const val NULL_DEVICE_ID = 5
 
         private val INPUT_DEVICES_MAP: Map<Int, InputDevice> =
             mapOf(
