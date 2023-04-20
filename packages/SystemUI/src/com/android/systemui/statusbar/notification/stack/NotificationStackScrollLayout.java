@@ -2839,6 +2839,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param listener callback for notification removed
      */
     public void setOnNotificationRemovedListener(OnNotificationRemovedListener listener) {
+        NotificationShelfController.assertRefactorFlagDisabled(mAmbientState.getFeatureFlags());
         mOnNotificationRemovedListener = listener;
     }
 
@@ -2852,10 +2853,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!mChildTransferInProgress) {
             onViewRemovedInternal(expandableView, this);
         }
-        if (mOnNotificationRemovedListener != null) {
-            mOnNotificationRemovedListener.onNotificationRemoved(
-                    expandableView,
-                    mChildTransferInProgress);
+        if (mAmbientState.getFeatureFlags().isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            mShelf.requestRoundnessResetFor(expandableView);
+        } else {
+            if (mOnNotificationRemovedListener != null) {
+                mOnNotificationRemovedListener.onNotificationRemoved(
+                        expandableView,
+                        mChildTransferInProgress);
+            }
         }
     }
 
