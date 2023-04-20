@@ -16,11 +16,7 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
-
-import dagger.Binds;
 import dagger.Module;
-import dagger.multibindings.IntoSet;
 import dagger.multibindings.Multibinds;
 
 import java.util.Set;
@@ -29,9 +25,4 @@ import java.util.Set;
 interface CentralSurfacesStartableModule {
     @Multibinds
     Set<CentralSurfacesComponent.Startable> multibindStartables();
-
-    @Binds
-    @IntoSet
-    CentralSurfacesComponent.Startable sysBarAttrsListener(
-            SystemBarAttributesListener systemBarAttributesListener);
 }
