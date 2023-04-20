@@ -342,6 +342,30 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void advanced_onDeviceListUpdateWithConnectedDeviceRemote_verifyItemSize() {
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        when(mMediaDevice1.getFeatures()).thenReturn(
+                ImmutableList.of(MediaRoute2Info.FEATURE_REMOTE_PLAYBACK));
+        when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice1);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+        final List<MediaDevice> devices = new ArrayList<>();
+        for (MediaItem item : mMediaOutputController.getMediaItemList()) {
+            if (item.getMediaDevice().isPresent()) {
+                devices.add(item.getMediaDevice().get());
+            }
+        }
+
+        assertThat(devices.containsAll(mMediaDevices)).isTrue();
+        assertThat(devices.size()).isEqualTo(mMediaDevices.size());
+        assertThat(mMediaOutputController.getMediaItemList().size()).isEqualTo(
+                mMediaDevices.size() + 1);
+        verify(mCb).onDeviceListChanged();
+    }
+
+    @Test
     public void advanced_categorizeMediaItems_withSuggestedDevice_verifyDeviceListSize() {
         when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
         when(mMediaDevice1.isSuggestedDevice()).thenReturn(true);
