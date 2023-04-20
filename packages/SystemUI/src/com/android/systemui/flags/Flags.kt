@@ -108,7 +108,7 @@ object Flags {
 
     // TODO(b/275694445): Tracking Bug
     @JvmField
-    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = unreleasedFlag(208,
+    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = releasedFlag(208,
         "lockscreen_without_secure_lock_when_dreaming")
 
     /**
