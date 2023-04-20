@@ -243,14 +243,10 @@ filegroup {
         // domain
         "tests/src/com/android/systemui/keyguard/domain/interactor/AlternateBouncerInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/AlternateBouncerInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTransitionInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/LightRevealScrimInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/quickaffordance/FakeKeyguardQuickAffordanceRegistry.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
         // ui
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",

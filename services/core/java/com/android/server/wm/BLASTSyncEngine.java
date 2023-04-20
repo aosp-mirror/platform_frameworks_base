@@ -133,7 +133,7 @@ class BLASTSyncEngine {
             return mOrphanTransaction;
         }
 
-        private void onSurfacePlacement() {
+        private void tryFinish() {
             if (!mReady) return;
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: onSurfacePlacement checking %s",
                     mSyncId, mRootMembers);
@@ -168,14 +168,13 @@ class BLASTSyncEngine {
             class CommitCallback implements Runnable {
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
-                public void onCommitted() {
+                public void onCommitted(SurfaceControl.Transaction t) {
                     synchronized (mWm.mGlobalLock) {
                         if (ran) {
                             return;
                         }
                         mHandler.removeCallbacks(this);
                         ran = true;
-                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
                         for (WindowContainer wc : wcAwaitingCommit) {
                             wc.onSyncTransactionCommitted(t);
                         }
@@ -194,12 +193,12 @@ class BLASTSyncEngine {
                     Slog.e(TAG, "WM sent Transaction to organized, but never received" +
                            " commit callback. Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                    onCommitted();
-
+                    onCommitted(merged);
                 }
             };
             CommitCallback callback = new CommitCallback();
-            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::onCommitted);
+            merged.addTransactionCommittedListener(Runnable::run,
+                    () -> callback.onCommitted(new SurfaceControl.Transaction()));
             mHandler.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
@@ -222,6 +221,12 @@ class BLASTSyncEngine {
                         pt.mApplySync.run();
                     }
                 });
+            }
+            // Notify idle listeners
+            for (int i = mOnIdleListeners.size() - 1; i >= 0; --i) {
+                // If an idle listener adds a sync, though, then stop notifying.
+                if (mActiveSyncs.size() > 0) break;
+                mOnIdleListeners.get(i).run();
             }
         }
 
@@ -280,6 +285,8 @@ class BLASTSyncEngine {
      * @see #queueSyncSet
      */
     private final ArrayList<PendingSyncSet> mPendingSyncSets = new ArrayList<>();
+
+    private final ArrayList<Runnable> mOnIdleListeners = new ArrayList<>();
 
     BLASTSyncEngine(WindowManagerService wms) {
         this(wms, wms.mH);
@@ -379,8 +386,13 @@ class BLASTSyncEngine {
     void onSurfacePlacement() {
         // backwards since each state can remove itself if finished
         for (int i = mActiveSyncs.size() - 1; i >= 0; --i) {
-            mActiveSyncs.valueAt(i).onSurfacePlacement();
+            mActiveSyncs.valueAt(i).tryFinish();
         }
+    }
+
+    /** Only use this for tests! */
+    void tryFinishForTest(int syncId) {
+        getSyncSet(syncId).tryFinish();
     }
 
     /**
@@ -408,5 +420,9 @@ class BLASTSyncEngine {
     /** @return {@code true} if there are any sync-sets waiting to start. */
     boolean hasPendingSyncSets() {
         return !mPendingSyncSets.isEmpty();
+    }
+
+    void addOnIdleListener(Runnable onIdleListener) {
+        mOnIdleListeners.add(onIdleListener);
     }
 }

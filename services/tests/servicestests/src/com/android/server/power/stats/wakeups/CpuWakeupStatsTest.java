@@ -17,6 +17,8 @@
 package com.android.server.power.stats.wakeups;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SENSOR;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
@@ -50,6 +52,8 @@ public class CpuWakeupStatsTest {
     private static final String KERNEL_REASON_ALARM_IRQ = "120 test.alarm.device";
     private static final String KERNEL_REASON_WIFI_IRQ = "130 test.wifi.device";
     private static final String KERNEL_REASON_SOUND_TRIGGER_IRQ = "129 test.sound_trigger.device";
+    private static final String KERNEL_REASON_SENSOR_IRQ = "15 test.sensor.device";
+    private static final String KERNEL_REASON_CELLULAR_DATA_IRQ = "18 test.cellular_data.device";
     private static final String KERNEL_REASON_UNKNOWN_IRQ = "140 test.unknown.device";
     private static final String KERNEL_REASON_UNKNOWN = "free-form-reason test.alarm.device";
     private static final String KERNEL_REASON_ALARM_ABNORMAL = "-1 test.alarm.device";
@@ -106,6 +110,83 @@ public class CpuWakeupStatsTest {
             final long now = mRandom.nextLong(retention + 1, 100 * retention);
             obj.noteWakeupTimeAndReason(now, i, KERNEL_REASON_UNKNOWN_IRQ);
             assertThat(obj.mWakeupEvents.closestIndexOnOrBefore(now - retention)).isLessThan(0);
+        }
+    }
+
+    @Test
+    public void irqAttributionAllCombinations() {
+        final int[] subsystems = new int[] {
+                CPU_WAKEUP_SUBSYSTEM_ALARM,
+                CPU_WAKEUP_SUBSYSTEM_WIFI,
+                CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
+                CPU_WAKEUP_SUBSYSTEM_SENSOR,
+                CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA,
+        };
+
+        final String[] kernelReasons = new String[] {
+                KERNEL_REASON_ALARM_IRQ,
+                KERNEL_REASON_WIFI_IRQ,
+                KERNEL_REASON_SOUND_TRIGGER_IRQ,
+                KERNEL_REASON_SENSOR_IRQ,
+                KERNEL_REASON_CELLULAR_DATA_IRQ,
+        };
+
+        final int[] uids = new int[] {
+                TEST_UID_2, TEST_UID_3, TEST_UID_4, TEST_UID_1, TEST_UID_5
+        };
+
+        final int[] procStates = new int[] {
+                TEST_PROC_STATE_2,
+                TEST_PROC_STATE_3,
+                TEST_PROC_STATE_4,
+                TEST_PROC_STATE_1,
+                TEST_PROC_STATE_5
+        };
+
+        final int total = subsystems.length;
+        assertThat(kernelReasons.length).isEqualTo(total);
+        assertThat(uids.length).isEqualTo(total);
+        assertThat(procStates.length).isEqualTo(total);
+
+        for (int mask = 1; mask < (1 << total); mask++) {
+            final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3,
+                    mHandler);
+            populateDefaultProcStates(obj);
+
+            final long wakeupTime = mRandom.nextLong(123456);
+
+            String combinedKernelReason = null;
+            for (int i = 0; i < total; i++) {
+                if ((mask & (1 << i)) != 0) {
+                    combinedKernelReason = (combinedKernelReason == null)
+                            ? kernelReasons[i]
+                            : String.join(":", combinedKernelReason, kernelReasons[i]);
+                }
+
+                obj.noteWakingActivity(subsystems[i], wakeupTime + 2, uids[i]);
+            }
+            obj.noteWakeupTimeAndReason(wakeupTime, 1, combinedKernelReason);
+
+            assertThat(obj.mWakeupAttribution.size()).isEqualTo(1);
+
+            final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+            assertThat(attribution.size()).isEqualTo(Integer.bitCount(mask));
+
+            for (int i = 0; i < total; i++) {
+                if ((mask & (1 << i)) == 0) {
+                    assertThat(attribution.contains(subsystems[i])).isFalse();
+                    continue;
+                }
+                assertThat(attribution.contains(subsystems[i])).isTrue();
+                assertThat(attribution.get(subsystems[i]).get(uids[i])).isEqualTo(procStates[i]);
+
+                for (int j = 0; j < total; j++) {
+                    if (i == j) {
+                        continue;
+                    }
+                    assertThat(attribution.get(subsystems[i]).indexOfKey(uids[j])).isLessThan(0);
+                }
+            }
         }
     }
 

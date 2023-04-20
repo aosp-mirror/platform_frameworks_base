@@ -328,8 +328,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                                 // due to not having a good mechanism to know when
                                 // the content is no longer visible before it's fully removed
                                 if (getLastReportedRearDisplayPresentationStatus()
-                                        == SESSION_STATE_VISIBLE) {
-                                    consumer.accept(SESSION_STATE_INVISIBLE);
+                                        == SESSION_STATE_CONTENT_VISIBLE) {
+                                    consumer.accept(SESSION_STATE_CONTENT_INVISIBLE);
                                 }
                                 mRearDisplayPresentationController = null;
                             }
@@ -414,8 +414,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }
 
-        if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
-                || isRearDisplayActive()) {
+        if (isRearDisplayActive()) {
             return WindowAreaComponent.STATUS_ACTIVE;
         }
 
@@ -537,7 +536,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 if (request.equals(mRearDisplayStateRequest)) {
                     mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_ACTIVE;
                     mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
-                    updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
                 }
             }
         }
@@ -550,7 +548,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 }
                 mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
                 mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
-                updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
             }
         }
     }

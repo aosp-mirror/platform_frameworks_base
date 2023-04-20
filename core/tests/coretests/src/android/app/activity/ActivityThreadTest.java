@@ -71,6 +71,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.content.ReferrerIntent;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -95,7 +96,8 @@ public class ActivityThreadTest {
     // few sequence numbers the framework used to launch the test activity.
     private static final int BASE_SEQ = 10000;
 
-    private final ActivityTestRule<TestActivity> mActivityTestRule =
+    @Rule
+    public final ActivityTestRule<TestActivity> mActivityTestRule =
             new ActivityTestRule<>(TestActivity.class, true /* initialTouchMode */,
                     false /* launchActivity */);
 

@@ -764,6 +764,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     @Override
     public void stop() {
         synchronized (mLock) {
+            clearDisplayBrightnessFollowersLocked();
+
             mStopped = true;
             Message msg = mHandler.obtainMessage(MSG_STOP);
             mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
@@ -854,7 +856,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         noteScreenBrightness(mPowerState.getScreenBrightness());
 
         // Initialize all of the brightness tracking state
-        final float brightness = mDisplayBrightnessController.convertToNits(
+        final float brightness = mDisplayBrightnessController.convertToAdjustedNits(
                 mPowerState.getScreenBrightness());
         if (mBrightnessTracker != null && brightness >= PowerManager.BRIGHTNESS_MIN) {
             mBrightnessTracker.start(brightness);
@@ -2165,7 +2167,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private void notifyBrightnessTrackerChanged(float brightness, boolean userInitiated,
             boolean wasShortTermModelActive) {
-        final float brightnessInNits = mDisplayBrightnessController.convertToNits(brightness);
+        final float brightnessInNits =
+                mDisplayBrightnessController.convertToAdjustedNits(brightness);
         if (mAutomaticBrightnessStrategy.shouldUseAutoBrightness() && brightnessInNits >= 0.0f
                 && mAutomaticBrightnessController != null && mBrightnessTracker != null) {
             // We only want to track changes on devices that can actually map the display backlight
@@ -2198,6 +2201,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
                     /* ambientLux= */ 0), mClock.uptimeMillis());
         }
+    }
+
+    @GuardedBy("mLock")
+    private void clearDisplayBrightnessFollowersLocked() {
+        for (int i = 0; i < mDisplayBrightnessFollowers.size(); i++) {
+            DisplayPowerControllerInterface follower = mDisplayBrightnessFollowers.valueAt(i);
+            mHandler.postAtTime(() -> follower.setBrightnessToFollow(
+                    PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
+                    /* ambientLux= */ 0), mClock.uptimeMillis());
+        }
+        mDisplayBrightnessFollowers.clear();
     }
 
     @Override
@@ -2438,15 +2452,16 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         int appliedRbcStrength  = event.isRbcEnabled() ? event.getRbcStrength() : -1;
         float appliedHbmMaxNits =
                 event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF
-                ? -1f : mDisplayBrightnessController.convertToNits(event.getHbmMax());
+                ? -1f : mDisplayBrightnessController.convertToAdjustedNits(event.getHbmMax());
         // thermalCapNits set to -1 if not currently capping max brightness
         float appliedThermalCapNits =
                 event.getThermalMax() == PowerManager.BRIGHTNESS_MAX
-                ? -1f : mDisplayBrightnessController.convertToNits(event.getThermalMax());
+                ? -1f : mDisplayBrightnessController.convertToAdjustedNits(event.getThermalMax());
         if (mIsDisplayInternal) {
             FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
-                    mDisplayBrightnessController.convertToNits(event.getInitialBrightness()),
-                    mDisplayBrightnessController.convertToNits(event.getBrightness()),
+                    mDisplayBrightnessController
+                            .convertToAdjustedNits(event.getInitialBrightness()),
+                    mDisplayBrightnessController.convertToAdjustedNits(event.getBrightness()),
                     event.getLux(),
                     event.getPhysicalDisplayId(),
                     event.wasShortTermModelActive(),

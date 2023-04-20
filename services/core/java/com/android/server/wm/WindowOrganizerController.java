@@ -231,19 +231,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                  */
                 final BLASTSyncEngine.SyncGroup syncGroup = prepareSyncWithOrganizer(callback);
                 final int syncId = syncGroup.mSyncId;
-                if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-                    mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup);
-                    applyTransaction(t, syncId, null /*transition*/, caller);
-                    setSyncReady(syncId);
+                if (mTransitionController.isShellTransitionsEnabled()) {
+                    mTransitionController.startLegacySyncOrQueue(syncGroup, () -> {
+                        applyTransaction(t, syncId, null /*transition*/, caller);
+                        setSyncReady(syncId);
+                    });
                 } else {
-                    // Because the BLAST engine only supports one sync at a time, queue the
-                    // transaction.
-                    mService.mWindowManager.mSyncEngine.queueSyncSet(
-                            () -> mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup),
-                            () -> {
-                                applyTransaction(t, syncId, null /*transition*/, caller);
-                                setSyncReady(syncId);
-                            });
+                    if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
+                        mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup);
+                        applyTransaction(t, syncId, null /*transition*/, caller);
+                        setSyncReady(syncId);
+                    } else {
+                        // Because the BLAST engine only supports one sync at a time, queue the
+                        // transaction.
+                        mService.mWindowManager.mSyncEngine.queueSyncSet(
+                                () -> mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup),
+                                () -> {
+                                    applyTransaction(t, syncId, null /*transition*/, caller);
+                                    setSyncReady(syncId);
+                                });
+                    }
                 }
                 return syncId;
             }

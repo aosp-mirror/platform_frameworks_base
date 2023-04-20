@@ -235,6 +235,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private TransitionInfo subCopy(@NonNull TransitionInfo info,
             @WindowManager.TransitionType int newType, boolean withChanges) {
         final TransitionInfo out = new TransitionInfo(newType, withChanges ? info.getFlags() : 0);
+        out.setTrack(info.getTrack());
         out.setDebugId(info.getDebugId());
         if (withChanges) {
             for (int i = 0; i < info.getChanges().size(); ++i) {

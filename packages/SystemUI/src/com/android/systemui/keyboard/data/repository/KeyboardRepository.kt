@@ -106,7 +106,7 @@ constructor(
     }
 
     private fun isPhysicalFullKeyboard(deviceId: Int): Boolean {
-        val device = inputManager.getInputDevice(deviceId)
+        val device = inputManager.getInputDevice(deviceId) ?: return false
         return !device.isVirtual && device.isFullKeyboard
     }
 

@@ -1781,7 +1781,24 @@ public final class DisplayManagerService extends SystemService {
         } else {
             configurePreferredDisplayModeLocked(display);
         }
-        addDisplayPowerControllerLocked(display);
+        DisplayPowerControllerInterface dpc = addDisplayPowerControllerLocked(display);
+
+        if (dpc != null) {
+            final int leadDisplayId = display.getLeadDisplayIdLocked();
+            updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
+
+            // Loop through all the displays and check if any should follow this one - it could be
+            // that the follower display was added before the lead display.
+            mLogicalDisplayMapper.forEachLocked(d -> {
+                if (d.getLeadDisplayIdLocked() == displayId) {
+                    DisplayPowerControllerInterface followerDpc =
+                            mDisplayPowerControllers.get(d.getDisplayIdLocked());
+                    if (followerDpc != null) {
+                        updateDisplayPowerControllerLeaderLocked(followerDpc, displayId);
+                    }
+                }
+            });
+        }
 
         mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
 
@@ -1832,8 +1849,8 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void updateDisplayPowerControllerLeaderLocked(DisplayPowerControllerInterface dpc,
-            int leadDisplayId) {
+    private void updateDisplayPowerControllerLeaderLocked(
+            @NonNull DisplayPowerControllerInterface dpc, int leadDisplayId) {
         if (dpc.getLeadDisplayId() == leadDisplayId) {
             // Lead display hasn't changed, nothing to do.
             return;
@@ -1851,9 +1868,11 @@ public final class DisplayManagerService extends SystemService {
 
         // And then, if it's following, register it with the new one.
         if (leadDisplayId != Layout.NO_LEAD_DISPLAY) {
-            final DisplayPowerControllerInterface newLead =
+            final DisplayPowerControllerInterface newLeader =
                     mDisplayPowerControllers.get(leadDisplayId);
-            newLead.addDisplayBrightnessFollower(dpc);
+            if (newLeader != null) {
+                newLeader.addDisplayBrightnessFollower(dpc);
+            }
         }
     }
 
@@ -1872,6 +1891,7 @@ public final class DisplayManagerService extends SystemService {
         final DisplayPowerControllerInterface dpc =
                 mDisplayPowerControllers.removeReturnOld(displayId);
         if (dpc != null) {
+            updateDisplayPowerControllerLeaderLocked(dpc, Layout.NO_LEAD_DISPLAY);
             dpc.stop();
         }
         mDisplayStates.delete(displayId);
@@ -3062,10 +3082,11 @@ public final class DisplayManagerService extends SystemService {
     }
 
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-    private void addDisplayPowerControllerLocked(LogicalDisplay display) {
+    private DisplayPowerControllerInterface addDisplayPowerControllerLocked(
+            LogicalDisplay display) {
         if (mPowerHandler == null) {
             // initPowerManagement has not yet been called.
-            return;
+            return null;
         }
 
         if (mBrightnessTracker == null && display.getDisplayIdLocked() == Display.DEFAULT_DISPLAY) {
@@ -3086,7 +3107,7 @@ public final class DisplayManagerService extends SystemService {
         if (hbmMetadata == null) {
             Slog.wtf(TAG, "High Brightness Mode Metadata is null in DisplayManagerService for "
                     + "display: " + display.getDisplayIdLocked());
-            return;
+            return null;
         }
         if (DeviceConfig.getBoolean("display_manager",
                 "use_newly_structured_display_power_controller", true)) {
@@ -3101,6 +3122,7 @@ public final class DisplayManagerService extends SystemService {
                     () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted);
         }
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
+        return displayPowerController;
     }
 
     private void handleBrightnessChange(LogicalDisplay display) {
