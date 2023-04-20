@@ -83,6 +83,8 @@ public class SecureSettings {
         Settings.Secure.DOUBLE_TAP_TO_WAKE,
         Settings.Secure.WAKE_GESTURE_ENABLED,
         Settings.Secure.LONG_PRESS_TIMEOUT,
+        Settings.Secure.KEY_REPEAT_TIMEOUT_MS,
+        Settings.Secure.KEY_REPEAT_DELAY_MS,
         Settings.Secure.CAMERA_GESTURE_DISABLED,
         Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED,
         Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,

@@ -85,9 +85,9 @@ public class ViewConfiguration {
     private static final int DEFAULT_MULTI_PRESS_TIMEOUT = 300;
 
     /**
-     * Defines the time between successive key repeats in milliseconds.
+     * Defines the default duration between successive key repeats in milliseconds.
      */
-    private static final int KEY_REPEAT_DELAY = 50;
+    private static final int DEFAULT_KEY_REPEAT_DELAY_MS = 50;
 
     /**
      * Defines the duration in milliseconds a user needs to hold down the
@@ -669,14 +669,19 @@ public class ViewConfiguration {
      * @return the time before the first key repeat in milliseconds.
      */
     public static int getKeyRepeatTimeout() {
-        return getLongPressTimeout();
+        // Before the key repeat timeout was introduced, some users relied on changing
+        // LONG_PRESS_TIMEOUT settings to also change the key repeat timeout. To support
+        // this backward compatibility, we'll use the long press timeout as default value.
+        return AppGlobals.getIntCoreSetting(Settings.Secure.KEY_REPEAT_TIMEOUT_MS,
+                getLongPressTimeout());
     }
 
     /**
      * @return the time between successive key repeats in milliseconds.
      */
     public static int getKeyRepeatDelay() {
-        return KEY_REPEAT_DELAY;
+        return AppGlobals.getIntCoreSetting(Settings.Secure.KEY_REPEAT_DELAY_MS,
+                DEFAULT_KEY_REPEAT_DELAY_MS);
     }
 
     /**
