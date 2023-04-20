@@ -334,6 +334,17 @@ public class PackageInstaller {
     public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
 
     /**
+     * Path to the validated base APK for this session, which may point at an
+     * APK inside the session (when the session defines the base), or it may
+     * point at the existing base APK (when adding splits to an existing app).
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_RESOLVED_BASE_PATH =
+            "android.content.pm.extra.RESOLVED_BASE_PATH";
+
+    /**
      * Streaming installation pending.
      * Caller should make sure DataLoader is able to prepare image and reinitiate the operation.
      *
