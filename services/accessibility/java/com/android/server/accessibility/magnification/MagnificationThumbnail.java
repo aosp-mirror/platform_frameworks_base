@@ -58,7 +58,9 @@ public class MagnificationThumbnail {
     @VisibleForTesting
     public final FrameLayout mThumbnailLayout;
 
-    private final View mThumbNailView;
+    private final View mThumbnailView;
+    private int mThumbnailWidth;
+    private int mThumbnailHeight;
 
     private final WindowManager.LayoutParams mBackgroundParams;
     private boolean mVisible = false;
@@ -66,7 +68,7 @@ public class MagnificationThumbnail {
     private static final float ASPECT_RATIO = 14f;
     private static final float BG_ASPECT_RATIO = ASPECT_RATIO / 2f;
 
-    private ObjectAnimator mThumbNailAnimator;
+    private ObjectAnimator mThumbnailAnimator;
     private boolean mIsFadingIn;
 
     /**
@@ -79,9 +81,11 @@ public class MagnificationThumbnail {
         mWindowBounds =  mWindowManager.getCurrentWindowMetrics().getBounds();
         mThumbnailLayout = (FrameLayout) LayoutInflater.from(mContext)
                 .inflate(R.layout.thumbnail_background_view, /* root: */ null);
-        mThumbNailView =
+        mThumbnailView =
                 mThumbnailLayout.findViewById(R.id.accessibility_magnification_thumbnail_view);
         mBackgroundParams = createLayoutParams();
+        mThumbnailWidth = 0;
+        mThumbnailHeight = 0;
     }
 
     /**
@@ -90,35 +94,35 @@ public class MagnificationThumbnail {
      * @param currentBounds the current magnification bounds
      */
     @AnyThread
-    public void setThumbNailBounds(Rect currentBounds, float scale, float centerX, float centerY) {
+    public void setThumbnailBounds(Rect currentBounds, float scale, float centerX, float centerY) {
         if (DEBUG) {
-            Log.d(LOG_TAG, "setThumbNailBounds " + currentBounds);
+            Log.d(LOG_TAG, "setThumbnailBounds " + currentBounds);
         }
         mHandler.post(() -> {
             mWindowBounds = currentBounds;
             setBackgroundBounds();
             if (mVisible) {
-                updateThumbNailMainThread(scale, centerX, centerY);
+                updateThumbnailMainThread(scale, centerX, centerY);
             }
         });
     }
 
     private void setBackgroundBounds() {
         Point magnificationBoundary = getMagnificationThumbnailPadding(mContext);
-        final int thumbNailWidth = (int) (mWindowBounds.width() / BG_ASPECT_RATIO);
-        final int thumbNailHeight = (int) (mWindowBounds.height() / BG_ASPECT_RATIO);
+        mThumbnailWidth = (int) (mWindowBounds.width() / BG_ASPECT_RATIO);
+        mThumbnailHeight = (int) (mWindowBounds.height() / BG_ASPECT_RATIO);
         int initX = magnificationBoundary.x;
         int initY = magnificationBoundary.y;
-        mBackgroundParams.width = thumbNailWidth;
-        mBackgroundParams.height = thumbNailHeight;
+        mBackgroundParams.width = mThumbnailWidth;
+        mBackgroundParams.height = mThumbnailHeight;
         mBackgroundParams.x = initX;
         mBackgroundParams.y = initY;
     }
 
     @MainThread
-    private void showThumbNail() {
+    private void showThumbnail() {
         if (DEBUG) {
-            Log.d(LOG_TAG, "showThumbNail " + mVisible);
+            Log.d(LOG_TAG, "showThumbnail " + mVisible);
         }
         animateThumbnail(true);
     }
@@ -127,14 +131,14 @@ public class MagnificationThumbnail {
      * Hides thumbnail and removes the view from the window when finished animating.
      */
     @AnyThread
-    public void hideThumbNail() {
-        mHandler.post(this::hideThumbNailMainThread);
+    public void hideThumbnail() {
+        mHandler.post(this::hideThumbnailMainThread);
     }
 
     @MainThread
-    private void hideThumbNailMainThread() {
+    private void hideThumbnailMainThread() {
         if (DEBUG) {
-            Log.d(LOG_TAG, "hideThumbNail " + mVisible);
+            Log.d(LOG_TAG, "hideThumbnail " + mVisible);
         }
         if (mVisible) {
             animateThumbnail(false);
@@ -155,14 +159,14 @@ public class MagnificationThumbnail {
                         + " fadeIn: " + fadeIn
                         + " mVisible: " + mVisible
                         + " isFadingIn: " + mIsFadingIn
-                        + " isRunning: " + mThumbNailAnimator
+                        + " isRunning: " + mThumbnailAnimator
             );
         }
 
         // Reset countdown to hide automatically
-        mHandler.removeCallbacks(this::hideThumbNailMainThread);
+        mHandler.removeCallbacks(this::hideThumbnailMainThread);
         if (fadeIn) {
-            mHandler.postDelayed(this::hideThumbNailMainThread, LINGER_DURATION_MS);
+            mHandler.postDelayed(this::hideThumbnailMainThread, LINGER_DURATION_MS);
         }
 
         if (fadeIn == mIsFadingIn) {
@@ -175,18 +179,18 @@ public class MagnificationThumbnail {
             mVisible = true;
         }
 
-        if (mThumbNailAnimator != null) {
-            mThumbNailAnimator.cancel();
+        if (mThumbnailAnimator != null) {
+            mThumbnailAnimator.cancel();
         }
-        mThumbNailAnimator = ObjectAnimator.ofFloat(
+        mThumbnailAnimator = ObjectAnimator.ofFloat(
                 mThumbnailLayout,
                 "alpha",
                 fadeIn ? 1f : 0f
         );
-        mThumbNailAnimator.setDuration(
+        mThumbnailAnimator.setDuration(
                 fadeIn ? FADE_IN_ANIMATION_DURATION_MS : FADE_OUT_ANIMATION_DURATION_MS
         );
-        mThumbNailAnimator.addListener(new Animator.AnimatorListener() {
+        mThumbnailAnimator.addListener(new Animator.AnimatorListener() {
             private boolean mIsCancelled;
 
             @Override
@@ -231,7 +235,7 @@ public class MagnificationThumbnail {
             }
         });
 
-        mThumbNailAnimator.start();
+        mThumbnailAnimator.start();
     }
 
     /**
@@ -246,38 +250,48 @@ public class MagnificationThumbnail {
      *                of the viewport, or {@link Float#NaN} to leave unchanged
      */
     @AnyThread
-    public void updateThumbNail(float scale, float centerX, float centerY) {
-        mHandler.post(() -> updateThumbNailMainThread(scale, centerX, centerY));
+    public void updateThumbnail(float scale, float centerX, float centerY) {
+        mHandler.post(() -> updateThumbnailMainThread(scale, centerX, centerY));
     }
 
     @MainThread
-    private void updateThumbNailMainThread(float scale, float centerX, float centerY) {
+    private void updateThumbnailMainThread(float scale, float centerX, float centerY) {
         // Restart the fadeout countdown (or show if it's hidden)
-        showThumbNail();
+        showThumbnail();
 
-        var scaleDown = Float.isNaN(scale) ? mThumbNailView.getScaleX() : 1f / scale;
+        var scaleDown = Float.isNaN(scale) ? mThumbnailView.getScaleX() : 1f / scale;
         if (!Float.isNaN(scale)) {
-            mThumbNailView.setScaleX(scaleDown);
-            mThumbNailView.setScaleY(scaleDown);
+            mThumbnailView.setScaleX(scaleDown);
+            mThumbnailView.setScaleY(scaleDown);
+        }
+        float thumbnailWidth;
+        float thumbnailHeight;
+        if (mThumbnailView.getWidth() == 0 || mThumbnailView.getHeight() == 0) {
+            // if the thumbnail view size is not updated correctly, we just use the cached values.
+            thumbnailWidth = mThumbnailWidth;
+            thumbnailHeight = mThumbnailHeight;
+        } else {
+            thumbnailWidth = mThumbnailView.getWidth();
+            thumbnailHeight = mThumbnailView.getHeight();
         }
         if (!Float.isNaN(centerX)) {
-            var padding = mThumbNailView.getPaddingTop();
+            var padding = mThumbnailView.getPaddingTop();
             var ratio = 1f / BG_ASPECT_RATIO;
-            var centerXScaled = centerX * ratio - (mThumbNailView.getWidth() / 2f + padding);
-            var centerYScaled = centerY * ratio - (mThumbNailView.getHeight() / 2f + padding);
+            var centerXScaled = centerX * ratio - (thumbnailWidth / 2f + padding);
+            var centerYScaled = centerY * ratio - (thumbnailHeight / 2f + padding);
 
             if (DEBUG) {
                 Log.d(
                         LOG_TAG,
-                        "updateThumbNail centerXScaled : " + centerXScaled
+                        "updateThumbnail centerXScaled : " + centerXScaled
                                 + " centerYScaled : " + centerYScaled
-                                + " getTranslationX : " + mThumbNailView.getTranslationX()
+                                + " getTranslationX : " + mThumbnailView.getTranslationX()
                                 + " ratio : " + ratio
                 );
             }
 
-            mThumbNailView.setTranslationX(centerXScaled);
-            mThumbNailView.setTranslationY(centerYScaled);
+            mThumbnailView.setTranslationX(centerXScaled);
+            mThumbnailView.setTranslationY(centerYScaled);
         }
     }
 
