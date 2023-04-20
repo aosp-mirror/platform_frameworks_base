@@ -154,6 +154,7 @@ public class TransitionTracer {
         }
 
         outputStream.write(com.android.server.wm.shell.Transition.TYPE, transition.mType);
+        outputStream.write(com.android.server.wm.shell.Transition.FLAGS, transition.getFlags());
 
         for (int i = 0; i < targets.size(); ++i) {
             final long changeToken = outputStream
@@ -162,6 +163,7 @@ public class TransitionTracer {
             final Transition.ChangeInfo target = targets.get(i);
 
             final int mode = target.getTransitMode(target.mContainer);
+            final int flags = target.getChangeFlags(target.mContainer);
             final int layerId;
             if (target.mContainer.mSurfaceControl.isValid()) {
                 layerId = target.mContainer.mSurfaceControl.getLayerId();
@@ -170,6 +172,7 @@ public class TransitionTracer {
             }
 
             outputStream.write(com.android.server.wm.shell.Target.MODE, mode);
+            outputStream.write(com.android.server.wm.shell.Target.FLAGS, flags);
             outputStream.write(com.android.server.wm.shell.Target.LAYER_ID, layerId);
 
             if (mActiveTracingEnabled) {
