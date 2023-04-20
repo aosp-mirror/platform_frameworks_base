@@ -2610,7 +2610,12 @@ public abstract class WallpaperService extends Service {
             mActiveEngines.get(i).detach();
         }
         mActiveEngines.clear();
-        mBackgroundThread.quitSafely();
+        if (mBackgroundThread != null) {
+            // onDestroy might be called without a previous onCreate if WallpaperService was
+            // instantiated manually. While this is a misuse of the API, some things break
+            // if here we don't take into consideration this scenario.
+            mBackgroundThread.quitSafely();
+        }
         Trace.endSection();
     }
 
