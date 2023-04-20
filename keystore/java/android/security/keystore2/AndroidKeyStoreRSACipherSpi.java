@@ -288,16 +288,34 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             }
         }
 
+        private static boolean isMgfDigestTagPresentInKeyProperties(
+                Authorization[] keyCharacteristics) {
+            for (Authorization authorization : keyCharacteristics) {
+                if (authorization.keyParameter.tag == KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         @Override
         protected final void addAlgorithmSpecificParametersToBegin(
-                @NonNull List<KeyParameter> parameters) {
-            super.addAlgorithmSpecificParametersToBegin(parameters);
+                @NonNull List<KeyParameter> parameters, Authorization[] keyCharacteristics) {
+            super.addAlgorithmSpecificParametersToBegin(parameters, keyCharacteristics);
             parameters.add(KeyStore2ParameterUtils.makeEnum(
                     KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest
             ));
-            parameters.add(KeyStore2ParameterUtils.makeEnum(
-                    KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, mKeymasterMgf1Digest
-            ));
+            // Only add the KM_TAG_RSA_OAEP_MGF_DIGEST tag to begin() if the MGF Digest is
+            // present in the key properties. Keys generated prior to Android 14 did not have
+            // this tag (Keystore didn't add it) so specifying any MGF digest tag would cause
+            // a begin() operation (on an Android 14 device) to fail (with a key that was generated
+            // on Android 13 or below).
+            if (isMgfDigestTagPresentInKeyProperties(keyCharacteristics)) {
+                parameters.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, mKeymasterMgf1Digest
+                ));
+            }
         }
 
         @Override
