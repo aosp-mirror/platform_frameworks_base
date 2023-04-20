@@ -33,7 +33,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:padding="12dp"
-        android:contentDescription="@string/vendor_icon_description" />
+        android:importantForAccessibility="no" />
 
     <TextView
         android:id="@+id/vendor_header_name"
