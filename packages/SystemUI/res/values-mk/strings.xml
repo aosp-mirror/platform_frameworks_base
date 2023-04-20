@@ -247,14 +247,14 @@
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Интернет"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Мрежите се достапни"</string>
-    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Мрежите се недостапни"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Не се достапни мрежи"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Нема достапни Wi-Fi мрежи"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Се вклучува…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Емитување на екранот"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Емитување екран"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Емитување"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Неименуван уред"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Нема достапни уреди"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi не е поврзано"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Нема Wi-Fi врска"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Осветленост"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверзија на боите"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекција на боите"</string>
@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Започни"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Сопри"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим со една рака"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Контраст"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандарден"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Среден"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Висок"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се одблокира пристапот до микрофонот на уредот?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се одблокира пристапот до камерата на уредот?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се одблокира пристапот до камерата и микрофонот на уредот?"</string>
@@ -796,7 +792,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се исклучи мобилниот интернет?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нема да имате пристап до податоците или интернетот преку <xliff:g id="CARRIER">%s</xliff:g>. Интернетот ќе биде достапен само преку Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"вашиот оператор"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Да се префрли на <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Ќе се вратите на <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Мобилниот интернет нема автоматски да се префрли според достапноста"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Не, фала"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Да, префрли се"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"означите како неомилена"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Преместете на позиција <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Изберете контроли до кои ќе пристапувате од „Брзите поставки“"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржете и влечете за да ги преуредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не се зачувани"</string>
@@ -1050,7 +1047,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Прикажи ги сите"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"За промена на мрежата, прекинете ја врската со етернетот"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"За да се подобри доживувањето на уредот, апликациите и услугите може сѐ уште да скенираат за Wi‑Fi мрежи во секое време, дури и кога Wi‑Fi е исклучено. Може да го промените ова во поставките за „Скенирање за Wi-Fi“. "<annotation id="link">"Промени"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Исклучи го авионскиот режим"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Исклучи „Авионски режим“"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> сака да ја додаде следнава плочка на „Брзите поставки“"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Додајте плочка"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не додавајте плочка"</string>
@@ -1126,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Вашето работно правило ви дозволува да упатувате повици само од работниот профил"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Префрли се на работен профил"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Затвори"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Приспособете го заклучениот екран"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi не е достапно"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камерата е блокирана"</string>
@@ -1134,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофонот е блокиран"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Приоритетниот режим е вклучен"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Вниманието на „Помошникот“ е вклучено"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Više vremena."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Manje vremena."</string>
     <string name="cancel" msgid="5665114069455378395">"Otkaži"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"Potvrdi"</string>
     <string name="done" msgid="381184316122520313">"Gotovo"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsetnici"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodajete novog korisnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Ovaj uređaj možete da delite sa drugim ljudima ako napravite još korisnika. Svaki korisnik ima sopstveni prostor, koji može da prilagođava pomoću aplikacija, pozadine i slično. Korisnici mogu da prilagođavaju i podešavanja uređaja koja utiču na svakoga, poput Wi‑Fi-ja.\n\nKada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike. Podešavanja i usluge pristupačnosti ne mogu da se prenose na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Dajete privilegije administratora?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Kao administrator, moći će da upravlja drugim korisnicima, menja podešavanja uređaja i resetuje uređaj na fabrička podešavanja."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Podešavate korisnika?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ta osoba treba da uzme uređaj i podesi svoj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Želite li da odmah podesite profil?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time ćete pokrenuti novu sesiju gosta i izbrisati sve aplikacije i podatke iz aktuelne sesije"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Izlazite iz režima gosta?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time ćete izbrisati sve aplikacije i podatke iz aktuelne sesije gosta"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Daj ovom korisniku administratorske privilegije"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Ne daj korisniku administratorske privilegije"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izađi"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Sačuvaćete aktivnosti gosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Sačuvajte aktivnosti iz aktuelne sesije ili izbrišite sve aplikacije i podatke"</string>
@@ -665,7 +677,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizička tastatura"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Odaberite raspored tastature"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Podrazumevano"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključite ekran"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključivanje ekrana"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvoli uključivanje ekrana"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvoljava aplikaciji da uključi ekran. Ako se omogući, aplikacija može da uključi ekran u bilo kom trenutku bez vaše eksplicitne namere."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Želite da zaustavite emitovanje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

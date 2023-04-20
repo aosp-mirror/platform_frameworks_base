@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"መተግበሪያው ስራ ላይ በሚውልበት ጊዜ እንደ የልብ ምት፣ የሙቀት መጠን እና የደም ኦክሲጅን መቶኛ ያለ የሰውነት ዳሳሽ ውሂብን እንዲደርስ ያስችለዋል።"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ከበስተጀርባ እያለ እንደ የልብ ምት ያለ የሰውነት ዳሳሽ ውሂብን መድረስ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"መተግበሪያው ከበስተጀርባ እያለ እንደ የልብ ምት፣ የሙቀት መጠን እና የደም ኦክሲጅን መቶኛ ያለ የሰውነት ዳሳሽ ውሂብን እንዲደርስ ያስችለዋል።"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"መተግበሪያው በጥቅም ላይ ሳለ የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን ይድረስ።"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"መተግበሪያው በጥቅም ላይ ሳለ መተግበሪያው የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን እንዲደርስ ይፈቅድለታል።"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"መተግበሪያው ዳራ ውስጥ ሳለ የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን ይድረስ።"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"መተግበሪያው በዳራ ውስጥ ሳለ መተግበሪያው የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን እንዲደርስ ይፈቅድለታል።"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"የቀን መቁጠሪያ ክስተቶችን እና ዝርዝሮችን አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ይህ መተግበሪያ ሁሉንም በእርስዎ ጡባዊ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ይህ መተግበሪያ ሁሉንም በእርስዎ Android TV መሣሪያ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"የፊት ሥርዓተ ክወና ተሰርዟል።"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"በመልክ መክፈት በተጠቃሚ ተሰርዟል"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"በጣም ብዙ ሙከራዎች። በመልክ መክፈት ተሰናክሏል።"</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"በጣም ብዙ ሙከራዎች። በምትኩ የማያ ገጽ መቆለፊያን ያስገቡ።"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ፊትን ማረጋገጥ አይቻልም። እንደገና ይሞክሩ።"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"በመልክ መክፈትን አላዋቀሩም።"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ያዢው የአንድ መተግበሪያ የባህሪያት መረጃን ማየት እንዲጀምር ያስችለዋል።"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"የዳሳሽ ውሂቡን በከፍተኛ የናሙና ብዛት ላይ ይድረሱበት"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"መተግበሪያው የዳሳሽ ውሂቡን ከ200 ኸ በሚበልጥ ፍጥነት ናሙና እንዲያደርግ ይፈቅድለታል"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"መተግበሪያን ያለ ተጠቃሚ እርምጃ ያዘምኑ"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ያዢው ያለ ተጠቃሚ እርምጃ ከዚህ በፊት የጫነውን መተግበሪያ እንዲያዘምነው ይፈቅዳል"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"በማያ ገጽ መቆለፊያ የይለፍ ቃሎች እና ፒኖች ውስጥ የሚፈቀዱ ቁምፊዎችን እና ርዝመታቸውን ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"የማሳያ-ክፈት ሙከራዎችን ክትትል ያድርጉባቸው"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> አሁን ላይ አይገኝም። በ<xliff:g id="APP_NAME_1">%2$s</xliff:g> የሚተዳደር ነው።"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"የበለጠ ለመረዳት"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"መተግበሪያን ላፍታ እንዳይቆም አድርግ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"የሥራ መተግበሪያዎች ይብሩ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"የእርስዎን የሥራ መተግበሪያዎች እና ማሳወቂያዎች መዳረሻ ያግኙ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"አብራ"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"የሥራ መተግበሪያዎች ከቆሙበት ይቀጥሉ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ከቆመበት ቀጥል"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ድንገተኛ አደጋ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"የእርስዎን የሥራ መተግበሪያዎች እና ጥሪዎች መዳረሻ ያግኙ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"መተግበሪያ አይገኝም"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> አሁን አይገኝም።"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> አይገኝም"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ለማብራት መታ ያድርጉ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ምንም የሥራ መተግበሪያዎች የሉም"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ምንም የግል መተግበሪያዎች የሉም"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> በግል መገለጫዎ ውስጥ ይከፈት?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> በስራ መገለጫዎ ውስጥ ይከፈት?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"የግል አሳሽ ተጠቀም"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"የስራ አሳሽ ተጠቀም"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"የሲም አውታረ መረብ መክፈቻ ፒን"</string>

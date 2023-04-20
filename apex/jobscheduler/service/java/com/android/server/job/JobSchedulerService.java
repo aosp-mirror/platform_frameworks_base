@@ -1577,8 +1577,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mJobPackageTracker.notePending(jobStatus);
                 mPendingJobQueue.add(jobStatus);
                 maybeRunPendingJobsLocked();
-            } else {
-                evaluateControllerStatesLocked(jobStatus);
             }
         }
         return JobScheduler.RESULT_SUCCESS;
@@ -3050,8 +3048,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "    queued " + job.toShortString());
                 }
                 newReadyJobs.add(job);
-            } else {
-                evaluateControllerStatesLocked(job);
             }
         }
 
@@ -3171,7 +3167,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 } else if (mPendingJobQueue.remove(job)) {
                     noteJobNonPending(job);
                 }
-                evaluateControllerStatesLocked(job);
             }
         }
 
@@ -3297,7 +3292,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @GuardedBy("mLock")
     boolean isReadyToBeExecutedLocked(JobStatus job, boolean rejectActive) {
-        final boolean jobReady = job.isReady();
+        final boolean jobReady = job.isReady() || evaluateControllerStatesLocked(job);
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
@@ -3372,12 +3367,17 @@ public class JobSchedulerService extends com.android.server.SystemService
         return !appIsBad;
     }
 
+    /**
+     * Gets each controller to evaluate the job's state
+     * and then returns the value of {@link JobStatus#isReady()}.
+     */
     @VisibleForTesting
-    void evaluateControllerStatesLocked(final JobStatus job) {
+    boolean evaluateControllerStatesLocked(final JobStatus job) {
         for (int c = mControllers.size() - 1; c >= 0; --c) {
             final StateController sc = mControllers.get(c);
             sc.evaluateStateLocked(job);
         }
+        return job.isReady();
     }
 
     /**

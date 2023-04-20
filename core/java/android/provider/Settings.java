@@ -3037,12 +3037,21 @@ public final class Settings {
         public void destroy() {
             try {
                 // If this process is the system server process, mArray is the same object as
-                // the memory int array kept inside SetingsProvider, so skipping the close()
-                if (!Settings.isInSystemServer()) {
+                // the memory int array kept inside SettingsProvider, so skipping the close()
+                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Error closing backing array", e);
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                destroy();
+            } finally {
+                super.finalize();
             }
         }
     }

@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасаваць"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Спалучэнне дае доступ да вашых кантактаў і гісторыі выклікаў пры падключэнні."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не атрымалася падключыцца да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не атрымалася спалучыцца з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, таму што PIN-код або пароль няправiльныя."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не спалучана з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g> з-за няправільнага PIN-кода або ключа доступу."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не магу размаўляць з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Злучэнне адхілена прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Камп\'ютар"</string>
@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Больш часу."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Менш часу."</string>
     <string name="cancel" msgid="5665114069455378395">"Скасаваць"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"ОК"</string>
     <string name="done" msgid="381184316122520313">"Гатова"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будзільнікі і напаміны"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Дадаць новага карыстальніка?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Вы можаце адкрыць доступ да гэтай прылады іншым людзям шляхам стварэння дадатковых карыстальнікаў. Кожны карыстальнік мае свой уласны раздзел, на якім ён можа наладзіць свае праграмы, шпалеры і іншае. Карыстальнікі таксама могуць наладжваць параметры прылады, напрыклад Wi-Fi, якія ўплываюць на ўсіх.\n\nКалі вы дадаяце новага карыстальніка, ён павінен наладзіць свой раздзел.\n\nЛюбы карыстальнік можа абнаўляць праграмы для ўсіх астатніх карыстальнікаў. Спецыяльныя магчымасці наладжваюцца асабіста кожным карыстальнікам."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Пасля стварэння профіля яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Даць гэтаму карыстальніку правы адміністратара?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Адміністратар можа кіраваць іншымі карыстальнікамі, змяняць налады прылады і скідваць налады прылады да заводскіх значэнняў."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Наладзіць профіль?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пераканайцеся, што чалавек мае магчымасць узяць прыладу і наладзіць свой раздзел"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Наладзiць профiль?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Будзе запушчаны новы гасцявы сеанс. Усе праграмы і даныя бягучага сеанса будуць выдалены"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Выйсці з гасцявога рэжыму?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Будуць выдалены праграмы і даныя бягучага гасцявога сеанса"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Даць гэтаму карыстальніку правы адміністратара"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Не даваць карыстальніку правы адміністратара"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Выйсці"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Захаваць дзеянні госця?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Можна захаваць даныя пра дзеянні ў бягучым сеансе ці выдаліць праграмы і даныя"</string>

@@ -117,6 +117,11 @@ class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
+    @FlakyTest(bugId = 278227468)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
     companion object {
         /**
          * Creates the test configurations.

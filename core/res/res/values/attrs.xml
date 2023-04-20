@@ -1335,7 +1335,15 @@
         <!-- The container color of surface, which replaces the previous surface at elevation level
              2. @hide -->
         <attr name="materialColorSurfaceContainer" format="color"/>
-
+         <!-- The primary branding color for the app. By default, this is the color applied to the
+             action bar background. @hide -->
+        <attr name="materialColorPrimary" format="color"/>
+        <!-- The secondary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top
+             of tertiary. @hide -->
+        <attr name="materialColorTertiary" format="color"/>
     </declare-styleable>
 
     <!-- **************************************************************** -->

@@ -58,8 +58,7 @@
     <string name="snackbar_action" msgid="37373514216505085">"ရွေးစရာများကို ကြည့်ရန်"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ရှေ့ဆက်ရန်"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"လက်မှတ်ထိုးဝင်ရန် နည်းလမ်းများ"</string>
-    <!-- no translation found for button_label_view_more (3429098227286495651) -->
-    <skip />
+    <string name="button_label_view_more" msgid="3429098227286495651">"ပိုကြည့်ရန်"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> အတွက်"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"လော့ခ်ချထားသည့် စကားဝှက်မန်နေဂျာများ"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"ဖွင့်ရန် တို့ပါ"</string>

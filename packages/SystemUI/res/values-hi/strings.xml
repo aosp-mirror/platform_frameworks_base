@@ -236,7 +236,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ब्लूटूथ चालू हो रहा है…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ऑटो-रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रीन का अपने-आप दिशा बदलना (ऑटो-रोटेट)"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह की जानकारी"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"स्क्रीन सेवर"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"कैमरे का ऐक्सेस"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"माइक्रोफ़ोन का ऐक्सेस"</string>
@@ -383,7 +383,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपकी स्क्रीन पर दिख रही या आपके डिवाइस पर चलाई जा रही जानकारी ऐक्सेस कर सकता है. इसमें पासवर्ड, पैसे चुकाने का ब्यौरा, फ़ोटो, मैसेज, और चलाए गए ऑडियो जैसी जानकारी शामिल है."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"इस फ़ंक्शन को उपलब्ध कराने वाली सेवा, रिकॉर्ड या कास्ट करते समय, आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पैसे चुकाने से जुड़ी जानकारी, फ़ोटो, मैसेज, और चलाए जाने वाले ऑडियो शामिल हैं."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"इस फ़ंक्शन को उपलब्ध कराने वाली सेवा, रिकॉर्ड या कास्ट करते समय, आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पेमेंट के तरीके की जानकारी, फ़ोटो, मैसेज, और चलाए जाने वाले ऑडियो शामिल हैं."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रिकॉर्डिंग या कास्ट करना शुरू करें?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> का इस्तेमाल करके रिकॉर्ड और कास्ट करना शुरू करें?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"क्या आपको शेयर या रिकॉर्ड करने की <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> को अनुमति देनी है?"</string>
@@ -599,7 +599,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"रोकें"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Next"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Previous"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rewind"</string>
@@ -794,7 +794,7 @@
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"क्या आपको मोबाइल डेटा, <xliff:g id="CARRIER">%s</xliff:g> पर वापस से स्विच करना है?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"उपलब्ध होने पर, मोबाइल डेटा अपने-आप स्विच नहीं होगा"</string>
-    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"स्विच न करें"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"नहीं, रहने दें"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"स्विच करें"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> को <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें?"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"पसंदीदा से हटाएं"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"इसे <xliff:g id="NUMBER">%d</xliff:g> नंबर पर ले जाएं"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"उन कंट्रोल को चुनें जिन्हें फटाफट सेटिंग से ऐक्सेस करना है"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कंट्रोल का क्रम बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदलाव सेव नहीं किए गए"</string>
@@ -1122,12 +1123,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"ऑफ़िस की नीति के तहत, वर्क प्रोफ़ाइल होने पर ही फ़ोन कॉल किए जा सकते हैं"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"वर्क प्रोफ़ाइल पर स्विच करें"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"बंद करें"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="6152703934761402399">"लॉक स्क्रीन को कस्टमाइज़ करें"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"लॉक स्क्रीन को पसंद के मुताबिक बनाने के लिए अनलॉक करें"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"वाई-फ़ाई उपलब्ध नहीं है"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"कैमरे का ऐक्सेस नहीं है"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"कैमरे और माइक्रोफ़ोन का ऐक्सेस नहीं है"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"माइक्रोफ़ोन का ऐक्सेस नहीं है"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"प्राथमिकता मोड चालू है"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant आपकी बातें सुन रही है"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिंग में जाकर, नोट लेने की सुविधा देने वाले ऐप्लिकेशन को डिफ़ॉल्ट के तौर पर सेट करें"</string>
 </resources>

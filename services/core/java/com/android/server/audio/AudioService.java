@@ -199,6 +199,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.audio.AudioServiceEvents.DeviceVolumeEvent;
 import com.android.server.audio.AudioServiceEvents.PhoneStateEvent;
+import com.android.server.audio.AudioServiceEvents.VolChangedBroadcastEvent;
 import com.android.server.audio.AudioServiceEvents.VolumeEvent;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
@@ -1214,7 +1215,7 @@ public class AudioService extends IAudioService.Stub
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
 
-        mDeviceBroker = new AudioDeviceBroker(mContext, this);
+        mDeviceBroker = new AudioDeviceBroker(mContext, this, mAudioSystem);
 
         mRecordMonitor = new RecordingActivityMonitor(mContext);
         mRecordMonitor.registerRecordingCallback(mVoiceRecordingActivityMonitor, true);
@@ -1687,7 +1688,7 @@ public class AudioService extends IAudioService.Stub
 
         synchronized (mSettingsLock) {
             final int forDock = mDockAudioMediaEnabled ?
-                    AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE;
+                    AudioSystem.FORCE_DIGITAL_DOCK : AudioSystem.FORCE_NONE;
             mDeviceBroker.setForceUse_Async(AudioSystem.FOR_DOCK, forDock, "onAudioServerDied");
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
@@ -2323,9 +2324,10 @@ public class AudioService extends IAudioService.Stub
                 SENDMSG_QUEUE,
                 AudioSystem.FOR_DOCK,
                 mDockAudioMediaEnabled ?
-                        AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE,
+                        AudioSystem.FORCE_DIGITAL_DOCK : AudioSystem.FORCE_NONE,
                 new String("readDockAudioSettings"),
                 0);
+
     }
 
 
@@ -3972,13 +3974,32 @@ public class AudioService extends IAudioService.Stub
             Log.e(TAG, "Unsupported non-stream type based VolumeInfo", new Exception());
             return;
         }
+
         int index = vi.getVolumeIndex();
         if (index == VolumeInfo.INDEX_NOT_SET && !vi.hasMuteCommand()) {
             throw new IllegalArgumentException(
                     "changing device volume requires a volume index or mute command");
         }
 
-        // TODO handle unmuting if current audio device
+        // force a cache clear to force reevaluating stream type to audio device selection
+        // that can interfere with the sending of the VOLUME_CHANGED_ACTION intent
+        mAudioSystem.clearRoutingCache();
+
+        // log the current device that will be used when evaluating the sending of the
+        // VOLUME_CHANGED_ACTION intent to see if the current device is the one being modified
+        final int currDev = getDeviceForStream(vi.getStreamType());
+
+        final boolean skipping = (currDev == ada.getInternalType());
+
+        AudioService.sVolumeLogger.enqueue(new DeviceVolumeEvent(vi.getStreamType(), index, ada,
+                currDev, callingPackage, skipping));
+
+        if (skipping) {
+            // setDeviceVolume was called on a device currently being used
+            return;
+        }
+
+        // TODO handle unmuting of current audio device
         // if a stream is not muted but the VolumeInfo is for muting, set the volume index
         // for the device to min volume
         if (vi.hasMuteCommand() && vi.isMuted() && !isStreamMute(vi.getStreamType())) {
@@ -4129,11 +4150,11 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        final EventLogger.Event event = (device == null)
-                ? new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
-                    index/*val1*/, flags/*val2*/, callingPackage)
-                : new DeviceVolumeEvent(streamType, index, device, callingPackage);
-        sVolumeLogger.enqueue(event);
+        if (device == null) {
+            // call was already logged in setDeviceVolume()
+            sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
+                    index/*val1*/, flags/*val2*/, callingPackage));
+        }
         setStreamVolume(streamType, index, flags, device,
                 callingPackage, callingPackage, attributionTag,
                 Binder.getCallingUid(), callingOrSelfHasAudioSettingsPermission());
@@ -4547,7 +4568,11 @@ public class AudioService extends IAudioService.Stub
                 maybeSendSystemAudioStatusCommand(false);
             }
         }
-        sendVolumeUpdate(streamType, oldIndex, index, flags, device);
+        if (ada == null) {
+            // only non-null when coming here from setDeviceVolume
+            // TODO change test to check early if device is current device or not
+            sendVolumeUpdate(streamType, oldIndex, index, flags, device);
+        }
     }
 
     private void dispatchAbsoluteVolumeChanged(int streamType, AbsoluteVolumeDeviceInfo deviceInfo,
@@ -4993,8 +5018,8 @@ public class AudioService extends IAudioService.Stub
 
         int streamType = vi.getStreamType();
         final VolumeInfo.Builder vib = new VolumeInfo.Builder(vi);
-        vib.setMinVolumeIndex(mStreamStates[streamType].mIndexMin);
-        vib.setMaxVolumeIndex(mStreamStates[streamType].mIndexMax);
+        vib.setMinVolumeIndex((mStreamStates[streamType].mIndexMin + 5) / 10);
+        vib.setMaxVolumeIndex((mStreamStates[streamType].mIndexMax + 5) / 10);
         synchronized (VolumeStreamState.class) {
             final int index;
             if (isFixedVolumeDevice(ada.getInternalType())) {
@@ -5003,7 +5028,11 @@ public class AudioService extends IAudioService.Stub
                 index = (mStreamStates[streamType].getIndex(ada.getInternalType()) + 5) / 10;
             }
             vib.setVolumeIndex(index);
-            return vib.setMuted(mStreamStates[streamType].mIsMuted).build();
+            // only set as a mute command if stream muted
+            if (mStreamStates[streamType].mIsMuted) {
+                vib.setMuted(true);
+            }
+            return vib.build();
         }
     }
 
@@ -8557,6 +8586,8 @@ public class AudioService extends IAudioService.Stub
                     mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
                     mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
                             mStreamVolumeAlias[mStreamType]);
+                    AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
+                            mStreamType, mStreamVolumeAlias[mStreamType], index));
                     sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
                 }
             }
@@ -10833,7 +10864,7 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_PHONE_STATE = 20;
     static final int LOG_NB_EVENTS_DEVICE_CONNECTION = 50;
     static final int LOG_NB_EVENTS_FORCE_USE = 20;
-    static final int LOG_NB_EVENTS_VOLUME = 40;
+    static final int LOG_NB_EVENTS_VOLUME = 100;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
     static final int LOG_NB_EVENTS_SPATIAL = 30;
     static final int LOG_NB_EVENTS_SOUND_DOSE = 30;
@@ -12478,20 +12509,16 @@ public class AudioService extends IAudioService.Stub
         }
 
         int addMixes(@NonNull ArrayList<AudioMix> mixes) {
-            // TODO optimize to not have to unregister the mixes already in place
             synchronized (mMixes) {
-                mAudioSystem.registerPolicyMixes(mMixes, false);
                 this.add(mixes);
-                return mAudioSystem.registerPolicyMixes(mMixes, true);
+                return mAudioSystem.registerPolicyMixes(mixes, true);
             }
         }
 
         int removeMixes(@NonNull ArrayList<AudioMix> mixes) {
-            // TODO optimize to not have to unregister the mixes already in place
             synchronized (mMixes) {
-                mAudioSystem.registerPolicyMixes(mMixes, false);
                 this.remove(mixes);
-                return mAudioSystem.registerPolicyMixes(mMixes, true);
+                return mAudioSystem.registerPolicyMixes(mixes, false);
             }
         }
 
