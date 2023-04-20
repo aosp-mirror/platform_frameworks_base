@@ -8226,6 +8226,14 @@
             </intent-filter>
         </service>
 
+        <service android:name="com.android.server.companion.datatransfer.contextsync.CallMetadataSyncConnectionService"
+                 android:permission="android.permission.BIND_CONNECTION_SERVICE"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService"/>
+            </intent-filter>
+        </service>
+
         <provider
             android:name="com.android.server.textclassifier.IconsContentProvider"
             android:authorities="com.android.textclassifier.icons"
