@@ -467,7 +467,7 @@ public interface WindowManager extends ViewManager {
      * implementation.
      * @hide
      */
-    int TRANSIT_FIRST_CUSTOM = 13;
+    int TRANSIT_FIRST_CUSTOM = 1000;
 
     /**
      * @hide
