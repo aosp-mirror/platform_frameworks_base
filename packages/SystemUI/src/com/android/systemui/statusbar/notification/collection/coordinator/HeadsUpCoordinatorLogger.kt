@@ -61,12 +61,13 @@ class HeadsUpCoordinatorLogger constructor(
         })
     }
 
-    fun logEntryUpdatedByRanking(key: String, shouldHun: Boolean) {
+    fun logEntryUpdatedByRanking(key: String, shouldHun: Boolean, reason: String) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
             bool1 = shouldHun
+            str2 = reason
         }, {
-            "updating entry via ranking applied: $str1 updated shouldHeadsUp=$bool1"
+            "updating entry via ranking applied: $str1 updated shouldHeadsUp=$bool1 because $str2"
         })
     }
 
