@@ -840,6 +840,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mAnchorId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
         mTitle = null;
         mTransitionTime = 0;
+        mLocales = LocaleList.getEmptyLocaleList();
     }
 
     /**
