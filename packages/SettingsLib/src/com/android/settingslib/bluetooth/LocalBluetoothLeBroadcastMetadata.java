@@ -261,19 +261,21 @@ public class LocalBluetoothLeBroadcastMetadata {
         Pattern pattern = Pattern.compile(PATTERN_BT_BROADCAST_METADATA);
         Matcher match = pattern.matcher(qrCodeString);
         if (match.find()) {
-            mSourceAddressType = Integer.parseInt(match.group(MATCH_INDEX_ADDRESS_TYPE));
-            mSourceDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
+            try {
+                mSourceAddressType = Integer.parseInt(match.group(MATCH_INDEX_ADDRESS_TYPE));
+                mSourceDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
                     match.group(MATCH_INDEX_DEVICE));
-            mSourceAdvertisingSid = Integer.parseInt(match.group(MATCH_INDEX_ADVERTISING_SID));
-            mBroadcastId = Integer.parseInt(match.group(MATCH_INDEX_BROADCAST_ID));
-            mPaSyncInterval = Integer.parseInt(match.group(MATCH_INDEX_SYNC_INTERVAL));
-            mIsEncrypted = Boolean.valueOf(match.group(MATCH_INDEX_IS_ENCRYPTED));
-            mBroadcastCode = match.group(MATCH_INDEX_BROADCAST_CODE).getBytes();
-            mPresentationDelayMicros =
-                  Integer.parseInt(match.group(MATCH_INDEX_PRESENTATION_DELAY));
+                mSourceAdvertisingSid = Integer.parseInt(
+                    match.group(MATCH_INDEX_ADVERTISING_SID));
+                mBroadcastId = Integer.parseInt(match.group(MATCH_INDEX_BROADCAST_ID));
+                mPaSyncInterval = Integer.parseInt(match.group(MATCH_INDEX_SYNC_INTERVAL));
+                mIsEncrypted = Boolean.valueOf(match.group(MATCH_INDEX_IS_ENCRYPTED));
+                mBroadcastCode = match.group(MATCH_INDEX_BROADCAST_CODE).getBytes();
+                mPresentationDelayMicros =
+                    Integer.parseInt(match.group(MATCH_INDEX_PRESENTATION_DELAY));
 
-            if (DEBUG) {
-                Log.d(TAG, "Converted qrCodeString result: "
+                if (DEBUG) {
+                    Log.d(TAG, "Converted qrCodeString result: "
                         + " ,Type = " + mSourceAddressType
                         + " ,Device = " + mSourceDevice
                         + " ,AdSid = " + mSourceAdvertisingSid
@@ -282,11 +284,11 @@ public class LocalBluetoothLeBroadcastMetadata {
                         + " ,encrypted = " + mIsEncrypted
                         + " ,BroadcastCode = " + Arrays.toString(mBroadcastCode)
                         + " ,delay = " + mPresentationDelayMicros);
-            }
+                }
 
-            mSubgroup = convertToSubgroup(match.group(MATCH_INDEX_SUBGROUPS));
+                mSubgroup = convertToSubgroup(match.group(MATCH_INDEX_SUBGROUPS));
 
-            return new BluetoothLeBroadcastMetadata.Builder()
+                return new BluetoothLeBroadcastMetadata.Builder()
                     .setSourceDevice(mSourceDevice, mSourceAddressType)
                     .setSourceAdvertisingSid(mSourceAdvertisingSid)
                     .setBroadcastId(mBroadcastId)
@@ -296,10 +298,13 @@ public class LocalBluetoothLeBroadcastMetadata {
                     .setPresentationDelayMicros(mPresentationDelayMicros)
                     .addSubgroup(mSubgroup)
                     .build();
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, "IllegalArgumentException when convert : " + e);
+                return null;
+            }
         } else {
             if (DEBUG) {
-                Log.d(TAG,
-                        "The match fail, can not convert it to BluetoothLeBroadcastMetadata.");
+                Log.d(TAG, "The match fail, can not convert it to BluetoothLeBroadcastMetadata.");
             }
             return null;
         }

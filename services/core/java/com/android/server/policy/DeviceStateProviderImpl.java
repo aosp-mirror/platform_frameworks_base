@@ -96,6 +96,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String CONFIG_FILE_NAME = "device_state_configuration.xml";
     private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
     private static final String FLAG_APP_INACCESSIBLE = "FLAG_APP_INACCESSIBLE";
+    private static final String FLAG_EMULATED_ONLY = "FLAG_EMULATED_ONLY";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -149,6 +150,8 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                                 case FLAG_APP_INACCESSIBLE:
                                     flags |= DeviceState.FLAG_APP_INACCESSIBLE;
                                     break;
+                                case FLAG_EMULATED_ONLY:
+                                    flags |= DeviceState.FLAG_EMULATED_ONLY;
                                 default:
                                     Slog.w(TAG, "Parsed unknown flag with name: "
                                             + configFlagString);
@@ -225,7 +228,13 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             }
             final Conditions conditions = stateConditions.get(i);
             if (conditions == null) {
-                mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
+                // If this state has the FLAG_EMULATED_ONLY flag on it, it should never be triggered
+                // by a physical hardware change, and should always return false for it's conditions
+                if (deviceStates.get(i).hasFlag(DeviceState.FLAG_EMULATED_ONLY)) {
+                    mStateConditions.put(state, FALSE_BOOLEAN_SUPPLIER);
+                } else {
+                    mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
+                }
                 continue;
             }
 
@@ -358,7 +367,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 return;
             }
 
-            int newState = mOrderedStates[0].getIdentifier();
+            int newState = INVALID_DEVICE_STATE;
             for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i].getIdentifier();
                 if (DEBUG) {
@@ -369,13 +378,14 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 try {
                     conditionSatisfied = mStateConditions.get(state).getAsBoolean();
                 } catch (IllegalStateException e) {
-                    // Failed to compute the current state based on current available data. Return
+                    // Failed to compute the current state based on current available data. Continue
                     // with the expectation that notifyDeviceStateChangedIfNeeded() will be called
-                    // when a callback with the missing data is triggered.
+                    // when a callback with the missing data is triggered. May trigger another state
+                    // change if another state is satisfied currently.
                     if (DEBUG) {
                         Slog.d(TAG, "Unable to check current state", e);
                     }
-                    return;
+                    continue;
                 }
 
                 if (conditionSatisfied) {
@@ -386,8 +396,12 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                     break;
                 }
             }
+            if (newState == INVALID_DEVICE_STATE) {
+                Slog.e(TAG, "No declared device states match any of the required conditions.");
+                dumpSensorValues();
+            }
 
-            if (newState != mLastReportedState) {
+            if (newState != INVALID_DEVICE_STATE && newState != mLastReportedState) {
                 mLastReportedState = newState;
                 stateToReport = newState;
             }
@@ -581,6 +595,19 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         }
 
         return null;
+    }
+
+    @GuardedBy("mLock")
+    private void dumpSensorValues() {
+        Slog.i(TAG, "Sensor values:");
+        for (Sensor sensor : mLatestSensorEvent.keySet()) {
+            SensorEvent sensorEvent = mLatestSensorEvent.get(sensor);
+            if (sensorEvent != null) {
+                Slog.i(TAG, sensor.getName() + ": " + Arrays.toString(sensorEvent.values));
+            } else {
+                Slog.i(TAG, sensor.getName() + ": null");
+            }
+        }
     }
 
     /**

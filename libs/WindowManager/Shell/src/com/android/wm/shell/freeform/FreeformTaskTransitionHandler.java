@@ -46,14 +46,14 @@ public class FreeformTaskTransitionHandler
         implements Transitions.TransitionHandler, FreeformTaskTransitionStarter {
 
     private final Transitions mTransitions;
-    private final WindowDecorViewModel<?> mWindowDecorViewModel;
+    private final WindowDecorViewModel mWindowDecorViewModel;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
 
     public FreeformTaskTransitionHandler(
             ShellInit shellInit,
             Transitions transitions,
-            WindowDecorViewModel<?> windowDecorViewModel) {
+            WindowDecorViewModel windowDecorViewModel) {
         mTransitions = transitions;
         mWindowDecorViewModel = windowDecorViewModel;
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {

@@ -31,7 +31,14 @@ interface IDreamOverlay {
     * @param params The {@link LayoutParams} for the associated DreamWindow, including the window
                     token of the Dream Activity.
     * @param callback The {@link IDreamOverlayCallback} for requesting actions such as exiting the
-    *                 dream.
+    *                dream.
+    * @param dreamComponent The component name of the dream service requesting overlay.
+    * @param shouldShowComplications Whether the dream overlay should show complications, e.g. clock
+    *                and weather.
     */
-    void startDream(in LayoutParams params, in IDreamOverlayCallback callback);
+    void startDream(in LayoutParams params, in IDreamOverlayCallback callback,
+        in String dreamComponent, in boolean shouldShowComplications);
+
+    /** Called when the dream is waking, to do any exit animations */
+    void wakeUp();
 }

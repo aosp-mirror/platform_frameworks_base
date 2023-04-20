@@ -33,6 +33,8 @@ public class SplitBounds implements Parcelable {
     // This class is orientation-agnostic, so we compute both for later use
     public final float topTaskPercent;
     public final float leftTaskPercent;
+    public final float dividerWidthPercent;
+    public final float dividerHeightPercent;
     /**
      * If {@code true}, that means at the time of creation of this object, the
      * split-screened apps were vertically stacked. This is useful in scenarios like
@@ -62,8 +64,12 @@ public class SplitBounds implements Parcelable {
             appsStackedVertically = false;
         }
 
-        leftTaskPercent = this.leftTopBounds.width() / (float) rightBottomBounds.right;
-        topTaskPercent = this.leftTopBounds.height() / (float) rightBottomBounds.bottom;
+        float totalWidth = rightBottomBounds.right - leftTopBounds.left;
+        float totalHeight = rightBottomBounds.bottom - leftTopBounds.top;
+        leftTaskPercent = leftTopBounds.width() / totalWidth;
+        topTaskPercent = leftTopBounds.height() / totalHeight;
+        dividerWidthPercent = visualDividerBounds.width() / totalWidth;
+        dividerHeightPercent = visualDividerBounds.height() / totalHeight;
     }
 
     public SplitBounds(Parcel parcel) {
@@ -75,6 +81,8 @@ public class SplitBounds implements Parcelable {
         appsStackedVertically = parcel.readBoolean();
         leftTopTaskId = parcel.readInt();
         rightBottomTaskId = parcel.readInt();
+        dividerWidthPercent = parcel.readInt();
+        dividerHeightPercent = parcel.readInt();
     }
 
     @Override
@@ -87,6 +95,8 @@ public class SplitBounds implements Parcelable {
         parcel.writeBoolean(appsStackedVertically);
         parcel.writeInt(leftTopTaskId);
         parcel.writeInt(rightBottomTaskId);
+        parcel.writeFloat(dividerWidthPercent);
+        parcel.writeFloat(dividerHeightPercent);
     }
 
     @Override

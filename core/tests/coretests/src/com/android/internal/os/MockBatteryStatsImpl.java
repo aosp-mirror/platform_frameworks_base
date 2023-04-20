@@ -114,6 +114,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return getUidStatsLocked(uid).mOnBatteryScreenOffBackgroundTimeBase;
     }
 
+    public long getMobileRadioPowerStateUpdateRateLimit() {
+        return MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS;
+    }
+
     public MockBatteryStatsImpl setNetworkStats(NetworkStats networkStats) {
         mNetworkStats = networkStats;
         return this;

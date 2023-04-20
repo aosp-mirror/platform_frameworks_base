@@ -51,8 +51,8 @@ constructor(
                     updateResources()
                 }
             })
-        dumpManager.registerDumpable("SplitShadeLockscreenOverScroller") { printWriter, _ ->
-            dump(printWriter)
+        dumpManager.registerCriticalDumpable("SplitShadeLockscreenOverScroller") { pw, _ ->
+            dump(pw)
         }
     }
 

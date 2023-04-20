@@ -41,12 +41,12 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.Before;
@@ -285,8 +285,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float dragDownAmount = event2.getY() - event1.getY();
 
         // Ensure correct expansion passed in.
-        PanelExpansionChangeEvent event =
-                new PanelExpansionChangeEvent(
+        ShadeExpansionChangeEvent event =
+                new ShadeExpansionChangeEvent(
                         expansion, /* expanded= */ false, /* tracking= */ true, dragDownAmount);
         verify(mStatusBarKeyguardViewManager).onPanelExpansionChanged(event);
     }

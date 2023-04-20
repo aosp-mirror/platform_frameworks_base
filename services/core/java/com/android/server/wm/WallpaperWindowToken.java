@@ -139,7 +139,7 @@ class WallpaperWindowToken extends WindowToken {
                 bac.linkFixedRotationTransformIfNeeded(this);
             } else if ((wallpaperTarget.mActivityRecord == null
                     // Ignore invisible activity because it may be moving to background.
-                    || wallpaperTarget.mActivityRecord.mVisibleRequested)
+                    || wallpaperTarget.mActivityRecord.isVisibleRequested())
                     && wallpaperTarget.mToken.hasFixedRotationTransform()) {
                 // If the wallpaper target has a fixed rotation, we want the wallpaper to follow its
                 // rotation

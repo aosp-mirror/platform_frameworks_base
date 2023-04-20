@@ -48,9 +48,8 @@ import androidx.annotation.NonNull;
 
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.SurfaceUtils;
-
-import java.util.function.Consumer;
 
 /**
  * Handles split decor like showing resizing hint for a specific split.
@@ -71,13 +70,19 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private SurfaceControl mIconLeash;
     private SurfaceControl mBackgroundLeash;
     private SurfaceControl mGapBackgroundLeash;
+    private SurfaceControl mScreenshot;
 
     private boolean mShown;
     private boolean mIsResizing;
-    private Rect mBounds = new Rect();
+    private final Rect mOldBounds = new Rect();
+    private final Rect mResizingBounds = new Rect();
+    private final Rect mTempRect = new Rect();
     private ValueAnimator mFadeAnimator;
 
     private int mIconSize;
+    private int mOffsetX;
+    private int mOffsetY;
+    private int mRunningAnimationCount = 0;
 
     public SplitDecorManager(Configuration configuration, IconProvider iconProvider,
             SurfaceSession surfaceSession) {
@@ -154,24 +159,30 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mResizingIconView = null;
         mIsResizing = false;
         mShown = false;
+        mOldBounds.setEmpty();
+        mResizingBounds.setEmpty();
     }
 
     /** Showing resizing hint. */
     public void onResizing(ActivityManager.RunningTaskInfo resizingTask, Rect newBounds,
-            Rect sideBounds, SurfaceControl.Transaction t) {
+            Rect sideBounds, SurfaceControl.Transaction t, int offsetX, int offsetY,
+            boolean immediately) {
         if (mResizingIconView == null) {
             return;
         }
 
         if (!mIsResizing) {
             mIsResizing = true;
-            mBounds.set(newBounds);
+            mOldBounds.set(newBounds);
         }
+        mResizingBounds.set(newBounds);
+        mOffsetX = offsetX;
+        mOffsetY = offsetY;
 
         final boolean show =
-                newBounds.width() > mBounds.width() || newBounds.height() > mBounds.height();
-        final boolean animate = show != mShown;
-        if (animate && mFadeAnimator != null && mFadeAnimator.isRunning()) {
+                newBounds.width() > mOldBounds.width() || newBounds.height() > mOldBounds.height();
+        final boolean update = show != mShown;
+        if (update && mFadeAnimator != null && mFadeAnimator.isRunning()) {
             // If we need to animate and animator still running, cancel it before we ensure both
             // background and icon surfaces are non null for next animation.
             mFadeAnimator.cancel();
@@ -184,10 +195,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }
 
-        if (mGapBackgroundLeash == null) {
+        if (mGapBackgroundLeash == null && !immediately) {
             final boolean isLandscape = newBounds.height() == sideBounds.height();
-            final int left = isLandscape ? mBounds.width() : 0;
-            final int top = isLandscape ? 0 : mBounds.height();
+            final int left = isLandscape ? mOldBounds.width() : 0;
+            final int top = isLandscape ? 0 : mOldBounds.height();
             mGapBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     GAP_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             // Fill up another side bounds area.
@@ -213,19 +224,60 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 newBounds.width() / 2 - mIconSize / 2,
                 newBounds.height() / 2 - mIconSize / 2);
 
-        if (animate) {
-            startFadeAnimation(show, null /* finishedConsumer */);
+        if (update) {
+            if (immediately) {
+                t.setVisibility(mBackgroundLeash, show);
+                t.setVisibility(mIconLeash, show);
+            } else {
+                startFadeAnimation(show, false, null);
+            }
             mShown = show;
         }
     }
 
     /** Stops showing resizing hint. */
-    public void onResized(SurfaceControl.Transaction t) {
+    public void onResized(SurfaceControl.Transaction t, Runnable animFinishedCallback) {
+        if (mScreenshot != null) {
+            t.setPosition(mScreenshot, mOffsetX, mOffsetY);
+
+            final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
+            final ValueAnimator va = ValueAnimator.ofFloat(1, 0);
+            va.addUpdateListener(valueAnimator -> {
+                final float progress = (float) valueAnimator.getAnimatedValue();
+                animT.setAlpha(mScreenshot, progress);
+                animT.apply();
+            });
+            va.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mRunningAnimationCount++;
+                }
+
+                @Override
+                public void onAnimationEnd(@androidx.annotation.NonNull Animator animation) {
+                    mRunningAnimationCount--;
+                    animT.remove(mScreenshot);
+                    animT.apply();
+                    animT.close();
+                    mScreenshot = null;
+
+                    if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                        animFinishedCallback.run();
+                    }
+                }
+            });
+            va.start();
+        }
+
         if (mResizingIconView == null) {
             return;
         }
 
         mIsResizing = false;
+        mOffsetX = 0;
+        mOffsetY = 0;
+        mOldBounds.setEmpty();
+        mResizingBounds.setEmpty();
         if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
             if (!mShown) {
                 // If fade-out animation is running, just add release callback to it.
@@ -245,10 +297,34 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mFadeAnimator.cancel();
         }
         if (mShown) {
-            fadeOutDecor(null /* finishedCallback */);
+            fadeOutDecor(animFinishedCallback);
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);
+            if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                animFinishedCallback.run();
+            }
+        }
+    }
+
+    /** Screenshot host leash and attach on it if meet some conditions */
+    public void screenshotIfNeeded(SurfaceControl.Transaction t) {
+        if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            mTempRect.set(mOldBounds);
+            mTempRect.offsetTo(0, 0);
+            mScreenshot = ScreenshotUtils.takeScreenshot(t, mHostLeash, mTempRect,
+                    Integer.MAX_VALUE - 1);
+        }
+    }
+
+    /** Set screenshot and attach on host leash it if meet some conditions */
+    public void setScreenshotIfNeeded(SurfaceControl screenshot, SurfaceControl.Transaction t) {
+        if (screenshot == null || !screenshot.isValid()) return;
+
+        if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            mScreenshot = screenshot;
+            t.reparent(screenshot, mHostLeash);
+            t.setLayer(screenshot, Integer.MAX_VALUE - 1);
         }
     }
 
@@ -256,18 +332,15 @@ public class SplitDecorManager extends WindowlessWindowManager {
      * directly. */
     public void fadeOutDecor(Runnable finishedCallback) {
         if (mShown) {
-            startFadeAnimation(false /* show */, transaction -> {
-                releaseDecor(transaction);
-                if (finishedCallback != null) finishedCallback.run();
-            });
+            startFadeAnimation(false /* show */, true, finishedCallback);
             mShown = false;
         } else {
             if (finishedCallback != null) finishedCallback.run();
         }
     }
 
-    private void startFadeAnimation(boolean show,
-            Consumer<SurfaceControl.Transaction> finishedConsumer) {
+    private void startFadeAnimation(boolean show, boolean releaseSurface,
+            Runnable finishedCallback) {
         final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
         mFadeAnimator = ValueAnimator.ofFloat(0f, 1f);
         mFadeAnimator.setDuration(FADE_DURATION);
@@ -284,15 +357,19 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mFadeAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
+                mRunningAnimationCount++;
                 if (show) {
-                    animT.show(mBackgroundLeash).show(mIconLeash).show(mGapBackgroundLeash).apply();
-                } else {
-                    animT.hide(mGapBackgroundLeash).apply();
+                    animT.show(mBackgroundLeash).show(mIconLeash);
                 }
+                if (mGapBackgroundLeash != null) {
+                    animT.setVisibility(mGapBackgroundLeash, show);
+                }
+                animT.apply();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation) {
+                mRunningAnimationCount--;
                 if (!show) {
                     if (mBackgroundLeash != null) {
                         animT.hide(mBackgroundLeash);
@@ -301,11 +378,15 @@ public class SplitDecorManager extends WindowlessWindowManager {
                         animT.hide(mIconLeash);
                     }
                 }
-                if (finishedConsumer != null) {
-                    finishedConsumer.accept(animT);
+                if (releaseSurface) {
+                    releaseDecor(animT);
                 }
                 animT.apply();
                 animT.close();
+
+                if (mRunningAnimationCount == 0 && finishedCallback != null) {
+                    finishedCallback.run();
+                }
             }
         });
         mFadeAnimator.start();

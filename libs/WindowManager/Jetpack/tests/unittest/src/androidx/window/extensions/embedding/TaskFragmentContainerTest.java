@@ -45,6 +45,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 
 import com.google.android.collect.Lists;
 
@@ -82,7 +84,10 @@ public class TaskFragmentContainerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mController = new SplitController();
+        DeviceStateManagerFoldingFeatureProducer producer =
+                mock(DeviceStateManagerFoldingFeatureProducer.class);
+        WindowLayoutComponentImpl component = mock(WindowLayoutComponentImpl.class);
+        mController = new SplitController(component, producer);
         spyOn(mController);
         mActivity = createMockActivity();
         mIntent = new Intent();
@@ -94,18 +99,21 @@ public class TaskFragmentContainerTest {
 
         // One of the activity and the intent must be non-null
         assertThrows(IllegalArgumentException.class,
-                () -> new TaskFragmentContainer(null, null, taskContainer, mController));
+                () -> new TaskFragmentContainer(null, null, taskContainer, mController,
+                        null /* pairedPrimaryContainer */));
 
         // One of the activity and the intent must be null.
         assertThrows(IllegalArgumentException.class,
-                () -> new TaskFragmentContainer(mActivity, mIntent, taskContainer, mController));
+                () -> new TaskFragmentContainer(mActivity, mIntent, taskContainer, mController,
+                        null /* pairedPrimaryContainer */));
     }
 
     @Test
     public void testFinish() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(mActivity,
-                null /* pendingAppearedIntent */, taskContainer, mController);
+                null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryContainer */);
         doReturn(container).when(mController).getContainerWithActivity(mActivity);
 
         // Only remove the activity, but not clear the reference until appeared.
@@ -137,12 +145,14 @@ public class TaskFragmentContainerTest {
     public void testFinish_notFinishActivityThatIsReparenting() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container0 = new TaskFragmentContainer(mActivity,
-                null /* pendingAppearedIntent */, taskContainer, mController);
+                null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryContainer */);
         final TaskFragmentInfo info = createMockTaskFragmentInfo(container0, mActivity);
         container0.setInfo(mTransaction, info);
         // Request to reparent the activity to a new TaskFragment.
         final TaskFragmentContainer container1 = new TaskFragmentContainer(mActivity,
-                null /* pendingAppearedIntent */, taskContainer, mController);
+                null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryContainer */);
         doReturn(container1).when(mController).getContainerWithActivity(mActivity);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
@@ -159,9 +169,11 @@ public class TaskFragmentContainerTest {
         final TaskContainer taskContainer = createTestTaskContainer();
         // Pending activity should be cleared when it has appeared on server side.
         final TaskFragmentContainer pendingActivityContainer = new TaskFragmentContainer(mActivity,
-                null /* pendingAppearedIntent */, taskContainer, mController);
+                null /* pendingAppearedIntent */, taskContainer, mController,
+                null /* pairedPrimaryContainer */);
 
-        assertTrue(pendingActivityContainer.mPendingAppearedActivities.contains(mActivity));
+        assertTrue(pendingActivityContainer.mPendingAppearedActivities.contains(
+                mActivity.getActivityToken()));
 
         final TaskFragmentInfo info0 = createMockTaskFragmentInfo(pendingActivityContainer,
                 mActivity);
@@ -171,7 +183,8 @@ public class TaskFragmentContainerTest {
 
         // Pending intent should be cleared when the container becomes non-empty.
         final TaskFragmentContainer pendingIntentContainer = new TaskFragmentContainer(
-                null /* pendingAppearedActivity */, mIntent, taskContainer, mController);
+                null /* pendingAppearedActivity */, mIntent, taskContainer, mController,
+                null /* pairedPrimaryContainer */);
 
         assertEquals(mIntent, pendingIntentContainer.getPendingAppearedIntent());
 
@@ -186,7 +199,7 @@ public class TaskFragmentContainerTest {
     public void testIsWaitingActivityAppear() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
 
         assertTrue(container.isWaitingActivityAppear());
 
@@ -208,7 +221,7 @@ public class TaskFragmentContainerTest {
         doNothing().when(mController).onTaskFragmentAppearEmptyTimeout(any(), any());
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
 
         assertNull(container.mAppearEmptyTimeout);
 
@@ -248,7 +261,7 @@ public class TaskFragmentContainerTest {
     public void testCollectNonFinishingActivities() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
         List<Activity> activities = container.collectNonFinishingActivities();
 
         assertTrue(activities.isEmpty());
@@ -276,7 +289,7 @@ public class TaskFragmentContainerTest {
     public void testAddPendingActivity() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
         container.addPendingAppearedActivity(mActivity);
 
         assertEquals(1, container.collectNonFinishingActivities().size());
@@ -290,9 +303,9 @@ public class TaskFragmentContainerTest {
     public void testIsAbove() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container0 = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
         final TaskFragmentContainer container1 = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
 
         assertTrue(container1.isAbove(container0));
         assertFalse(container0.isAbove(container1));
@@ -302,7 +315,7 @@ public class TaskFragmentContainerTest {
     public void testGetBottomMostActivity() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
         container.addPendingAppearedActivity(mActivity);
 
         assertEquals(mActivity, container.getBottomMostActivity());
@@ -317,9 +330,9 @@ public class TaskFragmentContainerTest {
 
     @Test
     public void testOnActivityDestroyed() {
-        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskContainer taskContainer = createTestTaskContainer(mController);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                mIntent, taskContainer, mController);
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
         container.addPendingAppearedActivity(mActivity);
         final List<IBinder> activities = new ArrayList<>();
         activities.add(mActivity.getActivityToken());
@@ -328,10 +341,191 @@ public class TaskFragmentContainerTest {
 
         assertTrue(container.hasActivity(mActivity.getActivityToken()));
 
-        taskContainer.onActivityDestroyed(mActivity);
+        taskContainer.onActivityDestroyed(mActivity.getActivityToken());
 
         // It should not contain the destroyed Activity.
         assertFalse(container.hasActivity(mActivity.getActivityToken()));
+    }
+
+    @Test
+    public void testIsInIntermediateState() {
+        // True if no info set.
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
+        spyOn(taskContainer);
+        doReturn(true).when(taskContainer).isVisible();
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // True if empty info set.
+        final List<IBinder> activities = new ArrayList<>();
+        doReturn(activities).when(mInfo).getActivities();
+        doReturn(true).when(mInfo).isEmpty();
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // False if info is not empty.
+        doReturn(false).when(mInfo).isEmpty();
+        container.setInfo(mTransaction, mInfo);
+
+        assertFalse(container.isInIntermediateState());
+        assertFalse(taskContainer.isInIntermediateState());
+
+        // True if there is pending appeared activity.
+        container.addPendingAppearedActivity(mActivity);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // True if the activity is finishing.
+        activities.add(mActivity.getActivityToken());
+        doReturn(true).when(mActivity).isFinishing();
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // False if the activity is not finishing.
+        doReturn(false).when(mActivity).isFinishing();
+        container.setInfo(mTransaction, mInfo);
+
+        assertFalse(container.isInIntermediateState());
+        assertFalse(taskContainer.isInIntermediateState());
+
+        // True if there is a token that can't find associated activity.
+        activities.clear();
+        activities.add(new Binder());
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // False if there is a token that can't find associated activity when the Task is invisible.
+        doReturn(false).when(taskContainer).isVisible();
+
+        assertFalse(container.isInIntermediateState());
+        assertFalse(taskContainer.isInIntermediateState());
+    }
+
+    @Test
+    public void testHasAppearedActivity() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
+        container.addPendingAppearedActivity(mActivity);
+
+        assertFalse(container.hasAppearedActivity(mActivity.getActivityToken()));
+
+        final List<IBinder> activities = new ArrayList<>();
+        activities.add(mActivity.getActivityToken());
+        doReturn(activities).when(mInfo).getActivities();
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.hasAppearedActivity(mActivity.getActivityToken()));
+    }
+
+    @Test
+    public void testHasPendingAppearedActivity() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
+        container.addPendingAppearedActivity(mActivity);
+
+        assertTrue(container.hasPendingAppearedActivity(mActivity.getActivityToken()));
+
+        final List<IBinder> activities = new ArrayList<>();
+        activities.add(mActivity.getActivityToken());
+        doReturn(activities).when(mInfo).getActivities();
+        container.setInfo(mTransaction, mInfo);
+
+        assertFalse(container.hasPendingAppearedActivity(mActivity.getActivityToken()));
+    }
+
+    @Test
+    public void testHasActivity() {
+        final TaskContainer taskContainer = createTestTaskContainer(mController);
+        final TaskFragmentContainer container1 = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
+        final TaskFragmentContainer container2 = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
+
+        // Activity is pending appeared on container2.
+        container2.addPendingAppearedActivity(mActivity);
+
+        assertFalse(container1.hasActivity(mActivity.getActivityToken()));
+        assertTrue(container2.hasActivity(mActivity.getActivityToken()));
+
+        // Activity is pending appeared on container1 (removed from container2).
+        container1.addPendingAppearedActivity(mActivity);
+
+        assertTrue(container1.hasActivity(mActivity.getActivityToken()));
+        assertFalse(container2.hasActivity(mActivity.getActivityToken()));
+
+        final List<IBinder> activities = new ArrayList<>();
+        activities.add(mActivity.getActivityToken());
+        doReturn(activities).when(mInfo).getActivities();
+
+        // Although Activity is appeared on container2, we prioritize pending appeared record on
+        // container1.
+        container2.setInfo(mTransaction, mInfo);
+
+        assertTrue(container1.hasActivity(mActivity.getActivityToken()));
+        assertFalse(container2.hasActivity(mActivity.getActivityToken()));
+
+        // When the pending appeared record is removed from container1, we respect the appeared
+        // record in container2.
+        container1.removePendingAppearedActivity(mActivity.getActivityToken());
+
+        assertFalse(container1.hasActivity(mActivity.getActivityToken()));
+        assertTrue(container2.hasActivity(mActivity.getActivityToken()));
+    }
+
+    @Test
+    public void testNewContainerWithPairedPrimaryContainer() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer tf0 = new TaskFragmentContainer(
+                null /* pendingAppearedActivity */, new Intent(), taskContainer, mController,
+                null /* pairedPrimaryTaskFragment */);
+        final TaskFragmentContainer tf1 = new TaskFragmentContainer(
+                null /* pendingAppearedActivity */, new Intent(), taskContainer, mController,
+                null /* pairedPrimaryTaskFragment */);
+        taskContainer.mContainers.add(tf0);
+        taskContainer.mContainers.add(tf1);
+
+        // When tf2 is created with using tf0 as pairedPrimaryContainer, tf2 should be inserted
+        // right above tf0.
+        final TaskFragmentContainer tf2 = new TaskFragmentContainer(
+                null /* pendingAppearedActivity */, new Intent(), taskContainer, mController, tf0);
+        assertEquals(0, taskContainer.indexOf(tf0));
+        assertEquals(1, taskContainer.indexOf(tf2));
+        assertEquals(2, taskContainer.indexOf(tf1));
+    }
+
+    @Test
+    public void testIsVisible() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(
+                null /* pendingAppearedActivity */, new Intent(), taskContainer, mController,
+                null /* pairedPrimaryTaskFragment */);
+
+        // Not visible when there is not appeared.
+        assertFalse(container.isVisible());
+
+        // Respect info.isVisible.
+        TaskFragmentInfo info = createMockTaskFragmentInfo(container, mActivity,
+                true /* isVisible */);
+        container.setInfo(mTransaction, info);
+
+        assertTrue(container.isVisible());
+
+        info = createMockTaskFragmentInfo(container, mActivity, false /* isVisible */);
+        container.setInfo(mTransaction, info);
+
+        assertFalse(container.isVisible());
     }
 
     /** Creates a mock activity in the organizer process. */

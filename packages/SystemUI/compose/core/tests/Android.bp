@@ -23,7 +23,7 @@ package {
 
 // TODO(b/230606318): Make those host tests instead of device tests.
 android_test {
-    name: "SystemUIComposeCoreTests",
+    name: "PlatformComposeCoreTests",
     manifest: "AndroidManifest.xml",
     test_suites: ["device-tests"],
     sdk_version: "current",
@@ -34,7 +34,7 @@ android_test {
     ],
 
     static_libs: [
-        "SystemUIComposeCore",
+        "PlatformComposeCore",
 
         "androidx.test.runner",
         "androidx.test.ext.junit",

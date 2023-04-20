@@ -22,8 +22,6 @@ import android.view.WindowInsetsController.Behavior
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
@@ -42,7 +40,6 @@ class SystemBarAttributesListener
 @Inject
 internal constructor(
     private val centralSurfaces: CentralSurfaces,
-    private val featureFlags: FeatureFlags,
     private val letterboxAppearanceCalculator: LetterboxAppearanceCalculator,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val lightBarController: LightBarController,
@@ -127,15 +124,11 @@ internal constructor(
         }
 
     private fun shouldUseLetterboxAppearance(letterboxDetails: Array<LetterboxDetails>) =
-        isLetterboxAppearanceFlagEnabled() && letterboxDetails.isNotEmpty()
-
-    private fun isLetterboxAppearanceFlagEnabled() =
-        featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)
+        letterboxDetails.isNotEmpty()
 
     private fun dump(printWriter: PrintWriter, strings: Array<String>) {
         printWriter.println("lastSystemBarAttributesParams: $lastSystemBarAttributesParams")
         printWriter.println("lastLetterboxAppearance: $lastLetterboxAppearance")
-        printWriter.println("letterbox appearance flag: ${isLetterboxAppearanceFlagEnabled()}")
     }
 }
 

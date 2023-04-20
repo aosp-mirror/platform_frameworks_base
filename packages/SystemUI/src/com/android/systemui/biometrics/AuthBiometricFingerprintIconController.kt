@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 
 import android.annotation.RawRes
 import android.content.Context
+import android.content.res.Configuration
 import android.hardware.fingerprint.FingerprintManager
 import android.view.DisplayInfo
 import android.view.Surface
@@ -33,15 +34,19 @@ import com.android.systemui.biometrics.AuthBiometricView.STATE_ERROR
 import com.android.systemui.biometrics.AuthBiometricView.STATE_HELP
 import com.android.systemui.biometrics.AuthBiometricView.STATE_IDLE
 import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMATION
+import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
+import com.android.systemui.unfold.updates.FoldProvider
 
 /** Fingerprint only icon animator for BiometricPrompt.  */
 open class AuthBiometricFingerprintIconController(
         context: Context,
         iconView: LottieAnimationView,
         protected val iconViewOverlay: LottieAnimationView
-) : AuthIconController(context, iconView) {
+) : AuthIconController(context, iconView), FoldProvider.FoldCallback {
 
+    private var isDeviceFolded: Boolean = false
     private val isSideFps: Boolean
+    private val screenSizeFoldProvider: ScreenSizeFoldProvider = ScreenSizeFoldProvider(context)
     var iconLayoutParamSize: Pair<Int, Int> = Pair(1, 1)
         set(value) {
             if (field == value) {
@@ -74,6 +79,8 @@ open class AuthBiometricFingerprintIconController(
         if (isSideFps && displayInfo.rotation == Surface.ROTATION_180) {
             iconView.rotation = 180f
         }
+        screenSizeFoldProvider.registerCallback(this, context.mainExecutor)
+        screenSizeFoldProvider.onConfigurationChange(context.resources.configuration)
     }
 
     private fun updateIconSideFps(@BiometricState lastState: Int, @BiometricState newState: Int) {
@@ -100,6 +107,8 @@ open class AuthBiometricFingerprintIconController(
         if (shouldAnimateForTransition(lastState, newState)) {
             iconView.playAnimation()
             iconViewOverlay.playAnimation()
+        } else if (lastState == STATE_IDLE && newState == STATE_AUTHENTICATING_ANIMATING_IN) {
+            iconView.playAnimation()
         }
         LottieColorUtils.applyDynamicColors(context, iconView)
         LottieColorUtils.applyDynamicColors(context, iconViewOverlay)
@@ -122,6 +131,10 @@ open class AuthBiometricFingerprintIconController(
             iconView.playAnimation()
         }
         LottieColorUtils.applyDynamicColors(context, iconView)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        screenSizeFoldProvider.onConfigurationChange(newConfig)
     }
 
     override fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int) {
@@ -191,11 +204,21 @@ open class AuthBiometricFingerprintIconController(
 
     @RawRes
     private fun getSideFpsAnimationForTransition(rotation: Int): Int = when (rotation) {
-        Surface.ROTATION_0 -> R.raw.biometricprompt_landscape_base
-        Surface.ROTATION_90 -> R.raw.biometricprompt_portrait_base_topleft
-        Surface.ROTATION_180 -> R.raw.biometricprompt_landscape_base
-        Surface.ROTATION_270 -> R.raw.biometricprompt_portrait_base_bottomright
-        else -> R.raw.biometricprompt_landscape_base
+        Surface.ROTATION_90 -> if (isDeviceFolded) {
+            R.raw.biometricprompt_folded_base_topleft
+        } else {
+            R.raw.biometricprompt_portrait_base_topleft
+        }
+        Surface.ROTATION_270 -> if (isDeviceFolded) {
+            R.raw.biometricprompt_folded_base_bottomright
+        } else {
+            R.raw.biometricprompt_portrait_base_bottomright
+        }
+        else -> if (isDeviceFolded) {
+            R.raw.biometricprompt_folded_base_default
+        } else {
+            R.raw.biometricprompt_landscape_base
+        }
     }
 
     @RawRes
@@ -272,5 +295,9 @@ open class AuthBiometricFingerprintIconController(
             }
         }
         else -> null
+    }
+
+    override fun onFoldUpdated(isFolded: Boolean) {
+        isDeviceFolded = isFolded
     }
 }

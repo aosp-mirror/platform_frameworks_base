@@ -41,6 +41,10 @@ java_test_host {
         "tests/**/*.kt",
         "tests/**/*.java",
     ],
+    data: [
+        ":framework",
+        ":androidx.annotation_annotation",
+    ],
     static_libs: [
         "SystemUILintChecker",
         "junit",

@@ -40,7 +40,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode
 
 import android.app.StatusBarManager;
 import android.app.StatusBarManager.WindowVisibleState;
-import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -56,6 +55,7 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
@@ -87,7 +87,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class TaskbarDelegate implements CommandQueue.Callbacks,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
-        ComponentCallbacks, Dumpable {
+        Dumpable {
     private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
@@ -112,8 +112,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 }
 
                 @Override
-                public void updateAssistantAvailable(boolean available) {
-                    updateAssistantAvailability(available);
+                public void updateAssistantAvailable(boolean available,
+                        boolean longPressHomeEnabled) {
+                    updateAssistantAvailability(available, longPressHomeEnabled);
                 }
             };
     private int mDisabledFlags;
@@ -126,7 +127,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final DisplayManager mDisplayManager;
     private Context mWindowContext;
     private ScreenPinningNotify mScreenPinningNotify;
-    private int mNavigationMode;
+    private int mNavigationMode = -1;
     private final Consumer<Rect> mPipListener;
 
     /**
@@ -215,17 +216,16 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             return;
         }
         mDisplayId = displayId;
+        parseCurrentSysuiState();
         mCommandQueue.addCallback(this);
         mOverviewProxyService.addCallback(this);
-        mEdgeBackGestureHandler.onNavigationModeChanged(
-                mNavigationModeController.addListener(this));
+        onNavigationModeChanged(mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.init();
         mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
         mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
-        mWindowContext.registerComponentCallbacks(this);
         mScreenPinningNotify = new ScreenPinningNotify(mWindowContext);
         // Set initial state for any listeners
         updateSysuiFlags();
@@ -233,6 +233,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mLightBarController.setNavigationBar(mLightBarTransitionsController);
         mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
         mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
+        mEdgeBackGestureHandler.onConfigurationChanged(mContext.getResources().getConfiguration());
         mInitialized = true;
     }
 
@@ -247,10 +248,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavBarHelper.destroy();
         mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
-        if (mWindowContext != null) {
-            mWindowContext.unregisterComponentCallbacks(this);
-            mWindowContext = null;
-        }
+        mWindowContext = null;
         mAutoHideController.setNavigationBar(null);
         mLightBarTransitionsController.destroy();
         mLightBarController.setNavigationBar(null);
@@ -267,11 +265,19 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     /**
-     * Returns {@code true} if this taskBar is {@link #init(int)}. Returns {@code false} if this
-     * taskbar has not yet been {@link #init(int)} or has been {@link #destroy()}.
+     * Returns {@code true} if this taskBar is {@link #init(int)}.
+     * Returns {@code false} if this taskbar has not yet been {@link #init(int)}
+     * or has been {@link #destroy()}.
      */
     public boolean isInitialized() {
         return mInitialized;
+    }
+
+    private void parseCurrentSysuiState() {
+        NavBarHelper.CurrentSysuiState state = mNavBarHelper.getCurrentSysuiState();
+        if (state.mWindowStateDisplayId == mDisplayId) {
+            mTaskBarWindowState = state.mWindowState;
+        }
     }
 
     private void updateSysuiFlags() {
@@ -304,13 +310,15 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         return (mSysUiState.getFlags() & View.STATUS_BAR_DISABLE_RECENT) == 0;
     }
 
-    private void updateAssistantAvailability(boolean assistantAvailable) {
+    private void updateAssistantAvailability(boolean assistantAvailable,
+            boolean longPressHomeEnabled) {
         if (mOverviewProxyService.getProxy() == null) {
             return;
         }
 
         try {
-            mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable);
+            mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable,
+                    longPressHomeEnabled);
         } catch (RemoteException e) {
             Log.e(TAG, "onAssistantAvailable() failed, available: " + assistantAvailable, e);
         }
@@ -460,13 +468,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         return mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
 
-    @Override
     public void onConfigurationChanged(Configuration configuration) {
         mEdgeBackGestureHandler.onConfigurationChanged(configuration);
     }
-
-    @Override
-    public void onLowMemory() {}
 
     @Override
     public void showPinningEnterExitToast(boolean entering) {
@@ -489,6 +493,11 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
         mScreenPinningNotify.showEscapeToast(QuickStepContract.isGesturalMode(mNavigationMode),
                 !QuickStepContract.isGesturalMode(mNavigationMode));
+    }
+
+    @VisibleForTesting
+    int getNavigationMode() {
+        return mNavigationMode;
     }
 
     @Override

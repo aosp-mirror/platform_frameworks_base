@@ -5,13 +5,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shade.STATE_CLOSED
+import com.android.systemui.shade.STATE_OPEN
+import com.android.systemui.shade.STATE_OPENING
+import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
-import com.android.systemui.statusbar.phone.panelstate.STATE_CLOSED
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPEN
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import org.junit.Before
@@ -148,7 +148,7 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
 
     companion object {
         val EXPANSION_EVENT =
-            PanelExpansionChangeEvent(
+            ShadeExpansionChangeEvent(
                 fraction = 0.5f, expanded = true, tracking = true, dragDownPxAmount = 10f)
     }
 }

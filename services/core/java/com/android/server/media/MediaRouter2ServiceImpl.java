@@ -58,6 +58,8 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -87,6 +89,7 @@ class MediaRouter2ServiceImpl {
     private static final int PACKAGE_IMPORTANCE_FOR_DISCOVERY = IMPORTANCE_FOREGROUND_SERVICE;
 
     private final Context mContext;
+    private final UserManagerInternal mUserManagerInternal;
     private final Object mLock = new Object();
     final AtomicInteger mNextRouterOrManagerId = new AtomicInteger(1);
     final ActivityManager mActivityManager;
@@ -99,7 +102,7 @@ class MediaRouter2ServiceImpl {
     @GuardedBy("mLock")
     private final ArrayMap<IBinder, ManagerRecord> mAllManagerRecords = new ArrayMap<>();
     @GuardedBy("mLock")
-    private int mCurrentUserId = -1;
+    private int mCurrentActiveUserId = -1;
 
     private final ActivityManager.OnUidImportanceListener mOnUidImportanceListener =
             (uid, importance) -> {
@@ -125,12 +128,13 @@ class MediaRouter2ServiceImpl {
         }
     };
 
-    MediaRouter2ServiceImpl(Context context) {
+    /* package */ MediaRouter2ServiceImpl(Context context) {
         mContext = context;
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mActivityManager.addOnUidImportanceListener(mOnUidImportanceListener,
                 PACKAGE_IMPORTANCE_FOR_DISCOVERY);
         mPowerManager = mContext.getSystemService(PowerManager.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
         IntentFilter screenOnOffIntentFilter = new IntentFilter();
         screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
@@ -601,25 +605,23 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    //TODO(b/136703681): Review this is handling multi-user properly.
-    void switchUser() {
+    /* package */ void updateRunningUserAndProfiles(int newActiveUserId) {
         synchronized (mLock) {
-            int userId = ActivityManager.getCurrentUser();
-            if (mCurrentUserId != userId) {
-                final int oldUserId = mCurrentUserId;
-                mCurrentUserId = userId; // do this first
-
-                UserRecord oldUser = mUserRecords.get(oldUserId);
-                if (oldUser != null) {
-                    oldUser.mHandler.sendMessage(
-                            obtainMessage(UserHandler::stop, oldUser.mHandler));
-                    disposeUserIfNeededLocked(oldUser); // since no longer current user
-                }
-
-                UserRecord newUser = mUserRecords.get(userId);
-                if (newUser != null) {
-                    newUser.mHandler.sendMessage(
-                            obtainMessage(UserHandler::start, newUser.mHandler));
+            if (mCurrentActiveUserId != newActiveUserId) {
+                mCurrentActiveUserId = newActiveUserId;
+                for (int i = 0; i < mUserRecords.size(); i++) {
+                    int userId = mUserRecords.keyAt(i);
+                    UserRecord userRecord = mUserRecords.valueAt(i);
+                    if (isUserActiveLocked(userId)) {
+                        // userId corresponds to the active user, or one of its profiles. We
+                        // ensure the associated structures are initialized.
+                        userRecord.mHandler.sendMessage(
+                                obtainMessage(UserHandler::start, userRecord.mHandler));
+                    } else {
+                        userRecord.mHandler.sendMessage(
+                                obtainMessage(UserHandler::stop, userRecord.mHandler));
+                        disposeUserIfNeededLocked(userRecord);
+                    }
                 }
             }
         }
@@ -637,11 +639,21 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    /**
+     * Returns {@code true} if the given {@code userId} corresponds to the active user or a profile
+     * of the active user, returns {@code false} otherwise.
+     */
+    @GuardedBy("mLock")
+    private boolean isUserActiveLocked(int userId) {
+        return mUserManagerInternal.getProfileParentId(userId) == mCurrentActiveUserId;
+    }
+
     ////////////////////////////////////////////////////////////////
     ////  ***Locked methods related to MediaRouter2
     ////   - Should have @NonNull/@Nullable on all arguments
     ////////////////////////////////////////////////////////////////
 
+    @GuardedBy("mLock")
     private void registerRouter2Locked(@NonNull IMediaRouter2 router, int uid, int pid,
             @NonNull String packageName, int userId, boolean hasConfigureWifiDisplayPermission,
             boolean hasModifyAudioRoutingPermission) {
@@ -669,6 +681,7 @@ class MediaRouter2ServiceImpl {
                         userRecord.mHandler, routerRecord));
     }
 
+    @GuardedBy("mLock")
     private void unregisterRouter2Locked(@NonNull IMediaRouter2 router, boolean died) {
         RouterRecord routerRecord = mAllRouterRecords.remove(router.asBinder());
         if (routerRecord == null) {
@@ -891,6 +904,7 @@ class MediaRouter2ServiceImpl {
         return sessionInfos;
     }
 
+    @GuardedBy("mLock")
     private void registerManagerLocked(@NonNull IMediaRouter2Manager manager,
             int uid, int pid, @NonNull String packageName, int userId) {
         final IBinder binder = manager.asBinder();
@@ -1125,13 +1139,14 @@ class MediaRouter2ServiceImpl {
     ////   - Should have @NonNull/@Nullable on all arguments
     ////////////////////////////////////////////////////////////
 
+    @GuardedBy("mLock")
     private UserRecord getOrCreateUserRecordLocked(int userId) {
         UserRecord userRecord = mUserRecords.get(userId);
         if (userRecord == null) {
             userRecord = new UserRecord(userId);
             mUserRecords.put(userId, userRecord);
             userRecord.init();
-            if (userId == mCurrentUserId) {
+            if (isUserActiveLocked(userId)) {
                 userRecord.mHandler.sendMessage(
                         obtainMessage(UserHandler::start, userRecord.mHandler));
             }
@@ -1139,12 +1154,13 @@ class MediaRouter2ServiceImpl {
         return userRecord;
     }
 
+    @GuardedBy("mLock")
     private void disposeUserIfNeededLocked(@NonNull UserRecord userRecord) {
         // If there are no records left and the user is no longer current then go ahead
         // and purge the user record and all of its associated state.  If the user is current
         // then leave it alone since we might be connected to a route or want to query
         // the same route information again soon.
-        if (userRecord.mUserId != mCurrentUserId
+        if (!isUserActiveLocked(userRecord.mUserId)
                 && userRecord.mRouterRecords.isEmpty()
                 && userRecord.mManagerRecords.isEmpty()) {
             if (DEBUG) {

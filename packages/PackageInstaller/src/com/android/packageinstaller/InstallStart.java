@@ -34,6 +34,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -96,6 +98,22 @@ public class InstallStart extends Activity {
                 mAbortInstall = true;
             }
         }
+
+        final String installerPackageNameFromIntent = getIntent().getStringExtra(
+                Intent.EXTRA_INSTALLER_PACKAGE_NAME);
+        if (installerPackageNameFromIntent != null) {
+            final String callingPkgName = getLaunchedFromPackage();
+            if (!TextUtils.equals(installerPackageNameFromIntent, callingPkgName)
+                    && mPackageManager.checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                    callingPkgName) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(LOG_TAG, "The given installer package name " + installerPackageNameFromIntent
+                        + " is invalid. Remove it.");
+                EventLog.writeEvent(0x534e4554, "236687884", getLaunchedFromUid(),
+                        "Invalid EXTRA_INSTALLER_PACKAGE_NAME");
+                getIntent().removeExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME);
+            }
+        }
+
         if (mAbortInstall) {
             setResult(RESULT_CANCELED);
             finish();

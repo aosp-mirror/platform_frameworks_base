@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Glasovna pošta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Težava s povezavo ali neveljavna koda MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija ni podprta."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacija je omejena na dovoljene telefonske številke, za katere ne velja zapora odhodnega klica."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nastavitev preusmerjanja klicev ni mogoče spremeniti v telefonu med gostovanjem v tujem omrežju."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Storitev je omogočena."</string>

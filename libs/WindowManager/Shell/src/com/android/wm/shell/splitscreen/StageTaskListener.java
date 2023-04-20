@@ -18,11 +18,11 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
@@ -70,11 +70,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
 
+        void onChildTaskAppeared(int taskId);
+
         void onStatusChanged(boolean visible, boolean hasChildren);
 
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
-
-        void onChildTaskEnterPip();
 
         void onRootTaskVanished();
 
@@ -188,6 +188,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
             }
+            mCallbacks.onChildTaskAppeared(taskId);
             sendStatusChanged();
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
@@ -257,9 +258,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
             }
-            if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
-                mCallbacks.onChildTaskEnterPip();
-            }
             sendStatusChanged();
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
@@ -288,15 +286,23 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
-    void onResizing(Rect newBounds, Rect sideBounds, SurfaceControl.Transaction t) {
+    void onResizing(Rect newBounds, Rect sideBounds, SurfaceControl.Transaction t, int offsetX,
+            int offsetY, boolean immediately) {
         if (mSplitDecorManager != null && mRootTaskInfo != null) {
-            mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, sideBounds, t);
+            mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, sideBounds, t, offsetX,
+                    offsetY, immediately);
         }
     }
 
     void onResized(SurfaceControl.Transaction t) {
         if (mSplitDecorManager != null) {
-            mSplitDecorManager.onResized(t);
+            mSplitDecorManager.onResized(t, null);
+        }
+    }
+
+    void screenshotIfNeeded(SurfaceControl.Transaction t) {
+        if (mSplitDecorManager != null) {
+            mSplitDecorManager.screenshotIfNeeded(t);
         }
     }
 
@@ -306,6 +312,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         } else {
             finishedCallback.run();
         }
+    }
+
+    SplitDecorManager getSplitDecorManager() {
+        return mSplitDecorManager;
     }
 
     void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {
@@ -332,6 +342,14 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void evictOtherChildren(WindowContainerTransaction wct, int taskId) {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            if (taskId == taskInfo.taskId) continue;
+            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+        }
+    }
+
     void evictNonOpeningChildren(RemoteAnimationTarget[] apps, WindowContainerTransaction wct) {
         final SparseArray<ActivityManager.RunningTaskInfo> toBeEvict = mChildrenTaskInfo.clone();
         for (int i = 0; i < apps.length; i++) {
@@ -352,6 +370,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
             }
         }
+    }
+
+    void reparentTopTask(WindowContainerTransaction wct) {
+        wct.reparentTasks(null /* currentParent */, mRootTaskInfo.token,
+                CONTROLLED_WINDOWING_MODES, CONTROLLED_ACTIVITY_TYPES,
+                true /* onTop */, true /* reparentTopOnly */);
     }
 
     void resetBounds(WindowContainerTransaction wct) {

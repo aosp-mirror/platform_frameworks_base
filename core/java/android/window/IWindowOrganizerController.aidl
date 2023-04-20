@@ -51,16 +51,19 @@ interface IWindowOrganizerController {
             in IWindowContainerTransactionCallback callback);
 
     /**
-     * Starts a transition.
+     * Starts a new transition.
      * @param type The transition type.
-     * @param transitionToken A token associated with the transition to start. If null, a new
-     *                        transition will be created of the provided type.
      * @param t Operations that are part of the transition.
-     * @return a token representing the transition. This will just be transitionToken if it was
-     *         non-null.
+     * @return a token representing the transition.
      */
-    IBinder startTransition(int type, in @nullable IBinder transitionToken,
-            in @nullable WindowContainerTransaction t);
+    IBinder startNewTransition(int type, in @nullable WindowContainerTransaction t);
+
+    /**
+     * Starts the given transition.
+     * @param transitionToken A token associated with the transition to start.
+     * @param t Operations that are part of the transition.
+     */
+    oneway void startTransition(IBinder transitionToken, in @nullable WindowContainerTransaction t);
 
     /**
      * Starts a legacy transition.

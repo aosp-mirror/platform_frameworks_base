@@ -27,7 +27,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.plugins.PluginActionManager;
 import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInstance;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.plugins.PluginPrefs;
 import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;

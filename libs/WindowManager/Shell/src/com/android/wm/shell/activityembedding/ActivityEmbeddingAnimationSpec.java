@@ -21,7 +21,6 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -80,15 +79,25 @@ class ActivityEmbeddingAnimationSpec {
 
     /** Animation for window that is opening in a change transition. */
     @NonNull
-    Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo.Change change) {
+    Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo.Change change,
+            @NonNull Rect parentBounds) {
+        // Use end bounds for opening.
         final Rect bounds = change.getEndAbsBounds();
-        final Point offset = change.getEndRelOffset();
-        // The window will be animated in from left or right depends on its position.
-        final int startLeft = offset.x == 0 ? -bounds.width() : bounds.width();
+        final int startLeft;
+        final int startTop;
+        if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
+            // The window will be animated in from left or right depending on its position.
+            startTop = 0;
+            startLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
+        } else {
+            // The window will be animated in from top or bottom depending on its position.
+            startTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
+            startLeft = 0;
+        }
 
         // The position should be 0-based as we will post translate in
         // ActivityEmbeddingAnimationAdapter#onAnimationUpdate
-        final Animation animation = new TranslateAnimation(startLeft, 0, 0, 0);
+        final Animation animation = new TranslateAnimation(startLeft, 0, startTop, 0);
         animation.setInterpolator(mFastOutExtraSlowInInterpolator);
         animation.setDuration(CHANGE_ANIMATION_DURATION);
         animation.initialize(bounds.width(), bounds.height(), bounds.width(), bounds.height());
@@ -98,15 +107,25 @@ class ActivityEmbeddingAnimationSpec {
 
     /** Animation for window that is closing in a change transition. */
     @NonNull
-    Animation createChangeBoundsCloseAnimation(@NonNull TransitionInfo.Change change) {
-        final Rect bounds = change.getEndAbsBounds();
-        final Point offset = change.getEndRelOffset();
-        // The window will be animated out to left or right depends on its position.
-        final int endLeft = offset.x == 0 ? -bounds.width() : bounds.width();
+    Animation createChangeBoundsCloseAnimation(@NonNull TransitionInfo.Change change,
+            @NonNull Rect parentBounds) {
+        // Use start bounds for closing.
+        final Rect bounds = change.getStartAbsBounds();
+        final int endTop;
+        final int endLeft;
+        if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
+            // The window will be animated out to left or right depending on its position.
+            endTop = 0;
+            endLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
+        } else {
+            // The window will be animated out to top or bottom depending on its position.
+            endTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
+            endLeft = 0;
+        }
 
         // The position should be 0-based as we will post translate in
         // ActivityEmbeddingAnimationAdapter#onAnimationUpdate
-        final Animation animation = new TranslateAnimation(0, endLeft, 0, 0);
+        final Animation animation = new TranslateAnimation(0, endLeft, 0, endTop);
         animation.setInterpolator(mFastOutExtraSlowInInterpolator);
         animation.setDuration(CHANGE_ANIMATION_DURATION);
         animation.initialize(bounds.width(), bounds.height(), bounds.width(), bounds.height());
@@ -158,7 +177,7 @@ class ActivityEmbeddingAnimationSpec {
         // The position should be 0-based as we will post translate in
         // ActivityEmbeddingAnimationAdapter#onAnimationUpdate
         final Animation endTranslate = new TranslateAnimation(startBounds.left - endBounds.left, 0,
-                0, 0);
+                startBounds.top - endBounds.top, 0);
         endTranslate.setDuration(CHANGE_ANIMATION_DURATION);
         endSet.addAnimation(endTranslate);
         // The end leash is resizing, we should update the window crop based on the clip rect.
@@ -181,15 +200,15 @@ class ActivityEmbeddingAnimationSpec {
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = Transitions.isOpeningType(change.getMode());
         final Animation animation;
-        // TODO(b/207070762): Implement edgeExtension version
         if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_open_enter
                     : com.android.internal.R.anim.task_fragment_clear_top_open_exit);
         } else {
+            // Use the same edge extension animation as regular activity open.
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                    ? com.android.internal.R.anim.task_fragment_open_enter
-                    : com.android.internal.R.anim.task_fragment_open_exit);
+                    ? com.android.internal.R.anim.activity_open_enter
+                    : com.android.internal.R.anim.activity_open_exit);
         }
         // Use the whole animation bounds instead of the change bounds, so that when multiple change
         // targets are opening at the same time, the animation applied to each will be the same.
@@ -205,15 +224,15 @@ class ActivityEmbeddingAnimationSpec {
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = Transitions.isOpeningType(change.getMode());
         final Animation animation;
-        // TODO(b/207070762): Implement edgeExtension version
         if (shouldShowBackdrop(info, change)) {
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
                     ? com.android.internal.R.anim.task_fragment_clear_top_close_enter
                     : com.android.internal.R.anim.task_fragment_clear_top_close_exit);
         } else {
+            // Use the same edge extension animation as regular activity close.
             animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                    ? com.android.internal.R.anim.task_fragment_close_enter
-                    : com.android.internal.R.anim.task_fragment_close_exit);
+                    ? com.android.internal.R.anim.activity_close_enter
+                    : com.android.internal.R.anim.activity_close_exit);
         }
         // Use the whole animation bounds instead of the change bounds, so that when multiple change
         // targets are closing at the same time, the animation applied to each will be the same.

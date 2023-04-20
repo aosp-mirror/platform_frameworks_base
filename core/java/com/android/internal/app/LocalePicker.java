@@ -311,8 +311,7 @@ public class LocalePicker extends ListFragment {
 
         try {
             final IActivityManager am = ActivityManager.getService();
-            final Configuration config = am.getConfiguration();
-
+            final Configuration config = new Configuration();
             config.setLocales(locales);
             config.userSetLocale = true;
 

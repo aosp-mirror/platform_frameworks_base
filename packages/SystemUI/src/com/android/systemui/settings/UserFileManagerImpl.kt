@@ -35,94 +35,130 @@ import java.io.File
 import javax.inject.Inject
 
 /**
- * Implementation for retrieving file paths for file storage of system and secondary users.
- * Files lie in {File Directory}/UserFileManager/{User Id} for secondary user.
- * For system user, we use the conventional {File Directory}
+ * Implementation for retrieving file paths for file storage of system and secondary users. Files
+ * lie in {File Directory}/UserFileManager/{User Id} for secondary user. For system user, we use the
+ * conventional {File Directory}
  */
 @SysUISingleton
-class UserFileManagerImpl @Inject constructor(
+class UserFileManagerImpl
+@Inject
+constructor(
     // Context of system process and system user.
-    val context: Context,
+    private val context: Context,
     val userManager: UserManager,
     val broadcastDispatcher: BroadcastDispatcher,
     @Background val backgroundExecutor: DelayableExecutor
-) : UserFileManager, CoreStartable(context) {
+) : UserFileManager, CoreStartable {
     companion object {
         private const val FILES = "files"
-        @VisibleForTesting internal const val SHARED_PREFS = "shared_prefs"
+        const val SHARED_PREFS = "shared_prefs"
         @VisibleForTesting internal const val ID = "UserFileManager"
-    }
 
-   private val broadcastReceiver = object : BroadcastReceiver() {
+        /** Returns `true` if the given user ID is that for the primary/system user. */
+        fun isPrimaryUser(userId: Int): Boolean {
+            return UserHandle(userId).isSystem
+        }
+
         /**
-         * Listen to Intent.ACTION_USER_REMOVED to clear user data.
+         * Returns a [File] pointing to the correct path for a secondary user ID.
+         *
+         * Note that there is no check for the type of user. This should only be called for
+         * secondary users, never for the system user. For that, make sure to call [isPrimaryUser].
+         *
+         * Note also that there is no guarantee that the parent directory structure for the file
+         * exists on disk. For that, call [ensureParentDirExists].
+         *
+         * @param context The context
+         * @param fileName The name of the file
+         * @param directoryName The name of the directory that would contain the file
+         * @param userId The ID of the user to build a file path for
          */
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == Intent.ACTION_USER_REMOVED) {
-                clearDeletedUserData()
+        fun secondaryUserFile(
+            context: Context,
+            fileName: String,
+            directoryName: String,
+            userId: Int,
+        ): File {
+            return Environment.buildPath(
+                context.filesDir,
+                ID,
+                userId.toString(),
+                directoryName,
+                fileName,
+            )
+        }
+
+        /**
+         * Checks to see if parent dir of the file exists. If it does not, we create the parent dirs
+         * recursively.
+         */
+        fun ensureParentDirExists(file: File) {
+            val parent = file.parentFile
+            if (!parent.exists()) {
+                if (!parent.mkdirs()) {
+                    Log.e(ID, "Could not create parent directory for file: ${file.absolutePath}")
+                }
             }
         }
     }
 
-    /**
-     * Poll for user-specific directories to delete upon start up.
-     */
+    private val broadcastReceiver =
+        object : BroadcastReceiver() {
+            /** Listen to Intent.ACTION_USER_REMOVED to clear user data. */
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == Intent.ACTION_USER_REMOVED) {
+                    clearDeletedUserData()
+                }
+            }
+        }
+
+    /** Poll for user-specific directories to delete upon start up. */
     override fun start() {
         clearDeletedUserData()
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_USER_REMOVED)
-        }
+        val filter = IntentFilter().apply { addAction(Intent.ACTION_USER_REMOVED) }
         broadcastDispatcher.registerReceiver(broadcastReceiver, filter, backgroundExecutor)
     }
 
-    /**
-     * Return the file based on current user.
-     */
+    /** Return the file based on current user. */
     override fun getFile(fileName: String, userId: Int): File {
-        return if (UserHandle(userId).isSystem) {
-            Environment.buildPath(
-                context.filesDir,
-                fileName
-            )
+        return if (isPrimaryUser(userId)) {
+            Environment.buildPath(context.filesDir, fileName)
         } else {
-            val secondaryFile = Environment.buildPath(
-                context.filesDir,
-                ID,
-                userId.toString(),
-                FILES,
-                fileName
-            )
+            val secondaryFile =
+                secondaryUserFile(
+                    context = context,
+                    userId = userId,
+                    directoryName = FILES,
+                    fileName = fileName,
+                )
             ensureParentDirExists(secondaryFile)
             secondaryFile
         }
     }
 
-    /**
-     * Get shared preferences from user.
-     */
+    /** Get shared preferences from user. */
     override fun getSharedPreferences(
         fileName: String,
         @Context.PreferencesMode mode: Int,
         userId: Int
     ): SharedPreferences {
-        if (UserHandle(userId).isSystem) {
+        if (isPrimaryUser(userId)) {
             return context.getSharedPreferences(fileName, mode)
         }
-        val secondaryUserDir = Environment.buildPath(
-            context.filesDir,
-            ID,
-            userId.toString(),
-            SHARED_PREFS,
-            fileName
-        )
+
+        val secondaryUserDir =
+            secondaryUserFile(
+                context = context,
+                fileName = fileName,
+                directoryName = SHARED_PREFS,
+                userId = userId,
+            )
 
         ensureParentDirExists(secondaryUserDir)
         return context.getSharedPreferences(secondaryUserDir, mode)
     }
 
-    /**
-     * Remove dirs for deleted users.
-     */
+    /** Remove dirs for deleted users. */
     @VisibleForTesting
     internal fun clearDeletedUserData() {
         backgroundExecutor.execute {
@@ -133,28 +169,15 @@ class UserFileManagerImpl @Inject constructor(
 
             dirsToDelete.forEach { dir ->
                 try {
-                    val dirToDelete = Environment.buildPath(
-                        file,
-                        dir,
-                    )
+                    val dirToDelete =
+                        Environment.buildPath(
+                            file,
+                            dir,
+                        )
                     dirToDelete.deleteRecursively()
                 } catch (e: Exception) {
                     Log.e(ID, "Deletion failed.", e)
                 }
-            }
-        }
-    }
-
-    /**
-     * Checks to see if parent dir of the file exists. If it does not, we create the parent dirs
-     * recursively.
-     */
-    @VisibleForTesting
-    internal fun ensureParentDirExists(file: File) {
-        val parent = file.parentFile
-        if (!parent.exists()) {
-            if (!parent.mkdirs()) {
-                Log.e(ID, "Could not create parent directory for file: ${file.absolutePath}")
             }
         }
     }

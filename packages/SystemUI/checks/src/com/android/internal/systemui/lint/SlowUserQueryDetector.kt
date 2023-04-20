@@ -46,11 +46,10 @@ class SlowUserQueryDetector : Detector(), SourceCodeScanner {
                 method.containingClass?.qualifiedName == "android.app.ActivityManager"
         ) {
             context.report(
-                ISSUE_SLOW_USER_ID_QUERY,
-                method,
-                context.getNameLocation(node),
-                "ActivityManager.getCurrentUser() is slow. " +
-                    "Use UserTracker.getUserId() instead."
+                issue = ISSUE_SLOW_USER_ID_QUERY,
+                location = context.getNameLocation(node),
+                message =
+                    "Use `UserTracker.getUserId()` instead of `ActivityManager.getCurrentUser()`"
             )
         }
         if (
@@ -59,10 +58,9 @@ class SlowUserQueryDetector : Detector(), SourceCodeScanner {
                 method.containingClass?.qualifiedName == "android.os.UserManager"
         ) {
             context.report(
-                ISSUE_SLOW_USER_INFO_QUERY,
-                method,
-                context.getNameLocation(node),
-                "UserManager.getUserInfo() is slow. " + "Use UserTracker.getUserInfo() instead."
+                issue = ISSUE_SLOW_USER_INFO_QUERY,
+                location = context.getNameLocation(node),
+                message = "Use `UserTracker.getUserInfo()` instead of `UserManager.getUserInfo()`"
             )
         }
     }
@@ -72,11 +70,13 @@ class SlowUserQueryDetector : Detector(), SourceCodeScanner {
         val ISSUE_SLOW_USER_ID_QUERY: Issue =
             Issue.create(
                 id = "SlowUserIdQuery",
-                briefDescription = "User ID queried using ActivityManager instead of UserTracker.",
+                briefDescription = "User ID queried using ActivityManager",
                 explanation =
-                    "ActivityManager.getCurrentUser() makes a binder call and is slow. " +
-                        "Instead, inject a UserTracker and call UserTracker.getUserId(). For " +
-                        "more info, see: http://go/multi-user-in-systemui-slides",
+                    """
+                    `ActivityManager.getCurrentUser()` uses a blocking binder call and is slow. \
+                    Instead, inject a `UserTracker` and call `UserTracker.getUserId()`.
+                    """,
+                moreInfo = "http://go/multi-user-in-systemui-slides",
                 category = Category.PERFORMANCE,
                 priority = 8,
                 severity = Severity.WARNING,
@@ -88,11 +88,13 @@ class SlowUserQueryDetector : Detector(), SourceCodeScanner {
         val ISSUE_SLOW_USER_INFO_QUERY: Issue =
             Issue.create(
                 id = "SlowUserInfoQuery",
-                briefDescription = "User info queried using UserManager instead of UserTracker.",
+                briefDescription = "User info queried using UserManager",
                 explanation =
-                    "UserManager.getUserInfo() makes a binder call and is slow. " +
-                        "Instead, inject a UserTracker and call UserTracker.getUserInfo(). For " +
-                        "more info, see: http://go/multi-user-in-systemui-slides",
+                    """
+                    `UserManager.getUserInfo()` uses a blocking binder call and is slow. \
+                    Instead, inject a `UserTracker` and call `UserTracker.getUserInfo()`.
+                    """,
+                moreInfo = "http://go/multi-user-in-systemui-slides",
                 category = Category.PERFORMANCE,
                 priority = 8,
                 severity = Severity.WARNING,

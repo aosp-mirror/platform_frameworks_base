@@ -41,7 +41,6 @@ import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.RemoteServiceException.BadForegroundServiceNotificationException;
-import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
 import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
@@ -109,6 +108,8 @@ import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.nfc.NfcFrameworkInitializer;
+import android.nfc.NfcServiceManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BluetoothServiceManager;
@@ -237,6 +238,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -926,6 +928,7 @@ public final class ActivityThread extends ClientTransactionHandler
         int samplingInterval;
         boolean autoStopProfiler;
         boolean streamingOutput;
+        int mClockType;
         boolean profiling;
         boolean handlingProfiling;
         public void setProfiler(ProfilerInfo profilerInfo) {
@@ -952,6 +955,7 @@ public final class ActivityThread extends ClientTransactionHandler
             samplingInterval = profilerInfo.samplingInterval;
             autoStopProfiler = profilerInfo.autoStopProfiler;
             streamingOutput = profilerInfo.streamingOutput;
+            mClockType = profilerInfo.clockType;
         }
         public void startProfiling() {
             if (profileFd == null || profiling) {
@@ -960,8 +964,8 @@ public final class ActivityThread extends ClientTransactionHandler
             try {
                 int bufferSize = SystemProperties.getInt("debug.traceview-buffer-size-mb", 8);
                 VMDebug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
-                        bufferSize * 1024 * 1024, 0, samplingInterval != 0, samplingInterval,
-                        streamingOutput);
+                        bufferSize * 1024 * 1024, mClockType, samplingInterval != 0,
+                        samplingInterval, streamingOutput);
                 profiling = true;
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Profiling failed on path " + profileFile, e);
@@ -1978,9 +1982,6 @@ public final class ActivityThread extends ClientTransactionHandler
         switch (typeId) {
             case ForegroundServiceDidNotStartInTimeException.TYPE_ID:
                 throw generateForegroundServiceDidNotStartInTimeException(message, extras);
-
-            case CannotDeliverBroadcastException.TYPE_ID:
-                throw new CannotDeliverBroadcastException(message);
 
             case CannotPostForegroundServiceNotificationException.TYPE_ID:
                 throw new CannotPostForegroundServiceNotificationException(message);
@@ -3432,8 +3433,13 @@ public final class ActivityThread extends ClientTransactionHandler
             if (mLastProcessState == processState) {
                 return;
             }
+            // Do not issue a transitional GC if we are transitioning between 2 cached states.
+            // Only update if the state flips between cached and uncached or vice versa
+            if (ActivityManager.isProcStateCached(mLastProcessState)
+                    != ActivityManager.isProcStateCached(processState)) {
+                updateVmProcessState(processState);
+            }
             mLastProcessState = processState;
-            updateVmProcessState(processState);
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
                         + (fromIpc ? " (from ipc" : ""));
@@ -3442,12 +3448,16 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     /** Update VM state based on ActivityManager.PROCESS_STATE_* constants. */
+    // Currently ART VM only uses state updates for Transitional GC, and thus
+    // this function initiates a Transitional GC for transitions into Cached apps states.
     private void updateVmProcessState(int processState) {
-        // TODO: Tune this since things like gmail sync are important background but not jank
-        // perceptible.
-        final int state = processState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-                ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
-                : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
+        // Only a transition into Cached state should result in a Transitional GC request
+        // to the ART runtime. Update VM state to JANK_IMPERCEPTIBLE in that case.
+        // Note that there are 4 possible cached states currently, all of which are
+        // JANK_IMPERCEPTIBLE from GC point of view.
+        final int state = ActivityManager.isProcStateCached(processState)
+                ? VM_PROCESS_STATE_JANK_IMPERCEPTIBLE
+                : VM_PROCESS_STATE_JANK_PERCEPTIBLE;
         VMRuntime.getRuntime().updateProcessState(state);
     }
 
@@ -4172,7 +4182,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void scheduleResume(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false));
+        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false,
+                /* shouldSendCompatFakeFocus */ false));
         executeTransaction(transaction);
     }
 
@@ -4211,18 +4222,20 @@ public final class ActivityThread extends ClientTransactionHandler
 
     static void handleAttachStartupAgents(String dataDir) {
         try {
-            Path code_cache = ContextImpl.getCodeCacheDirBeforeBind(new File(dataDir)).toPath();
-            if (!Files.exists(code_cache)) {
+            Path codeCache = ContextImpl.getCodeCacheDirBeforeBind(new File(dataDir)).toPath();
+            if (!Files.exists(codeCache)) {
                 return;
             }
-            Path startup_path = code_cache.resolve("startup_agents");
-            if (Files.exists(startup_path)) {
-                for (Path p : Files.newDirectoryStream(startup_path)) {
-                    handleAttachAgent(
-                            p.toAbsolutePath().toString()
-                            + "="
-                            + dataDir,
-                            null);
+            Path startupPath = codeCache.resolve("startup_agents");
+            if (Files.exists(startupPath)) {
+                try (DirectoryStream<Path> startupFiles = Files.newDirectoryStream(startupPath)) {
+                    for (Path p : startupFiles) {
+                        handleAttachAgent(
+                                p.toAbsolutePath().toString()
+                                        + "="
+                                        + dataDir,
+                                null);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -4799,7 +4812,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @Override
     public void handleResumeActivity(ActivityClientRecord r, boolean finalStateRequest,
-            boolean isForward, String reason) {
+            boolean isForward, boolean shouldSendCompatFakeFocus, String reason) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -4905,6 +4918,16 @@ public final class ActivityThread extends ClientTransactionHandler
             mNumVisibleActivities++;
             if (r.activity.mVisibleFromClient) {
                 r.activity.makeVisible();
+            }
+
+            if (shouldSendCompatFakeFocus) {
+                // Attaching to a window is asynchronous with the activity being resumed,
+                // so it's possible we will need to send a fake focus event after attaching
+                if (impl != null) {
+                    impl.dispatchCompatFakeFocus();
+                } else {
+                    r.window.getDecorView().fakeFocusAfterAttachingToWindow();
+                }
             }
         }
 
@@ -5255,6 +5278,11 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.setState(ON_START);
             }
         }
+    }
+
+    @Override
+    public void reportRefresh(ActivityClientRecord r) {
+        ActivityClient.getInstance().activityRefreshed(r.token);
     }
 
     private void handleSetCoreSettings(Bundle coreSettings) {
@@ -6488,6 +6516,7 @@ public final class ActivityThread extends ClientTransactionHandler
             mProfiler.samplingInterval = data.initProfilerInfo.samplingInterval;
             mProfiler.autoStopProfiler = data.initProfilerInfo.autoStopProfiler;
             mProfiler.streamingOutput = data.initProfilerInfo.streamingOutput;
+            mProfiler.mClockType = data.initProfilerInfo.clockType;
             if (data.initProfilerInfo.attachAgentDuringBind) {
                 agent = data.initProfilerInfo.agent;
             }
@@ -7908,6 +7937,7 @@ public final class ActivityThread extends ClientTransactionHandler
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
         BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
             BinderCallsStats.startForBluetooth(context); });
+        NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
     }
 
     private void purgePendingResources() {

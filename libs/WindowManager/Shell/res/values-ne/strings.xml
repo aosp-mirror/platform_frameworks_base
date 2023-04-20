@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"अनस्ट्यास गर्नुहोस्"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"एप विभाजित स्क्रिनमा काम नगर्न सक्छ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"अनुप्रयोगले विभाजित-स्क्रिनलाई समर्थन गर्दैन।"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"यो एप एउटा विन्डोमा मात्र खोल्न मिल्छ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"यो एपले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"विभाजित-स्क्रिन छुट्याउने"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"ठुलो बनाउनुहोस्"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"मिनिमाइज गर्नुहोस्"</string>
     <string name="close_button_text" msgid="2913281996024033299">"बन्द गर्नुहोस्"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"पछाडि"</string>
+    <string name="handle_text" msgid="1766582106752184456">"ह्यान्डल"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"फुल स्क्रिन"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"डेस्कटप मोड"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"स्प्लिट स्क्रिन"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"थप"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"फ्लोट"</string>
 </resources>

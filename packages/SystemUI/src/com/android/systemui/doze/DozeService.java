@@ -17,6 +17,7 @@
 package com.android.systemui.doze;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.service.dreams.DreamService;
@@ -26,7 +27,7 @@ import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.plugins.DozeServicePlugin;
 import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -59,6 +60,7 @@ public class DozeService extends DreamService
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
         DozeComponent dozeComponent = mDozeComponentBuilder.build(this);
         mDozeMachine = dozeComponent.getDozeMachine();
+        mDozeMachine.onConfigurationChanged(getResources().getConfiguration());
     }
 
     @Override
@@ -114,8 +116,8 @@ public class DozeService extends DreamService
 
     @Override
     public void requestWakeUp(@DozeLog.Reason int reason) {
-        PowerManager pm = getSystemService(PowerManager.class);
-        pm.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
+        final PowerManager pm = getSystemService(PowerManager.class);
+        pm.wakeUp(SystemClock.uptimeMillis(), DozeLog.getPowerManagerWakeReason(reason),
                 "com.android.systemui:NODOZE " + DozeLog.reasonToString(reason));
     }
 
@@ -124,6 +126,12 @@ public class DozeService extends DreamService
         if (mDozeMachine != null) {
             mDozeMachine.requestState(DozeMachine.State.DOZE_AOD);
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDozeMachine.onConfigurationChanged(newConfig);
     }
 
     @Override

@@ -16,11 +16,13 @@
 
 package com.android.systemui.controls.management
 
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.settings.UserTracker
+import java.util.concurrent.Executor
 
 class TestControlsRequestDialog(
+    mainExecutor: Executor,
     controller: ControlsController,
-    dispatcher: BroadcastDispatcher,
+    userTracker: UserTracker,
     listingController: ControlsListingController
-) : ControlsRequestDialog(controller, dispatcher, listingController)
+) : ControlsRequestDialog(mainExecutor, controller, userTracker, listingController)

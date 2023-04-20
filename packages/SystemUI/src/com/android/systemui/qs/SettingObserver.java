@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import android.app.ActivityManager;
 import android.database.ContentObserver;
 import android.os.Handler;
 
@@ -45,10 +44,6 @@ public abstract class SettingObserver extends ContentObserver implements Listena
     public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName,
             int userId) {
         this(settingsProxy, handler, settingName, userId, 0);
-    }
-
-    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName) {
-        this(settingsProxy, handler, settingName, ActivityManager.getCurrentUser());
     }
 
     public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName,

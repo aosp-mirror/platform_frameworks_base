@@ -412,14 +412,13 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     companion object {
-        private const val TAG = "ThemedBatteryDrawable"
-        private const val WIDTH = 12f
-        private const val HEIGHT = 20f
+        const val WIDTH = 12f
+        const val HEIGHT = 20f
         private const val CRITICAL_LEVEL = 15
         // On a 12x20 grid, how wide to make the fill protection stroke.
         // Scales when our size changes
         private const val PROTECTION_STROKE_WIDTH = 3f
         // Arbitrarily chosen for visibility at small sizes
-        private const val PROTECTION_MIN_STROKE_WIDTH = 6f
+        const val PROTECTION_MIN_STROKE_WIDTH = 6f
     }
 }

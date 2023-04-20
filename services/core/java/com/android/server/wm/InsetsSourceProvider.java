@@ -173,6 +173,7 @@ abstract class InsetsSourceProvider {
         mWindowContainer = windowContainer;
         // TODO: remove the frame provider for non-WindowState container.
         mFrameProvider = frameProvider;
+        mOverrideFrames.clear();
         mOverrideFrameProviders = overrideFrameProviders;
         if (windowContainer == null) {
             setServerVisible(false);
@@ -234,6 +235,8 @@ abstract class InsetsSourceProvider {
         updateSourceFrameForServerVisibility();
 
         if (mOverrideFrameProviders != null) {
+            // Not necessary to clear the mOverrideFrames here. It will be cleared every time the
+            // override frame provider updates.
             for (int i = mOverrideFrameProviders.size() - 1; i >= 0; i--) {
                 final int windowType = mOverrideFrameProviders.keyAt(i);
                 final Rect overrideFrame;

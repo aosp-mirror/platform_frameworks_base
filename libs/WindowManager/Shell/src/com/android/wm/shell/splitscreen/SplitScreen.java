@@ -70,15 +70,11 @@ public interface SplitScreen {
     /** Unregisters listener that gets split screen callback. */
     void unregisterSplitScreenListener(@NonNull SplitScreenListener listener);
 
-    /**
-     * Returns a binder that can be passed to an external process to manipulate SplitScreen.
-     */
-    default ISplitScreen createExternalInterface() {
-        return null;
-    }
-
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
+
+    /** Called when requested to go to fullscreen from the current active split app. */
+    void goToFullscreenFromSplit();
 
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {

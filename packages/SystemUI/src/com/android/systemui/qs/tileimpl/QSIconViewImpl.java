@@ -143,13 +143,18 @@ public class QSIconViewImpl extends QSIconView {
             if (d instanceof Animatable2) {
                 Animatable2 a = (Animatable2) d;
                 a.start();
-                if (state.isTransient) {
-                    a.registerAnimationCallback(new AnimationCallback() {
-                        @Override
-                        public void onAnimationEnd(Drawable drawable) {
-                            a.start();
-                        }
-                    });
+                if (shouldAnimate) {
+                    if (state.isTransient) {
+                        a.registerAnimationCallback(new AnimationCallback() {
+                            @Override
+                            public void onAnimationEnd(Drawable drawable) {
+                                a.start();
+                            }
+                        });
+                    }
+                } else {
+                    // Sends animator to end of animation. Needs to be called after calling start.
+                    a.stop();
                 }
             }
         }

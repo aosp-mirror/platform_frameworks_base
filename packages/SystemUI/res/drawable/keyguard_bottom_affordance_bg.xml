@@ -16,13 +16,53 @@
 * limitations under the License.
 */
 -->
-<shape
+<selector
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:shape="rectangle">
-  <solid android:color="?androidprv:attr/colorSurface"/>
-  <size
-      android:width="@dimen/keyguard_affordance_width"
-      android:height="@dimen/keyguard_affordance_height"/>
-  <corners android:radius="@dimen/keyguard_affordance_fixed_radius"/>
-</shape>
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+
+  <item android:state_selected="true">
+    <layer-list>
+      <item
+          android:left="3dp"
+          android:top="3dp"
+          android:right="3dp"
+          android:bottom="3dp">
+        <shape android:shape="oval">
+          <solid android:color="?androidprv:attr/colorSurface"/>
+          <size
+              android:width="@dimen/keyguard_affordance_width"
+              android:height="@dimen/keyguard_affordance_height"/>
+        </shape>
+      </item>
+
+      <item>
+        <shape android:shape="oval">
+          <stroke
+              android:color="@color/control_primary_text"
+              android:width="2dp"/>
+          <size
+              android:width="@dimen/keyguard_affordance_width"
+              android:height="@dimen/keyguard_affordance_height"/>
+        </shape>
+      </item>
+    </layer-list>
+  </item>
+
+  <item>
+    <layer-list>
+      <item
+          android:left="3dp"
+          android:top="3dp"
+          android:right="3dp"
+          android:bottom="3dp">
+        <shape android:shape="oval">
+          <solid android:color="?androidprv:attr/colorSurface"/>
+          <size
+              android:width="@dimen/keyguard_affordance_width"
+              android:height="@dimen/keyguard_affordance_height"/>
+        </shape>
+      </item>
+    </layer-list>
+  </item>
+
+</selector>

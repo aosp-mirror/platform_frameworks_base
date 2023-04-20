@@ -27,6 +27,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -42,16 +44,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TileLayoutTest extends SysuiTestCase {
-    private TileLayout mTileLayout;
+    private Resources mResources;
     private int mLayoutSizeForOneTile;
+    private TileLayout mTileLayout; // under test
 
     @Before
     public void setUp() throws Exception {
-        mTileLayout = new TileLayout(mContext);
+        Context context = Mockito.spy(mContext);
+        mResources = Mockito.spy(context.getResources());
+        Mockito.when(mContext.getResources()).thenReturn(mResources);
+
+        mTileLayout = new TileLayout(context);
         // Layout needs to leave space for the tile margins. Three times the margin size is
         // sufficient for any number of columns.
         mLayoutSizeForOneTile =
@@ -202,5 +210,22 @@ public class TileLayoutTest extends SysuiTestCase {
 
         verify(tileRecord1.tileView).setPosition(0);
         verify(tileRecord2.tileView).setPosition(1);
+    }
+
+    @Test
+    public void resourcesChanged_updateResources_returnsTrue() {
+        Mockito.when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
+        mTileLayout.updateResources(); // setup with 1
+        Mockito.when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(2);
+
+        assertEquals(true, mTileLayout.updateResources());
+    }
+
+    @Test
+    public void resourcesSame_updateResources_returnsFalse() {
+        Mockito.when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
+        mTileLayout.updateResources(); // setup with 1
+
+        assertEquals(false, mTileLayout.updateResources());
     }
 }

@@ -25,6 +25,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
@@ -56,6 +57,7 @@ class PulseExpansionHandlerTest : SysuiTestCase() {
     private val configurationController: ConfigurationController = mock()
     private val statusBarStateController: StatusBarStateController = mock()
     private val falsingManager: FalsingManager = mock()
+    private val shadeExpansionStateManager: ShadeExpansionStateManager = mock()
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController = mock()
     private val falsingCollector: FalsingCollector = mock()
     private val dumpManager: DumpManager = mock()
@@ -65,7 +67,8 @@ class PulseExpansionHandlerTest : SysuiTestCase() {
     fun setUp() {
         whenever(expandableView.collapsedHeight).thenReturn(collapsedHeight)
 
-        pulseExpansionHandler = PulseExpansionHandler(
+        pulseExpansionHandler =
+            PulseExpansionHandler(
                 mContext,
                 wakeUpCoordinator,
                 bypassController,
@@ -74,10 +77,11 @@ class PulseExpansionHandlerTest : SysuiTestCase() {
                 configurationController,
                 statusBarStateController,
                 falsingManager,
+                shadeExpansionStateManager,
                 lockscreenShadeTransitionController,
                 falsingCollector,
                 dumpManager
-        )
+            )
     }
 
     @Test

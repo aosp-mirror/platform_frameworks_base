@@ -20,13 +20,16 @@ package com.android.systemui.user.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.R
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -36,6 +39,7 @@ import kotlinx.coroutines.flow.map
 class UserSwitcherViewModel
 private constructor(
     private val userInteractor: UserInteractor,
+    private val guestUserInteractor: GuestUserInteractor,
     private val powerInteractor: PowerInteractor,
 ) : ViewModel() {
 
@@ -44,11 +48,7 @@ private constructor(
         userInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
 
     /** The maximum number of columns that the user selection grid should use. */
-    val maximumUserColumns: Flow<Int> =
-        users.map { LegacyUserUiHelper.getMaxUserSwitcherItemColumns(it.size) }
-
-    /** Whether the button to open the user action menu is visible. */
-    val isOpenMenuButtonVisible: Flow<Boolean> = userInteractor.actions.map { it.isNotEmpty() }
+    val maximumUserColumns: Flow<Int> = users.map { getMaxUserSwitcherItemColumns(it.size) }
 
     private val _isMenuVisible = MutableStateFlow(false)
     /**
@@ -60,7 +60,11 @@ private constructor(
     val menu: Flow<List<UserActionViewModel>> =
         userInteractor.actions.map { actions -> actions.map { action -> toViewModel(action) } }
 
+    /** Whether the button to open the user action menu is visible. */
+    val isOpenMenuButtonVisible: Flow<Boolean> = menu.map { it.isNotEmpty() }
+
     private val hasCancelButtonBeenClicked = MutableStateFlow(false)
+    private val isFinishRequiredDueToExecutedAction = MutableStateFlow(false)
 
     /**
      * Whether the observer should finish the experience. Once consumed, [onFinished] must be called
@@ -81,6 +85,7 @@ private constructor(
      */
     fun onFinished() {
         hasCancelButtonBeenClicked.value = false
+        isFinishRequiredDueToExecutedAction.value = false
     }
 
     /** Notifies that the user has clicked the "open menu" button. */
@@ -96,6 +101,15 @@ private constructor(
      */
     fun onMenuClosed() {
         _isMenuVisible.value = false
+    }
+
+    /** Returns the maximum number of columns for user items in the user switcher. */
+    private fun getMaxUserSwitcherItemColumns(userCount: Int): Int {
+        return if (userCount < 5) {
+            4
+        } else {
+            ceil(userCount / 2.0).toInt()
+        }
     }
 
     private fun createFinishRequestedFlow(): Flow<Boolean> {
@@ -120,8 +134,10 @@ private constructor(
             },
             // When the cancel button is clicked, we should finish.
             hasCancelButtonBeenClicked,
-        ) { selectedUserChanged, screenTurnedOff, cancelButtonClicked ->
-            selectedUserChanged || screenTurnedOff || cancelButtonClicked
+            // If an executed action told us to finish, we should finish,
+            isFinishRequiredDueToExecutedAction,
+        ) { selectedUserChanged, screenTurnedOff, cancelButtonClicked, executedActionFinish ->
+            selectedUserChanged || screenTurnedOff || cancelButtonClicked || executedActionFinish
         }
     }
 
@@ -130,7 +146,12 @@ private constructor(
     ): UserViewModel {
         return UserViewModel(
             viewKey = model.id,
-            name = model.name,
+            name =
+                if (model.isGuest && model.isSelected) {
+                    Text.Resource(R.string.guest_exit_quick_settings_button)
+                } else {
+                    model.name
+                },
             image = CircularDrawable(model.image),
             isSelectionMarkerVisible = model.isSelected,
             alpha =
@@ -149,28 +170,36 @@ private constructor(
         return UserActionViewModel(
             viewKey = model.ordinal.toLong(),
             iconResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.drawable.ic_manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                    )
-                },
+                LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
             textResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.string.manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                        isGuestUserAutoCreated = userInteractor.isGuestUserAutoCreated,
-                        isGuestUserResetting = userInteractor.isGuestUserResetting,
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                    )
-                },
-            onClicked = { userInteractor.executeAction(action = model) },
+                LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isGuestUserAutoCreated = guestUserInteractor.isGuestUserAutoCreated,
+                    isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
+            onClicked = {
+                userInteractor.executeAction(action = model)
+                // We don't finish because we want to show a dialog over the full-screen UI and
+                // that dialog can be dismissed in case the user changes their mind and decides not
+                // to add a user.
+                //
+                // We finish for all other actions because they navigate us away from the
+                // full-screen experience or are destructive (like changing to the guest user).
+                val shouldFinish = model != UserActionModel.ADD_USER
+                if (shouldFinish) {
+                    isFinishRequiredDueToExecutedAction.value = true
+                }
+            },
         )
     }
 
@@ -186,12 +215,14 @@ private constructor(
     @Inject
     constructor(
         private val userInteractor: UserInteractor,
+        private val guestUserInteractor: GuestUserInteractor,
         private val powerInteractor: PowerInteractor,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
             return UserSwitcherViewModel(
                 userInteractor = userInteractor,
+                guestUserInteractor = guestUserInteractor,
                 powerInteractor = powerInteractor,
             )
                 as T

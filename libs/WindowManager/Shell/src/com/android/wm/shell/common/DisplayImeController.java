@@ -274,29 +274,30 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
 
             if (hasImeSourceControl) {
-                final Point lastSurfacePosition = mImeSourceControl != null
-                        ? mImeSourceControl.getSurfacePosition() : null;
-                final boolean positionChanged =
-                        !imeSourceControl.getSurfacePosition().equals(lastSurfacePosition);
-                final boolean leashChanged =
-                        !haveSameLeash(mImeSourceControl, imeSourceControl);
                 if (mAnimation != null) {
+                    final Point lastSurfacePosition = hadImeSourceControl
+                            ? mImeSourceControl.getSurfacePosition() : null;
+                    final boolean positionChanged =
+                            !imeSourceControl.getSurfacePosition().equals(lastSurfacePosition);
                     if (positionChanged) {
                         startAnimation(mImeShowing, true /* forceRestart */);
                     }
                 } else {
-                    if (leashChanged) {
+                    if (!haveSameLeash(mImeSourceControl, imeSourceControl)) {
                         applyVisibilityToLeash(imeSourceControl);
                     }
                     if (!mImeShowing) {
                         removeImeSurface();
                     }
-                    if (mImeSourceControl != null) {
-                        mImeSourceControl.release(SurfaceControl::release);
-                    }
                 }
-                mImeSourceControl = imeSourceControl;
+            } else if (mAnimation != null) {
+                mAnimation.cancel();
             }
+
+            if (hadImeSourceControl && mImeSourceControl != imeSourceControl) {
+                mImeSourceControl.release(SurfaceControl::release);
+            }
+            mImeSourceControl = imeSourceControl;
         }
 
         private void applyVisibilityToLeash(InsetsSourceControl imeSourceControl) {

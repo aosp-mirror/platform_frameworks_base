@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class AuthCredentialPatternView extends AuthCredentialView {
 
-    private LockPatternView mLockPatternView;
+    @VisibleForTesting LockPatternView mLockPatternView;
 
     private class UnlockPatternListener implements LockPatternView.OnPatternListener {
 

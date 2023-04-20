@@ -258,6 +258,8 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CLEAR_DATA = 21;
     /** Notification was canceled due to an assistant adjustment update. */
     public static final int REASON_ASSISTANT_CANCEL = 22;
+    // If adding a new notification cancellation reason, you must also add handling for it in
+    // NotificationCancelledEvent.fromCancelReason.
 
     /**
      * @hide

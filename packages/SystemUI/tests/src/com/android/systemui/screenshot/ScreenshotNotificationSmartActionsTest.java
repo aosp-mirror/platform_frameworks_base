@@ -180,11 +180,11 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
+                new SaveImageInBackgroundTask(mContext, null, null, mScreenshotSmartActions, data,
                         ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action shareAction = task.createShareAction(mContext, mContext.getResources(),
-                Uri.parse("Screenshot_123.png")).get().action;
+                Uri.parse("Screenshot_123.png"), true).get().action;
 
         Intent intent = shareAction.actionIntent.getIntent();
         assertNotNull(intent);
@@ -208,11 +208,11 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
+                new SaveImageInBackgroundTask(mContext, null, null, mScreenshotSmartActions, data,
                         ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action editAction = task.createEditAction(mContext, mContext.getResources(),
-                Uri.parse("Screenshot_123.png")).get().action;
+                Uri.parse("Screenshot_123.png"), true).get().action;
 
         Intent intent = editAction.actionIntent.getIntent();
         assertNotNull(intent);
@@ -236,12 +236,12 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
+                new SaveImageInBackgroundTask(mContext, null, null, mScreenshotSmartActions, data,
                         ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action deleteAction = task.createDeleteAction(mContext,
                 mContext.getResources(),
-                Uri.parse("Screenshot_123.png"));
+                Uri.parse("Screenshot_123.png"), true);
 
         Intent intent = deleteAction.actionIntent.getIntent();
         assertNotNull(intent);

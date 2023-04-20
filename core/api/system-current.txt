@@ -189,6 +189,7 @@ package android {
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final String MANAGE_SPEECH_RECOGNITION = "android.permission.MANAGE_SPEECH_RECOGNITION";
     field public static final String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
+    field public static final String MANAGE_SUBSCRIPTION_USER_ASSOCIATION = "android.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION";
     field public static final String MANAGE_TEST_NETWORKS = "android.permission.MANAGE_TEST_NETWORKS";
     field public static final String MANAGE_TIME_AND_ZONE_DETECTION = "android.permission.MANAGE_TIME_AND_ZONE_DETECTION";
     field public static final String MANAGE_UI_TRANSLATION = "android.permission.MANAGE_UI_TRANSLATION";
@@ -760,25 +761,18 @@ package android.app {
 
   public class BroadcastOptions {
     method public void clearRequireCompatChange();
-    method public boolean isDeferUntilActive();
-    method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
-    method public static android.app.BroadcastOptions makeBasic();
+    method public int getPendingIntentBackgroundActivityStartMode();
+    method @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
-    method @NonNull public android.app.BroadcastOptions setDeferUntilActive(boolean);
-    method public void setDeliveryGroupMatchingFilter(@NonNull android.content.IntentFilter);
-    method public void setDeliveryGroupMatchingKey(@NonNull String, @NonNull String);
-    method public void setDeliveryGroupPolicy(int);
     method public void setDontSendToRestrictedApps(boolean);
-    method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @NonNull public android.app.BroadcastOptions setPendingIntentBackgroundActivityStartMode(int);
     method public void setRequireAllOfPermissions(@Nullable String[]);
     method public void setRequireCompatChange(long, boolean);
     method public void setRequireNoneOfPermissions(@Nullable String[]);
     method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppAllowlist(long, int, int, @Nullable String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
-    method public android.os.Bundle toBundle();
-    field public static final int DELIVERY_GROUP_POLICY_ALL = 0; // 0x0
-    field public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1; // 0x1
   }
 
   public class DownloadManager {
@@ -9118,9 +9112,7 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean addNfcUnlockHandler(android.nfc.NfcAdapter.NfcUnlockHandler, String[]);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean disable();
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean disable(boolean);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean disableNdefPush();
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enable();
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableNdefPush();
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableSecureNfc(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public java.util.Map<java.lang.String,java.lang.Boolean> getTagIntentAppPreferenceForUser(int);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOn();
@@ -9129,10 +9121,8 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void registerControllerAlwaysOnListener(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean removeNfcUnlockHandler(android.nfc.NfcAdapter.NfcUnlockHandler);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean setControllerAlwaysOn(boolean);
-    method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int setTagIntentAppPreferenceForUser(int, @NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void unregisterControllerAlwaysOnListener(@NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
-    field public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 1; // 0x1
     field public static final int TAG_INTENT_APP_PREF_RESULT_PACKAGE_NOT_FOUND = -1; // 0xffffffff
     field public static final int TAG_INTENT_APP_PREF_RESULT_SUCCESS = 0; // 0x0
     field public static final int TAG_INTENT_APP_PREF_RESULT_UNAVAILABLE = -2; // 0xfffffffe
@@ -12838,7 +12828,8 @@ package android.telephony {
 
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
-    method public int getRegistrationState();
+    method public int getNetworkRegistrationState();
+    method @Deprecated public int getRegistrationState();
     method public int getRejectCause();
     method public int getRoamingType();
     method public boolean isEmergencyEnabled();
@@ -13282,6 +13273,7 @@ package android.telephony {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int[] getCompleteActiveSubscriptionIdList();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEnabledSubscriptionId(int);
     method @NonNull public static android.content.res.Resources getResourcesForSubId(@NonNull android.content.Context, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION) public android.os.UserHandle getSubscriptionUserHandle(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isSubscriptionEnabled(int);
     method public void requestEmbeddedSubscriptionInfoListRefresh();
     method public void requestEmbeddedSubscriptionInfoListRefresh(int);
@@ -13291,6 +13283,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultVoiceSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION) public void setSubscriptionUserHandle(int, @Nullable android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(int, boolean);
     field @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS) public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED = "android.telephony.action.SUBSCRIPTION_PLANS_CHANGED";
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;

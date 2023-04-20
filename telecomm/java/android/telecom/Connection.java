@@ -82,7 +82,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
  * <p>
- * Subclasses of {@code Connection} override the {@code on*} methods to provide the the
+ * Subclasses of {@code Connection} override the {@code on*} methods to provide the
  * {@link ConnectionService}'s implementation of calling functionality.  The {@code on*} methods are
  * called by Telecom to inform an instance of a {@code Connection} of actions specific to that
  * {@code Connection} instance.

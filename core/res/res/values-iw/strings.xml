@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"דואר קולי"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"‏בעיה בחיבור או קוד MMI לא חוקי."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"התכונה לא נתמכת."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"הפעולה מוגבלת למספרי חיוג קבועים בלבד."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"לא ניתן לשנות את הגדרות העברת השיחות מהטלפון במצב נדידה."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"השירות הופעל."</string>

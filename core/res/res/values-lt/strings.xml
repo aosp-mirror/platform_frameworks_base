@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Balso paštas"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Ryšio problema arba neteisingas MMI kodas."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija nepalaikoma."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacija ribojama tik naudojant fiksuoto rinkimo numerius."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Negalima pakeisti telefono skambučio peradresavimo nustatymų, kai naudojate tarptinklinį ryšį."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Paslauga įgalinta."</string>

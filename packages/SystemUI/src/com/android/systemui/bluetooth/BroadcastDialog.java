@@ -17,15 +17,11 @@
 package com.android.systemui.bluetooth;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -33,7 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.media.MediaDataUtils;
+import com.android.systemui.media.controls.util.MediaDataUtils;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 

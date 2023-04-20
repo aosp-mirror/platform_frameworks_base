@@ -109,6 +109,12 @@ class SplitContainer {
         return (mSplitRule instanceof SplitPlaceholderRule);
     }
 
+    @NonNull
+    SplitInfo toSplitInfo() {
+        return new SplitInfo(mPrimaryContainer.toActivityStack(),
+                mSecondaryContainer.toActivityStack(), mSplitAttributes);
+    }
+
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {
         final boolean isPlaceholderContainer = splitRule instanceof SplitPlaceholderRule;
         final boolean shouldFinishPrimaryWithSecondary = (splitRule instanceof SplitPairRule)

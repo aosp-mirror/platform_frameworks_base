@@ -99,6 +99,6 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
         mRemoteInputCallback.onLockedRemoteInput(
                 mock(ExpandableNotificationRow.class), mock(View.class));
 
-        verify(mStatusBarKeyguardViewManager).showGenericBouncer(true);
+        verify(mStatusBarKeyguardViewManager).showBouncer(true);
     }
 }

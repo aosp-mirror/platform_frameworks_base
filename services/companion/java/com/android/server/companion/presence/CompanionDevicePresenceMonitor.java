@@ -281,6 +281,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         mConnectedBtDevices.remove(id);
         mNearbyBleDevices.remove(id);
         mReportedSelfManagedDevices.remove(id);
+        mSimulated.remove(id);
 
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do
@@ -363,7 +364,9 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         @Override
         public void handleMessage(@NonNull Message msg) {
             final int associationId = msg.what;
-            onDeviceGone(mSimulated, associationId, /* sourceLoggingTag */ "simulated");
+            if (mSimulated.contains(associationId)) {
+                onDeviceGone(mSimulated, associationId, /* sourceLoggingTag */ "simulated");
+            }
         }
     }
 }

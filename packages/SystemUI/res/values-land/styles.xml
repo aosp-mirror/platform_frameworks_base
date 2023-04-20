@@ -18,4 +18,42 @@
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer">
         <item name="android:layout_width">360dp</item>
     </style>
+
+    <style name="AuthCredentialHeaderStyle">
+        <item name="android:paddingStart">48dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">48dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:gravity">top|left</item>
+    </style>
+
+    <style name="AuthCredentialPatternContainerStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:maxHeight">320dp</item>
+        <item name="android:maxWidth">320dp</item>
+        <item name="android:minHeight">200dp</item>
+        <item name="android:minWidth">200dp</item>
+        <item name="android:paddingHorizontal">60dp</item>
+        <item name="android:paddingVertical">20dp</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.Title">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:textSize">36dp</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.Subtitle">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.Description">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
 </resources>

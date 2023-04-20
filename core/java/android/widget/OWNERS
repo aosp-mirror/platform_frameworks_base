@@ -13,3 +13,5 @@ per-file TextView*,Edit*,Selection* = file:../text/OWNERS
 per-file SpellChecker.java = file:../view/inputmethod/OWNERS
 
 per-file RemoteViews* = file:../appwidget/OWNERS
+
+per-file Toast.java = juliacr@google.com, jeffdq@google.com

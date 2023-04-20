@@ -290,13 +290,6 @@ public class FaceService extends SystemService {
                 return -1;
             }
 
-            if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
-                // If this happens, something in KeyguardUpdateMonitor is wrong. This should only
-                // ever be invoked when the user is encrypted or lockdown.
-                Slog.e(TAG, "detectFace invoked when user is not encrypted or lockdown");
-                return -1;
-            }
-
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for detectFace");

@@ -17,8 +17,8 @@ package com.android.systemui.biometrics
 
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 
 /**
  * Class that coordinates non-HBM animations for biometric prompt.
@@ -26,13 +26,13 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManage
 class UdfpsBpViewController(
     view: UdfpsBpView,
     statusBarStateController: StatusBarStateController,
-    panelExpansionStateManager: PanelExpansionStateManager,
+    shadeExpansionStateManager: ShadeExpansionStateManager,
     systemUIDialogManager: SystemUIDialogManager,
     dumpManager: DumpManager
 ) : UdfpsAnimationViewController<UdfpsBpView>(
     view,
     statusBarStateController,
-    panelExpansionStateManager,
+    shadeExpansionStateManager,
     systemUIDialogManager,
     dumpManager
 ) {

@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"សារ​ជា​សំឡេង"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"បញ្ហា​ក្នុង​ការ​តភ្ជាប់​ ឬ​កូដ MMI មិន​ត្រឹមត្រូវ។"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"មិនអាចប្រើមុខងារនេះបានទេ។"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ប្រតិបត្តិការ​ត្រូវ​បាន​ដាក់​កម្រិត​​​ចំពោះ​លេខ​ហៅ​ថេរ​តែ​ប៉ុណ្ណោះ។"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"មិន​អាច​ប្តូរ​ការ​កំណត់​នៃ​ការ​បញ្ជូន​ការ​ហៅ​បន្ត​ពី​ទូរសព្ទ​របស់​អ្នក​បាន​ទេ​ ខណៈ​ពេល​ដែល​អ្នក​កំពុង​ប្រើ​សេវា​រ៉ូមីង។"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"បាន​បើក​សេវាកម្ម។"</string>

@@ -185,8 +185,13 @@ public class ZygoteInit {
     private static void preloadSharedLibraries() {
         Log.i(TAG, "Preloading shared libraries...");
         System.loadLibrary("android");
-        System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
+
+        // TODO(b/206676167): This library is only used for renderscript today. When renderscript is
+        // removed, this load can be removed as well.
+        if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
+            System.loadLibrary("compiler_rt");
+        }
     }
 
     native private static void nativePreloadAppProcessHALs();
@@ -716,7 +721,8 @@ public class ZygoteInit {
         } catch (ErrnoException ex) {
             throw new RuntimeException("Failed to capget()", ex);
         }
-        capabilities &= ((long) data[0].effective) | (((long) data[1].effective) << 32);
+        capabilities &= Integer.toUnsignedLong(data[0].effective) |
+                (Integer.toUnsignedLong(data[1].effective) << 32);
 
         /* Hardcoded command line to start the system server */
         String[] args = {

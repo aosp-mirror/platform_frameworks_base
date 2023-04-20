@@ -18,14 +18,21 @@ package com.android.wm.shell.desktopmode;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
+import java.util.concurrent.Executor;
+
 /**
  * Interface to interact with desktop mode feature in shell.
  */
 @ExternalThread
 public interface DesktopMode {
 
-    /** Returns a binder that can be passed to an external process to manipulate DesktopMode. */
-    default IDesktopMode createExternalInterface() {
-        return null;
-    }
+    /**
+     * Adds a listener to find out about changes in the visibility of freeform tasks.
+     *
+     * @param listener the listener to add.
+     * @param callbackExecutor the executor to call the listener on.
+     */
+    void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+            Executor callbackExecutor);
+
 }

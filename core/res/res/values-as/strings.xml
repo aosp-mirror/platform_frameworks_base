@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ভইচমেইল"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"সংযোগৰ সমস্যা বা MMI ক\'ড মান্য নহয়।"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"সুবিধাটো সমৰ্থিত নহয়।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"কেৱল ফিক্সড ডায়েলিং নম্বৰৰ বাবে কার্য সীমাবদ্ধ কৰা হৈছে।"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"আপুনি ৰ\'মিঙত থকাৰ সময়ত কল ফৰৱাৰ্ডিঙৰ ছেটিং সলনি কৰিব নোৱাৰি।"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"সেৱা সক্ষম কৰা হ’ল।"</string>

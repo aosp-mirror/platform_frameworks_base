@@ -113,8 +113,10 @@ import android.app.NotificationManager;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -134,6 +136,7 @@ import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.PersistableBundle;
@@ -152,6 +155,7 @@ import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
@@ -176,6 +180,7 @@ import com.google.common.util.concurrent.AbstractFuture;
 import libcore.io.Streams;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -285,6 +290,8 @@ public class NetworkPolicyManagerServiceTest {
 
     private NetworkPolicyListenerAnswer mPolicyListener;
     private NetworkPolicyManagerService mService;
+
+    private final ArraySet<BroadcastReceiver> mRegisteredReceivers = new ArraySet<>();
 
     /**
      * In some of the tests while initializing NetworkPolicyManagerService,
@@ -437,6 +444,21 @@ public class NetworkPolicyManagerServiceTest {
             public void enforceCallingOrSelfPermission(String permission, String message) {
                 // Assume that we're AID_SYSTEM
             }
+
+            @Override
+            public Intent registerReceiver(BroadcastReceiver receiver,
+                    IntentFilter filter, String broadcastPermission, Handler scheduler) {
+                mRegisteredReceivers.add(receiver);
+                return super.registerReceiver(receiver, filter, broadcastPermission, scheduler);
+            }
+
+            @Override
+            public Intent registerReceiverForAllUsers(BroadcastReceiver receiver,
+                    IntentFilter filter, String broadcastPermission, Handler scheduler) {
+                mRegisteredReceivers.add(receiver);
+                return super.registerReceiverForAllUsers(receiver, filter, broadcastPermission,
+                        scheduler);
+            }
         };
 
         setNetpolicyXml(context);
@@ -555,6 +577,13 @@ public class NetworkPolicyManagerServiceTest {
     @After
     public void resetClock() throws Exception {
         RecurrenceRule.sClock = Clock.systemDefaultZone();
+    }
+
+    @After
+    public void unregisterReceivers() throws Exception {
+        for (BroadcastReceiver receiver : mRegisteredReceivers) {
+            mServiceContext.unregisterReceiver(receiver);
+        }
     }
 
     @Test

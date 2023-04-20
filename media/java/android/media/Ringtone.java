@@ -89,6 +89,7 @@ public class Ringtone {
             .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build();
+    private boolean mPreferBuiltinDevice;
     // playback properties, use synchronized with mPlaybackSettingsLock
     private boolean mIsLooping = false;
     private float mVolume = 1.0f;
@@ -157,7 +158,39 @@ public class Ringtone {
     }
 
     /**
+     * Finds the output device of type {@link AudioDeviceInfo#TYPE_BUILTIN_SPEAKER}. This device is
+     * the one on which outgoing audio for SIM calls is played.
+     *
+     * @param audioManager the audio manage.
+     * @return the {@link AudioDeviceInfo} corresponding to the builtin device, or {@code null} if
+     *     none can be found.
+     */
+    private AudioDeviceInfo getBuiltinDevice(AudioManager audioManager) {
+        AudioDeviceInfo[] deviceList = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+        for (AudioDeviceInfo device : deviceList) {
+            if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
+                return device;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sets the preferred device of the ringtong playback to the built-in device.
+     *
+     * @hide
+     */
+    public boolean preferBuiltinDevice(boolean enable) {
+        mPreferBuiltinDevice = enable;
+        if (mLocalPlayer == null) {
+            return true;
+        }
+        return mLocalPlayer.setPreferredDevice(getBuiltinDevice(mAudioManager));
+    }
+
+    /**
      * Creates a local media player for the ringtone using currently set attributes.
+     *
      * @hide
      */
     public void createLocalMediaPlayer() {
@@ -172,6 +205,8 @@ public class Ringtone {
         try {
             mLocalPlayer.setDataSource(mContext, mUri);
             mLocalPlayer.setAudioAttributes(mAudioAttributes);
+            mLocalPlayer.setPreferredDevice(
+                    mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null);
             synchronized (mPlaybackSettingsLock) {
                 applyPlaybackProperties_sync();
             }

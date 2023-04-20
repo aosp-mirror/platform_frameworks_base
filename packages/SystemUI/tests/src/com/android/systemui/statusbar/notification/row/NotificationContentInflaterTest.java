@@ -51,7 +51,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.MediaFeatureFlag;
+import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;

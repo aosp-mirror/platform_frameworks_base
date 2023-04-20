@@ -23,9 +23,10 @@ public interface SecurityMessageDisplay {
     /** Set text color for the next security message. */
     default void setNextMessageColor(ColorStateList colorState) {}
 
-    void setMessage(CharSequence msg);
-
-    void setMessage(int resId);
+    /**
+     * Sets a message to the underlying text view.
+     */
+    void setMessage(CharSequence msg, boolean animate);
 
     void formatMessage(int resId, Object... formatArgs);
 }

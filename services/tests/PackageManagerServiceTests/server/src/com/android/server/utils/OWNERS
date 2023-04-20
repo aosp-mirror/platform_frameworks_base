@@ -1,0 +1,4 @@
+per-file WatchableTester.java = file:/services/core/java/com/android/server/pm/OWNERS
+per-file WatchableTester.java = shombert@google.com
+per-file WatcherTest.java = file:/services/core/java/com/android/server/pm/OWNERS
+per-file WatcherTest.java = shombert@google.com

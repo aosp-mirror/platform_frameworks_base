@@ -5003,6 +5003,31 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.BackgroundServiceStartNotAllowedException> CREATOR;
   }
 
+  public class BroadcastOptions {
+    method public void clearDeferralPolicy();
+    method public void clearDeliveryGroupMatchingFilter();
+    method public void clearDeliveryGroupMatchingKey();
+    method public void clearDeliveryGroupPolicy();
+    method @NonNull public static android.app.BroadcastOptions fromBundle(@NonNull android.os.Bundle);
+    method public int getDeferralPolicy();
+    method @Nullable public android.content.IntentFilter getDeliveryGroupMatchingFilter();
+    method @Nullable public String getDeliveryGroupMatchingKey();
+    method public int getDeliveryGroupPolicy();
+    method public boolean isShareIdentityEnabled();
+    method @NonNull public static android.app.BroadcastOptions makeBasic();
+    method @NonNull public android.app.BroadcastOptions setDeferralPolicy(int);
+    method @NonNull public android.app.BroadcastOptions setDeliveryGroupMatchingFilter(@NonNull android.content.IntentFilter);
+    method @NonNull public android.app.BroadcastOptions setDeliveryGroupMatchingKey(@NonNull String, @NonNull String);
+    method @NonNull public android.app.BroadcastOptions setDeliveryGroupPolicy(int);
+    method @NonNull public android.app.BroadcastOptions setShareIdentityEnabled(boolean);
+    method @NonNull public android.os.Bundle toBundle();
+    field public static final int DEFERRAL_POLICY_DEFAULT = 0; // 0x0
+    field public static final int DEFERRAL_POLICY_NONE = 1; // 0x1
+    field public static final int DEFERRAL_POLICY_UNTIL_ACTIVE = 2; // 0x2
+    field public static final int DELIVERY_GROUP_POLICY_ALL = 0; // 0x0
+    field public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1; // 0x1
+  }
+
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
     ctor public DatePickerDialog(@NonNull android.content.Context);
     ctor public DatePickerDialog(@NonNull android.content.Context, @StyleRes int);
@@ -7217,8 +7242,8 @@ package android.app {
     method public android.content.Intent getCropAndSetWallpaperIntent(android.net.Uri);
     method public int getDesiredMinimumHeight();
     method public int getDesiredMinimumWidth();
-    method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable getDrawable();
-    method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable getFastDrawable();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable getDrawable();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable getFastDrawable();
     method public static android.app.WallpaperManager getInstance(android.content.Context);
     method @Nullable public android.app.WallpaperColors getWallpaperColors(int);
     method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.os.ParcelFileDescriptor getWallpaperFile(int);
@@ -7227,8 +7252,8 @@ package android.app {
     method public boolean hasResourceWallpaper(@RawRes int);
     method public boolean isSetWallpaperAllowed();
     method public boolean isWallpaperSupported();
-    method public android.graphics.drawable.Drawable peekDrawable();
-    method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable peekFastDrawable();
+    method @Nullable public android.graphics.drawable.Drawable peekDrawable();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable peekFastDrawable();
     method public void removeOnColorsChangedListener(@NonNull android.app.WallpaperManager.OnColorsChangedListener);
     method public void sendWallpaperCommand(android.os.IBinder, String, int, int, int, android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public void setBitmap(android.graphics.Bitmap) throws java.io.IOException;
@@ -18702,8 +18727,8 @@ package android.hardware.usb {
     method public int bulkTransfer(android.hardware.usb.UsbEndpoint, byte[], int, int, int);
     method public boolean claimInterface(android.hardware.usb.UsbInterface, boolean);
     method public void close();
-    method public int controlTransfer(int, int, int, int, byte[], int, int);
-    method public int controlTransfer(int, int, int, int, byte[], int, int, int);
+    method public int controlTransfer(int, int, int, int, @Nullable byte[], int, int);
+    method public int controlTransfer(int, int, int, int, @Nullable byte[], int, int, int);
     method public int getFileDescriptor();
     method public byte[] getRawDescriptors();
     method public String getSerial();
@@ -27478,24 +27503,15 @@ package android.nfc {
 
   public final class NfcAdapter {
     method public void disableForegroundDispatch(android.app.Activity);
-    method @Deprecated public void disableForegroundNdefPush(android.app.Activity);
     method public void disableReaderMode(android.app.Activity);
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
-    method @Deprecated public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
-    method @Deprecated public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
-    method @Deprecated public boolean isNdefPushEnabled();
     method public boolean isSecureNfcEnabled();
     method public boolean isSecureNfcSupported();
-    method @Deprecated public void setBeamPushUris(android.net.Uri[], android.app.Activity);
-    method @Deprecated public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
-    method @Deprecated public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
     field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
@@ -41269,11 +41285,15 @@ package android.telephony {
   }
 
   public class CarrierConfigManager {
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfig();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public android.os.PersistableBundle getConfig(@NonNull java.lang.String...);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigByComponentForSubId(@NonNull String, int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.os.PersistableBundle getConfigForSubId(int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public android.os.PersistableBundle getConfigForSubId(int, @NonNull java.lang.String...);
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyConfigChangedForSubId(int);
+    method public void registerCarrierConfigChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.CarrierConfigManager.CarrierConfigChangeListener);
+    method public void unregisterCarrierConfigChangeListener(@NonNull android.telephony.CarrierConfigManager.CarrierConfigChangeListener);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
     field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
     field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
@@ -41342,6 +41362,8 @@ package android.telephony {
     field public static final String KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY = "carrier_nr_availabilities_int_array";
     field public static final String KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL = "carrier_provisions_wifi_merged_networks_bool";
     field public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL = "carrier_rcs_provisioning_required_bool";
+    field public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
+    field public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY = "carrier_service_number_array";
     field public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING = "carrier_settings_activity_component_name_string";
     field public static final String KEY_CARRIER_SETTINGS_ENABLE_BOOL = "carrier_settings_enable_bool";
     field public static final String KEY_CARRIER_SUPPORTS_OPP_DATA_AUTO_PROVISIONING_BOOL = "carrier_supports_opp_data_auto_provisioning_bool";
@@ -41382,6 +41404,7 @@ package android.telephony {
     field public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL = "data_limit_notification_bool";
     field public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG = "data_limit_threshold_bytes_long";
     field public static final String KEY_DATA_RAPID_NOTIFICATION_BOOL = "data_rapid_notification_bool";
+    field public static final String KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG = "data_switch_validation_min_gap_long";
     field public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG = "data_switch_validation_timeout_long";
     field public static final String KEY_DATA_WARNING_NOTIFICATION_BOOL = "data_warning_notification_bool";
     field public static final String KEY_DATA_WARNING_THRESHOLD_BYTES_LONG = "data_warning_threshold_bytes_long";
@@ -41586,6 +41609,10 @@ package android.telephony {
     field public static final String KEY_BSF_SERVER_PORT_INT = "bsf.bsf_server_port_int";
     field public static final String KEY_BSF_TRANSPORT_TYPE_INT = "bsf.bsf_transport_type_int";
     field public static final String KEY_PREFIX = "bsf.";
+  }
+
+  public static interface CarrierConfigManager.CarrierConfigChangeListener {
+    method public void onCarrierConfigChanged(int, int, int, int);
   }
 
   public static final class CarrierConfigManager.Gps {
@@ -42719,9 +42746,12 @@ package android.telephony {
     method public int getDomain();
     method @Nullable public String getRegisteredPlmn();
     method public int getTransportType();
-    method public boolean isRegistered();
-    method public boolean isRoaming();
-    method public boolean isSearching();
+    method public boolean isNetworkRegistered();
+    method public boolean isNetworkRoaming();
+    method public boolean isNetworkSearching();
+    method @Deprecated public boolean isRegistered();
+    method @Deprecated public boolean isRoaming();
+    method @Deprecated public boolean isSearching();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
@@ -43278,6 +43308,7 @@ package android.telephony {
     method public int getActiveSubscriptionInfoCountMax();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public java.util.List<android.telephony.SubscriptionInfo> getAllSubscriptionInfoList();
     method @NonNull public java.util.List<android.telephony.SubscriptionInfo> getCompleteActiveSubscriptionInfoList();
     method public static int getDefaultDataSubscriptionId();
     method public static int getDefaultSmsSubscriptionId();
@@ -43289,7 +43320,8 @@ package android.telephony {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int, int);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int);
     method public static int getSlotIndex(int);
-    method @Nullable public int[] getSubscriptionIds(int);
+    method public static int getSubscriptionId(int);
+    method @Deprecated @Nullable public int[] getSubscriptionIds(int);
     method @NonNull public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getSubscriptionsInGroup(@NonNull android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isActiveSubscriptionId(int);
@@ -43473,6 +43505,7 @@ package android.telephony {
     method public int describeContents();
     method public int getNetworkType();
     method public int getOverrideNetworkType();
+    method public boolean isRoaming();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.TelephonyDisplayInfo> CREATOR;
     field public static final int OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO = 2; // 0x2

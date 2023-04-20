@@ -28,6 +28,8 @@ import static com.android.server.power.PowerManagerService.USER_ACTIVITY_SCREEN_
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_DOZE;
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_DRAW;
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_BRIGHT;
+import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_DIM;
+import static com.android.server.power.PowerManagerService.WAKE_LOCK_STAY_AWAKE;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
@@ -74,6 +76,8 @@ public class PowerGroup {
     private long mLastPowerOnTime;
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
+    @PowerManager.UserActivityEvent
+    private int mLastUserActivityEvent;
     /** Timestamp (milliseconds since boot) of the last time the power group was awoken.*/
     private long mLastWakeTime;
     /** Timestamp (milliseconds since boot) of the last time the power group was put to sleep. */
@@ -227,8 +231,8 @@ public class PowerGroup {
         }
     }
 
-    boolean dreamLocked(long eventTime, int uid) {
-        if (eventTime < mLastWakeTime || mWakefulness != WAKEFULNESS_AWAKE) {
+    boolean dreamLocked(long eventTime, int uid, boolean allowWake) {
+        if (eventTime < mLastWakeTime || (!allowWake && mWakefulness != WAKEFULNESS_AWAKE)) {
             return false;
         }
 
@@ -244,7 +248,7 @@ public class PowerGroup {
         return true;
     }
 
-    boolean dozeLocked(long eventTime, int uid, int reason) {
+    boolean dozeLocked(long eventTime, int uid, @PowerManager.GoToSleepReason int reason) {
         if (eventTime < getLastWakeTimeLocked() || !isInteractive(mWakefulness)) {
             return false;
         }
@@ -253,9 +257,14 @@ public class PowerGroup {
         try {
             reason = Math.min(PowerManager.GO_TO_SLEEP_REASON_MAX,
                     Math.max(reason, PowerManager.GO_TO_SLEEP_REASON_MIN));
+            long millisSinceLastUserActivity = eventTime - Math.max(
+                    mLastUserActivityTimeNoChangeLights, mLastUserActivityTime);
             Slog.i(TAG, "Powering off display group due to "
-                    + PowerManager.sleepReasonToString(reason)  + " (groupId= " + getGroupId()
-                    + ", uid= " + uid + ")...");
+                    + PowerManager.sleepReasonToString(reason)
+                    + " (groupId= " + getGroupId() + ", uid= " + uid
+                    + ", millisSinceLastUserActivity=" + millisSinceLastUserActivity
+                    + ", lastUserActivityEvent=" + PowerManager.userActivityEventToString(
+                    mLastUserActivityEvent) + ")...");
 
             setSandmanSummonedLocked(/* isSandmanSummoned= */ true);
             setWakefulnessLocked(WAKEFULNESS_DOZING, eventTime, uid, reason, /* opUid= */ 0,
@@ -266,14 +275,16 @@ public class PowerGroup {
         return true;
     }
 
-    boolean sleepLocked(long eventTime, int uid, int reason) {
+    boolean sleepLocked(long eventTime, int uid, @PowerManager.GoToSleepReason int reason) {
         if (eventTime < mLastWakeTime || getWakefulnessLocked() == WAKEFULNESS_ASLEEP) {
             return false;
         }
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "sleepPowerGroup");
         try {
-            Slog.i(TAG, "Sleeping power group (groupId=" + getGroupId() + ", uid=" + uid + ")...");
+            Slog.i(TAG,
+                    "Sleeping power group (groupId=" + getGroupId() + ", uid=" + uid + ", reason="
+                            + PowerManager.sleepReasonToString(reason) + ")...");
             setSandmanSummonedLocked(/* isSandmanSummoned= */ true);
             setWakefulnessLocked(WAKEFULNESS_ASLEEP, eventTime, uid, reason, /* opUid= */0,
                     /* opPackageName= */ null, /* details= */ null);
@@ -287,16 +298,20 @@ public class PowerGroup {
         return mLastUserActivityTime;
     }
 
-    void setLastUserActivityTimeLocked(long lastUserActivityTime) {
+    void setLastUserActivityTimeLocked(long lastUserActivityTime,
+            @PowerManager.UserActivityEvent int event) {
         mLastUserActivityTime = lastUserActivityTime;
+        mLastUserActivityEvent = event;
     }
 
     public long getLastUserActivityTimeNoChangeLightsLocked() {
         return mLastUserActivityTimeNoChangeLights;
     }
 
-    public void setLastUserActivityTimeNoChangeLightsLocked(long time) {
+    public void setLastUserActivityTimeNoChangeLightsLocked(long time,
+            @PowerManager.UserActivityEvent int event) {
         mLastUserActivityTimeNoChangeLights = time;
+        mLastUserActivityEvent = event;
     }
 
     public int getUserActivitySummaryLocked() {
@@ -326,6 +341,22 @@ public class PowerGroup {
 
     public int getWakeLockSummaryLocked() {
         return mWakeLockSummary;
+    }
+
+    /**
+     * Query whether a wake lock is at least partially responsible for keeping the device awake.
+     *
+     * This does not necessarily mean the wake lock is the sole reason the device is awake; there
+     * could also be user activity keeping the device awake, for example. It just means a wake lock
+     * is being held that would keep the device awake even if nothing else was.
+     *
+     * @return whether the PowerGroup is being kept awake at least in part because a wake lock is
+     *         being held.
+     */
+    public boolean hasWakeLockKeepingScreenOnLocked() {
+        final int screenOnWakeLockMask =
+                WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM | WAKE_LOCK_STAY_AWAKE;
+        return (mWakeLockSummary & (screenOnWakeLockMask)) != 0;
     }
 
     public void setWakeLockSummaryLocked(int summary) {
@@ -406,16 +437,14 @@ public class PowerGroup {
         return mDisplayPowerRequest.policy;
     }
 
-    boolean updateLocked(float screenBrightnessOverride, boolean autoBrightness,
-            boolean useProximitySensor, boolean boostScreenBrightness, int dozeScreenState,
-            float dozeScreenBrightness, boolean overrideDrawWakeLock,
-            PowerSaveState powerSaverState, boolean quiescent, boolean dozeAfterScreenOff,
-            boolean vrModeEnabled, boolean bootCompleted, boolean screenBrightnessBoostInProgress,
-            boolean waitForNegativeProximity) {
+    boolean updateLocked(float screenBrightnessOverride, boolean useProximitySensor,
+            boolean boostScreenBrightness, int dozeScreenState, float dozeScreenBrightness,
+            boolean overrideDrawWakeLock, PowerSaveState powerSaverState, boolean quiescent,
+            boolean dozeAfterScreenOff, boolean vrModeEnabled, boolean bootCompleted,
+            boolean screenBrightnessBoostInProgress, boolean waitForNegativeProximity) {
         mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
                 vrModeEnabled, bootCompleted, screenBrightnessBoostInProgress);
         mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
-        mDisplayPowerRequest.useAutoBrightness = autoBrightness;
         mDisplayPowerRequest.useProximitySensor = useProximitySensor;
         mDisplayPowerRequest.boostScreenBrightness = boostScreenBrightness;
 

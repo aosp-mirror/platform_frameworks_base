@@ -19,6 +19,7 @@ package androidx.window.util;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -31,11 +32,14 @@ import java.util.function.Consumer;
  *
  * @param <T> The type of data this producer returns through {@link DataProducer#getData}.
  */
-public abstract class BaseDataProducer<T> implements DataProducer<T> {
+public abstract class BaseDataProducer<T> implements DataProducer<T>,
+        AcceptOnceConsumer.AcceptOnceProducerCallback<T> {
 
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final Set<Consumer<T>> mCallbacks = new LinkedHashSet<>();
+    @GuardedBy("mLock")
+    private final Set<Consumer<T>> mCallbacksToRemove = new HashSet<>();
 
     /**
      * Adds a callback to the set of callbacks listening for data. Data is delivered through
@@ -85,6 +89,26 @@ public abstract class BaseDataProducer<T> implements DataProducer<T> {
             for (Consumer<T> callback : mCallbacks) {
                 callback.accept(value);
             }
+            removeFinishedCallbacksLocked();
+        }
+    }
+
+    /**
+     * Removes any callbacks that notified us through {@link #onConsumerReadyToBeRemoved(Consumer)}
+     * that they are ready to be removed.
+     */
+    @GuardedBy("mLock")
+    private void removeFinishedCallbacksLocked() {
+        for (Consumer<T> callback: mCallbacksToRemove) {
+            mCallbacks.remove(callback);
+        }
+        mCallbacksToRemove.clear();
+    }
+
+    @Override
+    public void onConsumerReadyToBeRemoved(Consumer<T> callback) {
+        synchronized (mLock) {
+            mCallbacksToRemove.add(callback);
         }
     }
 }

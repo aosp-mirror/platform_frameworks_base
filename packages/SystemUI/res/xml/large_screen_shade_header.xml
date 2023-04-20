@@ -107,7 +107,7 @@
         android:id="@+id/privacy_container">
         <Layout
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="@dimen/large_screen_shade_header_min_height"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/date"
             app:layout_constraintBottom_toBottomOf="@id/date"

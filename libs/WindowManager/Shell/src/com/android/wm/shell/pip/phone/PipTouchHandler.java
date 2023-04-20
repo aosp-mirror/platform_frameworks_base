@@ -427,7 +427,7 @@ public class PipTouchHandler {
         // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
         // occluded by the IME or shelf.
         if (fromImeAdjustment || fromShelfAdjustment) {
-            if (mTouchState.isUserInteracting()) {
+            if (mTouchState.isUserInteracting() && mTouchState.isDragging()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else if (ENABLE_PIP_KEEP_CLEAR_ALGORITHM) {
@@ -825,6 +825,16 @@ public class PipTouchHandler {
     }
 
     /**
+     * Resizes the pip window and updates user resized bounds
+     *
+     * @param bounds target bounds to resize to
+     * @param snapFraction snap fraction to apply after resizing
+     */
+    void userResizeTo(Rect bounds, float snapFraction) {
+        mPipResizeGestureHandler.userResizeTo(bounds, snapFraction);
+    }
+
+    /**
      * Gesture controlling normal movement of the PIP.
      */
     private class DefaultPipTouchGesture extends PipTouchGesture {
@@ -865,6 +875,8 @@ public class PipTouchHandler {
             }
 
             if (touchState.isDragging()) {
+                mPipBoundsState.setHasUserMovedPip(true);
+
                 // Move the pinned stack freely
                 final PointF lastDelta = touchState.getLastTouchDelta();
                 float lastX = mStartPosition.x + mDelta.x;

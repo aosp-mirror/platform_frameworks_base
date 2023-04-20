@@ -43,27 +43,8 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
     public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
     public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
-    // See IPip.aidl
-    public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
-    // See ISplitScreen.aidl
-    public static final String KEY_EXTRA_SHELL_SPLIT_SCREEN = "extra_shell_split_screen";
-    // See IFloatingTasks.aidl
-    public static final String KEY_EXTRA_SHELL_FLOATING_TASKS = "extra_shell_floating_tasks";
-    // See IOneHanded.aidl
-    public static final String KEY_EXTRA_SHELL_ONE_HANDED = "extra_shell_one_handed";
-    // See IShellTransitions.aidl
-    public static final String KEY_EXTRA_SHELL_SHELL_TRANSITIONS =
-            "extra_shell_shell_transitions";
-    // See IStartingWindow.aidl
-    public static final String KEY_EXTRA_SHELL_STARTING_WINDOW =
-            "extra_shell_starting_window";
     // See ISysuiUnlockAnimationController.aidl
     public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
-    // See IRecentTasks.aidl
-    public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
-    public static final String KEY_EXTRA_SHELL_BACK_ANIMATION = "extra_shell_back_animation";
-    // See IDesktopMode.aidl
-    public static final String KEY_EXTRA_SHELL_DESKTOP_MODE = "extra_shell_desktop_mode";
 
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
@@ -129,6 +110,9 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
     // The voice interaction session window is showing
     public static final int SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING = 1 << 25;
+    // Freeform windows are showing in desktop mode
+    public static final int SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE = 1 << 26;
+
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -156,7 +140,8 @@ public class QuickStepContract {
             SYSUI_STATE_BACK_DISABLED,
             SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
             SYSUI_STATE_IMMERSIVE_MODE,
-            SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING
+            SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING,
+            SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE
     })
     public @interface SystemUiStateFlags {}
 
@@ -192,6 +177,8 @@ public class QuickStepContract {
                 ? "bubbles_mange_menu_expanded" : "");
         str.add((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0 ? "immersive_mode" : "");
         str.add((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0 ? "vis_win_showing" : "");
+        str.add((flags & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0
+                ? "freeform_active_in_desktop_mode" : "");
         return str.toString();
     }
 

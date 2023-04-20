@@ -22,6 +22,8 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.WindowInsets.Type.ime;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -129,6 +131,15 @@ public class DisplayImeControllerTest extends ShellTestCase {
 
         assertTrue(mPerDisplay.mImeShowing);
         verify(mT).show(any());
+    }
+
+    @Test
+    public void insetsControlChanged_updateImeSourceControl() {
+        mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
+        assertNotNull(mPerDisplay.mImeSourceControl);
+
+        mPerDisplay.insetsControlChanged(new InsetsState(), new InsetsSourceControl[]{});
+        assertNull(mPerDisplay.mImeSourceControl);
     }
 
     private InsetsSourceControl[] insetsSourceControl() {

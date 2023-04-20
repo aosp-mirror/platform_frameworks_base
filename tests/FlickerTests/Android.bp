@@ -47,6 +47,9 @@ android_test {
         "launcher-aosp-tapl",
         "platform-test-annotations",
     ],
+    data: [
+        ":FlickerTestApp",
+    ],
 }
 
 java_library {

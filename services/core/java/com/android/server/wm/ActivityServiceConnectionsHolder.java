@@ -92,7 +92,7 @@ public class ActivityServiceConnectionsHolder<T> {
 
     public boolean isActivityVisible() {
         synchronized (mService.mGlobalLock) {
-            return mActivity.mVisibleRequested || mActivity.isState(RESUMED, PAUSING);
+            return mActivity.isVisibleRequested() || mActivity.isState(RESUMED, PAUSING);
         }
     }
 

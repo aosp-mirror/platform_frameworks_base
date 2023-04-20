@@ -19,6 +19,7 @@ package com.android.wm.shell.sysui;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
@@ -35,18 +36,6 @@ public interface ShellInterface {
      * Initializes the shell state.
      */
     default void onInit() {}
-
-    /**
-     * Dumps the shell state.
-     */
-    default void dump(PrintWriter pw) {}
-
-    /**
-     * Handles a shell command.
-     */
-    default boolean handleCommand(final String[] args, PrintWriter pw) {
-        return false;
-    }
 
     /**
      * Notifies the Shell that the configuration has changed.
@@ -74,4 +63,21 @@ public interface ShellInterface {
      * Notifies the Shell when a profile belonging to the user changes.
      */
     default void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {}
+
+    /**
+     * Handles a shell command.
+     */
+    default boolean handleCommand(final String[] args, PrintWriter pw) {
+        return false;
+    }
+
+    /**
+     * Updates the given {@param bundle} with the set of exposed interfaces.
+     */
+    default void createExternalInterfaces(Bundle bundle) {}
+
+    /**
+     * Dumps the shell state.
+     */
+    default void dump(PrintWriter pw) {}
 }

@@ -78,9 +78,6 @@
     <color name="biometric_dialog_accent">@color/material_dynamic_primary70</color>
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
 
-    <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#7DA7F1</color>
-
     <color name="GM2_green_500">#FF41Af6A</color>
     <color name="GM2_blue_500">#5195EA</color>
     <color name="GM2_red_500">#E25142</color>
@@ -101,4 +98,13 @@
     <color name="accessibility_floating_menu_background">#B3000000</color> <!-- 70% -->
 
     <color name="people_tile_background">@color/material_dynamic_secondary20</color>
+
+    <!-- UDFPS colors -->
+    <color name="udfps_enroll_icon">#7DA7F1</color>
+    <color name="udfps_moving_target_fill">#475670</color>
+    <!-- 50% of udfps_moving_target_fill-->
+    <color name="udfps_moving_target_fill_error">#80475670</color>
+    <color name="udfps_enroll_progress">#7DA7F1</color>
+    <color name="udfps_enroll_progress_help">#607DA7F1</color>
+    <color name="udfps_enroll_progress_help_with_talkback">#FFEE675C</color>
 </resources>

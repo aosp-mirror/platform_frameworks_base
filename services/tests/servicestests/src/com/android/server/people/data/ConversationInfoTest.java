@@ -30,6 +30,8 @@ import android.app.people.ConversationStatus;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -248,6 +250,60 @@ public final class ConversationInfoTest {
 
         ConversationInfo conversationInfoFromBackup =
                 ConversationInfo.readFromBackupPayload(conversationInfo.getBackupPayload());
+
+        assertEquals(SHORTCUT_ID, conversationInfoFromBackup.getShortcutId());
+        assertEquals(LOCUS_ID, conversationInfoFromBackup.getLocusId());
+        assertEquals(CONTACT_URI, conversationInfoFromBackup.getContactUri());
+        assertEquals(PHONE_NUMBER, conversationInfoFromBackup.getContactPhoneNumber());
+        assertEquals(
+                NOTIFICATION_CHANNEL_ID, conversationInfoFromBackup.getNotificationChannelId());
+        assertEquals(PARENT_NOTIFICATION_CHANNEL_ID,
+                conversationInfoFromBackup.getParentNotificationChannelId());
+        assertEquals(100L, conversationInfoFromBackup.getLastEventTimestamp());
+        assertEquals(200L, conversationInfoFromBackup.getCreationTimestamp());
+        assertTrue(conversationInfoFromBackup.isShortcutLongLived());
+        assertTrue(conversationInfoFromBackup.isShortcutCachedForNotification());
+        assertTrue(conversationInfoFromBackup.isImportant());
+        assertTrue(conversationInfoFromBackup.isNotificationSilenced());
+        assertTrue(conversationInfoFromBackup.isBubbled());
+        assertTrue(conversationInfoFromBackup.isDemoted());
+        assertTrue(conversationInfoFromBackup.isPersonImportant());
+        assertTrue(conversationInfoFromBackup.isPersonBot());
+        assertTrue(conversationInfoFromBackup.isContactStarred());
+        // ConversationStatus is a transient object and not persisted
+    }
+
+    @Test
+    public void testBuildFromProtoPayload() throws Exception {
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+
+        ConversationInfo conversationInfo = new ConversationInfo.Builder()
+                .setShortcutId(SHORTCUT_ID)
+                .setLocusId(LOCUS_ID)
+                .setContactUri(CONTACT_URI)
+                .setContactPhoneNumber(PHONE_NUMBER)
+                .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
+                .setParentNotificationChannelId(PARENT_NOTIFICATION_CHANNEL_ID)
+                .setLastEventTimestamp(100L)
+                .setCreationTimestamp(200L)
+                .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED
+                        | ShortcutInfo.FLAG_CACHED_NOTIFICATIONS)
+                .setImportant(true)
+                .setNotificationSilenced(true)
+                .setBubbled(true)
+                .setDemoted(true)
+                .setPersonImportant(true)
+                .setPersonBot(true)
+                .setContactStarred(true)
+                .addOrUpdateStatus(cs)
+                .addOrUpdateStatus(cs2)
+                .build();
+
+        final ProtoOutputStream protoOutputStream = new ProtoOutputStream();
+        conversationInfo.writeToProto(protoOutputStream);
+        ConversationInfo conversationInfoFromBackup =
+                ConversationInfo.readFromProto(new ProtoInputStream(protoOutputStream.getBytes()));
 
         assertEquals(SHORTCUT_ID, conversationInfoFromBackup.getShortcutId());
         assertEquals(LOCUS_ID, conversationInfoFromBackup.getLocusId());

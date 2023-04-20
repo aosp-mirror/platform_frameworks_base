@@ -54,6 +54,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
 
@@ -153,13 +154,18 @@ public class StatusBarStateControllerImpl implements
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     @Inject
-    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger, DumpManager dumpManager,
-            InteractionJankMonitor interactionJankMonitor) {
+    public StatusBarStateControllerImpl(
+            UiEventLogger uiEventLogger,
+            DumpManager dumpManager,
+            InteractionJankMonitor interactionJankMonitor,
+            ShadeExpansionStateManager shadeExpansionStateManager
+    ) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitor = interactionJankMonitor;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
+        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         dumpManager.registerDumpable(this);
     }
@@ -263,21 +269,6 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
-    public boolean setPanelExpanded(boolean expanded) {
-        if (mIsExpanded == expanded) {
-            return false;
-        }
-        mIsExpanded = expanded;
-        String tag = getClass().getSimpleName() + "#setIsExpanded";
-        DejankUtils.startDetectingBlockingIpcs(tag);
-        for (RankedListener rl : new ArrayList<>(mListeners)) {
-            rl.mListener.onExpandedChanged(mIsExpanded);
-        }
-        DejankUtils.stopDetectingBlockingIpcs(tag);
-        return true;
-    }
-
-    @Override
     public float getInterpolatedDozeAmount() {
         return mDozeInterpolator.getInterpolation(mDozeAmount);
     }
@@ -322,6 +313,18 @@ public class StatusBarStateControllerImpl implements
             startDozeAnimation();
         } else {
             setDozeAmountInternal(dozeAmount);
+        }
+    }
+
+    private void onShadeExpansionFullyChanged(Boolean isExpanded) {
+        if (mIsExpanded != isExpanded) {
+            mIsExpanded = isExpanded;
+            String tag = getClass().getSimpleName() + "#setIsExpanded";
+            DejankUtils.startDetectingBlockingIpcs(tag);
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onExpandedChanged(mIsExpanded);
+            }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
     }
 

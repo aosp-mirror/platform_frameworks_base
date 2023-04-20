@@ -17,16 +17,16 @@
 package com.android.keyguard.logging
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.dagger.BiometricMessagesLog
+import com.android.systemui.log.dagger.BiometricLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
 import javax.inject.Inject
 
 /** Helper class for logging for [com.android.systemui.biometrics.FaceHelpMessageDeferral] */
 @SysUISingleton
 class FaceMessageDeferralLogger
 @Inject
-constructor(@BiometricMessagesLog private val logBuffer: LogBuffer) :
+constructor(@BiometricLog private val logBuffer: LogBuffer) :
     BiometricMessageDeferralLogger(logBuffer, "FaceMessageDeferralLogger")
 
 open class BiometricMessageDeferralLogger(
