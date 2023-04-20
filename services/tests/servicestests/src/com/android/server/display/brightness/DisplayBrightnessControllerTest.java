@@ -279,20 +279,27 @@ public final class DisplayBrightnessControllerTest {
 
     @Test
     public void testConvertToNits() {
-        float brightness = 0.5f;
-        float nits = 300;
+        final float brightness = 0.5f;
+        final float nits = 300;
+        final float adjustedNits = 200;
 
         // ABC is null
         assertEquals(-1f, mDisplayBrightnessController.convertToNits(brightness),
+                /* delta= */ 0);
+        assertEquals(-1f, mDisplayBrightnessController.convertToAdjustedNits(brightness),
                 /* delta= */ 0);
 
         AutomaticBrightnessController automaticBrightnessController =
                 mock(AutomaticBrightnessController.class);
         when(automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
+        when(automaticBrightnessController.convertToAdjustedNits(brightness))
+                .thenReturn(adjustedNits);
         mDisplayBrightnessController.setAutomaticBrightnessController(
                 automaticBrightnessController);
 
         assertEquals(nits, mDisplayBrightnessController.convertToNits(brightness), /* delta= */ 0);
+        assertEquals(adjustedNits, mDisplayBrightnessController.convertToAdjustedNits(brightness),
+                /* delta= */ 0);
     }
 
     @Test
