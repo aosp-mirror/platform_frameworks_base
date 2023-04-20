@@ -104,7 +104,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * Represents a logical transition.
+ * Represents a logical transition. This keeps track of all the changes associated with a logical
+ * WM state -> state transition.
  * @see TransitionController
  */
 class Transition implements BLASTSyncEngine.TransactionReadyListener {
@@ -414,6 +415,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     @VisibleForTesting
     SurfaceControl.Transaction getFinishTransaction() {
         return mFinishTransaction;
+    }
+
+    boolean isPending() {
+        return mState == STATE_PENDING;
     }
 
     boolean isCollecting() {
