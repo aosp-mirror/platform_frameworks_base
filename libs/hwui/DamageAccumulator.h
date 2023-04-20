@@ -70,9 +70,9 @@ public:
         const StretchEffect* stretchEffect;
 
         /**
-         * Bounds of the child relative to the stretch container
+         * Bounds of the stretching container
          */
-        const SkRect childRelativeBounds;
+        const SkRect parentBounds;
 
         /**
          * Width of the stretch container
