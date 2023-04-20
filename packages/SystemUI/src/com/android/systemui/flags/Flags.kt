@@ -81,8 +81,7 @@ object Flags {
     // TODO(b/278873737): Tracking Bug
     @JvmField
     val LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE =
-            unreleasedFlag(278873737, "load_notifications_before_the_user_switch_is_complete",
-                    teamfood = true)
+            releasedFlag(278873737, "load_notifications_before_the_user_switch_is_complete")
 
     // TODO(b/277338665): Tracking Bug
     @JvmField
