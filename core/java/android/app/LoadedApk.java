@@ -1672,10 +1672,13 @@ public final class LoadedApk {
     static final class ReceiverDispatcher {
 
         final static class InnerReceiver extends IIntentReceiver.Stub {
+            final IApplicationThread mApplicationThread;
             final WeakReference<LoadedApk.ReceiverDispatcher> mDispatcher;
             final LoadedApk.ReceiverDispatcher mStrongRef;
 
-            InnerReceiver(LoadedApk.ReceiverDispatcher rd, boolean strong) {
+            InnerReceiver(IApplicationThread thread, LoadedApk.ReceiverDispatcher rd,
+                    boolean strong) {
+                mApplicationThread = thread;
                 mDispatcher = new WeakReference<LoadedApk.ReceiverDispatcher>(rd);
                 mStrongRef = strong ? rd : null;
             }
@@ -1722,7 +1725,8 @@ public final class LoadedApk {
                         if (extras != null) {
                             extras.setAllowFds(false);
                         }
-                        mgr.finishReceiver(this, resultCode, data, extras, false, intent.getFlags());
+                        mgr.finishReceiver(mApplicationThread.asBinder(), resultCode, data,
+                                extras, false, intent.getFlags());
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -1829,7 +1833,7 @@ public final class LoadedApk {
             }
 
             mAppThread = appThread;
-            mIIntentReceiver = new InnerReceiver(this, !registered);
+            mIIntentReceiver = new InnerReceiver(mAppThread, this, !registered);
             mReceiver = receiver;
             mContext = context;
             mActivityThread = activityThread;
