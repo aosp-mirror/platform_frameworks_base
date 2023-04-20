@@ -16,10 +16,12 @@
 
 package com.android.server.credentials.metrics;
 
+import static com.android.server.credentials.MetricUtilities.DELTA_CUT;
+import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
 
-import android.annotation.NonNull;
+import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.os.IBinder;
 import android.util.Log;
@@ -27,6 +29,7 @@ import android.util.Log;
 import com.android.server.credentials.ProviderSession;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +51,6 @@ public class RequestSessionMetric {
     protected final ChosenProviderFinalPhaseMetric
             mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric();
     // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
-    @NonNull
     protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
 
     public RequestSessionMetric() {
@@ -161,16 +163,32 @@ public class RequestSessionMetric {
         }
     }
 
+    // Used by get flows to generate the unique request count maps
+    private Map<String, Integer> getRequestCountMap(GetCredentialRequest request) {
+        Map<String, Integer> uniqueRequestCounts = new LinkedHashMap<>();
+        try {
+            request.getCredentialOptions().forEach(option -> {
+                String optionKey = generateMetricKey(option.getType(), DELTA_CUT);
+                if (!uniqueRequestCounts.containsKey(optionKey)) {
+                    uniqueRequestCounts.put(optionKey, 0);
+                }
+                uniqueRequestCounts.put(optionKey, uniqueRequestCounts.get(optionKey) + 1);
+            });
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during get request metric logging: " + e);
+        }
+        return uniqueRequestCounts;
+    }
+
     /**
      * Collects initializations for Get flow metrics.
      *
-     * @param requestClassTypeCount the number of class types in the request
-     * @param origin indicates if an origin was passed in or not
+     * @param request the get credential request containing information to parse for metrics
      */
-    public void collectGetFlowInitialMetricInfo(int requestClassTypeCount, boolean origin) {
+    public void collectGetFlowInitialMetricInfo(GetCredentialRequest request) {
         try {
-            mInitialPhaseMetric.setCountRequestClassType(requestClassTypeCount);
-            mInitialPhaseMetric.setOriginSpecified(origin);
+            mInitialPhaseMetric.setOriginSpecified(request.getOrigin() != null);
+            mInitialPhaseMetric.setRequestCounts(getRequestCountMap(request));
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
