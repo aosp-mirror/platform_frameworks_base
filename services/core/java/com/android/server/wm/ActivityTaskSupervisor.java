@@ -82,6 +82,7 @@ import static com.android.server.wm.Task.TAG_CLEANUP;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -260,6 +261,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     /** Helper for {@link Task#fillTaskInfo}. */
     final TaskInfoHelper mTaskInfoHelper = new TaskInfoHelper();
+
+    final OpaqueActivityHelper mOpaqueActivityHelper = new OpaqueActivityHelper();
 
     private final ActivityTaskSupervisorHandler mHandler;
     final Looper mLooper;
@@ -2903,6 +2906,38 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             synchronized (mService.mGlobalLock) {
                 mService.continueWindowLayout();
             }
+        }
+    }
+
+    /** The helper to get the top opaque activity of a container. */
+    static class OpaqueActivityHelper implements Predicate<ActivityRecord> {
+        private ActivityRecord mStarting;
+        private boolean mIncludeInvisibleAndFinishing;
+
+        ActivityRecord getOpaqueActivity(@NonNull WindowContainer<?> container) {
+            mIncludeInvisibleAndFinishing = true;
+            return container.getActivity(this,
+                    true /* traverseTopToBottom */, null /* boundary */);
+        }
+
+        ActivityRecord getVisibleOpaqueActivity(@NonNull WindowContainer<?> container,
+                @Nullable ActivityRecord starting) {
+            mStarting = starting;
+            mIncludeInvisibleAndFinishing = false;
+            final ActivityRecord opaque = container.getActivity(this,
+                    true /* traverseTopToBottom */, null /* boundary */);
+            mStarting = null;
+            return opaque;
+        }
+
+        @Override
+        public boolean test(ActivityRecord r) {
+            if (!mIncludeInvisibleAndFinishing && !r.visibleIgnoringKeyguard && r != mStarting) {
+                // Ignore invisible activities that are not the currently starting activity
+                // (about to be visible).
+                return false;
+            }
+            return r.occludesParent(mIncludeInvisibleAndFinishing /* includingFinishing */);
         }
     }
 
