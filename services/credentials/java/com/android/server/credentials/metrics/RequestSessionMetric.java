@@ -272,21 +272,8 @@ public class RequestSessionMetric {
                     candidatePhaseMetric.getStartQueryTimeNanoseconds());
             mChosenProviderFinalPhaseMetric.setQueryEndTimeNanoseconds(candidatePhaseMetric
                     .getQueryFinishTimeNanoseconds());
-
-            mChosenProviderFinalPhaseMetric.setNumEntriesTotal(candidatePhaseMetric
-                    .getNumEntriesTotal());
-            mChosenProviderFinalPhaseMetric.setCredentialEntryCount(candidatePhaseMetric
-                    .getCredentialEntryCount());
-            mChosenProviderFinalPhaseMetric.setCredentialEntryTypeCount(
-                    candidatePhaseMetric.getCredentialEntryTypeCount());
-            mChosenProviderFinalPhaseMetric.setActionEntryCount(candidatePhaseMetric
-                    .getActionEntryCount());
-            mChosenProviderFinalPhaseMetric.setRemoteEntryCount(candidatePhaseMetric
-                    .getRemoteEntryCount());
-            mChosenProviderFinalPhaseMetric.setAuthenticationEntryCount(
-                    candidatePhaseMetric.getAuthenticationEntryCount());
-            mChosenProviderFinalPhaseMetric.setAvailableEntries(candidatePhaseMetric
-                    .getAvailableEntries());
+            mChosenProviderFinalPhaseMetric.setResponseCollective(
+                    candidatePhaseMetric.getResponseCollective());
             mChosenProviderFinalPhaseMetric.setFinalFinishTimeNanoseconds(System.nanoTime());
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
