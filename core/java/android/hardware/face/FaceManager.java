@@ -44,6 +44,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 import android.view.Surface;
 
@@ -127,6 +128,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         @Override // binder call
         public void onRemoved(Face face, int remaining) {
             mHandler.obtainMessage(MSG_REMOVED, remaining, 0, face).sendToTarget();
+            if (remaining == 0) {
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0,
+                        UserHandle.USER_CURRENT);
+            }
         }
 
         @Override
