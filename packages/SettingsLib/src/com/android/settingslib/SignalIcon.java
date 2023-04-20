@@ -15,6 +15,9 @@
  */
 package com.android.settingslib;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.StringRes;
+
 /**
  * Icons for SysUI and Settings.
  */
@@ -66,34 +69,31 @@ public class SignalIcon {
     }
 
     /**
-     * Holds icons for a given MobileState.
+     * Holds RAT icons for a given MobileState.
      */
     public static class MobileIconGroup extends IconGroup {
-        public final int dataContentDescription; // mContentDescriptionDataType
-        public final int dataType;
+        @StringRes public final int dataContentDescription;
+        @DrawableRes public final int dataType;
 
         public MobileIconGroup(
                 String name,
-                int[][] sbIcons,
-                int[][] qsIcons,
-                int[] contentDesc,
-                int sbNullState,
-                int qsNullState,
-                int sbDiscState,
-                int qsDiscState,
-                int discContentDesc,
                 int dataContentDesc,
                 int dataType
         ) {
             super(name,
-                    sbIcons,
-                    qsIcons,
-                    contentDesc,
-                    sbNullState,
-                    qsNullState,
-                    sbDiscState,
-                    qsDiscState,
-                    discContentDesc);
+                    // The rest of the values are the same for every type of MobileIconGroup, so
+                    // just provide them here.
+                    // TODO(b/238425913): Eventually replace with {@link MobileNetworkTypeIcon} so
+                    //  that we don't have to fill in these superfluous fields.
+                    /* sbIcons= */ null,
+                    /* qsIcons= */ null,
+                    /* contentDesc= */ AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
+                    /* sbNullState= */ 0,
+                    /* qsNullState= */ 0,
+                    /* sbDiscState= */ 0,
+                    /* qsDiscState= */ 0,
+                    /* discContentDesc= */
+                        AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE);
             this.dataContentDescription = dataContentDesc;
             this.dataType = dataType;
         }

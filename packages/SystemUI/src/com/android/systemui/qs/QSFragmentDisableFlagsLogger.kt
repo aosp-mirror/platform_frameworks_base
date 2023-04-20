@@ -1,8 +1,8 @@
 package com.android.systemui.qs
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.QSFragmentDisableLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.statusbar.DisableFlagsLogger
 import javax.inject.Inject
 

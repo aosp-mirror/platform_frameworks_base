@@ -181,6 +181,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         if (mShowing == showing && mOccluded == occluded) return;
         mShowing = showing;
         mOccluded = occluded;
+        mKeyguardUpdateMonitor.setKeyguardShowing(showing, occluded);
         Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events",
                 "Keyguard showing: " + showing + " occluded: " + occluded);
         notifyKeyguardChanged();
@@ -387,6 +388,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStateController:");
+        pw.println("  mShowing: " + mShowing);
+        pw.println("  mOccluded: " + mOccluded);
         pw.println("  mSecure: " + mSecure);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mTrustManaged: " + mTrustManaged);
@@ -435,7 +438,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         }
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
+        public void onKeyguardVisibilityChanged(boolean visible) {
             update(false /* updateAlways */);
         }
 

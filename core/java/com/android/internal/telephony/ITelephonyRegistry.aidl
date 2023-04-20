@@ -32,6 +32,7 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
+import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
@@ -109,4 +110,8 @@ interface ITelephonyRegistry {
             int phoneId, in List<String> privilegedPackageNames, in int[] privilegedUids);
     void notifyCarrierServiceChanged(int phoneId, in String packageName, int uid);
 
+    void addCarrierConfigChangeListener(ICarrierConfigChangeListener listener,
+            String pkg, String featureId);
+    void removeCarrierConfigChangeListener(ICarrierConfigChangeListener listener, String pkg);
+    void notifyCarrierConfigChanged(int phoneId, int subId, int carrierId, int specificCarrierId);
 }

@@ -62,7 +62,7 @@ class ConnectivityRepositoryImpl @Inject constructor(
     tunerService: TunerService,
 ) : ConnectivityRepository, Dumpable {
     init {
-        dumpManager.registerDumpable("$SB_LOGGING_TAG:ConnectivityRepository", this)
+        dumpManager.registerDumpable("${SB_LOGGING_TAG}Repository", this)
     }
 
     // The default set of hidden icons to use if we don't get any from [TunerService].

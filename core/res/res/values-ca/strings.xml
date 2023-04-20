@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Bústia de veu"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema de connexió o codi MMI no vàlid."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"La funció no s\'admet."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"L\'operació està restringida a números de marcatge fixos."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"No es pot canviar la configuració de desviació de trucades del telèfon quan estàs en itinerància."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"El servei s\'ha activat."</string>

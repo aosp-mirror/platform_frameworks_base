@@ -34,6 +34,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
@@ -64,6 +65,8 @@ class AirplaneModeTileTest : SysuiTestCase() {
     private lateinit var mConnectivityManager: Lazy<ConnectivityManager>
     @Mock
     private lateinit var mGlobalSettings: GlobalSettings
+    @Mock
+    private lateinit var mUserTracker: UserTracker
     private lateinit var mTestableLooper: TestableLooper
     private lateinit var mTile: AirplaneModeTile
 
@@ -87,7 +90,8 @@ class AirplaneModeTileTest : SysuiTestCase() {
             mQsLogger,
             mBroadcastDispatcher,
             mConnectivityManager,
-            mGlobalSettings)
+            mGlobalSettings,
+            mUserTracker)
     }
 
     @Test

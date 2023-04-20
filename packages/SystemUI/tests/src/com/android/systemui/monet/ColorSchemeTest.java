@@ -147,6 +147,18 @@ public class ColorSchemeTest extends SysuiTestCase {
     }
 
     @Test
+    public void testMonochromatic() {
+        int colorInt = 0xffB3588A; // H350 C50 T50
+        ColorScheme colorScheme = new ColorScheme(colorInt, false /* darkTheme */,
+                Style.MONOCHROMATIC /* style */);
+        int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
+        Assert.assertTrue(
+                Color.red(neutralMid) == Color.green(neutralMid)
+                && Color.green(neutralMid) == Color.blue(neutralMid)
+        );
+    }
+
+    @Test
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void testToString() {
         new ColorScheme(Color.TRANSPARENT, false /* darkTheme */).toString();

@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection.inflation;
 
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+
 import android.os.SystemClock;
 import android.service.notification.NotificationStats;
 
@@ -70,6 +72,8 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
             dismissalSurface = NotificationStats.DISMISSAL_PEEK;
         } else if (mStatusBarStateController.isDozing()) {
             dismissalSurface = NotificationStats.DISMISSAL_AOD;
+        } else if (mStatusBarStateController.getState() == KEYGUARD) {
+            dismissalSurface = NotificationStats.DISMISSAL_LOCKSCREEN;
         }
         return new DismissedByUserStats(
                 dismissalSurface,

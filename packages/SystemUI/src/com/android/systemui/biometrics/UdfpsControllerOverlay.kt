@@ -21,13 +21,18 @@ import android.annotation.UiThread
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
+import android.os.Build
 import android.os.RemoteException
+import android.provider.Settings
 import android.util.Log
 import android.util.RotationUtils
 import android.view.LayoutInflater
@@ -38,21 +43,28 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener
 import androidx.annotation.LayoutRes
+import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 
 private const val TAG = "UdfpsControllerOverlay"
+
+@VisibleForTesting
+const val SETTING_REMOVE_ENROLLMENT_UI = "udfps_overlay_remove_enrollment_ui"
 
 /**
  * Keeps track of the overlay state and UI resources associated with a single FingerprintService
@@ -60,35 +72,39 @@ private const val TAG = "UdfpsControllerOverlay"
  * methods.
  */
 @UiThread
-class UdfpsControllerOverlay(
-    private val context: Context,
-    fingerprintManager: FingerprintManager,
-    private val inflater: LayoutInflater,
-    private val windowManager: WindowManager,
-    private val accessibilityManager: AccessibilityManager,
-    private val statusBarStateController: StatusBarStateController,
-    private val panelExpansionStateManager: PanelExpansionStateManager,
-    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val dialogManager: SystemUIDialogManager,
-    private val dumpManager: DumpManager,
-    private val transitionController: LockscreenShadeTransitionController,
-    private val configurationController: ConfigurationController,
-    private val systemClock: SystemClock,
-    private val keyguardStateController: KeyguardStateController,
-    private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
-    private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
-    val requestId: Long,
-    @ShowReason val requestReason: Int,
-    private val controllerCallback: IUdfpsOverlayControllerCallback,
-    private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
-    private val activityLaunchAnimator: ActivityLaunchAnimator
+class UdfpsControllerOverlay @JvmOverloads constructor(
+        private val context: Context,
+        fingerprintManager: FingerprintManager,
+        private val inflater: LayoutInflater,
+        private val windowManager: WindowManager,
+        private val accessibilityManager: AccessibilityManager,
+        private val statusBarStateController: StatusBarStateController,
+        private val shadeExpansionStateManager: ShadeExpansionStateManager,
+        private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        private val dialogManager: SystemUIDialogManager,
+        private val dumpManager: DumpManager,
+        private val transitionController: LockscreenShadeTransitionController,
+        private val configurationController: ConfigurationController,
+        private val systemClock: SystemClock,
+        private val keyguardStateController: KeyguardStateController,
+        private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
+        private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
+        val requestId: Long,
+        @ShowReason val requestReason: Int,
+        private val controllerCallback: IUdfpsOverlayControllerCallback,
+        private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
+        private val activityLaunchAnimator: ActivityLaunchAnimator,
+        private val featureFlags: FeatureFlags,
+        private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+        private val isDebuggable: Boolean = Build.IS_DEBUGGABLE
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
         private set
 
     private var overlayParams: UdfpsOverlayParams = UdfpsOverlayParams()
+    private var sensorBounds: Rect = Rect()
 
     private var overlayTouchListener: TouchExplorationStateChangeListener? = null
 
@@ -102,18 +118,23 @@ class UdfpsControllerOverlay(
         gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         flags = (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or
-          WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
+                WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
         // Avoid announcing window title.
         accessibilityTitle = " "
+
+        if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+            inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
+        }
     }
 
     /** A helper if the [requestReason] was due to enrollment. */
-    val enrollHelper: UdfpsEnrollHelper? = if (requestReason.isEnrollmentReason()) {
-        UdfpsEnrollHelper(context, fingerprintManager, requestReason)
-    } else {
-        null
-    }
+    val enrollHelper: UdfpsEnrollHelper? =
+        if (requestReason.isEnrollmentReason() && !shouldRemoveEnrollmentUi()) {
+            UdfpsEnrollHelper(context, fingerprintManager, requestReason)
+        } else {
+            null
+        }
 
     /** If the overlay is currently showing. */
     val isShowing: Boolean
@@ -129,11 +150,23 @@ class UdfpsControllerOverlay(
 
     private var touchExplorationEnabled = false
 
+    private fun shouldRemoveEnrollmentUi(): Boolean {
+        if (isDebuggable) {
+            return Settings.Global.getInt(
+                context.contentResolver,
+                SETTING_REMOVE_ENROLLMENT_UI,
+                0 /* def */
+            ) != 0
+        }
+        return false
+    }
+
     /** Show the overlay or return false and do nothing if it is already showing. */
     @SuppressLint("ClickableViewAccessibility")
     fun show(controller: UdfpsController, params: UdfpsOverlayParams): Boolean {
         if (overlayView == null) {
             overlayParams = params
+            sensorBounds = Rect(params.sensorBounds)
             try {
                 overlayView = (inflater.inflate(
                     R.layout.udfps_view, null, false
@@ -152,6 +185,7 @@ class UdfpsControllerOverlay(
                     }
 
                     windowManager.addView(this, coreLayoutParams.updateDimensions(animation))
+                    sensorRect = sensorBounds
                     touchExplorationEnabled = accessibilityManager.isTouchExplorationEnabled
                     overlayTouchListener = TouchExplorationStateChangeListener {
                         if (accessibilityManager.isTouchExplorationEnabled) {
@@ -168,6 +202,7 @@ class UdfpsControllerOverlay(
                         overlayTouchListener!!
                     )
                     overlayTouchListener?.onTouchExplorationStateChanged(true)
+                    useExpandedOverlay = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 }
             } catch (e: RuntimeException) {
                 Log.e(TAG, "showUdfpsOverlay | failed to add window", e)
@@ -183,26 +218,38 @@ class UdfpsControllerOverlay(
         view: UdfpsView,
         controller: UdfpsController
     ): UdfpsAnimationViewController<*>? {
-        return when (requestReason) {
+        val isEnrollment = when (requestReason) {
+            REASON_ENROLL_FIND_SENSOR, REASON_ENROLL_ENROLLING -> true
+            else -> false
+        }
+
+        val filteredRequestReason = if (isEnrollment && shouldRemoveEnrollmentUi()) {
+            REASON_AUTH_OTHER
+        } else {
+            requestReason
+        }
+
+        return when (filteredRequestReason) {
             REASON_ENROLL_FIND_SENSOR,
             REASON_ENROLL_ENROLLING -> {
                 UdfpsEnrollViewController(
                     view.addUdfpsView(R.layout.udfps_enroll_view) {
-                        updateSensorLocation(overlayParams.sensorBounds)
+                        updateSensorLocation(sensorBounds)
                     },
                     enrollHelper ?: throw IllegalStateException("no enrollment helper"),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     dialogManager,
                     dumpManager,
+                    featureFlags,
                     overlayParams.scaleFactor
                 )
             }
-            BiometricOverlayConstants.REASON_AUTH_KEYGUARD -> {
+            REASON_AUTH_KEYGUARD -> {
                 UdfpsKeyguardViewController(
                     view.addUdfpsView(R.layout.udfps_keyguard_view),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     statusBarKeyguardViewManager,
                     keyguardUpdateMonitor,
                     dumpManager,
@@ -213,25 +260,27 @@ class UdfpsControllerOverlay(
                     unlockedScreenOffAnimationController,
                     dialogManager,
                     controller,
-                    activityLaunchAnimator
+                    activityLaunchAnimator,
+                    featureFlags,
+                    primaryBouncerInteractor
                 )
             }
-            BiometricOverlayConstants.REASON_AUTH_BP -> {
+            REASON_AUTH_BP -> {
                 // note: empty controller, currently shows no visual affordance
                 UdfpsBpViewController(
                     view.addUdfpsView(R.layout.udfps_bp_view),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     dialogManager,
                     dumpManager
                 )
             }
-            BiometricOverlayConstants.REASON_AUTH_OTHER,
-            BiometricOverlayConstants.REASON_AUTH_SETTINGS -> {
+            REASON_AUTH_OTHER,
+            REASON_AUTH_SETTINGS -> {
                 UdfpsFpmOtherViewController(
                     view.addUdfpsView(R.layout.udfps_fpm_other_view),
                     statusBarStateController,
-                    panelExpansionStateManager,
+                    shadeExpansionStateManager,
                     dialogManager,
                     dumpManager
                 )
@@ -381,7 +430,12 @@ class UdfpsControllerOverlay(
         }
 
         // Original sensorBounds assume portrait mode.
-        val rotatedSensorBounds = Rect(overlayParams.sensorBounds)
+        var rotatedBounds =
+            if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+                Rect(overlayParams.overlayBounds)
+            } else {
+                Rect(overlayParams.sensorBounds)
+            }
 
         val rot = overlayParams.rotation
         if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
@@ -395,18 +449,27 @@ class UdfpsControllerOverlay(
             } else {
                 Log.v(TAG, "Rotate UDFPS bounds " + Surface.rotationToString(rot))
                 RotationUtils.rotateBounds(
-                    rotatedSensorBounds,
+                    rotatedBounds,
                     overlayParams.naturalDisplayWidth,
                     overlayParams.naturalDisplayHeight,
                     rot
                 )
+
+                if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+                    RotationUtils.rotateBounds(
+                            sensorBounds,
+                            overlayParams.naturalDisplayWidth,
+                            overlayParams.naturalDisplayHeight,
+                            rot
+                    )
+                }
             }
         }
 
-        x = rotatedSensorBounds.left - paddingX
-        y = rotatedSensorBounds.top - paddingY
-        height = rotatedSensorBounds.height() + 2 * paddingX
-        width = rotatedSensorBounds.width() + 2 * paddingY
+        x = rotatedBounds.left - paddingX
+        y = rotatedBounds.top - paddingY
+        height = rotatedBounds.height() + 2 * paddingX
+        width = rotatedBounds.width() + 2 * paddingY
 
         return this
     }
@@ -440,4 +503,4 @@ private fun Int.isEnrollmentReason() =
 private fun Int.isImportantForAccessibility() =
     this == REASON_ENROLL_FIND_SENSOR ||
             this == REASON_ENROLL_ENROLLING ||
-            this == BiometricOverlayConstants.REASON_AUTH_BP
+            this == REASON_AUTH_BP

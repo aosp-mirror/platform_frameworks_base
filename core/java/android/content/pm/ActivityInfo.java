@@ -1022,6 +1022,19 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public @interface SizeChangesSupportMode {}
 
     /**
+     * This change id enables compat policy that ignores app requested orientation in
+     * response to an app calling {@link android.app.Activity#setRequestedOrientation}. See
+     * com.android.server.wm.LetterboxUiController#shouldIgnoreRequestedOrientation for
+     * details.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION =
+            254631730L; // buganizer id
+
+    /**
      * This change id forces the packages it is applied to never have Display API sandboxing
      * applied for a letterbox or SCM activity. The Display APIs will continue to provide
      * DisplayArea bounds.
@@ -1127,6 +1140,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     @Overridable
     public static final long OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN = 218959984L;
+
+    /**
+     * Enables sending fake focus for unfocused apps in splitscreen. Some game engines
+     * wait to get focus before drawing the content of the app so fake focus helps them to avoid
+     * staying blacked out when they are resumed and do not have focus yet.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
 
     /**
      * Compares activity window layout min width/height with require space for multi window to

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -49,6 +50,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Presubmit
 @SmallTest
@@ -93,7 +97,7 @@ public class ALSProbeTest {
         mSensorEventListenerCaptor.getValue().onSensorChanged(
                 new SensorEvent(mLightSensor, 1, 2, new float[]{value}));
 
-        assertThat(mProbe.getCurrentLux()).isEqualTo(value);
+        assertThat(mProbe.getMostRecentLux()).isEqualTo(value);
     }
 
     @Test
@@ -123,11 +127,12 @@ public class ALSProbeTest {
 
         verify(mSensorManager, never()).registerListener(any(), any(), anyInt());
         verifyNoMoreInteractions(mSensorManager);
+        assertThat(mProbe.getMostRecentLux()).isLessThan(0);
     }
 
     @Test
     public void testDisabledReportsNegativeValue() {
-        assertThat(mProbe.getCurrentLux()).isLessThan(0f);
+        assertThat(mProbe.getMostRecentLux()).isLessThan(0f);
 
         mProbe.enable();
         verify(mSensorManager).registerListener(
@@ -136,7 +141,7 @@ public class ALSProbeTest {
                 new SensorEvent(mLightSensor, 1, 1, new float[]{4.0f}));
         mProbe.disable();
 
-        assertThat(mProbe.getCurrentLux()).isLessThan(0f);
+        assertThat(mProbe.getMostRecentLux()).isLessThan(0f);
     }
 
     @Test
@@ -150,7 +155,7 @@ public class ALSProbeTest {
 
         verify(mSensorManager).unregisterListener(eq(mSensorEventListenerCaptor.getValue()));
         verifyNoMoreInteractions(mSensorManager);
-        assertThat(mProbe.getCurrentLux()).isLessThan(0f);
+        assertThat(mProbe.getMostRecentLux()).isLessThan(0f);
     }
 
     @Test
@@ -166,7 +171,177 @@ public class ALSProbeTest {
 
         verify(mSensorManager).unregisterListener(any(SensorEventListener.class));
         verifyNoMoreInteractions(mSensorManager);
-        assertThat(mProbe.getCurrentLux()).isLessThan(0f);
+        assertThat(mProbe.getMostRecentLux()).isLessThan(0f);
+    }
+
+    @Test
+    public void testWatchDogCompletesAwait() {
+        mProbe.enable();
+
+        AtomicInteger lux = new AtomicInteger(-9);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+
+        verify(mSensorManager).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+
+        moveTimeBy(TIMEOUT_MS);
+
+        assertThat(lux.get()).isEqualTo(-1);
+        verify(mSensorManager).unregisterListener(any(SensorEventListener.class));
+        verifyNoMoreInteractions(mSensorManager);
+    }
+
+    @Test
+    public void testNextLuxWhenAlreadyEnabledAndNotAvailable() {
+        testNextLuxWhenAlreadyEnabled(false /* dataIsAvailable */);
+    }
+
+    @Test
+    public void testNextLuxWhenAlreadyEnabledAndAvailable() {
+        testNextLuxWhenAlreadyEnabled(true /* dataIsAvailable */);
+    }
+
+    private void testNextLuxWhenAlreadyEnabled(boolean dataIsAvailable) {
+        final List<Integer> values = List.of(1, 2, 3, 4, 6);
+        mProbe.enable();
+
+        verify(mSensorManager).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+
+        if (dataIsAvailable) {
+            for (int v : values) {
+                mSensorEventListenerCaptor.getValue().onSensorChanged(
+                        new SensorEvent(mLightSensor, 1, 1, new float[]{v}));
+            }
+        }
+        AtomicInteger lux = new AtomicInteger(-1);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+        if (!dataIsAvailable) {
+            for (int v : values) {
+                mSensorEventListenerCaptor.getValue().onSensorChanged(
+                        new SensorEvent(mLightSensor, 1, 1, new float[]{v}));
+            }
+        }
+
+        mSensorEventListenerCaptor.getValue().onSensorChanged(
+                new SensorEvent(mLightSensor, 1, 1, new float[]{200f}));
+
+        // should remain enabled
+        assertThat(lux.get()).isEqualTo(values.get(dataIsAvailable ? values.size() - 1 : 0));
+        verify(mSensorManager, never()).unregisterListener(any(SensorEventListener.class));
+        verifyNoMoreInteractions(mSensorManager);
+
+        final int anotherValue = 12;
+        mSensorEventListenerCaptor.getValue().onSensorChanged(
+                new SensorEvent(mLightSensor, 1, 1, new float[]{12}));
+        assertThat(mProbe.getMostRecentLux()).isEqualTo(anotherValue);
+    }
+
+    @Test
+    public void testNextLuxWhenNotEnabled() {
+        testNextLuxWhenNotEnabled(false /* enableWhileWaiting */);
+    }
+
+    @Test
+    public void testNextLuxWhenNotEnabledButEnabledLater() {
+        testNextLuxWhenNotEnabled(true /* enableWhileWaiting */);
+    }
+
+    private void testNextLuxWhenNotEnabled(boolean enableWhileWaiting) {
+        final List<Integer> values = List.of(1, 2, 3, 4, 6);
+        mProbe.disable();
+
+        AtomicInteger lux = new AtomicInteger(-1);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+
+        if (enableWhileWaiting) {
+            mProbe.enable();
+        }
+
+        verify(mSensorManager).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+        for (int v : values) {
+            mSensorEventListenerCaptor.getValue().onSensorChanged(
+                    new SensorEvent(mLightSensor, 1, 1, new float[]{v}));
+        }
+
+        // should restore the disabled state
+        assertThat(lux.get()).isEqualTo(values.get(0));
+        verify(mSensorManager, enableWhileWaiting ? never() : times(1)).unregisterListener(
+                any(SensorEventListener.class));
+        verifyNoMoreInteractions(mSensorManager);
+    }
+
+    @Test
+    public void testNextLuxIsNotCanceledByDisableOrDestroy() {
+        final int value = 7;
+        AtomicInteger lux = new AtomicInteger(-1);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+
+        verify(mSensorManager).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+
+        mProbe.destroy();
+        mProbe.disable();
+
+        assertThat(lux.get()).isEqualTo(-1);
+
+        mSensorEventListenerCaptor.getValue().onSensorChanged(
+                new SensorEvent(mLightSensor, 1, 1, new float[]{value}));
+
+        assertThat(lux.get()).isEqualTo(value);
+
+        mSensorEventListenerCaptor.getValue().onSensorChanged(
+                new SensorEvent(mLightSensor, 1, 1, new float[]{value + 1}));
+
+        // should remain destroyed
+        mProbe.enable();
+
+        assertThat(lux.get()).isEqualTo(value);
+        verify(mSensorManager).unregisterListener(any(SensorEventListener.class));
+        verifyNoMoreInteractions(mSensorManager);
+    }
+
+    @Test
+    public void testMultipleNextConsumers() {
+        final int value = 7;
+        AtomicInteger lux = new AtomicInteger(-1);
+        AtomicInteger lux2 = new AtomicInteger(-1);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+        mProbe.awaitNextLux((v) -> lux2.set(Math.round(v)), null /* handler */);
+
+        verify(mSensorManager).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+        mSensorEventListenerCaptor.getValue().onSensorChanged(
+                new SensorEvent(mLightSensor, 1, 1, new float[]{value}));
+
+        assertThat(lux.get()).isEqualTo(value);
+        assertThat(lux2.get()).isEqualTo(value);
+    }
+
+    @Test
+    public void testDestroyAllowsAwaitLuxExactlyOnce() {
+        final float lastValue = 5.5f;
+        mProbe.destroy();
+
+        AtomicInteger lux = new AtomicInteger(10);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+
+        verify(mSensorManager).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+        mSensorEventListenerCaptor.getValue().onSensorChanged(
+                new SensorEvent(mLightSensor, 1, 1, new float[]{lastValue}));
+
+        assertThat(lux.get()).isEqualTo(Math.round(lastValue));
+        verify(mSensorManager).unregisterListener(eq(mSensorEventListenerCaptor.getValue()));
+
+        lux.set(22);
+        mProbe.enable();
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+        mProbe.enable();
+
+        assertThat(lux.get()).isEqualTo(Math.round(lastValue));
+        verifyNoMoreInteractions(mSensorManager);
     }
 
     private void moveTimeBy(long millis) {

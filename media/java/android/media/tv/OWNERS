@@ -1,6 +1,7 @@
 quxiangfang@google.com
 shubang@google.com
 hgchen@google.com
+qingxun@google.com
 
 # For android remote service
 per-file ITvRemoteServiceInput.aidl = file:/media/lib/tvremote/OWNERS

@@ -25,8 +25,11 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class PendingTasksContainer {
 
-    private var pendingTasksCount: AtomicInteger = AtomicInteger(0)
-    private var completionCallback: AtomicReference<Runnable> = AtomicReference()
+    @Volatile
+    private var pendingTasksCount = AtomicInteger(0)
+
+    @Volatile
+    private var completionCallback = AtomicReference<Runnable>()
 
     /**
      * Registers a task that we should wait for

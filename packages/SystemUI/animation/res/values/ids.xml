@@ -16,7 +16,6 @@
 -->
 <resources>
     <!-- DialogLaunchAnimator -->
-    <item type="id" name="tag_launch_animation_running"/>
     <item type="id" name="tag_dialog_background"/>
 
     <!-- ViewBoundsAnimator -->

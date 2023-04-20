@@ -28,6 +28,8 @@ public enum ClipboardOverlayEvent implements UiEventLogger.UiEventEnum {
     CLIPBOARD_OVERLAY_EDIT_TAPPED(951),
     @UiEvent(doc = "clipboard share tapped")
     CLIPBOARD_OVERLAY_SHARE_TAPPED(1067),
+    @UiEvent(doc = "clipboard smart action shown")
+    CLIPBOARD_OVERLAY_ACTION_SHOWN(1260),
     @UiEvent(doc = "clipboard action tapped")
     CLIPBOARD_OVERLAY_ACTION_TAPPED(952),
     @UiEvent(doc = "clipboard remote copy tapped")
@@ -41,7 +43,9 @@ public enum ClipboardOverlayEvent implements UiEventLogger.UiEventEnum {
     @UiEvent(doc = "clipboard overlay tapped outside")
     CLIPBOARD_OVERLAY_TAP_OUTSIDE(1077),
     @UiEvent(doc = "clipboard overlay dismissed, miscellaneous reason")
-    CLIPBOARD_OVERLAY_DISMISSED_OTHER(1078);
+    CLIPBOARD_OVERLAY_DISMISSED_OTHER(1078),
+    @UiEvent(doc = "clipboard toast shown")
+    CLIPBOARD_TOAST_SHOWN(1270);
 
     private final int mId;
 

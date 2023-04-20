@@ -293,6 +293,28 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "hwbinder-stubs-srcs",
+    srcs: [
+        "android/os/HidlSupport.java",
+        "android/os/HidlMemory.java",
+        "android/os/HwBinder.java",
+        "android/os/HwBlob.java",
+        "android/os/HwParcel.java",
+        "android/os/IHwBinder.java",
+        "android/os/IHwInterface.java",
+        "android/os/DeadObjectException.java",
+        "android/os/DeadSystemException.java",
+        "android/os/NativeHandle.java",
+        "android/os/RemoteException.java",
+        "android/util/AndroidException.java",
+    ],
+    visibility: [
+        "//frameworks/base",
+        "//frameworks/base/api",
+    ],
+}
+
 cc_defaults {
     name: "incremental_default",
     cflags: [

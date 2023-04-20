@@ -49,11 +49,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.R
-import com.android.systemui.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
-import kotlinx.coroutines.flow.collect
 
 /**
  * Compose the screen associated to a [PeopleViewModel].
@@ -140,11 +139,20 @@ private fun PeopleScreenWithConversations(
                     bottom = PeopleSpacePadding,
                     start = 8.dp,
                     end = 8.dp,
-                )
+                ),
         ) {
-            ConversationList(R.string.priority_conversations, priorityTiles, onTileClicked)
-            item { Spacer(Modifier.height(35.dp)) }
-            ConversationList(R.string.recent_conversations, recentTiles, onTileClicked)
+            val hasPriorityConversations = priorityTiles.isNotEmpty()
+            if (hasPriorityConversations) {
+                ConversationList(R.string.priority_conversations, priorityTiles, onTileClicked)
+            }
+
+            if (recentTiles.isNotEmpty()) {
+                if (hasPriorityConversations) {
+                    item { Spacer(Modifier.height(35.dp)) }
+                }
+
+                ConversationList(R.string.recent_conversations, recentTiles, onTileClicked)
+            }
         }
     }
 }

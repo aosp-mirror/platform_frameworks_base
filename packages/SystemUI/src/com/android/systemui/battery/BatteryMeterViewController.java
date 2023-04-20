@@ -17,19 +17,23 @@ package com.android.systemui.battery;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
-import android.app.ActivityManager;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.View;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
+import androidx.annotation.NonNull;
+
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -42,12 +46,13 @@ import javax.inject.Inject;
 public class BatteryMeterViewController extends ViewController<BatteryMeterView> {
     private final ConfigurationController mConfigurationController;
     private final TunerService mTunerService;
+    private final Handler mMainHandler;
     private final ContentResolver mContentResolver;
     private final BatteryController mBatteryController;
 
     private final String mSlotBattery;
     private final SettingObserver mSettingObserver;
-    private final CurrentUserTracker mCurrentUserTracker;
+    private final UserTracker mUserTracker;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -84,6 +89,21 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 public void onBatteryUnknownStateChanged(boolean isUnknown) {
                     mView.onBatteryUnknownStateChanged(isUnknown);
                 }
+
+                @Override
+                public void onIsOverheatedChanged(boolean isOverheated) {
+                    mView.onIsOverheatedChanged(isOverheated);
+                }
+            };
+
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mContentResolver.unregisterContentObserver(mSettingObserver);
+                    registerShowBatteryPercentObserver(newUser);
+                    mView.updateShowPercent();
+                }
             };
 
     // Some places may need to show the battery conditionally, and not obey the tuner
@@ -93,30 +113,26 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
     @Inject
     public BatteryMeterViewController(
             BatteryMeterView view,
+            UserTracker userTracker,
             ConfigurationController configurationController,
             TunerService tunerService,
-            BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler,
             ContentResolver contentResolver,
+            FeatureFlags featureFlags,
             BatteryController batteryController) {
         super(view);
+        mUserTracker = userTracker;
         mConfigurationController = configurationController;
         mTunerService = tunerService;
+        mMainHandler = mainHandler;
         mContentResolver = contentResolver;
         mBatteryController = batteryController;
 
         mView.setBatteryEstimateFetcher(mBatteryController::getEstimatedTimeRemainingString);
+        mView.setDisplayShieldEnabled(featureFlags.isEnabled(Flags.BATTERY_SHIELD_ICON));
 
         mSlotBattery = getResources().getString(com.android.internal.R.string.status_bar_battery);
-        mSettingObserver = new SettingObserver(mainHandler);
-        mCurrentUserTracker = new CurrentUserTracker(broadcastDispatcher) {
-            @Override
-            public void onUserSwitched(int newUserId) {
-                contentResolver.unregisterContentObserver(mSettingObserver);
-                registerShowBatteryPercentObserver(newUserId);
-                mView.updateShowPercent();
-            }
-        };
+        mSettingObserver = new SettingObserver(mMainHandler);
     }
 
     @Override
@@ -125,9 +141,9 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         subscribeForTunerUpdates();
         mBatteryController.addCallback(mBatteryStateChangeCallback);
 
-        registerShowBatteryPercentObserver(ActivityManager.getCurrentUser());
+        registerShowBatteryPercentObserver(mUserTracker.getUserId());
         registerGlobalBatteryUpdateObserver();
-        mCurrentUserTracker.startTracking();
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
 
         mView.updateShowPercent();
     }
@@ -138,7 +154,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         unsubscribeFromTunerUpdates();
         mBatteryController.removeCallback(mBatteryStateChangeCallback);
 
-        mCurrentUserTracker.stopTracking();
+        mUserTracker.removeCallback(mUserChangedCallback);
         mContentResolver.unregisterContentObserver(mSettingObserver);
     }
 

@@ -20,6 +20,7 @@ import static com.android.systemui.dreams.complication.Complication.COMPLICATION
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_CAST_INFO;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_DATE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_HOME_CONTROLS;
+import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_MEDIA_ENTRY;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_NONE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_SMARTSPACE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_TIME;
@@ -54,6 +55,8 @@ public class ComplicationUtils {
                 return COMPLICATION_TYPE_HOME_CONTROLS;
             case DreamBackend.COMPLICATION_TYPE_SMARTSPACE:
                 return COMPLICATION_TYPE_SMARTSPACE;
+            case DreamBackend.COMPLICATION_TYPE_MEDIA_ENTRY:
+                return COMPLICATION_TYPE_MEDIA_ENTRY;
             default:
                 return COMPLICATION_TYPE_NONE;
         }

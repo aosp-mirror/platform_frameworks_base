@@ -61,6 +61,12 @@ public final class StartingWindowRemovalInfo implements Parcelable {
      */
     public boolean deferRemoveForIme;
 
+    /**
+     * The rounded corner radius
+     * @hide
+     */
+    public float roundedCornerRadius;
+
     public StartingWindowRemovalInfo() {
 
     }
@@ -80,6 +86,7 @@ public final class StartingWindowRemovalInfo implements Parcelable {
         mainFrame = source.readTypedObject(Rect.CREATOR);
         playRevealAnimation = source.readBoolean();
         deferRemoveForIme = source.readBoolean();
+        roundedCornerRadius = source.readFloat();
     }
 
     @Override
@@ -89,6 +96,7 @@ public final class StartingWindowRemovalInfo implements Parcelable {
         dest.writeTypedObject(mainFrame, flags);
         dest.writeBoolean(playRevealAnimation);
         dest.writeBoolean(deferRemoveForIme);
+        dest.writeFloat(roundedCornerRadius);
     }
 
     @Override
@@ -96,6 +104,7 @@ public final class StartingWindowRemovalInfo implements Parcelable {
         return "StartingWindowRemovalInfo{taskId=" + taskId
                 + " frame=" + mainFrame
                 + " playRevealAnimation=" + playRevealAnimation
+                + " roundedCornerRadius=" + roundedCornerRadius
                 + " deferRemoveForIme=" + deferRemoveForIme + "}";
     }
 

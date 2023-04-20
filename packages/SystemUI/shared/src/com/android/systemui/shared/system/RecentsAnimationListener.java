@@ -17,6 +17,7 @@
 package com.android.systemui.shared.system;
 
 import android.graphics.Rect;
+import android.view.RemoteAnimationTarget;
 
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
@@ -27,7 +28,7 @@ public interface RecentsAnimationListener {
      * Called when the animation into Recents can start. This call is made on the binder thread.
      */
     void onAnimationStart(RecentsAnimationControllerCompat controller,
-            RemoteAnimationTargetCompat[] apps, RemoteAnimationTargetCompat[] wallpapers,
+            RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
             Rect homeContentInsets, Rect minimizedHomeBounds);
 
     /**
@@ -39,7 +40,7 @@ public interface RecentsAnimationListener {
      * Called when the task of an activity that has been started while the recents animation
      * was running becomes ready for control.
      */
-    void onTasksAppeared(RemoteAnimationTargetCompat[] app);
+    void onTasksAppeared(RemoteAnimationTarget[] app);
 
     /**
      * Called to request that the current task tile be switched out for a screenshot (if not

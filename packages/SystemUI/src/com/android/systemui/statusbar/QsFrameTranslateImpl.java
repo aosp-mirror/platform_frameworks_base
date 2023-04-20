@@ -27,6 +27,8 @@ import javax.inject.Inject;
 
 /**
  * Default implementation of QS Translation. This by default does not do much.
+ * This class can be subclassed to allow System UI variants the flexibility to change position of
+ * the Quick Settings frame.
  */
 @SysUISingleton
 public class QsFrameTranslateImpl extends QsFrameTranslateController {
@@ -37,8 +39,8 @@ public class QsFrameTranslateImpl extends QsFrameTranslateController {
     }
 
     @Override
-    public void translateQsFrame(View qsFrame, QS qs, float overExpansion,
-            float qsTranslationForFullShadeTransition) {
+    public void translateQsFrame(View qsFrame, QS qs, int bottomInset) {
+        // Empty implementation by default, meant to be overridden by subclasses.
     }
 
     @Override

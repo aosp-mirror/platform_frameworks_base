@@ -33,7 +33,7 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
     private val lastConfig = Configuration()
     private var density: Int = 0
     private var smallestScreenWidth: Int = 0
-    private var maxBounds: Rect? = null
+    private var maxBounds = Rect()
     private var fontScale: Float = 0.toFloat()
     private val inCarMode: Boolean
     private var uiMode: Int = 0
@@ -47,6 +47,7 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
         fontScale = currentConfig.fontScale
         density = currentConfig.densityDpi
         smallestScreenWidth = currentConfig.smallestScreenWidthDp
+        maxBounds.set(currentConfig.windowConfiguration.maxBounds)
         inCarMode = currentConfig.uiMode and Configuration.UI_MODE_TYPE_MASK ==
                 Configuration.UI_MODE_TYPE_CAR
         uiMode = currentConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -92,7 +93,11 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
 
         val maxBounds = newConfig.windowConfiguration.maxBounds
         if (maxBounds != this.maxBounds) {
-            this.maxBounds = maxBounds
+            // Update our internal rect to have the same bounds, instead of using
+            // `this.maxBounds = maxBounds` directly. Setting it directly means that `maxBounds`
+            // would be a direct reference to windowConfiguration.maxBounds, so the if statement
+            // above would always fail. See b/245799099 for more information.
+            this.maxBounds.set(maxBounds)
             listeners.filterForEach({ this.listeners.contains(it) }) {
                 it.onMaxBoundsChanged()
             }

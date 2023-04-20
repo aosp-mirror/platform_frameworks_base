@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Correio de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema de conexão ou código MMI inválido."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Recurso indisponível."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"A operação é limitada somente a números de discagem fixa."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Não é possível alterar as configurações de encaminhamento de chamada do seu smartphone em roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"O serviço foi ativado."</string>

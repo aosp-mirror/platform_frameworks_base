@@ -2885,10 +2885,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || event == Event.ACTIVITY_DESTROYED)) {
             contentCaptureService.notifyActivityEvent(userId, activity, event);
         }
-        // TODO(b/201234353): Move the logic to client side.
-        if (mVoiceInteractionManagerProvider != null && (event == Event.ACTIVITY_PAUSED
-                || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED)) {
-            mVoiceInteractionManagerProvider.notifyActivityEventChanged();
+        // Currently we have move most of logic to the client side. When the activity lifecycle
+        // event changed, the client side will notify the VoiceInteractionManagerService. But
+        // when the application process died, the VoiceInteractionManagerService will miss the
+        // activity lifecycle event changed, so we still need ACTIVITY_DESTROYED event here to
+        // know if the activity has been destroyed.
+        if (mVoiceInteractionManagerProvider != null && event == Event.ACTIVITY_DESTROYED) {
+            mVoiceInteractionManagerProvider.notifyActivityDestroyed(appToken);
         }
     }
 
@@ -8159,15 +8162,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                 Integer.toString(currentUserId), currentUserId);
 
-        // On Automotive, at this point the system user has already been started and unlocked,
-        // and some of the tasks we do here have already been done. So skip those in that case.
-        // TODO(b/132262830, b/203885241): this workdound shouldn't be necessary once we move the
-        // headless-user start logic to UserManager-land
-        final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
-
-        if (bootingSystemUser) {
-            mSystemServiceManager.onUserStarting(t, currentUserId);
-        }
+        // On Automotive / Headless System User Mode, at this point the system user has already been
+        // started and unlocked, and some of the tasks we do here have already been done. So skip
+        // those in that case. The duplicate system user start is guarded in SystemServiceManager.
+        // TODO(b/242195409): this workaround shouldn't be necessary once we move the headless-user
+        // start logic to UserManager-land.
+        mSystemServiceManager.onUserStarting(t, currentUserId);
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
@@ -8197,7 +8197,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 t.traceEnd();
             }
 
-            if (bootingSystemUser) {
+            boolean isBootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+
+            // Some systems - like automotive - will explicitly unlock system user then switch
+            // to a secondary user.
+            // TODO(b/242195409): this workaround shouldn't be necessary once we move
+            // the headless-user start logic to UserManager-land.
+            if (isBootingSystemUser && !UserManager.isHeadlessSystemUserMode()) {
                 t.traceBegin("startHomeOnAllDisplays");
                 mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
                 t.traceEnd();
@@ -8208,7 +8214,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             t.traceEnd();
 
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
+                // Need to send the broadcasts for the system user here because
+                // UserController#startUserInternal will not send them for the system user starting,
+                // It checks if the user state already exists, which is always the case for the
+                // system user.
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
@@ -8249,7 +8259,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             t.traceEnd();
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
                 t.traceBegin("sendUserSwitchBroadcasts");
                 mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
                 t.traceEnd();
@@ -8405,13 +8415,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        boolean recoverable = eventType.equals("native_recoverable_crash");
+
         EventLogTags.writeAmCrash(Binder.getCallingPid(),
                 UserHandle.getUserId(Binder.getCallingUid()), processName,
                 r == null ? -1 : r.info.flags,
                 crashInfo.exceptionClassName,
                 crashInfo.exceptionMessage,
                 crashInfo.throwFileName,
-                crashInfo.throwLineNumber);
+                crashInfo.throwLineNumber,
+                recoverable ? 1 : 0);
 
         int processClassEnum = processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
                 : (r != null) ? r.getProcessClassEnum()
@@ -8479,7 +8492,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 eventType, r, processName, null, null, null, null, null, null, crashInfo,
                 new Float(loadingProgress), incrementalMetrics, null);
 
-        mAppErrors.crashApplication(r, crashInfo);
+        // For GWP-ASan recoverable crashes, don't make the app crash (the whole point of
+        // 'recoverable' is that the app doesn't crash). Normally, for nonrecoreable native crashes,
+        // debuggerd will terminate the process, but there's a backup where ActivityManager will
+        // also kill it. Avoid that.
+        if (recoverable) {
+            mAppErrors.sendRecoverableCrashToAppExitInfo(r, crashInfo);
+        } else {
+            mAppErrors.crashApplication(r, crashInfo);
+        }
     }
 
     public void handleApplicationStrictModeViolation(
@@ -14647,6 +14668,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new SecurityException(msg);
                 }
             }
+            if (!Build.IS_DEBUGGABLE && callingUid != ROOT_UID && callingUid != SHELL_UID
+                    && callingUid != SYSTEM_UID && !hasActiveInstrumentationLocked(callingPid)) {
+                // If it's not debug build and not called from root/shell/system uid, reject it.
+                final String msg = "Permission Denial: instrumentation test "
+                        + className + " from pid=" + callingPid + ", uid=" + callingUid
+                        + ", pkgName=" + getPackageNameByPid(callingPid)
+                        + " not allowed because it's not started from SHELL";
+                Slog.wtfQuiet(TAG, msg);
+                reportStartInstrumentationFailureLocked(watcher, className, msg);
+                throw new SecurityException(msg);
+            }
 
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
@@ -14866,6 +14898,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                     targetInfo);
         } catch (RemoteException e) {
             Slog.i(TAG, "RemoteException from instrumentWithoutRestart", e);
+        }
+    }
+
+    @GuardedBy("this")
+    private boolean hasActiveInstrumentationLocked(int pid) {
+        if (pid == 0) {
+            return false;
+        }
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord process = mPidsSelfLocked.get(pid);
+            return process != null && process.getActiveInstrumentation() != null;
+        }
+    }
+
+    private String getPackageNameByPid(int pid) {
+        synchronized (mPidsSelfLocked) {
+            final ProcessRecord app = mPidsSelfLocked.get(pid);
+
+            if (app != null && app.info != null) {
+                return app.info.packageName;
+            }
+
+            return null;
         }
     }
 

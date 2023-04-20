@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.notification.collection.listbuilder
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.INFO
+import com.android.systemui.plugins.log.LogLevel.WARNING
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -193,7 +193,7 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logParentChangeSuppressed(
+    fun logParentChangeSuppressedStarted(
         buildId: Int,
         suppressedParent: GroupEntry?,
         keepingParent: GroupEntry?
@@ -204,6 +204,21 @@ class ShadeListBuilderLogger @Inject constructor(
             str2 = keepingParent?.logKey
         }, {
             "(Build $long1)     Change of parent to '$str1' suppressed; keeping parent '$str2'"
+        })
+    }
+
+    fun logParentChangeSuppressedStopped(
+            buildId: Int,
+            previouslySuppressedParent: GroupEntry?,
+            previouslyKeptParent: GroupEntry?
+    ) {
+        buffer.log(TAG, INFO, {
+            long1 = buildId.toLong()
+            str1 = previouslySuppressedParent?.logKey
+            str2 = previouslyKeptParent?.logKey
+        }, {
+            "(Build $long1)     Change of parent to '$str1' no longer suppressed; " +
+                    "replaced parent '$str2'"
         })
     }
 

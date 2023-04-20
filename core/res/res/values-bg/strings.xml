@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Гласова поща"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Има проблем с връзката или MMI кодът е невалиден."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функцията не се поддържа."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Операцията е ограничена само до фиксираните номера за набиране."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Докато сте в режим на роуминг, настройките за пренасочване на обажданията не могат да се променят от телефона ви."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Услугата бе активирана."</string>

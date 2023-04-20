@@ -646,7 +646,7 @@ public class StartingSurfaceDrawer {
                             mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
                                     removalInfo.windowAnimationLeash, removalInfo.mainFrame,
                                     () -> removeWindowInner(record.mDecorView, true),
-                                    record.mCreateTime);
+                                    record.mCreateTime, removalInfo.roundedCornerRadius);
                         } else {
                             // the SplashScreenView has been copied to client, hide the view to skip
                             // default exit animation

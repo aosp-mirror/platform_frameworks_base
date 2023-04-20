@@ -16,11 +16,11 @@
 
 package com.android.keyguard;
 
-import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
@@ -141,17 +141,13 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     public void showMessage(CharSequence message, ColorStateList colorState) {
     }
 
-    /**
-     * Reload colors from resources.
-     **/
-    @CallSuper
-    public void reloadColors() {
-        if (mEmergencyButton != null) {
-            mEmergencyButton.reloadColors();
-        }
-    }
-
     public void startAppearAnimation() {
+        if (TextUtils.isEmpty(mMessageAreaController.getMessage())
+                && getInitialMessageResId() != 0) {
+            mMessageAreaController.setMessage(
+                    mView.getResources().getString(getInitialMessageResId()),
+                    /* animate= */ false);
+        }
         mView.startAppearAnimation();
     }
 
@@ -168,6 +164,9 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     public int getIndexIn(KeyguardSecurityViewFlipper view) {
         return view.indexOfChild(mView);
     }
+
+    /** Determines the message to show in the bouncer when it first appears. */
+    protected abstract int getInitialMessageResId();
 
     /** Factory for a {@link KeyguardInputViewController}. */
     public static class Factory {

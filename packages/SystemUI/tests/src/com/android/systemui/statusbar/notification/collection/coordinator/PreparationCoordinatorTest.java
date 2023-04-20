@@ -181,7 +181,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testInflatesNewNotification() {
         // WHEN there is a new notification
-        mCollectionListener.onEntryAdded(mEntry);
+        mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
 
         // THEN we inflate it
@@ -194,7 +194,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testRebindsInflatedNotificationsOnUpdate() {
         // GIVEN an inflated notification
-        mCollectionListener.onEntryAdded(mEntry);
+        mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), any(), any());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
@@ -213,7 +213,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testEntrySmartReplyAdditionWillRebindViews() {
         // GIVEN an inflated notification
-        mCollectionListener.onEntryAdded(mEntry);
+        mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), any(), any());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
@@ -232,7 +232,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testEntryChangedToMinimizedSectionWillRebindViews() {
         // GIVEN an inflated notification
-        mCollectionListener.onEntryAdded(mEntry);
+        mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), mParamsCaptor.capture(), any());
         assertFalse(mParamsCaptor.getValue().isLowPriority());
@@ -254,7 +254,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     public void testMinimizedEntryMovedIntoGroupWillRebindViews() {
         // GIVEN an inflated, minimized notification
         setSectionIsLowPriority(true);
-        mCollectionListener.onEntryAdded(mEntry);
+        mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), mParamsCaptor.capture(), any());
         assertTrue(mParamsCaptor.getValue().isLowPriority());
@@ -275,7 +275,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testEntryRankChangeWillNotRebindViews() {
         // GIVEN an inflated notification
-        mCollectionListener.onEntryAdded(mEntry);
+        mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), any(), any());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
@@ -294,7 +294,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Test
     public void testDoesntFilterInflatedNotifs() {
         // GIVEN an inflated notification
-        mCollectionListener.onEntryAdded(mEntry);
+        mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), any(), any());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
@@ -330,9 +330,9 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
             mCollectionListener.onEntryInit(entry);
         }
 
-        mCollectionListener.onEntryAdded(summary);
+        mCollectionListener.onEntryInit(summary);
         for (NotificationEntry entry : children) {
-            mCollectionListener.onEntryAdded(entry);
+            mCollectionListener.onEntryInit(entry);
         }
 
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(groupEntry));
@@ -393,6 +393,70 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testNullGroupSummary() {
+        // GIVEN a newly-posted group with a summary and two children
+        final GroupEntry group = new GroupEntryBuilder()
+                .setCreationTime(400)
+                .setSummary(getNotificationEntryBuilder().setId(1).build())
+                .addChild(getNotificationEntryBuilder().setId(2).build())
+                .addChild(getNotificationEntryBuilder().setId(3).build())
+                .build();
+        fireAddEvents(List.of(group));
+        final NotificationEntry child0 = group.getChildren().get(0);
+        final NotificationEntry child1 = group.getChildren().get(1);
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(group));
+
+        // WHEN the summary is pruned
+        new GroupEntryBuilder()
+                .setCreationTime(400)
+                .addChild(child0)
+                .addChild(child1)
+                .build();
+
+        // WHEN all of the children (but not the summary) finish inflating
+        mNotifInflater.invokeInflateCallbackForEntry(child0);
+        mNotifInflater.invokeInflateCallbackForEntry(child1);
+
+        // THEN the entire group is not filtered out
+        assertFalse(mUninflatedFilter.shouldFilterOut(child0, 401));
+        assertFalse(mUninflatedFilter.shouldFilterOut(child1, 401));
+    }
+
+    @Test
+    public void testPartiallyInflatedGroupsAreNotFilteredOutIfSummaryReinflate() {
+        // GIVEN a newly-posted group with a summary and two children
+        final String groupKey = "test_reinflate_group";
+        final int summaryId = 1;
+        final GroupEntry group = new GroupEntryBuilder()
+                .setKey(groupKey)
+                .setCreationTime(400)
+                .setSummary(getNotificationEntryBuilder().setId(summaryId).setImportance(1).build())
+                .addChild(getNotificationEntryBuilder().setId(2).build())
+                .addChild(getNotificationEntryBuilder().setId(3).build())
+                .build();
+        fireAddEvents(List.of(group));
+        final NotificationEntry summary = group.getSummary();
+        final NotificationEntry child0 = group.getChildren().get(0);
+        final NotificationEntry child1 = group.getChildren().get(1);
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(group));
+
+        // WHEN all of the children (but not the summary) finish inflating
+        mNotifInflater.invokeInflateCallbackForEntry(child0);
+        mNotifInflater.invokeInflateCallbackForEntry(child1);
+        mNotifInflater.invokeInflateCallbackForEntry(summary);
+
+        // WHEN the summary is updated and starts re-inflating
+        summary.setRanking(new RankingBuilder(summary.getRanking()).setImportance(4).build());
+        fireUpdateEvents(summary);
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(group));
+
+        // THEN the entire group is still not filtered out
+        assertFalse(mUninflatedFilter.shouldFilterOut(summary, 401));
+        assertFalse(mUninflatedFilter.shouldFilterOut(child0, 401));
+        assertFalse(mUninflatedFilter.shouldFilterOut(child1, 401));
+    }
+
+    @Test
     public void testCompletedInflatedGroupsAreReleased() {
         // GIVEN a newly-posted group with a summary and two children
         final GroupEntry group = new GroupEntryBuilder()
@@ -412,7 +476,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mNotifInflater.invokeInflateCallbackForEntry(child1);
         mNotifInflater.invokeInflateCallbackForEntry(summary);
 
-        // THEN the entire group is still filtered out
+        // THEN the entire group is no longer filtered out
         assertFalse(mUninflatedFilter.shouldFilterOut(summary, 401));
         assertFalse(mUninflatedFilter.shouldFilterOut(child0, 401));
         assertFalse(mUninflatedFilter.shouldFilterOut(child1, 401));
@@ -494,7 +558,11 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
     private void fireAddEvents(NotificationEntry entry) {
         mCollectionListener.onEntryInit(entry);
-        mCollectionListener.onEntryAdded(entry);
+        mCollectionListener.onEntryInit(entry);
+    }
+
+    private void fireUpdateEvents(NotificationEntry entry) {
+        mCollectionListener.onEntryUpdated(entry);
     }
 
     private static final String TEST_MESSAGE = "TEST_MESSAGE";

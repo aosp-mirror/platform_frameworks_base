@@ -80,6 +80,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
@@ -162,7 +163,7 @@ public class ContentProviderHelper {
     private ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
             String name, IBinder token, int callingUid, String callingPackage, String callingTag,
             boolean stable, int userId) {
-        ContentProviderRecord cpr;
+        ContentProviderRecord cpr = null;
         ContentProviderConnection conn = null;
         ProviderInfo cpi = null;
         boolean providerRunning = false;
@@ -184,8 +185,21 @@ public class ContentProviderHelper {
 
             checkTime(startTime, "getContentProviderImpl: getProviderByName");
 
-            // First check if this content provider has been published...
-            cpr = mProviderMap.getProviderByName(name, userId);
+            UserManagerService userManagerService = UserManagerService.getInstance();
+
+            /*
+             For clone user profile and allowed authority, skipping finding provider and redirecting
+             it to owner profile. Ideally clone profile should not have MediaProvider instance
+             installed and mProviderMap would not have entry for clone user. This is just fallback
+             check to ensure even if MediaProvider is installed in Clone Profile, it should not be
+             used and redirect to owner user's MediaProvider.
+             */
+            //todo(b/236121588) MediaProvider should not be installed in clone profile.
+            if (!isAuthorityRedirectedForCloneProfile(name)
+                    || !userManagerService.isMediaSharedWithParent(userId)) {
+                // First check if this content provider has been published...
+                cpr = mProviderMap.getProviderByName(name, userId);
+            }
             // If that didn't work, check if it exists for user 0 and then
             // verify that it's a singleton provider before using it.
             if (cpr == null && userId != UserHandle.USER_SYSTEM) {
@@ -200,11 +214,9 @@ public class ContentProviderHelper {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
                     } else if (isAuthorityRedirectedForCloneProfile(name)) {
-                        UserManagerInternal umInternal = LocalServices.getService(
-                                UserManagerInternal.class);
-                        UserInfo userInfo = umInternal.getUserInfo(userId);
-
-                        if (userInfo != null && userInfo.isCloneProfile()) {
+                        if (userManagerService.isMediaSharedWithParent(userId)) {
+                            UserManagerInternal umInternal = LocalServices.getService(
+                                    UserManagerInternal.class);
                             userId = umInternal.getProfileParentId(userId);
                             checkCrossUser = false;
                         }

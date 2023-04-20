@@ -18,13 +18,10 @@ package androidx.window.extensions.embedding;
 
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
@@ -44,8 +41,7 @@ class TaskFragmentAnimationController {
     private final TaskFragmentAnimationRunner mRemoteRunner = new TaskFragmentAnimationRunner();
     @VisibleForTesting
     final RemoteAnimationDefinition mDefinition;
-    /** Task Ids that we have registered for remote animation. */
-    private final ArraySet<Integer> mRegisterTasks = new ArraySet<>();
+    private boolean mIsRegistered;
 
     TaskFragmentAnimationController(@NonNull TaskFragmentOrganizer organizer) {
         mOrganizer = organizer;
@@ -54,39 +50,30 @@ class TaskFragmentAnimationController {
                 new RemoteAnimationAdapter(mRemoteRunner, 0, 0, true /* changeNeedsSnapshot */);
         mDefinition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, animationAdapter);
         mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, animationAdapter);
-        mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_OPEN, animationAdapter);
         mDefinition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_CLOSE, animationAdapter);
         mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, animationAdapter);
-        mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_CLOSE, animationAdapter);
         mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, animationAdapter);
     }
 
-    void registerRemoteAnimations(int taskId) {
+    void registerRemoteAnimations() {
         if (DEBUG) {
             Log.v(TAG, "registerRemoteAnimations");
         }
-        if (mRegisterTasks.contains(taskId)) {
+        if (mIsRegistered) {
             return;
         }
-        mOrganizer.registerRemoteAnimations(taskId, mDefinition);
-        mRegisterTasks.add(taskId);
+        mOrganizer.registerRemoteAnimations(mDefinition);
+        mIsRegistered = true;
     }
 
-    void unregisterRemoteAnimations(int taskId) {
+    void unregisterRemoteAnimations() {
         if (DEBUG) {
             Log.v(TAG, "unregisterRemoteAnimations");
         }
-        if (!mRegisterTasks.contains(taskId)) {
+        if (!mIsRegistered) {
             return;
         }
-        mOrganizer.unregisterRemoteAnimations(taskId);
-        mRegisterTasks.remove(taskId);
-    }
-
-    void unregisterAllRemoteAnimations() {
-        final ArraySet<Integer> tasks = new ArraySet<>(mRegisterTasks);
-        for (int taskId : tasks) {
-            unregisterRemoteAnimations(taskId);
-        }
+        mOrganizer.unregisterRemoteAnimations();
+        mIsRegistered = false;
     }
 }

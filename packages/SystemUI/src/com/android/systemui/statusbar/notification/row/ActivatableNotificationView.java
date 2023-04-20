@@ -39,8 +39,12 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationShelf}
@@ -91,6 +95,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
             = new PathInterpolator(0, 0, 0.5f, 1);
+    private final Set<SourceType> mOnDetachResetRoundness = new HashSet<>();
     private int mTintedRippleColor;
     private int mNormalRippleColor;
     private Gefingerpoken mTouchHandler;
@@ -134,6 +139,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mDismissed;
     private boolean mRefocusOnDismiss;
     private AccessibilityManager mAccessibilityManager;
+    protected boolean mUseRoundnessSourceTypes;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -613,22 +619,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void resetAllContentAlphas() {}
 
     @Override
-    protected void applyRoundness() {
-        super.applyRoundness();
-        applyBackgroundRoundness(getCurrentBackgroundRadiusTop(),
-                getCurrentBackgroundRadiusBottom());
+    public void applyRoundnessAndInvalidate() {
+        applyBackgroundRoundness(getTopCornerRadius(), getBottomCornerRadius());
+        super.applyRoundnessAndInvalidate();
     }
 
     @Override
-    public float getCurrentBackgroundRadiusTop() {
+    public float getTopCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusTop(), fraction);
+        return MathUtils.lerp(0, super.getTopCornerRadius(), fraction);
     }
 
     @Override
-    public float getCurrentBackgroundRadiusBottom() {
+    public float getBottomCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusBottom(), fraction);
+        return MathUtils.lerp(0, super.getBottomCornerRadius(), fraction);
     }
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {
@@ -774,6 +779,33 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public void setAccessibilityManager(AccessibilityManager accessibilityManager) {
         mAccessibilityManager = accessibilityManager;
+    }
+
+    /**
+     * Enable the support for rounded corner based on the SourceType
+     * @param enabled true if is supported
+     */
+    public void useRoundnessSourceTypes(boolean enabled) {
+        mUseRoundnessSourceTypes = enabled;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mUseRoundnessSourceTypes && !mOnDetachResetRoundness.isEmpty()) {
+            for (SourceType sourceType : mOnDetachResetRoundness) {
+                requestRoundnessReset(sourceType);
+            }
+            mOnDetachResetRoundness.clear();
+        }
+    }
+
+    /**
+     * SourceType which should be reset when this View is detached
+     * @param sourceType will be reset on View detached
+     */
+    public void addOnDetachResetRoundness(SourceType sourceType) {
+        mOnDetachResetRoundness.add(sourceType);
     }
 
     public interface OnActivatedListener {

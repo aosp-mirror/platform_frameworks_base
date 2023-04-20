@@ -34,6 +34,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener;
@@ -111,7 +112,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             ConfigurationController configurationController,
             @Main Handler handler,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            ShadeExpansionStateManager shadeExpansionStateManager) {
         super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
@@ -132,6 +134,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 updateResources();
             }
         });
+
+        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
     }
 
     public void setAnimationStateHandler(AnimationStateHandler handler) {
@@ -220,13 +224,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         mTrackingHeadsUp = trackingHeadsUp;
     }
 
-    /**
-     * Notify that the status bar panel gets expanded or collapsed.
-     *
-     * @param isExpanded True to notify expanded, false to notify collapsed.
-     * TODO(b/237811427) replace with a listener
-     */
-    public void setIsPanelExpanded(boolean isExpanded) {
+    private void onShadeExpansionFullyChanged(Boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {

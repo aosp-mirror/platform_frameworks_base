@@ -15,6 +15,22 @@
       ]
     }
   ],
+  "presubmit-pm": [
+    {
+      "name": "PackageManagerServiceServerTests",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ],
   "presubmit": [
     {
       "name": "ManagedProvisioningTests",
@@ -50,14 +66,6 @@
     },
     {
       "name": "ExtServicesUnitTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
-      "name": "TestablesTests",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -156,6 +164,20 @@
    },
    {
      "name": "FrameworksServicesTests",
+     "options": [
+       {
+         "include-annotation": "android.platform.test.annotations.Presubmit"
+       },
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       },
+       {
+         "exclude-annotation": "org.junit.Ignore"
+       }
+     ]
+   },
+   {
+     "name": "PackageManagerServiceServerTests",
      "options": [
        {
          "include-annotation": "android.platform.test.annotations.Presubmit"

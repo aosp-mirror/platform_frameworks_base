@@ -22,6 +22,8 @@ import android.content.res.Configuration;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -37,7 +39,6 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
     private final ConfigurationController mConfigurationController;
     private final FalsingManager mFalsingManager;
     private final NonInterceptingScrollView mQSPanelContainer;
-
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
         @Override
@@ -65,13 +66,15 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
             QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController,
             ConfigurationController configurationController,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager,
+            FeatureFlags featureFlags) {
         super(view);
         mQsPanelController = qsPanelController;
         mQuickStatusBarHeaderController = quickStatusBarHeaderController;
         mConfigurationController = configurationController;
         mFalsingManager = falsingManager;
         mQSPanelContainer = mView.getQSPanelContainer();
+        view.setUseCombinedHeaders(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS));
     }
 
     @Override

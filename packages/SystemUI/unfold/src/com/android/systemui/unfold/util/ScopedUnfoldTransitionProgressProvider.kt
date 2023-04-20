@@ -110,6 +110,12 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
         lastTransitionProgress = progress
     }
 
+    override fun onTransitionFinishing() {
+        if (isReadyToHandleTransition) {
+            listeners.forEach { it.onTransitionFinishing() }
+        }
+    }
+
     override fun onTransitionFinished() {
         if (isReadyToHandleTransition) {
             listeners.forEach { it.onTransitionFinished() }

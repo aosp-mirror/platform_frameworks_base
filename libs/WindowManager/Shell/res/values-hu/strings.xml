@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Félretevés megszüntetése"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ez az alkalmazás csak egy ablakban nyitható meg."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Az alkalmazást nem lehet másodlagos kijelzőn elindítani."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Elválasztó az osztott nézetben"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Teljes méret"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Kis méret"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Bezárás"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Vissza"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Fogópont"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Teljes képernyő"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Asztali üzemmód"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Osztott képernyő"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Továbbiak"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Lebegő"</string>
 </resources>

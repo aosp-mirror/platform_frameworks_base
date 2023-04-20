@@ -28,19 +28,20 @@ import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleView;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CombinedShadeHeadersConstraintManager;
 import com.android.systemui.shade.CombinedShadeHeadersConstraintManagerImpl;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationsQuickSettingsContainer;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -64,7 +65,6 @@ import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -221,20 +221,22 @@ public abstract class StatusBarViewModule {
     @Named(LARGE_SCREEN_BATTERY_CONTROLLER)
     static BatteryMeterViewController getBatteryMeterViewController(
             @Named(SPLIT_SHADE_BATTERY_VIEW) BatteryMeterView batteryMeterView,
+            UserTracker userTracker,
             ConfigurationController configurationController,
             TunerService tunerService,
-            BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler,
             ContentResolver contentResolver,
+            FeatureFlags featureFlags,
             BatteryController batteryController
     ) {
         return new BatteryMeterViewController(
                 batteryMeterView,
+                userTracker,
                 configurationController,
                 tunerService,
-                broadcastDispatcher,
                 mainHandler,
                 contentResolver,
+                featureFlags,
                 batteryController);
 
     }
@@ -284,7 +286,7 @@ public abstract class StatusBarViewModule {
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
             NotificationIconAreaController notificationIconAreaController,
-            PanelExpansionStateManager panelExpansionStateManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             FeatureFlags featureFlags,
             StatusBarIconController statusBarIconController,
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
@@ -306,7 +308,7 @@ public abstract class StatusBarViewModule {
                 animationScheduler,
                 locationPublisher,
                 notificationIconAreaController,
-                panelExpansionStateManager,
+                shadeExpansionStateManager,
                 featureFlags,
                 statusBarIconController,
                 darkIconManagerFactory,

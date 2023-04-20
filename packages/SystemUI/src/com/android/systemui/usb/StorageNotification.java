@@ -21,7 +21,6 @@ import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +46,7 @@ import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.util.NotificationChannels;
 
@@ -56,20 +56,30 @@ import javax.inject.Inject;
 
 /** */
 @SysUISingleton
-public class StorageNotification extends CoreStartable {
+public class StorageNotification implements CoreStartable {
     private static final String TAG = "StorageNotification";
 
     private static final String ACTION_SNOOZE_VOLUME = "com.android.systemui.action.SNOOZE_VOLUME";
     private static final String ACTION_FINISH_WIZARD = "com.android.systemui.action.FINISH_WIZARD";
+    private final Context mContext;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     // TODO: delay some notifications to avoid bumpy fast operations
 
-    private NotificationManager mNotificationManager;
-    private StorageManager mStorageManager;
+    private final NotificationManager mNotificationManager;
+    private final StorageManager mStorageManager;
 
     @Inject
-    public StorageNotification(Context context) {
-        super(context);
+    public StorageNotification(
+            Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            NotificationManager notificationManager,
+            StorageManager storageManager
+    ) {
+        mContext = context;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mNotificationManager = notificationManager;
+        mStorageManager = storageManager;
     }
 
     private static class MoveInfo {
@@ -168,17 +178,22 @@ public class StorageNotification extends CoreStartable {
 
     @Override
     public void start() {
-        mNotificationManager = mContext.getSystemService(NotificationManager.class);
-
-        mStorageManager = mContext.getSystemService(StorageManager.class);
         mStorageManager.registerListener(mListener);
 
-        mContext.registerReceiver(mSnoozeReceiver, new IntentFilter(ACTION_SNOOZE_VOLUME),
-                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
-        mContext.registerReceiver(mFinishReceiver, new IntentFilter(ACTION_FINISH_WIZARD),
-                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+        mBroadcastDispatcher.registerReceiver(
+                mSnoozeReceiver,
+                new IntentFilter(ACTION_SNOOZE_VOLUME),
+                null,
+                null,
+                Context.RECEIVER_EXPORTED_UNAUDITED,
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        mBroadcastDispatcher.registerReceiver(
+                mFinishReceiver,
+                new IntentFilter(ACTION_FINISH_WIZARD),
+                null,
+                null,
+                Context.RECEIVER_EXPORTED_UNAUDITED,
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
         // Kick current state into place
         final List<DiskInfo> disks = mStorageManager.getDisks();

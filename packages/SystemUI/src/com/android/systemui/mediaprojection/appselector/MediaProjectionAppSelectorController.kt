@@ -17,20 +17,22 @@
 package com.android.systemui.mediaprojection.appselector
 
 import android.content.ComponentName
-import com.android.systemui.media.dagger.MediaProjectionAppSelector
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MediaProjectionAppSelectorController(
+@MediaProjectionAppSelectorScope
+class MediaProjectionAppSelectorController @Inject constructor(
     private val recentTaskListProvider: RecentTaskListProvider,
+    private val view: MediaProjectionAppSelectorView,
     @MediaProjectionAppSelector private val scope: CoroutineScope,
-    private val appSelectorComponentName: ComponentName
+    @MediaProjectionAppSelector private val appSelectorComponentName: ComponentName
 ) {
 
-    fun init(view: MediaProjectionAppSelectorView) {
+    fun init() {
         scope.launch {
             val tasks = recentTaskListProvider.loadRecentTasks().sortTasks()
             view.bind(tasks)

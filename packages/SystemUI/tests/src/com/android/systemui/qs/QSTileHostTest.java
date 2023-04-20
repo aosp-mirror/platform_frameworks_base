@@ -52,7 +52,9 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.dump.nano.SystemUIProtoDump;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -65,7 +67,6 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -113,8 +114,6 @@ public class QSTileHostTest extends SysuiTestCase {
     private Provider<AutoTileManager> mAutoTiles;
     @Mock
     private DumpManager mDumpManager;
-    @Mock
-    private QSTile.State mMockState;
     @Mock
     private CentralSurfaces mCentralSurfaces;
     @Mock
@@ -195,7 +194,6 @@ public class QSTileHostTest extends SysuiTestCase {
     }
 
     private void setUpTileFactory() {
-        when(mMockState.toString()).thenReturn(MOCK_STATE_STRING);
         // Only create this kind of tiles
         when(mDefaultFactory.createTile(anyString())).thenAnswer(
                 invocation -> {
@@ -209,7 +207,11 @@ public class QSTileHostTest extends SysuiTestCase {
                     } else if ("na".equals(spec)) {
                         return new NotAvailableTile(mQSTileHost);
                     } else if (CUSTOM_TILE_SPEC.equals(spec)) {
-                        return mCustomTile;
+                        QSTile tile = mCustomTile;
+                        QSTile.State s = mock(QSTile.State.class);
+                        s.spec = spec;
+                        when(mCustomTile.getState()).thenReturn(s);
+                        return tile;
                     } else if ("internet".equals(spec)
                             || "wifi".equals(spec)
                             || "cell".equals(spec)) {
@@ -647,7 +649,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Test
     public void testSetTileRemoved_removedBySystem() {
         int user = mUserTracker.getUserId();
-        saveSetting("spec1" + CUSTOM_TILE_SPEC);
+        saveSetting("spec1," + CUSTOM_TILE_SPEC);
 
         // This will be done by TileServiceManager
         mQSTileHost.setTileAdded(CUSTOM_TILE, user, true);
@@ -656,6 +658,27 @@ public class QSTileHostTest extends SysuiTestCase {
         mMainExecutor.runAllReady();
         assertFalse(getSharedPreferenecesForUser(user)
                 .getBoolean(CUSTOM_TILE.flattenToString(), false));
+    }
+
+    @Test
+    public void testProtoDump_noTiles() {
+        SystemUIProtoDump proto = new SystemUIProtoDump();
+        mQSTileHost.dumpProto(proto, new String[0]);
+
+        assertEquals(0, proto.tiles.length);
+    }
+
+    @Test
+    public void testTilesInOrder() {
+        saveSetting("spec1," + CUSTOM_TILE_SPEC);
+
+        SystemUIProtoDump proto = new SystemUIProtoDump();
+        mQSTileHost.dumpProto(proto, new String[0]);
+
+        assertEquals(2, proto.tiles.length);
+        assertEquals("spec1", proto.tiles[0].getSpec());
+        assertEquals(CUSTOM_TILE.getPackageName(), proto.tiles[1].getComponentName().packageName);
+        assertEquals(CUSTOM_TILE.getClassName(), proto.tiles[1].getComponentName().className);
     }
 
     private SharedPreferences getSharedPreferenecesForUser(int user) {
@@ -707,12 +730,9 @@ public class QSTileHostTest extends SysuiTestCase {
 
         @Override
         public State newTileState() {
-            return mMockState;
-        }
-
-        @Override
-        public State getState() {
-            return mMockState;
+            State s = mock(QSTile.State.class);
+            when(s.toString()).thenReturn(MOCK_STATE_STRING);
+            return s;
         }
 
         @Override

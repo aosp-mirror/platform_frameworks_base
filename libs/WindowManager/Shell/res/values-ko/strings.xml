@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"숨기기 취소"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"앱이 분할 화면에서 작동하지 않을 수 있습니다."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"앱이 화면 분할을 지원하지 않습니다."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"이 앱은 창 1개에서만 열 수 있습니다."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"앱이 보조 디스플레이에서 작동하지 않을 수도 있습니다."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"앱이 보조 디스플레이에서의 실행을 지원하지 않습니다."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"화면 분할기"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"최대화"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"최소화"</string>
     <string name="close_button_text" msgid="2913281996024033299">"닫기"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"뒤로"</string>
+    <string name="handle_text" msgid="1766582106752184456">"핸들"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"전체 화면"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"데스크톱 모드"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"화면 분할"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"더보기"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"플로팅"</string>
 </resources>

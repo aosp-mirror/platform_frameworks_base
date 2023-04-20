@@ -29,9 +29,9 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -75,29 +75,32 @@ object KeyguardBouncerViewBinder {
                     hostViewController.showPrimarySecurityScreen()
                     hostViewController.onResume()
                 }
+
+                override fun setDismissAction(
+                    onDismissAction: ActivityStarter.OnDismissAction?,
+                    cancelAction: Runnable?
+                ) {
+                    hostViewController.setOnDismissAction(onDismissAction, cancelAction)
+                }
+
+                override fun willDismissWithActions(): Boolean {
+                    return hostViewController.hasDismissActions()
+                }
             }
         view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 try {
                     viewModel.setBouncerViewDelegate(delegate)
                     launch {
                         viewModel.show.collect {
+                            hostViewController.showPromptReason(it.promptReason)
+                            it.errorMessage?.let { errorMessage ->
+                                hostViewController.showErrorMessage(errorMessage)
+                            }
                             hostViewController.showPrimarySecurityScreen()
                             hostViewController.appear(
                                 SystemBarUtils.getStatusBarHeight(view.context)
                             )
-                        }
-                    }
-
-                    launch {
-                        viewModel.showPromptReason.collect { prompt ->
-                            hostViewController.showPromptReason(prompt)
-                        }
-                    }
-
-                    launch {
-                        viewModel.showBouncerErrorMessage.collect { errorMessage ->
-                            hostViewController.showErrorMessage(errorMessage)
                         }
                     }
 
@@ -119,15 +122,6 @@ object KeyguardBouncerViewBinder {
 
                     launch {
                         viewModel.startingToHide.collect { hostViewController.onStartingToHide() }
-                    }
-
-                    launch {
-                        viewModel.setDismissAction.collect {
-                            hostViewController.setOnDismissAction(
-                                it.onDismissAction,
-                                it.cancelAction
-                            )
-                        }
                     }
 
                     launch {
@@ -158,7 +152,6 @@ object KeyguardBouncerViewBinder {
                             val visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
                             view.visibility = visibility
                             hostViewController.onBouncerVisibilityChanged(visibility)
-                            viewModel.notifyBouncerVisibilityHasChanged(visibility)
                         }
                     }
 
@@ -187,6 +180,7 @@ object KeyguardBouncerViewBinder {
                     launch {
                         viewModel.bouncerShowMessage.collect {
                             hostViewController.showMessage(it.message, it.colorStateList)
+                            viewModel.onMessageShown()
                         }
                     }
 

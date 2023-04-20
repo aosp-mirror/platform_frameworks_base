@@ -18,8 +18,8 @@ package com.android.server.notification;
 
 import static android.service.notification.NotificationListenerService.REASON_ASSISTANT_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_CLEAR_DATA;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
-import static android.service.notification.NotificationListenerService.REASON_TIMEOUT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -172,16 +172,23 @@ public interface NotificationRecordLogger {
         NOTIFICATION_CANCEL_SNOOZED(181),
         @UiEvent(doc = "Notification was canceled due to timeout")
         NOTIFICATION_CANCEL_TIMEOUT(182),
-        // Values 183-189 reserved for future system dismissal reasons
+        @UiEvent(doc = "Notification was canceled due to the backing channel being deleted")
+        NOTIFICATION_CANCEL_CHANNEL_REMOVED(1261),
+        @UiEvent(doc = "Notification was canceled due to the app's storage being cleared")
+        NOTIFICATION_CANCEL_CLEAR_DATA(1262),
+        // Values above this line must remain in the same order as the corresponding
+        // NotificationCancelReason enum values.
         @UiEvent(doc = "Notification was canceled due to user dismissal of a peeking notification.")
         NOTIFICATION_CANCEL_USER_PEEK(190),
         @UiEvent(doc = "Notification was canceled due to user dismissal from the always-on display")
         NOTIFICATION_CANCEL_USER_AOD(191),
+        @UiEvent(doc = "Notification was canceled due to user dismissal from a bubble")
+        NOTIFICATION_CANCEL_USER_BUBBLE(1228),
+        @UiEvent(doc = "Notification was canceled due to user dismissal from the lockscreen")
+        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193),
         @UiEvent(doc = "Notification was canceled due to user dismissal from the notification"
                 + " shade.")
         NOTIFICATION_CANCEL_USER_SHADE(192),
-        @UiEvent(doc = "Notification was canceled due to user dismissal from the lockscreen")
-        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193),
         @UiEvent(doc = "Notification was canceled due to an assistant adjustment update.")
         NOTIFICATION_CANCEL_ASSISTANT(906);
 
@@ -206,7 +213,7 @@ public interface NotificationRecordLogger {
             // Most cancel reasons do not have a meaningful surface. Reason codes map directly
             // to NotificationCancelledEvent codes.
             if (surface == NotificationStats.DISMISSAL_OTHER) {
-                if ((REASON_CLICK <= reason) && (reason <= REASON_TIMEOUT)) {
+                if ((REASON_CLICK <= reason) && (reason <= REASON_CLEAR_DATA)) {
                     return NotificationCancelledEvent.values()[reason];
                 }
                 if (reason == REASON_ASSISTANT_CANCEL) {
@@ -232,6 +239,10 @@ public interface NotificationRecordLogger {
                     return NOTIFICATION_CANCEL_USER_AOD;
                 case NotificationStats.DISMISSAL_SHADE:
                     return NOTIFICATION_CANCEL_USER_SHADE;
+                case NotificationStats.DISMISSAL_BUBBLE:
+                    return NOTIFICATION_CANCEL_USER_BUBBLE;
+                case NotificationStats.DISMISSAL_LOCKSCREEN:
+                    return NOTIFICATION_CANCEL_USER_LOCKSCREEN;
                 default:
                     if (NotificationManagerService.DBG) {
                         throw new IllegalArgumentException("Unexpected surface for user-dismiss "

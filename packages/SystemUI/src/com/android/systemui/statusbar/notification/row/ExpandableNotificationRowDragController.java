@@ -45,10 +45,13 @@ import android.widget.Toast;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.InstanceId;
+import com.android.internal.logging.InstanceIdSequence;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import javax.inject.Inject;
@@ -63,14 +66,17 @@ public class ExpandableNotificationRowDragController {
     private final Context mContext;
     private final HeadsUpManager mHeadsUpManager;
     private final ShadeController mShadeController;
+    private NotificationPanelLogger mNotificationPanelLogger;
 
     @Inject
     public ExpandableNotificationRowDragController(Context context,
             HeadsUpManager headsUpManager,
-            ShadeController shadeController) {
+            ShadeController shadeController,
+            NotificationPanelLogger notificationPanelLogger) {
         mContext = context;
         mHeadsUpManager = headsUpManager;
         mShadeController = shadeController;
+        mNotificationPanelLogger = notificationPanelLogger;
 
         init();
     }
@@ -120,12 +126,16 @@ public class ExpandableNotificationRowDragController {
         dragIntent.putExtra(ClipDescription.EXTRA_PENDING_INTENT, contentIntent);
         dragIntent.putExtra(Intent.EXTRA_USER, android.os.Process.myUserHandle());
         ClipData.Item item = new ClipData.Item(dragIntent);
+        InstanceId instanceId = new InstanceIdSequence(Integer.MAX_VALUE).newInstanceId();
+        item.getIntent().putExtra(ClipDescription.EXTRA_LOGGING_INSTANCE_ID, instanceId);
         ClipData dragData = new ClipData(clipDescription, item);
         View.DragShadowBuilder myShadow = new View.DragShadowBuilder(snapshot);
         view.setOnDragListener(getDraggedViewDragListener());
         boolean result = view.startDragAndDrop(dragData, myShadow, null, View.DRAG_FLAG_GLOBAL
                 | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
         if (result) {
+            // Log notification drag only if it succeeds
+            mNotificationPanelLogger.logNotificationDrag(enr.getEntry());
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             if (enr.isPinned()) {
                 mHeadsUpManager.releaseAllImmediately();

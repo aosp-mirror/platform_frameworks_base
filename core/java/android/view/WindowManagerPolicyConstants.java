@@ -169,6 +169,9 @@ public interface WindowManagerPolicyConstants {
             case PowerManager.WAKE_REASON_POWER_BUTTON:
             case PowerManager.WAKE_REASON_PLUGGED_IN:
             case PowerManager.WAKE_REASON_GESTURE:
+            case PowerManager.WAKE_REASON_TAP:
+            case PowerManager.WAKE_REASON_LIFT:
+            case PowerManager.WAKE_REASON_BIOMETRIC:
             case PowerManager.WAKE_REASON_CAMERA_LAUNCH:
             case PowerManager.WAKE_REASON_WAKE_KEY:
             case PowerManager.WAKE_REASON_WAKE_MOTION:

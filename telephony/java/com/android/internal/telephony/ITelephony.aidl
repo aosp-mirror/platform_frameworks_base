@@ -2564,4 +2564,11 @@ interface ITelephony {
      * @hide
      */
     boolean isRemovableEsimDefaultEuicc(String callingPackage);
+
+    /**
+     * Get the SIM state for the logical SIM slot index.
+     *
+     * @param slotIndex Logical SIM slot index.
+     */
+    int getSimStateForSlotIndex(int slotIndex);
 }

@@ -18,6 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dream_overlay_status_bar"
+    android:visibility="invisible"
     android:layout_width="match_parent"
     android:layout_height="@dimen/dream_overlay_status_bar_height"
     android:paddingEnd="@dimen/dream_overlay_status_bar_margin"

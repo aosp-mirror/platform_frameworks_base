@@ -43,6 +43,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bluetooth.BluetoothLogger;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +57,7 @@ import java.util.List;
 @SmallTest
 public class BluetoothControllerImplTest extends SysuiTestCase {
 
+    private UserTracker mUserTracker;
     private LocalBluetoothManager mMockBluetoothManager;
     private CachedBluetoothDeviceManager mMockDeviceManager;
     private LocalBluetoothAdapter mMockAdapter;
@@ -70,6 +72,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mMockBluetoothManager = mDependency.injectMockDependency(LocalBluetoothManager.class);
         mDevices = new ArrayList<>();
+        mUserTracker = mock(UserTracker.class);
         mMockDeviceManager = mock(CachedBluetoothDeviceManager.class);
         when(mMockDeviceManager.getCachedDevicesCopy()).thenReturn(mDevices);
         when(mMockBluetoothManager.getCachedDeviceManager()).thenReturn(mMockDeviceManager);
@@ -81,6 +84,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mMockDumpManager = mock(DumpManager.class);
 
         mBluetoothControllerImpl = new BluetoothControllerImpl(mContext,
+                mUserTracker,
                 mMockDumpManager,
                 mock(BluetoothLogger.class),
                 mTestableLooper.getLooper(),

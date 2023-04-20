@@ -713,6 +713,9 @@ public class BubblePositioner {
      * is being shown.
      */
     public PointF getDefaultStartPosition() {
+        if (mPinLocation != null) {
+            return mPinLocation;
+        }
         // Start on the left if we're in LTR, right otherwise.
         final boolean startOnLeft =
                 mContext.getResources().getConfiguration().getLayoutDirection()
@@ -766,11 +769,18 @@ public class BubblePositioner {
     }
 
     /**
-     * In some situations bubbles will be pinned to a specific onscreen location. This sets the
-     * location to anchor the stack to.
+     * In some situations bubbles will be pinned to a specific onscreen location. This sets whether
+     * bubbles should be pinned or not.
      */
-    public void setPinnedLocation(PointF point) {
-        mPinLocation = point;
+    public void setUsePinnedLocation(boolean usePinnedLocation) {
+        if (usePinnedLocation) {
+            mShowingInTaskbar = true;
+            mPinLocation = new PointF(mPositionRect.right - mBubbleSize,
+                    mPositionRect.bottom - mBubbleSize);
+        } else {
+            mPinLocation = null;
+            mShowingInTaskbar = false;
+        }
     }
 
     /**

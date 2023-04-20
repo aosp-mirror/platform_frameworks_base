@@ -16,6 +16,8 @@
 
 package com.android.systemui.flags;
 
+import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
+
 import static java.util.Objects.requireNonNull;
 
 import android.content.res.Resources;
@@ -24,10 +26,8 @@ import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Default implementation of the a Flag manager that returns default values for release builds
@@ -44,14 +45,25 @@ import javax.inject.Inject;
  * how to set flags.
  */
 @SysUISingleton
-public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
+public class FeatureFlagsRelease implements FeatureFlags {
+    static final String TAG = "SysUIFlags";
+
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
     private final DeviceConfigProxy mDeviceConfigProxy;
     private final ServerFlagReader mServerFlagReader;
+    private final Restarter mRestarter;
+    private final Map<Integer, Flag<?>> mAllFlags;
     SparseBooleanArray mBooleanCache = new SparseBooleanArray();
     SparseArray<String> mStringCache = new SparseArray<>();
-    private boolean mInited;
+
+    private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
+            new ServerFlagReader.ChangeListener() {
+                @Override
+                public void onChange() {
+                    mRestarter.restartSystemUI();
+                }
+            };
 
     @Inject
     public FeatureFlagsRelease(
@@ -59,19 +71,28 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
             SystemPropertiesHelper systemProperties,
             DeviceConfigProxy deviceConfigProxy,
             ServerFlagReader serverFlagReader,
-            DumpManager dumpManager) {
+            @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
+            Restarter restarter) {
         mResources = resources;
         mSystemProperties = systemProperties;
         mDeviceConfigProxy = deviceConfigProxy;
         mServerFlagReader = serverFlagReader;
-        dumpManager.registerDumpable("SysUIFlags", this);
+        mAllFlags = allFlags;
+        mRestarter = restarter;
+    }
+
+    /** Call after construction to setup listeners. */
+    void init() {
+        mServerFlagReader.listenForChanges(mAllFlags.values(), mOnPropertiesChanged);
     }
 
     @Override
-    public void addListener(@NonNull Flag<?> flag, @NonNull Listener listener) {}
+    public void addListener(@NonNull Flag<?> flag, @NonNull Listener listener) {
+    }
 
     @Override
-    public void removeListener(@NonNull Listener listener) {}
+    public void removeListener(@NonNull Listener listener) {
+    }
 
     @Override
     public boolean isEnabled(@NotNull UnreleasedFlag flag) {
@@ -80,7 +101,7 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
 
     @Override
     public boolean isEnabled(@NotNull ReleasedFlag flag) {
-        return mServerFlagReader.readServerOverride(flag.getId(), true);
+        return mServerFlagReader.readServerOverride(flag.getNamespace(), flag.getName(), true);
     }
 
     @Override
@@ -88,18 +109,6 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
         int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
         if (cacheIndex < 0) {
             return isEnabled(flag.getId(), mResources.getBoolean(flag.getResourceId()));
-        }
-
-        return mBooleanCache.valueAt(cacheIndex);
-    }
-
-    @Override
-    public boolean isEnabled(@NonNull DeviceConfigBooleanFlag flag) {
-        int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
-        if (cacheIndex < 0) {
-            boolean deviceConfigValue = mDeviceConfigProxy.getBoolean(flag.getNamespace(),
-                    flag.getName(), flag.getDefault());
-            return isEnabled(flag.getId(), deviceConfigValue);
         }
 
         return mBooleanCache.valueAt(cacheIndex);
@@ -144,13 +153,25 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
         return defaultValue;
     }
 
+    @NonNull
+    @Override
+    public int getInt(@NonNull IntFlag flag) {
+        return flag.getDefault();
+    }
+
+    @NonNull
+    @Override
+    public int getInt(@NonNull ResourceIntFlag flag) {
+        return mResources.getInteger(flag.getResourceId());
+    }
+
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");
-        Map<Integer, Flag<?>> knownFlags = Flags.collectFlags();
-        for (Map.Entry<Integer, Flag<?>> idToFlag : knownFlags.entrySet()) {
-            int id = idToFlag.getKey();
-            Flag<?> flag = idToFlag.getValue();
+        Map<String, Flag<?>> knownFlags = FlagsFactory.INSTANCE.getKnownFlags();
+        for (Map.Entry<String, Flag<?>> nameToFlag : knownFlags.entrySet()) {
+            Flag<?> flag = nameToFlag.getValue();
+            int id = flag.getId();
             boolean def = false;
             if (mBooleanCache.indexOfKey(flag.getId()) < 0) {
                 if (flag instanceof SysPropBooleanFlag) {

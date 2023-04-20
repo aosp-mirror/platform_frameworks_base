@@ -1209,6 +1209,9 @@ public class AudioDeviceInventory {
                         "LE Audio device addr=" + address + " now available").printLog(TAG));
             }
 
+            // Reset LEA suspend state each time a new sink is connected
+            mAudioSystem.setParameters("LeAudioSuspended=false");
+
             mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
                     new DeviceInfo(device, name, address, AudioSystem.AUDIO_FORMAT_DEFAULT));
             mDeviceBroker.postAccessoryPlugMediaUnmute(device);
@@ -1254,6 +1257,9 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeLeAudioDeviceUnavailableLater(String address, int device, int delayMs) {
+        // prevent any activity on the LEA output to avoid unwanted
+        // reconnection of the sink.
+        mAudioSystem.setParameters("LeAudioSuspended=true");
         // the device will be made unavailable later, so consider it disconnected right away
         mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
         // send the delayed message to make the device unavailable later

@@ -98,6 +98,8 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
 
         override fun setIsDreaming(isDreaming: Boolean) {}
 
+        override fun setUiSurface(uiSurface: String) {}
+
         override fun setDozeAmount(amount: Float) {}
 
         override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {}

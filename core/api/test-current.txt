@@ -141,8 +141,9 @@ package android.app {
     field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
     field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 4; // 0x4
-    field public static final int PROCESS_CAPABILITY_NETWORK = 8; // 0x8
+    field @Deprecated public static final int PROCESS_CAPABILITY_NETWORK = 8; // 0x8
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
+    field public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 8; // 0x8
     field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
     field public static final int PROCESS_STATE_TOP = 2; // 0x2
     field public static final int STOP_USER_ON_SWITCH_DEFAULT = -1; // 0xffffffff
@@ -264,6 +265,7 @@ package android.app {
   }
 
   public class BroadcastOptions {
+    ctor public BroadcastOptions();
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
     method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
@@ -1140,6 +1142,7 @@ package android.hardware.camera2 {
   public final class CameraManager {
     method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(allOf={android.Manifest.permission.SYSTEM_CAMERA, android.Manifest.permission.CAMERA}) public void openCamera(@NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
+    field public static final long OVERRIDE_FRONT_CAMERA_APP_COMPAT = 250678880L; // 0xef10e60L
   }
 
   public abstract static class CameraManager.AvailabilityCallback {
@@ -1697,7 +1700,9 @@ package android.os {
     method public static boolean is64BitAbi(String);
     method public static boolean isDebuggable();
     field @Nullable public static final String BRAND_FOR_ATTESTATION;
+    field @Nullable public static final String DEVICE_FOR_ATTESTATION;
     field public static final boolean IS_EMULATOR;
+    field @Nullable public static final String MANUFACTURER_FOR_ATTESTATION;
     field @Nullable public static final String MODEL_FOR_ATTESTATION;
     field @Nullable public static final String PRODUCT_FOR_ATTESTATION;
   }

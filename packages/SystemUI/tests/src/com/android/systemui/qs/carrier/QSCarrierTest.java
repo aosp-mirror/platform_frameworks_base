@@ -24,6 +24,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
@@ -48,6 +49,7 @@ public class QSCarrierTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mTestableLooper = TestableLooper.get(this);
         LayoutInflater inflater = LayoutInflater.from(mContext);
+        mContext.ensureTestableResources();
         mTestableLooper.runWithLooper(() ->
                 mQSCarrier = (QSCarrier) inflater.inflate(R.layout.qs_carrier, null));
 
@@ -118,5 +120,31 @@ public class QSCarrierTest extends SysuiTestCase {
 
         mQSCarrier.updateState(c, true);
         assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());
+    }
+
+    @Test
+    public void testCarrierNameMaxWidth_smallScreen_fromResource() {
+        int maxEms = 10;
+        mContext.getOrCreateTestableResources().addOverride(R.integer.qs_carrier_max_em, maxEms);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_large_screen_shade_header, false);
+        TextView carrierText = mQSCarrier.requireViewById(R.id.qs_carrier_text);
+
+        mQSCarrier.onConfigurationChanged(mContext.getResources().getConfiguration());
+
+        assertEquals(maxEms, carrierText.getMaxEms());
+    }
+
+    @Test
+    public void testCarrierNameMaxWidth_largeScreen_maxInt() {
+        int maxEms = 10;
+        mContext.getOrCreateTestableResources().addOverride(R.integer.qs_carrier_max_em, maxEms);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_large_screen_shade_header, true);
+        TextView carrierText = mQSCarrier.requireViewById(R.id.qs_carrier_text);
+
+        mQSCarrier.onConfigurationChanged(mContext.getResources().getConfiguration());
+
+        assertEquals(Integer.MAX_VALUE, carrierText.getMaxEms());
     }
 }

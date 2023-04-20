@@ -123,7 +123,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
 
     private void receive(
             int resultCode, Bundle resultData,
-            @NonNull OnBackInvokedDispatcher receivingDispatcher) {
+            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
         final int callbackId = resultData.getInt(RESULT_KEY_ID);
         if (resultCode == RESULT_CODE_REGISTER) {
             int priority = resultData.getInt(RESULT_KEY_PRIORITY);
@@ -140,11 +140,11 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             @NonNull IOnBackInvokedCallback iCallback,
             @OnBackInvokedDispatcher.Priority int priority,
             int callbackId,
-            @NonNull OnBackInvokedDispatcher receivingDispatcher) {
+            @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
         final ImeOnBackInvokedCallback imeCallback =
                 new ImeOnBackInvokedCallback(iCallback, callbackId, priority);
         mImeCallbacks.add(imeCallback);
-        receivingDispatcher.registerOnBackInvokedCallback(priority, imeCallback);
+        receivingDispatcher.registerOnBackInvokedCallbackUnchecked(imeCallback, priority);
     }
 
     private void unregisterReceivedCallback(
@@ -220,16 +220,14 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
      * @param previous the previously focused {@link ViewRootImpl}.
      * @param current the currently focused {@link ViewRootImpl}.
      */
-    // TODO(b/232845902): Add CTS to test IME back behavior when there's root view change while
-    // IME is up.
     public void switchRootView(ViewRootImpl previous, ViewRootImpl current) {
         for (ImeOnBackInvokedCallback imeCallback : mImeCallbacks) {
             if (previous != null) {
                 previous.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(imeCallback);
             }
             if (current != null) {
-                current.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        imeCallback.mPriority, imeCallback);
+                current.getOnBackInvokedDispatcher().registerOnBackInvokedCallbackUnchecked(
+                        imeCallback, imeCallback.mPriority);
             }
         }
     }

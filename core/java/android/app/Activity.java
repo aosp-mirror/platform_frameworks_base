@@ -87,10 +87,12 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.service.voice.VoiceInteractionSession;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -154,6 +156,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
@@ -1601,6 +1604,25 @@ public class Activity extends ContextThemeWrapper
         return callbacks;
     }
 
+    private void notifyVoiceInteractionManagerServiceActivityEvent(
+            @VoiceInteractionSession.VoiceInteractionActivityEventType int type) {
+
+        final IVoiceInteractionManagerService service =
+                IVoiceInteractionManagerService.Stub.asInterface(
+                        ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        if (service == null) {
+            Log.w(TAG, "notifyVoiceInteractionManagerServiceActivityEvent: Can not get "
+                    + "VoiceInteractionManagerService");
+            return;
+        }
+
+        try {
+            service.notifyActivityEventChanged(mToken, type);
+        } catch (RemoteException e) {
+            // Empty
+        }
+    }
+
     /**
      * Called when the activity is starting.  This is where most initialization
      * should go: calling {@link #setContentView(int)} to inflate the
@@ -1662,7 +1684,7 @@ public class Activity extends ContextThemeWrapper
                 .isOnBackInvokedCallbackEnabled(this);
         if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = this::navigateBack;
+            mDefaultBackCallback = this::onBackInvoked;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
@@ -1876,6 +1898,9 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_START);
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_START);
     }
 
     /**
@@ -2019,6 +2044,12 @@ public class Activity extends ContextThemeWrapper
         final Window win = getWindow();
         if (win != null) win.makeActive();
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
+
+        // Because the test case "com.android.launcher3.jank.BinderTests#testPressHome" doesn't
+        // allow any binder call in onResume, we call this method in onPostResume.
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_RESUME);
+
         mCalled = true;
     }
 
@@ -2394,6 +2425,10 @@ public class Activity extends ContextThemeWrapper
         getAutofillClientController().onActivityPaused();
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_PAUSE);
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE);
+
         mCalled = true;
     }
 
@@ -2623,6 +2658,9 @@ public class Activity extends ContextThemeWrapper
 
         getAutofillClientController().onActivityStopped(mIntent, mChangingConfigurations);
         mEnterAnimationComplete = false;
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_STOP);
     }
 
     /**
@@ -3964,22 +4002,19 @@ public class Activity extends ContextThemeWrapper
         if (!fragmentManager.isStateSaved() && fragmentManager.popBackStackImmediate()) {
             return;
         }
-        navigateBack();
+        onBackInvoked();
     }
 
-    private void navigateBack() {
-        if (!isTaskRoot()) {
-            // If the activity is not the root of the task, allow finish to proceed normally.
-            finishAfterTransition();
-            return;
-        }
-        // Inform activity task manager that the activity received a back press while at the
-        // root of the task. This call allows ActivityTaskManager to intercept or move the task
-        // to the back.
-        ActivityClient.getInstance().onBackPressedOnTaskRoot(mToken,
+    private void onBackInvoked() {
+        // Inform activity task manager that the activity received a back press.
+        // This call allows ActivityTaskManager to intercept or move the task
+        // to the back when needed.
+        ActivityClient.getInstance().onBackPressed(mToken,
                 new RequestFinishCallback(new WeakReference<>(this)));
 
-        getAutofillClientController().onActivityBackPressed(mIntent);
+        if (isTaskRoot()) {
+            getAutofillClientController().onActivityBackPressed(mIntent);
+        }
     }
 
     /**
@@ -8045,8 +8080,9 @@ public class Activity extends ContextThemeWrapper
                 resultData.prepareToLeaveProcess(this);
             }
             upIntent.prepareToLeaveProcess(this);
-            return ActivityClient.getInstance().navigateUpTo(mToken, upIntent, resultCode,
-                    resultData);
+            String resolvedType = upIntent.resolveTypeIfNeeded(getContentResolver());
+            return ActivityClient.getInstance().navigateUpTo(mToken, upIntent, resolvedType,
+                    resultCode, resultData);
         } else {
             return mParent.navigateUpToFromChild(this, upIntent);
         }

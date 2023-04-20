@@ -59,6 +59,7 @@ public class FalsingDataProvider {
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
     private boolean mJustUnlockedWithFace;
+    private boolean mA11YAction;
 
     @Inject
     public FalsingDataProvider(
@@ -124,6 +125,7 @@ public class FalsingDataProvider {
             mPriorMotionEvents = mRecentMotionEvents;
             mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
         }
+        mA11YAction = false;
     }
 
     /** Returns screen width in pixels. */
@@ -332,6 +334,17 @@ public class FalsingDataProvider {
     /** Unregister a {@link GestureFinalizedListener}. */
     public void removeGestureCompleteListener(GestureFinalizedListener listener) {
         mGestureFinalizedListeners.remove(listener);
+    }
+
+    /** Return whether last gesture was an A11y action. */
+    public boolean isA11yAction() {
+        return mA11YAction;
+    }
+
+    /** Set whether last gesture was an A11y action. */
+    public void onA11yAction() {
+        completePriorGesture();
+        this.mA11YAction = true;
     }
 
     void onSessionStarted() {

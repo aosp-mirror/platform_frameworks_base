@@ -52,7 +52,7 @@ class ActionReceiver(
     private val userId: Int,
     private val registerAction: BroadcastReceiver.(IntentFilter) -> Unit,
     private val unregisterAction: BroadcastReceiver.() -> Unit,
-    private val bgExecutor: Executor,
+    private val workerExecutor: Executor,
     private val logger: BroadcastDispatcherLogger,
     private val testPendingRemovalAction: (BroadcastReceiver, Int) -> Boolean
 ) : BroadcastReceiver(), Dumpable {
@@ -112,7 +112,7 @@ class ActionReceiver(
         val id = index.getAndIncrement()
         logger.logBroadcastReceived(id, userId, intent)
         // Immediately return control to ActivityManager
-        bgExecutor.execute {
+        workerExecutor.execute {
             receiverDatas.forEach {
                 if (it.filter.matchCategories(intent.categories) == null &&
                     !testPendingRemovalAction(it.receiver, userId)) {

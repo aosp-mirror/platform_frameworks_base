@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
@@ -8,8 +9,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.LegacySourceType
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.StackScrollAlgorithmState
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
@@ -37,6 +40,13 @@ class NotificationShelfTest : SysuiTestCase() {
     private val shelfState = shelf.viewState as NotificationShelf.ShelfState
     private val ambientState = mock(AmbientState::class.java)
     private val hostLayoutController: NotificationStackScrollLayoutController = mock()
+    private val notificationTestHelper by lazy {
+        allowTestableLooperAsMainThread()
+        NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this))
+    }
 
     @Before
     fun setUp() {
@@ -297,6 +307,39 @@ class NotificationShelfTest : SysuiTestCase() {
                 expansionFraction = 0.95f,
                 expectedAlpha = aboutToShowBouncerProgress(0.95f)
         )
+    }
+
+    @Test
+    fun resetOnScrollRoundness_shouldSetOnScrollTo0() {
+        val row: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
+                /* topRoundness = */ 1f,
+                /* bottomRoundness = */ 1f,
+                /* sourceType = */ LegacySourceType.OnScroll)
+
+        NotificationShelf.resetLegacyOnScrollRoundness(row)
+
+        assertEquals(0f, row.topRoundness)
+        assertEquals(0f, row.bottomRoundness)
+    }
+
+    @Test
+    fun resetOnScrollRoundness_shouldNotResetOtherRoundness() {
+        val row1: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
+                /* topRoundness = */ 1f,
+                /* bottomRoundness = */ 1f,
+                /* sourceType = */ LegacySourceType.DefaultValue)
+        val row2: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
+                /* topRoundness = */ 1f,
+                /* bottomRoundness = */ 1f,
+                /* sourceType = */ LegacySourceType.OnDismissAnimation)
+
+        NotificationShelf.resetLegacyOnScrollRoundness(row1)
+        NotificationShelf.resetLegacyOnScrollRoundness(row2)
+
+        assertEquals(1f, row1.topRoundness)
+        assertEquals(1f, row1.bottomRoundness)
+        assertEquals(1f, row2.topRoundness)
+        assertEquals(1f, row2.bottomRoundness)
     }
 
     private fun setFractionToShade(fraction: Float) {

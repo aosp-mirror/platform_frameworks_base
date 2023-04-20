@@ -25,7 +25,7 @@ import android.service.notification.StatusBarNotification;
 import com.android.systemui.plugins.NotificationListenerController;
 import com.android.systemui.plugins.NotificationListenerController.NotificationProvider;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 
 import java.util.ArrayList;
 

@@ -155,6 +155,9 @@ public interface BatteryController extends DemoMode,
 
         default void onWirelessChargingChanged(boolean isWirlessCharging) {
         }
+
+        default void onIsOverheatedChanged(boolean isOverheated) {
+        }
     }
 
     /**

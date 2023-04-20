@@ -54,6 +54,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -83,7 +84,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -101,6 +101,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -137,8 +138,8 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private PackageManager mPackageManager;
     @Mock
     private IBinder mBinder;
-    @Mock
-    private DreamManagerInternal mDreamManager;
+    @Spy
+    private TestInjector mInjector;
     @Captor
     private ArgumentCaptor<Intent> mOrderedBroadcastIntent;
     @Captor
@@ -207,10 +208,10 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         addLocalService(WindowManagerInternal.class, mWindowManager);
         addLocalService(PowerManagerInternal.class, mLocalPowerManager);
         addLocalService(TwilightManager.class, mTwilightManager);
-        addLocalService(DreamManagerInternal.class, mDreamManager);
-        
+
+        mInjector = spy(new TestInjector());
         mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
-                mTwilightManager, new TestInjector());
+                mTwilightManager, mInjector);
         try {
             mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {/* ignore for permission denial */}
@@ -1321,84 +1322,86 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void dreamWhenDocked() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
-
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
-    }
-
-    @Test
-    public void noDreamWhenDocked_dreamsDisabled() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(false);
-
-        triggerDockIntent();
-        verifyAndSendResultBroadcast();
-        verify(mDreamManager, never()).requestDream();
-    }
-
-    @Test
-    public void noDreamWhenDocked_dreamsWhenDockedDisabled() {
-        setScreensaverActivateOnDock(false);
-        setScreensaverEnabled(true);
-
-        triggerDockIntent();
-        verifyAndSendResultBroadcast();
-        verify(mDreamManager, never()).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void noDreamWhenDocked_keyguardNotShowing_interactive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(false);
         when(mPowerManager.isInteractive()).thenReturn(true);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager, never()).requestDream();
+        verify(mInjector, never()).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void dreamWhenDocked_keyguardShowing_interactive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(true);
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void dreamWhenDocked_keyguardNotShowing_notInteractive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(false);
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void dreamWhenDocked_keyguardShowing_notInteractive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(true);
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeSuppressed_suppressionEnabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(true);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(true);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector, never()).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeSuppressed_suppressionDisabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(false);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(true);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeNotSuppressed_suppressionEnabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(true);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(false);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     private void triggerDockIntent() {
@@ -1435,22 +1438,6 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
                 mOrderedBroadcastIntent.getValue());
     }
 
-    private void setScreensaverEnabled(boolean enable) {
-        Settings.Secure.putIntForUser(
-                mContentResolver,
-                Settings.Secure.SCREENSAVER_ENABLED,
-                enable ? 1 : 0,
-                UserHandle.USER_CURRENT);
-    }
-
-    private void setScreensaverActivateOnDock(boolean enable) {
-        Settings.Secure.putIntForUser(
-                mContentResolver,
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                enable ? 1 : 0,
-                UserHandle.USER_CURRENT);
-    }
-
     private void requestAllPossibleProjectionTypes() throws RemoteException {
         for (int i = 0; i < Integer.SIZE; ++i) {
             mService.requestProjection(mBinder, 1 << i, PACKAGE_NAME);
@@ -1467,11 +1454,17 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         }
 
         public TestInjector(int callingUid) {
-          this.callingUid = callingUid;
+            this.callingUid = callingUid;
         }
 
+        @Override
         public int getCallingUid() {
             return callingUid;
+        }
+
+        @Override
+        public void startDreamWhenDockedIfAppropriate(Context context) {
+            // do nothing
         }
     }
 }

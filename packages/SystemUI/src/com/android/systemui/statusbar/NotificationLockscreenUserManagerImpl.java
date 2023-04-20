@@ -19,7 +19,6 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
-import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
@@ -31,6 +30,7 @@ import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -38,11 +38,11 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -51,6 +51,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -94,9 +95,11 @@ public class NotificationLockscreenUserManagerImpl implements
     private final SparseBooleanArray mUsersInLockdownLatestResult = new SparseBooleanArray();
     private final SparseBooleanArray mShouldHideNotifsLatestResult = new SparseBooleanArray();
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final List<UserChangedListener> mListeners = new ArrayList<>();
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final NotificationClickNotifier mClickNotifier;
+    private final Lazy<OverviewProxyService> mOverviewProxyServiceLazy;
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
@@ -126,21 +129,6 @@ public class NotificationLockscreenUserManagerImpl implements
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             switch (action) {
-                case Intent.ACTION_USER_SWITCHED:
-                    mCurrentUserId = intent.getIntExtra(
-                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
-                    updateCurrentProfilesCache();
-
-                    Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
-
-                    updateLockscreenNotificationSetting();
-                    updatePublicMode();
-                    mPresenter.onUserSwitched(mCurrentUserId);
-
-                    for (UserChangedListener listener : mListeners) {
-                        listener.onUserChanged(mCurrentUserId);
-                    }
-                    break;
                 case Intent.ACTION_USER_REMOVED:
                     int removedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                     if (removedUserId != -1) {
@@ -157,7 +145,7 @@ public class NotificationLockscreenUserManagerImpl implements
                     break;
                 case Intent.ACTION_USER_UNLOCKED:
                     // Start the overview connection to the launcher service
-                    Dependency.get(OverviewProxyService.class).startConnectionToCurrentUser();
+                    mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
                     break;
                 case NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION:
                     final IntentSender intentSender = intent.getParcelableExtra(
@@ -180,6 +168,25 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     };
 
+    protected final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mCurrentUserId = newUser;
+                    updateCurrentProfilesCache();
+
+                    Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
+
+                    updateLockscreenNotificationSetting();
+                    updatePublicMode();
+                    mPresenter.onUserSwitched(mCurrentUserId);
+
+                    for (UserChangedListener listener : mListeners) {
+                        listener.onUserChanged(mCurrentUserId);
+                    }
+                }
+            };
+
     protected final Context mContext;
     private final Handler mMainHandler;
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
@@ -189,16 +196,17 @@ public class NotificationLockscreenUserManagerImpl implements
     protected NotificationPresenter mPresenter;
     protected ContentObserver mLockscreenSettingsObserver;
     protected ContentObserver mSettingsObserver;
-    private boolean mHideSilentNotificationsOnLockscreen;
 
     @Inject
     public NotificationLockscreenUserManagerImpl(Context context,
             BroadcastDispatcher broadcastDispatcher,
             DevicePolicyManager devicePolicyManager,
             UserManager userManager,
+            UserTracker userTracker,
             Lazy<NotificationVisibilityProvider> visibilityProviderLazy,
             Lazy<CommonNotifCollection> commonNotifCollectionLazy,
             NotificationClickNotifier clickNotifier,
+            Lazy<OverviewProxyService> overviewProxyServiceLazy,
             KeyguardManager keyguardManager,
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
@@ -210,10 +218,12 @@ public class NotificationLockscreenUserManagerImpl implements
         mMainHandler = mainHandler;
         mDevicePolicyManager = devicePolicyManager;
         mUserManager = userManager;
-        mCurrentUserId = ActivityManager.getCurrentUser();
+        mUserTracker = userTracker;
+        mCurrentUserId = mUserTracker.getUserId();
         mVisibilityProviderLazy = visibilityProviderLazy;
         mCommonNotifCollectionLazy = commonNotifCollectionLazy;
         mClickNotifier = clickNotifier;
+        mOverviewProxyServiceLazy = overviewProxyServiceLazy;
         statusBarStateController.addCallback(this);
         mLockPatternUtils = new LockPatternUtils(context);
         mKeyguardManager = keyguardManager;
@@ -264,12 +274,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 UserHandle.USER_ALL);
 
         mContext.getContentResolver().registerContentObserver(
-                mSecureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS),
-                true,
-                mLockscreenSettingsObserver,
-                UserHandle.USER_ALL);
-
-        mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
                 mSettingsObserver);
 
@@ -286,7 +290,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 null /* handler */, UserHandle.ALL);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
@@ -300,7 +303,9 @@ public class NotificationLockscreenUserManagerImpl implements
         mContext.registerReceiver(mBaseBroadcastReceiver, internalFilter, PERMISSION_SELF, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
 
-        mCurrentUserId = ActivityManager.getCurrentUser(); // in case we reg'd receiver too late
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
+
+        mCurrentUserId = mUserTracker.getUserId(); // in case we reg'd receiver too late
         updateCurrentProfilesCache();
 
         mSettingsObserver.onChange(false);  // set up
@@ -337,9 +342,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 null /* admin */, mCurrentUserId);
         final boolean allowedByDpm = (dpmFlags
                 & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
-
-        mHideSilentNotificationsOnLockscreen = mSecureSettings.getIntForUser(
-                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1, mCurrentUserId) == 0;
 
         setShowLockscreenNotifications(show && allowedByDpm);
 

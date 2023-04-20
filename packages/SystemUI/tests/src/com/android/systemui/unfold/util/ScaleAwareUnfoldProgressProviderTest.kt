@@ -15,14 +15,13 @@
  */
 package com.android.systemui.unfold.util
 
-import android.animation.ValueAnimator
 import android.content.ContentResolver
 import android.database.ContentObserver
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.TestUnfoldTransitionProvider
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.util.mockito.any
 import org.junit.Before
@@ -30,6 +29,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
@@ -38,30 +38,25 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
 
-    @Mock
-    lateinit var contentResolver: ContentResolver
-
-    @Mock
-    lateinit var sinkProvider: TransitionProgressListener
+    @Mock lateinit var sinkProvider: TransitionProgressListener
 
     private val sourceProvider = TestUnfoldTransitionProvider()
 
-    lateinit var progressProvider: ScaleAwareTransitionProgressProvider
+    private lateinit var contentResolver: ContentResolver
+    private lateinit var progressProvider: ScaleAwareTransitionProgressProvider
 
     private val animatorDurationScaleListenerCaptor =
-            ArgumentCaptor.forClass(ContentObserver::class.java)
+        ArgumentCaptor.forClass(ContentObserver::class.java)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        contentResolver = spy(context.contentResolver)
 
-        progressProvider = ScaleAwareTransitionProgressProvider(
-                sourceProvider,
-                contentResolver
-        )
+        progressProvider = ScaleAwareTransitionProgressProvider(sourceProvider, contentResolver)
 
-        verify(contentResolver).registerContentObserver(any(), any(),
-                animatorDurationScaleListenerCaptor.capture())
+        verify(contentResolver)
+            .registerContentObserver(any(), any(), animatorDurationScaleListenerCaptor.capture())
 
         progressProvider.addCallback(sinkProvider)
     }
@@ -121,12 +116,20 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     }
 
     private fun setAnimationsEnabled(enabled: Boolean) {
-        val durationScale = if (enabled) {
-            1f
-        } else {
-            0f
-        }
-        ValueAnimator.setDurationScale(durationScale)
+        val durationScale =
+            if (enabled) {
+                1f
+            } else {
+                0f
+            }
+
+        // It uses [TestableSettingsProvider] and it will be cleared after the test
+        Settings.Global.putString(
+            contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            durationScale.toString()
+        )
+
         animatorDurationScaleListenerCaptor.value.dispatchChange(/* selfChange= */false)
     }
 }

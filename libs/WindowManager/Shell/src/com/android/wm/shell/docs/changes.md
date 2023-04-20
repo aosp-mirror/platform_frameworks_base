@@ -29,18 +29,36 @@ As mentioned in the [Dagger usage](dagger.md) docs, you need to determine whethe
 ### SysUI accessible components
 In addition to doing the above, you will also need to provide an interface for calling to SysUI
 from the Shell and vice versa.  The current pattern is to have a parallel `Optional<Component name>`
-interface that the `<Component name>Controller` implements and handles on the main Shell thread.
+interface that the `<Component name>Controller` implements and handles on the main Shell thread
+(see [SysUI/Shell threading](threading.md)).
 
 In addition, because components accessible to SysUI injection are explicitly listed, you'll have to
 add an appropriate method in `WMComponent` to get the interface and update the `Builder` in
 `SysUIComponent` to take the interface so it can be injected in SysUI code.  The binding between
 the two is done in `SystemUIFactory#init()` which will need to be updated as well.
 
+Specifically, to support calling into a controller from an external process (like Launcher):
+- Create an implementation of the external interface within the controller
+- Have all incoming calls post to the main shell thread (inject @ShellMainThread Executor into the
+  controller if needed)
+- Note that callbacks into SysUI should take an associated executor to call back on
+
 ### Launcher accessible components
 Because Launcher is not a part of SystemUI and is a separate process, exposing controllers to
 Launcher requires a new AIDL interface to be created and implemented by the controller.  The
 implementation of the stub interface in the controller otherwise behaves similar to the interface
 to SysUI where it posts the work to the main Shell thread.
+
+Specifically, to support calling into a controller from an external process (like Launcher):
+- Create an implementation of the interface binder's `Stub` class within the controller, have it
+  extend `ExternalInterfaceBinder` and implement `invalidate()` to ensure it doesn't hold long
+  references to the outer controller
+- Make the controller implement `RemoteCallable<T>`, and have all incoming calls use one of
+  the `ExecutorUtils.executeRemoteCallWithTaskPermission()` calls to verify the caller's identity
+  and ensure the call happens on the main shell thread and not the binder thread
+- Inject `ShellController` and add the instance of the implementation as external interface
+- In Launcher, update `TouchInteractionService` to pass the interface to `SystemUIProxy`, and then
+  call the SystemUIProxy method as needed in that code
 
 ### Component initialization
 To initialize the component:
@@ -64,8 +82,9 @@ adb logcat *:S WindowManagerShell
 
 ### General Do's & Dont's
 Do:
-- Do add unit tests for all new components
-- Do keep controllers simple and break them down as needed
+- Add unit tests for all new components
+- Keep controllers simple and break them down as needed
+- Any SysUI callbacks should also take an associated executor to run the callback on
 
 Don't:
 - **Don't** do initialization in the constructor, only do initialization in the init callbacks.

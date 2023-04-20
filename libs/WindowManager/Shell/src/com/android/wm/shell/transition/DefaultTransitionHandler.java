@@ -46,6 +46,7 @@ import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -59,6 +60,7 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_OPEN;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.sDisableCustomTaskAnimationProperty;
@@ -76,10 +78,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Canvas;
 import android.graphics.Insets;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -89,7 +88,6 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.Choreographer;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -322,6 +320,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int wallpaperTransit = getWallpaperTransitType(info);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.hasAllFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY
+                    | FLAG_IS_BEHIND_STARTING_WINDOW)) {
+                // Don't animate embedded activity if it is covered by the starting window.
+                // Non-embedded case still needs animation because the container can still animate
+                // the starting window together, e.g. CLOSE or CHANGE type.
+                continue;
+            }
+            if (change.hasFlags(TransitionInfo.FLAGS_IS_NON_APP_WINDOW)) {
+                // Wallpaper, IME, and system windows don't need any default animations.
+                continue;
+            }
             final boolean isTask = change.getTaskInfo() != null;
             boolean isSeamlessDisplayChange = false;
 
@@ -525,123 +534,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
     }
 
-    private void edgeExtendWindow(TransitionInfo.Change change,
-            Animation a, SurfaceControl.Transaction startTransaction,
-            SurfaceControl.Transaction finishTransaction) {
-        // Do not create edge extension surface for transfer starting window change.
-        // The app surface could be empty thus nothing can draw on the hardware renderer, which will
-        // block this thread when calling Surface#unlockCanvasAndPost.
-        if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-            return;
-        }
-        final Transformation transformationAtStart = new Transformation();
-        a.getTransformationAt(0, transformationAtStart);
-        final Transformation transformationAtEnd = new Transformation();
-        a.getTransformationAt(1, transformationAtEnd);
-
-        // We want to create an extension surface that is the maximal size and the animation will
-        // take care of cropping any part that overflows.
-        final Insets maxExtensionInsets = Insets.min(
-                transformationAtStart.getInsets(), transformationAtEnd.getInsets());
-
-        final int targetSurfaceHeight = Math.max(change.getStartAbsBounds().height(),
-                change.getEndAbsBounds().height());
-        final int targetSurfaceWidth = Math.max(change.getStartAbsBounds().width(),
-                change.getEndAbsBounds().width());
-        if (maxExtensionInsets.left < 0) {
-            final Rect edgeBounds = new Rect(0, 0, 1, targetSurfaceHeight);
-            final Rect extensionRect = new Rect(0, 0,
-                    -maxExtensionInsets.left, targetSurfaceHeight);
-            final int xPos = maxExtensionInsets.left;
-            final int yPos = 0;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Left Edge Extension", startTransaction, finishTransaction);
-        }
-
-        if (maxExtensionInsets.top < 0) {
-            final Rect edgeBounds = new Rect(0, 0, targetSurfaceWidth, 1);
-            final Rect extensionRect = new Rect(0, 0,
-                    targetSurfaceWidth, -maxExtensionInsets.top);
-            final int xPos = 0;
-            final int yPos = maxExtensionInsets.top;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Top Edge Extension", startTransaction, finishTransaction);
-        }
-
-        if (maxExtensionInsets.right < 0) {
-            final Rect edgeBounds = new Rect(targetSurfaceWidth - 1, 0,
-                    targetSurfaceWidth, targetSurfaceHeight);
-            final Rect extensionRect = new Rect(0, 0,
-                    -maxExtensionInsets.right, targetSurfaceHeight);
-            final int xPos = targetSurfaceWidth;
-            final int yPos = 0;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Right Edge Extension", startTransaction, finishTransaction);
-        }
-
-        if (maxExtensionInsets.bottom < 0) {
-            final Rect edgeBounds = new Rect(0, targetSurfaceHeight - 1,
-                    targetSurfaceWidth, targetSurfaceHeight);
-            final Rect extensionRect = new Rect(0, 0,
-                    targetSurfaceWidth, -maxExtensionInsets.bottom);
-            final int xPos = maxExtensionInsets.left;
-            final int yPos = targetSurfaceHeight;
-            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
-                    "Bottom Edge Extension", startTransaction, finishTransaction);
-        }
-    }
-
-    private SurfaceControl createExtensionSurface(SurfaceControl surfaceToExtend, Rect edgeBounds,
-            Rect extensionRect, int xPos, int yPos, String layerName,
-            SurfaceControl.Transaction startTransaction,
-            SurfaceControl.Transaction finishTransaction) {
-        final SurfaceControl edgeExtensionLayer = new SurfaceControl.Builder()
-                .setName(layerName)
-                .setParent(surfaceToExtend)
-                .setHidden(true)
-                .setCallsite("DefaultTransitionHandler#startAnimation")
-                .setOpaque(true)
-                .setBufferSize(extensionRect.width(), extensionRect.height())
-                .build();
-
-        SurfaceControl.LayerCaptureArgs captureArgs =
-                new SurfaceControl.LayerCaptureArgs.Builder(surfaceToExtend)
-                        .setSourceCrop(edgeBounds)
-                        .setFrameScale(1)
-                        .setPixelFormat(PixelFormat.RGBA_8888)
-                        .setChildrenOnly(true)
-                        .setAllowProtected(true)
-                        .build();
-        final SurfaceControl.ScreenshotHardwareBuffer edgeBuffer =
-                SurfaceControl.captureLayers(captureArgs);
-
-        if (edgeBuffer == null) {
-            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                    "Failed to capture edge of window.");
-            return null;
-        }
-
-        android.graphics.BitmapShader shader =
-                new android.graphics.BitmapShader(edgeBuffer.asBitmap(),
-                        android.graphics.Shader.TileMode.CLAMP,
-                        android.graphics.Shader.TileMode.CLAMP);
-        final Paint paint = new Paint();
-        paint.setShader(shader);
-
-        final Surface surface = new Surface(edgeExtensionLayer);
-        Canvas c = surface.lockHardwareCanvas();
-        c.drawRect(extensionRect, paint);
-        surface.unlockCanvasAndPost(c);
-        surface.release();
-
-        startTransaction.setLayer(edgeExtensionLayer, Integer.MIN_VALUE);
-        startTransaction.setPosition(edgeExtensionLayer, xPos, yPos);
-        startTransaction.setVisibility(edgeExtensionLayer, true);
-        finishTransaction.remove(edgeExtensionLayer);
-
-        return edgeExtensionLayer;
-    }
-
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
@@ -739,12 +631,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         // Animation length is already expected to be scaled.
         va.overrideDurationScale(1.0f);
         va.setDuration(anim.computeDurationHint());
-        va.addUpdateListener(animation -> {
+        final ValueAnimator.AnimatorUpdateListener updateListener = animation -> {
             final long currentPlayTime = Math.min(va.getDuration(), va.getCurrentPlayTime());
 
             applyTransformation(currentPlayTime, transaction, leash, anim, transformation, matrix,
                     position, cornerRadius, clipRect);
-        });
+        };
+        va.addUpdateListener(updateListener);
 
         final Runnable finisher = () -> {
             applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix,
@@ -757,20 +650,30 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             });
         };
         va.addListener(new AnimatorListenerAdapter() {
+            // It is possible for the end/cancel to be called more than once, which may cause
+            // issues if the animating surface has already been released. Track the finished
+            // state here to skip duplicate callbacks. See b/252872225.
             private boolean mFinished = false;
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mFinished) return;
-                mFinished = true;
-                finisher.run();
+                onFinish();
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
+                onFinish();
+            }
+
+            private void onFinish() {
                 if (mFinished) return;
                 mFinished = true;
                 finisher.run();
+                // The update listener can continue to be called after the animation has ended if
+                // end() is called manually again before the finisher removes the animation.
+                // Remove it manually here to prevent animating a released surface.
+                // See b/252872225.
+                va.removeUpdateListener(updateListener);
             }
         });
         animations.add(va);

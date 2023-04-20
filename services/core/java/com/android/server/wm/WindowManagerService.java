@@ -1883,7 +1883,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Make this invalid which indicates a null attached frame.
                 outAttachedFrame.set(0, 0, -1, -1);
             }
-            outSizeCompatScale[0] = win.getSizeCompatScale();
+            outSizeCompatScale[0] = win.getCompatScaleForClient();
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -6007,7 +6007,11 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mFrozenDisplayId != INVALID_DISPLAY && mFrozenDisplayId == w.getDisplayId()
                 && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Changing surface while display frozen: %s", w);
-            w.setOrientationChanging(true);
+            // WindowsState#reportResized won't tell invisible requested window to redraw,
+            // so do not set it as changing orientation to avoid affecting draw state.
+            if (w.isVisibleRequested()) {
+                w.setOrientationChanging(true);
+            }
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {
                 mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
                 // XXX should probably keep timeout from
@@ -8680,11 +8684,12 @@ public class WindowManagerService extends IWindowManager.Stub
         h.ownerPid = callingPid;
 
         if (region == null) {
-            h.replaceTouchableRegionWithCrop = true;
+            h.replaceTouchableRegionWithCrop(null);
         } else {
             h.touchableRegion.set(region);
+            h.replaceTouchableRegionWithCrop = false;
+            h.setTouchableRegionCrop(surface);
         }
-        h.setTouchableRegionCrop(null /* use the input surface's bounds */);
 
         final SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
@@ -8855,7 +8860,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 outInsetsState.set(state, true /* copySources */);
                 if (WindowState.hasCompatScale(attrs, token, overrideScale)) {
                     final float compatScale = token != null && token.hasSizeCompatBounds()
-                            ? token.getSizeCompatScale() * overrideScale
+                            ? token.getCompatScale() * overrideScale
                             : overrideScale;
                     outInsetsState.scale(1f / compatScale);
                 }
@@ -8867,14 +8872,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName) {
+    public List<DisplayInfo> getPossibleDisplayInfo(int displayId) {
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (packageName == null || !isRecentsComponent(packageName, callingUid)) {
-                    Slog.e(TAG, "Unable to verify uid for package " + packageName
-                            + " for getPossibleMaximumWindowMetrics");
+                if (!mAtmService.isCallerRecents(callingUid)) {
+                    Slog.e(TAG, "Unable to verify uid for getPossibleDisplayInfo"
+                            + " on uid " + callingUid);
                     return new ArrayList<>();
                 }
 
@@ -8890,31 +8895,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // Retrieve the DisplayInfo for all possible rotations across all possible display
         // layouts.
         return mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId);
-    }
-
-    /**
-     * Returns {@code true} when the calling package is the recents component.
-     */
-    boolean isRecentsComponent(@NonNull String callingPackageName, int callingUid) {
-        String recentsPackage;
-        try {
-            String recentsComponent = mContext.getResources().getString(
-                    R.string.config_recentsComponentName);
-            if (recentsComponent == null) {
-                return false;
-            }
-            recentsPackage = ComponentName.unflattenFromString(recentsComponent).getPackageName();
-        } catch (Resources.NotFoundException e) {
-            Slog.e(TAG, "Unable to verify if recents component", e);
-            return false;
-        }
-        try {
-            return callingUid == mContext.getPackageManager().getPackageUid(callingPackageName, 0)
-                    && callingPackageName.equals(recentsPackage);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Unable to verify if recents component", e);
-            return false;
-        }
     }
 
     void grantEmbeddedWindowFocus(Session session, IBinder focusToken, boolean grantFocus) {

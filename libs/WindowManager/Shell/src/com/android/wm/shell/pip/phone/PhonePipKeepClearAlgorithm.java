@@ -19,6 +19,7 @@ package com.android.wm.shell.pip.phone;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.view.Gravity;
 
@@ -33,6 +34,10 @@ import java.util.Set;
  * Calculates the adjusted position that does not occlude keep clear areas.
  */
 public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithm {
+
+    private boolean mKeepClearAreaGravityEnabled =
+            SystemProperties.getBoolean(
+                    "persist.wm.debug.enable_pip_keep_clear_algorithm_gravity", false);
 
     protected int mKeepClearAreasPadding;
 
@@ -53,31 +58,36 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithm {
         Rect startingBounds = pipBoundsState.getBounds().isEmpty()
                 ? pipBoundsAlgorithm.getEntryDestinationBoundsIgnoringKeepClearAreas()
                 : pipBoundsState.getBounds();
-        float snapFraction = pipBoundsAlgorithm.getSnapFraction(startingBounds);
-        int verticalGravity = Gravity.BOTTOM;
-        int horizontalGravity;
-        if (snapFraction >= 0.5f && snapFraction < 2.5f) {
-            horizontalGravity = Gravity.RIGHT;
-        } else {
-            horizontalGravity = Gravity.LEFT;
-        }
-        // push the bounds based on the gravity
         Rect insets = new Rect();
         pipBoundsAlgorithm.getInsetBounds(insets);
         if (pipBoundsState.isImeShowing()) {
             insets.bottom -= pipBoundsState.getImeHeight();
         }
-        Rect pushedBounds = new Rect(startingBounds);
-        if (verticalGravity == Gravity.BOTTOM) {
-            pushedBounds.offsetTo(pushedBounds.left,
-                    insets.bottom - pushedBounds.height());
+        Rect pipBounds = new Rect(startingBounds);
+
+        // move PiP towards corner if user hasn't moved it manually or the flag is on
+        if (mKeepClearAreaGravityEnabled
+                || (!pipBoundsState.hasUserMovedPip() && !pipBoundsState.hasUserResizedPip())) {
+            float snapFraction = pipBoundsAlgorithm.getSnapFraction(startingBounds);
+            int verticalGravity = Gravity.BOTTOM;
+            int horizontalGravity;
+            if (snapFraction >= 0.5f && snapFraction < 2.5f) {
+                horizontalGravity = Gravity.RIGHT;
+            } else {
+                horizontalGravity = Gravity.LEFT;
+            }
+            if (verticalGravity == Gravity.BOTTOM) {
+                pipBounds.offsetTo(pipBounds.left,
+                        insets.bottom - pipBounds.height());
+            }
+            if (horizontalGravity == Gravity.RIGHT) {
+                pipBounds.offsetTo(insets.right - pipBounds.width(), pipBounds.top);
+            } else {
+                pipBounds.offsetTo(insets.left, pipBounds.top);
+            }
         }
-        if (horizontalGravity == Gravity.RIGHT) {
-            pushedBounds.offsetTo(insets.right - pushedBounds.width(), pushedBounds.top);
-        } else {
-            pushedBounds.offsetTo(insets.left, pushedBounds.top);
-        }
-        return findUnoccludedPosition(pushedBounds, pipBoundsState.getRestrictedKeepClearAreas(),
+
+        return findUnoccludedPosition(pipBounds, pipBoundsState.getRestrictedKeepClearAreas(),
                 pipBoundsState.getUnrestrictedKeepClearAreas(), insets);
     }
 

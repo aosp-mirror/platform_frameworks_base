@@ -30,13 +30,6 @@ public interface OneHanded {
             OneHandedController.SUPPORT_ONE_HANDED_MODE, false);
 
     /**
-     * Returns a binder that can be passed to an external process to manipulate OneHanded.
-     */
-    default IOneHanded createExternalInterface() {
-        return null;
-    }
-
-    /**
      * Enters one handed mode.
      */
     void startOneHanded();

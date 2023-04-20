@@ -310,4 +310,10 @@ public class FalsingDataProviderTest extends ClassifierTest {
         // an empty array.
         assertThat(mDataProvider.getPriorMotionEvents()).isNotNull();
     }
+
+    @Test
+    public void test_MotionEventComplete_A11yAction() {
+        mDataProvider.onA11yAction();
+        assertThat(mDataProvider.isA11yAction()).isTrue();
+    }
 }

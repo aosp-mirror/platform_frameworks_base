@@ -47,7 +47,7 @@ class KeyguardLiftController @Inject constructor(
     private val asyncSensorManager: AsyncSensorManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dumpManager: DumpManager
-) : Dumpable, CoreStartable(context) {
+) : Dumpable, CoreStartable {
 
     private val pickupSensor = asyncSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE)
     private var isListening = false
@@ -73,7 +73,6 @@ class KeyguardLiftController @Inject constructor(
             isListening = false
             updateListeningState()
             keyguardUpdateMonitor.requestFaceAuth(
-                true,
                 FaceAuthApiRequestReason.PICK_UP_GESTURE_TRIGGERED
             )
             keyguardUpdateMonitor.requestActiveUnlock(
@@ -88,7 +87,7 @@ class KeyguardLiftController @Inject constructor(
             updateListeningState()
         }
 
-        override fun onKeyguardVisibilityChanged(showing: Boolean) {
+        override fun onKeyguardVisibilityChanged(visible: Boolean) {
             updateListeningState()
         }
     }

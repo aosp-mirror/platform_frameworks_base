@@ -17,12 +17,12 @@
 package com.android.systemui.statusbar.phone
 
 import android.app.PendingIntent
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotifInteractionLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.ERROR
+import com.android.systemui.plugins.log.LogLevel.INFO
+import com.android.systemui.plugins.log.LogLevel.WARNING
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
@@ -96,19 +96,11 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         })
     }
 
-    fun logFullScreenIntentSuppressedByDnD(entry: NotificationEntry) {
+    fun logFullScreenIntentSuppressedByVR(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "No Fullscreen intent: suppressed by DND: $str1"
-        })
-    }
-
-    fun logFullScreenIntentNotImportantEnough(entry: NotificationEntry) {
-        buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
-        }, {
-            "No Fullscreen intent: not important enough: $str1"
+            "No Fullscreen intent: suppressed by VR mode: $str1"
         })
     }
 

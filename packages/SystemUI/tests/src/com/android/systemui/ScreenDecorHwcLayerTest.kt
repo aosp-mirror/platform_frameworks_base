@@ -16,6 +16,7 @@
 
 package com.android.systemui
 
+import android.content.Context
 import android.graphics.Insets
 import android.graphics.PixelFormat
 import android.graphics.Rect
@@ -44,6 +45,7 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
 
     @Mock private lateinit var mockDisplay: Display
     @Mock private lateinit var mockRootView: View
+    @Mock private lateinit var mockContext: Context
 
     private val displayWidth = 100
     private val displayHeight = 200
@@ -75,7 +77,8 @@ class ScreenDecorHwcLayerTest : SysuiTestCase() {
         decorHwcLayer = Mockito.spy(ScreenDecorHwcLayer(mContext, decorationSupport))
         whenever(decorHwcLayer.width).thenReturn(displayWidth)
         whenever(decorHwcLayer.height).thenReturn(displayHeight)
-        whenever(decorHwcLayer.display).thenReturn(mockDisplay)
+        whenever(decorHwcLayer.context).thenReturn(mockContext)
+        whenever(mockContext.display).thenReturn(mockDisplay)
         whenever(decorHwcLayer.rootView).thenReturn(mockRootView)
         whenever(mockRootView.left).thenReturn(0)
         whenever(mockRootView.top).thenReturn(0)

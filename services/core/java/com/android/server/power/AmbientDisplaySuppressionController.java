@@ -40,13 +40,24 @@ import java.util.Set;
 public class AmbientDisplaySuppressionController {
     private static final String TAG = "AmbientDisplaySuppressionController";
 
-    private final Context mContext;
     private final Set<Pair<String, Integer>> mSuppressionTokens;
+    private final AmbientDisplaySuppressionChangedCallback mCallback;
     private IStatusBarService mStatusBarService;
 
-    AmbientDisplaySuppressionController(Context context) {
-        mContext = requireNonNull(context);
+    /** Interface to get a list of available logical devices. */
+    interface AmbientDisplaySuppressionChangedCallback {
+        /**
+         * Called when the suppression state changes.
+         *
+         * @param isSuppressed Whether ambient is suppressed.
+         */
+        void onSuppressionChanged(boolean isSuppressed);
+    }
+
+    AmbientDisplaySuppressionController(
+            @NonNull AmbientDisplaySuppressionChangedCallback callback) {
         mSuppressionTokens = Collections.synchronizedSet(new ArraySet<>());
+        mCallback = requireNonNull(callback);
     }
 
     /**
@@ -58,6 +69,7 @@ public class AmbientDisplaySuppressionController {
      */
     public void suppress(@NonNull String token, int callingUid, boolean suppress) {
         Pair<String, Integer> suppressionToken = Pair.create(requireNonNull(token), callingUid);
+        final boolean wasSuppressed = isSuppressed();
 
         if (suppress) {
             mSuppressionTokens.add(suppressionToken);
@@ -65,9 +77,14 @@ public class AmbientDisplaySuppressionController {
             mSuppressionTokens.remove(suppressionToken);
         }
 
+        final boolean isSuppressed = isSuppressed();
+        if (isSuppressed != wasSuppressed) {
+            mCallback.onSuppressionChanged(isSuppressed);
+        }
+
         try {
             synchronized (mSuppressionTokens) {
-                getStatusBar().suppressAmbientDisplay(isSuppressed());
+                getStatusBar().suppressAmbientDisplay(isSuppressed);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to suppress ambient display", e);

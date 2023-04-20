@@ -727,9 +727,8 @@ interface IWindowManager
      * If invoked through a package other than a launcher app, returns an empty list.
      *
      * @param displayId the id of the logical display
-     * @param packageName the name of the calling package
      */
-    List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName);
+    List<DisplayInfo> getPossibleDisplayInfo(int displayId);
 
     /**
      * Called to show global actions.

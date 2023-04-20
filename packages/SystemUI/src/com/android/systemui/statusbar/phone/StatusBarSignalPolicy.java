@@ -212,7 +212,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
     private void updateWifiIconWithState(WifiIconState state) {
         if (DEBUG) Log.d(TAG, "WifiIconState: " + state == null ? "" : state.toString());
         if (state.visible && state.resId > 0) {
-            mIconController.setSignalIcon(mSlotWifi, state);
+            mIconController.setWifiIcon(mSlotWifi, state);
             mIconController.setIconVisibility(mSlotWifi, true);
         } else {
             mIconController.setIconVisibility(mSlotWifi, false);

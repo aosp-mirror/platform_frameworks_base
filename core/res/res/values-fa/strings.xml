@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"پست صوتی"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"‏مشکل در اتصال یا کد MMI نامعتبر."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"از این ویژگی پشتیبانی نمی‌شود."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"عملکرد فقط به شماره‌های شماره‌گیری ثابت محدود است."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"وقتی درحال فراگردی هستید، نمی‌توانید تنظیمات هدایت تماس را از تلفنتان تغییر دهید."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"سرویس فعال شد."</string>

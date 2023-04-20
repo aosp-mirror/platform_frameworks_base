@@ -82,7 +82,6 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
     public void testComplicationAdded() {
         final DreamClockTimeComplication.Registrant registrant =
                 new DreamClockTimeComplication.Registrant(
-                        mContext,
                         mDreamOverlayStateController,
                         mComplication);
         registrant.start();
