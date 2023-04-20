@@ -38,6 +38,7 @@ import android.view.SurfaceView;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,7 +64,12 @@ public final class SurfaceSyncGroup {
     private static final int MAX_COUNT = 100;
 
     private static final AtomicInteger sCounter = new AtomicInteger(0);
-    private static final int TRANSACTION_READY_TIMEOUT = 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int TRANSACTION_READY_TIMEOUT = 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     private static Supplier<Transaction> sTransactionFactory = Transaction::new;
 
@@ -122,6 +128,14 @@ public final class SurfaceSyncGroup {
 
     @GuardedBy("mLock")
     private boolean mTimeoutAdded;
+
+    /**
+     * Disable the timeout for this SSG so it will never be set until there's an explicit call to
+     * add a timeout.
+     */
+    @GuardedBy("mLock")
+    private boolean mTimeoutDisabled;
+
 
     private static boolean isLocalBinder(IBinder binder) {
         return !(binder instanceof BinderProxy);
@@ -223,6 +237,10 @@ public final class SurfaceSyncGroup {
      */
     public void addSyncCompleteCallback(Executor executor, Runnable runnable) {
         synchronized (mLock) {
+            if (mFinished) {
+                executor.execute(runnable);
+                return;
+            }
             mSyncCompleteCallbacks.add(new Pair<>(executor, runnable));
         }
     }
@@ -768,6 +786,21 @@ public final class SurfaceSyncGroup {
         }
     }
 
+    /**
+     * @hide
+     */
+    public void toggleTimeout(boolean enable) {
+        synchronized (mLock) {
+            mTimeoutDisabled = !enable;
+            if (mTimeoutAdded && !enable) {
+                mHandler.removeCallbacksAndMessages(this);
+                mTimeoutAdded = false;
+            } else if (!mTimeoutAdded && enable) {
+                addTimeout();
+            }
+        }
+    }
+
     private void addTimeout() {
         synchronized (sHandlerThreadLock) {
             if (sHandlerThread == null) {
@@ -777,7 +810,7 @@ public final class SurfaceSyncGroup {
         }
 
         synchronized (mLock) {
-            if (mTimeoutAdded) {
+            if (mTimeoutAdded || mTimeoutDisabled) {
                 // We only need one timeout for the entire SurfaceSyncGroup since we just want to
                 // ensure it doesn't stay stuck forever.
                 return;
