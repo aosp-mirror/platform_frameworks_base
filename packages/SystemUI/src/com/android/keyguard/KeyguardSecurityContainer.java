@@ -333,6 +333,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         mSpringAnimation = new SpringAnimation(this, DynamicAnimation.TRANSLATION_Y);
         mViewConfiguration = ViewConfiguration.get(context);
         mDoubleTapDetector = new GestureDetector(context, new DoubleTapListener());
+
+        // Add additional top padding.
+        setPadding(getPaddingLeft(), getPaddingTop() + getResources().getDimensionPixelSize(
+                        R.dimen.keyguard_security_container_padding_top), getPaddingRight(),
+                getPaddingBottom());
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -780,6 +785,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     void reloadColors() {
         mViewMode.reloadColors();
+        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.materialColorSurface));
     }
 
     /** Handles density or font scale changes. */
