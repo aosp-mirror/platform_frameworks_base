@@ -405,39 +405,44 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void close() {
         super.close_enforcePermission();
         // Remove about-to-be-closed virtual device from the service before butchering it.
-        mService.removeVirtualDevice(mDeviceId);
+        boolean removed = mService.removeVirtualDevice(mDeviceId);
         mDeviceId = Context.DEVICE_ID_INVALID;
 
-        VirtualDisplayWrapper[] virtualDisplaysToBeReleased;
-        synchronized (mVirtualDeviceLock) {
-            if (mVirtualAudioController != null) {
-                mVirtualAudioController.stopListening();
-                mVirtualAudioController = null;
-            }
-            mLocaleList = null;
-            virtualDisplaysToBeReleased = new VirtualDisplayWrapper[mVirtualDisplays.size()];
-            for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                virtualDisplaysToBeReleased[i] = mVirtualDisplays.valueAt(i);
-            }
-            mVirtualDisplays.clear();
-            mVirtualSensorList = null;
-            mVirtualSensors.clear();
+        // Device is already closed.
+        if (!removed) {
+            return;
         }
-        // Destroy the display outside locked section.
-        for (VirtualDisplayWrapper virtualDisplayWrapper : virtualDisplaysToBeReleased) {
-            mDisplayManager.releaseVirtualDisplay(virtualDisplayWrapper.getToken());
-            // The releaseVirtualDisplay call above won't trigger
-            // VirtualDeviceImpl.onVirtualDisplayRemoved callback because we already removed the
-            // virtual device from the service - we release the other display-tied resources here
-            // with the guarantee it will be done exactly once.
-            releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
-        }
-
-        mAppToken.unlinkToDeath(this, 0);
-        mCameraAccessController.stopObservingIfNeeded();
 
         final long ident = Binder.clearCallingIdentity();
         try {
+            VirtualDisplayWrapper[] virtualDisplaysToBeReleased;
+            synchronized (mVirtualDeviceLock) {
+                if (mVirtualAudioController != null) {
+                    mVirtualAudioController.stopListening();
+                    mVirtualAudioController = null;
+                }
+                mLocaleList = null;
+                virtualDisplaysToBeReleased = new VirtualDisplayWrapper[mVirtualDisplays.size()];
+                for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                    virtualDisplaysToBeReleased[i] = mVirtualDisplays.valueAt(i);
+                }
+                mVirtualDisplays.clear();
+                mVirtualSensorList = null;
+                mVirtualSensors.clear();
+            }
+            // Destroy the display outside locked section.
+            for (VirtualDisplayWrapper virtualDisplayWrapper : virtualDisplaysToBeReleased) {
+                mDisplayManager.releaseVirtualDisplay(virtualDisplayWrapper.getToken());
+                // The releaseVirtualDisplay call above won't trigger
+                // VirtualDeviceImpl.onVirtualDisplayRemoved callback because we already removed the
+                // virtual device from the service - we release the other display-tied resources
+                // here with the guarantee it will be done exactly once.
+                releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
+            }
+
+            mAppToken.unlinkToDeath(this, 0);
+            mCameraAccessController.stopObservingIfNeeded();
+
             mInputController.close();
             mSensorController.close();
         } finally {
