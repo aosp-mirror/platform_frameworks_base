@@ -250,7 +250,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             waitConditions = arrayOf(ConditionsFactory.hasPipWindow())
         )
 
-        wmHelper.StateSyncBuilder().withPipShown().waitForAndVerify()
+        wmHelper.StateSyncBuilder()
+            .withWindowSurfaceAppeared(this)
+            .withPipShown()
+            .waitForAndVerify()
     }
 
     /** Expand the PIP window back to full screen via intent and wait until the app is visible */
