@@ -102,8 +102,6 @@ import android.window.TaskFragmentOrganizerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.pkg.AndroidPackage;
 
@@ -934,11 +932,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!isAttached() || isForceHidden() || isForceTranslucent()) {
             return true;
         }
-        final PooledPredicate p = PooledLambda.obtainPredicate(TaskFragment::isOpaqueActivity,
-                PooledLambda.__(ActivityRecord.class), starting, false /* including*/);
-        final ActivityRecord opaque = getActivity(p);
-        p.recycle();
-        return opaque == null;
+        // A TaskFragment isn't translucent if it has at least one visible activity that occludes
+        // this TaskFragment.
+        return mTaskSupervisor.mOpaqueActivityHelper.getVisibleOpaqueActivity(this,
+                starting) == null;
     }
 
     /**
@@ -951,25 +948,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
         // Including finishing Activity if the TaskFragment is becoming invisible in the transition.
-        final boolean includingFinishing = !isVisibleRequested();
-        final PooledPredicate p = PooledLambda.obtainPredicate(TaskFragment::isOpaqueActivity,
-                PooledLambda.__(ActivityRecord.class), null /* starting */, includingFinishing);
-        final ActivityRecord opaque = getActivity(p);
-        p.recycle();
-        return opaque == null;
-    }
-
-    private static boolean isOpaqueActivity(@NonNull ActivityRecord r,
-            @Nullable ActivityRecord starting, boolean includingFinishing) {
-        if (!r.visibleIgnoringKeyguard && r != starting) {
-            // Also ignore invisible activities that are not the currently starting
-            // activity (about to be visible).
-            return false;
-        }
-
-        // TaskFragment isn't translucent if it has at least one fullscreen activity that is
-        // visible.
-        return r.occludesParent(includingFinishing);
+        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this) == null;
     }
 
     ActivityRecord getTopNonFinishingActivity() {

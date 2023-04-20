@@ -372,7 +372,6 @@ public class TransitionTests extends WindowTestsBase {
             final ActivityRecord act = createActivityRecord(tasks[i]);
             // alternate so that the transition doesn't get promoted to the display area
             act.setVisibleRequested((i % 2) == 0); // starts invisible
-            act.visibleIgnoringKeyguard = (i % 2) == 0;
             if (i == showWallpaperTask) {
                 doReturn(true).when(act).showWallpaper();
             }
@@ -759,10 +758,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = createActivityRecord(oldTask);
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = createActivityRecord(newTask);
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
         changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
@@ -800,10 +797,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = createActivityRecord(oldTask);
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = createActivityRecord(newTask);
         opening.setOccludesParent(false);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
         changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
@@ -842,10 +837,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
                 false /* vis */, true /* exChg */));
@@ -886,10 +879,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(false);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
                 false /* vis */, true /* exChg */));
@@ -930,10 +921,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         closing.finishing = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
@@ -975,10 +964,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(false);
-        closing.visibleIgnoringKeyguard = true;
         closing.finishing = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
