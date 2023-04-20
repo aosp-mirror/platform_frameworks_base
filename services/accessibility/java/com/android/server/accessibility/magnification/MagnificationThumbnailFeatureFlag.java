@@ -19,15 +19,15 @@ package com.android.server.accessibility.magnification;
 import android.provider.DeviceConfig;
 
 /**
- * Encapsulates the feature flags for always on magnification. {@see DeviceConfig}
+ * Encapsulates the feature flags for magnification thumbnail. {@see DeviceConfig}
  *
  * @hide
  */
-public class AlwaysOnMagnificationFeatureFlag extends MagnificationFeatureFlagBase {
+public class MagnificationThumbnailFeatureFlag extends MagnificationFeatureFlagBase {
 
-    private static final String NAMESPACE = DeviceConfig.NAMESPACE_WINDOW_MANAGER;
-    private static final String FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION =
-            "AlwaysOnMagnifier__enable_always_on_magnifier";
+    private static final String NAMESPACE = DeviceConfig.NAMESPACE_ACCESSIBILITY;
+    private static final String FEATURE_NAME_ENABLE_MAGNIFIER_THUMBNAIL =
+            "enable_magnifier_thumbnail";
 
     @Override
     String getNamespace() {
@@ -36,7 +36,7 @@ public class AlwaysOnMagnificationFeatureFlag extends MagnificationFeatureFlagBa
 
     @Override
     String getFeatureName() {
-        return FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION;
+        return FEATURE_NAME_ENABLE_MAGNIFIER_THUMBNAIL;
     }
 
     @Override
