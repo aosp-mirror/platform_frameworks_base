@@ -209,10 +209,10 @@ import java.util.function.Consumer;
  * The overlay will maintain the same relative position within the window bounds as the window
  * moves. The overlay will also maintain the same relative position within the window bounds if
  * the window is resized.
- * To attach an overlay to a window, use {@link attachAccessibilityOverlayToWindow}.
+ * To attach an overlay to a window, use {@link #attachAccessibilityOverlayToWindow}.
  * Attaching an overlay to the display means that the overlay is independent of the active
  * windows on that display.
- * To attach an overlay to a display, use {@link attachAccessibilityOverlayToDisplay}. </p>
+ * To attach an overlay to a display, use {@link #attachAccessibilityOverlayToDisplay}. </p>
  * <p> When positioning an overlay that is attached to a window, the service must use window
  * coordinates. In order to position an overlay on top of an existing UI element it is necessary
  * to know the bounds of that element in window coordinates. To find the bounds in window
