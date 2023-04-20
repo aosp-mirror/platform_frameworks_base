@@ -3708,13 +3708,12 @@ public class CarrierConfigManager {
      * NR_SA - NR SA is unmetered for sub-6 frequencies
      * NR_SA_MMWAVE - NR SA is unmetered for mmwave frequencies
      *
-     * Note that this config only applies if an unmetered SubscriptionPlan is set via
-     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via {@link
+     * SubscriptionManager#setSubscriptionPlans(int, List, long)} or an unmetered override is set
      * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
      * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
      * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
      * regardless of the value of this config.
-     * TODO: remove other unmetered keys and replace with this
      * @hide
      */
     public static final String KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
@@ -3729,71 +3728,16 @@ public class CarrierConfigManager {
      * NR_SA - NR SA is unmetered when roaming for sub-6 frequencies
      * NR_SA_MMWAVE - NR SA is unmetered when roaming for mmwave frequencies
      *
-     * Note that this config only applies if an unmetered SubscriptionPlan is set via
-     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via {@link
+     * SubscriptionManager#setSubscriptionPlans(int, List, long)} or an unmetered override is set
      * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
      * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
      * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
      * when roaming regardless of the value of this config.
-     * TODO: remove KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL and replace with this
      * @hide
      */
     public static final String KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
             "roaming_unmetered_network_types_string_array";
-
-    /**
-     * Whether NR (non-standalone) should be unmetered for all frequencies.
-     * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
-     * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_BOOL = "unmetered_nr_nsa_bool";
-
-    /**
-     * Whether NR (non-standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_MMWAVE_BOOL = "unmetered_nr_nsa_mmwave_bool";
-
-    /**
-     * Whether NR (non-standalone) frequencies below 6GHz (sub6) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
-
-    /**
-     * Whether NR (non-standalone) should be unmetered when the device is roaming.
-     * If false, then the values for {@link #KEY_UNMETERED_NR_NSA_BOOL},
-     * {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL}, {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL},
-     * and unmetered {@link SubscriptionPlan} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL =
-            "unmetered_nr_nsa_when_roaming_bool";
-
-    /**
-     * Whether NR (standalone) should be unmetered for all frequencies.
-     * If either {@link #KEY_UNMETERED_NR_SA_MMWAVE_BOOL} or
-     * {@link #KEY_UNMETERED_NR_SA_SUB6_BOOL} are true, then this value will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_SA_BOOL = "unmetered_nr_sa_bool";
-
-    /**
-     * Whether NR (standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_SA_MMWAVE_BOOL = "unmetered_nr_sa_mmwave_bool";
-
-    /**
-     * Whether NR (standalone) frequencies below 6GHz (sub6) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_SA_SUB6_BOOL = "unmetered_nr_sa_sub6_bool";
 
     /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
@@ -4478,6 +4422,57 @@ public class CarrierConfigManager {
             "data_stall_recovery_should_skip_bool_array";
 
     /**
+     * String array containing the list of names for service numbers provided by carriers. This key
+     * should be used with {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY}. The names provided in
+     * this array will be mapped 1:1 with the numbers provided in the {@link
+     * #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array.
+     *
+     * <p>The data would be considered valid if and only if:
+     *
+     * <ul>
+     *   <li>The number of items in both the arrays are equal
+     *   <li>The data added to the {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array is valid.
+     *       See {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} for more information.
+     * </ul>
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * <string-array name="carrier_service_name_array" num="2">
+     *   <item value="Police"/>
+     *   <item value="Ambulance"/>
+     * </string-array>
+     * </code></pre>
+     */
+    public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
+
+    /**
+     * String array containing the list of service numbers provided by carriers. This key should be
+     * used with {@link #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY}. The numbers provided in this array
+     * will be mapped 1:1 with the names provided in the {@link
+     * #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY} array.
+     *
+     * <p>The data would be considered valid if and only if:
+     *
+     * <ul>
+     *   <li>The number of items in both the arrays are equal
+     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
+     *       or "+" followed by all numbers.
+     * </ul>
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * <string-array name="carrier_service_number_array" num="2">
+     *   <item value="123"/>
+     *   <item value="+343"/>
+     * </string-array>
+     * </code></pre>
+     */
+    public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
+        "carrier_service_number_array";
+
+    /**
      * Configs used by ImsServiceEntitlement.
      */
     public static final class ImsServiceEntitlement {
@@ -4833,9 +4828,30 @@ public class CarrierConfigManager {
      * The max acceptable value of this config is 24 hours.
      *
      * @hide
+     * @deprecated Use {@link #KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG} instead.
      */
+    @Deprecated
     public static final String KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG =
             "data_switch_validation_min_gap_long";
+
+    /**
+     * Data switch validation minimal interval, in milliseconds.
+     *
+     * If a connection to the default (Internet) PDN for the current subscription is validated on
+     * a given operator within a given tracking area, re-validations to that matching operator will
+     * be skipped if they would occur within the specified interval. Instead, the connection will
+     * automatically considered validated.
+     *
+     * If the network was validated within the interval but the latest validation result was false,
+     * the validation will not be skipped. If not set or set to 0, validation will not be skipped.
+     *
+     * The valid range of value is between 0 millisecond and 24 hours, inclusive in both sides. The
+     * default value is 24 hours.
+     *
+     * @see android.net.NetworkCapabilities#NET_CAPABILITY_VALIDATED
+     */
+    public static final String KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG =
+            KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG;
 
     /**
      * A boolean property indicating whether this subscription should be managed as an opportunistic
@@ -9183,13 +9199,6 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[] {
                 "NR_NSA", "NR_NSA_MMWAVE", "NR_SA", "NR_SA_MMWAVE"});
         sDefaults.putStringArray(KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[0]);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_MMWAVE_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_OPP_DATA_AUTO_PROVISIONING_BOOL, false);
@@ -9284,7 +9293,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_GBA_UA_TLS_CIPHER_SUITE_INT, TlsParams.TLS_NULL_WITH_NULL_NULL);
 
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG,
+                TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
@@ -9350,6 +9360,8 @@ public class CarrierConfigManager {
                 new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
                 new boolean[] {false, false, true, false, false});
+        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
+        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
     }
 
     /**

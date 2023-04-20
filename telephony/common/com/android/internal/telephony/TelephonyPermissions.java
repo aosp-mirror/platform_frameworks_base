@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -821,5 +822,36 @@ public final class TelephonyPermissions {
                     + packageName + ", uid=" + Binder.getCallingUid());
         }
         return Integer.MAX_VALUE;
+    }
+
+    /**
+     * Check if calling user is associated with the given subscription.
+     * @param context Context
+     * @param subId subscription ID
+     * @param callerUserHandle caller user handle
+     * @return  false if user is not associated with the subscription.
+     */
+    public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
+            @NonNull UserHandle callerUserHandle) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            // No subscription on device, return true.
+            return true;
+        }
+
+        SubscriptionManager subManager = context.getSystemService(SubscriptionManager.class);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if ((subManager != null) &&
+                    (!subManager.isSubscriptionAssociatedWithUser(subId, callerUserHandle))) {
+                // If subId is not associated with calling user, return false.
+                Log.e(LOG_TAG,"User[User ID:" + callerUserHandle.getIdentifier()
+                        + "] is not associated with Subscription ID:" + subId);
+                return false;
+
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
     }
 }

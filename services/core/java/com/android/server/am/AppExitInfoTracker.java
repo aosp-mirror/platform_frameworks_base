@@ -308,6 +308,16 @@ public final class AppExitInfoTracker {
         mKillHandler.obtainMessage(KillHandler.MSG_APP_KILL, raw).sendToTarget();
     }
 
+    void scheduleNoteAppRecoverableCrash(final ProcessRecord app) {
+        if (!mAppExitInfoLoaded.get() || app == null || app.info == null) return;
+
+        ApplicationExitInfo raw = obtainRawRecord(app, System.currentTimeMillis());
+        raw.setReason(ApplicationExitInfo.REASON_CRASH_NATIVE);
+        raw.setSubReason(ApplicationExitInfo.SUBREASON_UNKNOWN);
+        raw.setDescription("recoverable_crash");
+        mKillHandler.obtainMessage(KillHandler.MSG_APP_RECOVERABLE_CRASH, raw).sendToTarget();
+    }
+
     void scheduleNoteAppKill(final int pid, final int uid, final @Reason int reason,
             final @SubReason int subReason, final String msg) {
         if (!mAppExitInfoLoaded.get()) {
@@ -421,8 +431,24 @@ public final class AppExitInfoTracker {
         scheduleLogToStatsdLocked(info, true);
     }
 
+    /**
+     * Make note when ActivityManagerService gets a recoverable native crash, as the process isn't
+     * being killed but the crash should still be added to AppExitInfo. Also, because we're not
+     * crashing, don't log out to statsd.
+     */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void handleNoteAppRecoverableCrashLocked(final ApplicationExitInfo raw) {
+        addExitInfoLocked(raw, /* recoverable */ true);
+    }
+
     @GuardedBy("mLock")
     private ApplicationExitInfo addExitInfoLocked(ApplicationExitInfo raw) {
+        return addExitInfoLocked(raw, /* recoverable */ false);
+    }
+
+    @GuardedBy("mLock")
+    private ApplicationExitInfo addExitInfoLocked(ApplicationExitInfo raw, boolean recoverable) {
         if (!mAppExitInfoLoaded.get()) {
             Slog.w(TAG, "Skipping saving the exit info due to ongoing loading from storage");
             return null;
@@ -438,7 +464,7 @@ public final class AppExitInfoTracker {
             }
         }
         for (int i = 0; i < packages.length; i++) {
-            addExitInfoInnerLocked(packages[i], uid, info);
+            addExitInfoInnerLocked(packages[i], uid, info, recoverable);
         }
 
         schedulePersistProcessExitInfo(false);
@@ -845,7 +871,8 @@ public final class AppExitInfoTracker {
     }
 
     @GuardedBy("mLock")
-    private void addExitInfoInnerLocked(String packageName, int uid, ApplicationExitInfo info) {
+    private void addExitInfoInnerLocked(String packageName, int uid, ApplicationExitInfo info,
+            boolean recoverable) {
         AppExitInfoContainer container = mData.get(packageName, uid);
         if (container == null) {
             container = new AppExitInfoContainer(mAppExitInfoHistoryListSize);
@@ -859,7 +886,11 @@ public final class AppExitInfoTracker {
             }
             mData.put(packageName, uid, container);
         }
-        container.addExitInfoLocked(info);
+        if (recoverable) {
+            container.addRecoverableCrashLocked(info);
+        } else {
+            container.addExitInfoLocked(info);
+        }
     }
 
     @GuardedBy("mLock")
@@ -1284,38 +1315,40 @@ public final class AppExitInfoTracker {
      * A container class of {@link android.app.ApplicationExitInfo}
      */
     final class AppExitInfoContainer {
-        private SparseArray<ApplicationExitInfo> mInfos; // index is pid
+        private SparseArray<ApplicationExitInfo> mInfos; // index is a pid
+        private SparseArray<ApplicationExitInfo> mRecoverableCrashes; // index is a pid
         private int mMaxCapacity;
         private int mUid; // Application uid, not isolated uid.
 
         AppExitInfoContainer(final int maxCapacity) {
             mInfos = new SparseArray<ApplicationExitInfo>();
+            mRecoverableCrashes = new SparseArray<ApplicationExitInfo>();
             mMaxCapacity = maxCapacity;
         }
 
         @GuardedBy("mLock")
-        void getExitInfoLocked(final int filterPid, final int maxNum,
-                ArrayList<ApplicationExitInfo> results) {
+        void getInfosLocked(SparseArray<ApplicationExitInfo> map, final int filterPid,
+                final int maxNum, ArrayList<ApplicationExitInfo> results) {
             if (filterPid > 0) {
-                ApplicationExitInfo r = mInfos.get(filterPid);
+                ApplicationExitInfo r = map.get(filterPid);
                 if (r != null) {
                     results.add(r);
                 }
             } else {
-                final int numRep = mInfos.size();
+                final int numRep = map.size();
                 if (maxNum <= 0 || numRep <= maxNum) {
                     // Return all records.
                     for (int i = 0; i < numRep; i++) {
-                        results.add(mInfos.valueAt(i));
+                        results.add(map.valueAt(i));
                     }
                     Collections.sort(results,
                             (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
                 } else {
                     if (maxNum == 1) {
                         // Most of the caller might be only interested with the most recent one
-                        ApplicationExitInfo r = mInfos.valueAt(0);
+                        ApplicationExitInfo r = map.valueAt(0);
                         for (int i = 1; i < numRep; i++) {
-                            ApplicationExitInfo t = mInfos.valueAt(i);
+                            ApplicationExitInfo t = map.valueAt(i);
                             if (r.getTimestamp() < t.getTimestamp()) {
                                 r = t;
                             }
@@ -1326,7 +1359,7 @@ public final class AppExitInfoTracker {
                         ArrayList<ApplicationExitInfo> list = mTmpInfoList2;
                         list.clear();
                         for (int i = 0; i < numRep; i++) {
-                            list.add(mInfos.valueAt(i));
+                            list.add(map.valueAt(i));
                         }
                         Collections.sort(list,
                                 (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
@@ -1340,24 +1373,30 @@ public final class AppExitInfoTracker {
         }
 
         @GuardedBy("mLock")
-        void addExitInfoLocked(ApplicationExitInfo info) {
+        void getExitInfoLocked(final int filterPid, final int maxNum,
+                ArrayList<ApplicationExitInfo> results) {
+            getInfosLocked(mInfos, filterPid, maxNum, results);
+        }
+
+        @GuardedBy("mLock")
+        void addInfoLocked(SparseArray<ApplicationExitInfo> map, ApplicationExitInfo info) {
             int size;
-            if ((size = mInfos.size()) >= mMaxCapacity) {
+            if ((size = map.size()) >= mMaxCapacity) {
                 int oldestIndex = -1;
                 long oldestTimeStamp = Long.MAX_VALUE;
                 for (int i = 0; i < size; i++) {
-                    ApplicationExitInfo r = mInfos.valueAt(i);
+                    ApplicationExitInfo r = map.valueAt(i);
                     if (r.getTimestamp() < oldestTimeStamp) {
                         oldestTimeStamp = r.getTimestamp();
                         oldestIndex = i;
                     }
                 }
                 if (oldestIndex >= 0) {
-                    final File traceFile = mInfos.valueAt(oldestIndex).getTraceFile();
+                    final File traceFile = map.valueAt(oldestIndex).getTraceFile();
                     if (traceFile != null) {
                         traceFile.delete();
                     }
-                    mInfos.removeAt(oldestIndex);
+                    map.removeAt(oldestIndex);
                 }
             }
             // Claim the state information if there is any
@@ -1367,7 +1406,17 @@ public final class AppExitInfoTracker {
                     mActiveAppStateSummary, uid, pid));
             info.setTraceFile(findAndRemoveFromSparse2dArray(mActiveAppTraces, uid, pid));
             info.setAppTraceRetriever(mAppTraceRetriever);
-            mInfos.append(pid, info);
+            map.append(pid, info);
+        }
+
+        @GuardedBy("mLock")
+        void addExitInfoLocked(ApplicationExitInfo info) {
+            addInfoLocked(mInfos, info);
+        }
+
+        @GuardedBy("mLock")
+        void addRecoverableCrashLocked(ApplicationExitInfo info) {
+            addInfoLocked(mRecoverableCrashes, info);
         }
 
         @GuardedBy("mLock")
@@ -1382,9 +1431,9 @@ public final class AppExitInfoTracker {
         }
 
         @GuardedBy("mLock")
-        void destroyLocked() {
-            for (int i = mInfos.size() - 1; i >= 0; i--) {
-                ApplicationExitInfo ai = mInfos.valueAt(i);
+        void destroyLocked(SparseArray<ApplicationExitInfo> map) {
+            for (int i = map.size() - 1; i >= 0; i--) {
+                ApplicationExitInfo ai = map.valueAt(i);
                 final File traceFile = ai.getTraceFile();
                 if (traceFile != null) {
                     traceFile.delete();
@@ -1395,24 +1444,37 @@ public final class AppExitInfoTracker {
         }
 
         @GuardedBy("mLock")
+        void destroyLocked() {
+            destroyLocked(mInfos);
+            destroyLocked(mRecoverableCrashes);
+        }
+
+        @GuardedBy("mLock")
         void forEachRecordLocked(final BiFunction<Integer, ApplicationExitInfo, Integer> callback) {
-            if (callback != null) {
-                for (int i = mInfos.size() - 1; i >= 0; i--) {
-                    switch (callback.apply(mInfos.keyAt(i), mInfos.valueAt(i))) {
-                        case FOREACH_ACTION_REMOVE_ITEM:
-                            final File traceFile = mInfos.valueAt(i).getTraceFile();
-                            if (traceFile != null) {
-                                traceFile.delete();
-                            }
-                            mInfos.removeAt(i);
-                            break;
-                        case FOREACH_ACTION_STOP_ITERATION:
-                            i = 0;
-                            break;
-                        case FOREACH_ACTION_NONE:
-                        default:
-                            break;
-                    }
+            if (callback == null) return;
+            for (int i = mInfos.size() - 1; i >= 0; i--) {
+                switch (callback.apply(mInfos.keyAt(i), mInfos.valueAt(i))) {
+                    case FOREACH_ACTION_STOP_ITERATION: return;
+                    case FOREACH_ACTION_REMOVE_ITEM:
+                        final File traceFile = mInfos.valueAt(i).getTraceFile();
+                        if (traceFile != null) {
+                            traceFile.delete();
+                        }
+                        mInfos.removeAt(i);
+                        break;
+                }
+            }
+            for (int i = mRecoverableCrashes.size() - 1; i >= 0; i--) {
+                switch (callback.apply(
+                        mRecoverableCrashes.keyAt(i), mRecoverableCrashes.valueAt(i))) {
+                    case FOREACH_ACTION_STOP_ITERATION: return;
+                    case FOREACH_ACTION_REMOVE_ITEM:
+                        final File traceFile = mRecoverableCrashes.valueAt(i).getTraceFile();
+                        if (traceFile != null) {
+                            traceFile.delete();
+                        }
+                        mRecoverableCrashes.removeAt(i);
+                        break;
                 }
             }
         }
@@ -1422,6 +1484,9 @@ public final class AppExitInfoTracker {
             ArrayList<ApplicationExitInfo> list = new ArrayList<ApplicationExitInfo>();
             for (int i = mInfos.size() - 1; i >= 0; i--) {
                 list.add(mInfos.valueAt(i));
+            }
+            for (int i = mRecoverableCrashes.size() - 1; i >= 0; i--) {
+                list.add(mRecoverableCrashes.valueAt(i));
             }
             Collections.sort(list, (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
             int size = list.size();
@@ -1434,9 +1499,12 @@ public final class AppExitInfoTracker {
         void writeToProto(ProtoOutputStream proto, long fieldId) {
             long token = proto.start(fieldId);
             proto.write(AppsExitInfoProto.Package.User.UID, mUid);
-            int size = mInfos.size();
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < mInfos.size(); i++) {
                 mInfos.valueAt(i).writeToProto(proto, AppsExitInfoProto.Package.User.APP_EXIT_INFO);
+            }
+            for (int i = 0; i < mRecoverableCrashes.size(); i++) {
+                mRecoverableCrashes.valueAt(i).writeToProto(
+                        proto, AppsExitInfoProto.Package.User.APP_RECOVERABLE_CRASH);
             }
             proto.end(token);
         }
@@ -1448,14 +1516,23 @@ public final class AppExitInfoTracker {
                     next != ProtoInputStream.NO_MORE_FIELDS;
                     next = proto.nextField()) {
                 switch (next) {
-                    case (int) AppsExitInfoProto.Package.User.UID:
+                    case (int) AppsExitInfoProto.Package.User.UID: {
                         mUid = proto.readInt(AppsExitInfoProto.Package.User.UID);
                         break;
-                    case (int) AppsExitInfoProto.Package.User.APP_EXIT_INFO:
+                    }
+                    case (int) AppsExitInfoProto.Package.User.APP_EXIT_INFO: {
                         ApplicationExitInfo info = new ApplicationExitInfo();
                         info.readFromProto(proto, AppsExitInfoProto.Package.User.APP_EXIT_INFO);
                         mInfos.put(info.getPid(), info);
                         break;
+                    }
+                    case (int) AppsExitInfoProto.Package.User.APP_RECOVERABLE_CRASH: {
+                        ApplicationExitInfo info = new ApplicationExitInfo();
+                        info.readFromProto(
+                                proto, AppsExitInfoProto.Package.User.APP_RECOVERABLE_CRASH);
+                        mRecoverableCrashes.put(info.getPid(), info);
+                        break;
+                    }
                 }
             }
             proto.end(token);
@@ -1470,6 +1547,11 @@ public final class AppExitInfoTracker {
             for (int i = mInfos.size() - 1; i >= 0; i--) {
                 if (filterPid == 0 || filterPid == mInfos.keyAt(i)) {
                     list.add(mInfos.valueAt(i));
+                }
+            }
+            for (int i = mRecoverableCrashes.size() - 1; i >= 0; i--) {
+                if (filterPid == 0 || filterPid == mRecoverableCrashes.keyAt(i)) {
+                    list.add(mRecoverableCrashes.valueAt(i));
                 }
             }
             return list;
@@ -1610,6 +1692,7 @@ public final class AppExitInfoTracker {
         static final int MSG_PROC_DIED = 4103;
         static final int MSG_APP_KILL = 4104;
         static final int MSG_STATSD_LOG = 4105;
+        static final int MSG_APP_RECOVERABLE_CRASH = 4106;
 
         KillHandler(Looper looper) {
             super(looper, null, true);
@@ -1646,6 +1729,14 @@ public final class AppExitInfoTracker {
                     synchronized (mLock) {
                         performLogToStatsdLocked((ApplicationExitInfo) msg.obj);
                     }
+                }
+                break;
+                case MSG_APP_RECOVERABLE_CRASH: {
+                    ApplicationExitInfo raw = (ApplicationExitInfo) msg.obj;
+                    synchronized (mLock) {
+                        handleNoteAppRecoverableCrashLocked(raw);
+                    }
+                    recycleRawRecord(raw);
                 }
                 break;
                 default:

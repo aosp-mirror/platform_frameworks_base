@@ -29,7 +29,7 @@ android_test {
         "androidx.test.rules",
         "androidx.annotation_annotation",
         "apct-perftests-utils",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "collector-device-lib-platform",
         "androidx.benchmark_benchmark-macro",
     ],

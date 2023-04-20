@@ -896,7 +896,7 @@ public class AudioService extends IAudioService.Stub
 
     // Defines the format for the connection "address" for ALSA devices
     public static String makeAlsaAddressString(int card, int device) {
-        return "card=" + card + ";device=" + device + ";";
+        return "card=" + card + ";device=" + device;
     }
 
     public static final class Lifecycle extends SystemService {
@@ -1014,9 +1014,14 @@ public class AudioService extends IAudioService.Stub
 
         mSfxHelper = new SoundEffectsHelper(mContext, playerBase -> ignorePlayerLogs(playerBase));
 
-        final boolean headTrackingDefault = mContext.getResources().getBoolean(
+        final boolean binauralEnabledDefault = SystemProperties.getBoolean(
+                "ro.audio.spatializer_binaural_enabled_default", true);
+        final boolean transauralEnabledDefault = SystemProperties.getBoolean(
+                "ro.audio.spatializer_transaural_enabled_default", true);
+        final boolean headTrackingEnabledDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_spatial_audio_head_tracking_enabled_default);
-        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem, headTrackingDefault);
+        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem,
+                binauralEnabledDefault, transauralEnabledDefault, headTrackingEnabledDefault);
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
@@ -4082,13 +4087,14 @@ public class AudioService extends IAudioService.Stub
                 return;
         }
 
-        // Forcefully set LE audio volume as a workaround, since in some cases
-        // (like the outgoing call) the value of 'device' is not DEVICE_OUT_BLE_*
-        // even when BLE is connected.
+        // In some cases (like the outgoing or rejected call) the value of 'device' is not
+        // DEVICE_OUT_BLE_* even when BLE is connected. Changing the volume level in such case
+        // may cuase the other devices volume level leaking into the LeAudio device settings.
         if (!AudioSystem.isLeAudioDeviceType(device)) {
-            Log.w(TAG, "setLeAudioVolumeOnModeUpdate got unexpected device=" + device
-                    + ", forcing to device=" + AudioSystem.DEVICE_OUT_BLE_HEADSET);
-            device = AudioSystem.DEVICE_OUT_BLE_HEADSET;
+            Log.w(TAG, "setLeAudioVolumeOnModeUpdate ignoring invalid device="
+                    + device + ", mode=" + mode + ", index=" + index + " maxIndex=" + maxIndex
+                    + " streamType=" + streamType);
+            return;
         }
 
         if (DEBUG_VOL) {
@@ -7232,6 +7238,7 @@ public class AudioService extends IAudioService.Stub
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_LINE);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.addAll(AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
+        DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.addAll(AudioSystem.DEVICE_OUT_ALL_BLE_SET);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.addAll(AudioSystem.DEVICE_OUT_ALL_USB_SET);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_HDMI);
     }

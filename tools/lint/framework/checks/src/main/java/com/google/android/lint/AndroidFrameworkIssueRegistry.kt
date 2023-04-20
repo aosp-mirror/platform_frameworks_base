@@ -35,7 +35,8 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         CallingIdentityTokenDetector.ISSUE_RESULT_OF_CLEAR_IDENTITY_CALL_NOT_STORED_IN_VARIABLE,
         CallingSettingsNonUserGetterMethodsDetector.ISSUE_NON_USER_GETTER_CALLED,
         SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
-        PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS,
+        // TODO: Currently crashes due to OOM issue
+        // PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS,
         PermissionMethodDetector.ISSUE_PERMISSION_METHOD_USAGE,
         PermissionMethodDetector.ISSUE_CAN_BE_PERMISSION_METHOD,
     )

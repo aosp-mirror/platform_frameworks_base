@@ -70,12 +70,14 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
                 Log.i(TAG, "Operation cancelled for client " + mCallback.hashCode());
                 wrapCallback(mCallback::onCancel);
             } else if (e instanceof RkpProxyException) {
-                Log.e(TAG, "RKP error fetching key for client " + mCallback.hashCode(), e);
+                Log.e(TAG, "RKP error fetching key for client " + mCallback.hashCode() + ": "
+                        + e.getMessage());
                 RkpProxyException rkpException = (RkpProxyException) e;
                 wrapCallback(() -> mCallback.onError(toGetKeyError(rkpException),
                         e.getMessage()));
             } else {
-                Log.e(TAG, "Error fetching key for client " + mCallback.hashCode(), e);
+                Log.e(TAG, "Unknown error fetching key for client " + mCallback.hashCode() + ": "
+                        + e.getMessage());
                 wrapCallback(() -> mCallback.onError(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN,
                         e.getMessage()));
             }
