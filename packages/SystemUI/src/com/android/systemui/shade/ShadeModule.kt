@@ -17,15 +17,28 @@
 package com.android.systemui.shade
 
 import android.view.LayoutInflater
+import com.android.systemui.CoreStartable
 import com.android.systemui.R
+import com.android.systemui.biometrics.AuthRippleController
+import com.android.systemui.biometrics.AuthRippleView
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
 /** Module for classes related to the notification shade. */
 @Module
 abstract class ShadeModule {
+
+    @Binds
+    @IntoMap
+    @ClassKey(AuthRippleController::class)
+    abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
+
     companion object {
         @Provides
         @SysUISingleton
@@ -58,6 +71,23 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationPanelView {
             return notificationShadeWindowView.findViewById(R.id.notification_panel)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesLightRevealScrim(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): LightRevealScrim {
+            return notificationShadeWindowView.findViewById(R.id.light_reveal_scrim)
+        }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
+        fun providesAuthRippleView(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): AuthRippleView? {
+            return notificationShadeWindowView.findViewById(R.id.auth_ripple)
         }
     }
 }
