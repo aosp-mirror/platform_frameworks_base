@@ -342,23 +342,22 @@
 
 
     <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
-    <dimen name="long_screenshot_action_bar_top_margin">8dp</dimen>
+    <dimen name="long_screenshot_action_bar_top_margin">4dp</dimen>
 
     <!-- Dimensions shared between "overlays" (clipboard and screenshot preview UIs) -->
     <!-- Constrained size of the floating overlay preview -->
     <dimen name="overlay_x_scale">80dp</dimen>
     <!-- Radius of the chip background on floating overlay actions -->
-    <dimen name="overlay_button_corner_radius">8dp</dimen>
+    <dimen name="overlay_button_corner_radius">16dp</dimen>
     <!-- Margin between successive chips -->
     <dimen name="overlay_action_chip_margin_start">8dp</dimen>
-    <!-- Padding to make tappable chip height 48dp (18+11+11+4+4) -->
-    <dimen name="overlay_action_chip_margin_vertical">4dp</dimen>
-    <dimen name="overlay_action_chip_padding_vertical">11dp</dimen>
-    <dimen name="overlay_action_chip_icon_size">18sp</dimen>
+    <dimen name="overlay_action_chip_padding_vertical">12dp</dimen>
+    <dimen name="overlay_action_chip_icon_size">24sp</dimen>
     <!-- Padding on each side of the icon for icon-only chips -->
-    <dimen name="overlay_action_chip_icon_only_padding_horizontal">14dp</dimen>
+    <dimen name="overlay_action_chip_icon_only_padding_horizontal">12dp</dimen>
     <!-- Padding at the edges of the chip for icon-and-text chips -->
-    <dimen name="overlay_action_chip_padding_horizontal">12dp</dimen>
+    <dimen name="overlay_action_chip_padding_start">12dp</dimen>
+    <dimen name="overlay_action_chip_padding_end">16dp</dimen>
     <!-- Spacing between chip icon and chip text -->
     <dimen name="overlay_action_chip_spacing">8dp</dimen>
     <dimen name="overlay_action_chip_text_size">14sp</dimen>
@@ -368,8 +367,8 @@
     <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
     <dimen name="overlay_action_container_margin_bottom">6dp</dimen>
     <dimen name="overlay_bg_protection_height">242dp</dimen>
-    <dimen name="overlay_action_container_corner_radius">18dp</dimen>
-    <dimen name="overlay_action_container_padding_vertical">4dp</dimen>
+    <dimen name="overlay_action_container_corner_radius">20dp</dimen>
+    <dimen name="overlay_action_container_padding_vertical">8dp</dimen>
     <dimen name="overlay_action_container_padding_right">8dp</dimen>
     <dimen name="overlay_action_container_padding_end">8dp</dimen>
     <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>

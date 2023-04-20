@@ -782,10 +782,12 @@
     </style>
 
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
+        <item name="android:statusBarColor">?androidprv:attr/materialColorSurfaceContainer</item>
+        <item name="android:navigationBarColor">?androidprv:attr/materialColorSurfaceContainerHighest</item>
         <item name="android:windowActivityTransitions">true</item>
     </style>
 

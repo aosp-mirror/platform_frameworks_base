@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/work_profile_first_run"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
@@ -33,9 +34,13 @@
         android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
         android:contentDescription="@string/screenshot_dismiss_work_profile">
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:layout_gravity="center"
-            android:src="@drawable/overlay_cancel"/>
+            android:background="@drawable/circular_background"
+            android:backgroundTint="?androidprv:attr/materialColorSurfaceContainerHigh"
+            android:tint="?androidprv:attr/materialColorOnSurface"
+            android:padding="2dp"
+            android:src="@drawable/ic_close"/>
     </FrameLayout>
 </LinearLayout>
