@@ -1229,10 +1229,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     return;
                 }
 
+                // Live wallpapers always are system wallpapers unless lock screen live wp is
+                // enabled.
+                which = mIsLockscreenLiveWallpaperEnabled ? mWallpaper.mWhich : FLAG_SYSTEM;
                 mWallpaper.primaryColors = primaryColors;
 
-                // Live wallpapers always are system wallpapers.
-                which = FLAG_SYSTEM;
                 // It's also the lock screen wallpaper when we don't have a bitmap in there.
                 if (displayId == DEFAULT_DISPLAY) {
                     final WallpaperData lockedWallpaper = mLockWallpaperMap.get(mWallpaper.userId);
