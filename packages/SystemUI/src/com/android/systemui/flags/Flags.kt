@@ -80,12 +80,6 @@ object Flags {
     @JvmField
     val NOTIFICATION_INLINE_REPLY_ANIMATION = releasedFlag("notification_inline_reply_animation")
 
-    /** Makes sure notification panel is updated before the user switch is complete. */
-    // TODO(b/278873737): Tracking Bug
-    @JvmField
-    val LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE =
-        releasedFlag("load_notifications_before_the_user_switch_is_complete")
-
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =
