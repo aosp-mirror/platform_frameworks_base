@@ -26,4 +26,10 @@
     <device name="test.sound_trigger.device">
         <subsystem>Sound_trigger</subsystem>
     </device>
+    <device name="test.cellular_data.device">
+        <subsystem>Cellular_data</subsystem>
+    </device>
+    <device name="test.sensor.device">
+        <subsystem>Sensor</subsystem>
+    </device>
 </irq-device-map>
