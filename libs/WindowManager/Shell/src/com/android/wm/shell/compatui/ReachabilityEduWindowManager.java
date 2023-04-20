@@ -18,6 +18,7 @@ package com.android.wm.shell.compatui;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,11 +41,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  * Window manager for the reachability education
  */
 class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
-
-    /**
-     * The Compat UI should be below the Letterbox Education.
-     */
-    private static final int Z_ORDER = LetterboxEduWindowManager.Z_ORDER - 1;
 
     // The time to wait before hiding the education
     private static final long DISAPPEAR_DELAY_MS = 4000L;
@@ -102,7 +98,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected int getZOrder() {
-        return Z_ORDER;
+        return TASK_CHILD_LAYER_COMPAT_UI + 1;
     }
 
     @Override
