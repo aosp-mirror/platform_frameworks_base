@@ -4696,22 +4696,16 @@ public final class Settings {
                 "display_color_mode_vendor_hint";
 
         /**
-         * The user selected min refresh rate in frames per second.
-         *
-         * If this isn't set, 0 will be used.
+         * Whether or not the peak refresh rate should be forced. 0=no, 1=yes
          * @hide
          */
-        @Readable
-        public static final String MIN_REFRESH_RATE = "min_refresh_rate";
+        public static final String FORCE_PEAK_REFRESH_RATE = "force_peak_refresh_rate";
 
         /**
-         * The user selected peak refresh rate in frames per second.
-         *
-         * If this isn't set, the system falls back to a device specific default.
+         * Whether or not the peak refresh rate should be used for some content. 0=no, 1=yes
          * @hide
          */
-        @Readable
-        public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
+        public static final String SMOOTH_DISPLAY = "smooth_display";
 
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
