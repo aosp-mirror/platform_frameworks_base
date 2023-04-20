@@ -3559,6 +3559,11 @@ public final class ViewRootImpl implements ViewParent,
                         mTmpLocation[1] + host.mBottom - host.mTop);
 
                 host.gatherTransparentRegion(mTransparentRegion);
+                final Rect bounds = mAttachInfo.mTmpInvalRect;
+                if (getAccessibilityFocusedRect(bounds)) {
+                  host.applyDrawableToTransparentRegion(getAccessibilityFocusedDrawable(),
+                      mTransparentRegion);
+                }
                 if (mTranslator != null) {
                     mTranslator.translateRegionInWindowToScreen(mTransparentRegion);
                 }
@@ -4832,6 +4837,8 @@ public final class ViewRootImpl implements ViewParent,
             }
             if (!bounds.equals(drawable.getBounds())) {
                 accessibilityFocusDirty = true;
+                // Force recalculation of transparent regions
+                requestLayout();
             }
         }
 
