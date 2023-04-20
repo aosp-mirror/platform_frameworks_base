@@ -1020,7 +1020,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @param motionEventSources A bit mask of {@link android.view.InputDevice} sources.
      * @see AccessibilityService#onMotionEvent
-     * @see MotionEventSources
+     * @see #MotionEventSources
      */
     public void setMotionEventSources(@MotionEventSources int motionEventSources) {
         mMotionEventSources = motionEventSources;
