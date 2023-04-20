@@ -50,6 +50,8 @@ public class MetricUtilities {
     public static final int UNIT = 1;
     // Used for zero count metric emits, such as zero amounts of various types
     public static final int ZERO = 0;
+    // The number of characters at the end of the string to use as a key
+    public static final int DELTA_CUT = 20;
 
     /**
      * This retrieves the uid of any package name, given a context and a component name for the
@@ -84,6 +86,18 @@ public class MetricUtilities {
             throw new ArithmeticException("Input timestamps are too far apart and unsupported");
         }
         return (int) ((t2 - t1) / 1000);
+    }
+
+    /**
+     * Given the current design, we can designate how the strings in the backend should appear.
+     * This helper method lets us cut strings for our class types.
+     *
+     * @param classtype the classtype string we want to cut to generate a key
+     * @param deltaFromEnd the starting point from the end of the string we wish to begin at
+     * @return the cut up string key we want to use for metric logs
+     */
+    public static String generateMetricKey(String classtype, int deltaFromEnd) {
+        return classtype.substring(classtype.length() - deltaFromEnd);
     }
 
     /**
@@ -158,7 +172,9 @@ public class MetricUtilities {
     }
 
     /**
-     * A logging utility used primarily for the candidate phase of the current metric setup.
+     * A logging utility used primarily for the candidate phase of the current metric setup. This
+     * will primarily focus on track 2, where the session id is associated with known providers,
+     * but NOT the calling app.
      *
      * @param providers      a map with known providers and their held metric objects
      * @param emitSequenceId an emitted sequence id for the current session
@@ -209,6 +225,7 @@ public class MetricUtilities {
                 candidateActionEntryCountList[index] = metric.getActionEntryCount();
                 candidateAuthEntryCountList[index] = metric.getAuthenticationEntryCount();
                 candidateRemoteEntryCountList[index] = metric.getRemoteEntryCount();
+                // frameworkExceptionList[index] = metric.getFrameworkException();
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE_REPORTED,
@@ -297,10 +314,11 @@ public class MetricUtilities {
                     initialPhaseMetric.getCredentialServiceStartedTimeNanoseconds(),
                     /* count_credential_request_classtypes */
                     initialPhaseMetric.getCountRequestClassType(),
-                    // TODO(b/271135048) - add total count of request options
-                    // TODO(b/271135048) - Uncomment once built past PWG review -
-                    DEFAULT_REPEATED_STR,
-                    DEFAULT_REPEATED_INT_32,
+                    /* request_unique_classtypes */
+                    initialPhaseMetric.getUniqueRequestStrings(),
+                    /* per_classtype_counts */
+                    initialPhaseMetric.getUniqueRequestCounts(),
+                    /* origin_specified */
                     initialPhaseMetric.isOriginSpecified()
             );
         } catch (Exception e) {
