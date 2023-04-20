@@ -24,11 +24,11 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
-import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.After;
 import org.junit.Test;

@@ -41,11 +41,11 @@ import android.print.test.services.PrintServiceCallbacks;
 import android.print.test.services.PrinterDiscoverySessionCallbacks;
 import android.print.test.services.StubbablePrinterDiscoverySession;
 import android.printservice.recommendation.IRecommendationsChangeListener;
-import android.support.test.uiautomator.UiDevice;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.Before;
 import org.junit.Test;

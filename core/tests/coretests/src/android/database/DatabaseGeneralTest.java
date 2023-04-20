@@ -25,7 +25,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteException;
 import android.os.Parcel;
-import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.util.Log;
@@ -35,6 +34,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
+import androidx.test.uiautomator.UiDevice;
 
 import junit.framework.Assert;
 
