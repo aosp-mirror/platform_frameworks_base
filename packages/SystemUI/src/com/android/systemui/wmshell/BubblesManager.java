@@ -66,7 +66,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -100,7 +100,7 @@ public class BubblesManager {
     private final INotificationManager mNotificationManager;
     private final IDreamManager mDreamManager;
     private final NotificationVisibilityProvider mVisibilityProvider;
-    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
+    private final VisualInterruptionDecisionProvider mVisualInterruptionDecisionProvider;
     private final NotificationLockscreenUserManager mNotifUserManager;
     private final CommonNotifCollection mCommonNotifCollection;
     private final NotifPipeline mNotifPipeline;
@@ -126,7 +126,7 @@ public class BubblesManager {
             INotificationManager notificationManager,
             IDreamManager dreamManager,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationInterruptStateProvider interruptionStateProvider,
+            VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             CommonNotifCollection notifCollection,
@@ -145,7 +145,7 @@ public class BubblesManager {
                     notificationManager,
                     dreamManager,
                     visibilityProvider,
-                    interruptionStateProvider,
+                    visualInterruptionDecisionProvider,
                     zenModeController,
                     notifUserManager,
                     notifCollection,
@@ -169,7 +169,7 @@ public class BubblesManager {
             INotificationManager notificationManager,
             IDreamManager dreamManager,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationInterruptStateProvider interruptionStateProvider,
+            VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             CommonNotifCollection notifCollection,
@@ -185,7 +185,7 @@ public class BubblesManager {
         mNotificationManager = notificationManager;
         mDreamManager = dreamManager;
         mVisibilityProvider = visibilityProvider;
-        mNotificationInterruptStateProvider = interruptionStateProvider;
+        mVisualInterruptionDecisionProvider = visualInterruptionDecisionProvider;
         mNotifUserManager = notifUserManager;
         mCommonNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
@@ -272,7 +272,7 @@ public class BubblesManager {
                     for (NotificationEntry entry : activeEntries) {
                         if (mNotifUserManager.isCurrentProfile(entry.getSbn().getUserId())
                                 && savedBubbleKeys.contains(entry.getKey())
-                                && mNotificationInterruptStateProvider.shouldBubbleUp(entry)
+                                && shouldBubbleUp(entry)
                                 && entry.isBubble()) {
                             result.add(notifToBubbleEntry(entry));
                         }
@@ -416,16 +416,13 @@ public class BubblesManager {
     }
 
     void onEntryAdded(NotificationEntry entry) {
-        if (mNotificationInterruptStateProvider.shouldBubbleUp(entry)
-                && entry.isBubble()) {
+        if (shouldBubbleUp(entry) && entry.isBubble()) {
             mBubbles.onEntryAdded(notifToBubbleEntry(entry));
         }
     }
 
     void onEntryUpdated(NotificationEntry entry, boolean fromSystem) {
-        boolean shouldBubble = mNotificationInterruptStateProvider.shouldBubbleUp(entry);
-        mBubbles.onEntryUpdated(notifToBubbleEntry(entry),
-                shouldBubble, fromSystem);
+        mBubbles.onEntryUpdated(notifToBubbleEntry(entry), shouldBubbleUp(entry), fromSystem);
     }
 
     void onEntryRemoved(NotificationEntry entry) {
@@ -438,12 +435,8 @@ public class BubblesManager {
         for (int i = 0; i < orderedKeys.length; i++) {
             String key = orderedKeys[i];
             final NotificationEntry entry = mCommonNotifCollection.getEntry(key);
-            BubbleEntry bubbleEntry = entry != null
-                    ? notifToBubbleEntry(entry)
-                    : null;
-            boolean shouldBubbleUp = entry != null
-                    ? mNotificationInterruptStateProvider.shouldBubbleUp(entry)
-                    : false;
+            BubbleEntry bubbleEntry = entry != null ? notifToBubbleEntry(entry) : null;
+            boolean shouldBubbleUp = entry != null ? shouldBubbleUp(entry) : false;
             pendingOrActiveNotif.put(key, new Pair<>(bubbleEntry, shouldBubbleUp));
         }
         mBubbles.onRankingUpdated(rankingMap, pendingOrActiveNotif);
@@ -635,6 +628,10 @@ public class BubblesManager {
         } else {
             return e.legacyIsDismissableRecursive();
         }
+    }
+
+    private boolean shouldBubbleUp(NotificationEntry e) {
+        return mVisualInterruptionDecisionProvider.makeAndLogBubbleDecision(e).getShouldInterrupt();
     }
 
     /**
