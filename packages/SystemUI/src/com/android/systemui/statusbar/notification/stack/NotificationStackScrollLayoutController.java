@@ -105,11 +105,14 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -122,15 +125,16 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlin.Unit;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import kotlin.Unit;
 
 /**
  * Controller for {@link NotificationStackScrollLayout}.
@@ -151,6 +155,8 @@ public class NotificationStackScrollLayoutController {
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
+    private final Optional<NotificationListViewModel> mViewModel;
+
     private final DumpManager mDumpManager;
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
@@ -175,6 +181,8 @@ public class NotificationStackScrollLayoutController {
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateLogger mStackStateLogger;
     private final NotificationStackScrollLogger mLogger;
+    private final NotificationIconAreaController mNotifIconAreaController;
+
     private final GroupExpansionManager mGroupExpansionManager;
     private final NotifPipelineFlags mNotifPipelineFlags;
     private final SeenNotificationsProvider mSeenNotificationsProvider;
@@ -642,6 +650,7 @@ public class NotificationStackScrollLayoutController {
             KeyguardBypassController keyguardBypassController,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager lockscreenUserManager,
+            Optional<NotificationListViewModel> nsslViewModel,
             MetricsLogger metricsLogger,
             DumpManager dumpManager,
             FalsingCollector falsingCollector,
@@ -665,6 +674,7 @@ public class NotificationStackScrollLayoutController {
             StackStateLogger stackLogger,
             NotificationStackScrollLogger logger,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
+            NotificationIconAreaController notifIconAreaController,
             FeatureFlags featureFlags,
             NotificationTargetsHelper notificationTargetsHelper,
             SecureSettings secureSettings,
@@ -686,6 +696,7 @@ public class NotificationStackScrollLayoutController {
         mKeyguardBypassController = keyguardBypassController;
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
+        mViewModel = nsslViewModel;
         mMetricsLogger = metricsLogger;
         mDumpManager = dumpManager;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
@@ -707,6 +718,7 @@ public class NotificationStackScrollLayoutController {
         mVisibilityLocationProviderDelegator = visibilityLocationProviderDelegator;
         mSeenNotificationsProvider = seenNotificationsProvider;
         mShadeController = shadeController;
+        mNotifIconAreaController = notifIconAreaController;
         mFeatureFlags = featureFlags;
         mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mNotificationTargetsHelper = notificationTargetsHelper;
@@ -820,6 +832,10 @@ public class NotificationStackScrollLayoutController {
 
         mGroupExpansionManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
+
+        mViewModel.ifPresent(
+                vm -> NotificationListViewBinder
+                        .bind(mView, vm, mFalsingManager, mFeatureFlags, mNotifIconAreaController));
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
