@@ -13804,8 +13804,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         admin,
                         new BooleanPolicyValue(hidden),
                         userId);
-                Boolean resolvedPolicy = mDevicePolicyEngine.getResolvedPolicy(
-                        PolicyDefinition.APPLICATION_HIDDEN(packageName), userId);
                 result = mInjector.binderWithCleanCallingIdentity(() -> {
                     try {
                         // This is a best effort to continue returning the same value that was
@@ -18973,7 +18971,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19037,7 +19035,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19083,7 +19081,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19135,7 +19133,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19161,10 +19159,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (result) {
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
-                    .setAdmin(caller.getComponentName())
-                    .write();
+            if (isPermissionCheckFlagEnabled()) {
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
+                        .setAdmin(callerPackageName)
+                        .write();
+            } else {
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
+                        .setAdmin(caller.getComponentName())
+                        .write();
+            }
         }
         return result;
     }
