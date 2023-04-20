@@ -29,7 +29,6 @@ import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.battery.BatteryMeterViewController;
-import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -146,15 +145,6 @@ public abstract class StatusBarViewModule {
     public static LockIconView getLockIconView(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.lock_icon_view);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    @Nullable
-    public static AuthRippleView getAuthRippleView(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.auth_ripple);
     }
 
     /** */

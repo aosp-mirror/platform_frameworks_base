@@ -122,11 +122,6 @@ public interface CentralSurfacesComponent {
     LockIconViewController getLockIconViewController();
 
     /**
-     * Creates an AuthRippleViewController. Must be init after creation.
-     */
-    AuthRippleController getAuthRippleController();
-
-    /**
      * Creates a StatusBarHeadsUpChangeListener.
      */
     StatusBarHeadsUpChangeListener getStatusBarHeadsUpChangeListener();
