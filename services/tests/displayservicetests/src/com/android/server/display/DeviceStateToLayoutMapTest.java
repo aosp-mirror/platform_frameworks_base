@@ -19,8 +19,8 @@ package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 
-import android.view.Display;
 import android.view.DisplayAddress;
 
 import androidx.test.filters.SmallTest;
@@ -65,9 +65,15 @@ public class DeviceStateToLayoutMapTest {
 
         Layout testLayout = new Layout();
         createDefaultDisplay(testLayout, 123456L);
-        createNonDefaultDisplay(testLayout, 78910L, /* enabled= */ false, /* group= */ null);
-        createNonDefaultDisplay(testLayout, 98765L, /* enabled= */ true, /* group= */ "group1");
-        createNonDefaultDisplay(testLayout, 786L, /* enabled= */ false, /* group= */ "group2");
+        createNonDefaultDisplay(testLayout, 78910L, /* enabled= */ false, /* group= */ null,
+                /* leadDisplayAddress= */ null);
+        createNonDefaultDisplay(testLayout, 98765L, /* enabled= */ true, /* group= */ "group1",
+                /* leadDisplayAddress= */ null);
+        createNonDefaultDisplay(testLayout, 786L, /* enabled= */ false, /* group= */ "group2",
+                /* leadDisplayAddress= */ null);
+        createNonDefaultDisplay(testLayout, 1092L, /* enabled= */ true, /* group= */ null,
+                DisplayAddress.fromPhysicalDisplayId(78910L));
+        testLayout.postProcessLocked();
 
         assertEquals(testLayout, configLayout);
     }
@@ -78,7 +84,9 @@ public class DeviceStateToLayoutMapTest {
 
         Layout testLayout = new Layout();
         createDefaultDisplay(testLayout, 78910L);
-        createNonDefaultDisplay(testLayout, 123456L, /* enabled= */ false, /* group= */ null);
+        createNonDefaultDisplay(testLayout, 123456L, /* enabled= */ false, /* group= */ null,
+                /* leadDisplayAddress= */ null);
+        testLayout.postProcessLocked();
 
         assertEquals(testLayout, configLayout);
     }
@@ -122,18 +130,130 @@ public class DeviceStateToLayoutMapTest {
         Layout testLayout = new Layout();
         testLayout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(345L),
                 /* isDefault= */ true, /* isEnabled= */ true, /* displayGroupName= */ null,
-                mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT, Display.DEFAULT_DISPLAY,
-                /* brightnessThrottlingMapId= */ "brightness1",
+                mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT,
+                /* leadDisplayAddress= */ null, /* brightnessThrottlingMapId= */ "brightness1",
                 /* refreshRateZoneId= */ "zone1",
                 /* refreshRateThermalThrottlingMapId= */ "rr1");
         testLayout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(678L),
                 /* isDefault= */ false, /* isEnabled= */ false, /* displayGroupName= */ "group1",
-                mDisplayIdProducerMock, Layout.Display.POSITION_REAR, Display.DEFAULT_DISPLAY,
-                /* brightnessThrottlingMapId= */ "brightness2",
+                mDisplayIdProducerMock, Layout.Display.POSITION_REAR,
+                /* leadDisplayAddress= */ null, /* brightnessThrottlingMapId= */ "brightness2",
                 /* refreshRateZoneId= */ "zone2",
                 /* refreshRateThermalThrottlingMapId= */ "rr2");
+        testLayout.postProcessLocked();
 
         assertEquals(testLayout, configLayout);
+    }
+
+    @Test
+    public void testLeadDisplayAddress() {
+        Layout layout = new Layout();
+        createNonDefaultDisplay(layout, 111L, /* enabled= */ true, /* group= */ null,
+                /* leadDisplayAddress= */ null);
+        createNonDefaultDisplay(layout, 222L, /* enabled= */ true, /* group= */ null,
+                DisplayAddress.fromPhysicalDisplayId(111L));
+
+        layout.postProcessLocked();
+
+        com.android.server.display.layout.Layout.Display display111 =
+                layout.getByAddress(DisplayAddress.fromPhysicalDisplayId(111));
+        com.android.server.display.layout.Layout.Display display222 =
+                layout.getByAddress(DisplayAddress.fromPhysicalDisplayId(222));
+        assertEquals(display111.getLeadDisplayId(), layout.NO_LEAD_DISPLAY);
+        assertEquals(display222.getLeadDisplayId(), display111.getLogicalDisplayId());
+    }
+
+    @Test
+    public void testLeadDisplayAddress_defaultDisplay() {
+        Layout layout = new Layout();
+        createDefaultDisplay(layout, 123456L);
+
+        layout.postProcessLocked();
+
+        com.android.server.display.layout.Layout.Display display =
+                layout.getByAddress(DisplayAddress.fromPhysicalDisplayId(123456));
+        assertEquals(display.getLeadDisplayId(), layout.NO_LEAD_DISPLAY);
+    }
+
+    @Test
+    public void testLeadDisplayAddress_noLeadDisplay() {
+        Layout layout = new Layout();
+        createNonDefaultDisplay(layout, 222L, /* enabled= */ true, /* group= */ null,
+                /* leadDisplayAddress= */ null);
+
+        layout.postProcessLocked();
+
+        com.android.server.display.layout.Layout.Display display =
+                layout.getByAddress(DisplayAddress.fromPhysicalDisplayId(222));
+        assertEquals(display.getLeadDisplayId(), layout.NO_LEAD_DISPLAY);
+    }
+
+    @Test
+    public void testLeadDisplayAddress_selfLeadDisplayForNonDefaultDisplay() {
+        Layout layout = new Layout();
+
+        assertThrows("Expected Layout to throw IllegalArgumentException when the display points out"
+                + " itself as a lead display",
+                IllegalArgumentException.class,
+                () -> layout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(123L),
+                    /* isDefault= */ true, /* isEnabled= */ true, /* displayGroupName= */ null,
+                    mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT,
+                    DisplayAddress.fromPhysicalDisplayId(123L),
+                    /* brightnessThrottlingMapId= */ null, /* refreshRateZoneId= */ null,
+                    /* refreshRateThermalThrottlingMapId= */ null));
+    }
+
+    @Test
+    public void testLeadDisplayAddress_wrongLeadDisplayForDefaultDisplay() {
+        Layout layout = new Layout();
+
+        assertThrows("Expected Layout to throw IllegalArgumentException when the default display "
+                + "has a lead display",
+                IllegalArgumentException.class,
+                () -> layout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(123L),
+                    /* isDefault= */ true, /* isEnabled= */ true, /* displayGroupName= */ null,
+                    mDisplayIdProducerMock,  Layout.Display.POSITION_FRONT,
+                    DisplayAddress.fromPhysicalDisplayId(987L),
+                    /* brightnessThrottlingMapId= */ null, /* refreshRateZoneId= */ null,
+                    /* refreshRateThermalThrottlingMapId= */ null));
+    }
+
+    @Test
+    public void testLeadDisplayAddress_notExistingLeadDisplayForNonDefaultDisplay() {
+        Layout layout = new Layout();
+        createNonDefaultDisplay(layout, 222L, /* enabled= */ true, /* group= */ null,
+                DisplayAddress.fromPhysicalDisplayId(111L));
+
+        assertThrows("Expected Layout to throw IllegalArgumentException when a lead display doesn't"
+                + " exist", IllegalArgumentException.class, () -> layout.postProcessLocked());
+    }
+
+    @Test
+    public void testLeadDisplayAddress_leadDisplayInDifferentDisplayGroup() {
+        Layout layout = new Layout();
+        createNonDefaultDisplay(layout, 111, /* enabled= */ true, /* group= */ "group1",
+                /* leadDisplayAddress= */ null);
+        createNonDefaultDisplay(layout, 222L, /* enabled= */ true, /* group= */ "group2",
+                DisplayAddress.fromPhysicalDisplayId(111L));
+
+        assertThrows("Expected Layout to throw IllegalArgumentException when pointing to a lead "
+                + "display in the different group",
+                IllegalArgumentException.class, () -> layout.postProcessLocked());
+    }
+
+    @Test
+    public void testLeadDisplayAddress_cyclicLeadDisplay() {
+        Layout layout = new Layout();
+        createNonDefaultDisplay(layout, 111, /* enabled= */ true, /* group= */ null,
+                DisplayAddress.fromPhysicalDisplayId(222L));
+        createNonDefaultDisplay(layout, 222L, /* enabled= */ true, /* group= */ null,
+                DisplayAddress.fromPhysicalDisplayId(333L));
+        createNonDefaultDisplay(layout, 333L, /* enabled= */ true, /* group= */ null,
+                DisplayAddress.fromPhysicalDisplayId(222L));
+
+        assertThrows("Expected Layout to throw IllegalArgumentException when pointing to a lead "
+                + "display in the different group",
+                IllegalArgumentException.class, () -> layout.postProcessLocked());
     }
 
     ////////////////////
@@ -145,10 +265,11 @@ public class DeviceStateToLayoutMapTest {
                 mDisplayIdProducerMock);
     }
 
-    private void createNonDefaultDisplay(Layout layout, long id, boolean enabled, String group) {
+    private void createNonDefaultDisplay(Layout layout, long id, boolean enabled, String group,
+            DisplayAddress leadDisplayAddress) {
         layout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(id), /* isDefault= */ false,
                 enabled, group, mDisplayIdProducerMock, Layout.Display.POSITION_UNKNOWN,
-                Display.DEFAULT_DISPLAY, /* brightnessThrottlingMapId= */ null,
+                leadDisplayAddress, /* brightnessThrottlingMapId= */ null,
                 /* refreshRateZoneId= */ null,
                 /* refreshRateThermalThrottlingMapId= */ null);
     }
@@ -176,6 +297,10 @@ public class DeviceStateToLayoutMapTest {
                 +      "</display>\n"
                 +      "<display enabled=\"false\" displayGroup=\"group2\">\n"
                 +        "<address>786</address>\n"
+                +      "</display>\n"
+                +      "<display enabled=\"true\">\n"
+                +        "<address>1092</address>\n"
+                +        "<leadDisplayAddress>78910</leadDisplayAddress>\n"
                 +      "</display>\n"
                 +    "</layout>\n"
 
