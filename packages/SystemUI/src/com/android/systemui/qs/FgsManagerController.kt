@@ -44,6 +44,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -201,7 +202,7 @@ class FgsManagerControllerImpl @Inject constructor(
     @GuardedBy("lock")
     private val appListAdapter: AppListAdapter = AppListAdapter()
 
-    @GuardedBy("lock")
+    /* Only mutate on the background thread */
     private var runningApps: ArrayMap<UserPackage, RunningApp> = ArrayMap()
 
     private val userTrackerCallback = object : UserTracker.Callback {
@@ -374,11 +375,6 @@ class FgsManagerControllerImpl @Inject constructor(
     override fun showDialog(expandable: Expandable?) {
         synchronized(lock) {
             if (dialog == null) {
-
-                runningTaskIdentifiers.keys.forEach {
-                    it.updateUiControl()
-                }
-
                 val dialog = SystemUIDialog(context)
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
                 dialog.setMessage(R.string.fgs_manager_dialog_message)
@@ -421,33 +417,53 @@ class FgsManagerControllerImpl @Inject constructor(
                     }
                 }
 
-                backgroundExecutor.execute {
-                    synchronized(lock) {
-                        updateAppItemsLocked()
-                    }
-                }
+                updateAppItemsLocked(refreshUiControls = true)
             }
         }
     }
 
     @GuardedBy("lock")
-    private fun updateAppItemsLocked() {
+    private fun updateAppItemsLocked(refreshUiControls: Boolean = false) {
         if (dialog == null) {
-            runningApps.clear()
+            backgroundExecutor.execute {
+                clearRunningApps()
+            }
             return
         }
 
-        val addedPackages = runningTaskIdentifiers.keys.filter {
-            currentProfileIds.contains(it.userId) &&
+        val packagesToStartTime = runningTaskIdentifiers.mapValues { it.value.startTime }
+        val profileIds = currentProfileIds.toSet()
+        backgroundExecutor.execute {
+            updateAppItems(packagesToStartTime, profileIds, refreshUiControls)
+        }
+    }
+
+    /**
+     * Must be called on the background thread.
+     */
+    @WorkerThread
+    private fun updateAppItems(
+        packages: Map<UserPackage, Long>,
+        profileIds: Set<Int>,
+        refreshUiControls: Boolean = true
+    ) {
+        if (refreshUiControls) {
+            packages.forEach { (pkg, _) ->
+                pkg.updateUiControl()
+            }
+        }
+
+        val addedPackages = packages.keys.filter {
+            profileIds.contains(it.userId) &&
                     it.uiControl != UIControl.HIDE_ENTRY && runningApps[it]?.stopped != true
         }
-        val removedPackages = runningApps.keys.filter { !runningTaskIdentifiers.containsKey(it) }
+        val removedPackages = runningApps.keys.filter { it !in packages }
 
         addedPackages.forEach {
             val ai = packageManager.getApplicationInfoAsUser(it.packageName, 0, it.userId)
             runningApps[it] = RunningApp(
                 it.userId, it.packageName,
-                runningTaskIdentifiers[it]!!.startTime, it.uiControl,
+                packages[it]!!, it.uiControl,
                 packageManager.getApplicationLabel(ai),
                 packageManager.getUserBadgedIcon(
                     packageManager.getApplicationIcon(ai), UserHandle.of(it.userId)
@@ -470,6 +486,14 @@ class FgsManagerControllerImpl @Inject constructor(
             appListAdapter
                 .setData(runningApps.values.toList().sortedByDescending { it.timeStarted })
         }
+    }
+
+    /**
+     * Must be called on the background thread.
+     */
+    @WorkerThread
+    private fun clearRunningApps() {
+        runningApps.clear()
     }
 
     private fun stopPackage(userId: Int, packageName: String, timeStarted: Long) {
