@@ -414,8 +414,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }
 
-        if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
-                || isRearDisplayActive()) {
+        if (isRearDisplayActive()) {
             return WindowAreaComponent.STATUS_ACTIVE;
         }
 
@@ -537,7 +536,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 if (request.equals(mRearDisplayStateRequest)) {
                     mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_ACTIVE;
                     mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
-                    updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
                 }
             }
         }
@@ -550,7 +548,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 }
                 mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
                 mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
-                updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
             }
         }
     }
