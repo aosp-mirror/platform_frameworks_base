@@ -764,6 +764,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     @Override
     public void stop() {
         synchronized (mLock) {
+            clearDisplayBrightnessFollowersLocked();
+
             mStopped = true;
             Message msg = mHandler.obtainMessage(MSG_STOP);
             mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
@@ -2199,6 +2201,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
                     /* ambientLux= */ 0), mClock.uptimeMillis());
         }
+    }
+
+    @GuardedBy("mLock")
+    private void clearDisplayBrightnessFollowersLocked() {
+        for (int i = 0; i < mDisplayBrightnessFollowers.size(); i++) {
+            DisplayPowerControllerInterface follower = mDisplayBrightnessFollowers.valueAt(i);
+            mHandler.postAtTime(() -> follower.setBrightnessToFollow(
+                    PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
+                    /* ambientLux= */ 0), mClock.uptimeMillis());
+        }
+        mDisplayBrightnessFollowers.clear();
     }
 
     @Override
