@@ -47,7 +47,7 @@
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"Няма/Enhanced Open"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"Стандарт за сигурност Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise, 192-битова защита"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Запазено"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Няма връзка"</string>
@@ -519,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Повече време."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"По-малко време."</string>
     <string name="cancel" msgid="5665114069455378395">"Отказ"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"ОK"</string>
     <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будилници и напомняния"</string>
@@ -573,8 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Добавяне на нов потребител?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Можете да споделите това устройство с други хора, като създадете допълнителни потребители. Всеки от тях има собствено работно пространство, което може да персонализира с приложения, тапет и др. Потребителите могат също да коригират настройки на устройството, които засягат всички – например за Wi‑Fi.\n\nКогато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители. Настройките и услугите за достъпност може да не се прехвърлят за новия потребител."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Да се дадат ли админ. права?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Като администратор този потребител ще може да управлява други потребители, да променя настройките на устройството и да възстановява фабричните му настройки."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настройване на потребителя?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Уверете се, че човекът има възможност да вземе устройството и да настрои работното си пространство."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Ще настроите ли потребителския профил сега?"</string>
@@ -606,8 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Така ще стартирате нова сесия като гост и ще изтриете всички приложения и данни от текущата сесия"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Изход от режима на гост?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Така ще изтриете приложенията и данните от текущата сесия като гост"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Предоставяне на администраторски права на този потребител"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Без предоставяне на администраторски права на потребителя"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Изход"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Запазване на активността като гост?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Можете да запазите активността от сесията или да изтриете всички прил. и данни"</string>

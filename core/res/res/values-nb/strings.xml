@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Gir appen tilgang til data fra kroppssensorer, for eksempel puls, temperatur og oksygenmetning i blodet, når den er i bruk."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Tilgang til data fra kroppssensorer, for eksempel puls, når den er i bakgrunnen"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Gir appen tilgang til data fra kroppssensorer, for eksempel puls, temperatur og oksygenmetning i blodet, når den er i bakgrunnen."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Tilgang til data fra kroppssensorer for håndleddstemperatur mens appen er i bruk."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Gir appen tilgang til data fra kroppssensorer for håndleddstemperatur mens appen er i bruk."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Tilgang til data fra kroppssensorer for håndleddstemperatur mens appen er i bakgrunnen."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Gir appen tilgang til data fra kroppssensorer for håndleddstemperatur mens appen er i bakgrunnen."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Les kalenderaktivitet og detaljer"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Denne appen kan lese all kalenderaktivitet som er lagret på nettbrettet ditt, og dele eller lagre kalenderdataene."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Denne appen kan lese all kalenderaktivitet som er lagret på Android TV-enheten din, og dele eller lagre kalenderdataene."</string>
@@ -561,9 +557,9 @@
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"koble til og fra wifi"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Lar appen koble til og fra wifi-tilgangspunkter, og å gjøre endringer i enhetens konfigurasjon for wifi-nettverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"tillate multicast for trådløse nettverk"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser, ikke bare Android TV-enheten din. Dette bruker mer strøm enn modus uten multikasting."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Lar appen motta pakker som sendes til alle enhetene på et Wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Lar appen motta pakker som sendes til alle enhetene på et wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Lar appen motta pakker som sendes til alle enhetene på et wifi-nettverk ved hjelp av multikastingsadresser, ikke bare Android TV-enheten din. Dette bruker mer strøm enn modus uten multikasting."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Lar appen motta pakker som sendes til alle enhetene på et wifi-nettverk ved hjelp av multikastingsadresser,  Dette bruker mer strøm enn modusen uten multikasting."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"endre Bluetooth-innstillinger"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Lar appen konfigurere Bluetooth på Android TV-enheten din samt oppdage og koble sammen med eksterne enheter."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansikt-operasjonen ble avbrutt."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Ansiktslås ble avbrutt av brukeren"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"For mange forsøk. Prøv på nytt senere."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"For mange forsøk. Ansiktslås er slått av."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"For mange forsøk. Skriv inn skjermlås i stedet."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan ikke bekrefte ansiktet. Prøv på nytt."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Du har ikke konfigurert ansiktslås"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lar innehaveren se informasjon om funksjonene for en app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"tilgang til sensordata ved høy samplingfrekvens"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lar appen samle inn sensordata ved en hastighet som er høyere enn 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"oppdatere appen uten brukerhandling"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lar innehaveren oppdatere appen hen tidligere installerte, uten brukerhandling"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollerer tillatt lengde og tillatte tegn i passord og PIN-koder for opplåsing av skjermen."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåk forsøk på å låse opp skjermen"</string>
@@ -1367,7 +1362,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB er slått på"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-internettdeling er slått på"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB er slått på"</string>
-    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Enheten er koblet til som nettkamera"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Enheten er koblet til som webkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-tilbehør er tilkoblet"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for å få flere alternativ."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Den tilkoblede enheten lades. Trykk for å se flere alternativer."</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> er ikke tilgjengelig akkurat nå. Dette administreres av <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Finn ut mer"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Opphev pause for appen"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Vil du slå på jobbapper?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Få tilgang til jobbapper og -varsler"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Slå på"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Vil du slå på jobbapper igjen?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Slå på"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Nød"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Få tilgang til jobbapper og -samtaler"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen er ikke tilgjengelig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ikke tilgjengelig for øyeblikket."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> er utilgjengelig"</string>
@@ -2099,7 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Slå av"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Finn ut mer"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også avvise og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også lukke og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Varsel med informasjon om rutinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Batterisparing er slått på"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduserer batteribruken for å forlenge batterilevetiden"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Trykk for å slå på"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ingen jobbapper"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ingen personlige apper"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Vil du åpne <xliff:g id="APP">%s</xliff:g> i den personlige profilen din?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Vil du åpne <xliff:g id="APP">%s</xliff:g> i jobbprofilen din?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Bruk den personlige nettleseren"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Bruk jobbnettleseren"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-kode for å fjerne operatørlåser"</string>

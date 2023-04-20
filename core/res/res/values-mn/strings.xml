@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Аппыг ашиглаж байх үедээ зүрхний хэм, температур болон цусны хүчилтөрөгчийн хувь зэрэг биеийн мэдрэгчийн өгөгдөлд хандах боломжтой."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Ард нь байх үед зүрхний хэм зэрэг биеийн мэдрэгчийн өгөгдөлд хандаарай"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Апп ард нь байх үед зүрхний хэм, температур, цусны хүчилтөрөгчийн хувь зэрэг биеийн мэдрэгчийн өгөгдөлд хандах боломжтой."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Аппыг ашиглаж байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандана."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Аппыг ашиглаж байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандахыг аппад зөвшөөрнө."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Аппыг ард байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандана."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Аппыг ард байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандахыг аппад зөвшөөрнө."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Календарийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Энэ апп таны Android TV төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Царайны үйл ажиллагааг цуцаллаа."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Хэрэглэгч Царайгаар түгжээ тайлахыг цуцалсан"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Хэт олон удаа оролдлоо. Дараа дахин оролдоно уу."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Хэт олон удаа оролдлоо. Царайгаар түгжээ тайлахыг идэвхгүй болгосон."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Хэт олон удаа оролдлоо. Оронд нь дэлгэцийн түгжээ оруулна уу."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Царайг бататгаж чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Та Царайгаар түгжээ тайлахыг тохируулаагүй байна"</string>
@@ -1509,7 +1506,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Сүлжээ эсвэл VPN тохиргоог өөрчлөх"</string>
     <string name="upload_file" msgid="8651942222301634271">"Файл сонгох"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Сонгосон файл байхгүй"</string>
-    <string name="reset" msgid="3865826612628171429">"Бүгдийг цэвэрлэх"</string>
+    <string name="reset" msgid="3865826612628171429">"Шинэчлэх"</string>
     <string name="submit" msgid="862795280643405865">"Илгээх"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Жолоо барих апп ажиллаж байна"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Жолооны аппаас гарахын тулд товшино уу."</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> одоогоор боломжгүй байна. Үүнийг <xliff:g id="APP_NAME_1">%2$s</xliff:g>-р удирддаг."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дэлгэрэнгүй үзэх"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Аппыг түр зогсоохоо болих"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Ажлын аппуудыг асаах уу?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Ажлын аппууд болон мэдэгдлүүддээ хандах эрх аваарай"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Асаах"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Ажлын аппыг үргэлжлүүлэх үү?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Үргэлжлүүлэх"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Яаралтай тусламж"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Ажлын аппууд болон дуудлагууддаа хандах эрх аваарай"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апп боломжгүй байна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> яг одоо боломжгүй байна."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> боломжгүй байна"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Асаахын тулд товших"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ямар ч ажлын апп байхгүй байна"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ямар ч хувийн апп байхгүй байна"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Хувийн профайл дээрээ <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Ажлын профайл дээрээ <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Хувийн хөтөч ашиглах"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ажлын хөтөч ашиглах"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Сүлжээний SIM-н түгжээг тайлах ПИН"</string>

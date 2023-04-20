@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"రద్దు చేయండి"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"పెయిర్ చేయడం వలన కనెక్ట్ చేయబడినప్పుడు మీ కాంటాక్ట్‌లకు అలాగే కాల్ హిస్టరీకి యాక్సెస్‌ను మంజూరు చేస్తుంది."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో జత చేయడం సాధ్యపడలేదు."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"పిన్ లేదా పాస్‌కీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో పెయిర్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN లేదా పాస్‌కీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో పెయిర్ చేయడం సాధ్యపడలేదు."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో కమ్యూనికేట్ చేయడం సాధ్యపడదు."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> జత చేయడాన్ని తిరస్కరించింది."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"కంప్యూటర్"</string>
@@ -519,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ఎక్కువ సమయం."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"తక్కువ సమయం."</string>
     <string name="cancel" msgid="5665114069455378395">"రద్దు చేయండి"</string>
+    <string name="next" msgid="2699398661093607009">"తర్వాత"</string>
+    <string name="back" msgid="5554327870352703710">"వెనుకకు"</string>
+    <string name="save" msgid="3745809743277153149">"సేవ్ చేయండి"</string>
     <string name="okay" msgid="949938843324579502">"సరే"</string>
     <string name="done" msgid="381184316122520313">"పూర్తయింది"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"అలారాలు, రిమైండర్‌లు"</string>
@@ -573,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"కొత్త యూజర్‌ను జోడించాలా?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"అదనపు యూజర్‌లను క్రియేట్ చేయడం ద్వారా మీరు ఈ పరికరాన్ని ఇతరులతో షేర్ చేయవచ్చు. ప్రతి యూజర్‌కు‌ వారికంటూ ప్రత్యేక స్థలం ఉంటుంది, వారు ఆ స్థలాన్ని యాప్‌లు, వాల్‌పేపర్ మొదలైనవాటితో అనుకూలంగా మార్చవచ్చు. యూజర్‌లు ప్రతి ఒక్కరిపై ప్రభావం చూపే Wi‑Fi వంటి పరికర సెట్టింగ్‌లను కూడా సర్దుబాటు చేయవచ్చు.\n\nమీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి వారికంటూ స్వంత స్థలం సెట్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగిలిన యూజర్‌లందరి కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు. యాక్సెసిబిలిటీ సెట్టింగ్‌లు, సర్వీస్‌లు కొత్త యూజర్‌కి బదిలీ కాకపోవచ్చు."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"మీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా యూజర్ల కోసం యాప్‌లను అప్‌డేట్‌ చేయగలరు."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"వీరికి అడ్మిన్ హక్కు ఇవ్వాలా?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"ఒక అడ్మిన్‌గా, వారు ఇతర యూజర్‌లను మేనేజ్ చేయగలరు, పరికర సెట్టింగ్‌లను ఎడిట్ చేయగలరు, పరికరాన్ని ఫ్యాక్టరీ రీసెట్ చేయగలరు."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ఈ యూజర్‌ను అడ్మిన్ చేయాలా?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"యూజర్‌లకు లేని ప్రత్యేక హక్కులు అడ్మిన్‌లకు ఉంటాయి. అడ్మిన్, యూజర్‌లందరినీ మేనేజ్ చేయగలరు, ఈ పరికరాన్ని అప్‌డేట్ లేదా రీసెట్ చేయగలరు, సెట్టింగ్‌లను మార్చగలరు, ఇన్‌స్టాల్ అయ్యి ఉండే యాప్‌లన్నింటినీ చూడగలరు, ఇతరులకు అడ్మిన్ హక్కులను ఇవ్వగలరు, లేదా ఉపసంహరించగలరు."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"అడ్మిన్‌గా చేయాలి"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"యూజర్‌ను ఇప్పుడే సెటప్ చేయాలా?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి స్టోరేజ్‌ స్థలాన్ని సెటప్ చేయండి"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ఇప్పుడు ప్రొఫైల్‌ను సెటప్ చేయాలా?"</string>
@@ -606,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ఇది కొత్త గెస్ట్ సెషన్‌ను ప్రారంభిస్తుంది, ప్రస్తుత సెషన్ నుండి అన్ని యాప్‌లు, డేటాను తొలగిస్తుంది."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"గెస్ట్ మోడ్ నుండి వైదొలగాలా?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ఇది ప్రస్తుత గెస్ట్ సెషన్ నుండి యాప్‌లను వాటితో పాటు డేటాను తొలగిస్తుంది"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"ఈ యూజర్‌కు అడ్మిన్ హక్కులను ఇవ్వండి"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"యూజర్‌కు అడ్మిన్ హక్కులను ఇవ్వకండి"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"అవును, వారిని అడ్మిన్ చేయాలి"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"వద్దు, వారిని అడ్మిన్ చేయవద్దు"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"వైదొలగండి"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"గెస్ట్ యాక్టివిటీని సేవ్ చేయాలా?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"మీరు సెషన్ నుండి యాక్టివిటీని సేవ్ చేయవచ్చు, అన్ని యాప్‌లు, డేటాను తొలగించవచ్చు"</string>

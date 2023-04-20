@@ -127,7 +127,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Ukufinyeleleka"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Zungezisa isikrini"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Buka konke"</string>
-    <string name="accessibility_camera_button" msgid="2938898391716647247">"Ikhamela"</string>
+    <string name="accessibility_camera_button" msgid="2938898391716647247">"Ikhamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Ifoni"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Isisekeli sezwi"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"I-wallet"</string>
@@ -885,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"susa ubuntandokazi"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Hambisa ukuze ubeke ku-<xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Izilawuli"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Khetha izilawuli ukuze ufinyelele kusuka Kumasethingi Asheshayo"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Bamba futhi uhudule ukuze uphinde ulungise izilawuli"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Zonke izilawuli zisusiwe"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Izinguquko azilondolozwanga"</string>
@@ -1122,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Inqubomgomo yakho yomsebenzi ikuvumela ukuthi wenze amakholi wefoni kuphela ngephrofayela yomsebenzi"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Shintshela kuphrofayela yomsebenzi"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Vala"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Yenza ngokwezifiso ukukhiya isikrini"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"I-Wi-Fi ayitholakali"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Ikhamera ivinjiwe"</string>
@@ -1130,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Imakrofoni ivinjiwe"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Imodi ebalulekile ivuliwe"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Ukunaka kwe-Assistant kuvuliwe"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

@@ -71,6 +71,7 @@ import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeModule;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
@@ -177,6 +178,7 @@ import javax.inject.Named;
             SecurityRepositoryModule.class,
             ScreenRecordModule.class,
             SettingsUtilModule.class,
+            ShadeModule.class,
             SmartRepliesInflationModule.class,
             SmartspaceModule.class,
             StatusBarPipelineModule.class,

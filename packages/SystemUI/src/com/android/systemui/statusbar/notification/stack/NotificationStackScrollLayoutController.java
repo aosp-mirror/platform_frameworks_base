@@ -627,6 +627,7 @@ public class NotificationStackScrollLayoutController {
 
     @Inject
     public NotificationStackScrollLayoutController(
+            NotificationStackScrollLayout view,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationGutsManager notificationGutsManager,
             NotificationVisibilityProvider visibilityProvider,
@@ -668,6 +669,7 @@ public class NotificationStackScrollLayoutController {
             NotificationTargetsHelper notificationTargetsHelper,
             SecureSettings secureSettings,
             NotificationDismissibilityProvider dismissibilityProvider) {
+        mView = view;
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -711,10 +713,10 @@ public class NotificationStackScrollLayoutController {
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
         updateResources();
+        setUpView();
     }
 
-    public void attach(NotificationStackScrollLayout view) {
-        mView = view;
+    private void setUpView() {
         mView.setLogger(mStackStateLogger);
         mView.setController(this);
         mView.setLogger(mLogger);

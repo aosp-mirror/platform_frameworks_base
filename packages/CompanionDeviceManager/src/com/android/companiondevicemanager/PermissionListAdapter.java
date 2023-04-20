@@ -121,16 +121,15 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         if (viewHolder.mExpandButton.getTag() == null) {
             viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
         }
-        // Add expand buttons if the permissions are more than PERMISSION_SIZE in this list.
+        // Add expand buttons if the permissions are more than PERMISSION_SIZE in this list also
+        // make the summary invisible by default.
         if (mPermissions.size() > PERMISSION_SIZE) {
+
+            viewHolder.mPermissionSummary.setVisibility(View.GONE);
+
             view.setOnClickListener(v -> {
                 if ((Integer) viewHolder.mExpandButton.getTag() == R.drawable.btn_expand_more) {
                     viewHolder.mExpandButton.setImageResource(R.drawable.btn_expand_less);
-
-                    if (viewHolder.mSummary != null) {
-                        viewHolder.mPermissionSummary.setText(viewHolder.mSummary);
-                    }
-
                     viewHolder.mPermissionSummary.setVisibility(View.VISIBLE);
                     viewHolder.mExpandButton.setTag(R.drawable.btn_expand_less);
                 } else {
@@ -139,6 +138,11 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
                     viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
                 }
             });
+        } else {
+            // Remove expand buttons if the permissions are less than PERMISSION_SIZE in this list
+            // also show the summary by default.
+            viewHolder.mPermissionSummary.setVisibility(View.VISIBLE);
+            viewHolder.mExpandButton.setVisibility(View.GONE);
         }
 
         return viewHolder;
@@ -150,15 +154,8 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         final Spanned title = getHtmlFromResources(mContext, sTitleMap.get(type));
         final Spanned summary = getHtmlFromResources(mContext, sSummaryMap.get(type));
 
-        holder.mSummary = summary;
+        holder.mPermissionSummary.setText(summary);
         holder.mPermissionName.setText(title);
-
-        if (mPermissions.size() <= PERMISSION_SIZE) {
-            holder.mPermissionSummary.setText(summary);
-            holder.mExpandButton.setVisibility(View.GONE);
-        } else {
-            holder.mPermissionSummary.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -181,7 +178,6 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         private final TextView mPermissionSummary;
         private final ImageView mPermissionIcon;
         private final ImageButton mExpandButton;
-        private Spanned mSummary = null;
         ViewHolder(View itemView) {
             super(itemView);
             mPermissionName = itemView.findViewById(R.id.permission_name);

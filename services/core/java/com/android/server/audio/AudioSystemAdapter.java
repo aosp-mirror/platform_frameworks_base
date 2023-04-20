@@ -162,6 +162,16 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
+     * Empties the routing cache if enabled.
+     */
+    public void clearRoutingCache() {
+        if (DEBUG_CACHE) {
+            Log.d(TAG, "---- routing cache clear (from java) ----------");
+        }
+        invalidateRoutingCache();
+    }
+
+    /**
      * @see AudioManager#addOnDevicesForAttributesChangedListener(
      *      AudioAttributes, Executor, OnDevicesForAttributesChangedListener)
      */
@@ -464,6 +474,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      * @return
      */
     public int setParameters(String keyValuePairs) {
+        invalidateRoutingCache();
         return AudioSystem.setParameters(keyValuePairs);
     }
 

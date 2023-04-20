@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"এই অ্যাপ ব্যবহার করার সময় বডি সেন্সর ডেটা অ্যাক্সেস করার অনুমতি দেওয়া হয়। এর মধ্যে হার্ট রেট, তাপমাত্রা এবং রক্তে অক্সিজেনের পরিমাণের শতাংশ সম্পর্কিত তথ্যও আছে।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"অ্যাপ ব্যাকগ্রাউন্ডে চলার সময়, হার্ট রেটের মতো বডি সেন্সর ডেটার অ্যাক্সেস দিন"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"এই অ্যাপ ব্যাকগ্রাউন্ডে চলার সময় বডি সেন্সর ডেটা অ্যাক্সেস করার অনুমতি দেওয়া হয়। এর মধ্যে হার্ট রেট, তাপমাত্রা এবং রক্তে অক্সিজেনের পরিমাণের শতাংশ সম্পর্কিত তথ্যও আছে।"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"অ্যাপ ব্যবহার করার সময়, দেহের তাপমাত্রা সংক্রান্ত বডি সেন্সর ডেটা অ্যাক্সেস করা।"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"অ্যাপ ব্যবহার করার সময়, দেহের তাপমাত্রা সংক্রান্ত বডি সেন্সর ডেটা অ্যাক্সেস করার ক্ষেত্রে অ্যাপকে অনুমতি দেয়।"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"অ্যাপ ব্যাকগ্রাউন্ডে চলার সময়, দেহের তাপমাত্রা সংক্রান্ত বডি সেন্সর ডেটা অ্যাক্সেস করা।"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"অ্যাপ ব্যাকগ্রাউন্ডে চলার সময়, দেহের তাপমাত্রা সংক্রান্ত বডি সেন্সর ডেটা অ্যাক্সেস করার ক্ষেত্রে অ্যাপকে অনুমতি দেয়।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ক্যালেন্ডারের ইভেন্ট এবং বিশদ বিবরণ পড়ুন"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"এই অ্যাপটি আপনার ট্যাবলেটে সংরক্ষিত সমস্ত ক্যালেন্ডার ইভেন্ট পড়তে এবং আপনার ক্যালেন্ডারের ডেটা শেয়ার বা সংরক্ষণ করতে পারে৷"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"এই অ্যাপ আপনার Android TV ডিভাইসে সেভ করা সব ক্যালেন্ডার ইভেন্ট পড়তে পারে এবং আপনার ক্যালেন্ডারের ডেটা শেয়ার বা সেভ করতে পারে।"</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ফেস অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ব্যবহারকারী \'ফেস আনলক\' বাতিল করে দিয়েছেন"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"অনেকবার চেষ্টা করা হয়েছে। পরে আবার চেষ্টা করুন।"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"অনেকবার চেষ্টা করেছেন। \'ফেস আনলক\' বন্ধ করা হয়েছে।"</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"অনেকবার চেষ্টা করেছেন। এর পরিবর্তে স্ক্রিন লক ব্যবহার করুন।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"আপনার মুখ যাচাই করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"এখনও \'ফেস আনলক\' সেট আপ করেননি"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"কোনও অ্যাপের ফিচার সম্পর্কিত তথ্য দেখা শুরু করতে অনুমতি দেয়।"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"হাই স্যাম্পলিং রেটে সেন্সর ডেটা অ্যাক্সেস করুন"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-এর বেশি রেটে অ্যাপকে স্যাম্পল সেন্সর ডেটার জন্য অনুমতি দিন"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ব্যবহারকারীর অ্যাকশন ছাড়াই অ্যাপ আপডেট করুন"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"হোল্ডারকে ব্যবহারকারীর অ্যাকশন ছাড়াই আগের ইনস্টল করা অ্যাপ আপডেট করার অনুমতি দেয়"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"পাসওয়ার্ড নিয়মগুলি সেট করে"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"স্ক্রিন লক করার পাসওয়ার্ডগুলিতে অনুমতিপ্রাপ্ত অক্ষর এবং দৈর্ঘ্য নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"স্ক্রিন আনলক করার প্রচেষ্টাগুলির উপরে নজর রাখুন"</string>
@@ -1720,7 +1715,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"কালার ইনভার্সন"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"রঙ সংশোধন করা"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এক হাতে ব্যবহার করার মোড"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম আলো"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম ব্রাইটনেস"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"হিয়ারিং ডিভাইস"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করা হয়েছে।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> বন্ধ করা হয়েছে।"</string>
@@ -1914,7 +1909,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS অনুরোধ USSD অনুরোধে পরিবর্তন করা হয়েছে"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"নতুন SS অনুরোধে পরিবর্তন করা হয়েছে"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ফিশিংয়ের সতর্কতা"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"কর্মস্থলের প্রোফাইল"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"অফিস প্রোফাইল"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"সতর্ক করা হয়েছে"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"যাচাই করা হয়েছে"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"বড় করুন"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> এখন উপলভ্য নয়। এই অ্যাপটিকে <xliff:g id="APP_NAME_1">%2$s</xliff:g> অ্যাপ ম্যানেজ করে।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"আরও জানুন"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"অ্যাপ আবার চালু করুন"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"অফিস অ্যাপ চালু করবেন?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"আপনার অফিস অ্যাপ এবং বিজ্ঞপ্তিতে অ্যাক্সেস পান"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"চালু করুন"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"অফিসের অ্যাপ আনপজ করতে চান?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"আনপজ করুন"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"জরুরি"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"আপনার অফিসের অ্যাপ এবং কলে অ্যাক্সেস পান"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"অ্যাপ পাওয়া যাচ্ছে না"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূর্তে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপ পাওয়া যাচ্ছে না।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলভ্য নেই"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"চালু করতে ট্যাপ করুন"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"এর জন্য কোনও অফিস অ্যাপ নেই"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ব্যক্তিগত অ্যাপে দেখা যাবে না"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"আপনার ব্যক্তিগত প্রোফাইল থেকে <xliff:g id="APP">%s</xliff:g> খুলবেন?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"আপনার অফিস প্রোফাইল থেকে <xliff:g id="APP">%s</xliff:g> খুলবেন?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ব্যক্তিগত ব্রাউজার ব্যবহার করুন"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"অফিস ব্রাউজার ব্যবহার করুন"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"সিম নেটওয়ার্ক আনলক পিন"</string>
