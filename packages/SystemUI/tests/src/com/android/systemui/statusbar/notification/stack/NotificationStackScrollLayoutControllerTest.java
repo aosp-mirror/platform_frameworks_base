@@ -255,6 +255,34 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUpdateEmptyShadeView_bouncerShowing_hideEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ false,
+                /* areNotificationsHiddenInShade= */ false);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_bouncerNotShowing_showEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* areNotificationsHiddenInShade= */ false);
+    }
+
+    @Test
     public void testOnUserChange_verifySensitiveProfile() {
         when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
         initController(/* viewIsAttached= */ true);
