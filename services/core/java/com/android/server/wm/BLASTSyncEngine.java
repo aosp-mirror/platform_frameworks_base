@@ -133,7 +133,7 @@ class BLASTSyncEngine {
             return mOrphanTransaction;
         }
 
-        private void onSurfacePlacement() {
+        private void tryFinish() {
             if (!mReady) return;
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: onSurfacePlacement checking %s",
                     mSyncId, mRootMembers);
@@ -223,6 +223,12 @@ class BLASTSyncEngine {
                     }
                 });
             }
+            // Notify idle listeners
+            for (int i = mOnIdleListeners.size() - 1; i >= 0; --i) {
+                // If an idle listener adds a sync, though, then stop notifying.
+                if (mActiveSyncs.size() > 0) break;
+                mOnIdleListeners.get(i).run();
+            }
         }
 
         private void setReady(boolean ready) {
@@ -280,6 +286,8 @@ class BLASTSyncEngine {
      * @see #queueSyncSet
      */
     private final ArrayList<PendingSyncSet> mPendingSyncSets = new ArrayList<>();
+
+    private final ArrayList<Runnable> mOnIdleListeners = new ArrayList<>();
 
     BLASTSyncEngine(WindowManagerService wms) {
         this(wms, wms.mH);
@@ -379,8 +387,13 @@ class BLASTSyncEngine {
     void onSurfacePlacement() {
         // backwards since each state can remove itself if finished
         for (int i = mActiveSyncs.size() - 1; i >= 0; --i) {
-            mActiveSyncs.valueAt(i).onSurfacePlacement();
+            mActiveSyncs.valueAt(i).tryFinish();
         }
+    }
+
+    /** Only use this for tests! */
+    void tryFinishForTest(int syncId) {
+        getSyncSet(syncId).tryFinish();
     }
 
     /**
@@ -408,5 +421,9 @@ class BLASTSyncEngine {
     /** @return {@code true} if there are any sync-sets waiting to start. */
     boolean hasPendingSyncSets() {
         return !mPendingSyncSets.isEmpty();
+    }
+
+    void addOnIdleListener(Runnable onIdleListener) {
+        mOnIdleListeners.add(onIdleListener);
     }
 }
