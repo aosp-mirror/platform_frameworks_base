@@ -30,10 +30,12 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
+import static android.window.TransitionInfo.FLAG_SYNC;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -63,6 +65,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -587,7 +590,8 @@ public class ShellTransitionTests extends ShellTestCase {
         requestStartTransition(transitions, transitTokenNotReady);
 
         mDefaultHandler.setSimulateMerge(true);
-        mDefaultHandler.mFinishes.get(0).onTransitionFinished(null /* wct */, null /* wctCB */);
+        mDefaultHandler.mFinishes.get(0).second.onTransitionFinished(
+                null /* wct */, null /* wctCB */);
 
         // Make sure that the non-ready transition is not merged.
         assertEquals(0, mDefaultHandler.mergeCount());
@@ -1059,6 +1063,223 @@ public class ShellTransitionTests extends ShellTestCase {
         assertEquals(1, mDefaultHandler.activeCount());
     }
 
+    @Test
+    public void testMultipleTracks() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        TestTransitionHandler alwaysMergeHandler = new TestTransitionHandler();
+        alwaysMergeHandler.setSimulateMerge(true);
+
+        final boolean[] becameIdle = new boolean[]{false};
+
+        final WindowContainerTransaction emptyWCT = new WindowContainerTransaction();
+        final SurfaceControl.Transaction mockSCT = mock(SurfaceControl.Transaction.class);
+
+        // Make this always merge so we can ensure that it does NOT get a merge-attempt for a
+        // different track.
+        IBinder transitA = transitions.startTransition(TRANSIT_OPEN, emptyWCT, alwaysMergeHandler);
+        // start tracking idle
+        transitions.runOnIdle(() -> becameIdle[0] = true);
+
+        IBinder transitB = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitC = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, mDefaultHandler);
+
+        TransitionInfo infoA = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoA.setTrack(0);
+        TransitionInfo infoB = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoB.setTrack(1);
+        TransitionInfo infoC = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoC.setTrack(1);
+
+        transitions.onTransitionReady(transitA, infoA, mockSCT, mockSCT);
+        assertEquals(1, alwaysMergeHandler.activeCount());
+        transitions.onTransitionReady(transitB, infoB, mockSCT, mockSCT);
+        // should now be running in parallel
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, alwaysMergeHandler.activeCount());
+        // make sure we didn't try to merge into a different track.
+        assertEquals(0, alwaysMergeHandler.mergeCount());
+
+        // This should be queued-up since it is on track 1 (same as B)
+        transitions.onTransitionReady(transitC, infoC, mockSCT, mockSCT);
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, alwaysMergeHandler.activeCount());
+
+        // Now finish B and make sure C starts
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // Now C and A running in parallel
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, alwaysMergeHandler.activeCount());
+        assertEquals(0, alwaysMergeHandler.mergeCount());
+
+        // Finish A
+        alwaysMergeHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // C still running
+        assertEquals(0, alwaysMergeHandler.activeCount());
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertFalse(becameIdle[0]);
+
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertTrue(becameIdle[0]);
+    }
+
+    @Test
+    public void testSyncMultipleTracks() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        TestTransitionHandler secondHandler = new TestTransitionHandler();
+
+        // Disable the forced early-sync-finish so that we can test the ordering mechanics.
+        transitions.setDisableForceSyncForTest(true);
+        mDefaultHandler.mFinishOnSync = false;
+        secondHandler.mFinishOnSync = false;
+
+        final WindowContainerTransaction emptyWCT = new WindowContainerTransaction();
+        final SurfaceControl.Transaction mockSCT = mock(SurfaceControl.Transaction.class);
+
+        // Make this always merge so we can ensure that it does NOT get a merge-attempt for a
+        // different track.
+        IBinder transitA = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitB = transitions.startTransition(TRANSIT_OPEN, emptyWCT, secondHandler);
+        IBinder transitC = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, secondHandler);
+        IBinder transitSync = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, mDefaultHandler);
+        IBinder transitD = transitions.startTransition(TRANSIT_OPEN, emptyWCT, secondHandler);
+        IBinder transitE = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+
+        TransitionInfo infoA = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoA.setTrack(0);
+        TransitionInfo infoB = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoB.setTrack(1);
+        TransitionInfo infoC = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoC.setTrack(1);
+        TransitionInfo infoSync = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoSync.setTrack(0);
+        infoSync.setFlags(FLAG_SYNC);
+        TransitionInfo infoD = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoD.setTrack(1);
+        TransitionInfo infoE = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoE.setTrack(0);
+
+        // Start A B and C where A is track 0, B and C are track 1 (C should be queued)
+        transitions.onTransitionReady(transitA, infoA, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitB, infoB, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitC, infoC, mockSCT, mockSCT);
+        // should now be running in parallel (with one queued)
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Make the sync ready and the following (D, E) ready.
+        transitions.onTransitionReady(transitSync, infoSync, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitD, infoD, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitE, infoE, mockSCT, mockSCT);
+
+        // nothing should have happened yet since the sync is queued and blocking everything.
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Finish A (which is track 0 like the sync).
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // Even though the sync is on track 0 and track 0 became idle, it should NOT be started yet
+        // because it must wait for everything. Additionally, D/E shouldn't start yet either.
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Now finish B and C -- this should then allow the sync to start and D to run (in parallel)
+        secondHandler.finishOne();
+        secondHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // Now the sync and D (on track 1) should be running
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // finish the sync. track 0 still has E
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+        assertEquals(1, mDefaultHandler.activeCount());
+
+        mDefaultHandler.finishOne();
+        secondHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertEquals(0, secondHandler.activeCount());
+    }
+
+    @Test
+    public void testForceSyncTracks() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        TestTransitionHandler secondHandler = new TestTransitionHandler();
+
+        final WindowContainerTransaction emptyWCT = new WindowContainerTransaction();
+        final SurfaceControl.Transaction mockSCT = mock(SurfaceControl.Transaction.class);
+
+        // Make this always merge so we can ensure that it does NOT get a merge-attempt for a
+        // different track.
+        IBinder transitA = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitB = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitC = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, secondHandler);
+        IBinder transitD = transitions.startTransition(TRANSIT_OPEN, emptyWCT, secondHandler);
+        IBinder transitSync = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, mDefaultHandler);
+
+        TransitionInfo infoA = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoA.setTrack(0);
+        TransitionInfo infoB = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoB.setTrack(0);
+        TransitionInfo infoC = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoC.setTrack(1);
+        TransitionInfo infoD = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoD.setTrack(1);
+        TransitionInfo infoSync = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoSync.setTrack(0);
+        infoSync.setFlags(FLAG_SYNC);
+
+        transitions.onTransitionReady(transitA, infoA, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitB, infoB, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitC, infoC, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitD, infoD, mockSCT, mockSCT);
+        // should now be running in parallel (with one queued in each)
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Make the sync ready.
+        transitions.onTransitionReady(transitSync, infoSync, mockSCT, mockSCT);
+        mMainExecutor.flushAll();
+
+        // Everything should be forced-finish now except the sync
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(0, secondHandler.activeCount());
+
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        assertEquals(0, mDefaultHandler.activeCount());
+    }
+
     class ChangeBuilder {
         final TransitionInfo.Change mChange;
 
@@ -1097,9 +1318,11 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     class TestTransitionHandler implements Transitions.TransitionHandler {
-        ArrayList<Transitions.TransitionFinishCallback> mFinishes = new ArrayList<>();
+        ArrayList<Pair<IBinder, Transitions.TransitionFinishCallback>> mFinishes =
+                new ArrayList<>();
         final ArrayList<IBinder> mMerged = new ArrayList<>();
         boolean mSimulateMerge = false;
+        boolean mFinishOnSync = true;
         final ArraySet<IBinder> mShouldMerge = new ArraySet<>();
 
         @Override
@@ -1107,7 +1330,7 @@ public class ShellTransitionTests extends ShellTestCase {
                 @NonNull SurfaceControl.Transaction startTransaction,
                 @NonNull SurfaceControl.Transaction finishTransaction,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            mFinishes.add(finishCallback);
+            mFinishes.add(new Pair<>(transition, finishCallback));
             return true;
         }
 
@@ -1115,6 +1338,13 @@ public class ShellTransitionTests extends ShellTestCase {
         public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
+            if (mFinishOnSync && info.getType() == TRANSIT_SLEEP) {
+                for (int i = 0; i < mFinishes.size(); ++i) {
+                    if (mFinishes.get(i).first != mergeTarget) continue;
+                    mFinishes.remove(i).second.onTransitionFinished(null, null);
+                    return;
+                }
+            }
             if (!(mSimulateMerge || mShouldMerge.contains(transition))) return;
             mMerged.add(transition);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
@@ -1136,18 +1366,19 @@ public class ShellTransitionTests extends ShellTestCase {
         }
 
         void finishAll() {
-            final ArrayList<Transitions.TransitionFinishCallback> finishes = mFinishes;
+            final ArrayList<Pair<IBinder, Transitions.TransitionFinishCallback>> finishes =
+                    mFinishes;
             mFinishes = new ArrayList<>();
             for (int i = finishes.size() - 1; i >= 0; --i) {
-                finishes.get(i).onTransitionFinished(null /* wct */, null /* wctCB */);
+                finishes.get(i).second.onTransitionFinished(null /* wct */, null /* wctCB */);
             }
             mShouldMerge.clear();
         }
 
         void finishOne() {
-            Transitions.TransitionFinishCallback fin = mFinishes.remove(0);
+            Pair<IBinder, Transitions.TransitionFinishCallback> fin = mFinishes.remove(0);
             mMerged.clear();
-            fin.onTransitionFinished(null /* wct */, null /* wctCB */);
+            fin.second.onTransitionFinished(null /* wct */, null /* wctCB */);
         }
 
         int activeCount() {
