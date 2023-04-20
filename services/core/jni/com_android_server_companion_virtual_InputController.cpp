@@ -233,44 +233,50 @@ static void nativeCloseUinput(JNIEnv* env, jobject thiz, jlong ptr) {
 
 // Native methods for VirtualDpad
 static bool nativeWriteDpadKeyEvent(JNIEnv* env, jobject thiz, jlong ptr, jint androidKeyCode,
-                                    jint action) {
+                                    jint action, jlong eventTimeNanos) {
     VirtualDpad* virtualDpad = reinterpret_cast<VirtualDpad*>(ptr);
-    return virtualDpad->writeDpadKeyEvent(androidKeyCode, action);
+    return virtualDpad->writeDpadKeyEvent(androidKeyCode, action,
+                                          std::chrono::nanoseconds(eventTimeNanos));
 }
 
 // Native methods for VirtualKeyboard
 static bool nativeWriteKeyEvent(JNIEnv* env, jobject thiz, jlong ptr, jint androidKeyCode,
-                                jint action) {
+                                jint action, jlong eventTimeNanos) {
     VirtualKeyboard* virtualKeyboard = reinterpret_cast<VirtualKeyboard*>(ptr);
-    return virtualKeyboard->writeKeyEvent(androidKeyCode, action);
+    return virtualKeyboard->writeKeyEvent(androidKeyCode, action,
+                                          std::chrono::nanoseconds(eventTimeNanos));
 }
 
 // Native methods for VirtualTouchscreen
 static bool nativeWriteTouchEvent(JNIEnv* env, jobject thiz, jlong ptr, jint pointerId,
                                   jint toolType, jint action, jfloat locationX, jfloat locationY,
-                                  jfloat pressure, jfloat majorAxisSize) {
+                                  jfloat pressure, jfloat majorAxisSize, jlong eventTimeNanos) {
     VirtualTouchscreen* virtualTouchscreen = reinterpret_cast<VirtualTouchscreen*>(ptr);
     return virtualTouchscreen->writeTouchEvent(pointerId, toolType, action, locationX, locationY,
-                                               pressure, majorAxisSize);
+                                               pressure, majorAxisSize,
+                                               std::chrono::nanoseconds(eventTimeNanos));
 }
 
 // Native methods for VirtualMouse
 static bool nativeWriteButtonEvent(JNIEnv* env, jobject thiz, jlong ptr, jint buttonCode,
-                                   jint action) {
+                                   jint action, jlong eventTimeNanos) {
     VirtualMouse* virtualMouse = reinterpret_cast<VirtualMouse*>(ptr);
-    return virtualMouse->writeButtonEvent(buttonCode, action);
+    return virtualMouse->writeButtonEvent(buttonCode, action,
+                                          std::chrono::nanoseconds(eventTimeNanos));
 }
 
 static bool nativeWriteRelativeEvent(JNIEnv* env, jobject thiz, jlong ptr, jfloat relativeX,
-                                     jfloat relativeY) {
+                                     jfloat relativeY, jlong eventTimeNanos) {
     VirtualMouse* virtualMouse = reinterpret_cast<VirtualMouse*>(ptr);
-    return virtualMouse->writeRelativeEvent(relativeX, relativeY);
+    return virtualMouse->writeRelativeEvent(relativeX, relativeY,
+                                            std::chrono::nanoseconds(eventTimeNanos));
 }
 
 static bool nativeWriteScrollEvent(JNIEnv* env, jobject thiz, jlong ptr, jfloat xAxisMovement,
-                                   jfloat yAxisMovement) {
+                                   jfloat yAxisMovement, jlong eventTimeNanos) {
     VirtualMouse* virtualMouse = reinterpret_cast<VirtualMouse*>(ptr);
-    return virtualMouse->writeScrollEvent(xAxisMovement, yAxisMovement);
+    return virtualMouse->writeScrollEvent(xAxisMovement, yAxisMovement,
+                                          std::chrono::nanoseconds(eventTimeNanos));
 }
 
 static JNINativeMethod methods[] = {
@@ -283,12 +289,12 @@ static JNINativeMethod methods[] = {
         {"nativeOpenUinputTouchscreen", "(Ljava/lang/String;IILjava/lang/String;II)J",
          (void*)nativeOpenUinputTouchscreen},
         {"nativeCloseUinput", "(J)V", (void*)nativeCloseUinput},
-        {"nativeWriteDpadKeyEvent", "(JII)Z", (void*)nativeWriteDpadKeyEvent},
-        {"nativeWriteKeyEvent", "(JII)Z", (void*)nativeWriteKeyEvent},
-        {"nativeWriteButtonEvent", "(JII)Z", (void*)nativeWriteButtonEvent},
-        {"nativeWriteTouchEvent", "(JIIIFFFF)Z", (void*)nativeWriteTouchEvent},
-        {"nativeWriteRelativeEvent", "(JFF)Z", (void*)nativeWriteRelativeEvent},
-        {"nativeWriteScrollEvent", "(JFF)Z", (void*)nativeWriteScrollEvent},
+        {"nativeWriteDpadKeyEvent", "(JIIJ)Z", (void*)nativeWriteDpadKeyEvent},
+        {"nativeWriteKeyEvent", "(JIIJ)Z", (void*)nativeWriteKeyEvent},
+        {"nativeWriteButtonEvent", "(JIIJ)Z", (void*)nativeWriteButtonEvent},
+        {"nativeWriteTouchEvent", "(JIIIFFFFJ)Z", (void*)nativeWriteTouchEvent},
+        {"nativeWriteRelativeEvent", "(JFFJ)Z", (void*)nativeWriteRelativeEvent},
+        {"nativeWriteScrollEvent", "(JFFJ)Z", (void*)nativeWriteScrollEvent},
 };
 
 int register_android_server_companion_virtual_InputController(JNIEnv* env) {
