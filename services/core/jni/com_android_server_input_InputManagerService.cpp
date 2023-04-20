@@ -342,15 +342,15 @@ public:
     void notifySensorAccuracy(int32_t deviceId, InputDeviceSensorType sensorType,
                               InputDeviceSensorAccuracy accuracy) override;
     void notifyVibratorState(int32_t deviceId, bool isOn) override;
-    bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
-    void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
-    void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) override;
-    void interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
+    bool filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) override;
+    InputDispatcherConfiguration getDispatcherConfiguration() override;
+    void interceptKeyBeforeQueueing(const KeyEvent& keyEvent, uint32_t& policyFlags) override;
+    void interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
                                        uint32_t& policyFlags) override;
-    nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent* keyEvent,
+    nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent& keyEvent,
                                           uint32_t policyFlags) override;
-    bool dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent* keyEvent,
-                              uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) override;
+    std::optional<KeyEvent> dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent& keyEvent,
+                                                 uint32_t policyFlags) override;
     void pokeUserActivity(nsecs_t eventTime, int32_t eventType, int32_t displayId) override;
     void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
     void setPointerCapture(const PointerCaptureRequest& request) override;
@@ -450,7 +450,7 @@ NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& loo
 
     mServiceObj = env->NewGlobalRef(serviceObj);
 
-    InputManager* im = new InputManager(this, this);
+    InputManager* im = new InputManager(this, *this);
     mInputManager = im;
     defaultServiceManager()->addService(String16("inputflinger"), im);
 }
@@ -1007,21 +1007,22 @@ void NativeInputManager::notifyVibratorState(int32_t deviceId, bool isOn) {
     checkAndClearExceptionFromCallback(env, "notifyVibratorState");
 }
 
-void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
+InputDispatcherConfiguration NativeInputManager::getDispatcherConfiguration() {
     ATRACE_CALL();
+    InputDispatcherConfiguration config;
     JNIEnv* env = jniEnv();
 
-    jint keyRepeatTimeout = env->CallIntMethod(mServiceObj,
-            gServiceClassInfo.getKeyRepeatTimeout);
+    jint keyRepeatTimeout = env->CallIntMethod(mServiceObj, gServiceClassInfo.getKeyRepeatTimeout);
     if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatTimeout")) {
-        outConfig->keyRepeatTimeout = milliseconds_to_nanoseconds(keyRepeatTimeout);
+        config.keyRepeatTimeout = milliseconds_to_nanoseconds(keyRepeatTimeout);
     }
 
-    jint keyRepeatDelay = env->CallIntMethod(mServiceObj,
-            gServiceClassInfo.getKeyRepeatDelay);
+    jint keyRepeatDelay = env->CallIntMethod(mServiceObj, gServiceClassInfo.getKeyRepeatDelay);
     if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
-        outConfig->keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
+        config.keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
     }
+
+    return config;
 }
 
 void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
@@ -1294,20 +1295,21 @@ void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t ev
     checkAndClearExceptionFromCallback(env, "notifyStylusGestureStarted");
 }
 
-bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
+bool NativeInputManager::filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) {
     ATRACE_CALL();
     jobject inputEventObj;
 
     JNIEnv* env = jniEnv();
-    switch (inputEvent->getType()) {
+    switch (inputEvent.getType()) {
         case InputEventType::KEY:
             inputEventObj =
-                    android_view_KeyEvent_fromNative(env, static_cast<const KeyEvent*>(inputEvent));
+                    android_view_KeyEvent_fromNative(env,
+                                                     static_cast<const KeyEvent*>(&inputEvent));
             break;
         case InputEventType::MOTION:
             inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
                                                                   static_cast<const MotionEvent&>(
-                                                                          *inputEvent));
+                                                                          inputEvent));
             break;
         default:
             return true; // dispatch the event normally
@@ -1328,8 +1330,8 @@ bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t
     return pass;
 }
 
-void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
-        uint32_t& policyFlags) {
+void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
+                                                    uint32_t& policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
@@ -1340,9 +1342,9 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
     if ((policyFlags & POLICY_FLAG_TRUSTED)) {
-        nsecs_t when = keyEvent->getEventTime();
+        nsecs_t when = keyEvent.getEventTime();
         JNIEnv* env = jniEnv();
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
+        jobject keyEventObj = android_view_KeyEvent_fromNative(env, &keyEvent);
         jint wmActions;
         if (keyEventObj) {
             wmActions = env->CallIntMethod(mServiceObj,
@@ -1366,8 +1368,8 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
     }
 }
 
-void NativeInputManager::interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
-        uint32_t& policyFlags) {
+void NativeInputManager::interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
+                                                       uint32_t& policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
@@ -1411,9 +1413,9 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
     }
 }
 
-nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
-        const sp<IBinder>& token,
-        const KeyEvent* keyEvent, uint32_t policyFlags) {
+nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& token,
+                                                          const KeyEvent& keyEvent,
+                                                          uint32_t policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
@@ -1427,7 +1429,7 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
         // Token may be null
         jobject tokenObj = javaObjectForIBinder(env, token);
 
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
+        jobject keyEventObj = android_view_KeyEvent_fromNative(env, &keyEvent);
         if (keyEventObj) {
             jlong delayMillis = env->CallLongMethod(mServiceObj,
                     gServiceClassInfo.interceptKeyBeforeDispatching,
@@ -1449,19 +1451,20 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
     return result;
 }
 
-bool NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
-        const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) {
+std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
+                                                                 const KeyEvent& keyEvent,
+                                                                 uint32_t policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and do not perform default handling.
-    bool result = false;
+    std::optional<KeyEvent> result;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
         ScopedLocalFrame localFrame(env);
 
         // Note: tokenObj may be null.
         jobject tokenObj = javaObjectForIBinder(env, token);
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
+        jobject keyEventObj = android_view_KeyEvent_fromNative(env, &keyEvent);
         if (keyEventObj) {
             jobject fallbackKeyEventObj = env->CallObjectMethod(mServiceObj,
                     gServiceClassInfo.dispatchUnhandledKey,
@@ -1474,9 +1477,9 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
 
             if (fallbackKeyEventObj) {
                 // Note: outFallbackKeyEvent may be the same object as keyEvent.
-                if (!android_view_KeyEvent_toNative(env, fallbackKeyEventObj,
-                        outFallbackKeyEvent)) {
-                    result = true;
+                result = KeyEvent();
+                if (android_view_KeyEvent_toNative(env, fallbackKeyEventObj, &(*result)) != OK) {
+                    result.reset();
                 }
                 android_view_KeyEvent_recycle(env, fallbackKeyEventObj);
                 env->DeleteLocalRef(fallbackKeyEventObj);
