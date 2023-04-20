@@ -132,7 +132,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     public WindowContainerTransaction handleRequest(IBinder transition,
             TransitionRequestInfo request) {
         // do not directly handle requests. Only entry point should be via startRecentsTransition
-        Slog.e(TAG, "RecentsTransitionHandler.handleRequest: Unexpected transition request");
+        // TODO: Only log an error if the transition is a recents transition
         return null;
     }
 
@@ -612,13 +612,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             t.apply();
             // not using the incoming anim-only surfaces
             info.releaseAnimSurfaces();
-            if (appearedTargets == null) return;
-            try {
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                        "[%d] RecentsController.merge: calling onTasksAppeared", mInstanceId);
-                mListener.onTasksAppeared(appearedTargets);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error sending appeared tasks to recents animation", e);
+            if (appearedTargets != null) {
+                try {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                            "[%d] RecentsController.merge: calling onTasksAppeared", mInstanceId);
+                    mListener.onTasksAppeared(appearedTargets);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error sending appeared tasks to recents animation", e);
+                }
             }
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         }
