@@ -127,6 +127,7 @@ public class UserLifecycleTests {
     private BroadcastWaiter mBroadcastWaiter;
     private UserSwitchWaiter mUserSwitchWaiter;
     private String mUserSwitchTimeoutMs;
+    private String mDisableUserSwitchingDialogAnimations;
 
     private final BenchmarkRunner mRunner = new BenchmarkRunner();
     @Rule
@@ -153,16 +154,17 @@ public class UserLifecycleTests {
             Log.w(TAG, "WARNING: Tests are being run from user " + mAm.getCurrentUser()
                     + " rather than the system user");
         }
-        mUserSwitchTimeoutMs = setSystemProperty("debug.usercontroller.user_switch_timeout_ms",
-                "100000");
-        if (TextUtils.isEmpty(mUserSwitchTimeoutMs)) {
-            mUserSwitchTimeoutMs = "invalid";
-        }
+        mUserSwitchTimeoutMs = setSystemProperty(
+                "debug.usercontroller.user_switch_timeout_ms", "100000");
+        mDisableUserSwitchingDialogAnimations = setSystemProperty(
+                "debug.usercontroller.disable_user_switching_dialog_animations", "true");
     }
 
     @After
     public void tearDown() throws Exception {
         setSystemProperty("debug.usercontroller.user_switch_timeout_ms", mUserSwitchTimeoutMs);
+        setSystemProperty("debug.usercontroller.disable_user_switching_dialog_animations",
+                mDisableUserSwitchingDialogAnimations);
         mBroadcastWaiter.close();
         mUserSwitchWaiter.close();
         for (int userId : mUsersToRemove) {
@@ -1538,7 +1540,7 @@ public class UserLifecycleTests {
     private String setSystemProperty(String name, String value) throws Exception {
         final String oldValue = ShellHelper.runShellCommand("getprop " + name);
         assertEquals("", ShellHelper.runShellCommand("setprop " + name + " " + value));
-        return oldValue;
+        return TextUtils.firstNotEmpty(oldValue, "invalid");
     }
 
     private void waitForBroadcastIdle() {
