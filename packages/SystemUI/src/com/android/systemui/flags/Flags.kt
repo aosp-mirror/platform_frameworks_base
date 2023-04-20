@@ -87,7 +87,9 @@ object Flags {
         releasedFlag(270682168, "animated_notification_shade_insets")
 
     // TODO(b/268005230): Tracking Bug
-    @JvmField val SENSITIVE_REVEAL_ANIM = unreleasedFlag(268005230, "sensitive_reveal_anim")
+    @JvmField
+    val SENSITIVE_REVEAL_ANIM =
+        unreleasedFlag(268005230, "sensitive_reveal_anim", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
