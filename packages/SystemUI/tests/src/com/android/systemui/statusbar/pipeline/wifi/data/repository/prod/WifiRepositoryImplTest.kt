@@ -994,7 +994,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun wifiNetwork_currentNetworkLost_flowHasNoNetwork() =
+    fun wifiNetwork_currentActiveNetworkLost_flowHasNoNetwork() =
         testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
@@ -1002,6 +1002,33 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             getNetworkCallback()
                 .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(PRIMARY_WIFI_INFO))
             assertThat((latest as WifiNetworkModel.Active).networkId).isEqualTo(NETWORK_ID)
+
+            // WHEN we lose our current network
+            getNetworkCallback().onLost(NETWORK)
+
+            // THEN we update to no network
+            assertThat(latest is WifiNetworkModel.Inactive).isTrue()
+
+            job.cancel()
+        }
+
+    /** Possible regression test for b/278618530. */
+    @Test
+    fun wifiNetwork_currentCarrierMergedNetworkLost_flowHasNoNetwork() =
+        testScope.runTest {
+            var latest: WifiNetworkModel? = null
+            val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.isPrimary).thenReturn(true)
+                    whenever(this.isCarrierMerged).thenReturn(true)
+                }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+            assertThat(latest is WifiNetworkModel.CarrierMerged).isTrue()
+            assertThat((latest as WifiNetworkModel.CarrierMerged).networkId).isEqualTo(NETWORK_ID)
 
             // WHEN we lose our current network
             getNetworkCallback().onLost(NETWORK)
