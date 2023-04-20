@@ -91,7 +91,7 @@ public final class DisplayPowerControllerTest {
     private static final int DISPLAY_ID = Display.DEFAULT_DISPLAY;
     private static final String UNIQUE_ID = "unique_id_test123";
     private static final int FOLLOWER_DISPLAY_ID = DISPLAY_ID + 1;
-    private static final String FOLLOWER_UNIQUE_DISPLAY_ID = "unique_id_456";
+    private static final String FOLLOWER_UNIQUE_ID = "unique_id_456";
     private static final int SECOND_FOLLOWER_DISPLAY_ID = FOLLOWER_DISPLAY_ID + 1;
     private static final String SECOND_FOLLOWER_UNIQUE_DISPLAY_ID = "unique_id_789";
     private static final float PROX_SENSOR_MAX_RANGE = 5;
@@ -279,7 +279,7 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testProximitySensorListenerNotRegisteredForNonDefaultDisplay() {
         DisplayPowerControllerHolder followerDpc =
-                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_DISPLAY_ID);
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
 
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
         // send a display power request
@@ -298,7 +298,7 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testDisplayBrightnessFollowers_BothDpcsSupportNits() {
         DisplayPowerControllerHolder followerDpc =
-                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_DISPLAY_ID);
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -344,7 +344,7 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testDisplayBrightnessFollowers_FollowerDoesNotSupportNits() {
         DisplayPowerControllerHolder followerDpc =
-                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_DISPLAY_ID);
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -372,7 +372,7 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testDisplayBrightnessFollowers_LeadDpcDoesNotSupportNits() {
         DisplayPowerControllerHolder followerDpc =
-                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_DISPLAY_ID);
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -398,7 +398,7 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testDisplayBrightnessFollowers_NeitherDpcSupportsNits() {
         DisplayPowerControllerHolder followerDpc =
-                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_DISPLAY_ID);
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -449,9 +449,9 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
-    public void testDisplayBrightnessFollowersRemoval() {
+    public void testDisplayBrightnessFollowersRemoval_RemoveSingleFollower() {
         DisplayPowerControllerHolder followerHolder =
-                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_DISPLAY_ID);
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
         DisplayPowerControllerHolder secondFollowerHolder =
                 createDisplayPowerController(SECOND_FOLLOWER_DISPLAY_ID,
                         SECOND_FOLLOWER_UNIQUE_DISPLAY_ID);
@@ -522,6 +522,78 @@ public final class DisplayPowerControllerTest {
         verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
         verify(followerHolder.animator, never()).animateTo(anyFloat(), anyFloat(), anyFloat());
         verify(secondFollowerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void testDisplayBrightnessFollowersRemoval_RemoveAllFollowers() {
+        DisplayPowerControllerHolder followerHolder =
+                createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
+        DisplayPowerControllerHolder secondFollowerHolder =
+                createDisplayPowerController(SECOND_FOLLOWER_DISPLAY_ID,
+                        SECOND_FOLLOWER_UNIQUE_DISPLAY_ID);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        followerHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        secondFollowerHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        ArgumentCaptor<BrightnessSetting.BrightnessSettingListener> listenerCaptor =
+                ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
+        verify(mHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        BrightnessSetting.BrightnessSettingListener listener = listenerCaptor.getValue();
+
+        // Set the initial brightness on the DPCs we're going to remove so we have a fixed value for
+        // it to return to.
+        listenerCaptor = ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
+        verify(followerHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        BrightnessSetting.BrightnessSettingListener followerListener = listenerCaptor.getValue();
+        listenerCaptor = ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
+        verify(secondFollowerHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        BrightnessSetting.BrightnessSettingListener secondFollowerListener =
+                listenerCaptor.getValue();
+        final float initialFollowerBrightness = 0.3f;
+        when(followerHolder.brightnessSetting.getBrightness()).thenReturn(
+                initialFollowerBrightness);
+        when(secondFollowerHolder.brightnessSetting.getBrightness()).thenReturn(
+                initialFollowerBrightness);
+        followerListener.onBrightnessChanged(initialFollowerBrightness);
+        secondFollowerListener.onBrightnessChanged(initialFollowerBrightness);
+        advanceTime(1);
+        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness),
+                anyFloat(), anyFloat());
+        verify(secondFollowerHolder.animator).animateTo(eq(initialFollowerBrightness),
+                anyFloat(), anyFloat());
+
+        mHolder.dpc.addDisplayBrightnessFollower(followerHolder.dpc);
+        mHolder.dpc.addDisplayBrightnessFollower(secondFollowerHolder.dpc);
+        clearInvocations(followerHolder.animator, secondFollowerHolder.animator);
+
+        // Validate both followers are correctly registered and receiving brightness updates
+        float brightness = 0.6f;
+        float nits = 600;
+        when(mHolder.automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
+        when(followerHolder.automaticBrightnessController.convertToFloatScale(nits))
+                .thenReturn(brightness);
+        when(secondFollowerHolder.automaticBrightnessController.convertToFloatScale(nits))
+                .thenReturn(brightness);
+        when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
+        listener.onBrightnessChanged(brightness);
+        advanceTime(1); // Send messages, run updatePowerState
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(followerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+        verify(secondFollowerHolder.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
+
+        clearInvocations(mHolder.animator, followerHolder.animator, secondFollowerHolder.animator);
+
+        // Stop the lead DPC and validate that the followers go back to their original brightness.
+        mHolder.dpc.stop();
+        advanceTime(1);
+        verify(followerHolder.animator).animateTo(eq(initialFollowerBrightness),
+                anyFloat(), anyFloat());
+        verify(secondFollowerHolder.animator).animateTo(eq(initialFollowerBrightness),
+                anyFloat(), anyFloat());
+        clearInvocations(followerHolder.animator, secondFollowerHolder.animator);
     }
 
     @Test
