@@ -4746,13 +4746,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFooterView.setVisible(visible, animate);
         mFooterView.setSecondaryVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
-        if (mHasFilteredOutSeenNotifications) {
-            mFooterView.setFooterLabelTextAndIcon(
-                    R.string.unlock_to_see_notif_text,
-                    R.drawable.ic_friction_lock_closed);
-        } else {
-            mFooterView.setFooterLabelTextAndIcon(0, 0);
-        }
+        mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
