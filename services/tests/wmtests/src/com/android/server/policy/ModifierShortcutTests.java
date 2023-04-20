@@ -21,6 +21,8 @@ import static android.view.KeyEvent.KEYCODE_B;
 import static android.view.KeyEvent.KEYCODE_C;
 import static android.view.KeyEvent.KEYCODE_CTRL_LEFT;
 import static android.view.KeyEvent.KEYCODE_E;
+import static android.view.KeyEvent.KEYCODE_ENTER;
+import static android.view.KeyEvent.KEYCODE_H;
 import static android.view.KeyEvent.KEYCODE_K;
 import static android.view.KeyEvent.KEYCODE_M;
 import static android.view.KeyEvent.KEYCODE_META_LEFT;
@@ -163,5 +165,25 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
     public void testMetaAlt() {
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_ALT_LEFT}, 0);
         mPhoneWindowManager.assertToggleCapsLock();
+    }
+
+    /**
+     * META + H to go to homescreen
+     */
+    @Test
+    public void testMetaH() {
+        mPhoneWindowManager.overrideLaunchHome();
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_H}, 0);
+        mPhoneWindowManager.assertGoToHomescreen();
+    }
+
+    /**
+     * META + ENTER to go to homescreen
+     */
+    @Test
+    public void testMetaEnter() {
+        mPhoneWindowManager.overrideLaunchHome();
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_ENTER}, 0);
+        mPhoneWindowManager.assertGoToHomescreen();
     }
 }
