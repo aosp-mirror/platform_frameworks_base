@@ -365,6 +365,11 @@ public class WallpaperBackupAgent extends BackupAgent {
         final int sysWhich = FLAG_SYSTEM | (lockImageStage.exists() ? 0 : FLAG_LOCK);
 
         try {
+            // First parse the live component name so that we know for logging if we care about
+            // logging errors with the image restore.
+            ComponentName wpService = parseWallpaperComponent(infoStage, "wp");
+            mSystemHasLiveComponent = wpService != null;
+
             // It is valid for the imagery to be absent; it means that we were not permitted
             // to back up the original image on the source device, or there was no user-supplied
             // wallpaper image present.
@@ -372,10 +377,10 @@ public class WallpaperBackupAgent extends BackupAgent {
             restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
 
             // And reset to the wallpaper service we should be using
-            ComponentName wpService = parseWallpaperComponent(infoStage, "wp");
             updateWallpaperComponent(wpService, !lockImageStage.exists());
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
+            mEventLogger.onRestoreException(e);
         } finally {
             Slog.v(TAG, "Restore finished; clearing backup bookkeeping");
             infoStage.delete();
@@ -399,12 +404,15 @@ public class WallpaperBackupAgent extends BackupAgent {
                 // We have a live wallpaper and no static lock image,
                 // allow live wallpaper to show "through" on lock screen.
                 mWallpaperManager.clear(FLAG_LOCK);
+                mEventLogger.onLockLiveWallpaperRestored(wpService);
             }
+            mEventLogger.onSystemLiveWallpaperRestored(wpService);
         } else {
             // If we've restored a live wallpaper, but the component doesn't exist,
             // we should log it as an error so we can easily identify the problem
             // in reports from users
             if (wpService != null) {
+                // TODO(b/268471749): Handle delayed case
                 applyComponentAtInstall(wpService, applyToLock);
                 Slog.w(TAG, "Wallpaper service " + wpService + " isn't available. "
                         + " Will try to apply later");
@@ -424,13 +432,37 @@ public class WallpaperBackupAgent extends BackupAgent {
                 try (FileInputStream in = new FileInputStream(stage)) {
                     mWallpaperManager.setStream(in, cropHint.isEmpty() ? null : cropHint, true,
                             which);
+
+                    // And log the success
+                    if ((which & FLAG_SYSTEM) > 0) {
+                        mEventLogger.onSystemImageWallpaperRestored();
+                    } else {
+                        mEventLogger.onLockImageWallpaperRestored();
+                    }
                 }
+            } else {
+                logRestoreError(which, ERROR_NO_METADATA);
             }
         } else {
             Slog.d(TAG, "Restore data doesn't exist for file " + stage.getPath());
+            logRestoreErrorIfNoLiveComponent(which, ERROR_NO_WALLPAPER);
         }
     }
 
+    private void logRestoreErrorIfNoLiveComponent(int which, String error) {
+        if (mSystemHasLiveComponent) {
+            return;
+        }
+        logRestoreError(which, error);
+    }
+
+    private void logRestoreError(int which, String error) {
+        if ((which & FLAG_SYSTEM) == FLAG_SYSTEM) {
+            mEventLogger.onSystemImageWallpaperRestoreFailed(error);
+        } else if ((which & FLAG_LOCK) == FLAG_LOCK) {
+            mEventLogger.onLockImageWallpaperRestoreFailed(error);
+        }
+    }
     private Rect parseCropHint(File wallpaperInfo, String sectionTag) {
         Rect cropHint = new Rect();
         try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
