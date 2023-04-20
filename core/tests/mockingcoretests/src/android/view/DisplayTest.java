@@ -460,6 +460,36 @@ public class DisplayTest {
         assertArrayEquals(sortedHdrTypes, displayMode.getSupportedHdrTypes());
     }
 
+    @Test
+    public void testGetSupportedHdrTypesReturnsCopy() {
+        int[] hdrTypes = new int[]{1, 2, 3};
+        Display.Mode displayMode = new Display.Mode(0, 0, 0, 0, new float[0], hdrTypes);
+
+        int[] hdrTypesCopy = displayMode.getSupportedHdrTypes();
+        hdrTypesCopy[0] = 0;
+        assertArrayEquals(hdrTypes, displayMode.getSupportedHdrTypes());
+    }
+
+    @Test
+    public void testGetAlternativeRefreshRatesReturnsCopy() {
+        float[] alternativeRates = new float[]{1.0f, 2.0f};
+        Display.Mode displayMode = new Display.Mode(0, 0, 0, 0, alternativeRates, new int[0]);
+
+        float[] alternativeRatesCopy = displayMode.getAlternativeRefreshRates();
+        alternativeRatesCopy[0] = 0.0f;
+        assertArrayEquals(alternativeRates, displayMode.getAlternativeRefreshRates(), 0.0f);
+    }
+
+    @Test
+    public void testHdrCapabilitiesGetSupportedHdrTypesReturnsCopy() {
+        int[] hdrTypes = new int[]{1, 2, 3};
+        Display.HdrCapabilities hdrCapabilities = new Display.HdrCapabilities(hdrTypes, 0, 0, 0);
+
+        int[] hdrTypesCopy = hdrCapabilities.getSupportedHdrTypes();
+        hdrTypesCopy[0] = 0;
+        assertArrayEquals(hdrTypes, hdrCapabilities.getSupportedHdrTypes());
+    }
+
     // Given rotated display dimensions, calculate the letterboxed app bounds.
     private static Rect buildAppBounds(int displayWidth, int displayHeight) {
         final int midWidth = displayWidth / 2;
