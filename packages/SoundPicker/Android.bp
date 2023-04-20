@@ -7,21 +7,24 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_app {
-    name: "SoundPicker",
-    defaults: ["platform_app_defaults"],
-    manifest: "AndroidManifest.xml",
-
-    static_libs: [
-        "androidx.appcompat_appcompat",
+android_library {
+    name: "SoundPickerLib",
+    srcs: [
+        "src/**/*.java",
     ],
     resource_dirs: [
         "res",
     ],
-    srcs: [
-        "src/**/*.java",
+    static_libs: [
+        "androidx.appcompat_appcompat",
     ],
+}
 
+android_app {
+    name: "SoundPicker",
+    defaults: ["platform_app_defaults"],
+    manifest: "AndroidManifest.xml",
+    static_libs: ["SoundPickerLib"],
     platform_apis: true,
     certificate: "media",
     privileged: true,
