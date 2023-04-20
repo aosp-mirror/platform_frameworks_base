@@ -109,14 +109,19 @@ public class TransitionTests extends WindowTestsBase {
     final SurfaceControl.Transaction mMockT = mock(SurfaceControl.Transaction.class);
     private BLASTSyncEngine mSyncEngine;
 
+    private Transition createTestTransition(int transitType, TransitionController controller) {
+        return new Transition(transitType, 0 /* flags */, controller, controller.mSyncEngine);
+    }
+
     private Transition createTestTransition(int transitType) {
         final TransitionController controller = new TestTransitionController(
                 mock(ActivityTaskManagerService.class));
 
         mSyncEngine = createTestBLASTSyncEngine();
-        final Transition t = new Transition(transitType, 0 /* flags */, controller, mSyncEngine);
-        t.startCollecting(0 /* timeoutMs */);
-        return t;
+        controller.setSyncEngine(mSyncEngine);
+        final Transition out = createTestTransition(transitType, controller);
+        out.startCollecting(0 /* timeoutMs */);
+        return out;
     }
 
     @Test
@@ -1282,6 +1287,7 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testIntermediateVisibility() {
         final TransitionController controller = new TestTransitionController(mAtm);
+        controller.setSyncEngine(mWm.mSyncEngine);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1365,6 +1371,7 @@ public class TransitionTests extends WindowTestsBase {
                 super.dispatchLegacyAppTransitionFinished(ar);
             }
         };
+        controller.setSyncEngine(mWm.mSyncEngine);
         controller.mSnapshotController = mWm.mSnapshotController;
         final TaskSnapshotController taskSnapshotController = controller.mSnapshotController
                 .mTaskSnapshotController;
@@ -1462,6 +1469,7 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testNotReadyPushPop() {
         final TransitionController controller = new TestTransitionController(mAtm);
+        controller.setSyncEngine(mWm.mSyncEngine);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1916,6 +1924,110 @@ public class TransitionTests extends WindowTestsBase {
                 transition.mType, 0 /* flags */, targets, mMockT);
         assertTrue((info.getChanges().get(0).getFlags() & TransitionInfo.FLAG_MOVED_TO_TOP) != 0);
         assertEquals(TRANSIT_CHANGE, info.getChanges().get(0).getMode());
+    }
+
+    @Test
+    public void testQueueStartCollect() {
+        final TransitionController controller = mAtm.getTransitionController();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitB = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitC = createTestTransition(TRANSIT_OPEN, controller);
+
+        final boolean[] onStartA = new boolean[]{false, false};
+        final boolean[] onStartB = new boolean[]{false, false};
+        controller.startCollectOrQueue(transitA, (deferred) -> {
+            onStartA[0] = true;
+            onStartA[1] = deferred;
+        });
+        controller.startCollectOrQueue(transitB, (deferred) -> {
+            onStartB[0] = true;
+            onStartB[1] = deferred;
+        });
+        waitUntilHandlersIdle();
+
+        assertTrue(onStartA[0]);
+        assertFalse(onStartA[1]);
+        assertTrue(transitA.isCollecting());
+
+        // B should be queued, so no calls yet
+        assertFalse(onStartB[0]);
+        assertTrue(transitB.isPending());
+
+        // finish collecting A
+        transitA.start();
+        transitA.setAllReady();
+        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        waitUntilHandlersIdle();
+
+        assertTrue(transitA.isPlaying());
+        assertTrue(transitB.isCollecting());
+        assertTrue(onStartB[0]);
+        // Should receive deferred = true
+        assertTrue(onStartB[1]);
+
+        // finish collecting B
+        transitB.start();
+        transitB.setAllReady();
+        mSyncEngine.tryFinishForTest(transitB.getSyncId());
+        assertTrue(transitB.isPlaying());
+
+        // Now we should be able to start collecting directly a new transition
+        final boolean[] onStartC = new boolean[]{false, false};
+        controller.startCollectOrQueue(transitC, (deferred) -> {
+            onStartC[0] = true;
+            onStartC[1] = deferred;
+        });
+        waitUntilHandlersIdle();
+        assertTrue(onStartC[0]);
+        assertFalse(onStartC[1]);
+        assertTrue(transitC.isCollecting());
+    }
+
+    @Test
+    public void testQueueWithLegacy() {
+        final TransitionController controller = mAtm.getTransitionController();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitB = createTestTransition(TRANSIT_OPEN, controller);
+
+        controller.startCollectOrQueue(transitA, (deferred) -> {});
+
+        BLASTSyncEngine.SyncGroup legacySync = mSyncEngine.prepareSyncSet(
+                mock(BLASTSyncEngine.TransactionReadyListener.class), "test");
+        final boolean[] applyLegacy = new boolean[]{false};
+        controller.startLegacySyncOrQueue(legacySync, () -> applyLegacy[0] = true);
+        assertFalse(applyLegacy[0]);
+        waitUntilHandlersIdle();
+
+        controller.startCollectOrQueue(transitB, (deferred) -> {});
+        assertTrue(transitA.isCollecting());
+
+        // finish collecting A
+        transitA.start();
+        transitA.setAllReady();
+        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        waitUntilHandlersIdle();
+
+        assertTrue(transitA.isPlaying());
+        // legacy sync should start now
+        assertTrue(applyLegacy[0]);
+        // transitB must wait
+        assertTrue(transitB.isPending());
+
+        // finish legacy sync
+        mSyncEngine.setReady(legacySync.mSyncId);
+        mSyncEngine.tryFinishForTest(legacySync.mSyncId);
+        // transitioncontroller should be notified so it can start collecting B
+        assertTrue(transitB.isCollecting());
     }
 
     private static void makeTaskOrganized(Task... tasks) {

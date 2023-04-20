@@ -51,6 +51,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
@@ -88,6 +89,7 @@ class TransitionController {
 
     private WindowProcessController mTransitionPlayerProc;
     final ActivityTaskManagerService mAtm;
+    BLASTSyncEngine mSyncEngine;
 
     final RemotePlayer mRemotePlayer;
     SnapshotController mSnapshotController;
@@ -120,6 +122,26 @@ class TransitionController {
     final Lock mRunningLock = new Lock();
 
     private final IBinder.DeathRecipient mTransitionPlayerDeath;
+
+    static class QueuedTransition {
+        final Transition mTransition;
+        final OnStartCollect mOnStartCollect;
+        final BLASTSyncEngine.SyncGroup mLegacySync;
+
+        QueuedTransition(Transition transition, OnStartCollect onStartCollect) {
+            mTransition = transition;
+            mOnStartCollect = onStartCollect;
+            mLegacySync = null;
+        }
+
+        QueuedTransition(BLASTSyncEngine.SyncGroup legacySync, OnStartCollect onStartCollect) {
+            mTransition = null;
+            mOnStartCollect = onStartCollect;
+            mLegacySync = legacySync;
+        }
+    }
+
+    private final ArrayList<QueuedTransition> mQueuedTransitions = new ArrayList<>();
 
     /** The transition currently being constructed (collecting participants). */
     private Transition mCollectingTransition = null;
@@ -158,6 +180,14 @@ class TransitionController {
         mTransitionTracer = wms.mTransitionTracer;
         mIsWaitingForDisplayEnabled = !wms.mDisplayEnabled;
         registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
+        setSyncEngine(wms.mSyncEngine);
+    }
+
+    @VisibleForTesting
+    void setSyncEngine(BLASTSyncEngine syncEngine) {
+        mSyncEngine = syncEngine;
+        // Check the queue whenever the sync-engine becomes idle.
+        mSyncEngine.addOnIdleListener(this::tryStartCollectFromQueue);
     }
 
     private void detachPlayer() {
@@ -195,7 +225,7 @@ class TransitionController {
             throw new IllegalStateException("Simultaneous transition collection not supported"
                     + " yet. Use {@link #createPendingTransition} for explicit queueing.");
         }
-        Transition transit = new Transition(type, flags, this, mAtm.mWindowManager.mSyncEngine);
+        Transition transit = new Transition(type, flags, this, mSyncEngine);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s", transit);
         moveToCollecting(transit);
         return transit;
@@ -325,7 +355,7 @@ class TransitionController {
     /** @return {@code true} if a transition is running */
     boolean inTransition() {
         // TODO(shell-transitions): eventually properly support multiple
-        return isCollecting() || isPlaying();
+        return isCollecting() || isPlaying() || !mQueuedTransitions.isEmpty();
     }
 
     /** @return {@code true} if a transition is running in a participant subtree of wc */
@@ -453,8 +483,7 @@ class TransitionController {
             // some frames before and after the display projection transaction is applied by the
             // remote player. That may cause some buffers to show in different rotation. So use
             // sync method to pause clients drawing until the projection transaction is applied.
-            mAtm.mWindowManager.mSyncEngine.setSyncMethod(displayTransition.getSyncId(),
-                    BLASTSyncEngine.METHOD_BLAST);
+            mSyncEngine.setSyncMethod(displayTransition.getSyncId(), BLASTSyncEngine.METHOD_BLAST);
         }
         final Rect startBounds = displayChange.getStartAbsBounds();
         final Rect endBounds = displayChange.getEndAbsBounds();
@@ -741,6 +770,31 @@ class TransitionController {
         mStateValidators.clear();
     }
 
+    void tryStartCollectFromQueue() {
+        if (mQueuedTransitions.isEmpty()) return;
+        // Only need to try the next one since, even when transition can collect in parallel,
+        // they still need to serialize on readiness.
+        final QueuedTransition queued = mQueuedTransitions.get(0);
+        if (mCollectingTransition != null || mSyncEngine.hasActiveSync()) {
+            return;
+        }
+        mQueuedTransitions.remove(0);
+        // This needs to happen immediately to prevent another sync from claiming the syncset
+        // out-of-order (moveToCollecting calls startSyncSet)
+        if (queued.mTransition != null) {
+            moveToCollecting(queued.mTransition);
+        } else {
+            // legacy sync
+            mSyncEngine.startSyncSet(queued.mLegacySync);
+        }
+        // Post this so that the now-playing transition logic isn't interrupted.
+        mAtm.mH.post(() -> {
+            synchronized (mAtm.mGlobalLock) {
+                queued.mOnStartCollect.onCollectStarted(true /* deferred */);
+            }
+        });
+    }
+
     void moveToPlaying(Transition transition) {
         if (transition != mCollectingTransition) {
             throw new IllegalStateException("Trying to move non-collecting transition to playing");
@@ -749,6 +803,7 @@ class TransitionController {
         mPlayingTransitions.add(transition);
         updateRunningRemoteAnimation(transition, true /* isPlaying */);
         mTransitionTracer.logState(transition);
+        // Sync engine should become idle after this, so the idle listener will check the queue.
     }
 
     void updateAnimatingState(SurfaceControl.Transaction t) {
@@ -758,12 +813,12 @@ class TransitionController {
             t.setEarlyWakeupStart();
             // Usually transitions put quite a load onto the system already (with all the things
             // happening in app), so pause task snapshot persisting to not increase the load.
-            mAtm.mWindowManager.mSnapshotController.setPause(true);
+            mSnapshotController.setPause(true);
             mAnimatingState = true;
             Transition.asyncTraceBegin("animating", 0x41bfaf1 /* hashcode of TAG */);
         } else if (!animatingState && mAnimatingState) {
             t.setEarlyWakeupEnd();
-            mAtm.mWindowManager.mSnapshotController.setPause(false);
+            mSnapshotController.setPause(false);
             mAnimatingState = false;
             Transition.asyncTraceEnd(0x41bfaf1 /* hashcode of TAG */);
         }
@@ -793,6 +848,7 @@ class TransitionController {
         transition.abort();
         mCollectingTransition = null;
         mTransitionTracer.logState(transition);
+        // abort will call through the normal finish paths and thus check the queue.
     }
 
     /**
@@ -874,7 +930,7 @@ class TransitionController {
         if (!mPlayingTransitions.isEmpty()) {
             state = LEGACY_STATE_RUNNING;
         } else if ((mCollectingTransition != null && mCollectingTransition.getLegacyIsReady())
-                || mAtm.mWindowManager.mSyncEngine.hasPendingSyncSets()) {
+                || mSyncEngine.hasPendingSyncSets()) {
             // The transition may not be "ready", but we have a sync-transaction waiting to start.
             // Usually the pending transaction is for a transition, so assuming that is the case,
             // we can't be IDLE for test purposes. Ideally, we should have a STATE_COLLECTING.
@@ -885,25 +941,43 @@ class TransitionController {
     }
 
     /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
+    private void queueTransition(Transition transit, OnStartCollect onStartCollect) {
+        mQueuedTransitions.add(new QueuedTransition(transit, onStartCollect));
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
+                "Queueing transition: %s", transit);
+    }
+
+    /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
     boolean startCollectOrQueue(Transition transit, OnStartCollect onStartCollect) {
-        if (mAtm.mWindowManager.mSyncEngine.hasActiveSync()) {
+        if (!mQueuedTransitions.isEmpty()) {
+            // Just add to queue since we already have a queue.
+            queueTransition(transit, onStartCollect);
+            return false;
+        }
+        if (mSyncEngine.hasActiveSync()) {
             if (!isCollecting()) {
                 Slog.w(TAG, "Ongoing Sync outside of transition.");
             }
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
-                    "Queueing transition: %s", transit);
-            mAtm.mWindowManager.mSyncEngine.queueSyncSet(
-                    // Make sure to collect immediately to prevent another transition
-                    // from sneaking in before it. Note: moveToCollecting internally
-                    // calls startSyncSet.
-                    () -> moveToCollecting(transit),
-                    () -> onStartCollect.onCollectStarted(true /* deferred */));
+            queueTransition(transit, onStartCollect);
             return false;
-        } else {
-            moveToCollecting(transit);
-            onStartCollect.onCollectStarted(false /* deferred */);
-            return true;
         }
+        moveToCollecting(transit);
+        onStartCollect.onCollectStarted(false /* deferred */);
+        return true;
+    }
+
+    /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
+    boolean startLegacySyncOrQueue(BLASTSyncEngine.SyncGroup syncGroup, Runnable applySync) {
+        if (!mQueuedTransitions.isEmpty() || mSyncEngine.hasActiveSync()) {
+            // Just add to queue since we already have a queue.
+            mQueuedTransitions.add(new QueuedTransition(syncGroup, (d) -> applySync.run()));
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
+                    "Queueing legacy sync-set: %s", syncGroup.mSyncId);
+            return false;
+        }
+        mSyncEngine.startSyncSet(syncGroup);
+        applySync.run();
+        return true;
     }
 
     interface OnStartCollect {
