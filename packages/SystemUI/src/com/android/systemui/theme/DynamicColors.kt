@@ -50,6 +50,7 @@ class DynamicColors {
                 Pair.create("surface_variant", MDC.surfaceVariant),
                 Pair.create("on_surface_variant", MDC.onSurfaceVariant),
                 Pair.create("outline", MDC.outline),
+                Pair.create("outline_variant", MDC.outlineVariant),
                 Pair.create("error", MDC.error),
                 Pair.create("on_error", MDC.onError),
                 Pair.create("error_container", MDC.errorContainer),

@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"యాప్ ఉపయోగంలో ఉన్నప్పుడు గుండె స్పందన రేటు, ఉష్ణోగ్రత, ఇంకా రక్తంలోని ఆక్సిజన్ శాతం వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"బ్యాక్‌గ్రౌండ్‌లో గుండె స్పందన రేటు వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయండి"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"యాప్ బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు గుండె స్పందన రేటు, ఉష్ణోగ్రత, ఇంకా రక్తంలోని ఆక్సిజన్ శాతం వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"యాప్ వినియోగంలో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయండి."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"యాప్ వినియోగంలో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"యాప్ బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయండి."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"యాప్ బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"క్యాలెండర్ ఈవెంట్‌లు మరియు వివరాలను చదవడం"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ఈ యాప్ మీ టాబ్లెట్‌లో స్టోరేజ్‌ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ఈ యాప్‌ మీ Android TV పరికరంలో స్టోరేజ్‌ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు, మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ యాక్టివిటీ రద్దయింది."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ఫేస్ అన్‌లాక్‌ను యూజర్ రద్దు చేశారు"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. ఫేస్ అన్‌లాక్ డిజేబుల్ చేయబడింది."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"మీరు ఫేస్ అన్‌లాక్‌ను సెటప్ చేయలేదు"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"యాప్ ఫీచర్‌ల సమాచారాన్ని చూడటాన్ని ప్రారంభించడానికి హోల్డర్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"అధిక శాంపిల్ రేటు వద్ద సెన్సార్ డేటాను యాక్సెస్ చేయండి"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz కంటే ఎక్కువ రేట్ వద్ద శాంపిల్ సెన్సార్ డేటాకు యాప్‌ను అనుమతిస్తుంది"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"యూజర్ చర్య లేకుండా యాప్‌ను అప్‌డేట్ చేయండి"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"యూజర్ చర్య లేకుండా హోల్డర్ మునుపు ఇన్‌స్టాల్ చేసిన యాప్‌ను అప్‌డేట్ చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"స్క్రీన్ అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు. ఇది <xliff:g id="APP_NAME_1">%2$s</xliff:g> ద్వారా నిర్వహించబడుతుంది."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"మరింత తెలుసుకోండి"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"యాప్‌పై వున్న పాజ్‌ను తొలగించండి"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"వర్క్ యాప్‌లను ఆన్ చేయాలా?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"మీ వర్క్ యాప్‌లు, నోటిఫికేషన్‌లకు యాక్సెస్‌ను పొందండి"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ఆన్ చేయి"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"వర్క్ యాప్స్ అన్‌పాజ్ చేయాలా?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"అన్‌పాజ్ చేయండి"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ఎమర్జెన్సీ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"మీ వర్క్ యాప్‌లు, కాల్స్‌కు యాక్సెస్‌ను పొందండి"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> అందుబాటులో లేదు"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ఆన్ చేయడానికి ట్యాప్ చేయండి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g>ను మీ వ్యక్తిగత ప్రొఫైల్‌లో తెరవాలా?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g>ను మీ వర్క్ ప్రొఫైల్‌లో తెరవాలా?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"వ్యక్తిగత బ్రౌజర్‌ను ఉపయోగించండి"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"వర్క్ బ్రౌజర్‌ను ఉపయోగించండి"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM నెట్‌వర్క్ అన్‌లాక్ పిన్‌"</string>

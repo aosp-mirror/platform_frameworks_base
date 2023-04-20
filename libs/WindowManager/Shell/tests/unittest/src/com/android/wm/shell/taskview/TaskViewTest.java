@@ -471,4 +471,53 @@ public class TaskViewTest extends ShellTestCase {
         assertThat(insetsInfo.touchableRegion.contains(20, 20)).isFalse();
         assertThat(insetsInfo.touchableRegion.contains(30, 30)).isFalse();
     }
+
+    @Test
+    public void testTaskViewPrepareOpenAnimationSetsBoundsAndVisibility() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        TaskViewBase taskViewBase = mock(TaskViewBase.class);
+        Rect bounds = new Rect(0, 0, 100, 100);
+        when(taskViewBase.getCurrentBoundsOnScreen()).thenReturn(bounds);
+        mTaskViewTaskController.setTaskViewBase(taskViewBase);
+
+        // Surface created, but task not available so bounds / visibility isn't set
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        verify(mTaskViewTransitions, never()).updateVisibilityState(
+                eq(mTaskViewTaskController), eq(true));
+
+        // Make the task available / start prepareOpen
+        WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+
+        // Bounds got set
+        verify(wct).setBounds(any(WindowContainerToken.class), eq(bounds));
+        // Visibility & bounds state got set
+        verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(true));
+        verify(mTaskViewTransitions).updateBoundsState(eq(mTaskViewTaskController), eq(bounds));
+    }
+
+    @Test
+    public void testTaskViewPrepareOpenAnimationSetsVisibilityFalse() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        TaskViewBase taskViewBase = mock(TaskViewBase.class);
+        Rect bounds = new Rect(0, 0, 100, 100);
+        when(taskViewBase.getCurrentBoundsOnScreen()).thenReturn(bounds);
+        mTaskViewTaskController.setTaskViewBase(taskViewBase);
+
+        // Task is available, but the surface was never created
+        WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+
+        // Bounds do not get set as there is no surface
+        verify(wct, never()).setBounds(any(WindowContainerToken.class), any());
+        // Visibility is set to false, bounds aren't set
+        verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(false));
+        verify(mTaskViewTransitions, never()).updateBoundsState(eq(mTaskViewTaskController), any());
+    }
 }

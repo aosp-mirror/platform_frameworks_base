@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Під час використання додатка він матиме доступ до даних датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ до показників датчиків на тілі, наприклад пульсу, у фоновому режимі"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Коли додаток працюватиме у фоновому режимі, він матиме доступ до показників датчиків на тілі, наприклад пульсу, температури та відсотка кисню в крові."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Отримувати доступ до даних датчика на тілі про температуру в зоні зап’ястя, коли додаток використовується."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Під час використання додатка він матиме доступ до даних датчика на тілі про температуру в зоні зап’ястя."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Отримувати доступ до даних датчика на тілі про температуру в зоні зап’ястя, коли додаток працює у фоновому режимі."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Коли додаток працюватиме у фоновому режимі, він матиме доступ до даних датчика на тілі про температуру в зоні зап’ястя."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Переглядати події календаря й додаткову інформацію"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Цей додаток може переглядати всі події календаря, збережені на вашому планшеті, а також надсилати та зберігати дані календаря."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Додаток може переглядати всі події календаря, збережені на вашому пристрої Android TV, а також надсилати та зберігати дані календаря."</string>
@@ -669,7 +665,7 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Сталася помилка. Повторіть спробу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок відбитка пальця"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейсконтроль"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейс-контроль"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Сталася помилка з фейсконтролем"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Натисніть, щоб видалити свою модель обличчя, а потім знову додайте її"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейсконтролю"</string>
@@ -715,7 +711,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Дію з обличчям скасовано."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Користувач скасував операцію фейсконтролю"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Забагато спроб. Повторіть пізніше."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Забагато спроб. Фейсконтроль вимкнено."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Забагато спроб. Розблокуйте екран іншим способом."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ви не налаштували фейсконтроль"</string>
@@ -802,10 +799,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозволяє додатку почати перегляд інформації про функції іншого додатка."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"доступ до даних датчиків із високою частотою дикретизації"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Додаток зможе дискретизувати дані даних датчиків із частотою понад 200 Гц"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"оновлювати додаток без дій із боку користувача"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволяє власнику оновлювати раніше встановлений додаток без дій із боку користувача"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Відстежувати спроби розблокування екрана"</string>
@@ -1047,7 +1042,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Розгорнути область розблокування."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Розблокування повзунком."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Розблокування ключем."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Фейсконтроль."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Фейс-контроль."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Розблокування PIN-кодом."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Розблокування SIM-карти PIN-кодом."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Розблокування SIM-карти PUK-кодом."</string>
@@ -1958,11 +1953,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Додаток <xliff:g id="APP_NAME_0">%1$s</xliff:g> зараз недоступний. Керує додаток <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Докладніше"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Відновити доступ до додатка"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Увімкнути робочі додатки?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Отримайте доступ до своїх робочих додатків і сповіщень"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Увімкнути робочі додатки?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Увімкнути"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Екстрений виклик"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Отримайте доступ до своїх робочих додатків і дзвінків"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2172,8 +2165,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Торкніться, щоб увімкнути"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Немає робочих додатків"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Відкрити додаток <xliff:g id="APP">%s</xliff:g> в особистому профілі?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Відкрити додаток <xliff:g id="APP">%s</xliff:g> у робочому профілі?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>

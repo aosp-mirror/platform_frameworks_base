@@ -465,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Poskytuje aplikaci přístup k datům z tělesných senzorů, jako je tepová frekvence, teplota a procento nasycení krve kyslíkem, během používání aplikace."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Přístup k datům z tělesných senzorů, jako je tepová frekvence, při běhu na pozadí"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Poskytuje aplikaci přístup k datům z tělesných senzorů, jako je tepová frekvence, teplota a procento nasycení krve kyslíkem, při běhu na pozadí."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Má přístup k údajům o teplotě zápěstí z tělesného senzoru během používání aplikace."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Poskytuje aplikaci přístup k údajům o teplotě zápěstí z tělesného senzoru během používání aplikace."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Má přístup k údajům o teplotě zápěstí z tělesného senzoru při běhu na pozadí."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Poskytuje aplikaci přístup k údajům o teplotě zápěstí z tělesného senzoru při běhu na pozadí."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čtení událostí v kalendáři včetně podrobností"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Tato aplikace může číst všechny události v kalendáři uložené v tabletu a sdílet či ukládat data kalendáře."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Tato aplikace může číst všechny události v kalendáři uložené v zařízení Android TV a sdílet či ukládat data kalendáře."</string>
@@ -690,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Umístěte telefon víc doleva"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Umístěte telefon víc doprava"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Dívejte se přímo na zařízení."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Obličej není vidět. Držte telefon na úrovni očí."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Obličej není vidět. Držte telefon v úrovni očí."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Zaznamenejte obličej znovu."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Obličej se nepodařilo rozpoznat. Zkuste to znovu."</string>
@@ -715,7 +711,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operace snímání obličeje byla zrušena."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Odemknutí obličejem zrušeno uživatelem"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Příliš mnoho pokusů. Zkuste to později."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Příliš mnoho pokusů. Odemknutí obličejem bylo deaktivováno."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Příliš mnoho pokusů. Zadejte zámek obrazovky."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Obličej se nepodařilo ověřit. Zkuste to znovu."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Odemknutí obličejem nemáte nastavené."</string>
@@ -802,10 +799,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umožňuje držiteli zobrazit informace o funkcích aplikace."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"přístup k datům ze senzorů s vyšší vzorkovací frekvencí"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Umožňuje aplikaci vzorkovat data ze senzorů s frekvencí vyšší než 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizovat aplikaci bez zásahu uživatele"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Umožňuje držiteli aktualizovat aplikaci, kterou dříve nainstaloval, bez zásahu uživatele"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovat pokusy o odemknutí obrazovky"</string>
@@ -1958,11 +1953,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikace <xliff:g id="APP_NAME_0">%1$s</xliff:g> momentálně není dostupná. Tato předvolba se spravuje v aplikaci <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Další informace"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Zrušit pozastavení aplikace"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Zapnout pracovní aplikace?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Získejte přístup ke svým pracovním aplikacím a oznámením"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnout"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušit pozast. prac. aplikací?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušit pozastavení"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Stav nouze"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Získejte přístup ke svým pracovním aplikacím a hovorům"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> v tuto chvíli není k dispozici."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> není k dispozici"</string>
@@ -2172,8 +2165,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Klepnutím ho zapnete"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žádné pracovní aplikace"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žádné osobní aplikace"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Otevřít aplikaci <xliff:g id="APP">%s</xliff:g> v osobním profilu?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Otevřít aplikaci <xliff:g id="APP">%s</xliff:g> v pracovním profilu?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použít osobní prohlížeč"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použít pracovní prohlížeč"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kód PIN odblokování sítě pro SIM kartu"</string>

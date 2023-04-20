@@ -223,15 +223,6 @@ fun FlickerTest.splitAppLayerBoundsChanges(
                     portraitPosTop,
                     scenario.endRotation
                 )
-                .then()
-                .isInvisible(component)
-                .then()
-                .splitAppLayerBoundsSnapToDivider(
-                    component,
-                    landscapePosLeft,
-                    portraitPosTop,
-                    scenario.endRotation
-                )
         } else {
             splitAppLayerBoundsSnapToDivider(
                     component,

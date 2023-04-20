@@ -300,7 +300,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"કાર્યાલયની પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"સંપર્કો"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"સ્થાન"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"લોકેશન"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"કૅલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ઍપ ઉપયોગમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે હૃદયના ધબકારા જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરો"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"કૅલેન્ડર ઇવેન્ટ્સ અને વિગતો વાંચો"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત બધા કૅલેન્ડર ઇવેન્ટને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ચહેરા સંબંધિત કાર્યવાહી રદ કરવામાં આવી છે."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"વપરાશકર્તાએ ફેસ અનલૉક કાર્ય રદ કર્યું"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ઘણા બધા પ્રયત્નો. થોડા સમય પછી ફરી પ્રયાસ કરો."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ઘણા બધા પ્રયાસો. ફેસ અનલૉક સુવિધા બંધ કરેલી છે."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ઘણા બધા પ્રયાસો. તેને બદલે સ્ક્રીન લૉકનો ઉપયોગ કરો."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ચહેરો ચકાસી શકાતો નથી. ફરી પ્રયાસ કરો."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"તમે ફેસ અનલૉક સુવિધાનું સેટઅપ કર્યું નથી"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> હમણાં ઉપલબ્ધ નથી. આને <xliff:g id="APP_NAME_1">%2$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"વધુ જાણો"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ઍપ ફરી શરૂ કરો"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"શું ઑફિસ માટેની ઍપ ચાલુ કરીએ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"તમારી ઑફિસ માટેની ઍપ અને નોટિફિકેશનનો ઍક્સેસ મેળવો"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ચાલુ કરો"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ઑફિસની થોભાવેલી ઍપ ચાલુ કરીએ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ફરી ચાલુ કરો"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ઇમર્જન્સી"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"તમારી ઑફિસ માટેની ઍપ અને કૉલનો ઍક્સેસ મેળવો"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ઍપ ઉપલબ્ધ નથી"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> હાલમાં ઉપલબ્ધ નથી."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ઉપલબ્ધ નથી"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ચાલુ કરવા માટે ટૅપ કરો"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"કોઈ ઑફિસ માટેની ઍપ સપોર્ટ કરતી નથી"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"કોઈ વ્યક્તિગત ઍપ સપોર્ટ કરતી નથી"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"તમારી વ્યક્તિગત પ્રોફાઇલમાં <xliff:g id="APP">%s</xliff:g> ખોલીએ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"તમારી ઑફિસની પ્રોફાઇલમાં <xliff:g id="APP">%s</xliff:g> ખોલીએ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"વ્યક્તિગત બ્રાઉઝરનો ઉપયોગ કરો"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ઑફિસના બ્રાઉઝરના ઉપયોગ કરો"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"સિમ નેટવર્કને અનલૉક કરવાનો પિન"</string>

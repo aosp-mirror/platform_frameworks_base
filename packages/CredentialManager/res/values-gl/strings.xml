@@ -10,7 +10,7 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"Ocultar contrasinal"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Máis protección coas claves de acceso"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Cunha clave de acceso non é necesario que crees ou lembres contrasinais complexos"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"As claves de acceso son claves dixitais encriptadas que creas usando a túa impresión dixital, a túa cara ou o teu bloqueo de pantalla"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"As claves de acceso son claves dixitais encriptadas que creas usando a impresión dixital, o recoñecemento facial ou un bloqueo de pantalla"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"As claves de acceso gárdanse nun xestor de contrasinais para que poidas iniciar sesión noutros dispositivos"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Máis información sobre as claves de acceso"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnoloxía sen contrasinais"</string>
@@ -58,8 +58,7 @@
     <string name="snackbar_action" msgid="37373514216505085">"Ver opcións"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuar"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opcións de inicio de sesión"</string>
-    <!-- no translation found for button_label_view_more (3429098227286495651) -->
-    <skip />
+    <string name="button_label_view_more" msgid="3429098227286495651">"Ver máis"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Para <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Xestores de contrasinais bloqueados"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Toca para desbloquear"</string>

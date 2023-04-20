@@ -50,14 +50,12 @@ import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
-import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
-import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -98,29 +96,6 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationShadeWindowView providesNotificationShadeWindowView(
-            LayoutInflater layoutInflater) {
-        NotificationShadeWindowView notificationShadeWindowView = (NotificationShadeWindowView)
-                layoutInflater.inflate(R.layout.super_notification_shade, /* root= */ null);
-        if (notificationShadeWindowView == null) {
-            throw new IllegalStateException(
-                    "R.layout.super_notification_shade could not be properly inflated");
-        }
-
-        return notificationShadeWindowView;
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationStackScrollLayout providesNotificationStackScrollLayout(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationShelf providesNotificationShelf(LayoutInflater layoutInflater,
             NotificationStackScrollLayout notificationStackScrollLayout) {
         NotificationShelf view = (NotificationShelf) layoutInflater.inflate(
@@ -155,14 +130,6 @@ public abstract class StatusBarViewModule {
 
             return notificationShelfController;
         }
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationPanelView getNotificationPanelView(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.getNotificationPanelView();
     }
 
     /** */
@@ -273,12 +240,6 @@ public abstract class StatusBarViewModule {
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.notification_container_parent);
     }
-
-    @Binds
-    @IntoSet
-    abstract OnStatusBarViewInitializedListener statusBarInitializedListener(
-            LetterboxAppearanceCalculator letterboxAppearanceCalculator
-    );
 
     @Binds
     @IntoSet

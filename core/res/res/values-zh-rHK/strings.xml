@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用時存取人體感應器資料，例如心率、體溫、血氧百分比等。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時存取人體感應器資料，例如心率"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心率、體溫、血氧百分比等。"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"應用程式在使用期間存取人體感應器手腕溫度資料。"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"允許應用程式在使用期間存取人體感應器手腕溫度資料。"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"應用程式在背景執行時存取人體感應器手腕溫度資料。"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"允許應用程式在背景執行時存取人體感應器手腕溫度資料。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此應用程式可以讀取所有儲存在您的平板電腦的日曆活動，並分享或儲存您的日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"此應用程式可以讀取所有儲存在 Android TV 裝置上的日曆活動，並分享或儲存您的日曆資料。"</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"面孔操作已取消。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"使用者已取消「面孔解鎖」"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"嘗試次數過多，請稍後再試。"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"嘗試次數過多，因此系統已停用「面孔解鎖」。"</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"嘗試次數過多，請改為解除螢幕鎖定來驗證身分。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證面孔。請再試一次。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"您尚未設定「面孔解鎖」"</string>
@@ -1874,8 +1871,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"好"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"「省電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"「省電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"「慳電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"「慳電模式」會開啟深色主題背景，並限制或關閉背景活動、部分視覺效果、特定功能和部分網絡連線。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"目前無法使用 <xliff:g id="APP_NAME_0">%1$s</xliff:g>。此應用程式是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」管理。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"瞭解詳情"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"取消暫停應用程式"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"要開啟工作應用程式存取權嗎？"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"開啟工作應用程式和通知的存取權"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"開啟"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"要取消暫停工作應用程式嗎？"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"取消暫停"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"撥打緊急電話"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"要求存取工作應用程式和通話"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"無法使用應用程式"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"目前無法使用「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"無法使用「<xliff:g id="ACTIVITY">%1$s</xliff:g>」"</string>
@@ -2099,10 +2094,10 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"加強版通知在 Android 12 取代了 Android 自動調整通知。此功能會顯示建議的操作和回覆，更可為您整理通知。\n\n加強版通知功能可存取您的通知內容 (包括聯絡人姓名和訊息等個人資料)，亦可以關閉或回應通知，例如接聽來電和控制「請勿騷擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"「日常安排模式」資料通知"</string>
-    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"已開啟「省電模式」"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"已開啟「慳電模式」"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"減少用電可延長電池壽命"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省電模式"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"已關閉省電模式"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"慳電模式"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"已關閉慳電模式"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"手機電量充足。各項功能已不再受限。"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"平板電腦電量充足。各項功能已不再受限。"</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"裝置電量充足。各項功能已不再受限。"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"輕按即可啟用"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"要在個人設定檔中開啟「<xliff:g id="APP">%s</xliff:g>」嗎？"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"要在工作設定檔中開啟「<xliff:g id="APP">%s</xliff:g>」嗎？"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用個人瀏覽器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作瀏覽器"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 網絡解鎖 PIN"</string>
@@ -2327,7 +2324,7 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"裝置過熱"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"由於手機過熱，雙螢幕功能無法使用"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"無法使用雙螢幕功能"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"由於「省電模式」已開啟，因此無法使用雙螢幕功能。您可以前往「設定」中關閉此模式。"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"由於「慳電模式」已開啟，因此無法使用雙螢幕功能。您可以前往「設定」中關閉此模式。"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"前往「設定」"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"關閉"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"已設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>

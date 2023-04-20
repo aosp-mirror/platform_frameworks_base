@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή χρησιμοποιείται."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, στο παρασκήνιο"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή είναι σε χρήση."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή είναι σε χρήση."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ανάγνωση συμβάντων ημερολογίου και λεπτομερειών"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στο tablet που χρησιμοποιείτε και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στη συσκευή Android TV και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
@@ -688,7 +684,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Μετακινήστε το τηλέφωνο προς τα αριστερά"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Μετακινήστε το τηλέφωνο προς τα δεξιά"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Κοιτάξτε απευθείας τη συσκευή σας."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Δεν εντοπίστηκε το πρόσωπό σας. Κρατήστε το τηλέφωνο στο ύψος των ματιών."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Κρατήστε το τηλέφωνο στο ύψος των ματιών σας."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Πάρα πολλή κίνηση. Κρατήστε σταθερό το τηλέφωνο."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Καταχωρίστε ξανά το πρόσωπό σας."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Το πρόσωπο δεν αναγνωρίζεται. Δοκιμάστε ξανά."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Η ενέργεια προσώπου ακυρώθηκε."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Το Ξεκλείδωμα με το πρόσωπο ακυρώθηκε από τον χρήστη"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Πάρα πολλές προσπάθειες. Το Ξεκλείδωμα με το πρόσωπο απενεργοποιήθηκε."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Πάρα πολλές προσπάθειες. Χρησιμοποιήστε εναλλακτικά το κλείδωμα οθόνης."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Αδύνατη επαλήθευση του προσώπου. Επανάληψη."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Δεν έχετε ρυθμίσει το Ξεκλείδωμα με το πρόσωπο"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Επιτρέπει στον κάτοχο να ξεκινήσει την προβολή των πληροφοριών για τις λειτουργίες μιας εφαρμογής."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"πρόσβαση σε δεδομένα αισθητήρα με υψηλό ρυθμό δειγματοληψίας"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Επιτρέπει στην εφαρμογή τη δειγματοληψία των δεδομένων αισθητήρα με ρυθμό μεγαλύτερο από 200 Hz."</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ενημέρωση εφαρμογής χωρίς ενέργεια από τον χρήστη"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Επιτρέπει στον κάτοχο να ενημερώσει την εφαρμογή που εγκατέστησε προηγουμένως χωρίς κάποια ενέργεια από τον χρήστη"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ελέγξτε την έκταση και τους επιτρεπόμενους χαρακτήρες σε κωδικούς πρόσβασης κλειδώματος οθόνης και PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Η εφαρμογή <xliff:g id="APP_NAME_0">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή. Η διαχείριση πραγματοποιείται από την εφαρμογή <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Μάθετε περισσότερα"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Κατάργηση παύσης εφαρμογής"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Ενεργοπ. εφαρμογών εργασιών;"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Αποκτήστε πρόσβαση στις εφαρμογές εργασιών και τις ειδοποιήσεις"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Ενεργοποίηση"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Αναίρ. παύσης εφαρμ. εργασιών;"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Αναίρεση παύσης"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Έκτακτη ανάγκη"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Αποκτήστε πρόσβαση στις εφαρμογές εργασιών και τις κλήσεις"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Πατήστε για ενεργοποίηση"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Δεν υπάρχουν εφαρμογές εργασιών"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Δεν υπάρχουν προσωπικές εφαρμογές"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Θέλετε να ανοίξετε την εφαρμογή <xliff:g id="APP">%s</xliff:g> στο προσωπικό σας προφίλ;"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Θέλετε να ανοίξετε την εφαρμογή <xliff:g id="APP">%s</xliff:g> στο προφίλ σας εργασίας;"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Χρήση προσωπικού προγράμματος περιήγησης"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Χρήση προγράμματος περιήγησης εργασίας"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ξεκλειδώματος δικτύου κάρτας SIM"</string>

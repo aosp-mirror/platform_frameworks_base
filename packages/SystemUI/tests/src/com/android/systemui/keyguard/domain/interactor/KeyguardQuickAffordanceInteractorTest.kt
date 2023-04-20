@@ -635,14 +635,14 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     companion object {
-        private val ICON: Icon = mock {
-            whenever(this.contentDescription)
-                .thenReturn(
+        private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
+        private val ICON: Icon =
+            Icon.Resource(
+                res = CONTENT_DESCRIPTION_RESOURCE_ID,
+                contentDescription =
                     ContentDescription.Resource(
                         res = CONTENT_DESCRIPTION_RESOURCE_ID,
-                    )
-                )
-        }
-        private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
+                    ),
+            )
     }
 }

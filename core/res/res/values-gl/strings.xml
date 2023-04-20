@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite que a aplicación acceda aos datos dos sensores corporais (por exemplo, a frecuencia cardíaca, a temperatura ou a porcentaxe de osíxeno en sangue) mentres se estea utilizando."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Acceso en segundo plano aos datos dos sensores corporais, como a frecuencia cardíaca"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite que a aplicación acceda aos datos dos sensores corporais (por exemplo, a frecuencia cardíaca, a temperatura ou a porcentaxe de osíxeno en sangue) mentres se estea executando en segundo plano."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Acceder aos datos de temperatura do sensor corporal do pulso mentres se está utilizando a aplicación."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite que a aplicación acceda aos datos de temperatura do sensor corporal do pulso mentres se está utilizando a aplicación."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Acceder aos datos de temperatura do sensor corporal do pulso mentres a aplicación está en segundo plano."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite que a aplicación acceda aos datos de temperatura do sensor corporal do pulso mentres a aplicación está en segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler os detalles e os eventos do calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta aplicación pode ler todos os eventos do calendario almacenados na túa tableta e compartir ou gardar os datos do calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta aplicación pode ler todos os eventos do calendario almacenados no dispositivo Android TV e compartir ou gardar os datos do calendario."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Cancelouse a operación relacionada coa cara"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"O usuario cancelou o desbloqueo facial"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Téntao de novo máis tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Realizaches demasiados intentos. Desactivouse o desbloqueo facial."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Realizaches demasiados intentos. Mellor usa o bloqueo de pantalla."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Non se puido verificar a cara. Téntao de novo."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Non configuraches o desbloqueo facial"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o propietario comece a ver a información das funcións dunha aplicación."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acceder aos datos dos sensores usando unha taxa de mostraxe alta"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que a aplicación recompile mostras dos datos dos sensores cunha taxa superior a 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"actualizar a aplicación sen que o usuario teña que realizar ningunha acción"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite que o titular actualice a aplicación que instalase anteriormente sen que o usuario teña que realizar ningunha acción"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecer as normas de contrasinal"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controla a lonxitude e os caracteres permitidos nos contrasinais e nos PIN de bloqueo da pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Controlar os intentos de desbloqueo da pantalla"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"A aplicación <xliff:g id="APP_NAME_0">%1$s</xliff:g> non está dispoñible neste momento. A dispoñibilidade está xestionada por <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Máis información"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Volver activar aplicación"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Activar as apps do traballo?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Obtén acceso ás túas aplicacións e notificacións do traballo"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivar apps do traballo?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Reactivar"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emerxencia"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Obtén acceso ás túas chamadas e aplicacións do traballo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"A aplicación non está dispoñible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> non está dispoñible neste momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non está dispoñible"</string>
@@ -2170,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Tocar para activar o perfil"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Non hai ningunha aplicación do traballo compatible"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Non hai ningunha aplicación persoal compatible"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Queres abrir <xliff:g id="APP">%s</xliff:g> no teu perfil persoal?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Queres abrir <xliff:g id="APP">%s</xliff:g> no teu perfil de traballo?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilizar navegador persoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilizar navegador de traballo"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo da rede SIM"</string>

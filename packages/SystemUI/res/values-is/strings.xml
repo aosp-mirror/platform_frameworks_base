@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Vinnur úr skjáupptöku"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Hefja upptöku?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu. Þar á meðal eru upplýsingar á borð við aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android-kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu, þar á meðal aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Taka upp allan skjáinn"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Taka upp eitt forrit"</string>
     <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Þegar þú tekur upp hefur Android aðgang að öllu sem sést á skjánum eða spilast í tækinu. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð eða aðrar viðkvæmar upplýsingar."</string>
@@ -299,14 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hefja"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stöðva"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Einhent stilling"</string>
-    <!-- no translation found for quick_settings_contrast_label (988087460210159123) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_standard (2538227821968061832) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_medium (5158352575583902566) -->
-    <skip />
-    <!-- no translation found for quick_settings_contrast_high (656049259587494499) -->
-    <skip />
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Birtuskil"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Staðlað"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Miðlungs"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Mikið"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Opna fyrir hljóðnema tækisins?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Opna fyrir myndavél tækisins?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Opna fyrir myndavél og hljóðnema tækisins?"</string>
@@ -889,7 +885,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjarlægja úr eftirlæti"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Færa í stöðu <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Stýringar"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Veldu stýringar til að opna með flýtistillingum"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Haltu og dragðu til að endurraða stýringum"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Allar stýringar fjarlægðar"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Breytingar ekki vistaðar"</string>
@@ -1126,7 +1123,8 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Vinnureglur gera þér aðeins kleift að hringja símtöl úr vinnusniði"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Skipta yfir í vinnusnið"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Loka"</string>
-    <!-- no translation found for lock_screen_settings (6152703934761402399) -->
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Sérsníða lásskjá"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
     <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi er ekki til staðar"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Lokað fyrir myndavél"</string>
@@ -1134,4 +1132,6 @@
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Lokað fyrir hljóðnema"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Kveikt er á forgangsstillingu"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Hjálparinn er að hlusta"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Lejon aplikacionin që të ketë qasje te të dhënat e sensorit të trupit, si p.sh. rrahjet e zemrës, temperatura dhe përqindja e oksigjenit në gjak ndërkohë që aplikacioni është në përdorim."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Qasje te të dhënat e sensorit të trupit, si rrahjet e zemrës kur është në sfond"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Lejon aplikacionin që të ketë qasje te të dhënat e sensorit të trupit, si p.sh. rrahjet e zemrës, temperatura dhe përqindja e oksigjenit në gjak ndërkohë që aplikacioni është në sfond."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Qasu te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit ndërsa aplikacioni është në përdorim."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Lejon aplikacionin të ketë qasje te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit, ndërsa aplikacioni është në përdorim."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Qasu te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit ndërsa aplikacioni është në sfond."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Lejon aplikacionin të ketë qasje te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit, ndërsa aplikacioni është në sfond."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lexo ngjarjet e kalendarit dhe detajet"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në tabletin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në pajisjen tënde Android TV dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
@@ -713,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Veprimi me fytyrën u anulua."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"\"Shkyçja me fytyrë\" u anulua nga përdoruesi"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Shumë përpjekje. Provo sërish më vonë."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Shumë përpjekje. \"Shkyçja me fytyrë\" u çaktivizua."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Shumë përpjekje. Fut më mirë kyçjen e ekranit."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Fytyra nuk mund të verifikohet. Provo përsëri."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nuk e ke konfiguruar \"Shkyçjen me fytyrë\""</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> nuk ofrohet në këtë moment. Kjo menaxhohet nga <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Mëso më shumë"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulo pauzën për aplikacionin"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Të aktivizohen aplikacionet e punës?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Merr qasje tek aplikacionet e punës dhe njoftimet e tua"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivizo"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Hiq nga pauza apl. e punës?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Hiq nga pauza"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgjenca"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Merr qasje tek aplikacionet e punës dhe telefonatat e tua"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nuk ofrohet"</string>
@@ -2168,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Trokit për ta aktivizuar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nuk ka aplikacione pune"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nuk ka aplikacione personale"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Të hapet <xliff:g id="APP">%s</xliff:g> në profilin tënd personal?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Të hapet <xliff:g id="APP">%s</xliff:g> në profilin tënd të punës?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Përdor shfletuesin personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Përdor shfletuesin e punës"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kodi PIN i shkyçjes së rrjetit të kartës SIM"</string>

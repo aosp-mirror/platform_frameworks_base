@@ -191,10 +191,10 @@ import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CircleReveal;
@@ -455,6 +455,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private AuthRippleController mAuthRippleController;
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final StatusBarInitializer mStatusBarInitializer;
     private final StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
@@ -723,6 +724,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             FragmentService fragmentService,
             LightBarController lightBarController,
             AutoHideController autoHideController,
+            StatusBarInitializer statusBarInitializer,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowStateController statusBarWindowStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -817,6 +819,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mFragmentService = fragmentService;
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
+        mStatusBarInitializer = statusBarInitializer;
         mStatusBarWindowController = statusBarWindowController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -1261,8 +1264,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);
 
         // Set up CollapsedStatusBarFragment and PhoneStatusBarView
-        StatusBarInitializer initializer = mCentralSurfacesComponent.getStatusBarInitializer();
-        initializer.setStatusBarViewUpdatedListener(
+        mStatusBarInitializer.setStatusBarViewUpdatedListener(
                 (statusBarView, statusBarViewController, statusBarTransitions) -> {
                     mStatusBarView = statusBarView;
                     mPhoneStatusBarViewController = statusBarViewController;
@@ -1278,7 +1280,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
                     checkBarModes();
                 });
-        initializer.initializeStatusBar(mCentralSurfacesComponent);
+        mStatusBarInitializer.initializeStatusBar(
+                mCentralSurfacesComponent::createCollapsedStatusBarFragment);
 
         mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
 
@@ -1511,13 +1514,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean tracking = event.getTracking();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
 
-        if (getShadeViewController() != null) {
-            getShadeViewController().updateSystemUiStateFlags();
-        }
-
         if (fraction == 0 || fraction == 1) {
             if (getNavigationBarView() != null) {
                 getNavigationBarView().onStatusBarPanelStateChanged();
+            }
+            if (getShadeViewController() != null) {
+                // Needed to update SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED and
+                // SYSUI_STATE_QUICK_SETTINGS_EXPANDED
+                getShadeViewController().updateSystemUiStateFlags();
             }
         }
     }
@@ -1526,6 +1530,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     void onShadeExpansionFullyChanged(Boolean isExpanded) {
         if (mPanelExpanded != isExpanded) {
             mPanelExpanded = isExpanded;
+            if (getShadeViewController() != null) {
+                // Needed to update SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
+                getShadeViewController().updateSystemUiStateFlags();
+            }
             if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
                 if (DEBUG) {
                     Log.v(TAG, "clearing notification effects from Height");
@@ -1640,6 +1648,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotificationShadeWindowView = mCentralSurfacesComponent.getNotificationShadeWindowView();
         mNotificationShadeWindowViewController = mCentralSurfacesComponent
                 .getNotificationShadeWindowViewController();
+        // TODO(b/277762009): Inject [NotificationShadeWindowView] directly into the controller.
+        //  (Right now, there's a circular dependency.)
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
         NotificationPanelViewController npvc =
