@@ -388,11 +388,6 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         }
         // Sync Transactions can't operate simultaneously with shell transition collection.
         if (isUsingShellTransitions()) {
-            if (mTaskViewTransitions.hasPending()) {
-                // There is already a transition in-flight. The window bounds will be synced
-                // once it is complete.
-                return;
-            }
             mTaskViewTransitions.setTaskBounds(this, boundsOnScreen);
             return;
         }
@@ -489,12 +484,14 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             finishTransaction.reparent(mTaskLeash, mSurfaceControl)
                     .setPosition(mTaskLeash, 0, 0)
                     .apply();
-
+            mTaskViewTransitions.updateBoundsState(this, mTaskViewBase.getCurrentBoundsOnScreen());
+            mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
             wct.setBounds(mTaskToken, mTaskViewBase.getCurrentBoundsOnScreen());
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely
             wct.setHidden(mTaskToken, true /* hidden */);
+            mTaskViewTransitions.updateVisibilityState(this, false /* visible */);
             // listener callback is below
         }
         if (newTask) {
