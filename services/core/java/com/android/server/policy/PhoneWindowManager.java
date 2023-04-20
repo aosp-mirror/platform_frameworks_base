@@ -1989,6 +1989,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Supplier<GlobalActions> getGlobalActionsFactory() {
             return () -> new GlobalActions(mContext, mWindowManagerFuncs);
         }
+
+        KeyguardServiceDelegate getKeyguardServiceDelegate() {
+            return new KeyguardServiceDelegate(mContext,
+                    new StateCallback() {
+                        @Override
+                        public void onTrustedChanged() {
+                            mWindowManagerFuncs.notifyKeyguardTrustedChanged();
+                        }
+
+                        @Override
+                        public void onShowingChanged() {
+                            mWindowManagerFuncs.onKeyguardShowingAndNotOccludedChanged();
+                        }
+                    });
+        }
     }
 
     /** {@inheritDoc} */
@@ -2246,18 +2261,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mKeyguardDrawnTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_keyguardDrawnTimeout);
-        mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
-                new StateCallback() {
-                    @Override
-                    public void onTrustedChanged() {
-                        mWindowManagerFuncs.notifyKeyguardTrustedChanged();
-                    }
-
-                    @Override
-                    public void onShowingChanged() {
-                        mWindowManagerFuncs.onKeyguardShowingAndNotOccludedChanged();
-                    }
-                });
+        mKeyguardDelegate = injector.getKeyguardServiceDelegate();
         initKeyCombinationRules();
         initSingleKeyGestureRules();
         mSideFpsEventHandler = new SideFpsEventHandler(mContext, mHandler, mPowerManager);
