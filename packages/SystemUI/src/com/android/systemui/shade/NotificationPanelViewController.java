@@ -59,8 +59,6 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.hardware.biometrics.SensorLocationInternal;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -224,8 +222,6 @@ import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -235,6 +231,8 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -410,7 +408,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private int mDisplayRightInset = 0; // in pixels
     private int mDisplayLeftInset = 0; // in pixels
 
-    private final KeyguardClockPositionAlgorithm
+    @VisibleForTesting
+    KeyguardClockPositionAlgorithm
             mClockPositionAlgorithm =
             new KeyguardClockPositionAlgorithm();
     private final KeyguardClockPositionAlgorithm.Result
@@ -1493,11 +1492,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         ? 1.0f : mInterpolatedDarkAmount;
 
         float udfpsAodTopLocation = -1f;
-        if (mUpdateMonitor.isUdfpsEnrolled() && mAuthController.getUdfpsProps().size() > 0) {
-            FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
-            final SensorLocationInternal location = props.getLocation();
-            udfpsAodTopLocation = location.sensorLocationY - location.sensorRadius
-                    - mUdfpsMaxYBurnInOffset;
+        if (mUpdateMonitor.isUdfpsEnrolled() && mAuthController.getUdfpsLocation() != null) {
+            udfpsAodTopLocation = mAuthController.getUdfpsLocation().y
+                    - mAuthController.getUdfpsRadius() - mUdfpsMaxYBurnInOffset;
         }
 
         mClockPositionAlgorithm.setup(
