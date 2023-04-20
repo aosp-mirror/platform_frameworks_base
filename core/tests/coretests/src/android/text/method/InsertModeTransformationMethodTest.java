@@ -224,6 +224,12 @@ public class InsertModeTransformationMethodTest {
         assertThat(spans0to2.length).isEqualTo(1);
         assertThat(spans0to2[0]).isEqualTo(span1);
 
+        // only span2 is in the range of [3, 4).
+        // note: span1 [0, 3) is not in the range because [3, 4) is not collapsed.
+        final TestSpan[] spans3to4 = transformedText.getSpans(3, 4, TestSpan.class);
+        assertThat(spans3to4.length).isEqualTo(1);
+        assertThat(spans3to4[0]).isEqualTo(span2);
+
         // span1 and span2 are in the range of [1, 6).
         final TestSpan[] spans1to6 = transformedText.getSpans(1, 6, TestSpan.class);
         assertThat(spans1to6.length).isEqualTo(2);
@@ -262,7 +268,7 @@ public class InsertModeTransformationMethodTest {
         text.setSpan(span2, 2, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setSpan(span3, 4, 5, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        // In the transformedText, the new ranges of the spans are:
+        // In the transformedText "abc\uFFFD def", the new ranges of the spans are:
         // span1: [0, 3)
         // span2: [2, 5)
         // span3: [5, 6)
@@ -276,6 +282,12 @@ public class InsertModeTransformationMethodTest {
         final TestSpan[] spans0to2 = transformedText.getSpans(0, 2, TestSpan.class);
         assertThat(spans0to2.length).isEqualTo(1);
         assertThat(spans0to2[0]).isEqualTo(span1);
+
+        // only span2 is in the range of [3, 4).
+        // note: span1 [0, 3) is not in the range because [3, 4) is not collapsed.
+        final TestSpan[] spans3to4 = transformedText.getSpans(3, 4, TestSpan.class);
+        assertThat(spans3to4.length).isEqualTo(1);
+        assertThat(spans3to4[0]).isEqualTo(span2);
 
         // span1 and span2 are in the range of [1, 5).
         final TestSpan[] spans1to4 = transformedText.getSpans(1, 4, TestSpan.class);
@@ -318,20 +330,143 @@ public class InsertModeTransformationMethodTest {
     }
 
     @Test
-    public void transformedText_getSpanStartAndEnd() {
+    public void transformedText_getSpans_collapsedRange() {
         final SpannableString text = new SpannableString(TEXT);
         final TestSpan span1 = new TestSpan();
         final TestSpan span2 = new TestSpan();
         final TestSpan span3 = new TestSpan();
 
         text.setSpan(span1, 0, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span2, 3, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span3, 3, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        // In the transformedText "abc\n\n def", the new ranges of the spans are:
+        // span1: [0, 3)
+        // span2: [3, 3)
+        // span3: [5, 6)
+        final InsertModeTransformationMethod transformationMethod =
+                new InsertModeTransformationMethod(3, false, null);
+        final Spanned transformedText =
+                (Spanned) transformationMethod.getTransformation(text, sView);
+
+        // only span1 is in the range of [0, 0).
+        final TestSpan[] spans0to0 = transformedText.getSpans(0, 0, TestSpan.class);
+        assertThat(spans0to0.length).isEqualTo(1);
+        assertThat(spans0to0[0]).isEqualTo(span1);
+
+        // span1 and span 2 are in the range of [3, 3).
+        final TestSpan[] spans3to3 = transformedText.getSpans(3, 3, TestSpan.class);
+        assertThat(spans3to3.length).isEqualTo(2);
+        assertThat(spans3to3[0]).isEqualTo(span1);
+        assertThat(spans3to3[1]).isEqualTo(span2);
+
+        // only the span2 with collapsed range is in the range of [3, 4).
+        final TestSpan[] spans3to4 = transformedText.getSpans(3, 4, TestSpan.class);
+        assertThat(spans3to4.length).isEqualTo(1);
+        assertThat(spans3to4[0]).isEqualTo(span2);
+
+        // no span is in the range of [4, 5). (span2 is not mistakenly included.)
+        final TestSpan[] spans4to5 = transformedText.getSpans(4, 5, TestSpan.class);
+        assertThat(spans4to5).isEmpty();
+
+        // only span3 is in the range of [4, 6). (span2 is not mistakenly included.)
+        final TestSpan[] spans4to6 = transformedText.getSpans(4, 6, TestSpan.class);
+        assertThat(spans4to6.length).isEqualTo(1);
+        assertThat(spans4to6[0]).isEqualTo(span3);
+
+        // no span is in the range of [4, 4).
+        final TestSpan[] spans4to4 = transformedText.getSpans(4, 4, TestSpan.class);
+        assertThat(spans4to4.length).isEqualTo(0);
+
+        // span3 is in the range of [5, 5).
+        final TestSpan[] spans5to5 = transformedText.getSpans(5, 5, TestSpan.class);
+        assertThat(spans5to5.length).isEqualTo(1);
+        assertThat(spans5to5[0]).isEqualTo(span3);
+
+        // span3 is in the range of [6, 6).
+        final TestSpan[] spans6to6 = transformedText.getSpans(6, 6, TestSpan.class);
+        assertThat(spans6to6.length).isEqualTo(1);
+        assertThat(spans6to6[0]).isEqualTo(span3);
+    }
+
+    @Test
+    public void transformedText_getSpans_collapsedRange_singleLine() {
+        final SpannableString text = new SpannableString(TEXT);
+        final TestSpan span1 = new TestSpan();
+        final TestSpan span2 = new TestSpan();
+        final TestSpan span3 = new TestSpan();
+
+        text.setSpan(span1, 0, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span2, 3, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span3, 3, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        // In the transformedText "abc\uFFFD def", the new ranges of the spans are:
+        // span1: [0, 3)
+        // span2: [3, 3)
+        // span3: [4, 5)
+        final InsertModeTransformationMethod transformationMethod =
+                new InsertModeTransformationMethod(3, true, null);
+        final Spanned transformedText =
+                (Spanned) transformationMethod.getTransformation(text, sView);
+
+        // only span1 is in the range of [0, 0).
+        final TestSpan[] spans0to0 = transformedText.getSpans(0, 0, TestSpan.class);
+        assertThat(spans0to0.length).isEqualTo(1);
+        assertThat(spans0to0[0]).isEqualTo(span1);
+
+        // span1 and span2 are in the range of [3, 3).
+        final TestSpan[] spans3to3 = transformedText.getSpans(3, 3, TestSpan.class);
+        assertThat(spans3to3.length).isEqualTo(2);
+        assertThat(spans3to3[0]).isEqualTo(span1);
+        assertThat(spans3to3[1]).isEqualTo(span2);
+
+        // only the span2 with collapsed range is in the range of [3, 4).
+        final TestSpan[] spans3to4 = transformedText.getSpans(3, 4, TestSpan.class);
+        assertThat(spans3to4.length).isEqualTo(1);
+        assertThat(spans3to4[0]).isEqualTo(span2);
+
+        // span3 is in the range of [4, 5). (span2 is not mistakenly included.)
+        final TestSpan[] spans4to5 = transformedText.getSpans(4, 5, TestSpan.class);
+        assertThat(spans4to5.length).isEqualTo(1);
+        assertThat(spans4to5[0]).isEqualTo(span3);
+
+        // only span3 is in the range of [4, 6). (span2 is not mistakenly included.)
+        final TestSpan[] spans4to6 = transformedText.getSpans(4, 6, TestSpan.class);
+        assertThat(spans4to6.length).isEqualTo(1);
+        assertThat(spans4to6[0]).isEqualTo(span3);
+
+        // span3 is in the range of [4, 4).
+        final TestSpan[] spans4to4 = transformedText.getSpans(4, 4, TestSpan.class);
+        assertThat(spans4to4.length).isEqualTo(1);
+        assertThat(spans4to4[0]).isEqualTo(span3);
+
+        // span3 is in the range of [5, 5).
+        final TestSpan[] spans5to5 = transformedText.getSpans(5, 5, TestSpan.class);
+        assertThat(spans5to5.length).isEqualTo(1);
+        assertThat(spans5to5[0]).isEqualTo(span3);
+    }
+
+    @Test
+    public void transformedText_getSpanStartAndEnd() {
+        final SpannableString text = new SpannableString(TEXT);
+        final TestSpan span1 = new TestSpan();
+        final TestSpan span2 = new TestSpan();
+        final TestSpan span3 = new TestSpan();
+        final TestSpan span4 = new TestSpan();
+        final TestSpan span5 = new TestSpan();
+
+        text.setSpan(span1, 0, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setSpan(span2, 2, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setSpan(span3, 4, 5, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span4, 3, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span5, 3, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         // In the transformedText, the new ranges of the spans are:
         // span1: [0, 3)
         // span2: [2, 6)
         // span3: [6, 7)
+        // span4: [3, 3)
+        // span5: [5, 6)
         final InsertModeTransformationMethod transformationMethod =
                 new InsertModeTransformationMethod(3, false, null);
         final Spanned transformedText =
@@ -345,6 +480,12 @@ public class InsertModeTransformationMethodTest {
 
         assertThat(transformedText.getSpanStart(span3)).isEqualTo(6);
         assertThat(transformedText.getSpanEnd(span3)).isEqualTo(7);
+
+        assertThat(transformedText.getSpanStart(span4)).isEqualTo(3);
+        assertThat(transformedText.getSpanEnd(span4)).isEqualTo(3);
+
+        assertThat(transformedText.getSpanStart(span5)).isEqualTo(5);
+        assertThat(transformedText.getSpanEnd(span5)).isEqualTo(6);
     }
 
     @Test
@@ -353,15 +494,21 @@ public class InsertModeTransformationMethodTest {
         final TestSpan span1 = new TestSpan();
         final TestSpan span2 = new TestSpan();
         final TestSpan span3 = new TestSpan();
+        final TestSpan span4 = new TestSpan();
+        final TestSpan span5 = new TestSpan();
 
         text.setSpan(span1, 0, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setSpan(span2, 2, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setSpan(span3, 4, 5, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span4, 3, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(span5, 3, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         // In the transformedText, the new ranges of the spans are:
         // span1: [0, 3)
         // span2: [2, 5)
         // span3: [5, 6)
+        // span4: [3. 3)
+        // span5: [4, 5)
         final InsertModeTransformationMethod transformationMethod =
                 new InsertModeTransformationMethod(3, true, null);
         final Spanned transformedText =
@@ -375,6 +522,12 @@ public class InsertModeTransformationMethodTest {
 
         assertThat(transformedText.getSpanStart(span3)).isEqualTo(5);
         assertThat(transformedText.getSpanEnd(span3)).isEqualTo(6);
+
+        assertThat(transformedText.getSpanStart(span4)).isEqualTo(3);
+        assertThat(transformedText.getSpanEnd(span4)).isEqualTo(3);
+
+        assertThat(transformedText.getSpanStart(span5)).isEqualTo(4);
+        assertThat(transformedText.getSpanEnd(span5)).isEqualTo(5);
 
         final ReplacementSpan[] replacementSpans =
                 transformedText.getSpans(0, 8, ReplacementSpan.class);
