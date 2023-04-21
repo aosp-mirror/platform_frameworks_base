@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -55,6 +56,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
+@RoboPilotTest
 @TestableLooper.RunWithLooper
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControllerBaseTest() {
