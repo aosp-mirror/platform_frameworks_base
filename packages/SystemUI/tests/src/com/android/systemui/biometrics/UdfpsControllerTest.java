@@ -76,6 +76,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.R;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.udfps.InteractionEvent;
@@ -125,6 +126,7 @@ import java.util.Optional;
 import javax.inject.Provider;
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class UdfpsControllerTest extends SysuiTestCase {
