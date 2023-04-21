@@ -48,6 +48,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
@@ -60,6 +61,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -387,7 +389,8 @@ public class PreferencesHelper implements RankingConfig {
                 NotificationChannel channel = new NotificationChannel(
                         id, channelName, channelImportance);
                 if (forRestore) {
-                    channel.populateFromXmlForRestore(parser, mContext);
+                    final boolean pkgInstalled = r.uid != UNKNOWN_UID;
+                    channel.populateFromXmlForRestore(parser, pkgInstalled, mContext);
                 } else {
                     channel.populateFromXml(parser);
                 }
@@ -2412,6 +2415,21 @@ public class PreferencesHelper implements RankingConfig {
                         mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, changeUserId));
                         synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
+
+                            // Try to restore any unrestored sound resources
+                            for (NotificationChannel channel : r.channels.values()) {
+                                if (!channel.isSoundRestored()) {
+                                    Uri uri = channel.getSound();
+                                    Uri restoredUri = channel.restoreSoundUri(mContext, uri, true);
+                                    if (Settings.System.DEFAULT_NOTIFICATION_URI.equals(
+                                            restoredUri)) {
+                                        Log.w(TAG,
+                                                "Could not restore sound: " + uri + " for channel: "
+                                                        + channel);
+                                    }
+                                    channel.setSound(restoredUri, channel.getAudioAttributes());
+                                }
+                            }
                         }
                         if (r.migrateToPm) {
                             try {
