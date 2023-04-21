@@ -3648,9 +3648,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         /* wakingUp= */ true,
                         mShouldDelayWakeUpAnimation);
 
-                if (!mKeyguardBypassController.getBypassEnabled()) {
-                    mHeadsUpManager.releaseAllImmediately();
-                }
                 updateVisibleToUser();
                 updateIsKeyguard();
                 mDozeServiceHost.stopDozing();
