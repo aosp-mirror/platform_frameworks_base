@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Επιτρέπει στην εφαρμογή τον έλεγχο της δόνησης."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Επιτρέπει στην εφαρμογή να έχει πρόσβαση στην κατάσταση δόνησης."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"πραγματοποιεί απευθείας κλήση τηλεφωνικών αριθμών"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Επιτρέπει στην εφαρμογή την κλήση αριθμών τηλεφώνου χωρίς δική σας παρέμβαση. Αυτό μπορεί να προκαλέσει μη αναμενόμενες χρεώσεις ή κλήσεις. Έχετε υπόψη ότι δεν επιτρέπεται στην εφαρμογή η κλήση αριθμών έκτακτης ανάγκης. Οι κακόβουλες εφαρμογές ενδέχεται να σας κοστίσουν χρήματα, πραγματοποιώντας κλήσεις χωρίς την έγκρισή σας."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"έχει πρόσβαση στην υπηρεσία κλήσεων της IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Επιτρέπει στην εφαρμογή τη χρήση της υπηρεσίας IMS για την πραγματοποίηση κλήσεων χωρίς τη δική σας παρέμβαση."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"διαβάζει την κατάσταση και ταυτότητα τηλεφώνου"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Η ενέργεια προσώπου ακυρώθηκε."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Το Ξεκλείδωμα με το πρόσωπο ακυρώθηκε από τον χρήστη"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Πάρα πολλές προσπάθειες. Το Ξεκλείδωμα με το πρόσωπο δεν είναι διαθέσιμο"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Πάρα πολλές προσπάθειες. Χρησιμοποιήστε εναλλακτικά το κλείδωμα οθόνης."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Αδύνατη επαλήθευση του προσώπου. Επανάληψη."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Δεν έχετε ρυθμίσει το Ξεκλείδωμα με το πρόσωπο"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με εφαρμογές εργασιών"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Δεν είναι δυνατή η κοινοποίηση αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Το προφίλ εργασίας σας έχει τεθεί σε παύση."</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Πατήστε για ενεργοποίηση"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Δεν υπάρχουν εφαρμογές εργασιών"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Δεν υπάρχουν προσωπικές εφαρμογές"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Άνοιγμα προσωπικού <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Άνοιγμα <xliff:g id="APP">%s</xliff:g> εργασίας"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Χρήση προσωπικού προγράμματος περιήγησης"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Χρήση προγράμματος περιήγησης εργασίας"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ξεκλειδώματος δικτύου κάρτας SIM"</string>

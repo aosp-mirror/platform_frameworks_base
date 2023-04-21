@@ -504,7 +504,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la app acceda al estado del modo de vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Permite que la aplicación haga llamadas a números de teléfono sin intervención del usuario, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que las aplicaciones no pueden usar este servicio para realizar llamadas a números de emergencia, pero las aplicaciones malintencionadas pueden causarte gastos imprevistos al realizar llamadas sin tu confirmación."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acceder al servicio IMS para realizar llamadas"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que la aplicación utilice el servicio IMS para hacer llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"leer la identidad y el estado del dispositivo"</string>
@@ -2093,7 +2094,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, lo que incluye información personal, como nombres de contactos y mensajes. También puede descartar o responder notificaciones (como contestar llamadas) y controlar la función No interrumpir."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, lo que incluye información personal, como nombres de contactos y mensajes. También pueden descartar o responder notificaciones (como contestar llamadas) y controlar la función No interrumpir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación de información del modo de Rutinas"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ahorro de batería activado"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduciendo el uso de la batería para extender su duración"</string>
@@ -2160,8 +2161,10 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No se puede abrir este contenido con apps de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No se pueden usar apps personales para compartir este contenido"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"No se puede abrir este contenido con apps personales"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"El perfil de trabajo está en pausa"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Presionar para activar"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"El contenido no es compatible con apps de trabajo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"El contenido no es compatible con apps personales"</string>
     <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->

@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Antaa sovelluksen hallita värinää."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Sallii sovelluksen käyttää värinätilaa."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"soittaa puhelinnumeroihin suoraan"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Antaa sovelluksen soittaa puhelinnumeroihin kysymättä sinulta. Tämä voi aiheuttaa odottamattomia kuluja tai puheluita. Huomaa, että tämä ei anna sovellukselle lupaa soittaa hätänumeroihin. Haitalliset sovellukset voivat aiheuttaa sinulle kuluja soittamalla puheluita ilman lupaa."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"pikaviestipalvelun puhelukäyttöoikeus"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Antaa sovelluksen soittaa puheluita pikaviestipalvelun avulla ilman käyttäjän toimia."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lue puhelimen tila ja identiteetti"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Kasvotoiminto peruutettu"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Käyttäjä perui kasvojentunnistusavauksen"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Liikaa yrityksiä. Face Unlock ei saatavilla."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Liian monta yritystä. Lisää sen sijaan näytön lukitus."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kasvoja ei voi vahvistaa. Yritä uudelleen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Et ole ottanut käyttöön kasvojentunnistusavausta"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tätä sisältöä ei voi avata työsovelluksilla"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tätä sisältöä ei voi jakaa henkilökohtaisilla sovelluksilla"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tätä sisältöä ei voi avata henkilökohtaisilla sovelluksilla"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Työprofiilin käyttö on keskeytetty"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Laita päälle napauttamalla"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ei työsovelluksia"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ei henkilökohtaisia sovelluksia"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Avaa henkilökohtainen sovellus (<xliff:g id="APP">%s</xliff:g>)"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Avaa työsovellus (<xliff:g id="APP">%s</xliff:g>)"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Käytä henkilökohtaista selainta"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Käytä työselainta"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kortin verkkoversion lukituksen avaamisen PIN-koodi"</string>

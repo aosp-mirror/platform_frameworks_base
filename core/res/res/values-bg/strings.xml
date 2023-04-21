@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без заглавие&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Няма телефонен номер)"</string>
@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Разрешава на приложението да контролира устройството за вибрация."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дава възможност на приложението да осъществява достъп до състоянието на вибриране."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно обаждане до телефонни номера"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Разрешава на приложението да се обажда без ваша намеса до телефонни номера, което може да доведе до неочаквано таксуване или обаждания. Обърнете внимание, че това не му позволява да извършва обаждания до спешните служби. Злонамерените приложения могат да ви въвлекат в разходи, като извършват обаждания без потвърждение от ваша страна."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"достъп до услугата за незабавни съобщения за обаждания"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Разрешава на приложението да използва услугата за незабавни съобщения за извършване на обаждания без намеса от ваша страна."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"четене на състоянието и идентификационните данни на телефона"</string>
@@ -684,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Преместете телефона наляво"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Преместете телефона надясно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Моля, гледайте точно към устройството си."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето ви не се вижда. Дръжте телефона на нивото на очите си."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето не се вижда. Задръжте на нивото на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Твърде много движение. Дръжте телефона неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Моля, регистрирайте лицето си отново."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Лицето не е разпознато. Опитайте отново."</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Операцията с лице е анулирана."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Отключването с лице е анулирано от потребителя"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Твърде много опити. Опитайте отново по-късно."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Твърде много опити. „Отключване с лице“ не е налице."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Твърде много опити. Използвайте опцията за заключване на екрана."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Лицето не може да се потвърди. Опитайте отново."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Не сте настроили отключването с лице"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Това съдържание не може да се отваря със служебни приложения"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Това съдържание не може да се споделя с лични приложения"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Това съдържание не може да се отваря с лични приложения"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Служебният потребителски профил е поставен на пауза"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Докоснете за включване"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Няма подходящи служебни приложения"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Няма подходящи лични приложения"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Към личния потребителски профил в(ъв) <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Към служебния потребителски профил в(ъв) <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Използване на личния браузър"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Използване на служебния браузър"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ПИН за отключване на мрежата за SIM"</string>

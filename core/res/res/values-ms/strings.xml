@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Membenarkan apl mengawal penggetar."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Membenarkan apl mengakses keadaan penggetar."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"panggil terus nombor telefon"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Membenarkan apl memanggil nombor telefon tanpa campur tangan anda. Ini mungkin menyebabkan caj atau panggilan yang di luar jangkaan. Apl hasad boleh menyebabkan anda kerugian wang dengan membuat panggilan tanpa pengesahan anda."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"akses perkhidmatan panggilan IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Membenarkan apl menggunakan perkhidmatan IMS untuk membuat panggilan tanpa campur tangan anda."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"baca status dan identiti telefon"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Pengendalian wajah dibatalkan."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Buka Kunci Wajah dibatalkan oleh pengguna"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Terlalu banyak percubaan. Buka Kunci Wajah tidak tersedia."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Terlalu banyak percubaan. Sebaliknya, masukkan kunci skrin."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat mengesahkan wajah. Cuba lagi."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyediakan Buka Kunci Wajah"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Kandungan ini tidak boleh dibuka dengan apl kerja"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kandungan ini tidak boleh dikongsi dengan apl peribadi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Kandungan ini tidak boleh dibuka dengan apl peribadi"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profil kerja dijeda"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Ketik untuk menghidupkan profil"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Tiada apl kerja"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Tiada apl peribadi"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Buka <xliff:g id="APP">%s</xliff:g> peribadi"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Buka <xliff:g id="APP">%s</xliff:g> kerja"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan penyemak imbas peribadi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan penyemak imbas kerja"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN buka kunci rangkaian SIM"</string>

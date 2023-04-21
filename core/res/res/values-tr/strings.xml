@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Uygulamaya, titreşimi denetleme izni verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Uygulamanın titreşim durumuna erişimesine izni verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon numaralarına doğrudan çağrı yap"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Uygulamaya sizin müdahaleniz olmadan telefon numaralarını arama izni verir. Bu durum beklenmeyen ödemelere veya aramalara neden olabilir. Ancak bu iznin, uygulamanın acil numaraları aramasına olanak sağlamadığını unutmayın. Kötü amaçlı uygulamalar onayınız olmadan aramalar yaparak sizi zarara sokabilir."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS çağrı hizmetine erişme"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Uygulamanın, sizin müdahaleniz olmadan telefon etmek için IMS hizmetini kullanmasına izin verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefonun durumunu ve kimliğini okuma"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Yüz işlemi iptal edildi."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Yüz Tanıma Kilidi kullanıcı tarafından iptal edildi"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Çok deneme yapıldı. Yüz Tanıma Kilidi kullanılamıyor."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini girin."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Yüz doğrulanamıyor. Tekrar deneyin."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Yüz Tanıma Kilidi ayarlamadınız"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu içerik, iş uygulamalarıyla açılamaz"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu içerik, kişisel uygulamalarla paylaşılamaz"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu içerik, kişisel uygulamalarla açılamaz"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"İş profili duraklatıldı"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Açmak için dokunun"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş uygulaması yok"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Kişisel uygulama yok"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Kişisel uygulamayı (<xliff:g id="APP">%s</xliff:g>) aç"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"İş uygulamasını (<xliff:g id="APP">%s</xliff:g>) aç"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kişisel tarayıcıyı kullan"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"İş tarayıcısını kullan"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ağ kilidi açma PIN kodu"</string>

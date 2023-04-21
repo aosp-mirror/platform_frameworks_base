@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"એપ્લિકેશનને વાઇબ્રેટરને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ઍપને વાઇબ્રેટર સ્થિતિને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"સીધા જ ફોન નંબર્સ પર કૉલ કરો"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"એપ્લિકેશનને તમારા હસ્તક્ષેપ વિના ફોન નંબર્સ પર કૉલ કરવાની મંજૂરી આપે છે. આ અનપેક્ષિત શુલ્ક અથવા કૉલ્સમાં પરિણમી શકે છે. નોંધો કે આ એપ્લિકેશનને કટોકટીના નંબર્સ પર કૉલ કરવાની મંજૂરી આપતું નથી. દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારી પુષ્ટિ વિના કૉલ્સ કરીને તમારા પૈસા ખર્ચ કરી શકે છે."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS કૉલ સેવા ઍક્સેસ કરો"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"તમારા હસ્તક્ષેપ વગર કૉલ્સ કરવા માટે IMS સેવાનો ઉપયોગ કરવાની એપ્લિકેશનને મંજૂરી આપે છે."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ફોન સ્થિતિ અને ઓળખ વાંચો"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ચહેરા સંબંધિત કાર્યવાહી રદ કરવામાં આવી છે."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"વપરાશકર્તાએ ફેસ અનલૉક કાર્ય રદ કર્યું"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ઘણા બધા પ્રયત્નો. થોડા સમય પછી ફરી પ્રયાસ કરો."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ઘણા બધા પ્રયાસો કર્યા. ફેસ અનલૉક ઉપલબ્ધ નથી."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ઘણા બધા પ્રયાસો. તેને બદલે સ્ક્રીન લૉકનો ઉપયોગ કરો."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ચહેરો ચકાસી શકાતો નથી. ફરી પ્રયાસ કરો."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"તમે ફેસ અનલૉક સુવિધાનું સેટઅપ કર્યું નથી"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"આ કન્ટેન્ટ ઑફિસ માટેની ઍપ વડે ખોલી શકાતું નથી"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"આ કન્ટેન્ટ વ્યક્તિગત ઍપ સાથે શેર કરી શકાતું નથી"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"આ કન્ટેન્ટ વ્યક્તિગત ઍપ વડે ખોલી શકાતું નથી"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ઑફિસની પ્રોફાઇલ થોભાવી છે"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ચાલુ કરવા માટે ટૅપ કરો"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"કોઈ ઑફિસ માટેની ઍપ સપોર્ટ કરતી નથી"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"કોઈ વ્યક્તિગત ઍપ સપોર્ટ કરતી નથી"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"વ્યક્તિગત પ્રોફાઇલવાળી <xliff:g id="APP">%s</xliff:g> ઍપ ખોલો"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"ઑફિસની પ્રોફાઇલવાળી <xliff:g id="APP">%s</xliff:g> ઍપ ખોલો"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"વ્યક્તિગત બ્રાઉઝરનો ઉપયોગ કરો"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ઑફિસના બ્રાઉઝરના ઉપયોગ કરો"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"સિમ નેટવર્કને અનલૉક કરવાનો પિન"</string>
