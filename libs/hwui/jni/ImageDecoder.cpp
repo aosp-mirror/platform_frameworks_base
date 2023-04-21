@@ -25,6 +25,7 @@
 #include <SkCodecAnimation.h>
 #include <SkColorSpace.h>
 #include <SkColorType.h>
+#include <SkEncodedImageFormat.h>
 #include <SkImageInfo.h>
 #include <SkRect.h>
 #include <SkSize.h>
@@ -48,7 +49,8 @@
 
 using namespace android;
 
-static jclass    gImageDecoder_class;
+jclass gImageDecoder_class;
+jmethodID gImageDecoder_isP010SupportedForHEVCMethodID;
 static jclass    gSize_class;
 static jclass    gDecodeException_class;
 static jclass    gCanvas_class;
@@ -298,6 +300,14 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         colorType = kN32_SkColorType;
     }
 
+    // b/276879147, fallback to RGBA_8888 when decoding HEIF and P010 is not supported.
+    if (colorType == kRGBA_1010102_SkColorType &&
+        decoder->mCodec->getEncodedFormat() == SkEncodedImageFormat::kHEIF &&
+        env->CallStaticBooleanMethod(gImageDecoder_class,
+                                     gImageDecoder_isP010SupportedForHEVCMethodID) == JNI_FALSE) {
+        colorType = kN32_SkColorType;
+    }
+
     if (!decoder->setOutColorType(colorType)) {
         doThrowISE(env, "Failed to set out color type!");
         return nullptr;
@@ -540,6 +550,8 @@ int register_android_graphics_ImageDecoder(JNIEnv* env) {
     gImageDecoder_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder"));
     gImageDecoder_constructorMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "<init>", "(JIIZZ)V");
     gImageDecoder_postProcessMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "postProcessAndRelease", "(Landroid/graphics/Canvas;)I");
+    gImageDecoder_isP010SupportedForHEVCMethodID =
+            GetStaticMethodIDOrDie(env, gImageDecoder_class, "isP010SupportedForHEVC", "()Z");
 
     gSize_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/util/Size"));
     gSize_constructorMethodID = GetMethodIDOrDie(env, gSize_class, "<init>", "(II)V");
