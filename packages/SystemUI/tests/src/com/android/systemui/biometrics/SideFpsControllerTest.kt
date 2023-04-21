@@ -52,6 +52,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.dump.DumpManager
@@ -90,6 +91,7 @@ private const val DISPLAY_ID = 2
 private const val SENSOR_ID = 1
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class SideFpsControllerTest : SysuiTestCase() {

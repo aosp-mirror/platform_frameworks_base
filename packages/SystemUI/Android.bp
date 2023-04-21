@@ -228,26 +228,33 @@ filegroup {
 filegroup {
     name: "SystemUI-tests-robolectric-pilots",
     srcs: [
+        /* Keyguard converted tests */
         // data
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/CameraQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/DoNotDisturbQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FakeKeyguardQuickAffordanceConfig.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/FlashlightQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/HomeControlsKeyguardQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLegacySettingSyncerTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLocalUserSelectionManagerTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceRemoteUserSelectionManagerTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/MuteQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/QrCodeScannerKeyguardQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/QuickAccessWalletKeyguardQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/VideoCameraQuickAffordanceConfigTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/BiometricSettingsRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/DeviceEntryFaceAuthRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/DeviceEntryFingerprintAuthRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/DevicePostureRepositoryTest.kt",
         "tests/src/com/android/systemui/keyguard/data/repository/KeyguardQuickAffordanceRepositoryTest.kt",
         "tests/src/com/android/systemui/keyguard/data/repository/KeyguardRepositoryImplTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/LightRevealScrimRepositoryTest.kt",
+        "tests/src/com/android/systemui/keyguard/data/repository/TrustRepositoryTest.kt",
         // domain
         "tests/src/com/android/systemui/keyguard/domain/interactor/AlternateBouncerInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTransitionInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/LightRevealScrimInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/quickaffordance/FakeKeyguardQuickAffordanceRegistry.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
         // ui
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",
@@ -256,8 +263,13 @@ filegroup {
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/OccludedToLockscreenTransitionViewModelTest.kt",
+        // Keyguard helper
+        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FakeKeyguardQuickAffordanceConfig.kt",
+        "tests/src/com/android/systemui/dump/LogBufferHelper.kt",
+        "tests/src/com/android/systemui/statusbar/phone/FakeKeyguardStateController.java",
+        "tests/src/com/android/systemui/keyguard/domain/quickaffordance/FakeKeyguardQuickAffordanceRegistry.kt",
 
-        // Biometric
+        /* Biometric converted tests */
         "tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt",
         "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintAndFaceViewTest.kt",
         "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintViewTest.kt",
