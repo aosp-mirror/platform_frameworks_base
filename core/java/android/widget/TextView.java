@@ -2795,11 +2795,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mEditor != null) {
             mEditor.setTransformationMethod(method);
         } else {
-            setTransformationMethodInternal(method);
+            setTransformationMethodInternal(method, /* updateText */ true);
         }
     }
 
-    void setTransformationMethodInternal(@Nullable TransformationMethod method) {
+    /**
+     * Set the transformation that is applied to the text that this TextView is displaying,
+     * optionally call the setText.
+     * @param method the new transformation method to be set.
+     * @param updateText whether the call {@link #setText} which will update the TextView to display
+     *                   the new content. This method is helpful when updating
+     *                   {@link TransformationMethod} inside {@link #setText}. It should only be
+     *                   false if text will be updated immediately after this call, otherwise the
+     *                   TextView will enter an inconsistent state.
+     */
+    void setTransformationMethodInternal(@Nullable TransformationMethod method,
+            boolean updateText) {
         if (method == mTransformation) {
             // Avoid the setText() below if the transformation is
             // the same.
@@ -2821,7 +2832,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mAllowTransformationLengthChange = false;
         }
 
-        setText(mText);
+        if (updateText) {
+            setText(mText);
+        }
 
         if (hasPasswordTransformationMethod()) {
             notifyViewAccessibilityStateChangedIfNeeded(
@@ -7000,6 +7013,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @UnsupportedAppUsage
     private void setText(CharSequence text, BufferType type,
                          boolean notifyBefore, int oldlen) {
+        if (mEditor != null) {
+            mEditor.beforeSetText();
+        }
         mTextSetFromXmlOrResourceId = false;
         if (text == null) {
             text = "";
