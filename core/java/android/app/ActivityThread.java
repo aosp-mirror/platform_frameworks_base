@@ -269,7 +269,6 @@ public final class ActivityThread extends ClientTransactionHandler
         implements ActivityThreadInternal {
     /** @hide */
     public static final String TAG = "ActivityThread";
-    private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
     static final boolean localLOGV = false;
     static final boolean DEBUG_MESSAGES = false;
     /** @hide */
@@ -371,7 +370,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private final AtomicInteger mNumLaunchingActivities = new AtomicInteger();
     @GuardedBy("mAppThread")
     private int mLastProcessState = PROCESS_STATE_UNKNOWN;
-    ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
+    final ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
     final ArrayMap<IBinder, CreateServiceData> mServicesData = new ArrayMap<>();
     @UnsupportedAppUsage
@@ -567,7 +566,7 @@ public final class ActivityThread extends ClientTransactionHandler
         Configuration createdConfig;
         Configuration overrideConfig;
         // Used for consolidating configs before sending on to Activity.
-        private Configuration tmpConfig = new Configuration();
+        private final Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config and camera compat control state.
         ViewRootImpl.ActivityConfigCallback activityConfigCallback;
         ActivityClientRecord nextIdle;
@@ -772,7 +771,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
-    final class ProviderClientRecord {
+    static final class ProviderClientRecord {
         final String[] mNames;
         @UnsupportedAppUsage
         final IContentProvider mProvider;
@@ -799,7 +798,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @UnsupportedAppUsage
-        Intent intent;
+        final Intent intent;
         @UnsupportedAppUsage
         ActivityInfo info;
         @UnsupportedAppUsage
@@ -3339,11 +3338,8 @@ public final class ActivityThread extends ClientTransactionHandler
     public void registerOnActivityPausedListener(Activity activity,
             OnActivityPausedListener listener) {
         synchronized (mOnPauseListeners) {
-            ArrayList<OnActivityPausedListener> list = mOnPauseListeners.get(activity);
-            if (list == null) {
-                list = new ArrayList<OnActivityPausedListener>();
-                mOnPauseListeners.put(activity, list);
-            }
+            ArrayList<OnActivityPausedListener> list =
+                    mOnPauseListeners.computeIfAbsent(activity, k -> new ArrayList<>());
             list.add(listener);
         }
     }
@@ -5403,7 +5399,7 @@ public final class ActivityThread extends ClientTransactionHandler
     /** Core implementation of activity destroy call. */
     void performDestroyActivity(ActivityClientRecord r, boolean finishing,
             int configChanges, boolean getNonConfigInstance, String reason) {
-        Class<? extends Activity> activityClass = null;
+        Class<? extends Activity> activityClass;
         if (localLOGV) Slog.v(TAG, "Performing finish of " + r);
         activityClass = r.activity.getClass();
         r.activity.mConfigChangeFlags |= configChanges;
@@ -7085,7 +7081,7 @@ public final class ActivityThread extends ClientTransactionHandler
         // Note that we cannot hold the lock while acquiring and installing the
         // provider since it might take a long time to run and it could also potentially
         // be re-entrant in the case where the provider is in the same process.
-        ContentProviderHolder holder = null;
+        ContentProviderHolder holder;
         final ProviderKey key = getGetProviderKey(auth, userId);
         try {
             synchronized (key) {
@@ -7139,11 +7135,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private ProviderKey getGetProviderKey(String auth, int userId) {
         final ProviderKey key = new ProviderKey(auth, userId);
         synchronized (mGetProviderKeys) {
-            ProviderKey lock = mGetProviderKeys.get(key);
-            if (lock == null) {
-                lock = key;
-                mGetProviderKeys.put(key, lock);
-            }
+            ProviderKey lock = mGetProviderKeys.computeIfAbsent(key, k -> k);
             return lock;
         }
     }
@@ -7778,7 +7770,7 @@ public final class ActivityThread extends ClientTransactionHandler
             if (!DEPRECATE_DATA_COLUMNS) return;
 
             // Install interception and make sure it sticks!
-            Os def = null;
+            Os def;
             do {
                 def = Os.getDefault();
             } while (!Os.compareAndSetDefault(def, new AndroidOs(def)));
