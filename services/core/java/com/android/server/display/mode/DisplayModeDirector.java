@@ -1708,13 +1708,14 @@ public class DisplayModeDirector {
         }
 
         public void observe() {
-            mInjector.registerDisplayListener(this, mHandler);
+            DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+            dm.registerDisplayListener(this, mHandler);
 
             // Populate existing displays
             SparseArray<Display.Mode[]> modes = new SparseArray<>();
             SparseArray<Display.Mode> defaultModes = new SparseArray<>();
             DisplayInfo info = new DisplayInfo();
-            Display[] displays = mInjector.getDisplays();
+            Display[] displays = dm.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
             for (Display d : displays) {
                 final int displayId = d.getDisplayId();
                 d.getDisplayInfo(info);
@@ -1753,9 +1754,17 @@ public class DisplayModeDirector {
             updateLayoutLimitedFrameRate(displayId, displayInfo);
         }
 
+        @Nullable
         private DisplayInfo getDisplayInfo(int displayId) {
+            Display d = mContext.getSystemService(DisplayManager.class).getDisplay(displayId);
+            if (d == null) {
+                // We can occasionally get a display added or changed event for a display that was
+                // subsequently removed, which means this returns null. Check this case and bail
+                // out early; if it gets re-attached we'll eventually get another call back for it.
+                return null;
+            }
             DisplayInfo info = new DisplayInfo();
-            mInjector.getDisplayInfo(displayId, info);
+            d.getDisplayInfo(info);
             return info;
         }
 
@@ -2426,7 +2435,8 @@ public class DisplayModeDirector {
         }
 
         private void updateDefaultDisplayState() {
-            Display display = mInjector.getDisplay(Display.DEFAULT_DISPLAY);
+            Display display = mContext.getSystemService(DisplayManager.class)
+                    .getDisplay(Display.DEFAULT_DISPLAY);
             if (display == null) {
                 return;
             }
@@ -2743,7 +2753,8 @@ public class DisplayModeDirector {
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
 
             synchronized (mSensorObserverLock) {
-                for (Display d : mInjector.getDisplays()) {
+                for (Display d : mDisplayManager.getDisplays(
+                        DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
                     mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
                 }
             }
@@ -2754,7 +2765,8 @@ public class DisplayModeDirector {
         }
 
         private void recalculateVotesLocked() {
-            final Display[] displays = mInjector.getDisplays();
+            final Display[] displays = mDisplayManager.getDisplays(
+                    DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
             for (Display d : displays) {
                 int displayId = d.getDisplayId();
                 Vote vote = null;
@@ -2785,7 +2797,7 @@ public class DisplayModeDirector {
 
         @Override
         public void onDisplayAdded(int displayId) {
-            boolean isDozeState = mInjector.isDozeState(mInjector.getDisplay(displayId));
+            boolean isDozeState = mInjector.isDozeState(mDisplayManager.getDisplay(displayId));
             synchronized (mSensorObserverLock) {
                 mDozeStateByDisplay.put(displayId, isDozeState);
                 recalculateVotesLocked();
@@ -2797,7 +2809,7 @@ public class DisplayModeDirector {
             boolean wasDozeState = mDozeStateByDisplay.get(displayId);
             synchronized (mSensorObserverLock) {
                 mDozeStateByDisplay.put(displayId,
-                        mInjector.isDozeState(mInjector.getDisplay(displayId)));
+                        mInjector.isDozeState(mDisplayManager.getDisplay(displayId)));
                 if (wasDozeState != mDozeStateByDisplay.get(displayId)) {
                     recalculateVotesLocked();
                 }
@@ -3162,12 +3174,7 @@ public class DisplayModeDirector {
                 @NonNull ContentObserver observer);
 
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
-                Handler handler);
-
-        void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
                 Handler handler, long flags);
-
-        Display getDisplay(int displayId);
 
         Display[] getDisplays();
 
@@ -3206,19 +3213,8 @@ public class DisplayModeDirector {
 
         @Override
         public void registerDisplayListener(DisplayManager.DisplayListener listener,
-                Handler handler) {
-            getDisplayManager().registerDisplayListener(listener, handler);
-        }
-
-        @Override
-        public void registerDisplayListener(DisplayManager.DisplayListener listener,
                 Handler handler, long flags) {
             getDisplayManager().registerDisplayListener(listener, handler, flags);
-        }
-
-        @Override
-        public Display getDisplay(int displayId) {
-            return getDisplayManager().getDisplay(displayId);
         }
 
         @Override
@@ -3229,13 +3225,10 @@ public class DisplayModeDirector {
         @Override
         public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
             Display display = getDisplayManager().getDisplay(displayId);
-            if (display == null) {
-                // We can occasionally get a display added or changed event for a display that was
-                // subsequently removed, which means this returns null. Check this case and bail
-                // out early; if it gets re-attached we'll eventually get another call back for it.
-                return false;
+            if (display != null) {
+                return display.getDisplayInfo(displayInfo);
             }
-            return display.getDisplayInfo(displayInfo);
+            return false;
         }
 
         @Override
