@@ -89,6 +89,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -2390,6 +2393,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             if (!mMainStage.isActive()) return false;
 
             mSplitLayout.setFreezeDividerWindow(false);
+            final StageChangeRecord record = new StageChangeRecord();
             for (int iC = 0; iC < info.getChanges().size(); ++iC) {
                 final TransitionInfo.Change change = info.getChanges().get(iC);
                 if (change.getMode() == TRANSIT_CHANGE
@@ -2405,20 +2409,28 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     if (!stage.containsTask(taskInfo.taskId)) {
                         Log.w(TAG, "Expected onTaskAppeared on " + stage + " to have been called"
                                 + " with " + taskInfo.taskId + " before startAnimation().");
+                        record.addRecord(stage, true, taskInfo.taskId);
                     }
                 } else if (isClosingType(change.getMode())) {
                     if (stage.containsTask(taskInfo.taskId)) {
+                        record.addRecord(stage, false, taskInfo.taskId);
                         Log.w(TAG, "Expected onTaskVanished on " + stage + " to have been called"
                                 + " with " + taskInfo.taskId + " before startAnimation().");
                     }
                 }
             }
-            if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+            // If the size of dismissStages > 0, the task is closed without prepare pending
+            // transition, which could happen if all activities were finished after finish top
+            // activity in a task, so the trigger task is null when handleRequest.
+            final ArraySet<StageTaskListener> dismissStages = record.getShouldDismissedStage();
+            if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0
+                    || dismissStages.size() > 0) {
                 Log.e(TAG, "Somehow removed the last task in a stage outside of a proper "
                         + "transition.");
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
-                final int dismissTop = mMainStage.getChildCount() == 0
-                        ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
+                final int dismissTop = (dismissStages.size() == 1
+                        && getStageType(dismissStages.valueAt(0)) == STAGE_TYPE_MAIN)
+                        || mMainStage.getChildCount() == 0 ? STAGE_TYPE_SIDE : STAGE_TYPE_MAIN;
                 prepareExitSplitScreen(dismissTop, wct);
                 mSplitTransitions.startDismissTransition(wct, this, dismissTop,
                         EXIT_REASON_UNKNOWN);
@@ -2443,6 +2455,57 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         return startPendingAnimation(transition, info, startTransaction, finishTransaction,
                 finishCallback);
+    }
+
+    static class StageChangeRecord {
+        static class StageChange {
+            final StageTaskListener mStageTaskListener;
+            final IntArray mAddedTaskId = new IntArray();
+            final IntArray mRemovedTaskId = new IntArray();
+            StageChange(StageTaskListener stage) {
+                mStageTaskListener = stage;
+            }
+
+            boolean shouldDismissStage() {
+                if (mAddedTaskId.size() > 0 || mRemovedTaskId.size() == 0) {
+                    return false;
+                }
+                int removeChildTaskCount = 0;
+                for (int i = mRemovedTaskId.size() - 1; i >= 0; --i) {
+                    if (mStageTaskListener.containsTask(mRemovedTaskId.get(i))) {
+                        ++removeChildTaskCount;
+                    }
+                }
+                return removeChildTaskCount == mStageTaskListener.getChildCount();
+            }
+        }
+        private final ArrayMap<StageTaskListener, StageChange> mChanges = new ArrayMap<>();
+
+        void addRecord(StageTaskListener stage, boolean open, int taskId) {
+            final StageChange next;
+            if (!mChanges.containsKey(stage)) {
+                next = new StageChange(stage);
+                mChanges.put(stage, next);
+            } else {
+                next = mChanges.get(stage);
+            }
+            if (open) {
+                next.mAddedTaskId.add(taskId);
+            } else {
+                next.mRemovedTaskId.add(taskId);
+            }
+        }
+
+        ArraySet<StageTaskListener> getShouldDismissedStage() {
+            final ArraySet<StageTaskListener> dismissTarget = new ArraySet<>();
+            for (int i = mChanges.size() - 1; i >= 0; --i) {
+                final StageChange change = mChanges.valueAt(i);
+                if (change.shouldDismissStage()) {
+                    dismissTarget.add(change.mStageTaskListener);
+                }
+            }
+            return dismissTarget;
+        }
     }
 
     /** Starts the pending transition animation. */
