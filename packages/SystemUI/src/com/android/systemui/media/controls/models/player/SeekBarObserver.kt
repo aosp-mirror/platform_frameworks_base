@@ -21,9 +21,9 @@ import android.animation.ObjectAnimator
 import android.text.format.DateUtils
 import androidx.annotation.UiThread
 import androidx.lifecycle.Observer
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.media.controls.ui.SquigglyProgress
 
 /**

@@ -24,20 +24,20 @@ import android.os.SystemClock;
 import android.util.MathUtils;
 import android.util.TimeUtils;
 
+import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 
 /**
  * Class to control all aspects about light bar changes.
