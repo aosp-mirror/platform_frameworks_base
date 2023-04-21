@@ -220,6 +220,7 @@ public final class SurfaceControl implements Parcelable {
             long newParentNativeObject);
     private static native void nativeSetBuffer(long transactionObj, long nativeObject,
             HardwareBuffer buffer, long fencePtr, Consumer<SyncFence> releaseCallback);
+    private static native void nativeUnsetBuffer(long transactionObj, long nativeObject);
     private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
             int transform);
     private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
@@ -3664,6 +3665,22 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Unsets the buffer for the SurfaceControl in the current Transaction. This will not clear
+         * the buffer being rendered, but resets the buffer state in the Transaction only. The call
+         * will also invoke the release callback.
+         *
+         * Note, this call is different from passing a null buffer to
+         * {@link SurfaceControl.Transaction#setBuffer} which will release the last displayed
+         * buffer.
+         *
+         * @hide
+         */
+        public Transaction unsetBuffer(SurfaceControl sc) {
+            nativeUnsetBuffer(mNativeObject, sc.mNativeObject);
+            return this;
+        }
+
+        /**
          * Updates the HardwareBuffer displayed for the SurfaceControl.
          *
          * Note that the buffer must be allocated with {@link HardwareBuffer#USAGE_COMPOSER_OVERLAY}
@@ -3682,7 +3699,8 @@ public final class SurfaceControl implements Parcelable {
          * until all presentation fences have signaled, ensuring the transaction remains consistent.
          *
          * @param sc The SurfaceControl to update
-         * @param buffer The buffer to be displayed
+         * @param buffer The buffer to be displayed. Pass in a null buffer to release the last
+         * displayed buffer.
          * @param fence The presentation fence. If null or invalid, this is equivalent to
          *              {@link #setBuffer(SurfaceControl, HardwareBuffer)}
          * @return this
