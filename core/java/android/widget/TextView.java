@@ -806,6 +806,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CharSequence mHint;
     @UnsupportedAppUsage
     private Layout mHintLayout;
+    private boolean mHideHint;
 
     private MovementMethod mMovement;
 
@@ -7180,6 +7181,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
+        mHideHint = false;
+
         if (a11yTextChangeType == AccessibilityUtils.TEXT) {
             notifyViewAccessibilityStateChangedIfNeeded(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
@@ -7338,6 +7341,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void setHintInternal(CharSequence hint) {
+        mHideHint = false;
         mHint = TextUtils.stringOrSpannedString(hint);
 
         if (mLayout != null) {
@@ -7376,6 +7380,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ViewDebug.CapturedViewProperty
     public CharSequence getHint() {
         return mHint;
+    }
+
+    /**
+     * Temporarily hides the hint text until the text is modified, or the hint text is modified, or
+     * the view gains or loses focus.
+     *
+     * @hide
+     */
+    public void hideHint() {
+        if (isShowingHint()) {
+            mHideHint = true;
+            invalidate();
+        }
     }
 
     /**
@@ -8974,7 +8991,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Layout layout = mLayout;
 
-        if (mHint != null && mText.length() == 0) {
+        if (mHint != null && !mHideHint && mText.length() == 0) {
             if (mHintTextColor != null) {
                 color = mCurHintTextColor;
             }
@@ -11293,7 +11310,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean isShowingHint() {
-        return TextUtils.isEmpty(mText) && !TextUtils.isEmpty(mHint);
+        return TextUtils.isEmpty(mText) && !TextUtils.isEmpty(mHint) && !mHideHint;
     }
 
     /**
@@ -12437,6 +12454,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
 
+        mHideHint = false;
         clearGesturePreviewHighlight();
     }
 
@@ -12576,6 +12594,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             super.onFocusChanged(focused, direction, previouslyFocusedRect);
             return;
         }
+
+        mHideHint = false;
 
         if (mEditor != null) mEditor.onFocusChanged(focused, direction);
 
