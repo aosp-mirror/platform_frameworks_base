@@ -17,27 +17,38 @@
 package android.flags;
 
 import android.annotation.NonNull;
-import android.provider.DeviceConfig;
 
-/**
- * A flag representing a false value.
- *
- * The flag can never be changed or overridden. It is false at compile time.
- *
- * @hide
- */
-public final class FusedOffFlag extends BooleanFlagBase {
+abstract class BooleanFlagBase implements Flag<Boolean> {
+
+    private final String mNamespace;
+    private final String mName;
+
     /**
-     * @param namespace A namespace for this flag. See {@link DeviceConfig}.
-     * @param name      A name for this flag.
+     * @param namespace A namespace for this flag. See {@link android.provider.DeviceConfig}.
+     * @param name A name for this flag.
      */
-    FusedOffFlag(String namespace, String name) {
-        super(namespace, name);
+    BooleanFlagBase(String namespace, String name) {
+        mNamespace = namespace;
+        mName = name;
+    }
+
+    public abstract Boolean getDefault();
+
+    @Override
+    @NonNull
+    public String getNamespace() {
+        return mNamespace;
     }
 
     @Override
     @NonNull
-    public Boolean getDefault() {
-        return false;
+    public String getName() {
+        return mName;
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        return getNamespace() + "." + getName() + "[" + getDefault() + "]";
     }
 }
