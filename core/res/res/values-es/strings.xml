@@ -772,7 +772,7 @@
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Borrar datos del perfil"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Borrar datos del usuario"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en este tablet sin avisar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en esta tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Eliminar los datos de este usuario del dispositivo Android TV sin previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Borra los datos del perfil de este sistema de infoentretenimiento sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Borra los datos del usuario en este teléfono sin avisar."</string>

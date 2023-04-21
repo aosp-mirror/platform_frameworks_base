@@ -1464,7 +1464,7 @@
     <string name="ime_action_default" msgid="8265027027659800121">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"شماره گیری \nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"ایجاد مخاطب\nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست مجوز کرده‌اند."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست اجازه کرده‌اند."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>

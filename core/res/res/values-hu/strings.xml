@@ -2278,7 +2278,7 @@
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Háttértevékenység"</string>
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Egy alkalmazás meríti az akkumulátort"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Az egyik alkalmazás még aktív"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"A(z) <xliff:g id="APP">%1$s</xliff:g> fut a háttérben. Koppintson az akkumulátorhasználat kezeléséhez."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"A(z) <xliff:g id="APP">%1$s</xliff:g> fut a háttérben. Koppintson az akkuhasználat kezeléséhez."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A(z) <xliff:g id="APP">%1$s</xliff:g> befolyásolhatja az akkumulátor üzemidejét. Koppintson az aktív alkalmazások áttekintéséhez."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nem lehet hozzáférni a telefon kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
