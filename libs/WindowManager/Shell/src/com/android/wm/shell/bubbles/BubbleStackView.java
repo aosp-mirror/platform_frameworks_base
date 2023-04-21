@@ -282,6 +282,11 @@ public class BubbleStackView extends FrameLayout
     /** Whether the expanded view has been hidden, because we are dragging out a bubble. */
     private boolean mExpandedViewTemporarilyHidden = false;
 
+    /**
+     * Whether the last bubble is being removed when expanded, which impacts the collapse animation.
+     */
+    private boolean mRemovingLastBubbleWhileExpanded = false;
+
     /** Animator for animating the expanded view's alpha (including the TaskView inside it). */
     private final ValueAnimator mExpandedViewAlphaAnimator = ValueAnimator.ofFloat(0f, 1f);
 
@@ -765,7 +770,7 @@ public class BubbleStackView extends FrameLayout
 
                 // Update scrim
                 if (!mScrimAnimating) {
-                    showScrim(true);
+                    showScrim(true, null /* runnable */);
                 }
             }
         }
@@ -1772,6 +1777,20 @@ public class BubbleStackView extends FrameLayout
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "removeBubble: " + bubble);
         }
+        if (isExpanded() && getBubbleCount() == 1) {
+            mRemovingLastBubbleWhileExpanded = true;
+            // We're expanded while the last bubble is being removed. Let the scrim animate away
+            // and then remove our views (removing the icon view triggers the removal of the
+            // bubble window so do that at the end of the animation so we see the scrim animate).
+            showScrim(false, () -> {
+                mRemovingLastBubbleWhileExpanded = false;
+                bubble.cleanupExpandedView();
+                mBubbleContainer.removeView(bubble.getIconView());
+                bubble.cleanupViews(); // cleans up the icon view
+                updateExpandedView(); // resets state for no expanded bubble
+            });
+            return;
+        }
         // Remove it from the views
         for (int i = 0; i < getBubbleCount(); i++) {
             View v = mBubbleContainer.getChildAt(i);
@@ -2142,7 +2161,7 @@ public class BubbleStackView extends FrameLayout
         mExpandedViewAlphaAnimator.start();
     }
 
-    private void showScrim(boolean show) {
+    private void showScrim(boolean show, Runnable after) {
         AnimatorListenerAdapter listener = new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -2152,6 +2171,9 @@ public class BubbleStackView extends FrameLayout
             @Override
             public void onAnimationEnd(Animator animation) {
                 mScrimAnimating = false;
+                if (after != null) {
+                    after.run();
+                }
             }
         };
         if (show) {
@@ -2178,7 +2200,7 @@ public class BubbleStackView extends FrameLayout
         }
         beforeExpandedViewAnimation();
 
-        showScrim(true);
+        showScrim(true, null /* runnable */);
         updateZOrder();
         updateBadges(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
@@ -2302,7 +2324,10 @@ public class BubbleStackView extends FrameLayout
         mIsExpanded = false;
         mIsExpansionAnimating = true;
 
-        showScrim(false);
+        if (!mRemovingLastBubbleWhileExpanded) {
+            // When we remove the last bubble it animates the scrim.
+            showScrim(false, null /* runnable */);
+        }
 
         mBubbleContainer.cancelAllAnimations();
 
