@@ -324,7 +324,7 @@ public class RequestSessionMetric {
      */
     public void logCandidatePhaseMetrics(Map<String, ProviderSession> providers) {
         try {
-            logApiCalledCandidatePhase(providers, ++mSequenceCounter);
+            logApiCalledCandidatePhase(providers, ++mSequenceCounter, mInitialPhaseMetric);
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
