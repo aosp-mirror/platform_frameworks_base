@@ -261,8 +261,9 @@ public class ImageFormat {
     /**
      * Compressed JPEG format that includes an embedded recovery map.
      *
-     * <p>JPEG compressed main image along with XMP embedded recovery map
-     * following ISO TBD.</p>
+     * <p>JPEG compressed main image along with embedded recovery map following the
+     * <a href="https://developer.android.com/guide/topics/media/hdr-image-format">Ultra HDR
+     * Image format specification</a>.</p>
      */
     public static final int JPEG_R = 0x1005;
 
