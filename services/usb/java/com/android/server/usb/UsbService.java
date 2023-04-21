@@ -347,10 +347,11 @@ public class UsbService extends IUsbManager.Stub {
         return null;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_MTP)
     /* Returns a dup of the control file descriptor for the given function. */
     @Override
     public ParcelFileDescriptor getControlFd(long function) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_MTP, null);
+        getControlFd_enforcePermission();
         return mDeviceManager.getControlFd(function);
     }
 
@@ -507,10 +508,11 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public boolean hasDevicePermissionWithIdentity(UsbDevice device, String packageName,
             int pid, int uid) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        hasDevicePermissionWithIdentity_enforcePermission();
 
         final int userId = UserHandle.getUserId(uid);
         return getPermissionsForUser(userId).hasPermission(device, packageName, pid, uid);
@@ -530,9 +532,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public boolean hasAccessoryPermissionWithIdentity(UsbAccessory accessory, int pid, int uid) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        hasAccessoryPermissionWithIdentity_enforcePermission();
 
         final int userId = UserHandle.getUserId(uid);
         return getPermissionsForUser(userId).hasPermission(accessory, pid, uid);
@@ -567,9 +570,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public void grantDevicePermission(UsbDevice device, int uid) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        grantDevicePermission_enforcePermission();
         final int userId = UserHandle.getUserId(uid);
 
         final long token = Binder.clearCallingIdentity();
@@ -580,9 +584,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public void grantAccessoryPermission(UsbAccessory accessory, int uid) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        grantAccessoryPermission_enforcePermission();
         final int userId = UserHandle.getUserId(uid);
 
         final long token = Binder.clearCallingIdentity();
@@ -625,9 +630,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public void setCurrentFunctions(long functions, int operationId) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        setCurrentFunctions_enforcePermission();
         Preconditions.checkArgument(UsbManager.areSettableFunctions(functions));
         Preconditions.checkState(mDeviceManager != null);
         mDeviceManager.setCurrentFunctions(functions, operationId);
@@ -643,32 +649,36 @@ public class UsbService extends IUsbManager.Stub {
         return (getCurrentFunctions() & UsbManager.usbFunctionsFromString(function)) != 0;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public long getCurrentFunctions() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        getCurrentFunctions_enforcePermission();
         Preconditions.checkState(mDeviceManager != null);
         return mDeviceManager.getCurrentFunctions();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public void setScreenUnlockedFunctions(long functions) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        setScreenUnlockedFunctions_enforcePermission();
         Preconditions.checkArgument(UsbManager.areSettableFunctions(functions));
         Preconditions.checkState(mDeviceManager != null);
 
         mDeviceManager.setScreenUnlockedFunctions(functions);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public long getScreenUnlockedFunctions() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        getScreenUnlockedFunctions_enforcePermission();
         Preconditions.checkState(mDeviceManager != null);
         return mDeviceManager.getScreenUnlockedFunctions();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public int getCurrentUsbSpeed() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        getCurrentUsbSpeed_enforcePermission();
         Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
 
         final long ident = Binder.clearCallingIdentity();
@@ -679,9 +689,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public int getGadgetHalVersion() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        getGadgetHalVersion_enforcePermission();
         Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
 
         final long ident = Binder.clearCallingIdentity();
@@ -692,9 +703,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public void resetUsbGadget() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        resetUsbGadget_enforcePermission();
         Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
 
         final long ident = Binder.clearCallingIdentity();
@@ -731,9 +743,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public List<ParcelableUsbPort> getPorts() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        getPorts_enforcePermission();
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -822,9 +835,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public int getUsbHalVersion() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        getUsbHalVersion_enforcePermission();
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -891,9 +905,10 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
     @Override
     public void setUsbDeviceConnectionHandler(ComponentName usbDeviceConnectionHandler) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        setUsbDeviceConnectionHandler_enforcePermission();
         synchronized (mLock) {
             if (mCurrentUserId == UserHandle.getCallingUserId()) {
                 if (mHostManager != null) {
