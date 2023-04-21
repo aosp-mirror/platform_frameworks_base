@@ -3835,13 +3835,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     void setSyncGroup(@NonNull BLASTSyncEngine.SyncGroup group) {
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "setSyncGroup #%d on %s", group.mSyncId, this);
-        if (group != null) {
-            if (mSyncGroup != null && mSyncGroup != group) {
-                // This can still happen if WMCore starts a new transition when there is ongoing
-                // sync transaction from Shell. Please file a bug if it happens.
-                throw new IllegalStateException("Can't sync on 2 engines simultaneously"
-                        + " currentSyncId=" + mSyncGroup.mSyncId + " newSyncId=" + group.mSyncId);
-            }
+        if (mSyncGroup != null && mSyncGroup != group) {
+            // This can still happen if WMCore starts a new transition when there is ongoing
+            // sync transaction from Shell. Please file a bug if it happens.
+            throw new IllegalStateException("Can't sync on 2 groups simultaneously"
+                    + " currentSyncId=" + mSyncGroup.mSyncId + " newSyncId=" + group.mSyncId);
         }
         mSyncGroup = group;
     }
@@ -3883,12 +3881,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param cancel If true, this is being finished because it is leaving the sync group rather
      *               than due to the sync group completing.
      */
-    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+    void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
+            boolean cancel) {
         if (mSyncState == SYNC_STATE_NONE) return;
+        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
+        // If it's null, then we need to clean-up anyways.
+        if (syncGroup != null && group != syncGroup) return;
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "finishSync cancel=%b for %s", cancel, this);
         outMergedTransaction.merge(mSyncTransaction);
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).finishSync(outMergedTransaction, cancel);
+            mChildren.get(i).finishSync(outMergedTransaction, group, cancel);
         }
         if (cancel && mSyncGroup != null) mSyncGroup.onCancelSync(this);
         mSyncState = SYNC_STATE_NONE;
@@ -3903,7 +3905,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *
      * @return {@code true} if this subtree is finished waiting for sync participants.
      */
-    boolean isSyncFinished() {
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
         if (!isVisibleRequested()) {
             return true;
         }
@@ -3917,7 +3919,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Loop from top-down.
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
-            final boolean childFinished = child.isSyncFinished();
+            final boolean childFinished = group.isIgnoring(child) || child.isSyncFinished(group);
             if (childFinished && child.isVisibleRequested() && child.fillsParent()) {
                 // Any lower children will be covered-up, so we can consider this finished.
                 return true;
@@ -3968,11 +3970,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // This is getting removed.
                 if (oldParent.mSyncState != SYNC_STATE_NONE) {
                     // In order to keep the transaction in sync, merge it into the parent.
-                    finishSync(oldParent.mSyncTransaction, true /* cancel */);
+                    finishSync(oldParent.mSyncTransaction, getSyncGroup(), true /* cancel */);
                 } else if (mSyncGroup != null) {
                     // This is watched directly by the sync-group, so merge this transaction into
                     // into the sync-group so it isn't lost
-                    finishSync(mSyncGroup.getOrphanTransaction(), true /* cancel */);
+                    finishSync(mSyncGroup.getOrphanTransaction(), mSyncGroup, true /* cancel */);
                 } else {
                     throw new IllegalStateException("This container is in sync mode without a sync"
                             + " group: " + this);
@@ -3981,7 +3983,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             } else if (mSyncGroup == null) {
                 // This is being reparented out of the sync-group. To prevent ordering issues on
                 // this container, immediately apply/cancel sync on it.
-                finishSync(getPendingTransaction(), true /* cancel */);
+                finishSync(getPendingTransaction(), getSyncGroup(), true /* cancel */);
                 return;
             }
             // Otherwise this is the "root" of a synced subtree, so continue on to preparation.
