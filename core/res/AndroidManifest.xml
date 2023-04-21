@@ -2542,7 +2542,7 @@
     <permission android:name="android.permission.TURN_SCREEN_ON"
         android:label="@string/permlab_turnScreenOn"
         android:description="@string/permdesc_turnScreenOn"
-        android:protectionLevel="normal|appop" />
+        android:protectionLevel="signature|privileged|appop" />
 
     <!-- ==================================================== -->
     <!-- Permissions related to changing audio settings   -->
