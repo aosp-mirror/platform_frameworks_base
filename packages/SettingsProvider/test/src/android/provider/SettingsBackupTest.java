@@ -97,8 +97,7 @@ public class SettingsBackupTest {
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
                     Settings.System.DESKTOP_MODE, // developer setting for internal prototyping
-                    Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
-                    Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
+                    Settings.System.FORCE_PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                     Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                     Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
