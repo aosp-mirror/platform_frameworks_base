@@ -28,7 +28,7 @@ import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Interpolator
-import com.android.systemui.animation.Interpolators.LINEAR
+import com.android.app.animation.Interpolators.LINEAR
 import kotlin.math.roundToInt
 
 private const val TAG = "LaunchAnimator"

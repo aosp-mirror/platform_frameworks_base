@@ -36,7 +36,7 @@ import android.view.Surface
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.util.asIndenting
 import java.io.PrintWriter
 
