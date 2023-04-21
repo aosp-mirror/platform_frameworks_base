@@ -1610,8 +1610,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void doKeyguardLaterForChildProfilesLocked() {
-        UserManager um = UserManager.get(mContext);
-        for (int profileId : um.getEnabledProfileIds(UserHandle.myUserId())) {
+        for (UserInfo profile : mUserTracker.getUserProfiles()) {
+            if (!profile.isEnabled()) continue;
+            final int profileId = profile.id;
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(profileId)) {
                 long userTimeout = getLockTimeout(profileId);
                 if (userTimeout == 0) {
@@ -1634,8 +1635,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void doKeyguardForChildProfilesLocked() {
-        UserManager um = UserManager.get(mContext);
-        for (int profileId : um.getEnabledProfileIds(UserHandle.myUserId())) {
+        for (UserInfo profile : mUserTracker.getUserProfiles()) {
+            if (!profile.isEnabled()) continue;
+            final int profileId = profile.id;
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(profileId)) {
                 lockProfile(profileId);
             }
