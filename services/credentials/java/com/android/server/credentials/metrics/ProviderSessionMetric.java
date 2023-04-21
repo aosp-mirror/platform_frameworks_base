@@ -16,7 +16,7 @@
 
 package com.android.server.credentials.metrics;
 
-import static com.android.server.credentials.MetricUtilities.DELTA_CUT;
+import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 
 import android.annotation.NonNull;
@@ -170,7 +170,7 @@ public class ProviderSessionMetric {
         entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
 
         entries.forEach(entry -> {
-            String entryKey = generateMetricKey(entry.getType(), DELTA_CUT);
+            String entryKey = generateMetricKey(entry.getType(), DELTA_RESPONSES_CUT);
             responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
         });
 
@@ -212,7 +212,7 @@ public class ProviderSessionMetric {
         entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
 
         response.getCredentialEntries().forEach(entry -> {
-            String entryKey = generateMetricKey(entry.getType(), DELTA_CUT);
+            String entryKey = generateMetricKey(entry.getType(), DELTA_RESPONSES_CUT);
             responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
         });
 
