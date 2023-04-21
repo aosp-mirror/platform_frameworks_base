@@ -37,7 +37,7 @@ class AppIdAppOpMigration {
         val userState = state.mutateUserState(userId)!!
         val appIdAppOpModes = userState.mutateAppIdAppOpModes()
         legacyAppIdAppOpModes.forEach { (appId, legacyAppOpModes) ->
-            val packageNames = state.systemState.appIdPackageNames[appId]
+            val packageNames = state.externalState.appIdPackageNames[appId]
             // Non-application UIDs may not have an Android package but may still have app op state.
             if (packageNames == null && appId >= Process.FIRST_APPLICATION_UID) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when migrating app op state")

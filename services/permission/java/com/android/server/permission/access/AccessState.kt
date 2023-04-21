@@ -23,6 +23,8 @@ import com.android.server.permission.access.permission.Permission
 import com.android.server.pm.permission.PermissionAllowlist
 import com.android.server.pm.pkg.PackageState
 
+private typealias ExternalStateReference = MutableReference<ExternalState, MutableExternalState>
+
 private typealias SystemStateReference = MutableReference<SystemState, MutableSystemState>
 
 typealias UserStates = IntReferenceMap<UserState, MutableUserState>
@@ -30,9 +32,13 @@ typealias MutableUserStates = MutableIntReferenceMap<UserState, MutableUserState
 private typealias UserStatesReference = MutableReference<UserStates, MutableUserStates>
 
 sealed class AccessState(
+    internal val externalStateReference: ExternalStateReference,
     internal val systemStateReference: SystemStateReference,
     internal val userStatesReference: UserStatesReference
 ) : Immutable<MutableAccessState> {
+    val externalState: ExternalState
+        get() = externalStateReference.get()
+
     val systemState: SystemState
         get() = systemStateReference.get()
 
@@ -43,21 +49,27 @@ sealed class AccessState(
 }
 
 class MutableAccessState private constructor(
+    externalStateReference: ExternalStateReference,
     systemStateReference: SystemStateReference,
     userStatesReference: UserStatesReference
 ) : AccessState(
+    externalStateReference,
     systemStateReference,
     userStatesReference
 ) {
     constructor() : this(
+        ExternalStateReference(MutableExternalState()),
         SystemStateReference(MutableSystemState()),
         UserStatesReference(MutableUserStates())
     )
 
     internal constructor(accessState: AccessState) : this(
+        accessState.externalStateReference.toImmutable(),
         accessState.systemStateReference.toImmutable(),
         accessState.userStatesReference.toImmutable()
     )
+
+    fun mutateExternalState(): MutableExternalState = externalStateReference.mutate()
 
     fun mutateSystemState(writeMode: Int = WriteMode.ASYNCHRONOUS): MutableSystemState =
         systemStateReference.mutate().apply { requestWriteMode(writeMode) }
@@ -79,17 +91,7 @@ typealias MutableAppIdPackageNames =
 private typealias AppIdPackageNamesReference =
     MutableReference<AppIdPackageNames, MutableAppIdPackageNames>
 
-private typealias PermissionGroupsReference = MutableReference<
-    IndexedMap<String, PermissionGroupInfo>, MutableIndexedMap<String, PermissionGroupInfo>
->
-
-private typealias PermissionTreesReference =
-    MutableReference<IndexedMap<String, Permission>, MutableIndexedMap<String, Permission>>
-
-private typealias PermissionsReference =
-    MutableReference<IndexedMap<String, Permission>, MutableIndexedMap<String, Permission>>
-
-sealed class SystemState(
+sealed class ExternalState(
     val userIdsReference: UserIdsReference,
     packageStates: Map<String, PackageState>,
     disabledSystemPackageStates: Map<String, PackageState>,
@@ -102,12 +104,8 @@ sealed class SystemState(
     implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>,
     isSystemReady: Boolean,
     // TODO: STOPSHIP: Get and watch the state for deviceAndProfileOwners
-    deviceAndProfileOwners: IntMap<String>,
-    val permissionGroupsReference: PermissionGroupsReference,
-    val permissionTreesReference: PermissionTreesReference,
-    val permissionsReference: PermissionsReference,
-    writeMode: Int
-) : WritableState, Immutable<MutableSystemState> {
+    deviceAndProfileOwners: IntMap<String>
+) : Immutable<MutableExternalState> {
     val userIds: IntSet
         get() = userIdsReference.get()
 
@@ -146,22 +144,10 @@ sealed class SystemState(
     var deviceAndProfileOwners: IntMap<String> = deviceAndProfileOwners
         protected set
 
-    val permissionGroups: IndexedMap<String, PermissionGroupInfo>
-        get() = permissionGroupsReference.get()
-
-    val permissionTrees: IndexedMap<String, Permission>
-        get() = permissionTreesReference.get()
-
-    val permissions: IndexedMap<String, Permission>
-        get() = permissionsReference.get()
-
-    override var writeMode: Int = writeMode
-        protected set
-
-    override fun toMutable(): MutableSystemState = MutableSystemState(this)
+    override fun toMutable(): MutableExternalState = MutableExternalState(this)
 }
 
-class MutableSystemState private constructor(
+class MutableExternalState private constructor(
     userIdsReference: UserIdsReference,
     packageStates: Map<String, PackageState>,
     disabledSystemPackageStates: Map<String, PackageState>,
@@ -173,12 +159,8 @@ class MutableSystemState private constructor(
     permissionAllowlist: PermissionAllowlist,
     implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>,
     isSystemReady: Boolean,
-    deviceAndProfileOwners: IntMap<String>,
-    permissionGroupsReference: PermissionGroupsReference,
-    permissionTreesReference: PermissionTreesReference,
-    permissionsReference: PermissionsReference,
-    writeMode: Int
-) : SystemState(
+    deviceAndProfileOwners: IntMap<String>
+) : ExternalState(
     userIdsReference,
     packageStates,
     disabledSystemPackageStates,
@@ -190,12 +172,8 @@ class MutableSystemState private constructor(
     permissionAllowlist,
     implicitToSourcePermissions,
     isSystemReady,
-    deviceAndProfileOwners,
-    permissionGroupsReference,
-    permissionTreesReference,
-    permissionsReference,
-    writeMode
-), MutableWritableState {
+    deviceAndProfileOwners
+) {
     constructor() : this(
         UserIdsReference(MutableIntSet()),
         emptyMap(),
@@ -208,30 +186,22 @@ class MutableSystemState private constructor(
         PermissionAllowlist(),
         MutableIndexedMap(),
         false,
-        MutableIntMap(),
-        PermissionGroupsReference(MutableIndexedMap()),
-        PermissionTreesReference(MutableIndexedMap()),
-        PermissionsReference(MutableIndexedMap()),
-        WriteMode.NONE
+        MutableIntMap()
     )
 
-    internal constructor(systemState: SystemState) : this(
-        systemState.userIdsReference.toImmutable(),
-        systemState.packageStates,
-        systemState.disabledSystemPackageStates,
-        systemState.appIdPackageNamesReference.toImmutable(),
-        systemState.knownPackages,
-        systemState.isLeanback,
-        systemState.configPermissions,
-        systemState.privilegedPermissionAllowlistPackages,
-        systemState.permissionAllowlist,
-        systemState.implicitToSourcePermissions,
-        systemState.isSystemReady,
-        systemState.deviceAndProfileOwners,
-        systemState.permissionGroupsReference.toImmutable(),
-        systemState.permissionTreesReference.toImmutable(),
-        systemState.permissionsReference.toImmutable(),
-        WriteMode.NONE
+    internal constructor(externalState: ExternalState) : this(
+        externalState.userIdsReference.toImmutable(),
+        externalState.packageStates,
+        externalState.disabledSystemPackageStates,
+        externalState.appIdPackageNamesReference.toImmutable(),
+        externalState.knownPackages,
+        externalState.isLeanback,
+        externalState.configPermissions,
+        externalState.privilegedPermissionAllowlistPackages,
+        externalState.permissionAllowlist,
+        externalState.implicitToSourcePermissions,
+        externalState.isSystemReady,
+        externalState.deviceAndProfileOwners
     )
 
     fun mutateUserIds(): MutableIntSet = userIdsReference.mutate()
@@ -291,6 +261,63 @@ class MutableSystemState private constructor(
     fun setDeviceAndProfileOwners(deviceAndProfileOwners: IntMap<String>) {
         this.deviceAndProfileOwners = deviceAndProfileOwners
     }
+}
+
+private typealias PermissionGroupsReference = MutableReference<
+    IndexedMap<String, PermissionGroupInfo>, MutableIndexedMap<String, PermissionGroupInfo>
+>
+
+private typealias PermissionTreesReference =
+    MutableReference<IndexedMap<String, Permission>, MutableIndexedMap<String, Permission>>
+
+private typealias PermissionsReference =
+    MutableReference<IndexedMap<String, Permission>, MutableIndexedMap<String, Permission>>
+
+sealed class SystemState(
+    val permissionGroupsReference: PermissionGroupsReference,
+    val permissionTreesReference: PermissionTreesReference,
+    val permissionsReference: PermissionsReference,
+    writeMode: Int
+) : WritableState, Immutable<MutableSystemState> {
+    val permissionGroups: IndexedMap<String, PermissionGroupInfo>
+        get() = permissionGroupsReference.get()
+
+    val permissionTrees: IndexedMap<String, Permission>
+        get() = permissionTreesReference.get()
+
+    val permissions: IndexedMap<String, Permission>
+        get() = permissionsReference.get()
+
+    override var writeMode: Int = writeMode
+        protected set
+
+    override fun toMutable(): MutableSystemState = MutableSystemState(this)
+}
+
+class MutableSystemState private constructor(
+    permissionGroupsReference: PermissionGroupsReference,
+    permissionTreesReference: PermissionTreesReference,
+    permissionsReference: PermissionsReference,
+    writeMode: Int
+) : SystemState(
+    permissionGroupsReference,
+    permissionTreesReference,
+    permissionsReference,
+    writeMode
+), MutableWritableState {
+    constructor() : this(
+        PermissionGroupsReference(MutableIndexedMap()),
+        PermissionTreesReference(MutableIndexedMap()),
+        PermissionsReference(MutableIndexedMap()),
+        WriteMode.NONE
+    )
+
+    internal constructor(systemState: SystemState) : this(
+        systemState.permissionGroupsReference.toImmutable(),
+        systemState.permissionTreesReference.toImmutable(),
+        systemState.permissionsReference.toImmutable(),
+        WriteMode.NONE
+    )
 
     fun mutatePermissionGroups(): MutableIndexedMap<String, PermissionGroupInfo> =
         permissionGroupsReference.mutate()

@@ -75,7 +75,7 @@ class AccessPolicy private constructor(
         permissionAllowlist: PermissionAllowlist,
         implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>
     ) {
-        state.mutateSystemState(WriteMode.NONE).apply {
+        state.mutateExternalState().apply {
             mutateUserIds() += userIds
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
@@ -109,18 +109,18 @@ class AccessPolicy private constructor(
     }
 
     fun MutateStateScope.onUserAdded(userId: Int) {
-        newState.mutateSystemState(WriteMode.NONE).mutateUserIds() += userId
+        newState.mutateExternalState().mutateUserIds() += userId
         newState.mutateUserStatesNoWrite()[userId] = MutableUserState()
         forEachSchemePolicy {
             with(it) { onUserAdded(userId) }
         }
-        newState.systemState.packageStates.forEach { (_, packageState) ->
+        newState.externalState.packageStates.forEach { (_, packageState) ->
             upgradePackageVersion(packageState, userId)
         }
     }
 
     fun MutateStateScope.onUserRemoved(userId: Int) {
-        newState.mutateSystemState(WriteMode.NONE).mutateUserIds() -= userId
+        newState.mutateExternalState().mutateUserIds() -= userId
         newState.mutateUserStatesNoWrite() -= userId
         forEachSchemePolicy {
             with(it) { onUserRemoved(userId) }
@@ -135,7 +135,7 @@ class AccessPolicy private constructor(
         isSystemUpdated: Boolean
     ) {
         val addedAppIds = MutableIntSet()
-        newState.mutateSystemState(WriteMode.NONE).apply {
+        newState.mutateExternalState().apply {
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (packageName, packageState) ->
@@ -159,7 +159,7 @@ class AccessPolicy private constructor(
         }
         packageStates.forEach { (_, packageState) ->
             if (packageState.volumeUuid == volumeUuid) {
-                newState.systemState.userIds.forEachIndexed { _, userId ->
+                newState.userStates.forEachIndexed { _, userId, _ ->
                     upgradePackageVersion(packageState, userId)
                 }
             }
@@ -178,7 +178,7 @@ class AccessPolicy private constructor(
         }
         val appId = packageState.appId
         var isAppIdAdded = false
-        newState.mutateSystemState(WriteMode.NONE).apply {
+        newState.mutateExternalState().apply {
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             mutateAppIdPackageNames().mutateOrPut(appId) {
@@ -195,7 +195,7 @@ class AccessPolicy private constructor(
         forEachSchemePolicy {
             with(it) { onPackageAdded(packageState) }
         }
-        newState.systemState.userIds.forEachIndexed { _, userId ->
+        newState.userStates.forEachIndexed { _, userId, _ ->
             upgradePackageVersion(packageState, userId)
         }
     }
@@ -211,7 +211,7 @@ class AccessPolicy private constructor(
             "Removed package $packageName is still in packageStates in onPackageRemoved()"
         }
         var isAppIdRemoved = false
-        newState.mutateSystemState(WriteMode.NONE).apply {
+        newState.mutateExternalState().apply {
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             mutateAppIdPackageNames().mutate(appId)?.apply {
@@ -245,7 +245,7 @@ class AccessPolicy private constructor(
         packageName: String,
         userId: Int
     ) {
-        newState.mutateSystemState(WriteMode.NONE).apply {
+        newState.mutateExternalState().apply {
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             setKnownPackages(knownPackages)
@@ -267,7 +267,7 @@ class AccessPolicy private constructor(
         appId: Int,
         userId: Int
     ) {
-        newState.mutateSystemState(WriteMode.NONE).apply {
+        newState.mutateExternalState().apply {
             setPackageStates(packageStates)
             setDisabledSystemPackageStates(disabledSystemPackageStates)
             setKnownPackages(knownPackages)
@@ -278,7 +278,7 @@ class AccessPolicy private constructor(
     }
 
     fun MutateStateScope.onSystemReady() {
-        newState.mutateSystemState(WriteMode.NONE).setSystemReady(true)
+        newState.mutateExternalState().setSystemReady(true)
         forEachSchemePolicy {
             with(it) { onSystemReady() }
         }
@@ -382,7 +382,7 @@ class AccessPolicy private constructor(
             }
         }
         packageVersions.forEachReversedIndexed { packageVersionIndex, packageName, _ ->
-            if (packageName !in state.systemState.packageStates) {
+            if (packageName !in state.externalState.packageStates) {
                 Log.w(LOG_TAG, "Dropping unknown $packageName when parsing package versions")
                 packageVersions.removeAt(packageVersionIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)

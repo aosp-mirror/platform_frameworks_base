@@ -50,7 +50,7 @@ class PackageAppOpPersistence : BaseAppOpPersistence() {
             }
         }
         packageAppOpModes.forEachReversedIndexed { packageNameIndex, packageName, _ ->
-            if (packageName !in state.systemState.packageStates) {
+            if (packageName !in state.externalState.packageStates) {
                 Log.w(LOG_TAG, "Dropping unknown package $packageName when parsing app-op state")
                 packageAppOpModes.removeAt(packageNameIndex)
                 userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
