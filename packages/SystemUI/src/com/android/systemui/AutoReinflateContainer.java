@@ -16,6 +16,7 @@ package com.android.systemui;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -23,20 +24,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.systemui.statusbar.policy.ConfigurationController;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Custom {@link FrameLayout} that re-inflates when changes to {@link Configuration} happen.
  * Currently supports changes to density, asset path, and locale.
  */
-public class AutoReinflateContainer extends FrameLayout implements
-        ConfigurationController.ConfigurationListener {
+public class AutoReinflateContainer extends FrameLayout {
+
+    private static final Set<Integer> SUPPORTED_CHANGES = Set.of(
+            ActivityInfo.CONFIG_LOCALE,
+            ActivityInfo.CONFIG_UI_MODE,
+            ActivityInfo.CONFIG_ASSETS_PATHS,
+            ActivityInfo.CONFIG_DENSITY,
+            ActivityInfo.CONFIG_FONT_SCALE
+    );
 
     private final List<InflateListener> mInflateListeners = new ArrayList<>();
     private final int mLayout;
+
+    private final Configuration mLastConfig = new Configuration();
 
     public AutoReinflateContainer(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -51,15 +60,14 @@ public class AutoReinflateContainer extends FrameLayout implements
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Dependency.get(ConfigurationController.class).addCallback(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        Dependency.get(ConfigurationController.class).removeCallback(this);
+    protected void onConfigurationChanged(Configuration newConfig) {
+        int diff = mLastConfig.updateFrom(newConfig);
+        for (int change: SUPPORTED_CHANGES) {
+            if ((diff & change) != 0) {
+                inflateLayout();
+                return;
+            }
+        }
     }
 
     protected void inflateLayoutImpl() {
@@ -78,26 +86,6 @@ public class AutoReinflateContainer extends FrameLayout implements
     public void addInflateListener(InflateListener listener) {
         mInflateListeners.add(listener);
         listener.onInflated(getChildAt(0));
-    }
-
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        inflateLayout();
-    }
-
-    @Override
-    public void onThemeChanged() {
-        inflateLayout();
-    }
-
-    @Override
-    public void onUiModeChanged() {
-        inflateLayout();
-    }
-
-    @Override
-    public void onLocaleListChanged() {
-        inflateLayout();
     }
 
     public interface InflateListener {
