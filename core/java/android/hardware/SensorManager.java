@@ -450,6 +450,27 @@ public abstract class SensorManager {
     }
 
     /**
+     * Returns the {@link Sensor} object identified by the given sensor handle.
+     *
+     * The raw sensor handle integer is an implementation detail and as such this method should only
+     * be used by internal system components.
+     *
+     * @param sensorHandle The integer handle uniquely identifying the sensor.
+     * @return A Sensor object identified by the given {@code sensorHandle}, if such a sensor
+     * exists, {@code null} otherwise.
+     *
+     * @hide
+     */
+    public @Nullable Sensor getSensorByHandle(int sensorHandle) {
+        for (final Sensor sensor : getFullSensorList()) {
+            if (sensor.getHandle() == sensorHandle) {
+                return sensor;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Use this method to get a list of available dynamic sensors of a certain type.
      * Make multiple calls to get sensors of different types or use
      * {@link android.hardware.Sensor#TYPE_ALL Sensor.TYPE_ALL} to get all dynamic sensors.

@@ -30,6 +30,7 @@ import android.window.TransitionInfo;
  */
 public class TransitionInfoBuilder {
     final TransitionInfo mInfo;
+    static final int DISPLAY_ID = 0;
 
     public TransitionInfoBuilder(@WindowManager.TransitionType int type) {
         this(type, 0 /* flags */);
@@ -37,8 +38,15 @@ public class TransitionInfoBuilder {
 
     public TransitionInfoBuilder(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags) {
+        this(type, flags, false /* asNoOp */);
+    }
+
+    public TransitionInfoBuilder(@WindowManager.TransitionType int type,
+            @WindowManager.TransitionFlags int flags, boolean asNoOp) {
         mInfo = new TransitionInfo(type, flags);
-        mInfo.setRootLeash(createMockSurface(true /* valid */), 0, 0);
+        if (!asNoOp) {
+            mInfo.addRootLeash(DISPLAY_ID, createMockSurface(true /* valid */), 0, 0);
+        }
     }
 
     public TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
@@ -61,6 +69,7 @@ public class TransitionInfoBuilder {
     }
 
     public TransitionInfoBuilder addChange(TransitionInfo.Change change) {
+        change.setDisplayId(DISPLAY_ID, DISPLAY_ID);
         mInfo.addChange(change);
         return this;
     }

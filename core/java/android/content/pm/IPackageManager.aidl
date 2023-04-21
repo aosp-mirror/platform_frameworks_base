@@ -247,7 +247,7 @@ interface IPackageManager {
     @UnsupportedAppUsage
     String getInstallerPackageName(in String packageName);
 
-    InstallSourceInfo getInstallSourceInfo(in String packageName);
+    InstallSourceInfo getInstallSourceInfo(in String packageName, int userId);
 
     void resetApplicationPreferences(int userId);
 
@@ -353,12 +353,13 @@ interface IPackageManager {
      */
     @UnsupportedAppUsage
     void setComponentEnabledSetting(in ComponentName componentName,
-            in int newState, in int flags, int userId);
+            in int newState, in int flags, int userId, String callingPackage);
 
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSettings}.
      */
-    void setComponentEnabledSettings(in List<ComponentEnabledSetting> settings, int userId);
+    void setComponentEnabledSettings(in List<ComponentEnabledSetting> settings, int userId,
+            String callingPackage);
 
     /**
      * As per {@link android.content.pm.PackageManager#getComponentEnabledSetting}.

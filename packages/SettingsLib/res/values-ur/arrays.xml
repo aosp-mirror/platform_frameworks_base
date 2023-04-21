@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"فعال"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"ہیڈرز فلٹر کئے گئے"</item>
-    <item msgid="4818549483446395865">"‏A2DP میڈیا پیکٹ فلٹر کیے گئے"</item>
-    <item msgid="8207123990453243311">"‏RFCOMM چینل فلٹر کیا گیا"</item>
+    <item msgid="195768089203590086">"‏صرف ACL ہیڈر چھوڑ دیں"</item>
+    <item msgid="2776218217644557831">"‏A2DP میڈیا پیکٹ کو فلٹر کریں"</item>
+    <item msgid="8163235976612675092">"‏RFCOMM چینل کو فلٹر کریں"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"غیر فعال"</item>
-    <item msgid="5884245882825346396">"جادو"</item>
-    <item msgid="6569400572915342949">"ہیڈر"</item>
-    <item msgid="1239386221416967664">"مکمل فلٹر"</item>
+    <item msgid="3961868665260627524">"غیر فعال کریں"</item>
+    <item msgid="2505973306504851132">"حروف کی سٹرنگز کے ساتھ پُر کریں"</item>
+    <item msgid="5883011000629613855">"صرف ہیڈر چھوڑیں"</item>
+    <item msgid="1051534112762023603">"مکمل طور پر ہٹائیں"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"‏AVRCP 1.5 (ڈیفالٹ)"</item>

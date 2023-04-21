@@ -21,8 +21,9 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.companion.securechannel.AttestationVerifier;
 import com.android.server.companion.securechannel.SecureChannel;
-import com.android.server.companion.transport.CompanionTransportManager.Listener;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -35,14 +36,18 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
 
     private volatile boolean mShouldProcessRequests = false;
 
+    @GuardedBy("mRequestQueue")
     private final BlockingQueue<byte[]> mRequestQueue = new ArrayBlockingQueue<>(100);
 
-    SecureTransport(int associationId,
-            ParcelFileDescriptor fd,
-            Context context,
-            Listener listener) {
-        super(associationId, fd, context, listener);
+    SecureTransport(int associationId, ParcelFileDescriptor fd, Context context) {
+        super(associationId, fd, context);
         mSecureChannel = new SecureChannel(mRemoteIn, mRemoteOut, this, context);
+    }
+
+    SecureTransport(int associationId, ParcelFileDescriptor fd, Context context,
+            byte[] preSharedKey, AttestationVerifier verifier) {
+        super(associationId, fd, context);
+        mSecureChannel = new SecureChannel(mRemoteIn, mRemoteOut, this, preSharedKey, verifier);
     }
 
     @Override
@@ -53,6 +58,12 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
     @Override
     public void stop() {
         mSecureChannel.stop();
+        mShouldProcessRequests = false;
+    }
+
+    @Override
+    public void close() {
+        mSecureChannel.close();
         mShouldProcessRequests = false;
     }
 
@@ -82,12 +93,14 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
         }
 
         // Queue up a message to send
-        mRequestQueue.add(ByteBuffer.allocate(HEADER_LENGTH + data.length)
-                .putInt(message)
-                .putInt(sequence)
-                .putInt(data.length)
-                .put(data)
-                .array());
+        synchronized (mRequestQueue) {
+            mRequestQueue.add(ByteBuffer.allocate(HEADER_LENGTH + data.length)
+                    .putInt(message)
+                    .putInt(sequence)
+                    .putInt(data.length)
+                    .put(data)
+                    .array());
+        }
     }
 
     @Override
@@ -99,9 +112,11 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
         new Thread(() -> {
             try {
                 while (mShouldProcessRequests) {
-                    byte[] request = mRequestQueue.poll();
-                    if (request != null) {
-                        mSecureChannel.sendSecureMessage(request);
+                    synchronized (mRequestQueue) {
+                        byte[] request = mRequestQueue.poll();
+                        if (request != null) {
+                            mSecureChannel.sendSecureMessage(request);
+                        }
                     }
                 }
             } catch (IOException e) {

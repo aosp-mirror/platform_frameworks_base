@@ -24,7 +24,6 @@ import android.window.ScreenCapture.ScreenshotSync;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.screenshot.AppClipsActivity;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;

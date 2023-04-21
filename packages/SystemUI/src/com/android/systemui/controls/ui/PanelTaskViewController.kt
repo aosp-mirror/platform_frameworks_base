@@ -30,14 +30,14 @@ import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Trace
 import com.android.systemui.R
 import com.android.systemui.util.boundsOnScreen
-import com.android.wm.shell.TaskView
+import com.android.wm.shell.taskview.TaskView
 import java.util.concurrent.Executor
 
 class PanelTaskViewController(
     private val activityContext: Context,
     private val uiExecutor: Executor,
     private val pendingIntent: PendingIntent,
-    private val taskView: TaskView,
+    val taskView: TaskView,
     private val hide: () -> Unit = {}
 ) {
 
@@ -71,7 +71,7 @@ class PanelTaskViewController(
                 taskView.post {
                     val roundedCorner =
                         activityContext.resources.getDimensionPixelSize(
-                            R.dimen.notification_corner_radius
+                            R.dimen.controls_panel_corner_radius
                         )
                     val radii = FloatArray(8) { roundedCorner.toFloat() }
                     taskView.background =
@@ -107,6 +107,10 @@ class PanelTaskViewController(
                 hide()
             }
         }
+
+    fun refreshBounds() {
+        taskView.onLocationChanged()
+    }
 
     fun dismiss() {
         taskView.release()

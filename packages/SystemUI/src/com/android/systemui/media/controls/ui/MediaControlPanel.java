@@ -32,12 +32,17 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -51,6 +56,8 @@ import android.os.Process;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,9 +70,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -76,7 +83,6 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -117,16 +123,17 @@ import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
+import dagger.Lazy;
+
+import kotlin.Triple;
+import kotlin.Unit;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
-import kotlin.Triple;
-import kotlin.Unit;
 
 /**
  * A view controller used for Media Playback.
@@ -145,6 +152,12 @@ public class MediaControlPanel {
     // Event types logged by smartspace
     private static final int SMARTSPACE_CARD_CLICK_EVENT = 760;
     protected static final int SMARTSPACE_CARD_DISMISS_EVENT = 761;
+
+    private static final float REC_MEDIA_COVER_SCALE_FACTOR = 1.25f;
+    private static final float MEDIA_SCRIM_START_ALPHA = 0.25f;
+    private static final float MEDIA_REC_SCRIM_START_ALPHA = 0.15f;
+    private static final float MEDIA_PLAYER_SCRIM_END_ALPHA = 1.0f;
+    private static final float MEDIA_REC_SCRIM_END_ALPHA = 1.0f;
 
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
 
@@ -460,6 +473,7 @@ public class MediaControlPanel {
         TransitionLayout recommendations = vh.getRecommendations();
 
         mMediaViewController.attach(recommendations, MediaViewController.TYPE.RECOMMENDATION);
+        mMediaViewController.configurationChangeListener = this::updateRecommendationsVisibility;
 
         mRecommendationViewHolder.getRecommendations().setOnLongClickListener(v -> {
             if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) return true;
@@ -511,16 +525,15 @@ public class MediaControlPanel {
                 mLogger.logTapContentView(mUid, mPackageName, mInstanceId);
                 logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
 
-                // See StatusBarNotificationActivityStarter#onNotificationClicked
                 boolean showOverLockscreen = mKeyguardStateController.isShowing()
-                        && mActivityIntentHelper.wouldShowOverLockscreen(clickIntent.getIntent(),
+                        && mActivityIntentHelper.wouldPendingShowOverLockscreen(clickIntent,
                         mLockscreenUserManager.getCurrentUserId());
-
                 if (showOverLockscreen) {
-                    mActivityStarter.startActivity(clickIntent.getIntent(),
-                            /* dismissShade */ true,
-                            /* animationController */ null,
-                            /* showOverLockscreenWhenLocked */ true);
+                    try {
+                        clickIntent.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Pending intent for " + key + " was cancelled");
+                    }
                 } else {
                     mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                             buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
@@ -640,14 +653,17 @@ public class MediaControlPanel {
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                         if (device.getIntent() != null) {
-                            if (device.getIntent().isActivity()) {
-                                mActivityStarter.startActivity(
-                                        device.getIntent().getIntent(), true);
+                            PendingIntent deviceIntent = device.getIntent();
+                            boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                                    && mActivityIntentHelper.wouldPendingShowOverLockscreen(
+                                        deviceIntent, mLockscreenUserManager.getCurrentUserId());
+                            if (deviceIntent.isActivity() && !showOverLockscreen) {
+                                mActivityStarter.postStartActivityDismissingKeyguard(deviceIntent);
                             } else {
                                 try {
                                     BroadcastOptions options = BroadcastOptions.makeBasic();
                                     options.setInteractive(true);
-                                    device.getIntent().send(options.toBundle());
+                                    deviceIntent.send(options.toBundle());
                                 } catch (PendingIntent.CanceledException e) {
                                     Log.e(TAG, "Device pending intent was canceled");
                                 }
@@ -779,7 +795,7 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToPlayerAlbum(artworkIcon, mutableColorScheme, width, height);
                 isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
@@ -869,8 +885,9 @@ public class MediaControlPanel {
         Trace.beginAsyncSection(traceName, traceCookie);
 
         // Capture width & height from views in foreground for artwork scaling in background
-        int width = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredWidth();
-        int height = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredHeight();
+        int width = mContext.getResources().getDimensionPixelSize(R.dimen.qs_media_rec_album_width);
+        int height = mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_media_rec_album_height_expanded);
 
         mBackgroundExecutor.execute(() -> {
             // Album art
@@ -880,7 +897,8 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToRecommendationAlbum(artworkIcon, mutableColorScheme, width,
+                        height);
             } else {
                 artwork = new ColorDrawable(Color.TRANSPARENT);
             }
@@ -889,6 +907,11 @@ public class MediaControlPanel {
                 // Bind the artwork drawable to media cover.
                 ImageView mediaCover =
                         mRecommendationViewHolder.getMediaCoverItems().get(itemIndex);
+                // Rescale media cover
+                Matrix coverMatrix = new Matrix(mediaCover.getImageMatrix());
+                coverMatrix.postScale(REC_MEDIA_COVER_SCALE_FACTOR, REC_MEDIA_COVER_SCALE_FACTOR,
+                        0.5f * width, 0.5f * height);
+                mediaCover.setImageMatrix(coverMatrix);
                 mediaCover.setImageDrawable(artwork);
 
                 // Set up the app icon.
@@ -910,40 +933,62 @@ public class MediaControlPanel {
     // This method should be called from a background thread. WallpaperColors.fromBitmap takes a
     // good amount of time. We do that work on the background executor to avoid stalling animations
     // on the UI Thread.
-    private WallpaperColors getWallpaperColor(Icon artworkIcon) {
+    @VisibleForTesting
+    protected WallpaperColors getWallpaperColor(Icon artworkIcon) {
         if (artworkIcon != null) {
             if (artworkIcon.getType() == Icon.TYPE_BITMAP
                     || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
                 // Avoids extra processing if this is already a valid bitmap
-                return WallpaperColors
-                        .fromBitmap(artworkIcon.getBitmap());
+                Bitmap artworkBitmap = artworkIcon.getBitmap();
+                if (artworkBitmap.isRecycled()) {
+                    Log.d(TAG, "Cannot load wallpaper color from a recycled bitmap");
+                    return null;
+                }
+                return WallpaperColors.fromBitmap(artworkBitmap);
             } else {
                 Drawable artworkDrawable = artworkIcon.loadDrawable(mContext);
                 if (artworkDrawable != null) {
-                    return WallpaperColors
-                            .fromDrawable(artworkIcon.loadDrawable(mContext));
+                    return WallpaperColors.fromDrawable(artworkDrawable);
                 }
             }
         }
         return null;
     }
 
-    private LayerDrawable addGradientToIcon(
-            Icon artworkIcon,
-            ColorScheme mutableColorScheme,
-            int width,
-            int height
-    ) {
+    @VisibleForTesting
+    protected LayerDrawable addGradientToPlayerAlbum(Icon artworkIcon,
+            ColorScheme mutableColorScheme, int width, int height) {
         Drawable albumArt = getScaledBackground(artworkIcon, width, height);
-        GradientDrawable gradient = (GradientDrawable) AppCompatResources
-                .getDrawable(mContext, R.drawable.qs_media_scrim);
+        GradientDrawable gradient = (GradientDrawable) mContext.getDrawable(
+                R.drawable.qs_media_scrim).mutate();
+        return setupGradientColorOnDrawable(albumArt, gradient, mutableColorScheme,
+                MEDIA_SCRIM_START_ALPHA, MEDIA_PLAYER_SCRIM_END_ALPHA);
+    }
+
+    @VisibleForTesting
+    protected LayerDrawable addGradientToRecommendationAlbum(Icon artworkIcon,
+            ColorScheme mutableColorScheme, int width, int height) {
+        // First try scaling rec card using bitmap drawable.
+        // If returns null, set drawable bounds.
+        Drawable albumArt = getScaledRecommendationCover(artworkIcon, width, height);
+        if (albumArt == null) {
+            albumArt = getScaledBackground(artworkIcon, width, height);
+        }
+        GradientDrawable gradient = (GradientDrawable) mContext.getDrawable(
+                R.drawable.qs_media_rec_scrim).mutate();
+        return setupGradientColorOnDrawable(albumArt, gradient, mutableColorScheme,
+                MEDIA_REC_SCRIM_START_ALPHA, MEDIA_REC_SCRIM_END_ALPHA);
+    }
+
+    private LayerDrawable setupGradientColorOnDrawable(Drawable albumArt, GradientDrawable gradient,
+            ColorScheme mutableColorScheme, float startAlpha, float endAlpha) {
         gradient.setColors(new int[] {
                 ColorUtilKt.getColorWithAlpha(
                         MediaColorSchemesKt.backgroundStartFromScheme(mutableColorScheme),
-                        0.25f),
+                        startAlpha),
                 ColorUtilKt.getColorWithAlpha(
                         MediaColorSchemesKt.backgroundEndFromScheme(mutableColorScheme),
-                        0.9f),
+                        endAlpha),
         });
         return new LayerDrawable(new Drawable[] { albumArt, gradient });
     }
@@ -957,18 +1002,9 @@ public class MediaControlPanel {
 
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
-        if (width == 0 || height == 0 || targetWidth == 0 || targetHeight == 0) {
-            return;
-        }
-
-        float scale;
-        if ((width / (float) height) > (targetWidth / (float) targetHeight)) {
-            // Drawable is wider than target view, scale to match height
-            scale = targetHeight / (float) height;
-        } else {
-            // Drawable is taller than target view, scale to match width
-            scale = targetWidth / (float) width;
-        }
+        float scale = MediaDataUtils.getScaleFactor(new Pair(width, height),
+                new Pair(targetWidth, targetHeight));
+        if (scale == 0) return;
         transitionDrawable.setLayerSize(layer, (int) (scale * width), (int) (scale * height));
     }
 
@@ -1325,6 +1361,7 @@ public class MediaControlPanel {
 
         boolean hasTitle = false;
         boolean hasSubtitle = false;
+        int fittedRecsNum = getNumberOfFittedRecommendations();
         for (int itemIndex = 0; itemIndex < NUM_REQUIRED_RECOMMENDATIONS; itemIndex++) {
             SmartspaceAction recommendation = recommendations.get(itemIndex);
 
@@ -1337,7 +1374,8 @@ public class MediaControlPanel {
                         itemIndex
                 );
             } else {
-                mediaCoverImageView.setImageIcon(recommendation.getIcon());
+                mediaCoverImageView.post(
+                        () -> mediaCoverImageView.setImageIcon(recommendation.getIcon()));
             }
 
             // Set up the media item's click listener if applicable.
@@ -1404,12 +1442,20 @@ public class MediaControlPanel {
 
         // If there's no subtitles and/or titles for any of the albums, hide those views.
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         final boolean titlesVisible = hasTitle;
         final boolean subtitlesVisible = hasSubtitle;
-        mRecommendationViewHolder.getMediaTitles().forEach((titleView) ->
-                setVisibleAndAlpha(expandedSet, titleView.getId(), titlesVisible));
-        mRecommendationViewHolder.getMediaSubtitles().forEach((subtitleView) ->
-                setVisibleAndAlpha(expandedSet, subtitleView.getId(), subtitlesVisible));
+        mRecommendationViewHolder.getMediaTitles().forEach((titleView) -> {
+            setVisibleAndAlpha(expandedSet, titleView.getId(), titlesVisible);
+            setVisibleAndAlpha(collapsedSet, titleView.getId(), titlesVisible);
+        });
+        mRecommendationViewHolder.getMediaSubtitles().forEach((subtitleView) -> {
+            setVisibleAndAlpha(expandedSet, subtitleView.getId(), subtitlesVisible);
+            setVisibleAndAlpha(collapsedSet, subtitleView.getId(), subtitlesVisible);
+        });
+
+        // Media covers visibility.
+        setMediaCoversVisibility(fittedRecsNum);
 
         // Guts
         Runnable onDismissClickedRunnable = () -> {
@@ -1444,6 +1490,51 @@ public class MediaControlPanel {
             mMediaViewController.refreshState();
         }
         Trace.endSection();
+    }
+
+    private Unit updateRecommendationsVisibility() {
+        int fittedRecsNum = getNumberOfFittedRecommendations();
+        setMediaCoversVisibility(fittedRecsNum);
+        return Unit.INSTANCE;
+    }
+
+    private void setMediaCoversVisibility(int fittedRecsNum) {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
+        List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
+        // Hide media cover that cannot fit in the recommendation card.
+        for (int itemIndex = 0; itemIndex < NUM_REQUIRED_RECOMMENDATIONS; itemIndex++) {
+            setVisibleAndAlpha(expandedSet, mediaCoverContainers.get(itemIndex).getId(),
+                    itemIndex < fittedRecsNum);
+            setVisibleAndAlpha(collapsedSet, mediaCoverContainers.get(itemIndex).getId(),
+                    itemIndex < fittedRecsNum);
+        }
+    }
+
+    @VisibleForTesting
+    protected int getNumberOfFittedRecommendations() {
+        Resources res = mContext.getResources();
+        Configuration config = res.getConfiguration();
+        int defaultDpWidth = res.getInteger(R.integer.default_qs_media_rec_width_dp);
+        int recCoverWidth = res.getDimensionPixelSize(R.dimen.qs_media_rec_album_width)
+                + res.getDimensionPixelSize(R.dimen.qs_media_info_spacing) * 2;
+
+        // On landscape, media controls should take half of the screen width.
+        int displayAvailableDpWidth = config.screenWidthDp;
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            displayAvailableDpWidth = displayAvailableDpWidth / 2;
+        }
+        int fittedNum;
+        if (displayAvailableDpWidth > defaultDpWidth) {
+            int recCoverDefaultWidth = res.getDimensionPixelSize(
+                    R.dimen.qs_media_rec_default_width);
+            fittedNum = recCoverDefaultWidth / recCoverWidth;
+        } else {
+            int displayAvailableWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    displayAvailableDpWidth, res.getDisplayMetrics());
+            fittedNum = displayAvailableWidth / recCoverWidth;
+        }
+        return Math.min(fittedNum, NUM_REQUIRED_RECOMMENDATIONS);
     }
 
     private void fetchAndUpdateRecommendationColors(Drawable appIcon) {
@@ -1586,6 +1677,29 @@ public class MediaControlPanel {
         }
         drawable.setBounds(bounds);
         return drawable;
+    }
+
+    /**
+     * Scale artwork to fill the background of media covers in recommendation card.
+     */
+    @UiThread
+    private Drawable getScaledRecommendationCover(Icon artworkIcon, int width, int height) {
+        if (width == 0 || height == 0) {
+            return null;
+        }
+        if (artworkIcon != null) {
+            Bitmap bitmap;
+            if (artworkIcon.getType() == Icon.TYPE_BITMAP
+                    || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                Bitmap artworkBitmap = artworkIcon.getBitmap();
+                if (artworkBitmap != null) {
+                    bitmap = Bitmap.createScaledBitmap(artworkIcon.getBitmap(), width,
+                            height, false);
+                    return new BitmapDrawable(mContext.getResources(), bitmap);
+                }
+            }
+        }
+        return null;
     }
 
     /**

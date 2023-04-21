@@ -20,6 +20,7 @@ import static android.Manifest.permission.SOUNDTRIGGER_DELEGATE_IDENTITY;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
@@ -29,6 +30,7 @@ import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
+import android.media.soundtrigger_middleware.ISoundTriggerInjection;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
@@ -68,15 +70,18 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
 
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
     private final @NonNull Context mContext;
+    // Lightweight object used to delegate injection events to the fake STHAL
+    private final @NonNull SoundTriggerInjection mInjection;
 
     /**
      * Constructor for internal use only. Could be exposed for testing purposes in the future.
      * Users should access this class via {@link Lifecycle}.
      */
     private SoundTriggerMiddlewareService(@NonNull ISoundTriggerMiddlewareInternal delegate,
-            @NonNull Context context) {
+            @NonNull Context context, @NonNull SoundTriggerInjection injection) {
         mDelegate = Objects.requireNonNull(delegate);
         mContext = context;
+        mInjection = injection;
     }
 
     @Override
@@ -110,6 +115,16 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                 Objects.requireNonNull(middlemanIdentity),
                 Objects.requireNonNull(originatorIdentity))) {
             return new ModuleService(mDelegate.attach(handle, callback));
+        }
+    }
+
+    @Override
+    @android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    public void attachFakeHalInjection(@NonNull ISoundTriggerInjection injection) {
+        PermissionChecker.checkCallingOrSelfPermissionForPreflight(
+                mContext, android.Manifest.permission.MANAGE_SOUND_TRIGGER);
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            mInjection.registerClient(Objects.requireNonNull(injection));
         }
     }
 
@@ -223,7 +238,9 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
 
         @Override
         public void onStart() {
-            HalFactory[] factories = new HalFactory[]{new DefaultHalFactory()};
+            final SoundTriggerInjection injection = new SoundTriggerInjection();
+            HalFactory[] factories = new HalFactory[]{new DefaultHalFactory(),
+                    new FakeHalFactory(injection)};
 
             publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE,
                     new SoundTriggerMiddlewareService(
@@ -232,7 +249,8 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                                         new SoundTriggerMiddlewareValidation(
                                                 new SoundTriggerMiddlewareImpl(factories,
                                                         new AudioSessionProviderImpl())),
-                                        getContext())), getContext()));
+                                        getContext())), getContext(),
+                                        injection));
         }
     }
 }

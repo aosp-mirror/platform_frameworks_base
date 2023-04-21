@@ -48,6 +48,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -90,6 +91,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     @Inject
     public DreamTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -105,7 +107,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
             @Named(DreamModule.DREAM_ONLY_ENABLED_FOR_DOCK_USER)
                     boolean dreamOnlyEnabledForDockUser
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDreamManager = dreamManager;
         mBroadcastDispatcher = broadcastDispatcher;

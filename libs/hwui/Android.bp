@@ -55,6 +55,10 @@ cc_defaults {
         // GCC false-positives on this warning, and since we -Werror that's
         // a problem
         "-Wno-free-nonheap-object",
+
+        // Do not de-optimise cold code paths in AFDO.
+        // Some code paths might be infrequently executed but critical to latency.
+        "-fno-profile-sample-accurate",
     ],
 
     include_dirs: [
@@ -332,11 +336,13 @@ cc_defaults {
         "jni/android_graphics_Matrix.cpp",
         "jni/android_graphics_Picture.cpp",
         "jni/android_graphics_DisplayListCanvas.cpp",
+        "jni/android_graphics_Mesh.cpp",
         "jni/android_graphics_RenderNode.cpp",
         "jni/android_nio_utils.cpp",
         "jni/android_util_PathParser.cpp",
 
         "jni/Bitmap.cpp",
+        "jni/BufferUtils.cpp",
         "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
         "jni/ByteBufferStreamAdaptor.cpp",
@@ -351,7 +357,6 @@ cc_defaults {
         "jni/ImageDecoder.cpp",
         "jni/Interpolator.cpp",
         "jni/MeshSpecification.cpp",
-        "jni/Mesh.cpp",
         "jni/MaskFilter.cpp",
         "jni/NinePatch.cpp",
         "jni/NinePatchPeeker.cpp",
@@ -374,6 +379,7 @@ cc_defaults {
         "jni/text/LineBreaker.cpp",
         "jni/text/MeasuredText.cpp",
         "jni/text/TextShaper.cpp",
+        "jni/text/GraphemeBreak.cpp",
     ],
 
     header_libs: [
@@ -393,7 +399,7 @@ cc_defaults {
         "libharfbuzz_ng",
         "libimage_io",
         "libjpeg",
-        "libjpegrecoverymap",
+        "libultrahdr",
         "liblog",
         "libminikin",
         "libz",
@@ -535,9 +541,11 @@ cc_defaults {
         "AnimatorManager.cpp",
         "CanvasTransform.cpp",
         "DamageAccumulator.cpp",
+        "Gainmap.cpp",
         "Interpolator.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
+        "Mesh.cpp",
         "MemoryPolicy.cpp",
         "PathParser.cpp",
         "Properties.cpp",
@@ -733,6 +741,9 @@ cc_test {
         "tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
+    ],
+    data: [
+        ":hwuimicro",
     ],
 }
 

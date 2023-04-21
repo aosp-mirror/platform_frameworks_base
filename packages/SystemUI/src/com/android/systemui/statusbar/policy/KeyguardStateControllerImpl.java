@@ -38,13 +38,13 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  */
@@ -398,6 +398,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         pw.println("  mFaceAuthEnabled: " + mFaceAuthEnabled);
         pw.println("  isKeyguardFadingAway: " + isKeyguardFadingAway());
         pw.println("  isKeyguardGoingAway: " + isKeyguardGoingAway());
+        pw.println("  isLaunchTransitionFadingAway: " + isLaunchTransitionFadingAway());
     }
 
     private class UpdateMonitorCallback extends KeyguardUpdateMonitorCallback {

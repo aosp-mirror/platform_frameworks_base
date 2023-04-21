@@ -45,11 +45,13 @@ import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.adservices.data.adselection.CustomAudienceSignals;
-import com.android.adservices.service.adselection.AdDataArgument;
-import com.android.adservices.service.adselection.AdSelectionConfigArgument;
-import com.android.adservices.service.adselection.AdWithBidArgument;
-import com.android.adservices.service.adselection.CustomAudienceBiddingSignalsArgument;
-import com.android.adservices.service.adselection.CustomAudienceScoringSignalsArgument;
+import com.android.adservices.service.adselection.AdCounterKeyCopier;
+import com.android.adservices.service.adselection.AdCounterKeyCopierNoOpImpl;
+import com.android.adservices.service.adselection.AdDataArgumentUtil;
+import com.android.adservices.service.adselection.AdSelectionConfigArgumentUtil;
+import com.android.adservices.service.adselection.AdWithBidArgumentUtil;
+import com.android.adservices.service.adselection.CustomAudienceBiddingSignalsArgumentUtil;
+import com.android.adservices.service.adselection.CustomAudienceScoringSignalsArgumentUtil;
 import com.android.adservices.service.js.IsolateSettings;
 import com.android.adservices.service.js.JSScriptArgument;
 import com.android.adservices.service.js.JSScriptArrayArgument;
@@ -106,6 +108,14 @@ public class JSScriptEnginePerfTests {
     private static final Instant ACTIVATION_TIME = CLOCK.instant();
     private static final Instant EXPIRATION_TIME = CLOCK.instant().plus(Duration.ofDays(1));
     private static final AdSelectionSignals CONTEXTUAL_SIGNALS = AdSelectionSignals.EMPTY;
+    private static final AdCounterKeyCopier AD_COUNTER_KEY_COPIER_NO_OP =
+            new AdCounterKeyCopierNoOpImpl();
+
+    private final AdDataArgumentUtil mAdDataArgumentUtil =
+            new AdDataArgumentUtil(AD_COUNTER_KEY_COPIER_NO_OP);
+    private final AdWithBidArgumentUtil mAdWithBidArgumentUtil =
+            new AdWithBidArgumentUtil(mAdDataArgumentUtil);
+
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
@@ -437,7 +447,7 @@ public class JSScriptEnginePerfTests {
         List<AdData> adDataList = getSampleAdDataList(numOfAds, "https://ads.example/");
         ImmutableList.Builder<JSScriptArgument> adDataListArgument = new ImmutableList.Builder<>();
         for (AdData adData : adDataList) {
-            adDataListArgument.add(AdDataArgument.asScriptArgument("ignored", adData));
+            adDataListArgument.add(mAdDataArgumentUtil.asScriptArgument("ignored", adData));
         }
         AdSelectionSignals perBuyerSignals = generatePerBuyerSignals(numOfAds);
         AdSelectionSignals auctionSignals = AdSelectionSignals.fromString("{\"auctionSignal1"
@@ -455,7 +465,7 @@ public class JSScriptEnginePerfTests {
                 .add(jsonArg("perBuyerSignals", perBuyerSignals))
                 .add(jsonArg("trustedBiddingSignals", trustedBiddingSignals))
                 .add(jsonArg("contextualSignals", CONTEXTUAL_SIGNALS))
-                .add(CustomAudienceBiddingSignalsArgument.asScriptArgument(
+                .add(CustomAudienceBiddingSignalsArgumentUtil.asScriptArgument(
                         "customAudienceBiddingSignal", customAudienceSignals))
                 .build();
         InputStream testJsInputStream = sContext.getAssets().open(
@@ -485,7 +495,8 @@ public class JSScriptEnginePerfTests {
         ImmutableList.Builder<JSScriptArgument> adWithBidArrayArgument =
                 new ImmutableList.Builder<>();
         for (AdWithBid adWithBid : adWithBidList) {
-            adWithBidArrayArgument.add(AdWithBidArgument.asScriptArgument("adWithBid", adWithBid));
+            adWithBidArrayArgument.add(
+                    mAdWithBidArgumentUtil.asScriptArgument("adWithBid", adWithBid));
         }
         AdTechIdentifier seller = AdTechIdentifier.fromString("www.example-ssp.com");
         AdSelectionSignals sellerSignals = AdSelectionSignals.fromString("{\"signals\":[]}");
@@ -507,12 +518,12 @@ public class JSScriptEnginePerfTests {
 
         ImmutableList<JSScriptArgument> args = ImmutableList.<JSScriptArgument>builder()
                 .add(arrayArg("adsWithBids", adWithBidArrayArgument.build()))
-                .add(AdSelectionConfigArgument.asScriptArgument(adSelectionConfig,
+                .add(AdSelectionConfigArgumentUtil.asScriptArgument(adSelectionConfig,
                         "adSelectionConfig"))
                 .add(jsonArg("sellerSignals", sellerSignals))
                 .add(jsonArg("trustedScoringSignals", trustedScoringSignalsJson))
                 .add(jsonArg("contextualSignals", CONTEXTUAL_SIGNALS))
-                .add(CustomAudienceScoringSignalsArgument.asScriptArgument(
+                .add(CustomAudienceScoringSignalsArgumentUtil.asScriptArgument(
                         "customAudienceScoringSignal", customAudienceSignals))
                 .build();
         InputStream testJsInputStream = sContext.getAssets().open(

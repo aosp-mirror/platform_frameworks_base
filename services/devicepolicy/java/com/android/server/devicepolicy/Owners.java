@@ -120,7 +120,9 @@ class Owners {
                 } else {
                     mDeviceStateCache.setDeviceOwnerType(NO_DEVICE_OWNER);
                 }
-
+                for (int userId : usersIds) {
+                    mDeviceStateCache.setHasProfileOwner(userId, hasProfileOwner(userId));
+                }
             } else {
                 mUserManagerInternal.setDeviceManaged(hasDeviceOwner());
                 for (int userId : usersIds) {

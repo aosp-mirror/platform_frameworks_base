@@ -33,6 +33,8 @@ import android.provider.Settings
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.UserIcons
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.R
 import com.android.systemui.SystemUISecondaryUserService
 import com.android.systemui.animation.Expandable
@@ -47,7 +49,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
-import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -93,6 +94,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     telephonyInteractor: TelephonyInteractor,
     broadcastDispatcher: BroadcastDispatcher,
+    keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
@@ -290,6 +292,12 @@ constructor(
 
     val isSimpleUserSwitcher: Boolean
         get() = repository.isSimpleUserSwitcher()
+    val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onKeyguardGoingAway() {
+                dismissDialog()
+            }
+        }
 
     init {
         refreshUsersScheduler.refreshIfNotPaused()
@@ -320,6 +328,7 @@ constructor(
                 onBroadcastReceived(intent, previousSelectedUser)
             }
             .launchIn(applicationScope)
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
     }
 
     fun addCallback(callback: UserCallback) {
@@ -503,24 +512,12 @@ constructor(
         }
     }
 
-    fun showUserSwitcher(context: Context, expandable: Expandable) {
-        if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+    fun showUserSwitcher(expandable: Expandable) {
+        if (featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog(expandable))
+        } else {
             showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
-            return
         }
-
-        val intent =
-            Intent(context, UserSwitcherActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-
-        activityStarter.startActivity(
-            intent,
-            true /* dismissShade */,
-            expandable.activityLaunchController(),
-            true /* showOverlockscreenwhenlocked */,
-            UserHandle.SYSTEM,
-        )
     }
 
     private fun showDialog(request: ShowDialogRequestModel) {

@@ -86,8 +86,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
 
     @Override
     public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
-            boolean withAudio, ITunerCallback callback, int targetSdkVersion)
-            throws RemoteException {
+            boolean withAudio, ITunerCallback callback) throws RemoteException {
         if (isDebugEnabled()) {
             Slogf.d(TAG, "Opening module %d", moduleId);
         }
@@ -95,7 +94,7 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
         if (callback == null) {
             throw new IllegalArgumentException("Callback must not be null");
         }
-        return mHalAidl.openSession(moduleId, bandConfig, withAudio, callback, targetSdkVersion);
+        return mHalAidl.openSession(moduleId, bandConfig, withAudio, callback);
     }
 
     @Override

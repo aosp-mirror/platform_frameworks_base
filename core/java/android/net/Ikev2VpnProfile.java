@@ -769,6 +769,19 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("IkeV2VpnProfile [");
+        sb.append(" MaxMtu=" + mMaxMtu);
+        if (mIsBypassable) sb.append(" Bypassable");
+        if (mRequiresInternetValidation) sb.append(" RequiresInternetValidation");
+        if (mIsRestrictedToTestNetworks) sb.append(" RestrictedToTestNetworks");
+        if (mAutomaticNattKeepaliveTimerEnabled) sb.append(" AutomaticNattKeepaliveTimerEnabled");
+        if (mAutomaticIpVersionSelectionEnabled) sb.append(" AutomaticIpVersionSelectionEnabled");
+        sb.append("]");
+        return sb.toString();
+    }
+
     /** A incremental builder for IKEv2 VPN profiles */
     public static final class Builder {
         private int mType = -1;

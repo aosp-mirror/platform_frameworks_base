@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Включено"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"Применен фильтр по заголовкам"</item>
-    <item msgid="4818549483446395865">"Применен фильтр по медиапакетам A2DP"</item>
-    <item msgid="8207123990453243311">"Применен фильтр по каналу RFCOMM"</item>
+    <item msgid="195768089203590086">"Только заголовки списка контроля доступа"</item>
+    <item msgid="2776218217644557831">"Фильтровать A2DP-медиапакеты"</item>
+    <item msgid="8163235976612675092">"Фильтровать RFCOMM-канал"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"Отключено"</item>
-    <item msgid="5884245882825346396">"Специальный параметр"</item>
-    <item msgid="6569400572915342949">"Заголовок"</item>
-    <item msgid="1239386221416967664">"Общий фильтр"</item>
+    <item msgid="3961868665260627524">"Отключить"</item>
+    <item msgid="2505973306504851132">"Заполнить строкой символов"</item>
+    <item msgid="5883011000629613855">"Оставить только заголовок"</item>
+    <item msgid="1051534112762023603">"Удалить полностью"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (по умолчанию)"</item>

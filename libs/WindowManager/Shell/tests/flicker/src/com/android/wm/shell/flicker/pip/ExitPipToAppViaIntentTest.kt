@@ -16,16 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import org.junit.Assume
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -41,12 +36,13 @@ import org.junit.runners.Parameterized
  *     Launch another full screen mode [testApp]
  *     Expand [pipApp] app to full screen via an intent
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
  * ```
@@ -71,37 +67,4 @@ open class ExitPipToAppViaIntentTest(flicker: FlickerTest) : ExitPipToAppTransit
                 wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
             }
         }
-
-    /** {@inheritDoc} */
-    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerPositionAtStartAndEnd()
-    }
-
-    @Presubmit
-    @Test
-    fun statusBarLayerRotatesScales_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        super.statusBarLayerPositionAtStartAndEnd()
-    }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 197726610)
-    @Test
-    override fun pipLayerExpands() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.pipLayerExpands()
-    }
-
-    @Presubmit
-    @Test
-    fun pipLayerExpands_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        super.pipLayerExpands()
-    }
 }

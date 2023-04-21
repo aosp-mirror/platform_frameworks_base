@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,8 +48,10 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.ClockEvents;
+import com.android.systemui.plugins.ClockFaceConfig;
 import com.android.systemui.plugins.ClockFaceController;
 import com.android.systemui.plugins.ClockFaceEvents;
+import com.android.systemui.plugins.ClockTickRate;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
@@ -181,9 +184,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mClockController.getEvents()).thenReturn(mClockEvents);
         when(mSmallClockController.getEvents()).thenReturn(mClockFaceEvents);
         when(mLargeClockController.getEvents()).thenReturn(mClockFaceEvents);
-        when(mClockController.getAnimations()).thenReturn(mClockAnimations);
+        when(mLargeClockController.getAnimations()).thenReturn(mClockAnimations);
+        when(mSmallClockController.getAnimations()).thenReturn(mClockAnimations);
         when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
         when(mClockEventController.getClock()).thenReturn(mClockController);
+        when(mSmallClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
+        when(mLargeClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
@@ -314,8 +322,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetClockAnimationsForwardsToClock() {
-        assertEquals(mClockAnimations, mController.getClockAnimations());
+    public void testGetClock_ForwardsToClock() {
+        assertEquals(mClockController, mController.getClock());
     }
 
     @Test
@@ -363,6 +371,34 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         observer.onChange(true);
         mExecutor.runAllReady();
         assertEquals(View.VISIBLE, mFakeWeatherView.getVisibility());
+    }
+
+    @Test
+    public void testChangeClockDateWeatherEnabled_SetsDateWeatherViewVisibility() {
+        ArgumentCaptor<ClockRegistry.ClockChangeListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(ClockRegistry.ClockChangeListener.class);
+        when(mSmartspaceController.isEnabled()).thenReturn(true);
+        when(mSmartspaceController.isDateWeatherDecoupled()).thenReturn(true);
+        when(mSmartspaceController.isWeatherEnabled()).thenReturn(true);
+        mController.init();
+        mExecutor.runAllReady();
+        assertEquals(View.VISIBLE, mFakeDateView.getVisibility());
+
+        when(mSmallClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
+        when(mLargeClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
+        verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
+        listenerArgumentCaptor.getValue().onCurrentClockChanged();
+
+        mExecutor.runAllReady();
+        assertEquals(View.INVISIBLE, mFakeDateView.getVisibility());
+    }
+
+    @Test
+    public void testGetClock_nullClock_returnsNull() {
+        when(mClockEventController.getClock()).thenReturn(null);
+        assertNull(mController.getClock());
     }
 
     private void verifyAttachment(VerificationMode times) {

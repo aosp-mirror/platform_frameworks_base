@@ -72,7 +72,7 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     public static final class Builder {
         @ConnectionStatus private int mStatus;
         private KnownNetwork mKnownNetwork;
-        private Bundle mExtras;
+        private Bundle mExtras = Bundle.EMPTY;
 
         public Builder() {}
 
@@ -120,8 +120,16 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
         }
     }
 
+    private static void validate(@ConnectionStatus int status) {
+        if (status != CONNECTION_STATUS_UNKNOWN && status != CONNECTION_STATUS_SAVED
+                && status != CONNECTION_STATUS_SAVE_FAILED) {
+            throw new IllegalArgumentException("Illegal connection status");
+        }
+    }
+
     private KnownNetworkConnectionStatus(@ConnectionStatus int status, KnownNetwork knownNetwork,
-            Bundle extras) {
+            @NonNull Bundle extras) {
+        validate(status);
         mStatus = status;
         mKnownNetwork = knownNetwork;
         mExtras = extras;

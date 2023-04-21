@@ -53,10 +53,6 @@ public interface NotificationSwipeActionHelper {
     /** Returns true if the gesture should be rejected. */
     boolean isFalseGesture();
 
-    public boolean swipedFarEnough(float translation, float viewSize);
-
-    public boolean swipedFastEnough(float translation, float velocity);
-
     @ProvidesInterface(version = SnoozeOption.VERSION)
     public interface SnoozeOption {
         public static final int VERSION = 2;

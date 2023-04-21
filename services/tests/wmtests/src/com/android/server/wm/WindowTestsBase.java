@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -26,12 +27,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Process.SYSTEM_UID;
-import static android.view.InsetsState.ITYPE_BOTTOM_MANDATORY_GESTURES;
-import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
-import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
@@ -82,6 +77,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -99,6 +95,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
@@ -312,7 +309,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         beforeCreateTestDisplay();
         mDisplayContent = createNewDisplayWithImeSupport(DISPLAY_IME_POLICY_LOCAL);
         addCommonWindows(annotation.addAllCommonWindows(), annotation.addWindows());
-        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(false);
+        mDisplayContent.getDisplayPolicy().setRemoteInsetsControllerControlsSystemBars(false);
 
         // Adding a display will cause freezing the display. Make sure to wait until it's
         // unfrozen to not run into race conditions with the tests.
@@ -338,10 +335,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
                     LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             mStatusBarWindow.mAttrs.setFitInsetsTypes(0);
+            final IBinder owner = new Binder();
             mStatusBarWindow.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                    new InsetsFrameProvider(ITYPE_STATUS_BAR),
-                    new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
-                    new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES)
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
             };
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
@@ -358,14 +356,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             mNavBarWindow.mAttrs.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+            final IBinder owner = new Binder();
             mNavBarWindow.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                    new InsetsFrameProvider(ITYPE_NAVIGATION_BAR),
-                    new InsetsFrameProvider(ITYPE_BOTTOM_MANDATORY_GESTURES),
-                    new InsetsFrameProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT)
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
             };
             for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
                 mNavBarWindow.mAttrs.paramsForRotation[rot] =
-                        getNavBarLayoutParamsForRotation(rot);
+                        getNavBarLayoutParamsForRotation(rot, owner);
             }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
@@ -388,7 +387,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
-    private WindowManager.LayoutParams getNavBarLayoutParamsForRotation(int rotation) {
+    private WindowManager.LayoutParams getNavBarLayoutParamsForRotation(
+            int rotation, IBinder owner) {
         int width = WindowManager.LayoutParams.MATCH_PARENT;
         int height = WindowManager.LayoutParams.MATCH_PARENT;
         int gravity = Gravity.BOTTOM;
@@ -417,9 +417,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR),
-                new InsetsFrameProvider(ITYPE_BOTTOM_MANDATORY_GESTURES),
-                new InsetsFrameProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT)
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
         };
         return lp;
     }
@@ -454,8 +454,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     WindowState createNavBarWithProvidedInsets(DisplayContent dc) {
         final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, dc, "navbar");
+        final Binder owner = new Binder();
         navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR, Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())
+                        .setInsetsSize(Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
         };
         dc.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
         return navbar;
@@ -465,6 +467,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
         final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
         return createWindow(null, type, activity, name);
+    }
+
+    WindowState createDreamWindow(WindowState parent, int type, String name) {
+        final WindowToken token = createWindowToken(
+                mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM, type);
+        return createWindow(parent, type, token, name);
     }
 
     // TODO: Move these calls to a builder?
@@ -879,7 +887,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     BLASTSyncEngine createTestBLASTSyncEngine() {
-        return new BLASTSyncEngine(mWm) {
+        return createTestBLASTSyncEngine(mWm.mH);
+    }
+
+    BLASTSyncEngine createTestBLASTSyncEngine(Handler handler) {
+        return new BLASTSyncEngine(mWm, handler) {
             @Override
             void scheduleTimeout(SyncGroup s, long timeoutMs) {
                 // Disable timeout.
@@ -1746,7 +1758,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
     static class TestTransitionController extends TransitionController {
         TestTransitionController(ActivityTaskManagerService atms) {
             super(atms);
-            mTaskSnapshotController = mock(TaskSnapshotController.class);
+            doReturn(this).when(atms).getTransitionController();
+            mSnapshotController = mock(SnapshotController.class);
             mTransitionTracer = mock(TransitionTracer.class);
         }
     }
@@ -1799,7 +1812,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit.getToken());
+            mController.finishTransition(mLastTransit);
         }
     }
 }

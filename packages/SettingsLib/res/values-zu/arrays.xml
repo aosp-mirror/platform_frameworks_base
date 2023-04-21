@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Kunikwe amandla"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"Izihloko Zihlungiwe"</item>
-    <item msgid="4818549483446395865">"I-A2DP Media Packets Ihlungiwe"</item>
-    <item msgid="8207123990453243311">"Isiteshi se-RFCOMM Sihlungiwe"</item>
+    <item msgid="195768089203590086">"Shiya kuphela onhlokweni be-ACL"</item>
+    <item msgid="2776218217644557831">"Hlunga amaphakethe wemidiya ye-A2DP"</item>
+    <item msgid="8163235976612675092">"Isiteshi se-RFCOMM"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"Kukhutshaziwe"</item>
-    <item msgid="5884245882825346396">"Umlingo"</item>
-    <item msgid="6569400572915342949">"Unhlokweni"</item>
-    <item msgid="1239386221416967664">"Isihlungi Esigcwele"</item>
+    <item msgid="3961868665260627524">"Khubaza"</item>
+    <item msgid="2505973306504851132">"Gcwalisa ngeyunithi yezinhlamvu"</item>
+    <item msgid="5883011000629613855">"Shiya unhlokweni kuphela"</item>
+    <item msgid="1051534112762023603">"Susa ngokugcwele"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"I-AVRCP 1.5 (Okuzenzakalelayo)"</item>

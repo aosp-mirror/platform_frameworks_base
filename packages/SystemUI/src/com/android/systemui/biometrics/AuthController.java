@@ -85,6 +85,8 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,8 +99,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlin.Unit;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -148,6 +148,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @NonNull private final WindowManager mWindowManager;
     @NonNull private final DisplayManager mDisplayManager;
     @Nullable private UdfpsController mUdfpsController;
+    @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
     @Nullable private SideFpsController mSideFpsController;
     @Nullable private UdfpsLogger mUdfpsLogger;
@@ -197,31 +198,35 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mCurrentDialog != null
-                    && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
                 reason = (reason != null) ? reason : "unknown";
-                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, reason: " + reason);
-
-                mCurrentDialog.dismissWithoutCallback(true /* animate */);
-                mCurrentDialog = null;
-
-                for (Callback cb : mCallbacks) {
-                    cb.onBiometricPromptDismissed();
-                }
-
-                try {
-                    if (mReceiver != null) {
-                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
-                                null /* credentialAttestation */);
-                        mReceiver = null;
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Remote exception", e);
-                }
+                closeDioalog(reason);
             }
         }
     };
+
+    private void closeDioalog(String reason) {
+        if (isShowing()) {
+            Log.i(TAG, "Close BP, reason :" + reason);
+            mCurrentDialog.dismissWithoutCallback(true /* animate */);
+            mCurrentDialog = null;
+
+            for (Callback cb : mCallbacks) {
+                cb.onBiometricPromptDismissed();
+            }
+
+            try {
+                if (mReceiver != null) {
+                    mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                            null /* credentialAttestation */);
+                    mReceiver = null;
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception", e);
+            }
+        }
+    }
 
     private void cancelIfOwnerIsNotInForeground() {
         mExecution.assertIsMainThread();
@@ -545,6 +550,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         }
     }
 
+    @Override
+    public void handleShowGlobalActionsMenu() {
+        closeDioalog("PowerMenu shown");
+    }
+
     /**
      * @return where the UDFPS exists on the screen in pixels in portrait mode.
      */
@@ -806,16 +816,18 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             final FingerprintSensorPropertiesInternal udfpsProp = mUdfpsProps.get(0);
 
             final Rect previousUdfpsBounds = mUdfpsBounds;
+            final UdfpsOverlayParams previousUdfpsOverlayParams = mUdfpsOverlayParams;
+
             mUdfpsBounds = udfpsProp.getLocation().getRect();
             mUdfpsBounds.scale(mScaleFactor);
 
             final Rect overlayBounds = new Rect(
                     0, /* left */
-                    mCachedDisplayInfo.getNaturalHeight() / 2, /* top */
+                    0, /* top */
                     mCachedDisplayInfo.getNaturalWidth(), /* right */
                     mCachedDisplayInfo.getNaturalHeight() /* botom */);
 
-            final UdfpsOverlayParams overlayParams = new UdfpsOverlayParams(
+            mUdfpsOverlayParams = new UdfpsOverlayParams(
                     mUdfpsBounds,
                     overlayBounds,
                     mCachedDisplayInfo.getNaturalWidth(),
@@ -823,10 +835,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                     mScaleFactor,
                     mCachedDisplayInfo.rotation);
 
-            mUdfpsController.updateOverlayParams(udfpsProp, overlayParams);
-            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds)) {
+            mUdfpsController.updateOverlayParams(udfpsProp, mUdfpsOverlayParams);
+            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds) || !Objects.equals(
+                    previousUdfpsOverlayParams, mUdfpsOverlayParams)) {
                 for (Callback cb : mCallbacks) {
-                    cb.onUdfpsLocationChanged();
+                    cb.onUdfpsLocationChanged(mUdfpsOverlayParams);
                 }
             }
         }
@@ -872,7 +885,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     }
 
     /**
-     * Stores the callback received from {@link com.android.server.display.DisplayModeDirector}.
+     * Stores the callback received from
+     * {@link com.android.server.display.mode.DisplayModeDirector}.
      *
      * DisplayModeDirector implements {@link IUdfpsRefreshRateRequestCallback}
      * and registers it with this class by calling
@@ -969,6 +983,38 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     public List<FingerprintSensorPropertiesInternal> getSfpsProps() {
         return mSidefpsProps;
     }
+
+    /**
+     * @return true if udfps HW is supported on this device. Can return true even if the user has
+     * not enrolled udfps. This may be false if called before onAllAuthenticatorsRegistered.
+     */
+    public boolean isUdfpsSupported() {
+        return getUdfpsProps() != null && !getUdfpsProps().isEmpty();
+    }
+
+    /**
+     * @return true if sfps HW is supported on this device. Can return true even if the user has
+     * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
+     */
+    public boolean isSfpsSupported() {
+        return getSfpsProps() != null && !getSfpsProps().isEmpty();
+    }
+
+    /**
+     * @return true if rear fps HW is supported on this device. Can return true even if the user has
+     * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
+     */
+    public boolean isRearFpsSupported() {
+        if (mFpProps != null) {
+            for (FingerprintSensorPropertiesInternal prop: mFpProps) {
+                if (prop.sensorType == TYPE_REAR) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     private String getErrorString(@Modality int modality, int error, int vendorCode) {
         switch (modality) {
@@ -1303,7 +1349,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         default void onEnrollmentsChanged(@Modality int modality) {}
 
         /**
-         * Called when UDFPS enrollments have changed. This is called after boot and on changes to
+         * Called when enrollments have changed. This is called after boot and on changes to
          * enrollment.
          */
         default void onEnrollmentsChanged(
@@ -1335,7 +1381,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
          * On devices with UDFPS, this is always called alongside
          * {@link #onFingerprintLocationChanged}.
          */
-        default void onUdfpsLocationChanged() {}
+        default void onUdfpsLocationChanged(UdfpsOverlayParams udfpsOverlayParams) {}
 
         /**
          * Called when the location of the face unlock sensor (typically the front facing camera)

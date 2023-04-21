@@ -18,6 +18,8 @@ package com.android.server.dreams;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -39,9 +41,12 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Executor;
 
 /**
  * A collection of tests to exercise {@link DreamOverlayService}.
@@ -59,6 +64,9 @@ public class DreamOverlayServiceTest {
 
     @Mock
     IDreamOverlayCallback mOverlayCallback;
+
+    @Mock
+    Executor mExecutor;
 
     /**
      * {@link TestDreamOverlayService} is a simple {@link DreamOverlayService} implementation for
@@ -78,8 +86,8 @@ public class DreamOverlayServiceTest {
 
         private final Monitor mMonitor;
 
-        TestDreamOverlayService(Monitor monitor) {
-            super();
+        TestDreamOverlayService(Monitor monitor, Executor executor) {
+            super(executor);
             mMonitor = monitor;
         }
 
@@ -118,13 +126,63 @@ public class DreamOverlayServiceTest {
     }
 
     /**
+     * Verifies that callbacks for subclasses are run on the provided executor.
+     */
+    @Test
+    public void testCallbacksRunOnExecutor() throws RemoteException {
+        final TestDreamOverlayService.Monitor monitor = Mockito.mock(
+                TestDreamOverlayService.Monitor.class);
+        final TestDreamOverlayService service = new TestDreamOverlayService(monitor, mExecutor);
+        final IBinder binder = service.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(binder);
+
+        final IDreamOverlayClient client = getClient(overlay);
+
+        // Start the dream.
+        client.startDream(mLayoutParams, mOverlayCallback,
+                FIRST_DREAM_COMPONENT.flattenToString(), false);
+
+        // The callback should not have run yet.
+        verify(monitor, never()).onStartDream();
+
+        // Run the Runnable sent to the executor.
+        ArgumentCaptor<Runnable> mRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mExecutor).execute(mRunnableCaptor.capture());
+        mRunnableCaptor.getValue().run();
+
+        // Callback is run.
+        verify(monitor).onStartDream();
+
+        // Verify onWakeUp is run on the executor.
+        client.wakeUp();
+        verify(monitor, never()).onWakeUp();
+        mRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mExecutor).execute(mRunnableCaptor.capture());
+        mRunnableCaptor.getValue().run();
+        verify(monitor).onWakeUp();
+
+        // Verify onEndDream is run on the executor.
+        client.endDream();
+        verify(monitor, never()).onEndDream();
+        mRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mExecutor).execute(mRunnableCaptor.capture());
+        mRunnableCaptor.getValue().run();
+        verify(monitor).onEndDream();
+    }
+
+    /**
      * Verifies that only the currently started dream is able to affect the overlay.
      */
     @Test
     public void testOverlayClientInteraction() throws RemoteException {
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mExecutor).execute(any());
+
         final TestDreamOverlayService.Monitor monitor = Mockito.mock(
                 TestDreamOverlayService.Monitor.class);
-        final TestDreamOverlayService service = new TestDreamOverlayService(monitor);
+        final TestDreamOverlayService service = new TestDreamOverlayService(monitor, mExecutor);
         final IBinder binder = service.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(binder);
 

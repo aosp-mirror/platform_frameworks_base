@@ -19,7 +19,7 @@ import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.graphics.RectF
 import com.android.systemui.Dumpable
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionListener

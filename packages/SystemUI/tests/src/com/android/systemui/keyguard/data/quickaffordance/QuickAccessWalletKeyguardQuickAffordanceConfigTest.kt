@@ -69,7 +69,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - keyguard showing - has wallet card - visible model`() = runBlockingTest {
+    fun affordance_keyguardShowing_hasWalletCard_visibleModel() = runBlockingTest {
         setUpState()
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
@@ -90,7 +90,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - wallet not enabled - model is none`() = runBlockingTest {
+    fun affordance_walletNotEnabled_modelIsNone() = runBlockingTest {
         setUpState(isWalletEnabled = false)
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
@@ -102,7 +102,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - query not successful - model is none`() = runBlockingTest {
+    fun affordance_queryNotSuccessful_modelIsNone() = runBlockingTest {
         setUpState(isWalletQuerySuccessful = false)
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
@@ -114,7 +114,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - no selected card - model is none`() = runBlockingTest {
+    fun affordance_noSelectedCard_modelIsNone() = runBlockingTest {
         setUpState(hasSelectedCard = false)
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
@@ -143,7 +143,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - default`() = runTest {
+    fun getPickerScreenState_default() = runTest {
         setUpState()
 
         assertThat(underTest.getPickerScreenState())
@@ -151,7 +151,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - unavailable`() = runTest {
+    fun getPickerScreenState_unavailable() = runTest {
         setUpState(
             isWalletServiceAvailable = false,
         )
@@ -161,7 +161,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - disabled when the feature is not enabled`() = runTest {
+    fun getPickerScreenState_disabledWhenTheFeatureIsNotEnabled() = runTest {
         setUpState(
             isWalletEnabled = false,
         )
@@ -171,7 +171,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - disabled when there is no card`() = runTest {
+    fun getPickerScreenState_disabledWhenThereIsNoCard() = runTest {
         setUpState(
             hasSelectedCard = false,
         )

@@ -99,9 +99,16 @@ public class SurfaceControlViewHost {
         @Override
         public ISurfaceSyncGroup getSurfaceSyncGroup() {
             CompletableFuture<ISurfaceSyncGroup> surfaceSyncGroup = new CompletableFuture<>();
-            mViewRoot.mHandler.post(
-                    () -> surfaceSyncGroup.complete(
-                            mViewRoot.getOrCreateSurfaceSyncGroup().mISurfaceSyncGroup));
+            // If the call came from in process and it's already running on the UI thread, return
+            // results immediately instead of posting to the main thread. If we post to the main
+            // thread, it will block itself and the return value will always be null.
+            if (Thread.currentThread() == mViewRoot.mThread) {
+                return mViewRoot.getOrCreateSurfaceSyncGroup().mISurfaceSyncGroup;
+            } else {
+                mViewRoot.mHandler.post(
+                        () -> surfaceSyncGroup.complete(
+                                mViewRoot.getOrCreateSurfaceSyncGroup().mISurfaceSyncGroup));
+            }
             try {
                 return surfaceSyncGroup.get(1, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -112,6 +119,8 @@ public class SurfaceControlViewHost {
     }
 
     private ISurfaceControlViewHost mRemoteInterface = new ISurfaceControlViewHostImpl();
+
+    private ViewRootImpl.ConfigChangedCallback mConfigChangedCallback;
 
     /**
      * Package encapsulating a Surface hierarchy which contains interactive view
@@ -296,10 +305,11 @@ public class SurfaceControlViewHost {
     /** @hide */
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm, @NonNull String callsite) {
+        mSurfaceControl = wwm.mRootSurface;
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout());
         mCloseGuard.openWithCallSite("release", callsite);
-        addConfigCallback(c, d);
+        setConfigCallback(c, d);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
 
@@ -349,21 +359,23 @@ public class SurfaceControlViewHost {
 
         mViewRoot = new ViewRootImpl(context, display, mWm, new WindowlessWindowLayout());
         mCloseGuard.openWithCallSite("release", callsite);
-        addConfigCallback(context, display);
+        setConfigCallback(context, display);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
 
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
-    private void addConfigCallback(Context c, Display d) {
+    private void setConfigCallback(Context c, Display d) {
         final IBinder token = c.getWindowContextToken();
-        mViewRoot.addConfigCallback((conf) -> {
+        mConfigChangedCallback = conf -> {
             if (token instanceof WindowTokenClient) {
                 final WindowTokenClient w = (WindowTokenClient)  token;
                 w.onConfigurationChanged(conf, d.getDisplayId(), true);
             }
-        });
+        };
+
+        ViewRootImpl.addConfigCallback(mConfigChangedCallback);
     }
 
     /**
@@ -378,8 +390,7 @@ public class SurfaceControlViewHost {
             mCloseGuard.warnIfOpen();
         }
         // We aren't on the UI thread here so we need to pass false to doDie
-        mViewRoot.die(false /* immediate */);
-        WindowManagerGlobal.getInstance().removeWindowlessRoot(mViewRoot);
+        doRelease(false /* immediate */);
     }
 
     /**
@@ -392,11 +403,17 @@ public class SurfaceControlViewHost {
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
             return new SurfacePackage(new SurfaceControl(mSurfaceControl, "getSurfacePackage"),
-                mAccessibilityEmbeddedConnection,
-                mWm.getFocusGrantToken(), mRemoteInterface);
+                mAccessibilityEmbeddedConnection, getFocusGrantToken(), mRemoteInterface);
         } else {
             return null;
         }
+    }
+
+    /**
+     * @hide
+     */
+    public @NonNull AttachedSurfaceControl getRootSurfaceControl() {
+        return mViewRoot;
     }
 
     /**
@@ -489,7 +506,16 @@ public class SurfaceControlViewHost {
      */
     public void release() {
         // ViewRoot will release mSurfaceControl for us.
-        mViewRoot.die(true /* immediate */);
+        doRelease(true /* immediate */);
+    }
+
+    private void doRelease(boolean immediate) {
+        if (mConfigChangedCallback != null) {
+            ViewRootImpl.removeConfigCallback(mConfigChangedCallback);
+            mConfigChangedCallback = null;
+        }
+
+        mViewRoot.die(immediate);
         WindowManagerGlobal.getInstance().removeWindowlessRoot(mViewRoot);
         mReleased = true;
         mCloseGuard.close();
@@ -499,7 +525,7 @@ public class SurfaceControlViewHost {
      * @hide
      */
     public IBinder getFocusGrantToken() {
-        return mWm.getFocusGrantToken();
+        return mWm.getFocusGrantToken(getWindowToken().asBinder());
     }
 
     private void addWindowToken(WindowManager.LayoutParams attrs) {

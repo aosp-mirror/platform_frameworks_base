@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Handler;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -95,7 +96,7 @@ class BLASTSyncEngine {
      */
     class SyncGroup {
         final int mSyncId;
-        final int mSyncMethod;
+        int mSyncMethod = METHOD_BLAST;
         final TransactionReadyListener mListener;
         final Runnable mOnTimeout;
         boolean mReady = false;
@@ -103,9 +104,8 @@ class BLASTSyncEngine {
         private SurfaceControl.Transaction mOrphanTransaction = null;
         private String mTraceName;
 
-        private SyncGroup(TransactionReadyListener listener, int id, String name, int method) {
+        private SyncGroup(TransactionReadyListener listener, int id, String name) {
             mSyncId = id;
-            mSyncMethod = method;
             mListener = listener;
             mOnTimeout = () -> {
                 Slog.w(TAG, "Sync group " + mSyncId + " timeout");
@@ -133,7 +133,7 @@ class BLASTSyncEngine {
             return mOrphanTransaction;
         }
 
-        private void onSurfacePlacement() {
+        private void tryFinish() {
             if (!mReady) return;
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: onSurfacePlacement checking %s",
                     mSyncId, mRootMembers);
@@ -168,14 +168,13 @@ class BLASTSyncEngine {
             class CommitCallback implements Runnable {
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
-                public void onCommitted() {
+                public void onCommitted(SurfaceControl.Transaction t) {
                     synchronized (mWm.mGlobalLock) {
                         if (ran) {
                             return;
                         }
-                        mWm.mH.removeCallbacks(this);
+                        mHandler.removeCallbacks(this);
                         ran = true;
-                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
                         for (WindowContainer wc : wcAwaitingCommit) {
                             wc.onSyncTransactionCommitted(t);
                         }
@@ -194,19 +193,19 @@ class BLASTSyncEngine {
                     Slog.e(TAG, "WM sent Transaction to organized, but never received" +
                            " commit callback. Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                    onCommitted();
-
+                    onCommitted(merged);
                 }
             };
             CommitCallback callback = new CommitCallback();
-            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::onCommitted);
-            mWm.mH.postDelayed(callback, BLAST_TIMEOUT_DURATION);
+            merged.addTransactionCommittedListener(Runnable::run,
+                    () -> callback.onCommitted(new SurfaceControl.Transaction()));
+            mHandler.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             mActiveSyncs.remove(mSyncId);
-            mWm.mH.removeCallbacks(mOnTimeout);
+            mHandler.removeCallbacks(mOnTimeout);
 
             // Immediately start the next pending sync-transaction if there is one.
             if (mActiveSyncs.size() == 0 && !mPendingSyncSets.isEmpty()) {
@@ -217,11 +216,17 @@ class BLASTSyncEngine {
                     throw new IllegalStateException("Pending Sync Set didn't start a sync.");
                 }
                 // Post this so that the now-playing transition setup isn't interrupted.
-                mWm.mH.post(() -> {
+                mHandler.post(() -> {
                     synchronized (mWm.mGlobalLock) {
                         pt.mApplySync.run();
                     }
                 });
+            }
+            // Notify idle listeners
+            for (int i = mOnIdleListeners.size() - 1; i >= 0; --i) {
+                // If an idle listener adds a sync, though, then stop notifying.
+                if (mActiveSyncs.size() > 0) break;
+                mOnIdleListeners.get(i).run();
             }
         }
 
@@ -229,7 +234,7 @@ class BLASTSyncEngine {
             if (mReady == ready) {
                 return;
             }
-            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready", mSyncId);
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready %b", mSyncId, ready);
             mReady = ready;
             if (!ready) return;
             mWm.mWindowPlacerLocked.requestTraversal();
@@ -270,6 +275,7 @@ class BLASTSyncEngine {
     }
 
     private final WindowManagerService mWm;
+    private final Handler mHandler;
     private int mNextSyncId = 0;
     private final SparseArray<SyncGroup> mActiveSyncs = new SparseArray<>();
 
@@ -280,21 +286,28 @@ class BLASTSyncEngine {
      */
     private final ArrayList<PendingSyncSet> mPendingSyncSets = new ArrayList<>();
 
+    private final ArrayList<Runnable> mOnIdleListeners = new ArrayList<>();
+
     BLASTSyncEngine(WindowManagerService wms) {
+        this(wms, wms.mH);
+    }
+
+    @VisibleForTesting
+    BLASTSyncEngine(WindowManagerService wms, Handler mainHandler) {
         mWm = wms;
+        mHandler = mainHandler;
     }
 
     /**
      * Prepares a {@link SyncGroup} that is not active yet. Caller must call {@link #startSyncSet}
      * before calling {@link #addToSyncSet(int, WindowContainer)} on any {@link WindowContainer}.
      */
-    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name, int method) {
-        return new SyncGroup(listener, mNextSyncId++, name, method);
+    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name) {
+        return new SyncGroup(listener, mNextSyncId++, name);
     }
 
-    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name,
-            int method) {
-        final SyncGroup s = prepareSyncSet(listener, name, method);
+    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
+        final SyncGroup s = prepareSyncSet(listener, name);
         startSyncSet(s, timeoutMs);
         return s.mSyncId;
     }
@@ -307,8 +320,8 @@ class BLASTSyncEngine {
         if (mActiveSyncs.size() != 0) {
             // We currently only support one sync at a time, so start a new SyncGroup when there is
             // another may cause issue.
-            ProtoLog.w(WM_DEBUG_SYNC_ENGINE,
-                    "SyncGroup %d: Started when there is other active SyncGroup", s.mSyncId);
+            Slog.e(TAG, "SyncGroup " + s.mSyncId
+                    + ": Started when there is other active SyncGroup");
         }
         mActiveSyncs.put(s.mSyncId, s);
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s",
@@ -327,11 +340,20 @@ class BLASTSyncEngine {
 
     @VisibleForTesting
     void scheduleTimeout(SyncGroup s, long timeoutMs) {
-        mWm.mH.postDelayed(s.mOnTimeout, timeoutMs);
+        mHandler.postDelayed(s.mOnTimeout, timeoutMs);
     }
 
     void addToSyncSet(int id, WindowContainer wc) {
         getSyncGroup(id).addToSync(wc);
+    }
+
+    void setSyncMethod(int id, int method) {
+        final SyncGroup syncGroup = getSyncGroup(id);
+        if (!syncGroup.mRootMembers.isEmpty()) {
+            throw new IllegalStateException(
+                    "Not allow to change sync method after adding group member, id=" + id);
+        }
+        syncGroup.mSyncMethod = method;
     }
 
     void setReady(int id, boolean ready) {
@@ -364,8 +386,13 @@ class BLASTSyncEngine {
     void onSurfacePlacement() {
         // backwards since each state can remove itself if finished
         for (int i = mActiveSyncs.size() - 1; i >= 0; --i) {
-            mActiveSyncs.valueAt(i).onSurfacePlacement();
+            mActiveSyncs.valueAt(i).tryFinish();
         }
+    }
+
+    /** Only use this for tests! */
+    void tryFinishForTest(int syncId) {
+        getSyncSet(syncId).tryFinish();
     }
 
     /**
@@ -393,5 +420,9 @@ class BLASTSyncEngine {
     /** @return {@code true} if there are any sync-sets waiting to start. */
     boolean hasPendingSyncSets() {
         return !mPendingSyncSets.isEmpty();
+    }
+
+    void addOnIdleListener(Runnable onIdleListener) {
+        mOnIdleListeners.add(onIdleListener);
     }
 }

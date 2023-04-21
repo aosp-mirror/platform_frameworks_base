@@ -18,7 +18,6 @@ package com.android.wm.shell.pip.phone;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -33,6 +32,7 @@ import android.view.DisplayInfo;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -74,7 +74,8 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Mock private Context mContext;
     @Mock private Resources mResources;
 
-    private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipDisplayLayoutState mPipDisplayLayoutState;
+    private TestPipSizeSpecHandler mPipSizeSpecHandler;
 
     /**
      * Sets up static Mockito session for SystemProperties and mocks necessary static methods.
@@ -82,8 +83,6 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     private static void setUpStaticSystemPropertiesSession() {
         sStaticMockitoSession = mockitoSession()
                 .mockStatic(SystemProperties.class).startMocking();
-        // make sure the feature flag is on
-        when(SystemProperties.getBoolean(anyString(), anyBoolean())).thenReturn(true);
         when(SystemProperties.get(anyString(), anyString())).thenAnswer(invocation -> {
             String property = invocation.getArgument(0);
             if (property.equals("com.android.wm.shell.pip.phone.def_percentage")) {
@@ -137,7 +136,6 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Before
     public void setUp() {
         initExpectedSizes();
-        setUpStaticSystemPropertiesSession();
 
         when(mResources.getDimensionPixelSize(anyInt())).thenReturn(DEFAULT_MIN_EDGE_SIZE);
         when(mResources.getFloat(anyInt())).thenReturn(OPTIMIZED_ASPECT_RATIO);
@@ -148,11 +146,6 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         // set up the mock context for spec handler specifically
         when(mContext.getResources()).thenReturn(mResources);
 
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
-
-        // no overridden min edge size by default
-        mPipSizeSpecHandler.setOverrideMinSize(null);
-
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.logicalWidth = DISPLAY_EDGE_SIZE;
         displayInfo.logicalHeight = DISPLAY_EDGE_SIZE;
@@ -161,7 +154,14 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         // this is done to avoid unnecessary mocking while allowing for custom display dimensions
         DisplayLayout displayLayout = new DisplayLayout(displayInfo, getContext().getResources(),
                 false, false);
-        mPipSizeSpecHandler.setDisplayLayout(displayLayout);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipDisplayLayoutState.setDisplayLayout(displayLayout);
+
+        setUpStaticSystemPropertiesSession();
+        mPipSizeSpecHandler = new TestPipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+
+        // no overridden min edge size by default
+        mPipSizeSpecHandler.setOverrideMinSize(null);
     }
 
     @After
@@ -210,5 +210,17 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         Size actualSize = mPipSizeSpecHandler.getSizeForAspectRatio(initSize, 9f / 16);
 
         Assert.assertEquals(expectedSize, actualSize);
+    }
+
+    static class TestPipSizeSpecHandler extends PipSizeSpecHandler {
+
+        TestPipSizeSpecHandler(Context context, PipDisplayLayoutState displayLayoutState) {
+            super(context, displayLayoutState);
+        }
+
+        @Override
+        boolean supportsPipSizeLargeScreen() {
+            return true;
+        }
     }
 }

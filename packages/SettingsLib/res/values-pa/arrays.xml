@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"ਚਾਲੂ"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"ਸਿਰਲੇਖ ਫਿਲਟਰ ਕੀਤੇ ਗਏ"</item>
-    <item msgid="4818549483446395865">"A2DP ਮੀਡੀਆ ਪੈਕੇਟ ਫਿਲਟਰ ਕੀਤੇ ਗਏ"</item>
-    <item msgid="8207123990453243311">"RFCOMM ਚੈਨਲ ਫਿਲਟਰ ਕੀਤੇ ਗਏ"</item>
+    <item msgid="195768089203590086">"ਸਿਰਫ਼ ACL ਸਿਰਲੇਖਾਂ ਨੂੰ ਛੱਡੋ"</item>
+    <item msgid="2776218217644557831">"A2DP ਮੀਡੀਆ ਪੈਕੇਟਾਂ ਨੂੰ ਫਿਲਟਰ ਕਰੋ"</item>
+    <item msgid="8163235976612675092">"RFCOMM ਚੈਨਲ ਨੂੰ ਫਿਲਟਰ ਕਰੋ"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"ਬੰਦ ਹੈ"</item>
-    <item msgid="5884245882825346396">"ਜਾਦੂ"</item>
-    <item msgid="6569400572915342949">"ਸਿਰਲੇਖ"</item>
-    <item msgid="1239386221416967664">"ਸਭ ਫਿਲਟਰ"</item>
+    <item msgid="3961868665260627524">"ਬੰਦ ਕਰੋ"</item>
+    <item msgid="2505973306504851132">"ਅੱਖਰ-ਚਿੰਨ੍ਹਾਂ ਦੀ ਸਤਰ ਨਾਲ ਭਰੋ"</item>
+    <item msgid="5883011000629613855">"ਸਿਰਫ਼ ਸਿਰਲੇਖ ਨੂੰ ਛੱਡੋ"</item>
+    <item msgid="1051534112762023603">"ਪੂਰੀ ਤਰ੍ਹਾਂ ਹਟਾਓ"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (ਪੂਰਵ-ਨਿਰਧਾਰਿਤ)"</item>

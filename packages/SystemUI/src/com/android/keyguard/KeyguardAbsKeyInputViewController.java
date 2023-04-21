@@ -44,7 +44,7 @@ import java.util.Map;
 public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKeyInputView>
         extends KeyguardInputViewController<T> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final LockPatternUtils mLockPatternUtils;
+    protected final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
@@ -107,14 +107,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         // start fresh
         mDismissing = false;
         mView.resetPasswordText(false /* animate */, false /* announce */);
-        // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                KeyguardUpdateMonitor.getCurrentUser());
-        if (shouldLockout(deadline)) {
-            handleAttemptLockout(deadline);
-        } else {
-            resetState();
-        }
+        resetState();
     }
 
     @Override
@@ -123,7 +116,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     }
 
     @Override
-    public void showMessage(CharSequence message, ColorStateList colorState) {
+    public void showMessage(CharSequence message, ColorStateList colorState, boolean animated) {
         if (mMessageAreaController == null) {
             return;
         }
@@ -131,7 +124,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         if (colorState != null) {
             mMessageAreaController.setNextMessageColor(colorState);
         }
-        mMessageAreaController.setMessage(message);
+        mMessageAreaController.setMessage(message, animated);
     }
 
     // Allow subclasses to override this behavior
@@ -277,6 +270,12 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     public void onResume(int reason) {
         mResumed = true;
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (shouldLockout(deadline)) {
+            handleAttemptLockout(deadline);
+        }
     }
 
     @Override

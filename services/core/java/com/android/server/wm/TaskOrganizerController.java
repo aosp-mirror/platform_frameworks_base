@@ -390,7 +390,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             boolean taskAppearedSent = t.mTaskAppearedSent;
             if (taskAppearedSent) {
                 if (t.getSurfaceControl() != null) {
-                    t.migrateToNewSurfaceControl(t.getSyncTransaction());
+                    t.migrateToNewSurfaceControl(t.getPendingTransaction());
                 }
                 t.mTaskAppearedSent = false;
             }
@@ -681,6 +681,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
         removalInfo.taskId = task.mTaskId;
         removalInfo.playRevealAnimation = prepareAnimation
+                && task.getDisplayContent() != null
                 && task.getDisplayInfo().state == Display.STATE_ON;
         final boolean playShiftUpAnimation = !task.inMultiWindowMode();
         final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
@@ -1166,12 +1167,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
-        enforceTaskPermission("setIsIgnoreOrientationRequestDisabled()");
+    public void setOrientationRequestPolicy(boolean isIgnoreOrientationRequestDisabled,
+            @Nullable int[] fromOrientations, @Nullable int[] toOrientations) {
+        enforceTaskPermission("setOrientationRequestPolicy()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mService.mWindowManager.setIsIgnoreOrientationRequestDisabled(isDisabled);
+                mService.mWindowManager
+                        .setOrientationRequestPolicy(isIgnoreOrientationRequestDisabled,
+                                fromOrientations, toOrientations);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

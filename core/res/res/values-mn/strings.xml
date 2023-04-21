@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi дуудлага"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi дуудлага"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Идэвхгүй"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi-р залгах"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Мобайл сүлжээгээр дуудлага хийх"</string>
@@ -462,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Аппыг ашиглаж байх үедээ зүрхний хэм, температур болон цусны хүчилтөрөгчийн хувь зэрэг биеийн мэдрэгчийн өгөгдөлд хандах боломжтой."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Ард нь байх үед зүрхний хэм зэрэг биеийн мэдрэгчийн өгөгдөлд хандаарай"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Апп ард нь байх үед зүрхний хэм, температур, цусны хүчилтөрөгчийн хувь зэрэг биеийн мэдрэгчийн өгөгдөлд хандах боломжтой."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Аппыг ашиглаж байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандана."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Аппыг ашиглаж байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандахыг аппад зөвшөөрнө."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Аппыг ард байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандана."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Аппыг ард байх үед биеийн мэдрэгчийн бугуйн температурын өгөгдөлд хандахыг аппад зөвшөөрнө."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Календарийн арга хэмжээ, дэлгэрэнгүйг унших"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Энэ апп таны таблетад хадгалсан календарийн бүх арга хэмжээг унших, календарийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Энэ апп таны Android TV төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
@@ -712,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Царайны үйл ажиллагааг цуцаллаа."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Хэрэглэгч Царайгаар түгжээ тайлахыг цуцалсан"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Хэт олон удаа оролдлоо. Дараа дахин оролдоно уу."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Хэт олон удаа оролдлоо. Царайгаар түгжээ тайлахыг идэвхгүй болгосон."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Хэт олон удаа оролдлоо. Оронд нь дэлгэцийн түгжээ оруулна уу."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Царайг бататгаж чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Та Царайгаар түгжээ тайлахыг тохируулаагүй байна"</string>
@@ -799,6 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Аппын онцлогуудын мэдээллийг үзэж эхлэхийг эзэмшигчид зөвшөөрдөг."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"түүврийн өндөр хувиар мэдрэгчийн өгөгдөлд хандах"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Аппад 200 Гц-ээс их хувиар мэдрэгчийн өгөгдлийг түүвэрлэх боломжийг олгодог"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"хэрэглэгчийн үйлдэлгүйгээр аппыг шинэчлэх"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Эзэмшигчид өмнө нь суулгасан аппыг хэрэглэгчийн үйлдэлгүйгээр шинэчлэхийг зөвшөөрнө"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
@@ -1393,7 +1393,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Оруулах аргыг сонгоно уу"</string>
     <string name="show_ime" msgid="6406112007347443383">"Биет гар идэвхтэй үед үүнийг дэлгэцэд харуулна уу"</string>
     <string name="hardware" msgid="1800597768237606953">"Хийсвэр гарыг харуулах"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Биет гарыг хэлбэрт оруулах"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>-г тохируулна уу"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Биет гарыг тохируулна уу"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Хэл болон бүдүүвчийг сонгохын тулд дарна уу"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1505,7 +1506,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Сүлжээ эсвэл VPN тохиргоог өөрчлөх"</string>
     <string name="upload_file" msgid="8651942222301634271">"Файл сонгох"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Сонгосон файл байхгүй"</string>
-    <string name="reset" msgid="3865826612628171429">"Бүгдийг цэвэрлэх"</string>
+    <string name="reset" msgid="3865826612628171429">"Шинэчлэх"</string>
     <string name="submit" msgid="862795280643405865">"Илгээх"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Жолоо барих апп ажиллаж байна"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Жолооны аппаас гарахын тулд товшино уу."</string>
@@ -1718,7 +1719,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Сонсголын төхөөрөмжүүд"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Дууны түвшний түлхүүрийг удаан дарсан. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г асаалаа."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дууны түвшний түлхүүрийг удаан дарсан. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г унтраалаа."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г ашиглахын тулд дууны түвшнийг ихэсгэх, багасгах түлхүүрийг 3 секундийн турш зэрэг дарна уу"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Дууны түвшний товчнуудыг суллана уу. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г асаахын тулд дууны түвшний 2 товчийг зэрэг 3 секундийн турш удаан дарна уу."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Хандалтын товчлуурыг товшихдоо ашиглах онцлогийг сонгоно уу:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Хандалтын зангаагаар ашиглах үйлчилгээг сонгоно уу (хоёр хуруугаараа дэлгэцийн доороос дээш хоёр хуруугаар шударна уу):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Хандалтын зангаагаар ашиглах онцлогийг сонгоно уу (гурван хуруугаар дэлгэцийн доороос дээш шударна уу):"</string>
@@ -1950,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> одоогоор боломжгүй байна. Үүнийг <xliff:g id="APP_NAME_1">%2$s</xliff:g>-р удирддаг."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дэлгэрэнгүй үзэх"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Аппыг түр зогсоохоо болих"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Ажлын аппуудыг асаах уу?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Ажлын аппууд болон мэдэгдлүүддээ хандах эрх аваарай"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Асаах"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Ажлын аппыг үргэлжлүүлэх үү?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Үргэлжлүүлэх"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Яаралтай тусламж"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Ажлын аппууд болон дуудлагууддаа хандах эрх аваарай"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апп боломжгүй байна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> яг одоо боломжгүй байна."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> боломжгүй байна"</string>
@@ -2164,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Асаахын тулд товших"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ямар ч ажлын апп байхгүй байна"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ямар ч хувийн апп байхгүй байна"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Хувийн профайл дээрээ <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Ажлын профайл дээрээ <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Хувийн хөтөч ашиглах"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ажлын хөтөч ашиглах"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Сүлжээний SIM-н түгжээг тайлах ПИН"</string>
@@ -2322,5 +2323,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> контент харуулахын тулд хоёр дэлгэцийг хоёуланг нь ашиглаж байна"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Төхөөрөмж хэт халуун байна"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Таны утас хэт халж байгаа тул Хоёр дэлгэц боломжгүй байна"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen боломжгүй байна"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Батарей хэмнэгч асаалттай байгаа тул Dual Screen боломжгүй байна. Та үүнийг Тохиргоонд унтрааж болно."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Тохиргоо руу очих"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Унтраах"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>-г тохируулсан"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Гарын бүдүүвчийг <xliff:g id="LAYOUT_1">%s</xliff:g> болгож тохируулсан. Өөрчлөхийн тулд товшино уу."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Гарын бүдүүвчийг <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> болгож тохируулсан. Өөрчлөхийн тулд товшино уу."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Гарын бүдүүвчийг <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> болгож тохируулсан. Өөрчлөхийн тулд товшино уу."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Гарын бүдүүвчийг <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> болгож тохируулсан… Өөрчлөхийн тулд товшино уу."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Биет гарыг тохируулсан"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Гарыг харахын тулд товшино уу"</string>
 </resources>

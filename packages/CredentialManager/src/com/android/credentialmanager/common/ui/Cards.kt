@@ -16,19 +16,22 @@
 
 package com.android.credentialmanager.common.ui
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.android.credentialmanager.ui.theme.Shapes
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 /**
  * Container card for the whole sheet.
@@ -40,21 +43,20 @@ import androidx.compose.ui.unit.dp
 fun SheetContainerCard(
     topAppBar: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
+    contentVerticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: LazyListScope.() -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxWidth().wrapContentHeight(),
         border = null,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                ElevationTokens.Level1
-            ),
+            containerColor = LocalAndroidColorScheme.current.colorSurfaceBright,
         ),
     ) {
         if (topAppBar != null) {
             topAppBar()
         }
-        Column(
+        LazyColumn(
             modifier = Modifier.padding(
                 start = 24.dp,
                 end = 24.dp,
@@ -63,6 +65,7 @@ fun SheetContainerCard(
             ).fillMaxWidth().wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
             content = content,
+            verticalArrangement = contentVerticalArrangement,
         )
     }
 }
@@ -79,7 +82,7 @@ fun CredentialContainerCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth().wrapContentHeight(),
-        shape = MaterialTheme.shapes.medium,
+        shape = Shapes.medium,
         border = null,
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent,

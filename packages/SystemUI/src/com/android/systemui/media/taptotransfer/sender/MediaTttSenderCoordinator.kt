@@ -56,6 +56,9 @@ constructor(
     private val uiEventLogger: MediaTttSenderUiEventLogger,
 ) : CoreStartable, Dumpable {
 
+    // Since the media transfer display is similar to a heads-up notification, use the same timeout.
+    private val defaultTimeout = context.resources.getInteger(R.integer.heads_up_notification_decay)
+
     // A map to store current chip state per id.
     private var stateMap: MutableMap<String, ChipStateSender> = mutableMapOf()
 
@@ -165,6 +168,12 @@ constructor(
                 logger.logPackageNotFound(packageName)
             }
 
+        val timeout =
+            when (chipStateSender.timeoutLength) {
+                TimeoutLength.DEFAULT -> defaultTimeout
+                TimeoutLength.LONG -> 2 * defaultTimeout
+            }
+
         return ChipbarInfo(
             // Display the app's icon as the start icon
             startIcon = icon.toTintedIcon(),
@@ -191,7 +200,7 @@ constructor(
             allowSwipeToDismiss = true,
             windowTitle = MediaTttUtils.WINDOW_TITLE_SENDER,
             wakeReason = MediaTttUtils.WAKE_REASON_SENDER,
-            timeoutMs = chipStateSender.timeout,
+            timeoutMs = timeout,
             id = routeInfo.id,
             priority = ViewPriority.NORMAL,
         )

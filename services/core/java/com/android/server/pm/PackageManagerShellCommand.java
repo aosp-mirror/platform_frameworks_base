@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
@@ -124,10 +125,12 @@ import dalvik.system.DexFile;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
@@ -348,6 +351,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runDisableVerificationForUid();
                 case "set-silent-updates-policy":
                     return runSetSilentUpdatesPolicy();
+                case "get-app-metadata":
+                    return runGetAppMetadata();
                 default: {
                     if (ART_SERVICE_COMMANDS.contains(cmd)) {
                         if (DexOptHelper.useArtService()) {
@@ -391,6 +396,11 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runLegacyDexoptCommand(@NonNull String cmd)
             throws RemoteException, LegacyDexoptDisabledException {
         Installer.checkLegacyDexoptDisabled();
+
+        if (!PackageManagerServiceUtils.isRootOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Dexopt shell commands need root or shell access");
+        }
+
         switch (cmd) {
             case "compile":
                 return runCompile();
@@ -687,7 +697,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         null /* usesSplitNames */, null /* configForSplit */,
                         null /* splitApkPaths */, null /* splitRevisionCodes */,
                         apkLite.getTargetSdkVersion(), null /* requiredSplitTypes */,
-                        null /* splitTypes */);
+                        null /* splitTypes */, apkLite.isAllowUpdateOwnership());
                 sessionSize += InstallLocationUtils.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
             } catch (IOException e) {
@@ -1945,6 +1955,8 @@ class PackageManagerShellCommand extends ShellCommand {
         List<String> packageNames = null;
         if (allPackages) {
             packageNames = mInterface.getAllPackages();
+            // Compiling the system server is only supported from odrefresh, so skip it.
+            packageNames.removeIf(packageName -> PLATFORM_PACKAGE_NAME.equals(packageName));
         } else {
             String packageName = getNextArg();
             if (packageName == null) {
@@ -2442,7 +2454,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     mInterface.getApplicationEnabledSetting(pkg, translatedUserId)));
             return 0;
         } else {
-            mInterface.setComponentEnabledSetting(cn, state, 0, translatedUserId);
+            mInterface.setComponentEnabledSetting(cn, state, 0, translatedUserId, "shell");
             getOutPrintWriter().println("Component " + cn.toShortString() + " new state: "
                     + enabledSettingToString(
                     mInterface.getComponentEnabledSetting(cn, translatedUserId)));
@@ -3536,6 +3548,30 @@ class PackageManagerShellCommand extends ShellCommand {
         return 1;
     }
 
+    private int runGetAppMetadata() {
+        final PrintWriter pw = getOutPrintWriter();
+        String pkgName = getNextArgRequired();
+        ParcelFileDescriptor pfd = null;
+        try {
+            pfd = mInterface.getAppMetadataFd(pkgName, mContext.getUserId());
+        } catch (RemoteException e) {
+            pw.println("Failure [" + e.getClass().getName() + " - " + e.getMessage() + "]");
+            return -1;
+        }
+        if (pfd != null) {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new ParcelFileDescriptor.AutoCloseInputStream(pfd)))) {
+                while (br.ready()) {
+                    pw.println(br.readLine());
+                }
+            } catch (IOException e) {
+                pw.println("Failure [" + e.getClass().getName() + " - " + e.getMessage() + "]");
+                return -1;
+            }
+        }
+        return 1;
+    }
+
     private int runArtServiceCommand() {
         try (var in = ParcelFileDescriptor.dup(getInFileDescriptor());
                 var out = ParcelFileDescriptor.dup(getOutFileDescriptor());
@@ -4395,15 +4431,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -f: force compilation even if not needed");
         pw.println("      -m: select compilation mode");
         pw.println("          MODE is one of the dex2oat compiler filters:");
-        pw.println("            assume-verified");
-        pw.println("            extract");
         pw.println("            verify");
-        pw.println("            quicken");
-        pw.println("            space-profile");
-        pw.println("            space");
         pw.println("            speed-profile");
         pw.println("            speed");
-        pw.println("            everything");
         pw.println("      -r: select compilation reason");
         pw.println("          REASON is one of:");
         for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {

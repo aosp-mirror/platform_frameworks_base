@@ -63,6 +63,18 @@ static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
     return SkMatrix::I();
 }
 
+static SkM44 GetPixelSnapMatrix(SkISize windowSize, int transform) {
+    // Small (~1/16th) nudge to ensure that pixel-aligned non-AA'd draws fill the
+    // desired fragment
+    static const SkScalar kOffset = 0.063f;
+    SkMatrix preRotation = GetPreTransformMatrix(windowSize, transform);
+    SkMatrix invert;
+    LOG_ALWAYS_FATAL_IF(!preRotation.invert(&invert));
+    return SkM44::Translate(kOffset, kOffset)
+            .postConcat(SkM44(preRotation))
+            .preConcat(SkM44(invert));
+}
+
 static bool ConnectAndSetWindowDefaults(ANativeWindow* window) {
     ATRACE_CALL();
 
@@ -178,6 +190,8 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
 
     outWindowInfo->preTransform =
             GetPreTransformMatrix(outWindowInfo->size, outWindowInfo->transform);
+    outWindowInfo->pixelSnapMatrix =
+            GetPixelSnapMatrix(outWindowInfo->size, outWindowInfo->transform);
 
     err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
     if (err != 0 || query_value < 0) {
@@ -413,6 +427,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
         }
 
         mWindowInfo.preTransform = GetPreTransformMatrix(mWindowInfo.size, mWindowInfo.transform);
+        mWindowInfo.pixelSnapMatrix = GetPixelSnapMatrix(mWindowInfo.size, mWindowInfo.transform);
     }
 
     uint32_t idx;
@@ -438,9 +453,15 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     VulkanSurface::NativeBufferInfo* bufferInfo = &mNativeBuffers[idx];
 
     if (bufferInfo->skSurface.get() == nullptr) {
+        SkSurfaceProps surfaceProps;
+        if (mWindowInfo.colorMode != ColorMode::Default) {
+            surfaceProps = SkSurfaceProps(SkSurfaceProps::kAlwaysDither_Flag | surfaceProps.flags(),
+                                          surfaceProps.pixelGeometry());
+        }
         bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
                 mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
-                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr, /*from_window=*/true);
+                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, &surfaceProps,
+                /*from_window=*/true);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer,

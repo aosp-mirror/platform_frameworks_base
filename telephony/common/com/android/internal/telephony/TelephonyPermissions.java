@@ -331,8 +331,8 @@ public final class TelephonyPermissions {
      * Same as {@link #checkCallingOrSelfReadSubscriberIdentifiers(Context, int, String, String,
      * String)} except this allows an additional parameter reportFailure. Caller may not want to
      * report a failure when this is an internal/intermediate check, for example,
-     * SubscriptionController calls this with an INVALID_SUBID to check if caller has the required
-     * permissions to bypass carrier privilege checks.
+     * SubscriptionManagerService calls this with an INVALID_SUBID to check if caller has the
+     * required permissions to bypass carrier privilege checks.
      * @param reportFailure Indicates if failure should be reported.
      */
     public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
@@ -838,6 +838,34 @@ public final class TelephonyPermissions {
                     + packageName + ", uid=" + Binder.getCallingUid());
         }
         return Integer.MAX_VALUE;
+    }
+
+    /**
+     * Check if calling user is associated with the given subscription.
+     * Subscription-user association check is skipped if destination address is an emergency number.
+     *
+     * @param context Context
+     * @param subId subscription ID
+     * @param callerUserHandle caller user handle
+     * @param destAddr destination address of the message
+     * @return  true if destAddr is an emergency number
+     * and return false if user is not associated with the subscription.
+     */
+    public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
+            @NonNull UserHandle callerUserHandle, @NonNull String destAddr) {
+        // Skip subscription-user association check for emergency numbers
+        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (tm != null && tm.isEmergencyNumber(destAddr)) {
+                Log.d(LOG_TAG, "checkSubscriptionAssociatedWithUser:"
+                        + " destAddr is emergency number");
+                return true;
+            }
+        }   finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return checkSubscriptionAssociatedWithUser(context, subId, callerUserHandle);
     }
 
     /**

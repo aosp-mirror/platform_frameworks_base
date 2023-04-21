@@ -18,23 +18,25 @@ package android.net.wifi.sharedconnectivity.app;
 
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_PSK;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_PHONE;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_CLOUD_SELF;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_PHONE;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.google.common.truth.Truth.assertThat;
 
+import android.os.Bundle;
 import android.os.Parcel;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 /**
- * Unit tests for {@link android.app.sharedconnectivity.KnownNetwork}.
+ * Unit tests for {@link KnownNetwork}.
  */
 @SmallTest
 public class KnownNetworkTest {
@@ -42,15 +44,20 @@ public class KnownNetworkTest {
     private static final int NETWORK_SOURCE = NETWORK_SOURCE_NEARBY_SELF;
     private static final String SSID = "TEST_SSID";
     private static final int[] SECURITY_TYPES = {SECURITY_TYPE_WEP};
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder("TEST_NAME", "TEST_MODEL")
+                    .setDeviceType(DEVICE_TYPE_TABLET).setConnectionStrength(2)
+                    .setBatteryPercentage(50).build();
+    private static final String BUNDLE_KEY = "INT-KEY";
+    private static final int BUNDLE_VALUE = 1;
+
     private static final int NETWORK_SOURCE_1 = NETWORK_SOURCE_CLOUD_SELF;
     private static final String SSID_1 = "TEST_SSID1";
     private static final int[] SECURITY_TYPES_1 = {SECURITY_TYPE_PSK};
-    private static final DeviceInfo DEVICE_INFO_1 = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_PHONE).setDeviceName("TEST_NAME_1")
-            .setModelName("TEST_MODEL_1").setConnectionStrength(3).setBatteryPercentage(33).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO1 =
+            new NetworkProviderInfo.Builder("TEST_NAME_1", "TEST_MODEL_1")
+                    .setDeviceType(DEVICE_TYPE_PHONE).setConnectionStrength(3)
+                    .setBatteryPercentage(33).build();
 
     /**
      * Verifies parcel serialization/deserialization.
@@ -69,8 +76,8 @@ public class KnownNetworkTest {
         parcelR.setDataPosition(0);
         KnownNetwork fromParcel = KnownNetwork.CREATOR.createFromParcel(parcelR);
 
-        assertEquals(network, fromParcel);
-        assertEquals(network.hashCode(), fromParcel.hashCode());
+        assertThat(fromParcel).isEqualTo(network);
+        assertThat(fromParcel.hashCode()).isEqualTo(network.hashCode());
     }
 
     /**
@@ -80,20 +87,21 @@ public class KnownNetworkTest {
     public void testEqualsOperation() {
         KnownNetwork network1 = buildKnownNetworkBuilder().build();
         KnownNetwork network2 = buildKnownNetworkBuilder().build();
-        assertEquals(network1, network2);
+        assertThat(network1).isEqualTo(network2);
 
         KnownNetwork.Builder builder = buildKnownNetworkBuilder()
                 .setNetworkSource(NETWORK_SOURCE_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
         builder = buildKnownNetworkBuilder().setSsid(SSID_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildKnownNetworkBuilder().setSecurityTypes(SECURITY_TYPES_1);
-        assertNotEquals(network1, builder.build());
+        builder = buildKnownNetworkBuilder();
+        Arrays.stream(SECURITY_TYPES_1).forEach(builder::addSecurityType);
+        assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildKnownNetworkBuilder().setDeviceInfo(DEVICE_INFO_1);
-        assertNotEquals(network1, builder.build());
+        builder = buildKnownNetworkBuilder().setNetworkProviderInfo(NETWORK_PROVIDER_INFO1);
+        assertThat(builder.build()).isNotEqualTo(network1);
     }
 
     /**
@@ -102,14 +110,35 @@ public class KnownNetworkTest {
     @Test
     public void testGetMethods() {
         KnownNetwork network = buildKnownNetworkBuilder().build();
-        assertEquals(network.getNetworkSource(), NETWORK_SOURCE);
-        assertEquals(network.getSsid(), SSID);
-        assertArrayEquals(network.getSecurityTypes(), SECURITY_TYPES);
-        assertEquals(network.getDeviceInfo(), DEVICE_INFO);
+        ArraySet<Integer> securityTypes = new ArraySet<>();
+        Arrays.stream(SECURITY_TYPES).forEach(securityTypes::add);
+
+        assertThat(network.getNetworkSource()).isEqualTo(NETWORK_SOURCE);
+        assertThat(network.getSsid()).isEqualTo(SSID);
+        assertThat(network.getSecurityTypes()).containsExactlyElementsIn(securityTypes);
+        assertThat(network.getNetworkProviderInfo()).isEqualTo(NETWORK_PROVIDER_INFO);
+        assertThat(network.getExtras().getInt(BUNDLE_KEY)).isEqualTo(BUNDLE_VALUE);
+    }
+
+    @Test
+    public void testHashCode() {
+        KnownNetwork network1 = buildKnownNetworkBuilder().build();
+        KnownNetwork network2 = buildKnownNetworkBuilder().build();
+
+        assertThat(network1.hashCode()).isEqualTo(network2.hashCode());
     }
 
     private KnownNetwork.Builder buildKnownNetworkBuilder() {
-        return new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE).setSsid(SSID)
-                .setSecurityTypes(SECURITY_TYPES).setDeviceInfo(DEVICE_INFO);
+        KnownNetwork.Builder builder = new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
+                .setSsid(SSID).setNetworkProviderInfo(NETWORK_PROVIDER_INFO)
+                .setExtras(buildBundle());
+        Arrays.stream(SECURITY_TYPES).forEach(builder::addSecurityType);
+        return builder;
+    }
+
+    private Bundle buildBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(BUNDLE_KEY, BUNDLE_VALUE);
+        return bundle;
     }
 }

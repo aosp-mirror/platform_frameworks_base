@@ -76,14 +76,18 @@ class WallpaperWindowToken extends WindowToken {
             return;
         }
         mShowWhenLocked = showWhenLocked;
+        if (mDisplayContent.mWallpaperController.mIsLockscreenLiveWallpaperEnabled) {
+            // Move the window token to the front (private) or back (showWhenLocked). This is
+            // possible
+            // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER
+            // windows.
+            final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
 
-        // Move the window token to the front (private) or back (showWhenLocked). This is possible
-        // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER windows.
-        final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
-
-        // Note: Moving all the way to the front or back breaks ordering based on addition times.
-        // We should never have more than one non-animating token of each type.
-        getParent().positionChildAt(position, this /* child */, false  /*includingParents */);
+            // Note: Moving all the way to the front or back breaks ordering based on addition
+            // times.
+            // We should never have more than one non-animating token of each type.
+            getParent().positionChildAt(position, this /* child */, false /*includingParents */);
+        }
     }
 
     boolean canShowWhenLocked() {
@@ -125,26 +129,10 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     void updateWallpaperWindows(boolean visible) {
-        boolean changed = false;
         if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
                     token, visible);
             setVisibility(visible);
-            changed = true;
-        }
-        if (mTransitionController.isShellTransitionsEnabled()) {
-            // Apply legacy fixed rotation to wallpaper if it is becoming visible
-            if (!mTransitionController.useShellTransitionsRotation() && changed && visible) {
-                final WindowState wallpaperTarget =
-                        mDisplayContent.mWallpaperController.getWallpaperTarget();
-                if (wallpaperTarget != null && wallpaperTarget.mToken.hasFixedRotationTransform()) {
-                    linkFixedRotationTransform(wallpaperTarget.mToken);
-                }
-            }
-            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
-            // when finishing transition. Otherwise commitVisibility() is already called from above
-            // setVisibility().
-            return;
         }
 
         final WindowState wallpaperTarget =
@@ -167,6 +155,12 @@ class WallpaperWindowToken extends WindowToken {
                 // rotation
                 linkFixedRotationTransform(wallpaperTarget.mToken);
             }
+        }
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
+            // when finishing transition. Otherwise commitVisibility() is already called from above
+            // setVisibility().
+            return;
         }
 
         setVisible(visible);

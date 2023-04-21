@@ -18,6 +18,7 @@ package com.android.server;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ContentResolver;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -27,6 +28,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -41,6 +43,7 @@ final class HsumBootUserInitializer {
 
     private final UserManagerInternal mUmi;
     private final ActivityManagerService mAms;
+    private final PackageManagerService mPms;
     private final ContentResolver mContentResolver;
 
     private final ContentObserver mDeviceProvisionedObserver =
@@ -63,20 +66,23 @@ final class HsumBootUserInitializer {
 
     /** Static factory method for creating a {@link HsumBootUserInitializer} instance. */
     public static @Nullable HsumBootUserInitializer createInstance(ActivityManagerService am,
-            ContentResolver contentResolver, boolean shouldAlwaysHaveMainUser) {
+            PackageManagerService pms, ContentResolver contentResolver,
+            boolean shouldAlwaysHaveMainUser) {
 
         if (!UserManager.isHeadlessSystemUserMode()) {
             return null;
         }
         return new HsumBootUserInitializer(
                 LocalServices.getService(UserManagerInternal.class),
-                am, contentResolver, shouldAlwaysHaveMainUser);
+                am, pms, contentResolver, shouldAlwaysHaveMainUser);
     }
 
     private HsumBootUserInitializer(UserManagerInternal umi, ActivityManagerService am,
-            ContentResolver contentResolver, boolean shouldAlwaysHaveMainUser) {
+            PackageManagerService pms, ContentResolver contentResolver,
+            boolean shouldAlwaysHaveMainUser) {
         mUmi = umi;
         mAms = am;
+        mPms = pms;
         mContentResolver = contentResolver;
         mShouldAlwaysHaveMainUser = shouldAlwaysHaveMainUser;
     }
@@ -131,7 +137,8 @@ final class HsumBootUserInitializer {
 
         try {
             t.traceBegin("getBootUser");
-            final int bootUser = mUmi.getBootUser();
+            final int bootUser = mUmi.getBootUser(/* waitUntilSet= */ mPms
+                    .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, /* version= */0));
             t.traceEnd();
             t.traceBegin("switchToBootUser-" + bootUser);
             switchToBootUser(bootUser);

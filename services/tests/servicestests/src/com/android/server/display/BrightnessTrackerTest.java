@@ -176,21 +176,18 @@ public class BrightnessTrackerTest {
         assertFalse(mInjector.mColorSamplingEnabled);
 
         // Update brightness config to enabled color sampling.
-        mTracker.setBrightnessConfiguration(buildBrightnessConfiguration(
-                /* collectColorSamples= */ true));
+        mTracker.setShouldCollectColorSample(/* collectColorSamples= */ true);
         mInjector.waitForHandler();
         assertTrue(mInjector.mColorSamplingEnabled);
 
         // Update brightness config to disable color sampling.
-        mTracker.setBrightnessConfiguration(buildBrightnessConfiguration(
-                /* collectColorSamples= */ false));
+        mTracker.setShouldCollectColorSample(/* collectColorSamples= */ false);
         mInjector.waitForHandler();
         assertFalse(mInjector.mColorSamplingEnabled);
 
         // Pretend screen is off, update config to turn on color sampling.
         mInjector.sendScreenChange(/* screenOn= */ false);
-        mTracker.setBrightnessConfiguration(buildBrightnessConfiguration(
-                /* collectColorSamples= */ true));
+        mTracker.setShouldCollectColorSample(/* collectColorSamples= */ true);
         mInjector.waitForHandler();
         assertFalse(mInjector.mColorSamplingEnabled);
 
@@ -883,7 +880,7 @@ public class BrightnessTrackerTest {
     private void startTracker(BrightnessTracker tracker, float initialBrightness,
             boolean collectColorSamples) {
         tracker.start(initialBrightness);
-        tracker.setBrightnessConfiguration(buildBrightnessConfiguration(collectColorSamples));
+        tracker.setShouldCollectColorSample(collectColorSamples);
         mInjector.waitForHandler();
     }
 

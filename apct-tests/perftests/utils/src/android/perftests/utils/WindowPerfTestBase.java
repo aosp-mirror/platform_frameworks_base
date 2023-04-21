@@ -73,7 +73,7 @@ public class WindowPerfTestBase {
     }
 
     public static void startAsyncAtrace(String tags) {
-        getUiAutomation().executeShellCommand("atrace -b 32768 --async_start " + tags);
+        getUiAutomation().executeShellCommand("atrace --async_start -b 32768 -c " + tags);
         // Avoid atrace isn't ready immediately.
         SystemClock.sleep(TimeUnit.NANOSECONDS.toMillis(TIME_1_S_IN_NS));
     }

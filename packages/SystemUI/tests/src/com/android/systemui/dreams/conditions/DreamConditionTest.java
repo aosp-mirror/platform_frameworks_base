@@ -18,19 +18,20 @@ package com.android.systemui.dreams.conditions;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.BroadcastReceiver;
+import android.app.DreamManager;
 import android.content.Context;
-import android.content.Intent;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.condition.Condition;
 
@@ -50,6 +51,12 @@ public class DreamConditionTest extends SysuiTestCase {
     @Mock
     Condition.Callback mCallback;
 
+    @Mock
+    DreamManager mDreamManager;
+
+    @Mock
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -59,15 +66,26 @@ public class DreamConditionTest extends SysuiTestCase {
      * Ensure a dreaming state immediately triggers the condition.
      */
     @Test
-    public void testInitialState() {
-        final Intent intent = new Intent(Intent.ACTION_DREAMING_STARTED);
-        when(mContext.registerReceiver(any(), any())).thenReturn(intent);
-        final DreamCondition condition = new DreamCondition(mContext);
+    public void testInitialDreamingState() {
+        when(mDreamManager.isDreaming()).thenReturn(true);
+        final DreamCondition condition = new DreamCondition(mDreamManager, mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
-        condition.start();
 
         verify(mCallback).onConditionChanged(eq(condition));
         assertThat(condition.isConditionMet()).isTrue();
+    }
+
+    /**
+     * Ensure a non-dreaming state does not trigger the condition.
+     */
+    @Test
+    public void testInitialNonDreamingState() {
+        when(mDreamManager.isDreaming()).thenReturn(false);
+        final DreamCondition condition = new DreamCondition(mDreamManager, mKeyguardUpdateMonitor);
+        condition.addCallback(mCallback);
+
+        verify(mCallback, never()).onConditionChanged(eq(condition));
+        assertThat(condition.isConditionMet()).isFalse();
     }
 
     /**
@@ -75,16 +93,21 @@ public class DreamConditionTest extends SysuiTestCase {
      */
     @Test
     public void testChange() {
-        final Intent intent = new Intent(Intent.ACTION_DREAMING_STARTED);
-        final ArgumentCaptor<BroadcastReceiver> receiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        when(mContext.registerReceiver(receiverCaptor.capture(), any())).thenReturn(intent);
-        final DreamCondition condition = new DreamCondition(mContext);
+        final ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCaptor =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+        when(mDreamManager.isDreaming()).thenReturn(true);
+        final DreamCondition condition = new DreamCondition(mDreamManager, mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
-        condition.start();
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture());
+
         clearInvocations(mCallback);
-        receiverCaptor.getValue().onReceive(mContext, new Intent(Intent.ACTION_DREAMING_STOPPED));
+        callbackCaptor.getValue().onDreamingStateChanged(false);
         verify(mCallback).onConditionChanged(eq(condition));
         assertThat(condition.isConditionMet()).isFalse();
+
+        clearInvocations(mCallback);
+        callbackCaptor.getValue().onDreamingStateChanged(true);
+        verify(mCallback).onConditionChanged(eq(condition));
+        assertThat(condition.isConditionMet()).isTrue();
     }
 }

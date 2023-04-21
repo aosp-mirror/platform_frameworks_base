@@ -22,16 +22,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:translationZ="0dp"
-        android:scaleType="centerCrop"
+        android:scaleType="matrix"
         android:adjustViewBounds="true"
         android:clipToOutline="true"
+        android:layerType="hardware"
         android:background="@drawable/bg_smartspace_media_item"/>
 
     <!-- App icon -->
     <com.android.internal.widget.CachingIconView
         android:id="@+id/media_rec_app_icon"
-        android:layout_width="@dimen/qs_media_rec_icon_top_margin"
-        android:layout_height="@dimen/qs_media_rec_icon_top_margin"
+        android:layout_width="@dimen/qs_media_rec_album_icon_size"
+        android:layout_height="@dimen/qs_media_rec_album_icon_size"
+        android:minWidth="@dimen/qs_media_rec_album_icon_size"
+        android:minHeight="@dimen/qs_media_rec_album_icon_size"
         android:layout_marginStart="@dimen/qs_media_info_spacing"
         android:layout_marginTop="@dimen/qs_media_info_spacing"/>
 

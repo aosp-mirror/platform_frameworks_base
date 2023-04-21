@@ -41,9 +41,10 @@ import java.util.List;
  * </p>
  *
  * <p>
- * All instances of CameraMetadata are immutable. The list of keys with {@link #getKeys()}
- * never changes, nor do the values returned by any key with {@code #get} throughout
- * the lifetime of the object.
+ * All instances of CameraMetadata are immutable. Beginning with API level 32, the list of keys
+ * returned by {@link #getKeys()} may change depending on the state of the device, as may the
+ * values returned by any key with {@code #get} throughout the lifetime of the object. For
+ * information on whether a specific value is fixed, see the documentation for its key.
  * </p>
  *
  * @see CameraDevice
@@ -159,7 +160,7 @@ public abstract class CameraMetadata<TKey> {
      * Optionally, if {@code filterTags} is not {@code null}, then filter out any keys
      * whose native {@code tag} is not in {@code filterTags}. The {@code filterTags} array will be
      * sorted as a side effect.
-     * {@code includeSynthetic} Includes public syntenthic fields by default.
+     * {@code includeSynthetic} Includes public synthetic fields by default.
      * </p>
      */
      /*package*/ @SuppressWarnings("unchecked")
@@ -2308,7 +2309,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>An external flash has been turned on.</p>
      * <p>It informs the camera device that an external flash has been turned on, and that
-     * metering (and continuous focus if active) should be quickly recaculated to account
+     * metering (and continuous focus if active) should be quickly recalculated to account
      * for the external flash. Otherwise, this mode acts like ON.</p>
      * <p>When the external flash is turned off, AE mode should be changed to one of the
      * other available AE modes.</p>
@@ -3285,6 +3286,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Automatically select ON or OFF based on the system level preferences.</p>
      * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @hide
      */
     public static final int CONTROL_AUTOFRAMING_AUTO = 2;
 
@@ -3645,17 +3647,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>This is the default sensor pixel mode. This is the only sensor pixel mode
-     * supported unless a camera device advertises
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.</p>
+     * <p>This is the default sensor pixel mode.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
     public static final int SENSOR_PIXEL_MODE_DEFAULT = 0;
 
     /**
-     * <p>This sensor pixel mode is offered by devices with capability
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.
-     * In this mode, sensors typically do not bin pixels, as a result can offer larger
+     * <p>In this mode, sensors typically do not bin pixels, as a result can offer larger
      * image sizes.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */

@@ -700,6 +700,7 @@ public class HdmiControlService extends SystemService {
         }
         if (mCecController == null) {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
+            return;
         }
         if (mMhlController == null) {
             mMhlController = HdmiMhlControllerStub.create(this);
@@ -712,9 +713,6 @@ public class HdmiControlService extends SystemService {
         }
         if (mEarcController == null) {
             Slog.i(TAG, "Device does not support eARC.");
-        }
-        if (mCecController == null && mEarcController == null) {
-            return;
         }
         mHdmiCecNetwork = new HdmiCecNetwork(this, mCecController, mMhlController);
         if (isCecControlEnabled()) {
@@ -1269,6 +1267,7 @@ public class HdmiControlService extends SystemService {
         // It's now safe to flush existing local devices from mCecController since they were
         // already moved to 'localDevices'.
         clearCecLocalDevices();
+        mHdmiCecNetwork.clearDeviceList();
         allocateLogicalAddress(localDevices, initiatedBy);
     }
 
@@ -1305,6 +1304,7 @@ public class HdmiControlService extends SystemService {
                                         HdmiControlManager.POWER_STATUS_ON, getCecVersion());
                                 localDevice.setDeviceInfo(deviceInfo);
                                 mHdmiCecNetwork.addLocalDevice(deviceType, localDevice);
+                                mHdmiCecNetwork.addCecDevice(localDevice.getDeviceInfo());
                                 mCecController.addLogicalAddress(logicalAddress);
                                 allocatedDevices.add(localDevice);
                             }
@@ -3776,11 +3776,12 @@ public class HdmiControlService extends SystemService {
                 }
                 try {
                     record.mListener.onReceived(srcAddress, destAddress, params, hasVendorId);
+                    return true;
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to notify vendor command reception", e);
                 }
             }
-            return true;
+            return false;
         }
     }
 

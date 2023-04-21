@@ -16,10 +16,13 @@
 
 package android.hardware.input
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Handler
 import android.os.HandlerExecutor
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
+import androidx.test.core.app.ApplicationProvider
 import com.android.server.testutils.any
 import org.junit.After
 import org.junit.Before
@@ -27,7 +30,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoJUnitRunner
 import java.util.concurrent.Executor
@@ -51,6 +56,7 @@ class KeyboardBacklightListenerTest {
     private lateinit var testLooper: TestLooper
     private var registeredListener: IKeyboardBacklightListener? = null
     private lateinit var executor: Executor
+    private lateinit var context: Context
     private lateinit var inputManager: InputManager
 
     @Mock
@@ -58,10 +64,14 @@ class KeyboardBacklightListenerTest {
 
     @Before
     fun setUp() {
+        context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
+        InputManagerGlobal.resetInstance(iInputManagerMock)
         testLooper = TestLooper()
         executor = HandlerExecutor(Handler(testLooper.looper))
         registeredListener = null
-        inputManager = InputManager.resetInstance(iInputManagerMock)
+        inputManager = InputManager(context)
+        `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
+                .thenReturn(inputManager)
 
         // Handle keyboard backlight listener registration.
         doAnswer {
@@ -89,7 +99,7 @@ class KeyboardBacklightListenerTest {
 
     @After
     fun tearDown() {
-        InputManager.clearInstance()
+        InputManagerGlobal.clearInstance()
     }
 
     private fun notifyKeyboardBacklightChanged(

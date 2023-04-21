@@ -109,6 +109,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -119,7 +120,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
@@ -263,6 +263,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final ConfigurationController mConfigurationController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
     private final VolumePanelFactory mVolumePanelFactory;
+    private final CsdWarningDialog.Factory mCsdWarningDialogFactory;
     private final ActivityStarter mActivityStarter;
 
     private boolean mShowing;
@@ -311,6 +312,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             InteractionJankMonitor interactionJankMonitor,
             DeviceConfigProxy deviceConfigProxy,
             Executor executor,
+            CsdWarningDialog.Factory csdWarningDialogFactory,
             DumpManager dumpManager) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
@@ -322,6 +324,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mConfigurationController = configurationController;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
         mVolumePanelFactory = volumePanelFactory;
+        mCsdWarningDialogFactory = csdWarningDialogFactory;
         mActivityStarter = activityStarter;
         mShowActiveStreamOnly = showActiveStreamOnly();
         mHasSeenODICaptionsTooltip =
@@ -1508,6 +1511,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mHandler.removeMessages(H.SHOW);
         if (mIsAnimatingDismiss) {
             Log.d(TAG, "dismissH: isAnimatingDismiss");
+            Trace.endSection();
             return;
         }
         mIsAnimatingDismiss = true;
@@ -2083,21 +2087,21 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         rescheduleTimeoutH();
     }
 
-    private void showCsdWarningH(int csdWarning, int durationMs) {
+    @VisibleForTesting void showCsdWarningH(int csdWarning, int durationMs) {
         synchronized (mSafetyWarningLock) {
+
             if (mCsdDialog != null) {
                 return;
             }
-            mCsdDialog = new CsdWarningDialog(csdWarning,
-                    mContext, mController.getAudioManager()) {
-                @Override
-                protected void cleanUp() {
-                    synchronized (mSafetyWarningLock) {
-                        mCsdDialog = null;
-                    }
-                    recheckH(null);
+
+            final Runnable cleanUp = () -> {
+                synchronized (mSafetyWarningLock) {
+                    mCsdDialog = null;
                 }
+                recheckH(null);
             };
+
+            mCsdDialog = mCsdWarningDialogFactory.create(csdWarning, cleanUp);
             mCsdDialog.show();
         }
         recheckH(null);
@@ -2336,6 +2340,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 case STATE_CHANGED: onStateChangedH(mState); break;
                 case CSD_TIMEOUT: onCsdTimeoutH(); break;
             }
+        }
+    }
+
+    @VisibleForTesting
+    void clearInternalHandlerAfterTest() {
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
         }
     }
 

@@ -39,7 +39,7 @@ public class KeyboardShortcutsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (mIsShortcutListSearchEnabled && Utilities.isTablet(context)) {
+        if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(context)) {
             if (Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
                 KeyboardShortcutListSearch.show(context, -1 /* deviceId unknown */);
             } else if (Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {

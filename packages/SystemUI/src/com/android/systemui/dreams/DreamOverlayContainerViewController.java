@@ -19,11 +19,13 @@ package com.android.systemui.dreams;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
-import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM;
-import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP;
 
+import android.animation.Animator;
 import android.content.res.Resources;
+import android.graphics.Region;
 import android.os.Handler;
 import android.util.MathUtils;
 import android.view.View;
@@ -31,10 +33,11 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.animation.Interpolators;
+import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
@@ -54,11 +57,14 @@ import javax.inject.Named;
  * View controller for {@link DreamOverlayContainerView}.
  */
 @DreamOverlayComponent.DreamOverlayScope
-public class DreamOverlayContainerViewController extends ViewController<DreamOverlayContainerView> {
+public class DreamOverlayContainerViewController extends
+        ViewController<DreamOverlayContainerView> implements
+        LowLightTransitionCoordinator.LowLightEnterListener {
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
     private final BlurUtils mBlurUtils;
     private final DreamOverlayAnimationsController mDreamOverlayAnimationsController;
     private final DreamOverlayStateController mStateController;
+    private final LowLightTransitionCoordinator mLowLightTransitionCoordinator;
 
     private final ComplicationHostViewController mComplicationHostViewController;
 
@@ -143,19 +149,18 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             };
 
     /**
-     * If true, overlay entry animations should be skipped once.
-     *
-     * This is turned on when exiting low light and should be turned off once the entry animations
-     * are skipped once.
+     * If {@code true}, the dream has just transitioned from the low light dream back to the user
+     * dream and we should play an entry animation where the overlay slides in downwards from the
+     * top instead of the typicla slide in upwards from the bottom.
      */
-    private boolean mSkipEntryAnimations;
+    private boolean mExitingLowLight;
 
     private final DreamOverlayStateController.Callback
             mDreamOverlayStateCallback =
             new DreamOverlayStateController.Callback() {
                 @Override
                 public void onExitLowLight() {
-                    mSkipEntryAnimations = true;
+                    mExitingLowLight = true;
                 }
             };
 
@@ -165,6 +170,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             DreamOverlayStatusBarViewController statusBarViewController,
+            LowLightTransitionCoordinator lowLightTransitionCoordinator,
             BlurUtils blurUtils,
             @Main Handler handler,
             @Main Resources resources,
@@ -182,6 +188,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mBlurUtils = blurUtils;
         mDreamOverlayAnimationsController = animationsController;
         mStateController = stateController;
+        mLowLightTransitionCoordinator = lowLightTransitionCoordinator;
 
         mBouncerlessScrimController = bouncerlessScrimController;
         mBouncerlessScrimController.addCallback(mBouncerlessExpansionCallback);
@@ -208,6 +215,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mStatusBarViewController.init();
         mComplicationHostViewController.init();
         mDreamOverlayAnimationsController.init(mView);
+        mLowLightTransitionCoordinator.setLowLightEnterListener(this);
     }
 
     @Override
@@ -216,17 +224,16 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        final Region emptyRegion = Region.obtain();
+        mView.getRootSurfaceControl().setTouchableRegion(emptyRegion);
+        emptyRegion.recycle();
 
         // Start dream entry animations. Skip animations for low light clock.
         if (!mStateController.isLowLightActive()) {
-            mDreamOverlayAnimationsController.startEntryAnimations();
-
-            if (mSkipEntryAnimations) {
-                // If we're transitioning from the low light dream back to the user dream, skip the
-                // overlay animations and show immediately.
-                mDreamOverlayAnimationsController.endAnimations();
-                mSkipEntryAnimations = false;
-            }
+            // If this is transitioning from the low light dream to the user dream, the overlay
+            // should translate in downwards instead of upwards.
+            mDreamOverlayAnimationsController.startEntryAnimations(mExitingLowLight);
+            mExitingLowLight = false;
         }
     }
 
@@ -309,5 +316,13 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         }
 
         mDreamOverlayAnimationsController.wakeUp(onAnimationEnd, callbackExecutor);
+    }
+
+    @Override
+    public Animator onBeforeEnterLowLight() {
+        // Return the animator so that the transition coordinator waits for the overlay exit
+        // animations to finish before entering low light, as otherwise the default DreamActivity
+        // animation plays immediately and there's no time for this animation to play.
+        return mDreamOverlayAnimationsController.startExitAnimations();
     }
 }

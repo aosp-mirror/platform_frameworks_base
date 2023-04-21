@@ -16,17 +16,12 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_GO_TO_APP;
-import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_NONE;
-import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_TRANSFER;
-import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
-import static android.media.RouteListingPreference.Item.SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED;
-import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_NONE;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -210,7 +205,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         && mController.isSubStatusSupported()
                         && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
-                            (device.hasOngoingSession() && currentlyConnected);
+                            (device.hasOngoingSession() && (currentlyConnected || isDeviceIncluded(
+                                    mController.getSelectedMediaDevice(), device)));
                     boolean isHost = device.isHostForOngoingSession()
                             && isActiveWithOngoingSession;
                     if (isHost) {
@@ -229,10 +225,17 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         if (isActiveWithOngoingSession) {
                             //Selected device which has ongoing session, disable seekbar since we
                             //only allow volume control on Host
-                            initSeekbar(device, isCurrentSeekbarInvisible);
                             mCurrentActivePosition = position;
                         }
-                        setUpDeviceIcon(device);
+                        boolean showSeekbar =
+                                (!device.hasOngoingSession() && currentlyConnected);
+                        if (showSeekbar) {
+                            updateTitleIcon(R.drawable.media_output_icon_volume,
+                                    mController.getColorItemContent());
+                            initSeekbar(device, isCurrentSeekbarInvisible);
+                        } else {
+                            setUpDeviceIcon(device);
+                        }
                         mSubTitleText.setText(device.getSubtextString());
                         Drawable deviceStatusIcon =
                                 device.hasOngoingSession() ? mContext.getDrawable(
@@ -246,8 +249,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         updateTwoLineLayoutContentAlpha(
                                 updateClickActionBasedOnSelectionBehavior(device)
                                         ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
-                        setTwoLineLayout(device, isActiveWithOngoingSession /* bFocused */,
-                                isActiveWithOngoingSession /* showSeekBar */,
+                        setTwoLineLayout(device, currentlyConnected /* bFocused */,
+                                showSeekbar  /* showSeekBar */,
                                 false /* showProgressBar */, true /* showSubtitle */,
                                 deviceStatusIcon != null /* showStatus */,
                                 isActiveWithOngoingSession /* isFakeActive */);
@@ -296,6 +299,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             && mController.isAdvancedLayoutSupported()) {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
+                        updateTitleIcon(R.drawable.media_output_icon_volume,
+                                mController.getColorItemContent());
                         boolean isDeviceDeselectable = isDeviceIncluded(
                                 mController.getDeselectableMediaDevice(), device);
                         updateGroupableCheckBox(true, isDeviceDeselectable, device);
@@ -343,7 +348,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             updateDeviceStatusIcon(deviceStatusIcon);
                             mStatusIcon.setVisibility(View.VISIBLE);
                         }
-                        updateTwoLineLayoutContentAlpha(
+                        updateSingleLineLayoutContentAlpha(
                                 updateClickActionBasedOnSelectionBehavior(device)
                                         ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
                     } else {
@@ -367,11 +372,18 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mStatusIcon.setAlpha(alphaValue);
         }
 
+        private void updateSingleLineLayoutContentAlpha(float alphaValue) {
+            mTitleIcon.setAlpha(alphaValue);
+            mTitleText.setAlpha(alphaValue);
+            mStatusIcon.setAlpha(alphaValue);
+        }
+
         private void updateEndClickAreaAsSessionEditing(MediaDevice device) {
             mEndClickIcon.setOnClickListener(null);
             mEndTouchArea.setOnClickListener(null);
             updateEndClickAreaColor(mController.getColorSeekbarProgress());
-            mEndClickIcon.setColorFilter(mController.getColorItemContent());
+            mEndClickIcon.setImageTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
             mEndClickIcon.setOnClickListener(
                     v -> mController.tryToLaunchInAppRoutingIntent(device.getId(), v));
             mEndTouchArea.setOnClickListener(v -> mCheckBox.performClick());
@@ -379,8 +391,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
         public void updateEndClickAreaColor(int color) {
             if (mController.isAdvancedLayoutSupported()) {
-                mEndTouchArea.getBackground().setColorFilter(
-                        new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+                mEndTouchArea.setBackgroundTintList(
+                        ColorStateList.valueOf(color));
             }
         }
 
@@ -394,22 +406,22 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         private void updateConnectionFailedStatusIcon() {
             mStatusIcon.setImageDrawable(
                     mContext.getDrawable(R.drawable.media_output_status_failed));
-            mStatusIcon.setColorFilter(mController.getColorItemContent());
+            mStatusIcon.setImageTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
         }
 
         private void updateDeviceStatusIcon(Drawable drawable) {
             mStatusIcon.setImageDrawable(drawable);
-            mStatusIcon.setColorFilter(mController.getColorItemContent());
+            mStatusIcon.setImageTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
             if (drawable instanceof AnimatedVectorDrawable) {
                 ((AnimatedVectorDrawable) drawable).start();
             }
         }
 
         private void updateProgressBarColor() {
-            mProgressBar.getIndeterminateDrawable().setColorFilter(
-                    new PorterDuffColorFilter(
-                            mController.getColorItemContent(),
-                            PorterDuff.Mode.SRC_IN));
+            mProgressBar.getIndeterminateDrawable().setTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
         }
 
         public void updateEndClickArea(MediaDevice device, boolean isDeviceDeselectable) {
@@ -419,9 +431,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mEndTouchArea.setImportantForAccessibility(
                     View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             if (mController.isAdvancedLayoutSupported()) {
-                mEndTouchArea.getBackground().setColorFilter(
-                        new PorterDuffColorFilter(mController.getColorItemBackground(),
-                                PorterDuff.Mode.SRC_IN));
+                mEndTouchArea.setBackgroundTintList(
+                        ColorStateList.valueOf(mController.getColorItemBackground()));
             }
             setUpContentDescriptionForView(mEndTouchArea, true, device);
         }
@@ -450,11 +461,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new));
                 final Drawable addDrawable = mContext.getDrawable(R.drawable.ic_add);
                 mTitleIcon.setImageDrawable(addDrawable);
-                mTitleIcon.setColorFilter(mController.getColorItemContent());
+                mTitleIcon.setImageTintList(
+                        ColorStateList.valueOf(mController.getColorItemContent()));
                 if (mController.isAdvancedLayoutSupported()) {
-                    mIconAreaLayout.getBackground().setColorFilter(
-                            new PorterDuffColorFilter(mController.getColorItemBackground(),
-                                    PorterDuff.Mode.SRC_IN));
+                    mIconAreaLayout.setBackgroundTintList(
+                            ColorStateList.valueOf(mController.getColorItemBackground()));
                 }
                 mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
@@ -534,11 +545,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         @DoNotInline
         static Drawable getDeviceStatusIconBasedOnSelectionBehavior(MediaDevice device,
                 Context context) {
-            switch (device.getSubtext()) {
-                case SUBTEXT_AD_ROUTING_DISALLOWED:
-                case SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED:
+            switch (device.getSelectionBehavior()) {
+                case SELECTION_BEHAVIOR_NONE:
                     return context.getDrawable(R.drawable.media_output_status_failed);
-                case SUBTEXT_SUBSCRIPTION_REQUIRED:
+                case SELECTION_BEHAVIOR_TRANSFER:
+                    return null;
+                case SELECTION_BEHAVIOR_GO_TO_APP:
                     return context.getDrawable(R.drawable.media_output_status_help);
             }
             return null;

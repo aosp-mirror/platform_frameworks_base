@@ -19,15 +19,15 @@ package com.android.wm.shell.flicker.pip
 import android.app.Instrumentation
 import android.content.Intent
 import android.platform.test.annotations.Presubmit
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
+import android.tools.common.Rotation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
+import android.tools.device.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.PipAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.BaseTest
 import com.google.common.truth.Truth
 import org.junit.Test
@@ -70,7 +70,7 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
     ): FlickerBuilder.() -> Unit {
         return {
             setup {
-                setRotation(PlatformConsts.Rotation.ROTATION_0)
+                setRotation(Rotation.ROTATION_0)
                 removeAllTasksButHome()
                 pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
             }

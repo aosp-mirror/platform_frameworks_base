@@ -1553,9 +1553,7 @@ public final class InputMethodManager {
         if (fallbackContext == null) {
             return false;
         }
-        if (!isStylusHandwritingEnabled(fallbackContext)) {
-            return false;
-        }
+
         return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(userId);
     }
 
@@ -1650,6 +1648,7 @@ public final class InputMethodManager {
      *
      * @param userId user ID to query
      * @return {@link List} of {@link InputMethodInfo}.
+     * @see #getEnabledInputMethodSubtypeListAsUser(String, boolean, int)
      * @hide
      */
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
@@ -1675,6 +1674,27 @@ public final class InputMethodManager {
                 imi == null ? null : imi.getId(),
                 allowsImplicitlyEnabledSubtypes,
                 UserHandle.myUserId());
+    }
+
+    /**
+     * Returns a list of enabled input method subtypes for the specified input method info for the
+     * specified user.
+     *
+     * @param imeId IME ID to be queried about.
+     * @param allowsImplicitlyEnabledSubtypes {@code true} to include implicitly enabled subtypes.
+     * @param userId user ID to be queried about.
+     *               {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required if this is
+     *               different from the calling process user ID.
+     * @return {@link List} of {@link InputMethodSubtype}.
+     * @see #getEnabledInputMethodListAsUser(int)
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
+            @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
+        return IInputMethodManagerGlobalInvoker.getEnabledInputMethodSubtypeList(
+                Objects.requireNonNull(imeId), allowsImplicitlyEnabledSubtypes, userId);
     }
 
     /**
@@ -2244,11 +2264,6 @@ public final class InputMethodManager {
         }
 
         boolean useDelegation = !TextUtils.isEmpty(delegatorPackageName);
-        if (!isStylusHandwritingEnabled(view.getContext())) {
-            Log.w(TAG, "Stylus handwriting pref is disabled. "
-                    + "Ignoring calls to start stylus handwriting.");
-            return false;
-        }
 
         checkFocus();
         synchronized (mH) {
@@ -2264,21 +2279,13 @@ public final class InputMethodManager {
             }
             if (useDelegation) {
                 return IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegation(
-                        mClient, view.getContext().getOpPackageName(), delegatorPackageName);
+                        mClient, UserHandle.myUserId(), view.getContext().getOpPackageName(),
+                        delegatorPackageName);
             } else {
                 IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
             }
             return false;
         }
-    }
-
-    private boolean isStylusHandwritingEnabled(@NonNull Context context) {
-        if (Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
-            Log.d(TAG, "Stylus handwriting pref is disabled.");
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -2344,13 +2351,9 @@ public final class InputMethodManager {
             fallbackImm.prepareStylusHandwritingDelegation(delegatorView, delegatePackageName);
         }
 
-        if (!isStylusHandwritingEnabled(delegatorView.getContext())) {
-            Log.w(TAG, "Stylus handwriting pref is disabled. "
-                    + "Ignoring prepareStylusHandwritingDelegation().");
-            return;
-        }
         IInputMethodManagerGlobalInvoker.prepareStylusHandwritingDelegation(
                 mClient,
+                UserHandle.myUserId(),
                 delegatePackageName,
                 delegatorView.getContext().getOpPackageName());
     }

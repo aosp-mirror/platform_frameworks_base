@@ -21,8 +21,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
@@ -30,11 +28,13 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLoggerFake
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,19 +66,21 @@ class CameraToggleTileTest : SysuiTestCase() {
     private lateinit var privacyController: IndividualSensorPrivacyController
     @Mock
     private lateinit var keyguardStateController: KeyguardStateController
+    @Mock
+    private lateinit var uiEventLogger: QsEventLoggerFake
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: CameraToggleTile
-    private val uiEventLogger: UiEventLogger = UiEventLoggerFake()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         whenever(host.context).thenReturn(mContext)
-        whenever(host.uiEventLogger).thenReturn(uiEventLogger)
 
-        tile = CameraToggleTile(host,
+        tile = CameraToggleTile(
+                host,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 metricsLogger,
@@ -88,6 +90,12 @@ class CameraToggleTileTest : SysuiTestCase() {
                 qsLogger,
                 privacyController,
                 keyguardStateController)
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     @Test

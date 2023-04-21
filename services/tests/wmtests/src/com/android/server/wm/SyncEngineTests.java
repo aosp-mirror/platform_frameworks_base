@@ -22,7 +22,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.BLASTSyncEngine.METHOD_BLAST;
 import static com.android.server.wm.BLASTSyncEngine.METHOD_NONE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -42,6 +41,8 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.testutils.TestHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -363,7 +364,8 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = startSyncSet(bse, listener, METHOD_NONE);
+        final int id = startSyncSet(bse, listener);
+        bse.setSyncMethod(id, METHOD_NONE);
         bse.addToSyncSet(id, mAppWindow.mToken);
         mAppWindow.prepareSync();
         assertFalse(mAppWindow.shouldSyncWithBuffers());
@@ -371,14 +373,52 @@ public class SyncEngineTests extends WindowTestsBase {
         mAppWindow.removeImmediately();
     }
 
-    static int startSyncSet(BLASTSyncEngine engine,
-            BLASTSyncEngine.TransactionReadyListener listener) {
-        return startSyncSet(engine, listener, METHOD_BLAST);
+    @Test
+    public void testQueueSyncSet() {
+        final TestHandler testHandler = new TestHandler(null);
+        TestWindowContainer mockWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer mockWC2 = new TestWindowContainer(mWm, true /* waiter */);
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine(testHandler);
+
+        BLASTSyncEngine.TransactionReadyListener listener = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = startSyncSet(bse, listener);
+        bse.addToSyncSet(id, mockWC);
+        bse.setReady(id);
+        bse.onSurfacePlacement();
+        verify(listener, times(0)).onTransactionReady(eq(id), notNull());
+
+        final int[] nextId = new int[]{-1};
+        bse.queueSyncSet(
+                () -> nextId[0] = startSyncSet(bse, listener),
+                () -> {
+                    bse.setReady(nextId[0]);
+                    bse.addToSyncSet(nextId[0], mockWC2);
+                });
+
+        // Make sure it is queued
+        assertEquals(-1, nextId[0]);
+
+        // Finish the original sync and see that we've started a new sync-set immediately but
+        // that the readiness was posted.
+        mockWC.onSyncFinishedDrawing();
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
+        bse.onSurfacePlacement();
+        verify(listener, times(1)).onTransactionReady(eq(id), notNull());
+
+        assertTrue(nextId[0] != -1);
+        assertFalse(bse.isReady(nextId[0]));
+
+        // now make sure the applySync callback was posted.
+        testHandler.flush();
+        assertTrue(bse.isReady(nextId[0]));
     }
 
     static int startSyncSet(BLASTSyncEngine engine,
-            BLASTSyncEngine.TransactionReadyListener listener, int method) {
-        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "", method);
+            BLASTSyncEngine.TransactionReadyListener listener) {
+        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "Test");
     }
 
     static class TestWindowContainer extends WindowContainer {

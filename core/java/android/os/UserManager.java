@@ -2433,21 +2433,24 @@ public class UserManager {
     }
 
     /**
-     * Used to check if the context user is an admin user. An admin user is allowed to
+     * Used to check if the context user is an admin user. An admin user may be allowed to
      * modify or configure certain settings that aren't available to non-admin users,
      * create and delete additional users, etc. There can be more than one admin users.
      *
      * @return whether the context user is an admin user.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(anyOf = {
-            Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS,
-            Manifest.permission.QUERY_USERS})
-    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.CREATE_USERS,
+                    Manifest.permission.QUERY_USERS})
     public boolean isAdminUser() {
-        return isUserAdmin(getContextUserIfAppropriate());
+        try {
+            return mService.isAdminUser(getContextUserIfAppropriate());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -3053,13 +3056,14 @@ public class UserManager {
     }
 
     /**
-     * See {@link com.android.server.pm.UserManagerInternal#getDisplayAssignedToUser(int)}.
+     * See {@link com.android.server.pm.UserManagerInternal#getMainDisplayAssignedToUser(int)}.
      *
      * @hide
      */
-    public int getDisplayIdAssignedToUser() {
+    @TestApi
+    public int getMainDisplayIdAssignedToUser() {
         try {
-            return mService.getDisplayIdAssignedToUser();
+            return mService.getMainDisplayIdAssignedToUser();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3702,17 +3706,24 @@ public class UserManager {
      * {@link android.Manifest.permission#CREATE_USERS} suffices if flags are in
      * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION.
      *
+     *
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
      * @return the {@link UserInfo} object for the created user.
      *
      * @throws UserOperationException if the user could not be created.
+     *
+     * @deprecated Pre-created users are deprecated. This method should no longer be used, and will
+     *             be removed once all the callers are removed.
+     *
      * @hide
      */
+    @Deprecated
     @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
     public @NonNull UserInfo preCreateUser(@NonNull String userType)
             throws UserOperationException {
+        Log.w(TAG, "preCreateUser(): Pre-created user is deprecated.");
         try {
             return mService.preCreateUserWithThrow(userType);
         } catch (ServiceSpecificException e) {
@@ -3970,6 +3981,9 @@ public class UserManager {
      * The new user is created but not initialized. After switching into the user for the first
      * time, the preferred user name and account information are used by the setup process for that
      * user.
+     *
+     * This API should only be called if the current user is an {@link #isAdminUser() admin} user,
+     * as otherwise the returned intent will not be able to create a user.
      *
      * @param userName Optional name to assign to the user.
      * @param accountName Optional account name that will be used by the setup wizard to initialize
@@ -4289,8 +4303,12 @@ public class UserManager {
     /**
      * Returns information for all users on this device, based on the filtering parameters.
      *
+     * @deprecated Pre-created users are deprecated and no longer supported.
+     *             Use {@link #getUsers()}, {@link #getUsers(boolean)}, or {@link #getAliveUsers()}
+     *             instead.
      * @hide
      */
+    @Deprecated
     @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
@@ -5594,16 +5612,15 @@ public class UserManager {
      *
      * @see #KEY_RESTRICTIONS_PENDING
      *
-     * @deprecated Use
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. an Enterprise Device Policy Controller (DPC) and a Supervision admin.
+     * This API will only to return the restrictions set by the DPCs. To retrieve restrictions
+     * set by all managing apps, use
      * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
-     * Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it is
-     * possible for there to be multiple managing agents on the device with the ability to set
-     * restrictions. This API will only to return the restrictions set by device policy controllers
-     * (DPCs)
      *
      * @see DevicePolicyManager
      */
-    @Deprecated
     @WorkerThread
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public Bundle getApplicationRestrictions(String packageName) {
@@ -5616,12 +5633,15 @@ public class UserManager {
     }
 
     /**
-     * @deprecated Use
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. an Enterprise Device Policy Controller (DPC) and a Supervision admin.
+     * This API will only to return the restrictions set by the DPCs. To retrieve restrictions
+     * set by all managing apps, use
      * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
      *
      * @hide
      */
-    @Deprecated
     @WorkerThread
     public Bundle getApplicationRestrictions(String packageName, UserHandle user) {
         try {

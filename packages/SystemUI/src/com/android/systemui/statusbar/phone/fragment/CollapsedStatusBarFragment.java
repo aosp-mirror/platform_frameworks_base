@@ -44,16 +44,16 @@ import android.widget.LinearLayout;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.animation.Animator;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
@@ -107,7 +107,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private PhoneStatusBarView mStatusBar;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationPanelViewController mNotificationPanelViewController;
+    private final ShadeViewController mShadeViewController;
     private LinearLayout mEndSideContent;
     private View mClockView;
     private View mOngoingCallChip;
@@ -198,7 +198,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
             CarrierConfigTracker carrierConfigTracker,
@@ -221,7 +221,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mDarkIconManagerFactory = darkIconManagerFactory;
         mKeyguardStateController = keyguardStateController;
-        mNotificationPanelViewController = notificationPanelViewController;
+        mShadeViewController = shadeViewController;
         mStatusBarStateController = statusBarStateController;
         mCommandQueue = commandQueue;
         mCarrierConfigTracker = carrierConfigTracker;
@@ -453,9 +453,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     protected int adjustDisableFlags(int state) {
         boolean headsUpVisible =
                 mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
-        if (headsUpVisible) {
-            state |= DISABLE_CLOCK;
-        }
 
         if (!mKeyguardStateController.isLaunchTransitionFadingAway()
                 && !mKeyguardStateController.isKeyguardFadingAway()
@@ -470,6 +467,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (mOngoingCallController.hasOngoingCall()) {
             state &= ~DISABLE_ONGOING_CALL_CHIP;
         } else {
+            state |= DISABLE_ONGOING_CALL_CHIP;
+        }
+
+        if (headsUpVisible) {
+            // Disable everything on the left side of the status bar, since the app name for the
+            // heads up notification appears there instead.
+            state |= DISABLE_CLOCK;
             state |= DISABLE_ONGOING_CALL_CHIP;
         }
 
@@ -505,7 +509,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private boolean shouldHideNotificationIcons() {
         if (!mShadeExpansionStateManager.isClosed()
-                && mNotificationPanelViewController.hideStatusBarIconsWhenExpanded()) {
+                && mShadeViewController.shouldHideStatusBarIconsWhenExpanded()) {
             return true;
         }
 

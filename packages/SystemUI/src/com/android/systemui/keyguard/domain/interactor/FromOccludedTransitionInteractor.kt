@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -47,6 +47,7 @@ constructor(
         listenForOccludedToLockscreen()
         listenForOccludedToDreaming()
         listenForOccludedToAodOrDozing()
+        listenForOccludedToGone()
     }
 
     private fun listenForOccludedToDreaming() {
@@ -72,17 +73,60 @@ constructor(
     private fun listenForOccludedToLockscreen() {
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { (isOccluded, lastStartedKeyguardState) ->
+                .sample(
+                    combine(
+                        keyguardInteractor.isKeyguardShowing,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
                     // Occlusion signals come from the framework, and should interrupt any
                     // existing transition
-                    if (!isOccluded && lastStartedKeyguardState.to == KeyguardState.OCCLUDED) {
+                    if (
+                        !isOccluded &&
+                            isShowing &&
+                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
+                    ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
                                 KeyguardState.OCCLUDED,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(TO_LOCKSCREEN_DURATION),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForOccludedToGone() {
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded
+                .sample(
+                    combine(
+                        keyguardInteractor.isKeyguardShowing,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
+                    // Occlusion signals come from the framework, and should interrupt any
+                    // existing transition
+                    if (
+                        !isOccluded &&
+                            !isShowing &&
+                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.OCCLUDED,
+                                KeyguardState.GONE,
+                                getAnimator(),
                             )
                         )
                     }

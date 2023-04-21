@@ -106,7 +106,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `Setting a setting selects the affordance`() =
+    fun settingAsettingSelectsTheAffordance() =
         testScope.runTest {
             val job = underTest.startSyncing()
 
@@ -129,7 +129,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Clearing a setting selects the affordance`() =
+    fun clearingAsettingSelectsTheAffordance() =
         testScope.runTest {
             val job = underTest.startSyncing()
 
@@ -156,7 +156,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Selecting an affordance sets its setting`() =
+    fun selectingAnAffordanceSetsItsSetting() =
         testScope.runTest {
             val job = underTest.startSyncing()
 
@@ -172,7 +172,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
         }
 
     @Test
-    fun `Unselecting an affordance clears its setting`() =
+    fun unselectingAnAffordanceClearsItsSetting() =
         testScope.runTest {
             val job = underTest.startSyncing()
 

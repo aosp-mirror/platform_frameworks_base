@@ -57,6 +57,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.Manifest.permission;
 import android.accounts.Account;
+import android.annotation.BroadcastBehavior;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -3998,6 +3999,27 @@ public class DevicePolicyManager {
     public static final String EXTRA_RESOURCE_IDS =
             "android.app.extra.RESOURCE_IDS";
 
+    /**
+     * Broadcast Action: Broadcast sent to indicate that the device financing state has changed.
+     *
+     * <p>This occurs when, for example, a financing kiosk app has been added or removed.
+     *
+     * <p>To query the current device financing state see {@link #isDeviceFinanced}.
+     *
+     * <p>This will be delivered to the following apps if they include a receiver for this action
+     * in their manifest:
+     * <ul>
+     *     <li>Device owner admins.
+     *     <li>Organization-owned profile owner admins
+     *     <li>The supervision app
+     *     <li>The device management role holder
+     * </ul>
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true, includeBackground = true)
+    public static final String ACTION_DEVICE_FINANCING_STATE_CHANGED =
+            "android.app.admin.action.DEVICE_FINANCING_STATE_CHANGED";
+
     /** Allow the user to choose whether to enable MTE on the device. */
     public static final int MTE_NOT_CONTROLLED_BY_POLICY = 0;
 
@@ -6391,7 +6413,7 @@ public class DevicePolicyManager {
     public void lockNow(@LockNowFlag int flags) {
         if (mService != null) {
             try {
-                mService.lockNow(flags, mParentInstance);
+                mService.lockNow(flags, mContext.getPackageName(), mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8372,8 +8394,7 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call this method; if it has
-     * not, a security exception will be thrown, or the caller must hold the permission
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
+     * not, a security exception will be thrown.
      * <p>
      * <b>Note</b>, this policy type is deprecated for legacy device admins since
      * {@link android.os.Build.VERSION_CODES#Q}. On Android
@@ -8389,8 +8410,7 @@ public class DevicePolicyManager {
                      the caller is not a device admin
      * @param disabled Whether or not the camera should be disabled.
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
-     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} and the caller does not hold
-     *             the permisisons {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
     public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {
@@ -9612,7 +9632,8 @@ public class DevicePolicyManager {
      * @see #isProfileOwnerApp
      * @see #isDeviceOwnerApp
      * @param admin Which {@link DeviceAdminReceiver} this request is associate with.
-     * @param profileName The name of the profile.
+     * @param profileName The name of the profile. If the name is longer than 200 characters
+     *                    it will be truncated.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setProfileName(@NonNull ComponentName admin, String profileName) {
@@ -13624,8 +13645,8 @@ public class DevicePolicyManager {
      * privacy-sensitive events happening outside the managed profile would have been redacted
      * already.
      *
-     * @param admin Which device admin this request is associated with. Null if the caller is not
-     *              a device admin
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *              if called by a delegated app.
      * @param enabled whether security logging should be enabled or not.
      * @throws SecurityException if the caller is not permitted to control security logging.
      * @see #setAffiliationIds
@@ -13677,8 +13698,8 @@ public class DevicePolicyManager {
      * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
      * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device admin this request is associated with. Null if the caller is not
-     *              a device admin.
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *              if called by a delegated app.
      * @return the new batch of security logs which is a list of {@link SecurityEvent},
      * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
      * @throws SecurityException if the caller is not allowed to access security logging,
@@ -13835,8 +13856,8 @@ public class DevicePolicyManager {
      * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
      * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device admin this request is associated with. Null if the caller is not
-     *              a device admin.
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *             if called by a delegated app.
      * @return Device logs from before the latest reboot of the system, or {@code null} if this API
      *         is not supported on the device.
      * @throws SecurityException if the caller is not allowed to access security logging, or
@@ -15753,7 +15774,7 @@ public class DevicePolicyManager {
         throwIfParentInstance("setApplicationExemptions");
         if (mService != null) {
             try {
-                mService.setApplicationExemptions(packageName,
+                mService.setApplicationExemptions(mContext.getPackageName(), packageName,
                         ArrayUtils.convertToIntArray(new ArraySet<>(exemptions)));
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
@@ -15818,9 +15839,8 @@ public class DevicePolicyManager {
      * Called by a device owner or a profile owner or holder of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL} to disable user
      * control over apps. User will not be able to clear app data or force-stop packages. When
-     * called by a device owner, applies to all users on the device. Starting from Android 13,
-     * packages with user control disabled are exempted from being put in the "restricted" App
-     * Standby Bucket.
+     * called by a device owner, applies to all users on the device. Packages with user control
+     * disabled are exempted from App Standby Buckets.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *               caller is not a device admin.
@@ -16803,6 +16823,23 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Recalculate the incompatible accounts cache.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void calculateHasIncompatibleAccounts() {
+        if (mService != null) {
+            try {
+                mService.calculateHasIncompatibleAccounts();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * @return {@code true} if bypassing the device policy management role qualification is allowed
      * with the current state of the device.
      *
@@ -16879,5 +16916,56 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} if this device is marked as a financed device.
+     *
+     * <p>A financed device can be entered into lock task mode (see {@link #setLockTaskPackages})
+     * by the holder of the role {@link android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
+     * If this occurs, Device Owners and Profile Owners that have set lock task packages or
+     * features, or that attempt to set lock task packages or features, will receive a callback
+     * indicating that it could not be set. See {@link PolicyUpdateReceiver#onPolicyChanged} and
+     * {@link PolicyUpdateReceiver#onPolicySetResult}.
+     *
+     * <p>To be informed of changes to this status you can subscribe to the broadcast
+     * {@link ACTION_DEVICE_FINANCING_STATE_CHANGED}.
+     *
+     * @throws SecurityException if the caller is not a device owner, profile owner of an
+     * organization-owned managed profile, profile owner on the primary user or holder of one of the
+     * following roles: {@link android.app.role.RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT},
+     * android.app.role.RoleManager.ROLE_SYSTEM_SUPERVISION.
+     */
+    public boolean isDeviceFinanced() {
+        if (mService != null) {
+            try {
+                return mService.isDeviceFinanced(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the package name of the application holding the role:
+     * {@link android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
+     *
+     * @return the package name of the application holding the role or {@code null} if the role is
+     * not held by any applications.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @Nullable
+    public String getFinancedDeviceKioskRoleHolder() {
+        if (mService != null) {
+            try {
+                return mService.getFinancedDeviceKioskRoleHolder(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
     }
 }

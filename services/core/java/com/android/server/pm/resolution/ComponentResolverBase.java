@@ -126,17 +126,17 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
     @Nullable
     @Override
     public List<ResolveInfo> queryActivities(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, int callingUid, int userId) {
-        return mActivities.queryIntent(computer, intent, resolvedType, flags, callingUid, userId);
+            @Nullable String resolvedType, long flags, int userId) {
+        return mActivities.queryIntent(computer, intent, resolvedType, flags, userId);
     }
 
     @Nullable
     @Override
     public List<ResolveInfo> queryActivities(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedActivity> activities,
-            int callingUid, int userId) {
+            int userId) {
         return mActivities.queryIntentForPackage(computer, intent, resolvedType, flags, activities,
-                callingUid, userId);
+                userId);
     }
 
     @Nullable
@@ -168,17 +168,17 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
     @Nullable
     @Override
     public List<ResolveInfo> queryProviders(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, int callingUid, int userId) {
-        return mProviders.queryIntent(computer, intent, resolvedType, flags, callingUid, userId);
+            @Nullable String resolvedType, long flags, int userId) {
+        return mProviders.queryIntent(computer, intent, resolvedType, flags, userId);
     }
 
     @Nullable
     @Override
     public List<ResolveInfo> queryProviders(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedProvider> providers,
-            int callingUid, @UserIdInt int userId) {
+            @UserIdInt int userId) {
         return mProviders.queryIntentForPackage(computer, intent, resolvedType, flags, providers,
-                callingUid, userId);
+                userId);
     }
 
     @Nullable
@@ -241,33 +241,33 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
     @Nullable
     @Override
     public List<ResolveInfo> queryReceivers(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, int callingUid, int userId) {
-        return mReceivers.queryIntent(computer, intent, resolvedType, flags, callingUid, userId);
+            @Nullable String resolvedType, long flags, int userId) {
+        return mReceivers.queryIntent(computer, intent, resolvedType, flags, userId);
     }
 
     @Nullable
     @Override
     public List<ResolveInfo> queryReceivers(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedActivity> receivers,
-            int callingUid, @UserIdInt int userId) {
+            @UserIdInt int userId) {
         return mReceivers.queryIntentForPackage(computer, intent, resolvedType, flags, receivers,
-                callingUid, userId);
+                userId);
     }
 
     @Nullable
     @Override
     public List<ResolveInfo> queryServices(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId) {
-        return mServices.queryIntent(computer, intent, resolvedType, flags, callingUid, userId);
+            @Nullable String resolvedType, long flags, @UserIdInt int userId) {
+        return mServices.queryIntent(computer, intent, resolvedType, flags, userId);
     }
 
     @Nullable
     @Override
     public List<ResolveInfo> queryServices(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedService> services,
-            int callingUid, @UserIdInt int userId) {
+            @UserIdInt int userId) {
         return mServices.queryIntentForPackage(computer, intent, resolvedType, flags, services,
-                callingUid, userId);
+                userId);
     }
 
     @Override

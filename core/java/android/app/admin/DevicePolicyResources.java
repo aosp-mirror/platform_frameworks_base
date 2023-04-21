@@ -1802,14 +1802,6 @@ public final class DevicePolicyResources {
                     PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_TITLE";
 
             /**
-             * Text for dialog shown when user tries to open a work app when the work profile is
-             * turned off, confirming that the user wants to turn on access to their
-             * work apps.
-             */
-            public static final String UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE =
-                    PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE";
-
-            /**
              * Notification title shown when work profile is credential encrypted and requires
              * the user to unlock before it's usable.
              */
@@ -1857,6 +1849,17 @@ public final class DevicePolicyResources {
             public static final String WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON =
                     PREFIX + "TURN_ON_WORK_PROFILE_BUTTON_TEXT";
 
+            public static final String MINIRESOLVER_OPEN_IN_WORK =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_WORK";
+
+            public static final String MINIRESOLVER_OPEN_IN_PERSONAL =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            public static final String MINIRESOLVER_USE_WORK_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            public static final String MINIRESOLVER_USE_PERSONAL_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
         }
 
         /**

@@ -18,9 +18,9 @@ package com.android.server.clipboard;
 
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
+import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.content.Context.DEVICE_ID_INVALID;
 
 import android.Manifest;
 import android.annotation.NonNull;

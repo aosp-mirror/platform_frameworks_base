@@ -65,7 +65,7 @@ interface ControlsUiController {
      */
     fun getPreferredSelectedItem(structures: List<StructureInfo>): SelectedItem
 
-    fun updatePreferences(selectedItem: SelectedItem)
+    fun onSizeChange()
 }
 
 sealed class SelectedItem {

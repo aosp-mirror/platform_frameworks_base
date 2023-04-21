@@ -16,13 +16,14 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.tools.common.Rotation
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +35,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 270677470)
 class PipPinchInTest(flicker: FlickerTest) : PipTransition(flicker) {
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition { transitions { pipApp.pinchInPipWindow(wmHelper, 0.4f, 30) } }
@@ -61,7 +63,7 @@ class PipPinchInTest(flicker: FlickerTest) : PipTransition(flicker) {
         @JvmStatic
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

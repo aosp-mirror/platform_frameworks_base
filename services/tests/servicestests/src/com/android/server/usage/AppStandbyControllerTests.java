@@ -160,6 +160,9 @@ public class AppStandbyControllerTests {
     private static final String ADMIN_PKG2 = "com.android.admin2";
     private static final String ADMIN_PKG3 = "com.android.admin3";
 
+    private static final String ADMIN_PROTECTED_PKG = "com.android.admin.protected";
+    private static final String ADMIN_PROTECTED_PKG2 = "com.android.admin.protected2";
+
     private static final long MINUTE_MS = 60 * 1000;
     private static final long HOUR_MS = 60 * MINUTE_MS;
     private static final long DAY_MS = 24 * HOUR_MS;
@@ -229,7 +232,6 @@ public class AppStandbyControllerTests {
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
         boolean mIsCharging;
-        boolean mIsRestrictedBucketEnabled = true;
         List<String> mNonIdleWhitelistApps = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
@@ -310,11 +312,6 @@ public class AppStandbyControllerTests {
 
         @Override
         void updatePowerWhitelistCache() {
-        }
-
-        @Override
-        boolean isRestrictedBucketEnabled() {
-            return mIsRestrictedBucketEnabled;
         }
 
         @Override
@@ -1352,50 +1349,6 @@ public class AppStandbyControllerTests {
 
     @Test
     @FlakyTest(bugId = 185169504)
-    public void testRestrictedBucketDisabled() throws Exception {
-        mInjector.mIsRestrictedBucketEnabled = false;
-        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
-        // at the moment.
-        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-
-        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
-        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
-
-        // Nothing should be able to put it into the RESTRICTED bucket.
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_TIMEOUT);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_PREDICTED);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_SYSTEM);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_USER);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-    }
-
-    @Test
-    @FlakyTest(bugId = 185169504)
-    public void testRestrictedBucket_EnabledToDisabled() throws Exception {
-        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
-        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_SYSTEM);
-        assertBucket(STANDBY_BUCKET_RESTRICTED);
-
-        mInjector.mIsRestrictedBucketEnabled = false;
-        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
-        // at the moment.
-        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-
-        mController.checkIdleStates(USER_ID);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-    }
-
-    @Test
-    @FlakyTest(bugId = 185169504)
     public void testPredictionRaiseFromRestrictedTimeout_highBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
@@ -1755,6 +1708,19 @@ public class AppStandbyControllerTests {
         assertIsNotActiveAdmin(ADMIN_PKG, USER_ID2);
         assertIsActiveAdmin(ADMIN_PKG, USER_ID);
         assertIsNotActiveAdmin(ADMIN_PKG2, USER_ID);
+    }
+
+    @Test
+    public void testSetAdminProtectedPackages() {
+        assertAdminProtectedPackagesForTest(USER_ID, (String[]) null);
+        assertAdminProtectedPackagesForTest(USER_ID2, (String[]) null);
+
+        setAdminProtectedPackages(USER_ID, ADMIN_PROTECTED_PKG, ADMIN_PROTECTED_PKG2);
+        assertAdminProtectedPackagesForTest(USER_ID, ADMIN_PROTECTED_PKG, ADMIN_PROTECTED_PKG2);
+        assertAdminProtectedPackagesForTest(USER_ID2, (String[]) null);
+
+        setAdminProtectedPackages(USER_ID, (String[]) null);
+        assertAdminProtectedPackagesForTest(USER_ID, (String[]) null);
     }
 
     @Test
@@ -2193,6 +2159,28 @@ public class AppStandbyControllerTests {
 
     private void setActiveAdmins(int userId, String... admins) {
         mController.setActiveAdminApps(new ArraySet<>(Arrays.asList(admins)), userId);
+    }
+
+    private void setAdminProtectedPackages(int userId, String... packageNames) {
+        Set<String> adminProtectedPackages = packageNames != null ? new ArraySet<>(
+                Arrays.asList(packageNames)) : null;
+        mController.setAdminProtectedPackages(adminProtectedPackages, userId);
+    }
+
+    private void assertAdminProtectedPackagesForTest(int userId, String... packageNames) {
+        final Set<String> actualAdminProtectedPackages =
+                mController.getAdminProtectedPackagesForTest(userId);
+        if (packageNames == null) {
+            if (actualAdminProtectedPackages != null && !actualAdminProtectedPackages.isEmpty()) {
+                fail("Admin protected packages should be null; " + getAdminAppsStr(userId,
+                        actualAdminProtectedPackages));
+            }
+            return;
+        }
+        assertEquals(packageNames.length, actualAdminProtectedPackages.size());
+        for (String adminProtectedPackage : packageNames) {
+            assertTrue(actualAdminProtectedPackages.contains(adminProtectedPackage));
+        }
     }
 
     private void setAndAssertBucket(String pkg, int user, int bucket, int reason) throws Exception {

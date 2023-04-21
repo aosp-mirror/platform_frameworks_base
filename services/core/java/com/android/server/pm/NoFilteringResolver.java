@@ -102,7 +102,7 @@ public class NoFilteringResolver extends CrossProfileResolver {
             boolean hasNonNegativePriorityResult,
             Function<String, PackageStateInternal> pkgSettingFunction) {
         List<ResolveInfo> resolveInfos = mComponentResolver.queryActivities(computer,
-                intent, resolvedType, flags, Binder.getCallingUid(), targetUserId);
+                intent, resolvedType, flags, targetUserId);
         List<CrossProfileDomainInfo> crossProfileDomainInfos = new ArrayList<>();
         if (resolveInfos != null) {
 

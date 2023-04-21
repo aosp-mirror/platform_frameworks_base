@@ -21,7 +21,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
-import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
+import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -90,8 +90,9 @@ public class NavigationBarController implements
     private final DisplayTracker mDisplayTracker;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
+    private final NavBarHelper mNavBarHelper;
     private int mNavMode;
-    @VisibleForTesting boolean mIsTablet;
+    @VisibleForTesting boolean mIsLargeScreen;
 
     /** A displayId - nav bar maps. */
     @VisibleForTesting
@@ -133,21 +134,22 @@ public class NavigationBarController implements
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavMode = navigationModeController.addListener(this);
+        mNavBarHelper = navBarHelper;
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
                 dumpManager, autoHideController, lightBarController, pipOptional,
                 backAnimation.orElse(null), taskStackChangeListeners);
-        mIsTablet = isTablet(mContext);
+        mIsLargeScreen = isLargeScreen(mContext);
         dumpManager.registerDumpable(this);
     }
 
     @Override
     public void onConfigChanged(Configuration newConfig) {
-        boolean isOldConfigTablet = mIsTablet;
-        mIsTablet = isTablet(mContext);
+        boolean isOldConfigLargeScreen = mIsLargeScreen;
+        mIsLargeScreen = isLargeScreen(mContext);
         boolean willApplyConfig = mConfigChanges.applyNewConfig(mContext.getResources());
-        boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
+        boolean largeScreenChanged = mIsLargeScreen != isOldConfigLargeScreen;
         // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
         Log.i(DEBUG_MISSING_GESTURE_TAG, "NavbarController: newConfig=" + newConfig
                 + " mTaskbarDelegate initialized=" + mTaskbarDelegate.isInitialized()
@@ -224,6 +226,18 @@ public class NavigationBarController implements
         }
     }
 
+    private boolean shouldCreateNavBarAndTaskBar(int displayId) {
+        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            return wms.hasNavigationBar(displayId);
+        } catch (RemoteException e) {
+            // Cannot get wms, just return false with warning message.
+            Log.w(TAG, "Cannot get WindowManager.");
+            return false;
+        }
+    }
+
     /** @see #initializeTaskbarIfNecessary() */
     private boolean updateNavbarForTaskbar() {
         boolean taskbarShown = initializeTaskbarIfNecessary();
@@ -235,15 +249,21 @@ public class NavigationBarController implements
 
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
-        // Enable for tablet or (phone AND flag is set); assuming phone = !mIsTablet
-        boolean taskbarEnabled = mIsTablet || mFeatureFlags.isEnabled(Flags.HIDE_NAVBAR_WINDOW);
+        // Enable for large screens or (phone AND flag is set); assuming phone = !mIsLargeScreen
+        boolean taskbarEnabled = (mIsLargeScreen || mFeatureFlags.isEnabled(
+                Flags.HIDE_NAVBAR_WINDOW)) && shouldCreateNavBarAndTaskBar(mContext.getDisplayId());
 
         if (taskbarEnabled) {
             Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");
+            final int displayId = mContext.getDisplayId();
+            // Hint to NavBarHelper if we are replacing an existing bar to skip extra work
+            mNavBarHelper.setTogglingNavbarTaskbar(mNavigationBars.contains(displayId));
             // Remove navigation bar when taskbar is showing
-            removeNavigationBar(mContext.getDisplayId());
-            mTaskbarDelegate.init(mContext.getDisplayId());
+            removeNavigationBar(displayId);
+            mTaskbarDelegate.init(displayId);
+            mNavBarHelper.setTogglingNavbarTaskbar(false);
             Trace.endSection();
+
         } else {
             mTaskbarDelegate.destroy();
         }
@@ -258,7 +278,7 @@ public class NavigationBarController implements
     @Override
     public void onDisplayReady(int displayId) {
         Display display = mDisplayManager.getDisplay(displayId);
-        mIsTablet = isTablet(mContext);
+        mIsLargeScreen = isLargeScreen(mContext);
         createNavigationBar(display, null /* savedState */, null /* result */);
     }
 
@@ -323,23 +343,16 @@ public class NavigationBarController implements
         final int displayId = display.getDisplayId();
         final boolean isOnDefaultDisplay = displayId == mDisplayTracker.getDefaultDisplayId();
 
+        if (!shouldCreateNavBarAndTaskBar(displayId)) {
+            return;
+        }
+
         // We may show TaskBar on the default display for large screen device. Don't need to create
         // navigation bar for this case.
         if (isOnDefaultDisplay && initializeTaskbarIfNecessary()) {
             return;
         }
 
-        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
-
-        try {
-            if (!wms.hasNavigationBar(displayId)) {
-                return;
-            }
-        } catch (RemoteException e) {
-            // Cannot get wms, just return with warning message.
-            Log.w(TAG, "Cannot get WindowManager.");
-            return;
-        }
         final Context context = isOnDefaultDisplay
                 ? mContext
                 : mContext.createDisplayContext(display);
@@ -470,7 +483,7 @@ public class NavigationBarController implements
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("mIsTablet=" + mIsTablet);
+        pw.println("mIsLargeScreen=" + mIsLargeScreen);
         pw.println("mNavMode=" + mNavMode);
         for (int i = 0; i < mNavigationBars.size(); i++) {
             if (i > 0) {

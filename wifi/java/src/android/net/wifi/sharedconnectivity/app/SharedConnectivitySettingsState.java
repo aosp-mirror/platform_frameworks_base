@@ -17,7 +17,9 @@
 package android.net.wifi.sharedconnectivity.app;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -37,6 +39,7 @@ import java.util.Objects;
 public final class SharedConnectivitySettingsState implements Parcelable {
 
     private final boolean mInstantTetherEnabled;
+    private final PendingIntent mInstantTetherSettingsPendingIntent;
     private final Bundle mExtras;
 
     /**
@@ -44,9 +47,8 @@ public final class SharedConnectivitySettingsState implements Parcelable {
      */
     public static final class Builder {
         private boolean mInstantTetherEnabled;
-        private Bundle mExtras;
-
-        public Builder() {}
+        private PendingIntent mInstantTetherSettingsPendingIntent;
+        private Bundle mExtras = Bundle.EMPTY;
 
         /**
          * Sets the state of Instant Tether in settings
@@ -56,6 +58,18 @@ public final class SharedConnectivitySettingsState implements Parcelable {
         @NonNull
         public Builder setInstantTetherEnabled(boolean instantTetherEnabled) {
             mInstantTetherEnabled = instantTetherEnabled;
+            return this;
+        }
+
+        /**
+         * Sets the {@link PendingIntent} that will open the Instant Tether settings page.
+         * The pending intent must be set as {@link PendingIntent#FLAG_IMMUTABLE}.
+         *
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setInstantTetherSettingsPendingIntent(@NonNull PendingIntent pendingIntent) {
+            mInstantTetherSettingsPendingIntent = pendingIntent;
             return this;
         }
 
@@ -77,12 +91,23 @@ public final class SharedConnectivitySettingsState implements Parcelable {
          */
         @NonNull
         public SharedConnectivitySettingsState build() {
-            return new SharedConnectivitySettingsState(mInstantTetherEnabled, mExtras);
+            return new SharedConnectivitySettingsState(mInstantTetherEnabled,
+                    mInstantTetherSettingsPendingIntent, mExtras);
+
         }
     }
 
-    private SharedConnectivitySettingsState(boolean instantTetherEnabled, Bundle extras) {
+    private static void validate(PendingIntent pendingIntent) {
+        if (pendingIntent != null && !pendingIntent.isImmutable()) {
+            throw new IllegalArgumentException("Pending intent must be immutable");
+        }
+    }
+
+    private SharedConnectivitySettingsState(boolean instantTetherEnabled,
+            PendingIntent pendingIntent, @NonNull Bundle extras) {
+        validate(pendingIntent);
         mInstantTetherEnabled = instantTetherEnabled;
+        mInstantTetherSettingsPendingIntent = pendingIntent;
         mExtras = extras;
     }
 
@@ -93,6 +118,16 @@ public final class SharedConnectivitySettingsState implements Parcelable {
      */
     public boolean isInstantTetherEnabled() {
         return mInstantTetherEnabled;
+    }
+
+    /**
+     * Gets the pending intent to open Instant Tether settings page.
+     *
+     * @return Returns the pending intent that opens the settings page, null if none.
+     */
+    @Nullable
+    public PendingIntent getInstantTetherSettingsPendingIntent() {
+        return mInstantTetherSettingsPendingIntent;
     }
 
     /**
@@ -109,12 +144,14 @@ public final class SharedConnectivitySettingsState implements Parcelable {
     public boolean equals(Object obj) {
         if (!(obj instanceof SharedConnectivitySettingsState)) return false;
         SharedConnectivitySettingsState other = (SharedConnectivitySettingsState) obj;
-        return mInstantTetherEnabled == other.isInstantTetherEnabled();
+        return mInstantTetherEnabled == other.isInstantTetherEnabled()
+                && Objects.equals(mInstantTetherSettingsPendingIntent,
+                other.getInstantTetherSettingsPendingIntent());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mInstantTetherEnabled);
+        return Objects.hash(mInstantTetherEnabled, mInstantTetherSettingsPendingIntent);
     }
 
     @Override
@@ -124,6 +161,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        mInstantTetherSettingsPendingIntent.writeToParcel(dest, 0);
         dest.writeBoolean(mInstantTetherEnabled);
         dest.writeBundle(mExtras);
     }
@@ -135,8 +173,10 @@ public final class SharedConnectivitySettingsState implements Parcelable {
      */
     @NonNull
     public static SharedConnectivitySettingsState readFromParcel(@NonNull Parcel in) {
-        return new SharedConnectivitySettingsState(in.readBoolean(),
-                in.readBundle());
+        PendingIntent pendingIntent = PendingIntent.CREATOR.createFromParcel(in);
+        boolean instantTetherEnabled = in.readBoolean();
+        Bundle extras = in.readBundle();
+        return new SharedConnectivitySettingsState(instantTetherEnabled, pendingIntent, extras);
     }
 
     @NonNull
@@ -156,6 +196,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
     public String toString() {
         return new StringBuilder("SharedConnectivitySettingsState[")
                 .append("instantTetherEnabled=").append(mInstantTetherEnabled)
+                .append("PendingIntent=").append(mInstantTetherSettingsPendingIntent.toString())
                 .append("extras=").append(mExtras.toString())
                 .append("]").toString();
     }

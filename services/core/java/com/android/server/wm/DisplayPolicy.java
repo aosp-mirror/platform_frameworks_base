@@ -17,14 +17,11 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.TYPE_INTERNAL;
+import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
+import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
+import static android.view.InsetsFrameProvider.SOURCE_DISPLAY;
 import static android.view.InsetsFrameProvider.SOURCE_FRAME;
-import static android.view.InsetsState.ITYPE_CAPTION_BAR;
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -41,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -129,7 +127,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
@@ -173,6 +171,8 @@ public class DisplayPolicy {
     private static final int SHOW_TYPES_FOR_SWIPE = Type.statusBars() | Type.navigationBars();
     private static final int SHOW_TYPES_FOR_PANIC = Type.navigationBars();
 
+    private static final int INSETS_OVERRIDE_INDEX_INVALID = -1;
+
     private final WindowManagerService mService;
     private final Context mContext;
     private final Context mUiContext;
@@ -184,6 +184,7 @@ public class DisplayPolicy {
 
     private final boolean mCarDockEnablesAccelerometer;
     private final boolean mDeskDockEnablesAccelerometer;
+    private final boolean mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer;
     private final AccessibilityManager mAccessibilityManager;
     private final ImmersiveModeConfirmation mImmersiveModeConfirmation;
     private final ScreenshotHelper mScreenshotHelper;
@@ -197,6 +198,11 @@ public class DisplayPolicy {
     private int mRightGestureInset;
 
     private boolean mCanSystemBarsBeShownByUser;
+
+    /**
+     * Let remote insets controller control system bars regardless of other settings.
+     */
+    private boolean mRemoteInsetsControllerControlsSystemBars;
 
     StatusBarManagerInternal getStatusBarManagerInternal() {
         synchronized (mServiceAcquireLock) {
@@ -388,6 +394,8 @@ public class DisplayPolicy {
         final Resources r = mContext.getResources();
         mCarDockEnablesAccelerometer = r.getBoolean(R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
+        mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer =
+                r.getBoolean(R.bool.config_deskRespectsNoSensorAndLockedWithoutAccelerometer);
         mCanSystemBarsBeShownByUser = !r.getBoolean(
                 R.bool.config_remoteInsetsControllerControlsSystemBars) || r.getBoolean(
                 R.bool.config_remoteInsetsControllerSystemBarsCanBeShownByUserAction);
@@ -699,6 +707,10 @@ public class DisplayPolicy {
         return mDeskDockEnablesAccelerometer;
     }
 
+    boolean isDeskDockRespectsNoSensorAndLockedWithoutAccelerometer() {
+        return mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer;
+    }
+
     public void setPersistentVrModeEnabled(boolean persistentVrModeEnabled) {
         mPersistentVrModeEnabled = persistentVrModeEnabled;
     }
@@ -779,6 +791,17 @@ public class DisplayPolicy {
 
     public ScreenOnListener getScreenOnListener() {
         return mScreenOnListener;
+    }
+
+
+    boolean isRemoteInsetsControllerControllingSystemBars() {
+        return mRemoteInsetsControllerControlsSystemBars;
+    }
+
+    @VisibleForTesting
+    void setRemoteInsetsControllerControlsSystemBars(
+            boolean remoteInsetsControllerControlsSystemBars) {
+        mRemoteInsetsControllerControlsSystemBars = remoteInsetsControllerControlsSystemBars;
     }
 
     public void screenTurnedOn(ScreenOnListener screenOnListener) {
@@ -1029,7 +1052,6 @@ public class DisplayPolicy {
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
             }
-            enforceSingleInsetsTypeCorrespondingToWindowType(attrs.providedInsets);
         }
         return ADD_OKAY;
     }
@@ -1058,31 +1080,24 @@ public class DisplayPolicy {
                 // The index of the provider and corresponding insets types cannot change at
                 // runtime as ensured in WMS. Make use of the index in the provider directly
                 // to access the latest provided size at runtime.
-                final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
-                        getFrameProvider(win, provider, i);
+                final TriFunction<DisplayFrames, WindowContainer, Rect, Integer> frameProvider =
+                        getFrameProvider(win, i, INSETS_OVERRIDE_INDEX_INVALID);
                 final InsetsFrameProvider.InsetsSizeOverride[] overrides =
-                        provider.insetsSizeOverrides;
-                final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+                        provider.getInsetsSizeOverrides();
+                final SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
                         overrideProviders;
                 if (overrides != null) {
                     overrideProviders = new SparseArray<>();
                     for (int j = overrides.length - 1; j >= 0; j--) {
-                        final TriConsumer<DisplayFrames, WindowContainer, Rect>
-                                overrideFrameProvider =
-                                getOverrideFrameProvider(win, i, j);
-                        overrideProviders.put(overrides[j].windowType, overrideFrameProvider);
+                        overrideProviders.put(
+                                overrides[j].getWindowType(), getFrameProvider(win, i, j));
                     }
                 } else {
                     overrideProviders = null;
                 }
-                // TODO (b/234093736): Let InsetsFrameProvider have the following fields:
-                //                     - IBinder owner.
-                //                     - int index.
-                //                     - @InsetsType int type.
-                //                     So we can create the id by using InsetsSource#createId.
-                //                     And we won't need toPublicType anymore.
-                final int id = provider.type;
-                final @InsetsType int type = InsetsState.toPublicType(id);
+                final @InsetsType int type = provider.getType();
+                final int id = InsetsSource.createId(
+                        provider.getOwner(), provider.getIndex(), type);
                 mDisplayContent.getInsetsStateController().getOrCreateSourceProvider(id, type)
                         .setWindowContainer(win, frameProvider, overrideProviders);
                 mInsetsSourceWindowsExceptIme.add(win);
@@ -1090,36 +1105,81 @@ public class DisplayPolicy {
         }
     }
 
-    @Nullable
-    private TriConsumer<DisplayFrames, WindowContainer, Rect> getFrameProvider(WindowState win,
-            InsetsFrameProvider provider, int index) {
-        if (provider.insetsSize == null && provider.source == SOURCE_FRAME) {
-            return null;
-        }
-        return (displayFrames, windowContainer, inOutFrame) -> {
-            final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
-            final InsetsFrameProvider ifp = lp.providedInsets[index];
-            InsetsFrameProvider.calculateInsetsFrame(displayFrames.mUnrestricted,
-                    windowContainer.getBounds(), displayFrames.mDisplayCutoutSafe, inOutFrame,
-                    ifp.source, ifp.insetsSize, lp.privateFlags,
-                    ifp.minimalInsetsSizeInDisplayCutoutSafe);
-        };
-    }
-
-    @NonNull
-    private TriConsumer<DisplayFrames, WindowContainer, Rect> getOverrideFrameProvider(
+    private static TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getFrameProvider(
             WindowState win, int index, int overrideIndex) {
         return (displayFrames, windowContainer, inOutFrame) -> {
             final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
             final InsetsFrameProvider ifp = lp.providedInsets[index];
-            InsetsFrameProvider.calculateInsetsFrame(displayFrames.mUnrestricted,
-                    windowContainer.getBounds(), displayFrames.mDisplayCutoutSafe, inOutFrame,
-                    ifp.source, ifp.insetsSizeOverrides[overrideIndex].insetsSize, lp.privateFlags,
-                    null);
+            final Rect displayFrame = displayFrames.mUnrestricted;
+            final Rect safe = displayFrames.mDisplayCutoutSafe;
+            boolean extendByCutout = false;
+            switch (ifp.getSource()) {
+                case SOURCE_DISPLAY:
+                    inOutFrame.set(displayFrame);
+                    break;
+                case SOURCE_CONTAINER_BOUNDS:
+                    inOutFrame.set(windowContainer.getBounds());
+                    break;
+                case SOURCE_FRAME:
+                    extendByCutout =
+                            (lp.privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
+                    break;
+                case SOURCE_ARBITRARY_RECTANGLE:
+                    inOutFrame.set(ifp.getArbitraryRectangle());
+                    break;
+            }
+            final Insets insetsSize = overrideIndex == INSETS_OVERRIDE_INDEX_INVALID
+                    ? ifp.getInsetsSize()
+                    : ifp.getInsetsSizeOverrides()[overrideIndex].getInsetsSize();
+
+            if (ifp.getMinimalInsetsSizeInDisplayCutoutSafe() != null) {
+                sTmpRect2.set(inOutFrame);
+            }
+            calculateInsetsFrame(inOutFrame, insetsSize);
+
+            if (extendByCutout && insetsSize != null) {
+                WindowLayout.extendFrameByCutout(safe, displayFrame, inOutFrame, sTmpRect);
+            }
+
+            if (ifp.getMinimalInsetsSizeInDisplayCutoutSafe() != null) {
+                // The insets is at least with the given size within the display cutout safe area.
+                // Calculate the smallest size.
+                calculateInsetsFrame(sTmpRect2, ifp.getMinimalInsetsSizeInDisplayCutoutSafe());
+                WindowLayout.extendFrameByCutout(safe, displayFrame, sTmpRect2, sTmpRect);
+                // If it's larger than previous calculation, use it.
+                if (sTmpRect2.contains(inOutFrame)) {
+                    inOutFrame.set(sTmpRect2);
+                }
+            }
+            return ifp.getFlags();
         };
     }
 
-    TriConsumer<DisplayFrames, WindowContainer, Rect> getImeSourceFrameProvider() {
+    /**
+     * Calculate the insets frame given the insets size and the source frame.
+     * @param inOutFrame the source frame.
+     * @param insetsSize the insets size. Only the first non-zero value will be taken.
+     */
+    private static void calculateInsetsFrame(Rect inOutFrame, Insets insetsSize) {
+        if (insetsSize == null) {
+            return;
+        }
+        // Only one side of the provider shall be applied. Check in the order of left - top -
+        // right - bottom, only the first non-zero value will be applied.
+        if (insetsSize.left != 0) {
+            inOutFrame.right = inOutFrame.left + insetsSize.left;
+        } else if (insetsSize.top != 0) {
+            inOutFrame.bottom = inOutFrame.top + insetsSize.top;
+        } else if (insetsSize.right != 0) {
+            inOutFrame.left = inOutFrame.right - insetsSize.right;
+        } else if (insetsSize.bottom != 0) {
+            inOutFrame.top = inOutFrame.bottom - insetsSize.bottom;
+        } else {
+            inOutFrame.setEmpty();
+        }
+    }
+
+    TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getImeSourceFrameProvider() {
         return (displayFrames, windowContainer, inOutFrame) -> {
             WindowState windowState = windowContainer.asWindowState();
             if (windowState == null) {
@@ -1138,25 +1198,8 @@ public class DisplayPolicy {
             } else {
                 inOutFrame.inset(windowState.mGivenContentInsets);
             }
+            return 0;
         };
-    }
-
-    private static void enforceSingleInsetsTypeCorrespondingToWindowType(
-            InsetsFrameProvider[] providers) {
-        int count = 0;
-        for (InsetsFrameProvider provider : providers) {
-            switch (provider.type) {
-                case ITYPE_NAVIGATION_BAR:
-                case ITYPE_STATUS_BAR:
-                case ITYPE_CLIMATE_BAR:
-                case ITYPE_EXTRA_NAVIGATION_BAR:
-                case ITYPE_CAPTION_BAR:
-                    if (++count > 1) {
-                        throw new IllegalArgumentException(
-                                "Multiple InsetsTypes corresponding to Window type");
-                    }
-            }
-        }
     }
 
     /**
@@ -1664,6 +1707,8 @@ public class DisplayPolicy {
         mRightGestureInset = mGestureNavigationSettingsObserver.getRightSensitivity(res);
         mNavigationBarAlwaysShowOnSideGesture =
                 res.getBoolean(R.bool.config_navBarAlwaysShowOnSideEdgeGesture);
+        mRemoteInsetsControllerControlsSystemBars = res.getBoolean(
+                R.bool.config_remoteInsetsControllerControlsSystemBars);
 
         updateConfigurationAndScreenSizeDependentBehaviors();
 
@@ -1936,6 +1981,14 @@ public class DisplayPolicy {
             return;
         }
 
+        if (controlTarget != null) {
+            final WindowState win = controlTarget.getWindow();
+
+            if (win != null && win.isActivityTypeDream()) {
+                return;
+            }
+        }
+
         final @InsetsType int restorePositionTypes = (Type.statusBars() | Type.navigationBars())
                 & controlTarget.getRequestedVisibleTypes();
 
@@ -2154,16 +2207,15 @@ public class DisplayPolicy {
 
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
         final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
-        final boolean multiWindowTaskVisible =
+        final boolean adjacentTasksVisible =
                 defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
-                        && task.getTopLeafTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+                        && task.getTopLeafTask().getAdjacentTask() != null)
                         != null;
         final boolean freeformRootTaskVisible =
                 defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
 
-        // We need to force showing system bars when the multi-window or freeform root task is
-        // visible.
-        mForceShowSystemBars = multiWindowTaskVisible || freeformRootTaskVisible;
+        // We need to force showing system bars when adjacent tasks or freeform roots visible.
+        mForceShowSystemBars = adjacentTasksVisible || freeformRootTaskVisible;
         // We need to force the consumption of the system bars if they are force shown or if they
         // are controlled by a remote insets controller.
         mForceConsumeSystemBars = mForceShowSystemBars
@@ -2184,7 +2236,7 @@ public class DisplayPolicy {
 
         int appearance = APPEARANCE_OPAQUE_NAVIGATION_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
         appearance = configureStatusBarOpacity(appearance);
-        appearance = configureNavBarOpacity(appearance, multiWindowTaskVisible,
+        appearance = configureNavBarOpacity(appearance, adjacentTasksVisible,
                 freeformRootTaskVisible);
 
         // Show immersive mode confirmation if needed.
@@ -2458,6 +2510,8 @@ public class DisplayPolicy {
         pw.print("mCarDockEnablesAccelerometer="); pw.print(mCarDockEnablesAccelerometer);
         pw.print(" mDeskDockEnablesAccelerometer=");
         pw.println(mDeskDockEnablesAccelerometer);
+        pw.print(" mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer=");
+        pw.println(mDeskDockRespectsNoSensorAndLockedWithoutAccelerometer);
         pw.print(prefix); pw.print("mDockMode="); pw.print(Intent.dockStateToString(mDockMode));
         pw.print(" mLidState="); pw.println(WindowManagerFuncs.lidStateToString(mLidState));
         pw.print(prefix); pw.print("mAwake="); pw.print(mAwake);
@@ -2553,7 +2607,7 @@ public class DisplayPolicy {
         pw.print(mForceShowNavigationBarEnabled);
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);
         pw.print(prefix); pw.print("mRemoteInsetsControllerControlsSystemBars=");
-        pw.println(mDisplayContent.getInsetsPolicy().getRemoteInsetsControllerControlsSystemBars());
+        pw.println(mRemoteInsetsControllerControlsSystemBars);
         pw.print(prefix); pw.println("mDecorInsetsInfo:");
         for (int rotation = 0; rotation < mDecorInsets.mInfoForRotation.length; rotation++) {
             final DecorInsets.Info info = mDecorInsets.mInfoForRotation[rotation];
@@ -2662,10 +2716,9 @@ public class DisplayPolicy {
      */
     private static boolean intersectsAnyInsets(Rect bounds, InsetsState insetsState,
             @InsetsType int insetsType) {
-        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(insetsType);
-        for (int i = 0; i < internalTypes.size(); i++) {
-            final InsetsSource source = insetsState.peekSource(internalTypes.valueAt(i));
-            if (source == null || !source.isVisible()) {
+        for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = insetsState.sourceAt(i);
+            if ((source.getType() & insetsType) == 0 || !source.isVisible()) {
                 continue;
             }
             if (Rect.intersects(bounds, source.getFrame())) {

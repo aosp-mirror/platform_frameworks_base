@@ -10,13 +10,13 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"Skryť heslo"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Bezpečnejšie s prístupovými kľúčmi"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Ak máte prístupové kľúče, nemusíte vytvárať ani si pamätať zložité heslá"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Prístupové kľúče sú šifrované digitálne kľúče, ktoré môžete vytvoriť odtlačkom prsta, tvárou alebo zámkou obrazovky."</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Prístupové kľúče sú šifrované digitálne kľúče, ktoré môžete vytvoriť odtlačkom prsta, tvárou alebo zámkou obrazovky"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ukladajú sa do správcu hesiel, aby ste sa mohli prihlasovať v iných zariadeniach"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Viac o prístupových kľúčoch"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Technológia bez hesiel"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Prístupový kľúče vám umožňujú prihlásiť sa bez využitia hesiel. Stačí overiť totožnosť odtlačkom prsta, rozpoznávaním tváre, kódom PIN alebo vzorom potiahnutia a vytvoriť prístupový kľúč."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Prístupové kľúče vám umožňujú prihlásiť sa bez použitia hesiel. Stačí overiť totožnosť odtlačkom prsta, rozpoznávaním tváre, kódom PIN alebo vzorom potiahnutia a vytvoriť prístupový kľúč."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptografia verejných kľúčov"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Prístup. kľúče firiem patriacich do združenia FIDO (zahŕňajúceho Google, Apple, Microsoft a ďalšie) využívajú páry kryptograf. kľúčov a štandardy W3C. Na rozdiel od použív. mena a reťazca znakov využívaných v prípade hesiel sa pár súkr. a verej. kľúča vytvára pre aplikáciu alebo web. Súkr. kľúč sa bezpečne ukladá v zar. či správcovi hesiel a slúži na overenie totožnosti. Verej. kľúč sa zdieľa so serverom danej aplik. alebo webu. Príslušnými kľúčami sa môžete okamžite registrovať a prihlasovať."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Prístupové kľúče založené na štandardoch W3C a aliancie FIDO (do ktorej patria Google, Apple, Microsoft a ďalší) používajú páry kryptografických kľúčov. Na rozdiel od používateľského mena a hesla sa pre každú aplikáciu alebo web vytvára jeden pár kľúčov (súkromný a verejný). Súkromný kľúč, bezpečne uložený v zariadení alebo v správcovi hesiel, potvrdzuje vašu identitu. Verejný kľúč sa zdieľa so serverom aplikácie alebo stránky. Vďaka zhodným kľúčom je registrácia a prihlásenie okamžité."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Lepšie zabezpečenie účtu"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Každý kľúč je výhradne prepojený s aplikáciou alebo webom, pre ktorý bol vytvorený, takže sa nikdy nemôžete omylom prihlásiť do podvodnej aplikácie alebo na podvodnom webe. Servery navyše uchovávajú iba verejné kľúče, čím podstatne sťažujú hackovanie."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Plynulý prechod"</string>
@@ -35,7 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Uložiť <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> do"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Chcete vytvoriť prístupový kľúč v inom zariadení?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Chcete pre všetky svoje prihlasovacie údaje použiť <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"Tento správca hesiel uchová vaše heslá a prístupové kľúče, aby vám pomohol ľahšie sa prihlasovať"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Tento správca hesiel poskytovateľa <xliff:g id="USERNAME">%1$s</xliff:g> uchová vaše heslá a prístupové kľúče, aby vám pomohol ľahšie sa prihlasovať"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nastaviť ako predvolené"</string>
     <string name="use_once" msgid="9027366575315399714">"Použiť raz"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Počet hesiel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Počet prístupových kľúčov: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
@@ -47,22 +47,25 @@
     <string name="other_password_manager" msgid="565790221427004141">"Iní správcovia hesiel"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Zavrieť hárok"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Prejsť späť na predchádzajúcu stránku"</string>
-    <!-- no translation found for accessibility_close_button (1163435587545377687) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Zavrieť"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Zavrieť"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> použiť uložený prístupový kľúč?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> použiť uložené prihlasovacie údaje?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Vyberte uložené prihlasovacie údaje pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prihláste sa inak"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> vybrať možnosť?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Chcete použiť tieto informácie v aplikácii <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prihlásiť sa inak"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Zobraziť možnosti"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Pokračovať"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Možnosti prihlásenia"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"Zobraziť viac"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Pre používateľa <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Správcovia uzamknutých hesiel"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Odomknúť klepnutím"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Žiadne prihlasovacie údaje"</string>
-    <!-- no translation found for no_sign_in_info_in (2641118151920288356) -->
-    <skip />
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Žiadne prihlasovacie údaje v zdroji <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Spravovať prihlasovacie údaje"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Z iného zariadenia"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Použiť iné zariadenie"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Požiadavku zrušila aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

@@ -33,6 +33,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
@@ -83,6 +84,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
@@ -151,6 +153,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
     static final long REQUEST_LISTENING_MUST_MATCH_PACKAGE = 172251878L;
 
+    /**
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    static final long REQUEST_LISTENING_OTHER_USER_NOOP = 242194868L;
+
     private final Context mContext;
 
     private final Handler mHandler = new Handler();
@@ -171,6 +180,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final SessionMonitor mSessionMonitor;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
+    private int mLastSystemKey = -1;
 
     private final TileRequestTracker mTileRequestTracker;
 
@@ -893,10 +903,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void handleSystemKey(int key) throws RemoteException {
+    public void handleSystemKey(KeyEvent key) throws RemoteException {
         if (!checkCanCollapseStatusBar("handleSystemKey")) {
             return;
         }
+
+        mLastSystemKey = key.getKeyCode();
 
         if (mBar != null) {
             try {
@@ -904,6 +916,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             } catch (RemoteException ex) {
             }
         }
+    }
+
+    @Override
+    @TestApi
+    public int getLastSystemKey() {
+        enforceStatusBar();
+
+        return mLastSystemKey;
     }
 
     @Override
@@ -1888,7 +1908,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
             // Check current user
             if (userId != currentUser) {
-                throw new IllegalArgumentException("User " + userId + " is not the current user.");
+                if (CompatChanges.isChangeEnabled(REQUEST_LISTENING_OTHER_USER_NOOP, callingUid)) {
+                    return;
+                } else {
+                    throw new IllegalArgumentException(
+                            "User " + userId + " is not the current user.");
+                }
             }
         }
         if (mBar != null) {

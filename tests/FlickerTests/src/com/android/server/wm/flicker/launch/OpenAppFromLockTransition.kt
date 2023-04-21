@@ -18,11 +18,11 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import com.android.server.wm.flicker.navBarLayerPositionAtEnd
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.Ignore
 import org.junit.Test

@@ -52,7 +52,7 @@ import android.view.InsetsState;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -287,12 +287,14 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // IME cannot be the IME target.
         ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
 
-        WindowContainerInsetsSourceProvider statusBarProvider =
+        InsetsSourceProvider statusBarProvider =
                 getController().getOrCreateSourceProvider(ID_STATUS_BAR, statusBars());
-        final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>> imeOverrideProviders =
-                new SparseArray<>();
-        imeOverrideProviders.put(TYPE_INPUT_METHOD, ((displayFrames, windowState, rect) ->
-                rect.set(0, 1, 2, 3)));
+        final SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
+                imeOverrideProviders = new SparseArray<>();
+        imeOverrideProviders.put(TYPE_INPUT_METHOD, ((displayFrames, windowState, rect) -> {
+            rect.set(0, 1, 2, 3);
+            return 0;
+        }));
         statusBarProvider.setWindowContainer(statusBar, null, imeOverrideProviders);
         getController().getOrCreateSourceProvider(ID_IME, ime())
                 .setWindowContainer(ime, null, null);
@@ -353,7 +355,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     public void testTransientVisibilityOfFixedRotationState() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final WindowContainerInsetsSourceProvider provider = getController()
+        final InsetsSourceProvider provider = getController()
                 .getOrCreateSourceProvider(ID_STATUS_BAR, statusBars());
         provider.setWindowContainer(statusBar, null, null);
 

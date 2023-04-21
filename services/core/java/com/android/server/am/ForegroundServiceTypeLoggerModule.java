@@ -190,6 +190,10 @@ public class ForegroundServiceTypeLoggerModule {
         // and also clean up the start calls stack by UID
         final ArrayList<Integer> apiTypes = convertFgsTypeToApiTypes(record.foregroundServiceType);
         final UidState uidState = mUids.get(uid);
+        if (uidState == null) {
+            Log.e(TAG, "FGS stop call being logged with no start call for UID " + uid);
+            return;
+        }
         final ArrayList<Integer> apisFound = new ArrayList<>();
         final ArrayList<Long> timestampsFound = new ArrayList<>();
         for (int i = 0, size = apiTypes.size(); i < size; i++) {

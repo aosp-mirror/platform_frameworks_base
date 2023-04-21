@@ -34,9 +34,12 @@ import androidx.core.graphics.ColorUtils
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.util.asIndenting
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 
 /**
@@ -50,6 +53,7 @@ class FaceScanningOverlay(
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     val mainExecutor: Executor,
     val logger: ScreenDecorationsLogger,
+    val authController: AuthController,
 ) : ScreenDecorations.DisplayCutoutView(context, pos) {
     private var showScanningAnim = false
     private val rimPaint = Paint()
@@ -100,7 +104,9 @@ class FaceScanningOverlay(
     }
 
     override fun enableShowProtection(show: Boolean) {
-        val showScanningAnimNow = keyguardUpdateMonitor.isFaceDetectionRunning && show
+        val animationRequired =
+                keyguardUpdateMonitor.isFaceDetectionRunning || authController.isShowing
+        val showScanningAnimNow = animationRequired && show
         if (showScanningAnimNow == showScanningAnim) {
             return
         }
@@ -415,5 +421,16 @@ class FaceScanningOverlay(
             }
             path.transform(scaleMatrix)
         }
+    }
+
+    override fun dump(pw: PrintWriter) {
+        val ipw = pw.asIndenting()
+        ipw.increaseIndent()
+        ipw.println("FaceScanningOverlay:")
+        super.dump(ipw)
+        ipw.println("rimProgress=$rimProgress")
+        ipw.println("rimRect=$rimRect")
+        ipw.println("this=$this")
+        ipw.decreaseIndent()
     }
 }

@@ -259,8 +259,7 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void start() {
         if (DEBUG) {
             Log.d(TAG, "onStart");
         }
@@ -280,8 +279,7 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void stop() {
         if (DEBUG) {
             Log.d(TAG, "onStop");
         }

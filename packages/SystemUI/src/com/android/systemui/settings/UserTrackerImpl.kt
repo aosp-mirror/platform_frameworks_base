@@ -103,7 +103,7 @@ open class UserTrackerImpl internal constructor(
     @GuardedBy("callbacks")
     private val callbacks: MutableList<DataItem> = ArrayList()
 
-    fun initialize(startingUser: Int) {
+    open fun initialize(startingUser: Int) {
         if (initialized) {
             return
         }
@@ -161,6 +161,10 @@ open class UserTrackerImpl internal constructor(
 
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
+            override fun onBeforeUserSwitching(newUserId: Int) {
+                handleBeforeUserSwitching(newUserId)
+            }
+
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
                 backgroundHandler.run {
                     handleUserSwitching(newUserId)
@@ -176,15 +180,30 @@ open class UserTrackerImpl internal constructor(
         }, TAG)
     }
 
+    protected open fun handleBeforeUserSwitching(newUserId: Int) {
+        setUserIdInternal(newUserId)
+    }
+
     @WorkerThread
     protected open fun handleUserSwitching(newUserId: Int) {
         Assert.isNotMainThread()
         Log.i(TAG, "Switching to user $newUserId")
 
-        setUserIdInternal(newUserId)
-        notifySubscribers {
-            onUserChanging(newUserId, userContext)
-        }.await()
+        val list = synchronized(callbacks) {
+            callbacks.toList()
+        }
+        val latch = CountDownLatch(list.size)
+        list.forEach {
+            val callback = it.callback.get()
+            if (callback != null) {
+                it.executor.execute {
+                    callback.onUserChanging(userId, userContext, latch)
+                }
+            } else {
+                latch.countDown()
+            }
+        }
+        latch.await()
     }
 
     @WorkerThread
@@ -192,7 +211,6 @@ open class UserTrackerImpl internal constructor(
         Assert.isNotMainThread()
         Log.i(TAG, "Switched to user $newUserId")
 
-        setUserIdInternal(newUserId)
         notifySubscribers {
             onUserChanged(newUserId, userContext)
             onProfilesChanged(userProfiles)
@@ -224,25 +242,18 @@ open class UserTrackerImpl internal constructor(
         }
     }
 
-    private inline fun notifySubscribers(
-            crossinline action: UserTracker.Callback.() -> Unit
-    ): CountDownLatch {
+    private inline fun notifySubscribers(crossinline action: UserTracker.Callback.() -> Unit) {
         val list = synchronized(callbacks) {
             callbacks.toList()
         }
-        val latch = CountDownLatch(list.size)
 
         list.forEach {
             if (it.callback.get() != null) {
                 it.executor.execute {
                     it.callback.get()?.action()
-                    latch.countDown()
                 }
-            } else {
-                latch.countDown()
             }
         }
-        return latch
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

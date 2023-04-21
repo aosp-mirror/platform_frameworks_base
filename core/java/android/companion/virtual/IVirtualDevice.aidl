@@ -39,21 +39,22 @@ import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.os.ResultReceiver;
 
 /**
- * Interface for a virtual device.
+ * Interface for a virtual device for communication between the system server and the process of
+ * the owner of the virtual device.
  *
  * @hide
  */
 interface IVirtualDevice {
 
     /**
-     * Returns the association ID for this virtual device.
+     * Returns the CDM association ID of this virtual device.
      *
      * @see AssociationInfo#getId()
      */
     int getAssociationId();
 
     /**
-     * Returns the unique device ID for this virtual device.
+     * Returns the unique ID of this virtual device.
      */
     int getDeviceId();
 
@@ -64,55 +65,99 @@ interface IVirtualDevice {
     void close();
 
     /**
-     * Notifies of an audio session being started.
+     * Notifies that an audio session being started.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void onAudioSessionStarting(
-            int displayId,
-            IAudioRoutingCallback routingCallback,
+    void onAudioSessionStarting(int displayId, IAudioRoutingCallback routingCallback,
             IAudioConfigChangedCallback configChangedCallback);
 
+    /**
+     * Notifies that an audio session has ended.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void onAudioSessionEnded();
 
+    /**
+     * Creates a new dpad and registers it with the input framework with the given token.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void createVirtualDpad(
-            in VirtualDpadConfig config,
-            IBinder token);
+    void createVirtualDpad(in VirtualDpadConfig config, IBinder token);
+
+    /**
+     * Creates a new keyboard and registers it with the input framework with the given token.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void createVirtualKeyboard(
-            in VirtualKeyboardConfig config,
-            IBinder token);
+    void createVirtualKeyboard(in VirtualKeyboardConfig config, IBinder token);
+
+    /**
+     * Creates a new mouse and registers it with the input framework with the given token.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void createVirtualMouse(
-            in VirtualMouseConfig config,
-            IBinder token);
+    void createVirtualMouse(in VirtualMouseConfig config, IBinder token);
+
+    /**
+     * Creates a new touchscreen and registers it with the input framework with the given token.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void createVirtualTouchscreen(
-            in VirtualTouchscreenConfig config,
-            IBinder token);
+    void createVirtualTouchscreen(in VirtualTouchscreenConfig config, IBinder token);
+
+    /**
+     * Creates a new navigation touchpad and registers it with the input framework with the given
+     * token.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void createVirtualNavigationTouchpad(
-            in VirtualNavigationTouchpadConfig config,
-            IBinder token);
+    void createVirtualNavigationTouchpad(in VirtualNavigationTouchpadConfig config, IBinder token);
+
+    /**
+     * Removes the input device corresponding to the given token from the framework.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterInputDevice(IBinder token);
+
+    /**
+     * Returns the ID of the device corresponding to the given token, as registered with the input
+     * framework.
+     */
     int getInputDeviceId(IBinder token);
+
+    /**
+    * Injects a key event to the virtual dpad corresponding to the given token.
+    */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendDpadKeyEvent(IBinder token, in VirtualKeyEvent event);
+
+    /**
+    * Injects a key event to the virtual keyboard corresponding to the given token.
+    */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendKeyEvent(IBinder token, in VirtualKeyEvent event);
+
+    /**
+    * Injects a button event to the virtual mouse corresponding to the given token.
+    */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendButtonEvent(IBinder token, in VirtualMouseButtonEvent event);
+
+    /**
+    * Injects a relative event to the virtual mouse corresponding to the given token.
+    */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendRelativeEvent(IBinder token, in VirtualMouseRelativeEvent event);
+
+    /**
+    * Injects a scroll event to the virtual mouse corresponding to the given token.
+    */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendScrollEvent(IBinder token, in VirtualMouseScrollEvent event);
+
+    /**
+    * Injects a touch event to the virtual touch input device corresponding to the given token.
+    */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendTouchEvent(IBinder token, in VirtualTouchEvent event);
 
     /**
-     * Returns all virtual sensors for this device.
+     * Returns all virtual sensors created for this device.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     List<VirtualSensor> getVirtualSensorList();
@@ -126,8 +171,13 @@ interface IVirtualDevice {
     /**
      * Launches a pending intent on the given display that is owned by this virtual device.
      */
-    void launchPendingIntent(
-            int displayId, in PendingIntent pendingIntent, in ResultReceiver resultReceiver);
+    void launchPendingIntent(int displayId, in PendingIntent pendingIntent,
+            in ResultReceiver resultReceiver);
+
+    /**
+     * Returns the current cursor position of the mouse corresponding to the given token, in x and y
+     * coordinates.
+     */
     PointF getCursorPosition(IBinder token);
 
     /** Sets whether to show or hide the cursor while this virtual device is active. */
@@ -140,8 +190,12 @@ interface IVirtualDevice {
      * intent.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void registerIntentInterceptor(
-            in IVirtualDeviceIntentInterceptor intentInterceptor, in IntentFilter filter);
+    void registerIntentInterceptor(in IVirtualDeviceIntentInterceptor intentInterceptor,
+            in IntentFilter filter);
+
+    /**
+     * Unregisters a previously registered intent interceptor.
+     */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterIntentInterceptor(in IVirtualDeviceIntentInterceptor intentInterceptor);
 }

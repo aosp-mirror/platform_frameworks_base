@@ -193,7 +193,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
                                 : new OnBackInvokedCallbackWrapper(callback);
-                callbackInfo = new OnBackInvokedCallbackInfo(iCallback, priority);
+                callbackInfo = new OnBackInvokedCallbackInfo(
+                        iCallback,
+                        priority,
+                        callback instanceof OnBackAnimationCallback);
             }
             mWindowSession.setOnBackInvokedCallbackInfo(mWindow, callbackInfo);
         } catch (RemoteException e) {
@@ -355,6 +358,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void setImeOnBackInvokedDispatcher(
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         mImeDispatcher = imeDispatcher;
+    }
+
+    /** Returns true if a non-null {@link ImeOnBackInvokedDispatcher} has been set. **/
+    public boolean hasImeOnBackInvokedDispatcher() {
+        return mImeDispatcher != null;
     }
 
     /**

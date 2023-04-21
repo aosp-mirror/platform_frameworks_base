@@ -463,6 +463,13 @@ bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* str
     if (hasGainmap() && format == JavaCompressFormat::Jpeg) {
         SkBitmap baseBitmap = getSkBitmap();
         SkBitmap gainmapBitmap = gainmap()->bitmap->getSkBitmap();
+        if (gainmapBitmap.colorType() == SkColorType::kAlpha_8_SkColorType) {
+            SkBitmap greyGainmap;
+            auto greyInfo = gainmapBitmap.info().makeColorType(SkColorType::kGray_8_SkColorType);
+            greyGainmap.setInfo(greyInfo, gainmapBitmap.rowBytes());
+            greyGainmap.setPixelRef(sk_ref_sp(gainmapBitmap.pixelRef()), 0, 0);
+            gainmapBitmap = std::move(greyGainmap);
+        }
         SkJpegEncoder::Options options{.fQuality = quality};
         return SkJpegGainmapEncoder::EncodeHDRGM(stream, baseBitmap.pixmap(), options,
                                                  gainmapBitmap.pixmap(), options, gainmap()->info);

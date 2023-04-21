@@ -20,13 +20,13 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -97,6 +97,11 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
 
     /** {@inheritDoc} */
     @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
+    override fun taskBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarLayerPositionAtStartAndEnd() {}
 
@@ -128,9 +133,6 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
     override fun navBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
-    @FlakyTest @Test override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
-
-    /** {@inheritDoc} */
     @FlakyTest(bugId = 246284526)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
@@ -150,14 +152,15 @@ class OpenAppFromLockNotificationWarm(flicker: FlickerTest) : OpenAppFromNotific
         }
 
         /**
-         * Ensures that posted notifications will be visible on the lockscreen and not
-         * suppressed due to being marked as seen.
+         * Ensures that posted notifications will be visible on the lockscreen and not suppressed
+         * due to being marked as seen.
          */
         @ClassRule
         @JvmField
-        val disableUnseenNotifFilterRule = SettingOverrideRule(
-            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            /* value= */ "0",
-        )
+        val disableUnseenNotifFilterRule =
+            SettingOverrideRule(
+                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                /* value= */ "0",
+            )
     }
 }

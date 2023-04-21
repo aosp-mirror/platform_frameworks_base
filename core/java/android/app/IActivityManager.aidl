@@ -35,6 +35,7 @@ import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
+import android.app.IUidFrozenStateChangedCallback;
 import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
@@ -107,6 +108,15 @@ interface IActivityManager {
     int getUidProcessState(int uid, in String callingPackage);
     @UnsupportedAppUsage
     int checkPermission(in String permission, int pid, int uid);
+
+    /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiBegin(int apiType, int appUid, int appPid);
+
+    /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiEnd(int apiType, int appUid, int appPid);
+
+    /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
@@ -341,12 +351,6 @@ interface IActivityManager {
             in String message, boolean force, int exceptionTypeId);
     void crashApplicationWithTypeWithExtras(int uid, int initialPid, in String packageName,
             int userId, in String message, boolean force, int exceptionTypeId, in Bundle extras);
-    /** @deprecated -- use getProviderMimeTypeAsync */
-    @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
-            "Use {@link android.content.ContentResolver#getType} public API instead.")
-    String getProviderMimeType(in Uri uri, int userId);
-
-    oneway void getProviderMimeTypeAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     oneway void getMimeTypeFilterAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
@@ -875,12 +879,9 @@ interface IActivityManager {
     /** Returns if the service is a short-service is still "alive" and past the timeout. */
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
 
-    /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
-    oneway void logFgsApiBegin(int apiType, int appUid, int appPid);
-
-    /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
-    oneway void logFgsApiEnd(int apiType, int appUid, int appPid);
-
-    /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
-    oneway void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
+    void registerUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    int[] getUidFrozenState(in int[] uids);
 }

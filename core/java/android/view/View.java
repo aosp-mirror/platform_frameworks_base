@@ -92,6 +92,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -142,7 +143,6 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
-import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -3114,33 +3114,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Accessibility interactions from services without {@code isAccessibilityTool} set to true are
      * disallowed for any of the following conditions:
      * <li>this view sets {@link #getFilterTouchesWhenObscured()}.</li>
-     * <li>any parent of this view returns true from {@link #isAccessibilityDataPrivate()}.</li>
+     * <li>any parent of this view returns true from {@link #isAccessibilityDataSensitive()}.</li>
      * </p>
      */
-    public static final int ACCESSIBILITY_DATA_PRIVATE_AUTO = 0x00000000;
+    public static final int ACCESSIBILITY_DATA_SENSITIVE_AUTO = 0x00000000;
 
     /**
      * Only allow interactions from {@link android.accessibilityservice.AccessibilityService}s
      * with the {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool}
      * property set to true.
      */
-    public static final int ACCESSIBILITY_DATA_PRIVATE_YES = 0x00000001;
+    public static final int ACCESSIBILITY_DATA_SENSITIVE_YES = 0x00000001;
 
     /**
      * Allow interactions from all {@link android.accessibilityservice.AccessibilityService}s,
      * regardless of their
      * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property.
      */
-    public static final int ACCESSIBILITY_DATA_PRIVATE_NO = 0x00000002;
+    public static final int ACCESSIBILITY_DATA_SENSITIVE_NO = 0x00000002;
 
     /** @hide */
-    @IntDef(prefix = { "ACCESSIBILITY_DATA_PRIVATE_" }, value = {
-            ACCESSIBILITY_DATA_PRIVATE_AUTO,
-            ACCESSIBILITY_DATA_PRIVATE_YES,
-            ACCESSIBILITY_DATA_PRIVATE_NO,
+    @IntDef(prefix = { "ACCESSIBILITY_DATA_SENSITIVE_" }, value = {
+            ACCESSIBILITY_DATA_SENSITIVE_AUTO,
+            ACCESSIBILITY_DATA_SENSITIVE_YES,
+            ACCESSIBILITY_DATA_SENSITIVE_NO,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface AccessibilityDataPrivate {}
+    public @interface AccessibilityDataSensitive {}
 
     /**
      * Mask for obtaining the bits which specify how to determine
@@ -4611,9 +4611,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
      * set to true.
      */
-    private int mExplicitAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_AUTO;
-    /** Used to calculate and cache {@link #isAccessibilityDataPrivate()}. */
-    private int mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_AUTO;
+    private int mExplicitAccessibilityDataSensitive = ACCESSIBILITY_DATA_SENSITIVE_AUTO;
+    /** Used to calculate and cache {@link #isAccessibilityDataSensitive()}. */
+    private int mInferredAccessibilityDataSensitive = ACCESSIBILITY_DATA_SENSITIVE_AUTO;
 
     /**
      * Specifies the id of a view for which this view serves as a label for
@@ -5414,7 +5414,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * The pointer icon when the mouse hovers on this view. The default is null.
      */
-    private PointerIcon mPointerIcon;
+    private PointerIcon mMousePointerIcon;
 
     /**
      * @hide
@@ -6016,9 +6016,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     setImportantForAccessibility(a.getInt(attr,
                             IMPORTANT_FOR_ACCESSIBILITY_DEFAULT));
                     break;
-                case R.styleable.View_accessibilityDataPrivate:
-                    setAccessibilityDataPrivate(a.getInt(attr,
-                            ACCESSIBILITY_DATA_PRIVATE_AUTO));
+                case R.styleable.View_accessibilityDataSensitive:
+                    setAccessibilityDataSensitive(a.getInt(attr,
+                            ACCESSIBILITY_DATA_SENSITIVE_AUTO));
                     break;
                 case R.styleable.View_accessibilityLiveRegion:
                     setAccessibilityLiveRegion(a.getInt(attr, ACCESSIBILITY_LIVE_REGION_DEFAULT));
@@ -8324,6 +8324,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusLost();
         } else if (hasWindowFocus()) {
             notifyFocusChangeToImeFocusController(true /* hasFocus */);
+
+            if (mIsHandwritingDelegate) {
+                ViewRootImpl viewRoot = getViewRootImpl();
+                if (viewRoot != null) {
+                    viewRoot.getHandwritingInitiator().onDelegateViewFocused(this);
+                }
+            }
         }
 
         invalidate(true);
@@ -8660,9 +8667,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * is responsible for handling this call.
      * </p>
      * <p>
-     * If this view sets {@link #isAccessibilityDataPrivate()} then this view should only append
+     * If this view sets {@link #isAccessibilityDataSensitive()} then this view should only append
      * sensitive information to an event that also sets
-     * {@link AccessibilityEvent#isAccessibilityDataPrivate()}.
+     * {@link AccessibilityEvent#isAccessibilityDataSensitive()}.
      * </p>
      * <p>
      * <em>Note:</em> Accessibility events of certain types are not dispatched for
@@ -8920,7 +8927,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @UnsupportedAppUsage
-    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
+    @TestApi
+    public void getBoundsOnScreen(@NonNull Rect outRect, boolean clipToParent) {
         if (mAttachInfo == null) {
             return;
         }
@@ -8928,6 +8936,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         getBoundsToScreenInternal(position, clipToParent);
         outRect.set(Math.round(position.left), Math.round(position.top),
                 Math.round(position.right), Math.round(position.bottom));
+        // If "Sandboxing View Bounds APIs" override is enabled, applyViewBoundsSandboxingIfNeeded
+        // will sandbox outRect within window bounds.
+        mAttachInfo.mViewRootImpl.applyViewBoundsSandboxingIfNeeded(outRect);
     }
 
     /**
@@ -10336,52 +10347,70 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Check whether current activity / package is in denylist.If it's in the denylist,
-     * then the views marked as not important for autofill are not eligible for autofill.
+     * Check whether current activity / package is in autofill denylist.
+     *
+     * Called by viewGroup#populateChildrenForAutofill() to determine whether to include view in
+     * assist structure
      */
     final boolean isActivityDeniedForAutofillForUnimportantView() {
         final AutofillManager afm = getAutofillManager();
-        // keep behavior same with denylist feature not enabled
-        if (afm == null) return true;
-        return afm.isActivityDeniedForAutofillForUnimportantView();
+        if (afm == null) return false;
+        return afm.isActivityDeniedForAutofill();
     }
 
     /**
      * Check whether current view matches autofillable heuristics
+     *
+     * Called by viewGroup#populateChildrenForAutofill() to determine whether to include view in
+     * assist structure
      */
     final boolean isMatchingAutofillableHeuristics() {
         final AutofillManager afm = getAutofillManager();
-        // keep default behavior
         if (afm == null) return false;
-        return afm.isMatchingAutofillableHeuristics(this);
+        // check the flag to see if trigger fill request on not important views is enabled
+        return afm.isTriggerFillRequestOnUnimportantViewEnabled()
+            ? afm.isAutofillable(this) : false;
     }
 
     private boolean isAutofillable() {
         if (getAutofillType() == AUTOFILL_TYPE_NONE) return false;
 
-        // Disable triggering autofill if the view is integrated with CredentialManager.
-        if (AutofillFeatureFlags.shouldIgnoreCredentialViews()
-                && isCredential()) return false;
-
-        if (!isImportantForAutofill()) {
-            // If view matches heuristics and is not denied, it will be treated same as view that's
-            // important for autofill
-            if (isMatchingAutofillableHeuristics()
-                    && !isActivityDeniedForAutofillForUnimportantView()) {
-                return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
-            }
-            // View is not important for "regular" autofill, so we must check if Augmented Autofill
-            // is enabled for the activity
-            final AutofillOptions options = mContext.getAutofillOptions();
-            if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
-                return false;
-            }
-            final AutofillManager afm = getAutofillManager();
-            if (afm == null) return false;
-            afm.notifyViewEnteredForAugmentedAutofill(this);
+        final AutofillManager afm = getAutofillManager();
+        if (afm == null) {
+            return false;
         }
 
-        return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
+        // Disable triggering autofill if the view is integrated with CredentialManager.
+        if (afm.shouldIgnoreCredentialViews() && isCredential()) {
+            return false;
+        }
+
+        // Check whether view is not part of an activity. If it's not, return false.
+        if (getAutofillViewId() <= LAST_APP_AUTOFILL_ID) {
+            return false;
+        }
+
+        // If view is important and filter important view flag is turned on, or view is not
+        // important and trigger fill request on not important view flag is turned on, then use
+        // AutofillManager.isAutofillable() to decide whether view is autofillable instead.
+        if ((isImportantForAutofill() && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled())
+                || (!isImportantForAutofill()
+                    && afm.isTriggerFillRequestOnUnimportantViewEnabled())) {
+            return afm.isAutofillable(this) ? true : notifyAugmentedAutofillIfNeeded(afm);
+        }
+
+        // If the previous condition is not met, fall back to the previous way to trigger fill
+        // request based on autofill importance instead.
+        return isImportantForAutofill() ? true : notifyAugmentedAutofillIfNeeded(afm);
+    }
+
+    private boolean notifyAugmentedAutofillIfNeeded(AutofillManager afm) {
+        final AutofillOptions options = mContext.getAutofillOptions();
+        if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
+            return false;
+        }
+        afm.notifyViewEnteredForAugmentedAutofill(this);
+        return true;
     }
 
     /** @hide */
@@ -10697,6 +10726,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setVisibleToUser(isVisibleToUser());
 
         info.setImportantForAccessibility(isImportantForAccessibility());
+        info.setAccessibilityDataSensitive(isAccessibilityDataSensitive());
         info.setPackageName(mContext.getPackageName());
         info.setClassName(getAccessibilityClassName());
         info.setStateDescription(getStateDescription());
@@ -12437,11 +12467,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setHandwritingDelegatorCallback(@Nullable Runnable callback) {
         mHandwritingDelegatorCallback = callback;
         if (callback != null) {
-            // By default, the delegate must be from the same package as the delegator view.
-            mAllowedHandwritingDelegatePackageName = mContext.getOpPackageName();
             setHandwritingArea(new Rect(0, 0, getWidth(), getHeight()));
-        } else {
-            mAllowedHandwritingDelegatePackageName = null;
         }
     }
 
@@ -12460,8 +12486,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view from the specified package. If this method is not called, delegators may only be used to
      * initiate handwriting mode for a delegate editor view from the same package as the delegator
      * view. This method allows specifying a different trusted package which may contain a delegate
-     * editor view linked to this delegator view. This should be called after {@link
-     * #setHandwritingDelegatorCallback}.
+     * editor view linked to this delegator view.
+     *
+     * <p>This method has no effect unless {@link #setHandwritingDelegatorCallback} is also called
+     * to configure this view to act as a handwriting delegator.
      *
      * <p>If this method is called on the delegator view, then {@link
      * #setAllowedHandwritingDelegatorPackage} should also be called on the delegate editor view.
@@ -12479,33 +12507,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * delegateEditorView.setAllowedHandwritingDelegatorPackage(package1);</pre>
      *
      * @param allowedPackageName the package name of a delegate editor view linked to this delegator
-     *     view
-     * @throws IllegalStateException If the view has not been configured as a handwriting delegator
-     *     using {@link #setHandwritingDelegatorCallback}.
+     *     view, or {@code null} to restore the default behavior of only allowing delegate editor
+     *     views from the same package as this delegator view
      */
-    public void setAllowedHandwritingDelegatePackage(@NonNull String allowedPackageName) {
-        if (mHandwritingDelegatorCallback == null) {
-            throw new IllegalStateException("This view is not a handwriting delegator.");
-        }
+    public void setAllowedHandwritingDelegatePackage(@Nullable String allowedPackageName) {
         mAllowedHandwritingDelegatePackageName = allowedPackageName;
     }
 
     /**
      * Returns the allowed package for delegate editor views for which this view may act as a
-     * handwriting delegator. If {@link #setAllowedHandwritingDelegatePackage} has not been called,
-     * this will return this view's package name, since by default delegators may only be used to
-     * initiate handwriting mode for a delegate editor view from the same package as the delegator
-     * view. This will return a different allowed package if set by {@link
-     * #setAllowedHandwritingDelegatePackage}.
-     *
-     * @throws IllegalStateException If the view has not been configured as a handwriting delegator
-     *     using {@link #setHandwritingDelegatorCallback}.
+     * handwriting delegator, as set by {@link #setAllowedHandwritingDelegatePackage}. If {@link
+     * #setAllowedHandwritingDelegatePackage} has not been called, or called with {@code null}
+     * argument, this will return {@code null}, meaning that this delegator view may only be used to
+     * initiate handwriting mode for a delegate editor view from the same package as this delegator
+     * view.
      */
-    @NonNull
+    @Nullable
     public String getAllowedHandwritingDelegatePackageName() {
-        if (mHandwritingDelegatorCallback == null) {
-            throw new IllegalStateException("This view is not a handwriting delegator.");
-        }
         return mAllowedHandwritingDelegatePackageName;
     }
 
@@ -12519,12 +12537,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setIsHandwritingDelegate(boolean isHandwritingDelegate) {
         mIsHandwritingDelegate = isHandwritingDelegate;
-        if (mIsHandwritingDelegate) {
-            // By default, the delegator must be from the same package as the delegate view.
-            mAllowedHandwritingDelegatorPackageName = mContext.getOpPackageName();
-        } else {
-            mAllowedHandwritingDelegatePackageName = null;
-        }
     }
 
     /**
@@ -12537,41 +12549,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Specifies that a view from the specified package may act as a handwriting delegator for this
-     * delegate editor view. If this method is not called, only views from the same package as the
+     * delegate editor view. If this method is not called, only views from the same package as this
      * delegate editor view may act as a handwriting delegator. This method allows specifying a
      * different trusted package which may contain a delegator view linked to this delegate editor
-     * view. This should be called after {@link #setIsHandwritingDelegate}.
+     * view.
+     *
+     * <p>This method has no effect unless {@link #setIsHandwritingDelegate} is also called to
+     * configure this view to act as a handwriting delegate.
      *
      * <p>If this method is called on the delegate editor view, then {@link
      * #setAllowedHandwritingDelegatePackage} should also be called on the delegator view.
      *
      * @param allowedPackageName the package name of a delegator view linked to this delegate editor
-     *     view
-     * @throws IllegalStateException If the view has not been configured as a handwriting delegate
-     *     using {@link #setIsHandwritingDelegate}.
+     *     view, or {@code null} to restore the default behavior of only allowing delegator views
+     *     from the same package as this delegate editor view
      */
-    public void setAllowedHandwritingDelegatorPackage(@NonNull String allowedPackageName) {
-        if (!mIsHandwritingDelegate) {
-            throw new IllegalStateException("This view is not a handwriting delegate.");
-        }
+    public void setAllowedHandwritingDelegatorPackage(@Nullable String allowedPackageName) {
         mAllowedHandwritingDelegatorPackageName = allowedPackageName;
     }
 
     /**
      * Returns the allowed package for views which may act as a handwriting delegator for this
-     * delegate editor view. If {@link #setAllowedHandwritingDelegatorPackage} has not been called,
-     * this will return this view's package name, since by default only views from the same package
-     * as the delegator editor view may act as a handwriting delegator. This will return a different
-     * allowed package if set by {@link #setAllowedHandwritingDelegatorPackage}.
-     *
-     * @throws IllegalStateException If the view has not been configured as a handwriting delegate
-     *     using {@link #setIsHandwritingDelegate}.
+     * delegate editor view, as set by {@link #setAllowedHandwritingDelegatorPackage}. If {@link
+     * #setAllowedHandwritingDelegatorPackage} has not been called, or called with {@code null}
+     * argument, this will return {@code null}, meaning that only views from the same package as
+     * this delegator editor view may act as a handwriting delegator.
      */
-    @NonNull
+    @Nullable
     public String getAllowedHandwritingDelegatorPackageName() {
-        if (!mIsHandwritingDelegate) {
-            throw new IllegalStateException("This view is not a handwriting delegate.");
-        }
         return mAllowedHandwritingDelegatorPackageName;
     }
 
@@ -13606,7 +13611,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setFilterTouchesWhenObscured(boolean enabled) {
         setFlags(enabled ? FILTER_TOUCHES_WHEN_OBSCURED : 0,
                 FILTER_TOUCHES_WHEN_OBSCURED);
-        calculateAccessibilityDataPrivate();
+        calculateAccessibilityDataSensitive();
     }
 
     /**
@@ -14842,7 +14847,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // source View's AccessibilityDataPrivate value, and then filtering is done when
             // AccessibilityManagerService propagates events to each recipient AccessibilityService.
             if (!AccessibilityManager.getInstance(mContext).isRequestFromAccessibilityTool()
-                    && isAccessibilityDataPrivate()) {
+                    && isAccessibilityDataSensitive()) {
                 return false;
             }
         }
@@ -14858,43 +14863,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * set to true.
      *
      * <p>
-     * See default behavior provided by {@link #ACCESSIBILITY_DATA_PRIVATE_AUTO}. Otherwise,
-     * returns true for {@link #ACCESSIBILITY_DATA_PRIVATE_YES} or false for {@link
-     * #ACCESSIBILITY_DATA_PRIVATE_NO}.
+     * See default behavior provided by {@link #ACCESSIBILITY_DATA_SENSITIVE_AUTO}. Otherwise,
+     * returns true for {@link #ACCESSIBILITY_DATA_SENSITIVE_YES} or false for {@link
+     * #ACCESSIBILITY_DATA_SENSITIVE_NO}.
      * </p>
      *
      * @return True if this view should restrict accessibility service access to services that have
      * the isAccessibilityTool property.
      */
     @ViewDebug.ExportedProperty(category = "accessibility")
-    public boolean isAccessibilityDataPrivate() {
-        if (mInferredAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_AUTO) {
-            calculateAccessibilityDataPrivate();
+    public boolean isAccessibilityDataSensitive() {
+        if (mInferredAccessibilityDataSensitive == ACCESSIBILITY_DATA_SENSITIVE_AUTO) {
+            calculateAccessibilityDataSensitive();
         }
-        return mInferredAccessibilityDataPrivate == ACCESSIBILITY_DATA_PRIVATE_YES;
+        return mInferredAccessibilityDataSensitive == ACCESSIBILITY_DATA_SENSITIVE_YES;
     }
 
     /**
-     * Calculate and cache the inferred value for {@link #isAccessibilityDataPrivate()}.
+     * Calculate and cache the inferred value for {@link #isAccessibilityDataSensitive()}.
      *
      * <p>
      * <strong>Note:</strong> This method needs to be called any time one of the below conditions
      * changes, to recalculate the new value.
      * </p>
      */
-    void calculateAccessibilityDataPrivate() {
+    void calculateAccessibilityDataSensitive() {
         // Use the explicit value if set.
-        if (mExplicitAccessibilityDataPrivate != ACCESSIBILITY_DATA_PRIVATE_AUTO) {
-            mInferredAccessibilityDataPrivate = mExplicitAccessibilityDataPrivate;
+        if (mExplicitAccessibilityDataSensitive != ACCESSIBILITY_DATA_SENSITIVE_AUTO) {
+            mInferredAccessibilityDataSensitive = mExplicitAccessibilityDataSensitive;
         } else if (getFilterTouchesWhenObscured()) {
-            // Views that set filterTouchesWhenObscured default to accessibilityDataPrivate.
-            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
-        } else if (mParent instanceof View && ((View) mParent).isAccessibilityDataPrivate()) {
-            // Descendants of an accessibilityDataPrivate View are also accessibilityDataPrivate.
-            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_YES;
+            // Views that set filterTouchesWhenObscured default to accessibilityDataSensitive.
+            mInferredAccessibilityDataSensitive = ACCESSIBILITY_DATA_SENSITIVE_YES;
+        } else if (mParent instanceof View && ((View) mParent).isAccessibilityDataSensitive()) {
+            // Descendants of accessibilityDataSensitive Views are also accessibilityDataSensitive.
+            mInferredAccessibilityDataSensitive = ACCESSIBILITY_DATA_SENSITIVE_YES;
         } else {
-            // Otherwise, default to not accessibilityDataPrivate.
-            mInferredAccessibilityDataPrivate = ACCESSIBILITY_DATA_PRIVATE_NO;
+            // Otherwise, default to not accessibilityDataSensitive.
+            mInferredAccessibilityDataSensitive = ACCESSIBILITY_DATA_SENSITIVE_NO;
         }
     }
 
@@ -14904,10 +14909,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
      * set to true.
      */
-    public void setAccessibilityDataPrivate(
-            @AccessibilityDataPrivate int accessibilityDataPrivate) {
-        mExplicitAccessibilityDataPrivate = accessibilityDataPrivate;
-        calculateAccessibilityDataPrivate();
+    public void setAccessibilityDataSensitive(
+            @AccessibilityDataSensitive int accessibilityDataSensitive) {
+        mExplicitAccessibilityDataSensitive = accessibilityDataSensitive;
+        calculateAccessibilityDataSensitive();
     }
 
     /**
@@ -16183,7 +16188,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @UnsupportedAppUsage
-    public void getWindowDisplayFrame(Rect outRect) {
+    @TestApi
+    public void getWindowDisplayFrame(@NonNull Rect outRect) {
         if (mAttachInfo != null) {
             mAttachInfo.mViewRootImpl.getDisplayFrame(outRect);
             return;
@@ -26399,6 +26405,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (info != null) {
             outLocation[0] += info.mWindowLeft;
             outLocation[1] += info.mWindowTop;
+            // If OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS override is enabled,
+            // applyViewLocationSandboxingIfNeeded sandboxes outLocation within window bounds.
+            info.mViewRootImpl.applyViewLocationSandboxingIfNeeded(outLocation);
         }
     }
 
@@ -29498,30 +29507,71 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns the pointer icon for the motion event, or null if it doesn't specify the icon.
-     * The default implementation does not care the location or event types, but some subclasses
-     * may use it (such as WebViews).
-     * @param event The MotionEvent from a mouse
-     * @param pointerIndex The index of the pointer for which to retrieve the {@link PointerIcon}.
-     *                     This will be between 0 and {@link MotionEvent#getPointerCount()}.
+     * Resolve the pointer icon that should be used for specified pointer in the motion event.
+     *
+     * The default implementation will resolve the pointer icon to one set using
+     * {@link #setPointerIcon(PointerIcon)} for mouse devices. Subclasses may override this to
+     * customize the icon for the given pointer.
+     *
+     * For example, the pointer icon for a stylus pointer can be resolved in the following way:
+     * <code><pre>
+     * &#64;Override
+     * public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+     *     final int toolType = event.getToolType(pointerIndex);
+     *     if (!event.isFromSource(InputDevice.SOURCE_MOUSE)
+     *             && event.isFromSource(InputDevice.SOURCE_STYLUS)
+     *             && (toolType == MotionEvent.TOOL_TYPE_STYLUS
+     *                     || toolType == MotionEvent.TOOL_TYPE_ERASER)) {
+     *         // Show this pointer icon only if this pointer is a stylus.
+     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_WAIT);
+     *     }
+     *     // Use the default logic for determining the pointer icon for other non-stylus pointers,
+     *     // like for the mouse cursor.
+     *     return super.onResolvePointerIcon(event, pointerIndex);
+     * }
+     * </pre></code>
+     *
+     * @param event The {@link MotionEvent} that requires a pointer icon to be resolved for one of
+     *              pointers.
+     * @param pointerIndex The index of the pointer in {@code event} for which to retrieve the
+     *     {@link PointerIcon}. This will be between 0 and {@link MotionEvent#getPointerCount()}.
+     * @return the pointer icon to use for specified pointer, or {@code null} if a pointer icon
+     *     is not specified and the default icon should be used.
      * @see PointerIcon
+     * @see InputManager#isStylusPointerIconEnabled()
      */
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
         final float x = event.getX(pointerIndex);
         final float y = event.getY(pointerIndex);
         if (isDraggingScrollBar() || isOnScrollbarThumb(x, y)) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
+            // Use the default pointer icon.
+            return null;
         }
-        return mPointerIcon;
+
+        // Note: A drawing tablet will have both SOURCE_MOUSE and SOURCE_STYLUS, but it would use
+        // TOOL_TYPE_STYLUS. For now, treat drawing tablets the same way as a mouse or touchpad.
+        if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            return mMousePointerIcon;
+        }
+
+        return null;
     }
 
     /**
-     * Set the pointer icon for the current view.
+     * Set the pointer icon to be used for a mouse pointer in the current view.
+     *
      * Passing {@code null} will restore the pointer icon to its default value.
+     * Note that setting the pointer icon using this method will only set it for events coming from
+     * a mouse device (i.e. with source {@link InputDevice#SOURCE_MOUSE}). To resolve
+     * the pointer icon for other device types like styluses, override
+     * {@link #onResolvePointerIcon(MotionEvent, int)}.
+     *
      * @param pointerIcon A PointerIcon instance which will be shown when the mouse hovers.
+     * @see #onResolvePointerIcon(MotionEvent, int)
+     * @see PointerIcon
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
-        mPointerIcon = pointerIcon;
+        mMousePointerIcon = pointerIcon;
         if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
             return;
         }
@@ -29532,11 +29582,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the pointer icon for the current view.
+     * Gets the mouse pointer icon for the current view.
+     *
+     * @see #setPointerIcon(PointerIcon)
      */
     @InspectableProperty
     public PointerIcon getPointerIcon() {
-        return mPointerIcon;
+        return mMousePointerIcon;
     }
 
     /**

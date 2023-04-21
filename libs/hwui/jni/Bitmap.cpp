@@ -386,15 +386,10 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle, jint dstConfig
             return NULL;
         }
         if (hasGainmap) {
-            auto gainmap = sp<uirenderer::Gainmap>::make();
-            gainmap->info = original.gainmap()->info;
-            const SkBitmap skSrcBitmap = original.gainmap()->bitmap->getSkBitmap();
-            sk_sp<Bitmap> skBitmap(Bitmap::allocateHardwareBitmap(skSrcBitmap));
-            if (!skBitmap.get()) {
-                return NULL;
+            auto gm = uirenderer::Gainmap::allocateHardwareGainmap(original.gainmap());
+            if (gm) {
+                bitmap->setGainmap(std::move(gm));
             }
-            gainmap->bitmap = std::move(skBitmap);
-            bitmap->setGainmap(std::move(gainmap));
         }
         return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(isMutable));
     }

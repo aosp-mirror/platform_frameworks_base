@@ -416,6 +416,15 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testMagnifierDeactivates_shortcutTriggeredState_returnToIdleState() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
+
+        assertIn(STATE_IDLE);
+    }
+
+    @Test
     public void testThreeFingersOneTap_activatedState_dispatchMotionEvents() {
         goFromStateIdleTo(STATE_ACTIVATED);
         final EventCaptor eventCaptor = new EventCaptor();

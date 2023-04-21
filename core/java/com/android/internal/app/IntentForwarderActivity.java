@@ -16,14 +16,18 @@
 
 package com.android.internal.app;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_WORK;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
 import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -78,6 +82,10 @@ public class IntentForwarderActivity extends Activity  {
 
     public static String FORWARD_INTENT_TO_MANAGED_PROFILE
             = "com.android.internal.app.ForwardIntentToManagedProfile";
+
+    @TestApi
+    public static final String EXTRA_SKIP_USER_CONFIRMATION =
+            "com.android.internal.app.EXTRA_SKIP_USER_CONFIRMATION";
 
     private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEMES
             = new HashSet<>(Arrays.asList("sms", "smsto", "mms", "mmsto"));
@@ -181,6 +189,15 @@ public class IntentForwarderActivity extends Activity  {
             return;
         }
 
+        if (launchIntent.getBooleanExtra(EXTRA_SKIP_USER_CONFIRMATION, /* defaultValue= */ false)
+                && getCallingPackage() != null
+                && PERMISSION_GRANTED == getPackageManager().checkPermission(
+                        INTERACT_ACROSS_USERS, getCallingPackage())) {
+            startActivityAsCaller(launchIntent, targetUserId);
+            finish();
+            return;
+        }
+
         int layoutId = R.layout.miniresolver;
         setContentView(layoutId);
 
@@ -196,9 +213,7 @@ public class IntentForwarderActivity extends Activity  {
         buttonContainer.setPadding(0, 0, 0, buttonContainer.getPaddingBottom());
 
         ((TextView) findViewById(R.id.open_cross_profile)).setText(
-                getResources().getString(
-                        R.string.miniresolver_open_in_work,
-                        target.loadLabel(packageManagerForTargetUser)));
+                getOpenInWorkMessage(target.loadLabel(packageManagerForTargetUser)));
 
         // The mini-resolver's negative button is reused in this flow to cancel the intent
         ((Button) findViewById(R.id.use_same_profile_browser)).setText(R.string.cancel);
@@ -208,6 +223,13 @@ public class IntentForwarderActivity extends Activity  {
             startActivityAsCaller(launchIntent, targetUserId);
             finish();
         });
+    }
+
+    private String getOpenInWorkMessage(CharSequence targetLabel) {
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_OPEN_IN_WORK,
+                () -> getString(R.string.miniresolver_open_in_work, targetLabel),
+                targetLabel);
     }
 
     private String getForwardToPersonalMessage() {

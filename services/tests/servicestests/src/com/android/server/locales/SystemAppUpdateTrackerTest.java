@@ -131,6 +131,7 @@ public class SystemAppUpdateTrackerTest {
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
         doReturn(InstrumentationRegistry.getContext().getContentResolver())
                 .when(mMockContext).getContentResolver();
+        doReturn(mMockContext).when(mMockContext).createContextAsUser(any(), anyInt());
 
         mStoragefile = new AtomicFile(new File(
                 Environment.getExternalStorageDirectory(), "systemUpdateUnitTests.xml"));
@@ -138,9 +139,8 @@ public class SystemAppUpdateTrackerTest {
         mSystemAppUpdateTracker = new SystemAppUpdateTracker(mMockContext,
             mLocaleManagerService, mStoragefile);
 
-        AppUpdateTracker appUpdateTracker = mock(AppUpdateTracker.class);
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mockLocaleManagerBackupHelper,
-                mSystemAppUpdateTracker, appUpdateTracker, mLocaleManagerService);
+                mSystemAppUpdateTracker, mLocaleManagerService);
     }
 
     @After

@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class ConversionUtilTest {
-    private static final String TAG = "ConversionUtilTest";
+    private static final String TAG = "SoundTriggerMiddlewareConversionUtilTest";
 
     @Test
     public void testUuidRoundTrip() {

@@ -70,7 +70,7 @@ object ActionIntentCreator {
 
     /**
      * @return an ACTION_EDIT intent for the given URI, directed to config_screenshotEditor if
-     * available.
+     *   available.
      */
     fun createEditIntent(uri: Uri, context: Context): Intent {
         val editIntent = Intent(Intent.ACTION_EDIT)

@@ -24,8 +24,8 @@ object TintedIconViewBinder {
     /**
      * Binds the given tinted icon to the view.
      *
-     * [TintedIcon.tintAttr] will always be applied, meaning that if it is null, then the tint
-     * *will* be reset to null.
+     * [TintedIcon.tint] will always be applied, meaning that if it is null, then the tint *will* be
+     * reset to null.
      */
     fun bind(
         tintedIcon: TintedIcon,
@@ -33,8 +33,8 @@ object TintedIconViewBinder {
     ) {
         IconViewBinder.bind(tintedIcon.icon, view)
         view.imageTintList =
-            if (tintedIcon.tintAttr != null) {
-                Utils.getColorAttr(view.context, tintedIcon.tintAttr)
+            if (tintedIcon.tint != null) {
+                Utils.getColorAttr(view.context, tintedIcon.tint)
             } else {
                 null
             }

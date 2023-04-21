@@ -54,6 +54,7 @@ import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -127,6 +128,9 @@ public class Sensor {
         private final LockoutCache mLockoutCache;
         @NonNull
         private final LockoutResetDispatcher mLockoutResetDispatcher;
+
+        @NonNull
+        private AuthSessionCoordinator mAuthSessionCoordinator;
         @NonNull
         private final Callback mCallback;
 
@@ -134,6 +138,7 @@ public class Sensor {
                 @NonNull UserAwareBiometricScheduler scheduler, int sensorId, int userId,
                 @NonNull LockoutCache lockoutTracker,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+                @NonNull AuthSessionCoordinator authSessionCoordinator,
                 @NonNull Callback callback) {
             mContext = context;
             mHandler = handler;
@@ -143,6 +148,7 @@ public class Sensor {
             mUserId = userId;
             mLockoutCache = lockoutTracker;
             mLockoutResetDispatcher = lockoutResetDispatcher;
+            mAuthSessionCoordinator = authSessionCoordinator;
             mCallback = callback;
         }
 
@@ -346,8 +352,12 @@ public class Sensor {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceResetLockoutClient)) {
                     Slog.d(mTag, "onLockoutCleared outside of resetLockout by HAL");
+                    // Given that onLockoutCleared() can happen at any time, and is not necessarily
+                    // coming from a specific client, set this to -1 to indicate it wasn't for a
+                    // specific request.
                     FaceResetLockoutClient.resetLocalLockoutStateToNone(mSensorId, mUserId,
-                            mLockoutCache, mLockoutResetDispatcher);
+                            mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
+                            Utils.getCurrentStrength(mSensorId), -1 /* requestId */);
                 } else {
                     Slog.d(mTag, "onLockoutCleared after resetLockout");
                     final FaceResetLockoutClient resetLockoutClient =
@@ -514,7 +524,8 @@ public class Sensor {
 
                         final HalSessionCallback resultController = new HalSessionCallback(mContext,
                                 mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
-                                lockoutResetDispatcher, () -> {
+                                lockoutResetDispatcher,
+                                biometricContext.getAuthSessionCoordinator(), () -> {
                             Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
                             mCurrentSession = null;
                         });

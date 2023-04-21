@@ -17,12 +17,12 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.os.Build
+import android.util.Log
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.log.dagger.BouncerLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 
 /**
  * Encapsulates app state for the lock screen primary and alternate bouncer.
@@ -43,16 +44,15 @@ import kotlinx.coroutines.flow.map
  */
 interface KeyguardBouncerRepository {
     /** Values associated with the PrimaryBouncer (pin/pattern/password) input. */
-    val primaryBouncerVisible: StateFlow<Boolean>
-    val primaryBouncerShow: StateFlow<KeyguardBouncerModel?>
+    val primaryBouncerShow: StateFlow<Boolean>
     val primaryBouncerShowingSoon: StateFlow<Boolean>
-    val primaryBouncerHide: StateFlow<Boolean>
     val primaryBouncerStartingToHide: StateFlow<Boolean>
     val primaryBouncerStartingDisappearAnimation: StateFlow<Runnable?>
     /** Determines if we want to instantaneously show the primary bouncer instead of translating. */
     val primaryBouncerScrimmed: StateFlow<Boolean>
     /**
      * Set how much of the notification panel is showing on the screen.
+     *
      * ```
      *      0f = panel fully hidden = bouncer fully showing
      *      1f = panel fully showing = bouncer fully hidden
@@ -65,8 +65,6 @@ interface KeyguardBouncerRepository {
     val keyguardAuthenticated: StateFlow<Boolean?>
     val showMessage: StateFlow<BouncerShowMessageModel?>
     val resourceUpdateRequests: StateFlow<Boolean>
-    val bouncerPromptReason: Int
-    val bouncerErrorMessage: CharSequence?
     val alternateBouncerVisible: StateFlow<Boolean>
     val alternateBouncerUIAvailable: StateFlow<Boolean>
     val sideFpsShowing: StateFlow<Boolean>
@@ -75,13 +73,9 @@ interface KeyguardBouncerRepository {
 
     fun setPrimaryScrimmed(isScrimmed: Boolean)
 
-    fun setPrimaryVisible(isVisible: Boolean)
-
-    fun setPrimaryShow(keyguardBouncerModel: KeyguardBouncerModel?)
+    fun setPrimaryShow(isShowing: Boolean)
 
     fun setPrimaryShowingSoon(showingSoon: Boolean)
-
-    fun setPrimaryHide(hide: Boolean)
 
     fun setPrimaryStartingToHide(startingToHide: Boolean)
 
@@ -116,14 +110,10 @@ constructor(
     @BouncerLog private val buffer: TableLogBuffer,
 ) : KeyguardBouncerRepository {
     /** Values associated with the PrimaryBouncer (pin/pattern/password) input. */
-    private val _primaryBouncerVisible = MutableStateFlow(false)
-    override val primaryBouncerVisible = _primaryBouncerVisible.asStateFlow()
-    private val _primaryBouncerShow = MutableStateFlow<KeyguardBouncerModel?>(null)
+    private val _primaryBouncerShow = MutableStateFlow(false)
     override val primaryBouncerShow = _primaryBouncerShow.asStateFlow()
     private val _primaryBouncerShowingSoon = MutableStateFlow(false)
     override val primaryBouncerShowingSoon = _primaryBouncerShowingSoon.asStateFlow()
-    private val _primaryBouncerHide = MutableStateFlow(false)
-    override val primaryBouncerHide = _primaryBouncerHide.asStateFlow()
     private val _primaryBouncerStartingToHide = MutableStateFlow(false)
     override val primaryBouncerStartingToHide = _primaryBouncerStartingToHide.asStateFlow()
     private val _primaryBouncerDisappearAnimation = MutableStateFlow<Runnable?>(null)
@@ -134,6 +124,7 @@ constructor(
     override val primaryBouncerScrimmed = _primaryBouncerScrimmed.asStateFlow()
     /**
      * Set how much of the notification panel is showing on the screen.
+     *
      * ```
      *      0f = panel fully hidden = bouncer fully showing
      *      1f = panel fully showing = bouncer fully hidden
@@ -152,11 +143,6 @@ constructor(
     override val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
     override val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
-    override val bouncerPromptReason: Int
-        get() = viewMediatorCallback.bouncerPromptReason
-    override val bouncerErrorMessage: CharSequence?
-        get() = viewMediatorCallback.consumeCustomMessage()
-
     /** Values associated with the AlternateBouncer */
     private val _alternateBouncerVisible = MutableStateFlow(false)
     override val alternateBouncerVisible = _alternateBouncerVisible.asStateFlow()
@@ -175,10 +161,6 @@ constructor(
         _primaryBouncerScrimmed.value = isScrimmed
     }
 
-    override fun setPrimaryVisible(isVisible: Boolean) {
-        _primaryBouncerVisible.value = isVisible
-    }
-
     override fun setAlternateVisible(isVisible: Boolean) {
         if (isVisible && !_alternateBouncerVisible.value) {
             lastAlternateBouncerVisibleTime = clock.uptimeMillis()
@@ -192,16 +174,12 @@ constructor(
         _alternateBouncerUIAvailable.value = isAvailable
     }
 
-    override fun setPrimaryShow(keyguardBouncerModel: KeyguardBouncerModel?) {
-        _primaryBouncerShow.value = keyguardBouncerModel
+    override fun setPrimaryShow(isShowing: Boolean) {
+        _primaryBouncerShow.value = isShowing
     }
 
     override fun setPrimaryShowingSoon(showingSoon: Boolean) {
         _primaryBouncerShowingSoon.value = showingSoon
-    }
-
-    override fun setPrimaryHide(hide: Boolean) {
-        _primaryBouncerHide.value = hide
     }
 
     override fun setPrimaryStartingToHide(startingToHide: Boolean) {
@@ -246,18 +224,12 @@ constructor(
             return
         }
 
-        primaryBouncerVisible
-            .logDiffsForTable(buffer, "", "PrimaryBouncerVisible", false)
-            .launchIn(applicationScope)
         primaryBouncerShow
-            .map { it != null }
             .logDiffsForTable(buffer, "", "PrimaryBouncerShow", false)
+            .onEach { Log.d(TAG, "Keyguard Bouncer is ${if (it) "showing" else "hiding."}") }
             .launchIn(applicationScope)
         primaryBouncerShowingSoon
             .logDiffsForTable(buffer, "", "PrimaryBouncerShowingSoon", false)
-            .launchIn(applicationScope)
-        primaryBouncerHide
-            .logDiffsForTable(buffer, "", "PrimaryBouncerHide", false)
             .launchIn(applicationScope)
         primaryBouncerStartingToHide
             .logDiffsForTable(buffer, "", "PrimaryBouncerStartingToHide", false)
@@ -298,5 +270,6 @@ constructor(
 
     companion object {
         private const val NOT_VISIBLE = -1L
+        private const val TAG = "KeyguardBouncerRepositoryImpl"
     }
 }

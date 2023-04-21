@@ -150,6 +150,10 @@ public class UserManagerServiceShellCommand extends ShellCommand {
                     return runIsUserVisible();
                 case "get-main-user":
                     return runGetMainUserId();
+                case "can-switch-to-headless-system-user":
+                    return canSwitchToHeadlessSystemUser();
+                case "is-main-user-permanent-admin":
+                    return isMainUserPermanentAdmin();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -376,6 +380,7 @@ public class UserManagerServiceShellCommand extends ShellCommand {
             final int pid = Process.myPid();
             Slogf.i(LOG_TAG, "Restarting Android runtime(PID=%d) to finalize changes", pid);
             pw.println("Restarting Android runtime to finalize changes");
+            pw.println("The restart may trigger a 'Broken pipe' message; this is to be expected.");
             pw.flush();
 
             // Ideally there should be a cleaner / safer option to restart system_server, but
@@ -525,10 +530,24 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         PrintWriter pw = getOutPrintWriter();
         final int mainUserId = mService.getMainUserId();
         if (mainUserId == UserHandle.USER_NULL) {
-            pw.println("Couldn't get main user.");
+            pw.println("None");
             return 1;
         }
-        pw.println("Main user id: " + mainUserId);
+        pw.println(mainUserId);
+        return 0;
+    }
+
+    private int canSwitchToHeadlessSystemUser() {
+        PrintWriter pw = getOutPrintWriter();
+        boolean canSwitchToHeadlessSystemUser = mService.canSwitchToHeadlessSystemUser();
+        pw.println(canSwitchToHeadlessSystemUser);
+        return 0;
+    }
+
+    private int isMainUserPermanentAdmin() {
+        PrintWriter pw = getOutPrintWriter();
+        boolean isMainUserPermanentAdmin = mService.isMainUserPermanentAdmin();
+        pw.println(isMainUserPermanentAdmin);
         return 0;
     }
 

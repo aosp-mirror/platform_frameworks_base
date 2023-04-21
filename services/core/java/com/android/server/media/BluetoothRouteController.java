@@ -53,7 +53,16 @@ import java.util.Objects;
             return new NoOpBluetoothRouteController();
         }
 
-        return new LegacyBluetoothRouteController(context, btAdapter, listener);
+        MediaFeatureFlagManager flagManager = MediaFeatureFlagManager.getInstance();
+        boolean isUsingLegacyController = flagManager.getBoolean(
+                MediaFeatureFlagManager.FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
+                true);
+
+        if (isUsingLegacyController) {
+            return new LegacyBluetoothRouteController(context, btAdapter, listener);
+        } else {
+            return new AudioPoliciesBluetoothRouteController(context, btAdapter, listener);
+        }
     }
 
     /**
@@ -67,6 +76,17 @@ import java.util.Objects;
      * Stops the controller from listening to any Bluetooth events.
      */
     void stop();
+
+
+    /**
+     * Selects the route with the given {@code deviceAddress}.
+     *
+     * @param deviceAddress The physical address of the device to select. May be null to unselect
+     *                      the currently selected device.
+     * @return Whether the selection succeeds. If the selection fails, the state of the instance
+     * remains unaltered.
+     */
+    boolean selectRoute(@Nullable String deviceAddress);
 
     /**
      * Transfers Bluetooth output to the given route.
@@ -142,6 +162,12 @@ import java.util.Objects;
         @Override
         public void stop() {
             // no op
+        }
+
+        @Override
+        public boolean selectRoute(String deviceAddress) {
+            // no op
+            return false;
         }
 
         @Override

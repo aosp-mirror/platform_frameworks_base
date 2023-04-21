@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -122,11 +123,9 @@ class FlashNotificationsController {
     private static final int SCREEN_DEFAULT_COLOR_WITH_ALPHA =
             SCREEN_DEFAULT_COLOR | SCREEN_DEFAULT_ALPHA;
 
-    // TODO(b/266775677): Make protected-broadcast intent
     @VisibleForTesting
     static final String ACTION_FLASH_NOTIFICATION_START_PREVIEW =
             "com.android.internal.intent.action.FLASH_NOTIFICATION_START_PREVIEW";
-    // TODO(b/266775677): Make protected-broadcast intent
     @VisibleForTesting
     static final String ACTION_FLASH_NOTIFICATION_STOP_PREVIEW =
             "com.android.internal.intent.action.FLASH_NOTIFICATION_STOP_PREVIEW";
@@ -142,13 +141,10 @@ class FlashNotificationsController {
     @VisibleForTesting
     static final int PREVIEW_TYPE_LONG = 1;
 
-    // TODO(b/266775683): Move to settings provider
     @VisibleForTesting
     static final String SETTING_KEY_CAMERA_FLASH_NOTIFICATION = "camera_flash_notification";
-    // TODO(b/266775683): Move to settings provider
     @VisibleForTesting
     static final String SETTING_KEY_SCREEN_FLASH_NOTIFICATION = "screen_flash_notification";
-    // TODO(b/266775683): Move to settings provider
     @VisibleForTesting
     static final String SETTING_KEY_SCREEN_FLASH_NOTIFICATION_COLOR =
             "screen_flash_notification_color_global";
@@ -254,7 +250,7 @@ class FlashNotificationsController {
         broadcastFilter.addAction(ACTION_FLASH_NOTIFICATION_STOP_PREVIEW);
         mFlashBroadcastReceiver = new FlashBroadcastReceiver();
         mContext.registerReceiver(
-                mFlashBroadcastReceiver, broadcastFilter, Context.RECEIVER_EXPORTED);
+                mFlashBroadcastReceiver, broadcastFilter, Context.RECEIVER_NOT_EXPORTED);
 
         final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);
@@ -342,10 +338,12 @@ class FlashNotificationsController {
     private void requestStartFlashNotification(FlashNotification flashNotification) {
         if (DEBUG) Log.d(LOG_TAG, "requestStartFlashNotification");
 
-        mIsCameraFlashNotificationEnabled = Settings.System.getIntForUser(
+        boolean isFeatureOn = FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_FLASH_NOTIFICATIONS);
+        mIsCameraFlashNotificationEnabled = isFeatureOn && Settings.System.getIntForUser(
                 mContext.getContentResolver(), SETTING_KEY_CAMERA_FLASH_NOTIFICATION, 0,
                 UserHandle.USER_CURRENT) != 0;
-        mIsScreenFlashNotificationEnabled = Settings.System.getIntForUser(
+        mIsScreenFlashNotificationEnabled = isFeatureOn && Settings.System.getIntForUser(
                 mContext.getContentResolver(), SETTING_KEY_SCREEN_FLASH_NOTIFICATION, 0,
                 UserHandle.USER_CURRENT) != 0;
 

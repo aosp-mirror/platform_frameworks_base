@@ -153,6 +153,7 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -1117,7 +1118,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+    final private IUidObserver mUidObserver = new UidObserver() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
                 @ProcessCapability int capability) {
             synchronized (mUidStateCallbackInfos) {
@@ -1138,18 +1139,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         @Override public void onUidGone(int uid, boolean disabled) {
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
-        }
-
-        @Override public void onUidActive(int uid) {
-        }
-
-        @Override public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
@@ -1650,15 +1639,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, viewIntent);
                 break;
             }
             case TYPE_LIMIT: {
@@ -1679,15 +1660,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setSmallIcon(R.drawable.stat_notify_disabled_data);
 
                 final Intent intent = buildNetworkOverLimitIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, intent);
                 break;
             }
             case TYPE_LIMIT_SNOOZED: {
@@ -1711,15 +1684,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setChannelId(SystemNotificationChannels.NETWORK_STATUS);
 
                 final Intent intent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, intent);
                 break;
             }
             case TYPE_RAPID: {
@@ -1739,15 +1704,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, viewIntent);
                 break;
             }
             default: {
@@ -1763,6 +1720,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.getSystemService(NotificationManager.class).notifyAsUser(notificationId.getTag(),
                 notificationId.getId(), builder.build(), UserHandle.ALL);
         mActiveNotifs.add(notificationId);
+    }
+
+    private void setContentIntent(Notification.Builder builder, Intent intent) {
+        if (UserManager.isHeadlessSystemUserMode()) {
+            builder.setContentIntent(PendingIntent.getActivityAsUser(
+                    mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
+                    /* options= */ null, UserHandle.CURRENT));
+        } else {
+            builder.setContentIntent(PendingIntent.getActivity(
+                    mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
+        }
     }
 
     private void cancelNotification(NotificationId notificationId) {
@@ -5571,7 +5539,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // Do this without the lock held. handleUidChanged() and handleUidGone() are
             // called from the handler, so there's no multi-threading issue.
             if (updated) {
-                updateNetworkStats(uid, isProcStateAllowedWhileOnRestrictBackground(procState));
+                updateNetworkStats(uid,
+                        isProcStateAllowedWhileOnRestrictBackground(procState, capability));
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);

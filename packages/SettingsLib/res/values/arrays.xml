@@ -572,7 +572,7 @@
 
     <!-- BatteryMeterView parameters -->
     <array name="batterymeter_color_levels">
-        <item>15</item>
+        <item>20</item>
         <item>100</item>
     </array>
     <array name="batterymeter_color_values">

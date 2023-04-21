@@ -434,12 +434,13 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
             mCreateTime = SystemClock.uptimeMillis();
         }
 
-        void setSplashScreenView(SplashScreenView splashScreenView) {
+        void setSplashScreenView(@Nullable SplashScreenView splashScreenView) {
             if (mSetSplashScreen) {
                 return;
             }
             mSplashView = splashScreenView;
-            mBGColor = mSplashView.getInitBackgroundColor();
+            mBGColor = mSplashView != null ? mSplashView.getInitBackgroundColor()
+                    : Color.TRANSPARENT;
             mSetSplashScreen = true;
         }
 
@@ -477,28 +478,29 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
 
         @Override
         public void removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
-            if (mRootView != null) {
-                if (mSplashView != null) {
-                    clearSystemBarColor();
-                    if (immediately
-                            || mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
-                        removeWindowInner(mRootView, false);
-                    } else {
-                        if (info.playRevealAnimation) {
-                            mSplashscreenContentDrawer.applyExitAnimation(mSplashView,
-                                    info.windowAnimationLeash, info.mainFrame,
-                                    () -> removeWindowInner(mRootView, true),
-                                    mCreateTime, info.roundedCornerRadius);
-                        } else {
-                            // the SplashScreenView has been copied to client, hide the view to skip
-                            // default exit animation
-                            removeWindowInner(mRootView, true);
-                        }
-                    }
+            if (mRootView == null) {
+                return;
+            }
+            if (mSplashView == null) {
+                // shouldn't happen, the app window may be drawn earlier than starting window?
+                Slog.e(TAG, "Found empty splash screen, remove!");
+                removeWindowInner(mRootView, false);
+                return;
+            }
+            clearSystemBarColor();
+            if (immediately
+                    || mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
+                removeWindowInner(mRootView, false);
+            } else {
+                if (info.playRevealAnimation) {
+                    mSplashscreenContentDrawer.applyExitAnimation(mSplashView,
+                            info.windowAnimationLeash, info.mainFrame,
+                            () -> removeWindowInner(mRootView, true),
+                            mCreateTime, info.roundedCornerRadius);
                 } else {
-                    // shouldn't happen
-                    Slog.e(TAG, "Found empty splash screen, remove!");
-                    removeWindowInner(mRootView, false);
+                    // the SplashScreenView has been copied to client, hide the view to skip
+                    // default exit animation
+                    removeWindowInner(mRootView, true);
                 }
             }
         }

@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -82,6 +83,22 @@ public final class InputMethodInfo implements Parcelable {
      */
     public static final String ACTION_STYLUS_HANDWRITING_SETTINGS =
             "android.view.inputmethod.action.STYLUS_HANDWRITING_SETTINGS";
+
+    /**
+     * Maximal length of a component name
+     * @hide
+     */
+    @TestApi
+    public static final int COMPONENT_NAME_MAX_LENGTH = 1000;
+
+    /**
+     * The maximum amount of IMEs that are loaded per package (in order).
+     * If a package contains more IMEs, they will be ignored and cannot be enabled.
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("MinMaxConstant")
+    public static final int MAX_IMES_PER_PACKAGE = 20;
 
     static final String TAG = "InputMethodInfo";
 
@@ -252,6 +269,13 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.InputMethod_settingsActivity);
+            if ((si.name != null && si.name.length() > COMPONENT_NAME_MAX_LENGTH) || (
+                    settingsActivityComponent != null
+                            && settingsActivityComponent.length() > COMPONENT_NAME_MAX_LENGTH)) {
+                throw new XmlPullParserException(
+                        "Activity name exceeds maximum of 1000 characters");
+            }
+
             isVrOnly = sa.getBoolean(com.android.internal.R.styleable.InputMethod_isVrOnly, false);
             isDefaultResId = sa.getResourceId(
                     com.android.internal.R.styleable.InputMethod_isDefault, 0);

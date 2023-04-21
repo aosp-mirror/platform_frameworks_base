@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTANT;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -55,9 +56,9 @@ import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -130,18 +131,9 @@ final class ResolveIntentHelper {
                 boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
                         ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
                         filterCallingUid);
-                String[] categories = intent.getCategories() == null ? new String[0]
-                        : intent.getCategories().toArray(String[]::new);
-                FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
-                        FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
-                        filterCallingUid,
-                        query.get(i).getComponentInfo().getComponentName().flattenToShortString(),
-                        callerPackage,
-                        intent.getAction(),
-                        categories,
-                        resolvedType,
-                        intent.getScheme(),
-                        hasToBeExportedToMatch);
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
+                        filterCallingUid, intent, resolvedType, hasToBeExportedToMatch);
                 if (callback != null) {
                     handler.post(() -> {
                         try {
@@ -466,14 +458,15 @@ final class ResolveIntentHelper {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            computer, list, true, intent, resolvedType, filterCallingUid);
+                            mPlatformCompat, componentResolver, list, true, intent,
+                            resolvedType, filterCallingUid);
                 }
             }
         } else {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
-                final List<ResolveInfo> result = componentResolver.queryReceivers(
-                        computer, intent, resolvedType, flags, filterCallingUid, userId);
+                final List<ResolveInfo> result = componentResolver
+                        .queryReceivers(computer, intent, resolvedType, flags, userId);
                 if (result != null) {
                     list = result;
                 }
@@ -481,7 +474,7 @@ final class ResolveIntentHelper {
             final AndroidPackage pkg = computer.getPackage(pkgName);
             if (pkg != null) {
                 final List<ResolveInfo> result = componentResolver.queryReceivers(computer,
-                        intent, resolvedType, flags, pkg.getReceivers(), filterCallingUid, userId);
+                        intent, resolvedType, flags, pkg.getReceivers(), userId);
                 if (result != null) {
                     list = result;
                 }
@@ -491,7 +484,8 @@ final class ResolveIntentHelper {
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    computer, list, true, originalIntent, resolvedType, filterCallingUid);
+                    mPlatformCompat, componentResolver,
+                    list, true, originalIntent, resolvedType, filterCallingUid);
         }
 
         return computer.applyPostResolutionFilter(list, instantAppPkgName, false, queryingUid,
@@ -575,7 +569,7 @@ final class ResolveIntentHelper {
         String pkgName = intent.getPackage();
         if (pkgName == null) {
             final List<ResolveInfo> resolveInfos = componentResolver.queryProviders(computer,
-                    intent, resolvedType, flags, callingUid, userId);
+                    intent, resolvedType, flags, userId);
             if (resolveInfos == null) {
                 return Collections.emptyList();
             }
@@ -585,7 +579,7 @@ final class ResolveIntentHelper {
         final AndroidPackage pkg = computer.getPackage(pkgName);
         if (pkg != null) {
             final List<ResolveInfo> resolveInfos = componentResolver.queryProviders(computer,
-                    intent, resolvedType, flags, pkg.getProviders(), callingUid, userId);
+                    intent, resolvedType, flags, pkg.getProviders(), userId);
             if (resolveInfos == null) {
                 return Collections.emptyList();
             }

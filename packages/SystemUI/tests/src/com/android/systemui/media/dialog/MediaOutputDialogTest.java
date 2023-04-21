@@ -39,7 +39,7 @@ import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.View;
 
-import androidx.test.filters.SmallTest;
+import androidx.test.filters.MediumTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
@@ -65,7 +65,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@SmallTest
+@MediumTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class MediaOutputDialogTest extends SysuiTestCase {
@@ -306,7 +306,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @Test
     public void getStopButtonText_notSupportsBroadcast_returnsDefaultText() {
-        String stopText = mContext.getText(R.string.keyboard_key_media_stop).toString();
+        String stopText = mContext.getText(
+                R.string.media_output_dialog_button_stop_casting).toString();
         MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
         when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
 

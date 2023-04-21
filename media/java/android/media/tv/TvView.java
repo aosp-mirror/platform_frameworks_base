@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -640,6 +641,20 @@ public class TvView extends ViewGroup {
         }
     }
 
+
+    /**
+     * Sends TV messages to the session for testing purposes
+     *
+     * @hide
+     */
+    @TestApi
+    public void notifyTvMessage(@TvInputManager.TvMessageType int type,
+            @NonNull Bundle data) {
+        if (mSession != null) {
+            mSession.notifyTvMessage(type, data);
+        }
+    }
+
     /**
      * Sets the callback to be invoked when the time shift position is changed.
      *
@@ -723,12 +738,16 @@ public class TvView extends ViewGroup {
     /**
      * Enables or disables TV message detection in the stream of the bound TV input.
      *
-     * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
+     * @param type The type of message received, such as
+     *             {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
      * @param enabled {@code true} if you want to enable TV message detection
      *                {@code false} otherwise.
      */
-    public void setTvMessageEnabled(@NonNull @TvInputManager.TvMessageType String type,
+    public void setTvMessageEnabled(@TvInputManager.TvMessageType int type,
             boolean enabled) {
+        if (mSession != null) {
+            mSession.setTvMessageEnabled(type, enabled);
+        }
     }
 
     @Override
@@ -1236,11 +1255,18 @@ public class TvView extends ViewGroup {
          * This is called when a new TV Message has been received.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
-         * @param data The raw data of the message
+         * @param type The type of message received, such as
+         *             {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
          */
         public void onTvMessage(@NonNull String inputId,
-                @NonNull @TvInputManager.TvMessageType String type, @NonNull Bundle data) {
+                @TvInputManager.TvMessageType int type, @NonNull Bundle data) {
         }
     }
 
@@ -1655,7 +1681,7 @@ public class TvView extends ViewGroup {
         }
 
         @Override
-        public void onTvMessage(Session session, String type, Bundle data) {
+        public void onTvMessage(Session session, int type, Bundle data) {
             if (DEBUG) {
                 Log.d(TAG, "onTvMessage(type=" + type + ", data=" + data + ")");
             }

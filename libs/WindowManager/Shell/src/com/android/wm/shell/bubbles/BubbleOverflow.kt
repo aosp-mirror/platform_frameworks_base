@@ -28,7 +28,9 @@ import android.util.PathParser
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.R
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView
 
 class BubbleOverflow(
     private val context: Context,
@@ -92,7 +94,12 @@ class BubbleOverflow(
         val shapeColor = res.getColor(android.R.color.system_accent1_1000)
         overflowBtn?.iconDrawable?.setTint(shapeColor)
 
-        val iconFactory = BubbleIconFactory(context)
+        val iconFactory = BubbleIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size),
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                context.getResources().getColor(R.color.important_conversation),
+                context.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.importance_ring_stroke_width))
 
         // Update bitmap
         val fg = InsetDrawable(overflowBtn?.iconDrawable, overflowIconInset)
@@ -134,6 +141,10 @@ class BubbleOverflow(
 
     override fun getExpandedView(): BubbleExpandedView? {
         return expandedView
+    }
+
+    override fun getBubbleBarExpandedView(): BubbleBarExpandedView? {
+        return null
     }
 
     override fun getDotColor(): Int {

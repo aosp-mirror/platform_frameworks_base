@@ -64,18 +64,43 @@ public abstract class UserManagerInternal {
     })
     public @interface UserAssignmentResult {}
 
-    // TODO(b/248408342): Move keep annotation to the method referencing these fields reflectively.
-    @Keep public static final int USER_START_MODE_FOREGROUND = 1;
-    @Keep public static final int USER_START_MODE_BACKGROUND = 2;
-    @Keep public static final int USER_START_MODE_BACKGROUND_VISIBLE = 3;
-
     private static final String PREFIX_USER_START_MODE = "USER_START_MODE_";
+
+    /**
+     * Type used to indicate how a user started.
+     */
     @IntDef(flag = false, prefix = {PREFIX_USER_START_MODE}, value = {
             USER_START_MODE_FOREGROUND,
             USER_START_MODE_BACKGROUND,
             USER_START_MODE_BACKGROUND_VISIBLE
     })
     public @interface UserStartMode {}
+
+    // TODO(b/248408342): Move keep annotations below to the method referencing these fields
+    // reflectively.
+
+    /** (Full) user started on foreground (a.k.a. "current user"). */
+    @Keep public static final int USER_START_MODE_FOREGROUND = 1;
+
+    /**
+     * User (full or profile) started on background and is
+     * {@link UserManager#isUserVisible() invisible}.
+     *
+     * <p>This is the "traditional" way of starting a background user, and can be used to start
+     * profiles as well, although starting an invisible profile is not common from the System UI
+     * (it could be done through APIs or adb, though).
+     */
+    @Keep public static final int USER_START_MODE_BACKGROUND = 2;
+
+    /**
+     * User (full or profile) started on background and is
+     * {@link UserManager#isUserVisible() visible}.
+     *
+     * <p>This is the "traditional" way of starting a profile (i.e., when the profile of the current
+     * user is the current foreground user), but it can also be used to start a full user associated
+     * with a display (which is the case on automotives with passenger displays).
+     */
+    @Keep public static final int USER_START_MODE_BACKGROUND_VISIBLE = 3;
 
     public interface UserRestrictionsListener {
         /**
@@ -466,8 +491,11 @@ public abstract class UserManagerInternal {
     public abstract boolean isUserVisible(@UserIdInt int userId, int displayId);
 
     /**
-     * Returns the display id assigned to the user, or {@code Display.INVALID_DISPLAY} if the
-     * user is not assigned to any display.
+     * Returns the main display id assigned to the user, or {@code Display.INVALID_DISPLAY} if the
+     * user is not assigned to any main display.
+     *
+     * <p>In the context of multi-user multi-display, there can be multiple main displays, at most
+     * one per each zone. Main displays are where UI is launched which a user interacts with.
      *
      * <p>The current foreground user and its running profiles are associated with the
      * {@link android.view.Display#DEFAULT_DISPLAY default display}, while other users would only be
@@ -478,7 +506,17 @@ public abstract class UserManagerInternal {
      *
      * <p>If the user is a profile and is running, it's assigned to its parent display.
      */
-    public abstract int getDisplayAssignedToUser(@UserIdInt int userId);
+    public abstract int getMainDisplayAssignedToUser(@UserIdInt int userId);
+
+    /**
+     * Returns all display ids assigned to the user including {@link
+     * #assignUserToExtraDisplay(int, int) extra displays}, or {@code null} if there is no display
+     * assigned to the specified user.
+     *
+     * <p>Note that this method is different from {@link #getMainDisplayAssignedToUser(int)}, which
+     * returns a main display only.
+     */
+    public abstract @Nullable int[] getDisplaysAssignedToUser(@UserIdInt int userId);
 
     /**
      * Returns the main user (i.e., not a profile) that is assigned to the display, or the
@@ -548,5 +586,6 @@ public abstract class UserManagerInternal {
 
      * @throws UserManager.CheckedUserOperationException if no switchable user can be found
      */
-    public abstract @UserIdInt int getBootUser() throws UserManager.CheckedUserOperationException;
+    public abstract @UserIdInt int getBootUser(boolean waitUntilSet)
+            throws UserManager.CheckedUserOperationException;
 }

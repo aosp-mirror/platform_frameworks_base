@@ -16,6 +16,8 @@
 
 package com.android.server.devicestate;
 
+import static android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS;
+
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,7 +37,10 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Locale;
 
 /**
  * Manages the user-visible device state notifications.
@@ -54,15 +59,14 @@ class DeviceStateNotificationController extends BroadcastReceiver {
     private final NotificationManager mNotificationManager;
     private final PackageManager mPackageManager;
 
-    // Stores the notification title and content indexed with the device state identifier.
-    private final SparseArray<NotificationInfo> mNotificationInfos;
-
     // The callback when a device state is requested to be canceled.
     private final Runnable mCancelStateRunnable;
 
+    private final NotificationInfoProvider mNotificationInfoProvider;
+
     DeviceStateNotificationController(@NonNull Context context, @NonNull Handler handler,
             @NonNull Runnable cancelStateRunnable) {
-        this(context, handler, cancelStateRunnable, getNotificationInfos(context),
+        this(context, handler, cancelStateRunnable, new NotificationInfoProvider(context),
                 context.getPackageManager(), context.getSystemService(NotificationManager.class));
     }
 
@@ -70,13 +74,13 @@ class DeviceStateNotificationController extends BroadcastReceiver {
     DeviceStateNotificationController(
             @NonNull Context context, @NonNull Handler handler,
             @NonNull Runnable cancelStateRunnable,
-            @NonNull SparseArray<NotificationInfo> notificationInfos,
+            @NonNull NotificationInfoProvider notificationInfoProvider,
             @NonNull PackageManager packageManager,
             @NonNull NotificationManager notificationManager) {
         mContext = context;
         mHandler = handler;
         mCancelStateRunnable = cancelStateRunnable;
-        mNotificationInfos = notificationInfos;
+        mNotificationInfoProvider = notificationInfoProvider;
         mPackageManager = packageManager;
         mNotificationManager = notificationManager;
         mContext.registerReceiver(
@@ -95,16 +99,22 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param requestingAppUid the uid of the requesting app used to retrieve the app name.
      */
     void showStateActiveNotificationIfNeeded(int state, int requestingAppUid) {
-        NotificationInfo info = mNotificationInfos.get(state);
+        NotificationInfo info = getNotificationInfos().get(state);
         if (info == null || !info.hasActiveNotification()) {
             return;
         }
         String requesterApplicationLabel = getApplicationLabel(requestingAppUid);
         if (requesterApplicationLabel != null) {
+            final Intent intent = new Intent(INTENT_ACTION_CANCEL_STATE)
+                    .setPackage(mContext.getPackageName());
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
             showNotification(
                     info.name, info.activeNotificationTitle,
                     String.format(info.activeNotificationContent, requesterApplicationLabel),
-                    true /* ongoing */, R.drawable.ic_dual_screen
+                    true /* ongoing */, R.drawable.ic_dual_screen,
+                    pendingIntent,
+                    mContext.getString(R.string.device_state_notification_turn_off_button)
             );
         } else {
             Slog.e(TAG, "Cannot determine the requesting app name when showing state active "
@@ -119,14 +129,40 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param state the identifier of the device state being canceled.
      */
     void showThermalCriticalNotificationIfNeeded(int state) {
-        NotificationInfo info = mNotificationInfos.get(state);
+        NotificationInfo info = getNotificationInfos().get(state);
         if (info == null || !info.hasThermalCriticalNotification()) {
             return;
         }
         showNotification(
                 info.name, info.thermalCriticalNotificationTitle,
                 info.thermalCriticalNotificationContent, false /* ongoing */,
-                R.drawable.ic_thermostat
+                R.drawable.ic_thermostat,
+                null /* pendingIntent */,
+                null /* actionText */
+        );
+    }
+
+    /**
+     * Displays the notification indicating that the device state is canceled due to power
+     * save mode being enabled. Does nothing if the state does not have a power save mode
+     * notification.
+     *
+     * @param state the identifier of the device state being canceled.
+     */
+    void showPowerSaveNotificationIfNeeded(int state) {
+        NotificationInfo info = getNotificationInfos().get(state);
+        if (info == null || !info.hasPowerSaveModeNotification()) {
+            return;
+        }
+        final Intent intent = new Intent(ACTION_BATTERY_SAVER_SETTINGS);
+        final PendingIntent pendingIntent = PendingIntent.getActivity(
+                mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
+        showNotification(
+                info.name, info.powerSaveModeNotificationTitle,
+                info.powerSaveModeNotificationContent, false /* ongoing */,
+                R.drawable.ic_thermostat,
+                pendingIntent,
+                mContext.getString(R.string.device_state_notification_settings_button)
         );
     }
 
@@ -136,7 +172,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param state the device state identifier.
      */
     void cancelNotification(int state) {
-        if (!mNotificationInfos.contains(state)) {
+        if (getNotificationInfos().get(state) == null) {
             return;
         }
         mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
@@ -161,7 +197,8 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      */
     private void showNotification(
             @NonNull String name, @NonNull String title, @NonNull String content, boolean ongoing,
-            @DrawableRes int iconRes) {
+            @DrawableRes int iconRes,
+            @Nullable PendingIntent pendingIntent, @Nullable String actionText) {
         final NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
         final Notification.Builder builder = new Notification.Builder(mContext, CHANNEL_ID)
@@ -173,14 +210,10 @@ class DeviceStateNotificationController extends BroadcastReceiver {
                 .setOngoing(ongoing)
                 .setCategory(Notification.CATEGORY_SYSTEM);
 
-        if (ongoing) {
-            final Intent intent = new Intent(INTENT_ACTION_CANCEL_STATE)
-                    .setPackage(mContext.getPackageName());
-            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
+        if (pendingIntent != null && actionText != null) {
             final Notification.Action action = new Notification.Action.Builder(
                     null /* icon */,
-                    mContext.getString(R.string.device_state_notification_turn_off_button),
+                    actionText,
                     pendingIntent)
                     .build();
             builder.addAction(action);
@@ -190,58 +223,121 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         mNotificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, builder.build());
     }
 
-    /**
-     * Loads the resources for the notifications. The device state identifiers and strings are
-     * stored in arrays. All the string arrays must have the same length and same order as the
-     * identifier array.
-     */
-    private static SparseArray<NotificationInfo> getNotificationInfos(Context context) {
-        final SparseArray<NotificationInfo> notificationInfos = new SparseArray<>();
+    private SparseArray<NotificationInfo> getNotificationInfos() {
+        Locale locale = mContext.getResources().getConfiguration().getLocales().get(0);
+        return mNotificationInfoProvider.getNotificationInfos(locale);
+    }
 
-        final int[] stateIdentifiers =
-                context.getResources().getIntArray(
-                        R.array.device_state_notification_state_identifiers);
-        final String[] names =
-                context.getResources().getStringArray(R.array.device_state_notification_names);
-        final String[] activeNotificationTitles =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_active_titles);
-        final String[] activeNotificationContents =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_active_contents);
-        final String[] thermalCriticalNotificationTitles =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_thermal_titles);
-        final String[] thermalCriticalNotificationContents =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_thermal_contents);
+    @VisibleForTesting
+    public static class NotificationInfoProvider {
+        @NonNull
+        private final Context mContext;
+        private final Object mLock = new Object();
 
-        if (stateIdentifiers.length != names.length
-                || stateIdentifiers.length != activeNotificationTitles.length
-                || stateIdentifiers.length != activeNotificationContents.length
-                || stateIdentifiers.length != thermalCriticalNotificationTitles.length
-                || stateIdentifiers.length != thermalCriticalNotificationContents.length
-        ) {
-            throw new IllegalStateException(
-                    "The length of state identifiers and notification texts must match!");
+        @GuardedBy("mLock")
+        @Nullable
+        private SparseArray<NotificationInfo> mCachedNotificationInfos;
+
+        @GuardedBy("mLock")
+        @Nullable
+        @VisibleForTesting
+        Locale mCachedLocale;
+
+        NotificationInfoProvider(@NonNull Context context) {
+            mContext = context;
         }
 
-        for (int i = 0; i < stateIdentifiers.length; i++) {
-            int identifier = stateIdentifiers[i];
-            if (identifier == DeviceStateManager.INVALID_DEVICE_STATE) {
-                continue;
+        /**
+         * Loads the resources for the notifications. The device state identifiers and strings are
+         * stored in arrays. All the string arrays must have the same length and same order as the
+         * identifier array.
+         */
+        @NonNull
+        public SparseArray<NotificationInfo> getNotificationInfos(@NonNull Locale locale) {
+            synchronized (mLock) {
+                if (!locale.equals(mCachedLocale)) {
+                    refreshNotificationInfos(locale);
+                }
+                return mCachedNotificationInfos;
+            }
+        }
+
+
+        @VisibleForTesting
+        Locale getCachedLocale() {
+            synchronized (mLock) {
+                return mCachedLocale;
+            }
+        }
+
+        @VisibleForTesting
+        public void refreshNotificationInfos(Locale locale) {
+            synchronized (mLock) {
+                mCachedLocale = locale;
+                mCachedNotificationInfos = loadNotificationInfos();
+            }
+        }
+
+        @VisibleForTesting
+        public SparseArray<NotificationInfo> loadNotificationInfos() {
+            final SparseArray<NotificationInfo> notificationInfos = new SparseArray<>();
+
+            final int[] stateIdentifiers =
+                    mContext.getResources().getIntArray(
+                            R.array.device_state_notification_state_identifiers);
+            final String[] names =
+                    mContext.getResources().getStringArray(R.array.device_state_notification_names);
+            final String[] activeNotificationTitles =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_active_titles);
+            final String[] activeNotificationContents =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_active_contents);
+            final String[] thermalCriticalNotificationTitles =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_thermal_titles);
+            final String[] thermalCriticalNotificationContents =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_thermal_contents);
+            final String[] powerSaveModeNotificationTitles =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_power_save_titles);
+            final String[] powerSaveModeNotificationContents =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_power_save_contents);
+
+            if (stateIdentifiers.length != names.length
+                    || stateIdentifiers.length != activeNotificationTitles.length
+                    || stateIdentifiers.length != activeNotificationContents.length
+                    || stateIdentifiers.length != thermalCriticalNotificationTitles.length
+                    || stateIdentifiers.length != thermalCriticalNotificationContents.length
+                    || stateIdentifiers.length != powerSaveModeNotificationTitles.length
+                    || stateIdentifiers.length != powerSaveModeNotificationContents.length
+            ) {
+                throw new IllegalStateException(
+                        "The length of state identifiers and notification texts must match!");
             }
 
-            notificationInfos.put(
-                    identifier,
-                    new NotificationInfo(
-                            names[i], activeNotificationTitles[i], activeNotificationContents[i],
-                            thermalCriticalNotificationTitles[i],
-                            thermalCriticalNotificationContents[i])
-            );
-        }
+            for (int i = 0; i < stateIdentifiers.length; i++) {
+                int identifier = stateIdentifiers[i];
+                if (identifier == DeviceStateManager.INVALID_DEVICE_STATE) {
+                    continue;
+                }
 
-        return notificationInfos;
+                notificationInfos.put(
+                        identifier,
+                        new NotificationInfo(
+                                names[i],
+                                activeNotificationTitles[i],
+                                activeNotificationContents[i],
+                                thermalCriticalNotificationTitles[i],
+                                thermalCriticalNotificationContents[i],
+                                powerSaveModeNotificationTitles[i],
+                                powerSaveModeNotificationContents[i])
+                );
+            }
+            return notificationInfos;
+        }
     }
 
     /**
@@ -272,16 +368,21 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         public final String activeNotificationContent;
         public final String thermalCriticalNotificationTitle;
         public final String thermalCriticalNotificationContent;
+        public final String powerSaveModeNotificationTitle;
+        public final String powerSaveModeNotificationContent;
 
         NotificationInfo(String name, String activeNotificationTitle,
                 String activeNotificationContent, String thermalCriticalNotificationTitle,
-                String thermalCriticalNotificationContent) {
+                String thermalCriticalNotificationContent, String powerSaveModeNotificationTitle,
+                String powerSaveModeNotificationContent) {
 
             this.name = name;
             this.activeNotificationTitle = activeNotificationTitle;
             this.activeNotificationContent = activeNotificationContent;
             this.thermalCriticalNotificationTitle = thermalCriticalNotificationTitle;
             this.thermalCriticalNotificationContent = thermalCriticalNotificationContent;
+            this.powerSaveModeNotificationTitle = powerSaveModeNotificationTitle;
+            this.powerSaveModeNotificationContent = powerSaveModeNotificationContent;
         }
 
         boolean hasActiveNotification() {
@@ -291,6 +392,11 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         boolean hasThermalCriticalNotification() {
             return thermalCriticalNotificationTitle != null
                     && thermalCriticalNotificationTitle.length() > 0;
+        }
+
+        boolean hasPowerSaveModeNotification() {
+            return powerSaveModeNotificationTitle != null
+                    && powerSaveModeNotificationTitle.length() > 0;
         }
     }
 }

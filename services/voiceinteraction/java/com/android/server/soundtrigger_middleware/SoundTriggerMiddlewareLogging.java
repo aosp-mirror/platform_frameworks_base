@@ -26,21 +26,28 @@ import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.os.BatteryStatsInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
+import android.os.SystemClock;
+import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.LatencyTracker;
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * An ISoundTriggerMiddlewareService decorator, which adds logging of all API calls (and
@@ -68,12 +75,23 @@ import java.util.Objects;
 public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInternal, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareLogging";
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
-    private final @NonNull Context mContext;
+    private final @NonNull LatencyTracker mLatencyTracker;
+    private final @NonNull Supplier<BatteryStatsInternal> mBatteryStatsInternalSupplier;
 
     public SoundTriggerMiddlewareLogging(@NonNull Context context,
             @NonNull ISoundTriggerMiddlewareInternal delegate) {
+        this(LatencyTracker.getInstance(context),
+                () -> BatteryStatsHolder.INSTANCE,
+                delegate);
+    }
+
+    @VisibleForTesting
+    public SoundTriggerMiddlewareLogging(@NonNull LatencyTracker latencyTracker,
+            @NonNull Supplier<BatteryStatsInternal> batteryStatsInternalSupplier,
+            @NonNull ISoundTriggerMiddlewareInternal delegate) {
         mDelegate = delegate;
-        mContext = context;
+        mLatencyTracker = latencyTracker;
+        mBatteryStatsInternalSupplier = batteryStatsInternalSupplier;
     }
 
     @Override
@@ -291,6 +309,8 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
                     throws RemoteException {
                 try {
+                    mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
+                            SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
                     mCallbackDelegate.onRecognition(modelHandle, event, captureSession);
                     logVoidReturn("onRecognition", modelHandle, event);
                 } catch (Exception e) {
@@ -304,6 +324,8 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                     int captureSession)
                     throws RemoteException {
                 try {
+                    mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
+                            SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
                     startKeyphraseEventLatencyTracking(event);
                     mCallbackDelegate.onPhraseRecognition(modelHandle, event, captureSession);
                     logVoidReturn("onPhraseRecognition", modelHandle, event);
@@ -354,26 +376,6 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 logVoidReturnWithObject(this, mOriginatorIdentity, methodName, args);
             }
 
-            /**
-             * Starts the latency tracking log for keyphrase hotword invocation.
-             * The measurement covers from when the SoundTrigger HAL emits an event to when the
-             * {@link android.service.voice.VoiceInteractionSession} system UI view is shown.
-             */
-            private void startKeyphraseEventLatencyTracking(PhraseRecognitionEvent event) {
-                String latencyTrackerTag = null;
-                if (event.phraseExtras.length > 0) {
-                    latencyTrackerTag = "KeyphraseId=" + event.phraseExtras[0].id;
-                }
-                LatencyTracker latencyTracker = LatencyTracker.getInstance(mContext);
-                // To avoid adding cancel to all of the different failure modes between here and
-                // showing the system UI, we defensively cancel once.
-                // Either we hit the LatencyTracker timeout of 15 seconds or we defensively cancel
-                // here if any error occurs.
-                latencyTracker.onActionCancel(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
-                latencyTracker.onActionStart(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION,
-                        latencyTrackerTag);
-            }
-
             @Override
             public IBinder asBinder() {
                 return mCallbackDelegate.asBinder();
@@ -385,6 +387,35 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 return Objects.toString(mCallbackDelegate);
             }
         }
+    }
+
+    private static class BatteryStatsHolder {
+        private static final BatteryStatsInternal INSTANCE =
+                LocalServices.getService(BatteryStatsInternal.class);
+    }
+
+    /**
+     * Starts the latency tracking log for keyphrase hotword invocation.
+     * The measurement covers from when the SoundTrigger HAL emits an event to when the
+     * {@link android.service.voice.VoiceInteractionSession} system UI view is shown.
+     *
+     * <p>The session is only started if the {@link PhraseRecognitionEvent} has a status of
+     * {@link RecognitionStatus#SUCCESS}
+     */
+    private void startKeyphraseEventLatencyTracking(PhraseRecognitionEvent event) {
+        if (event.common.status != RecognitionStatus.SUCCESS
+                || ArrayUtils.isEmpty(event.phraseExtras)) {
+            return;
+        }
+
+        String latencyTrackerTag = "KeyphraseId=" + event.phraseExtras[0].id;
+        // To avoid adding cancel to all the different failure modes between here and
+        // showing the system UI, we defensively cancel once.
+        // Either we hit the LatencyTracker timeout of 15 seconds or we defensively cancel
+        // here if any error occurs.
+        mLatencyTracker.onActionCancel(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
+        mLatencyTracker.onActionStart(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION,
+                latencyTrackerTag);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -432,7 +463,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 printObject(originatorIdentity),
                 printArgs(args),
                 printObject(retVal));
-        Log.i(TAG, message);
+        Slog.i(TAG, message);
         appendMessage(message);
     }
 
@@ -443,7 +474,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 object,
                 printObject(originatorIdentity),
                 printArgs(args));
-        Log.i(TAG, message);
+        Slog.i(TAG, message);
         appendMessage(message);
     }
 
@@ -455,7 +486,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 object,
                 printObject(originatorIdentity),
                 printArgs(args));
-        Log.e(TAG, message, ex);
+        Slog.e(TAG, message, ex);
         appendMessage(message + " " + ex.toString());
     }
 

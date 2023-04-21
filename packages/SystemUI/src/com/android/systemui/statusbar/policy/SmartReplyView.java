@@ -726,7 +726,7 @@ public class SmartReplyView extends ViewGroup {
         mCurrentBackgroundColor = backgroundColor;
         mCurrentColorized = colorized;
 
-        final boolean dark = Notification.Builder.isColorDark(backgroundColor);
+        final boolean dark = ContrastColorUtil.isColorDark(backgroundColor);
 
         mCurrentTextColor = ContrastColorUtil.ensureTextContrast(
                 dark ? mDefaultTextColorDarkBg : mDefaultTextColor,

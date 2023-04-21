@@ -134,6 +134,7 @@ jlong nativeCreate(JNIEnv* env, jclass clazz, jobject obj) {
 
 void destroyNativeService(void* ptr) {
     WindowInfosListener* listener = reinterpret_cast<WindowInfosListener*>(ptr);
+    SurfaceComposerClient::getDefault()->removeWindowInfosListener(listener);
     listener->decStrong((void*)nativeCreate);
 }
 

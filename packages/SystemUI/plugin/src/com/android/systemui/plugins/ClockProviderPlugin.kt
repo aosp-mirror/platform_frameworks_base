@@ -63,11 +63,11 @@ interface ClockController {
     /** A large version of the clock, appropriate when a bigger viewport is available */
     val largeClock: ClockFaceController
 
+    /** Determines the way the hosting app should behave when rendering either clock face */
+    val config: ClockConfig
+
     /** Events that clocks may need to respond to */
     val events: ClockEvents
-
-    /** Triggers for various animations */
-    val animations: ClockAnimations
 
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
     fun initialize(
@@ -76,8 +76,10 @@ interface ClockController {
         foldFraction: Float,
     ) {
         events.onColorPaletteChanged(resources)
-        animations.doze(dozeFraction)
-        animations.fold(foldFraction)
+        smallClock.animations.doze(dozeFraction)
+        largeClock.animations.doze(dozeFraction)
+        smallClock.animations.fold(foldFraction)
+        largeClock.animations.fold(foldFraction)
         smallClock.events.onTimeTick()
         largeClock.events.onTimeTick()
     }
@@ -91,8 +93,14 @@ interface ClockFaceController {
     /** View that renders the clock face */
     val view: View
 
+    /** Determines the way the hosting app should behave when rendering this clock face */
+    val config: ClockFaceConfig
+
     /** Events specific to this clock face */
     val events: ClockFaceEvents
+
+    /** Triggers for various animations */
+    val animations: ClockAnimations
 
     /** Some clocks may log debug information */
     var logBuffer: LogBuffer?
@@ -111,6 +119,9 @@ interface ClockEvents {
 
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(resources: Resources) {}
+
+    /** Call if the seed color has changed and should be updated */
+    fun onSeedColorChanged(seedColor: Int?) {}
 
     /** Call whenever the weather data should update */
     fun onWeatherDataChanged(data: WeatherData) {}
@@ -134,12 +145,10 @@ interface ClockAnimations {
     fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {}
 
     /**
-     * Whether this clock has a custom position update animation. If true, the keyguard will call
-     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
-     * animation will be used (e.g. a simple translation).
+     * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,
+     * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
      */
-    val hasCustomPositionUpdatedAnimation
-        get() = false
+    fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {}
 }
 
 /** Events that have specific data about the related face */
@@ -147,12 +156,12 @@ interface ClockFaceEvents {
     /** Call every time tick */
     fun onTimeTick() {}
 
-    /** Expected interval between calls to onTimeTick. Can always reduce to PER_MINUTE in AOD. */
-    val tickRate: ClockTickRate
-        get() = ClockTickRate.PER_MINUTE
-
-    /** Region Darkness specific to the clock face */
-    fun onRegionDarknessChanged(isDark: Boolean) {}
+    /**
+     * Region Darkness specific to the clock face.
+     * - isRegionDark = dark theme -> clock should be light
+     * - !isRegionDark = light theme -> clock should be dark
+     */
+    fun onRegionDarknessChanged(isRegionDark: Boolean) {}
 
     /**
      * Call whenever font settings change. Pass in a target font size in pixels. The specific clock
@@ -183,18 +192,44 @@ data class ClockMetadata(
     val name: String,
 )
 
+/** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
+data class ClockConfig(
+    /** Transition to AOD should move smartspace like large clock instead of small clock */
+    val useAlternateSmartspaceAODTransition: Boolean = false,
+
+    /** True if the clock will react to tone changes in the seed color. */
+    val isReactiveToTone: Boolean = true,
+)
+
+/** Render configuration options for a clock face. Modifies the way SystemUI behaves. */
+data class ClockFaceConfig(
+    /** Expected interval between calls to onTimeTick. Can always reduce to PER_MINUTE in AOD. */
+    val tickRate: ClockTickRate = ClockTickRate.PER_MINUTE,
+
+    /** Call to check whether the clock consumes weather data */
+    val hasCustomWeatherDataDisplay: Boolean = false,
+
+    /**
+     * Whether this clock has a custom position update animation. If true, the keyguard will call
+     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
+     * animation will be used (e.g. a simple translation).
+     */
+    val hasCustomPositionUpdatedAnimation: Boolean = false,
+)
+
 /** Structure for keeping clock-specific settings */
 @Keep
 data class ClockSettings(
     val clockId: ClockId? = null,
     val seedColor: Int? = null,
 ) {
-    var _applied_timestamp: Long? = null
+    // Exclude metadata from equality checks
+    var metadata: JSONObject = JSONObject()
 
     companion object {
         private val KEY_CLOCK_ID = "clockId"
         private val KEY_SEED_COLOR = "seedColor"
-        private val KEY_TIMESTAMP = "_applied_timestamp"
+        private val KEY_METADATA = "metadata"
 
         fun serialize(setting: ClockSettings?): String {
             if (setting == null) {
@@ -204,7 +239,7 @@ data class ClockSettings(
             return JSONObject()
                 .put(KEY_CLOCK_ID, setting.clockId)
                 .put(KEY_SEED_COLOR, setting.seedColor)
-                .put(KEY_TIMESTAMP, setting._applied_timestamp)
+                .put(KEY_METADATA, setting.metadata)
                 .toString()
         }
 
@@ -216,11 +251,11 @@ data class ClockSettings(
             val json = JSONObject(jsonStr)
             val result =
                 ClockSettings(
-                    json.getString(KEY_CLOCK_ID),
+                    if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null,
                     if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null
                 )
-            if (!json.isNull(KEY_TIMESTAMP)) {
-                result._applied_timestamp = json.getLong(KEY_TIMESTAMP)
+            if (!json.isNull(KEY_METADATA)) {
+                result.metadata = json.getJSONObject(KEY_METADATA)
             }
             return result
         }

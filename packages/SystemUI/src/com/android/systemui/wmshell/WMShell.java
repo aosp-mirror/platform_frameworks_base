@@ -295,8 +295,8 @@ public final class WMShell implements
             @Override
             public void notifyExpandNotification() {
                 mSysUiMainExecutor.execute(
-                        () -> mCommandQueue.handleSystemKey(
-                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
+                        () -> mCommandQueue.handleSystemKey(new KeyEvent(KeyEvent.ACTION_DOWN,
+                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN)));
             }
         });
 
@@ -345,7 +345,8 @@ public final class WMShell implements
     }
 
     void initDesktopMode(DesktopMode desktopMode) {
-        desktopMode.addListener(new DesktopModeTaskRepository.VisibleTasksListener() {
+        desktopMode.addVisibleTasksListener(
+                new DesktopModeTaskRepository.VisibleTasksListener() {
             @Override
             public void onVisibilityChanged(boolean hasFreeformTasks) {
                 mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE, hasFreeformTasks)

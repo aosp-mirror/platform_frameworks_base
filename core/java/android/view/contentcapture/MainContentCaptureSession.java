@@ -562,11 +562,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         final int numberEvents = mEvents.size();
         final String reasonString = getFlushReasonAsString(reason);
 
-        if (sDebug) {
+        if (sVerbose) {
             ContentCaptureEvent event = mEvents.get(numberEvents - 1);
             String forceString = (reason == FLUSH_REASON_FORCE_FLUSH) ? ". The force flush event "
                     + ContentCaptureEvent.getTypeAsString(event.getType()) : "";
-            Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason)
+            Log.v(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason)
                     + forceString);
         }
         if (mFlushHistory != null) {

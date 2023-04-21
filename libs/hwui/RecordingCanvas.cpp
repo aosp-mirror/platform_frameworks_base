@@ -24,6 +24,7 @@
 #include <experimental/type_traits>
 #include <utility>
 
+#include "Mesh.h"
 #include "SkAndroidFrameworkUtils.h"
 #include "SkBlendMode.h"
 #include "SkCanvas.h"
@@ -50,6 +51,9 @@
 #include "include/gpu/GrDirectContext.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
+#ifdef __ANDROID__
+#include "renderthread/CanvasContext.h"
+#endif
 
 namespace android {
 namespace uirenderer {
@@ -488,7 +492,19 @@ struct DrawPoints final : Op {
     size_t count;
     SkPaint paint;
     void draw(SkCanvas* c, const SkMatrix&) const {
-        c->drawPoints(mode, count, pod<SkPoint>(this), paint);
+        if (paint.isAntiAlias()) {
+            c->drawPoints(mode, count, pod<SkPoint>(this), paint);
+        } else {
+            c->save();
+#ifdef __ANDROID__
+            auto pixelSnap = renderthread::CanvasContext::getActiveContext()->getPixelSnapMatrix();
+            auto transform = c->getLocalToDevice();
+            transform.postConcat(pixelSnap);
+            c->setMatrix(transform);
+#endif
+            c->drawPoints(mode, count, pod<SkPoint>(this), paint);
+            c->restore();
+        }
     }
 };
 struct DrawVertices final : Op {
@@ -502,14 +518,14 @@ struct DrawVertices final : Op {
         c->drawVertices(vertices, mode, paint);
     }
 };
-struct DrawMesh final : Op {
-    static const auto kType = Type::DrawMesh;
-    DrawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
+struct DrawSkMesh final : Op {
+    static const auto kType = Type::DrawSkMesh;
+    DrawSkMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
             : cpuMesh(mesh), blender(std::move(blender)), paint(paint) {
         isGpuBased = false;
     }
 
-    SkMesh cpuMesh;
+    const SkMesh& cpuMesh;
     mutable SkMesh gpuMesh;
     sk_sp<SkBlender> blender;
     SkPaint paint;
@@ -517,6 +533,7 @@ struct DrawMesh final : Op {
     mutable GrDirectContext::DirectContextID contextId;
     void draw(SkCanvas* c, const SkMatrix&) const {
         GrDirectContext* directContext = c->recordingContext()->asDirectContext();
+
         GrDirectContext::DirectContextID id = directContext->directContextID();
         if (!isGpuBased || contextId != id) {
             sk_sp<SkMesh::VertexBuffer> vb =
@@ -542,6 +559,18 @@ struct DrawMesh final : Op {
 
         c->drawMesh(gpuMesh, blender, paint);
     }
+};
+
+struct DrawMesh final : Op {
+    static const auto kType = Type::DrawMesh;
+    DrawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
+            : mesh(mesh), blender(std::move(blender)), paint(paint) {}
+
+    const Mesh& mesh;
+    sk_sp<SkBlender> blender;
+    SkPaint paint;
+
+    void draw(SkCanvas* c, const SkMatrix&) const { c->drawMesh(mesh.getSkMesh(), blender, paint); }
 };
 struct DrawAtlas final : Op {
     static const auto kType = Type::DrawAtlas;
@@ -858,6 +887,10 @@ void DisplayListData::drawVertices(const SkVertices* vert, SkBlendMode mode, con
     this->push<DrawVertices>(0, vert, mode, paint);
 }
 void DisplayListData::drawMesh(const SkMesh& mesh, const sk_sp<SkBlender>& blender,
+                               const SkPaint& paint) {
+    this->push<DrawSkMesh>(0, mesh, blender, paint);
+}
+void DisplayListData::drawMesh(const Mesh& mesh, const sk_sp<SkBlender>& blender,
                                const SkPaint& paint) {
     this->push<DrawMesh>(0, mesh, blender, paint);
 }
@@ -1205,6 +1238,9 @@ void RecordingCanvas::onDrawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender,
                                  const SkPaint& paint) {
     fDL->drawMesh(mesh, blender, paint);
 }
+void RecordingCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint) {
+    fDL->drawMesh(mesh, blender, paint);
+}
 void RecordingCanvas::onDrawAtlas2(const SkImage* atlas, const SkRSXform xforms[],
                                    const SkRect texs[], const SkColor colors[], int count,
                                    SkBlendMode bmode, const SkSamplingOptions& sampling,
@@ -1221,6 +1257,15 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 
 void RecordingCanvas::drawWebView(skiapipeline::FunctorDrawable* drawable) {
     fDL->drawWebView(drawable);
+}
+
+[[nodiscard]] const SkMesh& DrawMeshPayload::getSkMesh() const {
+    LOG_FATAL_IF(!meshWrapper && !mesh, "One of Mesh or Mesh must be non-null");
+    if (meshWrapper) {
+        return meshWrapper->getSkMesh();
+    } else {
+        return *mesh;
+    }
 }
 
 }  // namespace uirenderer

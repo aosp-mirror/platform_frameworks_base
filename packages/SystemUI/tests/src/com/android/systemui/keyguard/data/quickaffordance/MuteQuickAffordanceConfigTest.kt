@@ -85,7 +85,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `picker state - volume fixed - not available`() = testScope.runTest {
+    fun pickerState_volumeFixed_notAvailable() = testScope.runTest {
         //given
         whenever(audioManager.isVolumeFixed).thenReturn(true)
 
@@ -97,7 +97,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `picker state - volume not fixed - available`() = testScope.runTest {
+    fun pickerState_volumeNotFixed_available() = testScope.runTest {
         //given
         whenever(audioManager.isVolumeFixed).thenReturn(false)
 
@@ -109,7 +109,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `triggered - state was previously NORMAL - currently SILENT - move to previous state`() = testScope.runTest {
+    fun triggered_stateWasPreviouslyNORMAL_currentlySILENT_moveToPreviousState() = testScope.runTest {
         //given
         val ringerModeCapture = argumentCaptor<Int>()
         whenever(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
@@ -127,7 +127,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `triggered - state is not SILENT - move to SILENT ringer`() = testScope.runTest {
+    fun triggered_stateIsNotSILENT_moveToSILENTringer() = testScope.runTest {
         //given
         val ringerModeCapture = argumentCaptor<Int>()
         whenever(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)

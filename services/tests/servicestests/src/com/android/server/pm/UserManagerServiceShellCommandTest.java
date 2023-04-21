@@ -107,7 +107,7 @@ public class UserManagerServiceShellCommandTest {
                 new String[]{"get-main-user"}, mShellCallback, mResultReceiver));
 
         mWriter.flush();
-        assertEquals("Main user id: 12", mOutStream.toString().trim());
+        assertEquals("12", mOutStream.toString().trim());
     }
 
     @Test
@@ -118,7 +118,34 @@ public class UserManagerServiceShellCommandTest {
         assertEquals(1, mCommand.exec(mBinder, in, out, err,
                 new String[]{"get-main-user"}, mShellCallback, mResultReceiver));
         mWriter.flush();
-        assertEquals("Couldn't get main user.", mOutStream.toString().trim());
+        assertEquals("None", mOutStream.toString().trim());
     }
+
+    @Test
+    public void testCanSwitchToHeadlessSystemUser() {
+        doReturn(true).when(mUserManagerService).canSwitchToHeadlessSystemUser();
+        doReturn(mWriter).when(mCommand).getOutPrintWriter();
+
+        assertEquals(0, mCommand.exec(mBinder, in, out, err,
+                new String[]{"can-switch-to-headless-system-user"},
+                mShellCallback, mResultReceiver));
+
+        mWriter.flush();
+        assertEquals("true", mOutStream.toString().trim());
+    }
+
+
+    @Test
+    public void testIsMainUserPermanentAdmin() {
+        doReturn(false).when(mUserManagerService).isMainUserPermanentAdmin();
+        doReturn(mWriter).when(mCommand).getOutPrintWriter();
+
+        assertEquals(0, mCommand.exec(mBinder, in, out, err,
+                new String[]{"is-main-user-permanent-admin"}, mShellCallback, mResultReceiver));
+
+        mWriter.flush();
+        assertEquals("false", mOutStream.toString().trim());
+    }
+
 
 }

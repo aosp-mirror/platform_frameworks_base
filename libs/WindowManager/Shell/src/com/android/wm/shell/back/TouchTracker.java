@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.back;
 
+import android.annotation.FloatRange;
 import android.os.SystemProperties;
+import android.util.MathUtils;
+import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -42,11 +45,13 @@ class TouchTracker {
      */
     private float mInitTouchX;
     private float mInitTouchY;
+    private float mLatestVelocityX;
+    private float mLatestVelocityY;
     private float mStartThresholdX;
     private int mSwipeEdge;
     private boolean mCancelled;
 
-    void update(float touchX, float touchY) {
+    void update(float touchX, float touchY, float velocityX, float velocityY) {
         /**
          * If back was previously cancelled but the user has started swiping in the forward
          * direction again, restart back.
@@ -58,6 +63,8 @@ class TouchTracker {
         }
         mLatestTouchX = touchX;
         mLatestTouchY = touchY;
+        mLatestVelocityX = velocityX;
+        mLatestVelocityY = velocityY;
     }
 
     void setTriggerBack(boolean triggerBack) {
@@ -84,34 +91,62 @@ class TouchTracker {
     }
 
     BackMotionEvent createStartEvent(RemoteAnimationTarget target) {
-        return new BackMotionEvent(mInitTouchX, mInitTouchY, 0, mSwipeEdge, target);
+        return new BackMotionEvent(
+                /* touchX = */ mInitTouchX,
+                /* touchY = */ mInitTouchY,
+                /* progress = */ 0,
+                /* velocityX = */ 0,
+                /* velocityY = */ 0,
+                /* swipeEdge = */ mSwipeEdge,
+                /* departingAnimationTarget = */ target);
     }
 
     BackMotionEvent createProgressEvent() {
-        float progressThreshold = PROGRESS_THRESHOLD >= 0
-                ? PROGRESS_THRESHOLD : mProgressThreshold;
-        progressThreshold = progressThreshold == 0 ? 1 : progressThreshold;
         float progress = 0;
         // Progress is always 0 when back is cancelled and not restarted.
         if (!mCancelled) {
-            // If back is committed, progress is the distance between the last and first touch
-            // point, divided by the max drag distance. Otherwise, it's the distance between
-            // the last touch point and the starting threshold, divided by max drag distance.
-            // The starting threshold is initially the first touch location, and updated to
-            // the location everytime back is restarted after being cancelled.
-            float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
-            float deltaX = Math.max(
-                    mSwipeEdge == BackEvent.EDGE_LEFT
-                            ? mLatestTouchX - startX
-                            : startX - mLatestTouchX,
-                    0);
-            progress = Math.min(Math.max(deltaX / progressThreshold, 0), 1);
+            progress = getProgress(mLatestTouchX);
         }
         return createProgressEvent(progress);
     }
 
+    /**
+     * Progress value computed from the touch position.
+     *
+     * @param touchX the X touch position of the {@link MotionEvent}.
+     * @return progress value
+     */
+    @FloatRange(from = 0.0, to = 1.0)
+    float getProgress(float touchX) {
+        // If back is committed, progress is the distance between the last and first touch
+        // point, divided by the max drag distance. Otherwise, it's the distance between
+        // the last touch point and the starting threshold, divided by max drag distance.
+        // The starting threshold is initially the first touch location, and updated to
+        // the location everytime back is restarted after being cancelled.
+        float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
+        float deltaX = Math.abs(startX - touchX);
+        float maxX = getMaxX();
+        maxX = maxX == 0 ? 1 : maxX;
+        return MathUtils.constrain(deltaX / maxX, 0, 1);
+    }
+
+    /**
+     * Maximum X value (in pixels).
+     * Progress is considered to be completed (1f) when this limit is exceeded.
+     */
+    float getMaxX() {
+        return PROGRESS_THRESHOLD >= 0 ? PROGRESS_THRESHOLD : mProgressThreshold;
+    }
+
     BackMotionEvent createProgressEvent(float progress) {
-        return new BackMotionEvent(mLatestTouchX, mLatestTouchY, progress, mSwipeEdge, null);
+        return new BackMotionEvent(
+                /* touchX = */ mLatestTouchX,
+                /* touchY = */ mLatestTouchY,
+                /* progress = */ progress,
+                /* velocityX = */ mLatestVelocityX,
+                /* velocityY = */ mLatestVelocityY,
+                /* swipeEdge = */ mSwipeEdge,
+                /* departingAnimationTarget = */ null);
     }
 
     public void setProgressThreshold(float progressThreshold) {

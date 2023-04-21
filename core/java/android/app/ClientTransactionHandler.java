@@ -188,7 +188,7 @@ public abstract class ClientTransactionHandler {
 
     /** Perform activity launch. */
     public abstract Activity handleLaunchActivity(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions, Intent customIntent);
+            PendingTransactionActions pendingActions, int deviceId, Intent customIntent);
 
     /** Perform activity start. */
     public abstract void handleStartActivity(@NonNull ActivityClientRecord r,

@@ -17,10 +17,13 @@
 package com.android.credentialmanager
 
 import android.app.Activity
+import android.os.IBinder
+import android.text.TextUtils
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -35,6 +38,9 @@ import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
+import com.android.credentialmanager.logging.LifecycleEvent
+import com.android.credentialmanager.logging.UIMetrics
+import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 /** One and only one of create or get state can be active at any given time. */
 data class UiState(
@@ -43,6 +49,14 @@ data class UiState(
     val selectedEntry: BaseEntry? = null,
     val providerActivityState: ProviderActivityState = ProviderActivityState.NOT_APPLICABLE,
     val dialogState: DialogState = DialogState.ACTIVE,
+    // True if the UI has one and only one auto selectable entry. Its provider activity will be
+    // launched immediately, and canceling it will cancel the whole UI flow.
+    val isAutoSelectFlow: Boolean = false,
+    val cancelRequestState: CancelUiRequestState?,
+)
+
+data class CancelUiRequestState(
+    val appDisplayName: String?,
 )
 
 class CredentialSelectorViewModel(
@@ -52,6 +66,13 @@ class CredentialSelectorViewModel(
     var uiState by mutableStateOf(credManRepo.initState())
         private set
 
+    var uiMetrics: UIMetrics = UIMetrics()
+
+    init {
+        uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
+            credManRepo.requestInfo?.appPackageName)
+    }
+
     /**************************************************************************/
     /*****                       Shared Callbacks                         *****/
     /**************************************************************************/
@@ -59,6 +80,10 @@ class CredentialSelectorViewModel(
         Log.d(Constants.LOG_TAG, "User cancelled, finishing the ui")
         credManRepo.onUserCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+    }
+
+    fun onCancellationUiRequested(appDisplayName: String?) {
+        uiState = uiState.copy(cancelRequestState = CancelUiRequestState(appDisplayName))
     }
 
     /** Close the activity and don't report anything to the backend.
@@ -72,6 +97,12 @@ class CredentialSelectorViewModel(
     fun onNewCredentialManagerRepo(credManRepo: CredentialManagerRepo) {
         this.credManRepo = credManRepo
         uiState = credManRepo.initState()
+
+        if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
+            this.uiMetrics.resetInstanceId()
+            this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
+                credManRepo.requestInfo?.appPackageName)
+        }
     }
 
     fun launchProviderUi(
@@ -95,13 +126,20 @@ class CredentialSelectorViewModel(
         val resultCode = providerActivityResult.resultCode
         val resultData = providerActivityResult.data
         if (resultCode == Activity.RESULT_CANCELED) {
-            // Re-display the CredMan UI if the user canceled from the provider UI.
-            Log.d(Constants.LOG_TAG, "The provider activity was cancelled," +
-                " re-displaying our UI.")
-            uiState = uiState.copy(
-                selectedEntry = null,
-                providerActivityState = ProviderActivityState.NOT_APPLICABLE,
-            )
+            // Re-display the CredMan UI if the user canceled from the provider UI, or cancel
+            // the UI if this is the auto select flow.
+            if (uiState.isAutoSelectFlow) {
+                Log.d(Constants.LOG_TAG, "The auto selected provider activity was cancelled," +
+                    " ending the credential manager activity.")
+                onUserCancel()
+            } else {
+                Log.d(Constants.LOG_TAG, "The provider activity was cancelled," +
+                    " re-displaying our UI.")
+                uiState = uiState.copy(
+                    selectedEntry = null,
+                    providerActivityState = ProviderActivityState.NOT_APPLICABLE,
+                )
+            }
         } else {
             if (entry != null) {
                 Log.d(
@@ -129,10 +167,22 @@ class CredentialSelectorViewModel(
         onInternalError()
     }
 
+    fun onIllegalUiState(errorMessage: String) {
+        Log.w(Constants.LOG_TAG, errorMessage)
+        onInternalError()
+    }
+
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
+        this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
+            credManRepo.requestInfo?.appPackageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+    }
+
+    /** Return true if the current UI's request token matches the UI cancellation request token. */
+    fun shouldCancelCurrentUi(cancelRequestToken: IBinder): Boolean {
+        return credManRepo.requestInfo?.token?.equals(cancelRequestToken) ?: false
     }
 
     /**************************************************************************/
@@ -201,9 +251,15 @@ class CredentialSelectorViewModel(
             return
         }
         val newUiState = CreateFlowUtils.toCreateCredentialUiState(
-            prevUiState.enabledProviders, prevUiState.disabledProviders,
-            userConfigRepo.getDefaultProviderId(), prevUiState.requestDisplayInfo, true,
-            userConfigRepo.getIsPasskeyFirstUse())
+            enabledProviders = prevUiState.enabledProviders,
+            disabledProviders = prevUiState.disabledProviders,
+            defaultProviderIdPreferredByApp =
+            prevUiState.requestDisplayInfo.appPreferredDefaultProviderId,
+            defaultProviderIdSetByUser = userConfigRepo.getDefaultProviderId(),
+            requestDisplayInfo = prevUiState.requestDisplayInfo,
+            isOnPasskeyIntroStateAlready = true,
+            isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
+        )
         if (newUiState == null) {
             Log.d(Constants.LOG_TAG, "Unable to update create ui state")
             onInternalError()
@@ -259,10 +315,11 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState =
-                if (activeEntry.activeProvider.id ==
-                    userConfigRepo.getDefaultProviderId())
+                if (activeEntry.activeProvider.id == userConfigRepo.getDefaultProviderId() ||
+                    !TextUtils.isEmpty(uiState.createCredentialUiState?.requestDisplayInfo
+                        ?.appPreferredDefaultProviderId))
                     CreateScreenState.CREATION_OPTION_SELECTION
-                else CreateScreenState.MORE_OPTIONS_ROW_INTRO,
+                else CreateScreenState.DEFAULT_PROVIDER_CONFIRMATION,
                 activeEntry = activeEntry
             )
         )
@@ -352,5 +409,10 @@ class CredentialSelectorViewModel(
                 "Unexpected: confirm is pressed but no active entry exists.")
             onInternalError()
         }
+    }
+
+    @Composable
+    fun logUiEvent(uiEventEnum: UiEventEnum) {
+        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.appPackageName)
     }
 }

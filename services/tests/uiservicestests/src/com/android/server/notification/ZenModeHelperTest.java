@@ -38,11 +38,12 @@ import static android.service.notification.Condition.STATE_TRUE;
 import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
-import static com.android.os.AtomsProto.DNDModeProto.CHANNELS_BYPASSING_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.ENABLED_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.ID_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.UID_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.CHANNELS_BYPASSING_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.ENABLED_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.ID_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.UID_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
+import static com.android.os.dnd.DNDProtoEnums.ROOT_CONFIG;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
 import static junit.framework.Assert.assertEquals;
@@ -68,8 +69,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -77,7 +76,6 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -89,15 +87,14 @@ import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.VolumePolicy;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
-import android.service.notification.DNDModeProto;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
+import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -153,7 +150,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private Resources mResources;
     private TestableLooper mTestableLooper;
     private ZenModeHelper mZenModeHelperSpy;
-    private Context mContext;
     private ContentResolver mContentResolver;
     @Mock AppOpsManager mAppOps;
     private WrappedSysUiStatsEvent.WrappedBuilderFactory mStatsEventBuilderFactory;
@@ -163,9 +159,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
-        mContext = spy(getContext());
         mContentResolver = mContext.getContentResolver();
         mResources = spy(mContext.getResources());
+        String pkg = mContext.getPackageName();
         try {
             when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
                     getDefaultConfigParser());
@@ -190,7 +186,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         when(mPackageManager.getPackageUidAsUser(eq(CUSTOM_PKG_NAME), anyInt()))
                 .thenReturn(CUSTOM_PKG_UID);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
-                new String[] {getContext().getPackageName()});
+                new String[] {pkg});
         mZenModeHelperSpy.mPm = mPackageManager;
     }
 
@@ -878,27 +874,31 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals("Config mismatch: current vs expected: "
-                + mZenModeHelperSpy.mConfig.diff(expected), expected, mZenModeHelperSpy.mConfig);
+                + new ZenModeDiff.ConfigDiff(mZenModeHelperSpy.mConfig, expected), expected,
+                mZenModeHelperSpy.mConfig);
     }
 
     @Test
     public void testProto() {
         mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        // existence of manual rule means it should be in output
         mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelperSpy.mConfig.manualRule.pkg = "android";  // system
 
         int n = mZenModeHelperSpy.mConfig.automaticRules.size();
         List<String> ids = new ArrayList<>(n);
         for (ZenModeConfig.ZenRule rule : mZenModeHelperSpy.mConfig.automaticRules.values()) {
             ids.add(rule.id);
         }
-        ids.add("");
+        ids.add(ZenModeConfig.MANUAL_RULE_ID);
+        ids.add(""); // for ROOT_CONFIG, logged with empty string as id
 
         List<StatsEvent> events = new LinkedList<>();
         mZenModeHelperSpy.pullRules(events);
-        assertEquals(n + 1, events.size());
+        assertEquals(n + 2, events.size());  // automatic rules + manual rule + root config
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
             if (builder.getAtomId() == DND_MODE_RULE) {
-                if (builder.getInt(ZEN_MODE_FIELD_NUMBER) == DNDModeProto.ROOT_CONFIG) {
+                if (builder.getInt(ZEN_MODE_FIELD_NUMBER) == ROOT_CONFIG) {
                     assertTrue(builder.getBoolean(ENABLED_FIELD_NUMBER));
                     assertFalse(builder.getBoolean(CHANNELS_BYPASSING_FIELD_NUMBER));
                 }
@@ -1002,7 +1002,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
         mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
         mZenModeHelperSpy.mConfig.manualRule.enabled = true;
-        mZenModeHelperSpy.mConfig.manualRule.enabler = "com.enabler";
 
         List<StatsEvent> events = new LinkedList<>();
         mZenModeHelperSpy.pullRules(events);
@@ -1045,7 +1044,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
         assertEquals(
-                "Config mismatch: current vs expected: " + actual.diff(config10), config10, actual);
+                "Config mismatch: current vs expected: "
+                        + new ZenModeDiff.ConfigDiff(actual, config10), config10, actual);
         assertNotEquals("Expected config mismatch", config11, mZenModeHelperSpy.mConfigs.get(11));
     }
 
@@ -1061,7 +1061,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
 
         assertEquals("Config mismatch: current vs original: "
-                + mZenModeHelperSpy.mConfig.diff(original), original, mZenModeHelperSpy.mConfig);
+                + new ZenModeDiff.ConfigDiff(mZenModeHelperSpy.mConfig, original),
+                original, mZenModeHelperSpy.mConfig);
         assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
     }
 
@@ -1082,8 +1083,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
         expected.user = 10;
-        assertEquals(
-                "Config mismatch: current vs original: " + actual.diff(expected), expected, actual);
+        assertEquals("Config mismatch: current vs original: "
+                        + new ZenModeDiff.ConfigDiff(actual, expected),
+                expected, actual);
         assertEquals(expected.hashCode(), actual.hashCode());
         expected.user = 0;
         assertNotEquals(expected, mZenModeHelperSpy.mConfig);

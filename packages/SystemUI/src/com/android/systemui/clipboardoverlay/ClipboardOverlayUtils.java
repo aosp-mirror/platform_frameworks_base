@@ -39,6 +39,9 @@ import javax.inject.Inject;
 
 class ClipboardOverlayUtils {
 
+    // minimum proportion of entire text an entity must take up, to be considered for smart actions
+    private static final float MINIMUM_ENTITY_PROPORTION = .8f;
+
     private final TextClassifier mTextClassifier;
 
     @Inject
@@ -65,36 +68,23 @@ class ClipboardOverlayUtils {
         return false;
     }
 
-    public Optional<RemoteAction> getAction(CharSequence text, TextLinks textLinks, String source) {
-        return getActions(text, textLinks).stream().filter(remoteAction -> {
+    public Optional<RemoteAction> getAction(TextLinks textLinks, String source) {
+        return getActions(textLinks).stream().filter(remoteAction -> {
             ComponentName component = remoteAction.getActionIntent().getIntent().getComponent();
             return component != null && !TextUtils.equals(source, component.getPackageName());
         }).findFirst();
     }
 
-    private ArrayList<RemoteAction> getActions(CharSequence text, TextLinks textLinks) {
+    private ArrayList<RemoteAction> getActions(TextLinks textLinks) {
         ArrayList<RemoteAction> actions = new ArrayList<>();
         for (TextLinks.TextLink link : textLinks.getLinks()) {
-            TextClassification classification = mTextClassifier.classifyText(
-                    text, link.getStart(), link.getEnd(), null);
-            actions.addAll(classification.getActions());
-        }
-        return actions;
-    }
-
-    public Optional<RemoteAction> getAction(ClipData.Item item, String source) {
-        return getActions(item).stream().filter(remoteAction -> {
-            ComponentName component = remoteAction.getActionIntent().getIntent().getComponent();
-            return component != null && !TextUtils.equals(source, component.getPackageName());
-        }).findFirst();
-    }
-
-    private ArrayList<RemoteAction> getActions(ClipData.Item item) {
-        ArrayList<RemoteAction> actions = new ArrayList<>();
-        for (TextLinks.TextLink link : item.getTextLinks().getLinks()) {
-            TextClassification classification = mTextClassifier.classifyText(
-                    item.getText(), link.getStart(), link.getEnd(), null);
-            actions.addAll(classification.getActions());
+            // skip classification for incidental entities
+            if (link.getEnd() - link.getStart()
+                    >= textLinks.getText().length() * MINIMUM_ENTITY_PROPORTION) {
+                TextClassification classification = mTextClassifier.classifyText(
+                        textLinks.getText(), link.getStart(), link.getEnd(), null);
+                actions.addAll(classification.getActions());
+            }
         }
         return actions;
     }

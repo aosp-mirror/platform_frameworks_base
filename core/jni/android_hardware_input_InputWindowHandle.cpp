@@ -74,6 +74,7 @@ static struct {
     WeakRefHandleField touchableRegionSurfaceControl;
     jfieldID transform;
     jfieldID windowToken;
+    jfieldID focusTransferTarget;
 } gInputWindowHandleClassInfo;
 
 static struct {
@@ -214,6 +215,17 @@ bool NativeInputWindowHandle::updateInfo() {
         env->DeleteLocalRef(windowTokenObj);
     } else {
         mInfo.windowToken.clear();
+    }
+
+    ScopedLocalRef<jobject>
+            focusTransferTargetObj(env,
+                                   env->GetObjectField(obj,
+                                                       gInputWindowHandleClassInfo
+                                                               .focusTransferTarget));
+    if (focusTransferTargetObj.get()) {
+        mInfo.focusTransferTarget = ibinderForJavaObject(env, focusTransferTargetObj.get());
+    } else {
+        mInfo.focusTransferTarget.clear();
     }
 
     env->DeleteLocalRef(obj);
@@ -431,6 +443,9 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
                  "Landroid/graphics/Matrix;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.windowToken, clazz, "windowToken",
+                 "Landroid/os/IBinder;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.focusTransferTarget, clazz, "focusTransferTarget",
                  "Landroid/os/IBinder;");
 
     jclass weakRefClazz;

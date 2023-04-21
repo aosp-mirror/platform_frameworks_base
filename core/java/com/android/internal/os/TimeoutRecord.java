@@ -18,6 +18,8 @@ package com.android.internal.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.SystemClock;
 
@@ -98,18 +100,41 @@ public class TimeoutRecord {
 
     /** Record for a broadcast receiver timeout. */
     @NonNull
+    public static TimeoutRecord forBroadcastReceiver(@NonNull Intent intent,
+            @Nullable String packageName, @Nullable String className) {
+        final Intent logIntent;
+        if (packageName != null) {
+            if (className != null) {
+                logIntent = new Intent(intent);
+                logIntent.setComponent(new ComponentName(packageName, className));
+            } else {
+                logIntent = new Intent(intent);
+                logIntent.setPackage(packageName);
+            }
+        } else {
+            logIntent = intent;
+        }
+        return forBroadcastReceiver(logIntent);
+    }
+
+    /** Record for a broadcast receiver timeout. */
+    @NonNull
     public static TimeoutRecord forBroadcastReceiver(@NonNull Intent intent) {
-        String reason = "Broadcast of " + intent.toString();
-        return TimeoutRecord.endingNow(TimeoutKind.BROADCAST_RECEIVER, reason);
+        final StringBuilder reason = new StringBuilder("Broadcast of ");
+        intent.toString(reason);
+        return TimeoutRecord.endingNow(TimeoutKind.BROADCAST_RECEIVER, reason.toString());
     }
 
     /** Record for a broadcast receiver timeout. */
     @NonNull
     public static TimeoutRecord forBroadcastReceiver(@NonNull Intent intent,
             long timeoutDurationMs) {
-        String reason = "Broadcast of " + intent.toString() + ", waited " + timeoutDurationMs
-                + "ms";
-        return TimeoutRecord.endingNow(TimeoutKind.BROADCAST_RECEIVER, reason);
+        final StringBuilder reason = new StringBuilder("Broadcast of ");
+        intent.toString(reason);
+        reason.append(", waited ");
+        reason.append(timeoutDurationMs);
+        reason.append("ms");
+        return TimeoutRecord.endingNow(TimeoutKind.BROADCAST_RECEIVER, reason.toString());
     }
 
     /** Record for an input dispatch no focused window timeout */

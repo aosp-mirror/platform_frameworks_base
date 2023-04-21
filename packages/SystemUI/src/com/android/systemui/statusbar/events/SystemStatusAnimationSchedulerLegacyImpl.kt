@@ -39,6 +39,7 @@ import javax.inject.Inject
  *      - Simple prioritization: Privacy > Battery > connectivity (encoded in [StatusEvent])
  *      - Only schedules a single event, and throws away lowest priority events
  * ```
+ *
  * There are 4 basic stages of animation at play here:
  * ```
  *      1. System chrome animation OUT
@@ -46,6 +47,7 @@ import javax.inject.Inject
  *      3. Chip animation OUT; potentially into a dot
  *      4. System chrome animation IN
  * ```
+ *
  * Thus we can keep all animations synchronized with two separate ValueAnimators, one for system
  * chrome and the other for the chip. These can animate from 0,1 and listeners can parameterize
  * their respective views based on the progress of the animator. Interpolation differences TBD
@@ -168,7 +170,7 @@ constructor(
      * 3. Update the scheduler state so that clients know where we are
      * 4. Maybe: provide scaffolding such as: dot location, margins, etc
      * 5. Maybe: define a maximum animation length and enforce it. Probably only doable if we
-     * collect all of the animators and run them together.
+     *    collect all of the animators and run them together.
      */
     private fun runChipAnimation() {
         statusBarWindowController.setForceStatusBarVisible(true)

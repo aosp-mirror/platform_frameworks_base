@@ -401,6 +401,14 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         decodeColorType = kN32_SkColorType;
     }
 
+    // b/276879147, fallback to RGBA_8888 when decoding HEIF and P010 is not supported.
+    if (decodeColorType == kRGBA_1010102_SkColorType &&
+        codec->getEncodedFormat() == SkEncodedImageFormat::kHEIF &&
+        env->CallStaticBooleanMethod(gImageDecoder_class,
+                                     gImageDecoder_isP010SupportedForHEVCMethodID) == JNI_FALSE) {
+        decodeColorType = kN32_SkColorType;
+    }
+
     sk_sp<SkColorSpace> decodeColorSpace = codec->computeOutputColorSpace(
             decodeColorType, prefColorSpace);
 
@@ -637,7 +645,10 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
             return nullObjectReturn("Failed to allocate a hardware bitmap");
         }
         if (hasGainmap) {
-            hardwareBitmap->setGainmap(std::move(gainmap));
+            auto gm = uirenderer::Gainmap::allocateHardwareGainmap(gainmap);
+            if (gm) {
+                hardwareBitmap->setGainmap(std::move(gm));
+            }
         }
 
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,

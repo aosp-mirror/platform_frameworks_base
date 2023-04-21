@@ -39,6 +39,8 @@ public class CrossDeviceCall {
 
     private static final String TAG = "CrossDeviceCall";
 
+    public static final String EXTRA_CALL_ID =
+            "com.android.companion.datatransfer.contextsync.extra.CALL_ID";
     private static final int APP_ICON_BITMAP_DIMENSION = 256;
 
     private static final AtomicLong sNextId = new AtomicLong(1);
@@ -47,6 +49,7 @@ public class CrossDeviceCall {
     private final Call mCall;
     @VisibleForTesting boolean mIsEnterprise;
     @VisibleForTesting boolean mIsOtt;
+    private final String mCallingAppPackageName;
     private String mCallingAppName;
     private byte[] mCallingAppIcon;
     private String mCallerDisplayName;
@@ -59,7 +62,7 @@ public class CrossDeviceCall {
             CallAudioState callAudioState) {
         mId = sNextId.getAndIncrement();
         mCall = call;
-        final String callingAppPackageName = call != null
+        mCallingAppPackageName = call != null
                 ? call.getDetails().getAccountHandle().getComponentName().getPackageName() : null;
         mIsOtt = call != null
                 && (call.getDetails().getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
@@ -69,13 +72,13 @@ public class CrossDeviceCall {
                 == Call.Details.PROPERTY_ENTERPRISE_CALL;
         try {
             final ApplicationInfo applicationInfo = packageManager
-                    .getApplicationInfo(callingAppPackageName,
+                    .getApplicationInfo(mCallingAppPackageName,
                             PackageManager.ApplicationInfoFlags.of(0));
             mCallingAppName = packageManager.getApplicationLabel(applicationInfo).toString();
             mCallingAppIcon = renderDrawableToByteArray(
                     packageManager.getApplicationIcon(applicationInfo));
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Could not get application info for package " + callingAppPackageName, e);
+            Slog.e(TAG, "Could not get application info for package " + mCallingAppPackageName, e);
         }
         mIsMuted = callAudioState != null && callAudioState.isMuted();
         if (call != null) {
@@ -170,7 +173,8 @@ public class CrossDeviceCall {
         }
     }
 
-    private int convertStateToStatus(int callState) {
+    /** Converts a Telecom call state to a Context Sync status. */
+    public static int convertStateToStatus(int callState) {
         switch (callState) {
             case Call.STATE_HOLDING:
                 return android.companion.Telecom.Call.ON_HOLD;
@@ -178,17 +182,27 @@ public class CrossDeviceCall {
                 return android.companion.Telecom.Call.ONGOING;
             case Call.STATE_RINGING:
                 return android.companion.Telecom.Call.RINGING;
-            case Call.STATE_NEW:
-            case Call.STATE_DIALING:
-            case Call.STATE_DISCONNECTED:
-            case Call.STATE_SELECT_PHONE_ACCOUNT:
-            case Call.STATE_CONNECTING:
-            case Call.STATE_DISCONNECTING:
-            case Call.STATE_PULLING_CALL:
-            case Call.STATE_AUDIO_PROCESSING:
-            case Call.STATE_SIMULATED_RINGING:
             default:
                 return android.companion.Telecom.Call.UNKNOWN_STATUS;
+        }
+    }
+
+    /**
+     * Converts a Context Sync status to a Telecom call state. Note that this is lossy for
+     * and RINGING_SILENCED, as Telecom does not distinguish between RINGING and RINGING_SILENCED.
+     */
+    public static int convertStatusToState(int status) {
+        switch (status) {
+            case android.companion.Telecom.Call.ON_HOLD:
+                return Call.STATE_HOLDING;
+            case android.companion.Telecom.Call.ONGOING:
+                return Call.STATE_ACTIVE;
+            case android.companion.Telecom.Call.RINGING:
+            case android.companion.Telecom.Call.RINGING_SILENCED:
+                return Call.STATE_RINGING;
+            case android.companion.Telecom.Call.UNKNOWN_STATUS:
+            default:
+                return Call.STATE_NEW;
         }
     }
 
@@ -206,6 +220,10 @@ public class CrossDeviceCall {
 
     public byte[] getCallingAppIcon() {
         return mCallingAppIcon;
+    }
+
+    public String getCallingAppPackageName() {
+        return mCallingAppPackageName;
     }
 
     /**

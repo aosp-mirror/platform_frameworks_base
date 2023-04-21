@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"हलवा"</string>
     <string name="pip_expand" msgid="1051966011679297308">"विस्तार करा"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"कोलॅप्स करा"</string>
-    <string name="pip_edu_text" msgid="7930546669915337998">"नियंत्रणांसाठी "<annotation icon="home_icon">"होम"</annotation>" दोनदा दाबा"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"नियंत्रणांसाठी "<annotation icon="home_icon">"होम"</annotation>" दोनदा प्रेस करा"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"चित्रात-चित्र मेनू."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"डावीकडे हलवा"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"उजवीकडे हलवा"</string>

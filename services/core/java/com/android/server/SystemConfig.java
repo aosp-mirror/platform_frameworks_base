@@ -338,6 +338,9 @@ public class SystemConfig {
     // marked as stopped by the system
     @NonNull private final Set<String> mInitialNonStoppedSystemPackages = new ArraySet<>();
 
+    // A map of preloaded package names and the path to its app metadata file path.
+    private final ArrayMap<String, String> mAppMetadataFilePaths = new ArrayMap<>();
+
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
      * value maps actor name to package name.
@@ -534,6 +537,10 @@ public class SystemConfig {
 
     public Set<String> getInitialNonStoppedSystemPackages() {
         return mInitialNonStoppedSystemPackages;
+    }
+
+    public ArrayMap<String, String> getAppMetadataFilePaths() {
+        return mAppMetadataFilePaths;
     }
 
     /**
@@ -1466,7 +1473,20 @@ public class SystemConfig {
                         } else if (!Boolean.parseBoolean(stopped)) {
                             mInitialNonStoppedSystemPackages.add(pkgName);
                         }
-                    }
+                    } break;
+                    case "asl-file": {
+                        String packageName = parser.getAttributeValue(null, "package");
+                        String path = parser.getAttributeValue(null, "path");
+                        if (TextUtils.isEmpty(packageName)) {
+                            Slog.w(TAG, "<" + name + "> without valid package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(path)) {
+                            Slog.w(TAG, "<" + name + "> without valid path in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mAppMetadataFilePaths.put(packageName, path);
+                        }
+                    } break;
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "
                                 + permFile + " at " + parser.getPositionDescription());

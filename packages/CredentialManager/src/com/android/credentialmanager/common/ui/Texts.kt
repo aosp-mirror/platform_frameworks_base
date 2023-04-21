@@ -16,13 +16,16 @@
 
 package com.android.credentialmanager.common.ui
 
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 /**
  * The headline for a screen. E.g. "Create a passkey for X", "Choose a saved sign-in for X".
@@ -32,9 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun HeadlineText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = LocalAndroidColorScheme.current.colorOnSurface,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.headlineSmall,
     )
@@ -46,9 +49,9 @@ fun HeadlineText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium,
     )
 }
@@ -57,12 +60,20 @@ fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
  * Body-small typography; on-surface-variant color.
  */
 @Composable
-fun BodySmallText(text: String, modifier: Modifier = Modifier) {
+fun BodySmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
+        onTextLayout = onTextLayout,
     )
 }
 
@@ -72,9 +83,9 @@ fun BodySmallText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = LocalAndroidColorScheme.current.colorOnSurface,
         style = MaterialTheme.typography.titleLarge,
     )
 }
@@ -83,12 +94,20 @@ fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
  * Title-small typography; on-surface color.
  */
 @Composable
-fun SmallTitleText(text: String, modifier: Modifier = Modifier) {
+fun SmallTitleText(
+    text: String,
+    modifier: Modifier = Modifier,
+    enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = LocalAndroidColorScheme.current.colorOnSurface,
         style = MaterialTheme.typography.titleSmall,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
+        onTextLayout = onTextLayout,
     )
 }
 
@@ -98,7 +117,7 @@ fun SmallTitleText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun SectionHeaderText(text: String, modifier: Modifier = Modifier, color: Color) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = color,
         style = MaterialTheme.typography.titleSmall,
@@ -111,7 +130,7 @@ fun SectionHeaderText(text: String, modifier: Modifier = Modifier, color: Color)
 @Composable
 fun SnackbarContentText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.inverseOnSurface,
         style = MaterialTheme.typography.bodyMedium,
@@ -124,7 +143,7 @@ fun SnackbarContentText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun SnackbarActionText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.inversePrimary,
         style = MaterialTheme.typography.labelLarge,
@@ -137,10 +156,10 @@ fun SnackbarActionText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun LargeLabelTextOnSurfaceVariant(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
         style = MaterialTheme.typography.labelLarge,
     )
 }
@@ -151,7 +170,7 @@ fun LargeLabelTextOnSurfaceVariant(text: String, modifier: Modifier = Modifier) 
 @Composable
 fun LargeLabelText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.labelLarge,

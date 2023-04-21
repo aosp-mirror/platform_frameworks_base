@@ -16,11 +16,12 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_GO_TO_APP;
-import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_NONE;
 import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
 import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
 import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
+
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -531,7 +532,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);

@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRendererFactory
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
@@ -91,6 +92,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
@@ -184,11 +186,13 @@ class CustomizationProviderTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                logger = logger,
                 devicePolicyManager = devicePolicyManager,
                 backgroundDispatcher = testDispatcher,
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(
+                applicationScope = testScope.backgroundScope,
                 previewRendererFactory = previewRendererFactory,
                 mainDispatcher = testDispatcher,
                 backgroundHandler = backgroundHandler,
@@ -207,7 +211,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun `onAttachInfo - reportsContext`() {
+    fun onAttachInfo_reportsContext() {
         val callback: SystemUIAppComponentFactoryBase.ContextAvailableCallback = mock()
         underTest.setContextAvailableCallback(callback)
 
@@ -250,7 +254,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun `insert and query selection`() =
+    fun insertAndQuerySelection() =
         testScope.runTest {
             val slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
             val affordanceId = AFFORDANCE_2
@@ -274,7 +278,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `query slots`() =
+    fun querySlotsProvidesTwoSlots() =
         testScope.runTest {
             assertThat(querySlots())
                 .isEqualTo(
@@ -292,7 +296,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `query affordances`() =
+    fun queryAffordancesProvidesTwoAffordances() =
         testScope.runTest {
             assertThat(queryAffordances())
                 .isEqualTo(
@@ -312,7 +316,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `delete and query selection`() =
+    fun deleteAndQuerySelection() =
         testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
@@ -347,7 +351,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `delete all selections in a slot`() =
+    fun deleteAllSelectionsInAslot() =
         testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,

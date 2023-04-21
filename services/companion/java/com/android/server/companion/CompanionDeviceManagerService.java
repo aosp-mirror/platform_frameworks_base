@@ -19,6 +19,7 @@ package com.android.server.companion;
 
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -59,6 +60,8 @@ import android.companion.DeviceNotAssociatedException;
 import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IOnAssociationsChangedListener;
+import android.companion.IOnMessageReceivedListener;
+import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.content.ComponentName;
 import android.content.Context;
@@ -232,7 +235,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 /* cdmService */this, mAssociationStore);
         mCompanionAppController = new CompanionApplicationController(
                 context, mAssociationStore, mDevicePresenceMonitor);
-        mTransportManager = new CompanionTransportManager(context);
+        mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
 
@@ -601,6 +604,33 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void addOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            mTransportManager.addListener(listener);
+        }
+
+        @Override
+        public void removeOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            mTransportManager.removeListener(listener);
+        }
+
+        @Override
+        public void sendMessage(int messageType, byte[] data, int[] associationIds) {
+            mTransportManager.sendMessage(messageType, data, associationIds);
+        }
+
+        @Override
+        public void addOnMessageReceivedListener(int messageType,
+                IOnMessageReceivedListener listener) {
+            mTransportManager.addListener(messageType, listener);
+        }
+
+        @Override
+        public void removeOnMessageReceivedListener(int messageType,
+                IOnMessageReceivedListener listener) {
+            mTransportManager.removeListener(messageType, listener);
+        }
+
+        @Override
         public void legacyDisassociate(String deviceMacAddress, String packageName, int userId) {
             Log.i(TAG, "legacyDisassociate() pkg=u" + userId + "/" + packageName
                     + ", macAddress=" + deviceMacAddress);
@@ -865,12 +895,9 @@ public class CompanionDeviceManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
-            final CompanionDeviceShellCommand cmd = new CompanionDeviceShellCommand(
-                    CompanionDeviceManagerService.this,
-                    mAssociationStore,
-                    mDevicePresenceMonitor);
-            cmd.exec(this, in, out, err, args, callback, resultReceiver);
+            new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
+                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferRequestStore)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
@@ -1031,6 +1058,10 @@ public class CompanionDeviceManagerService extends SystemService {
         final String deviceProfile = association.getDeviceProfile();
         if (deviceProfile == null) {
             // No role was granted to for this association, there is nothing else we need to here.
+            return true;
+        }
+        // Do not need to remove the system role since it was pre-granted by the system.
+        if (deviceProfile.equals(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION)) {
             return true;
         }
 

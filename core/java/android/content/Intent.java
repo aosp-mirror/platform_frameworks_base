@@ -16,6 +16,7 @@
 
 package android.content;
 
+import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.ContentProvider.maybeAddUserId;
 
 import android.Manifest;
@@ -4233,6 +4234,13 @@ public class Intent implements Parcelable, Cloneable {
             "com.android.intent.action.SHOW_BRIGHTNESS_DIALOG";
 
     /**
+     * Activity Action: Shows the contrast setting dialog.
+     * @hide
+     */
+    public static final String ACTION_SHOW_CONTRAST_DIALOG =
+            "com.android.intent.action.SHOW_CONTRAST_DIALOG";
+
+    /**
      * Broadcast Action:  A global button was pressed.  Includes a single
      * extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
      * caused the broadcast.
@@ -5914,15 +5922,15 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A Parcelable[] of {@link ChooserAction} objects to provide the Android Sharesheet with
      * app-specific actions to be presented to the user when invoking {@link #ACTION_CHOOSER}.
+     * You can provide as many as five custom actions.
      */
     public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS =
             "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
 
     /**
      * Optional argument to be used with {@link #ACTION_CHOOSER}.
-     * A {@link android.app.PendingIntent} to be sent when the user wants to modify the content that
-     * they're sharing. This can be used to allow the user to return to the source app to, for
-     * example, select different media.
+     * A {@link ChooserAction} to allow the user to modify what is being shared in some way. This
+     * may be integrated into the content preview on sharesheets that have a preview UI.
      */
     public static final String EXTRA_CHOOSER_MODIFY_SHARE_ACTION =
             "android.intent.extra.CHOOSER_MODIFY_SHARE_ACTION";
@@ -11356,12 +11364,15 @@ public class Intent implements Parcelable, Cloneable {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
+        toString(b);
+        return b.toString();
+    }
 
+    /** @hide */
+    public void toString(@NonNull StringBuilder b) {
         b.append("Intent { ");
         toShortString(b, true, true, true, false);
         b.append(" }");
-
-        return b.toString();
     }
 
     /** @hide */
@@ -12338,7 +12349,9 @@ public class Intent implements Parcelable, Cloneable {
                             null, new String[] { getType() },
                             new ClipData.Item(text, htmlText, null, stream));
                     setClipData(clipData);
-                    addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                    if (stream != null) {
+                        addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                    }
                     return true;
                 }
             } catch (ClassCastException e) {
@@ -12377,7 +12390,9 @@ public class Intent implements Parcelable, Cloneable {
                     }
 
                     setClipData(clipData);
-                    addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                    if (streams != null) {
+                        addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                    }
                     return true;
                 }
             } catch (ClassCastException e) {
@@ -12452,5 +12467,20 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public boolean isDocument() {
         return (mFlags & FLAG_ACTIVITY_NEW_DOCUMENT) == FLAG_ACTIVITY_NEW_DOCUMENT;
+    }
+
+    /** @hide */
+    public boolean isSandboxActivity(@NonNull Context context) {
+        if (mAction != null && mAction.equals(ACTION_START_SANDBOXED_ACTIVITY)) {
+            return true;
+        }
+        final String sandboxPackageName = context.getPackageManager().getSdkSandboxPackageName();
+        if (mPackage != null && mPackage.equals(sandboxPackageName)) {
+            return true;
+        }
+        if (mComponent != null && mComponent.getPackageName().equals(sandboxPackageName)) {
+            return true;
+        }
+        return false;
     }
 }

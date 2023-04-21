@@ -124,8 +124,9 @@ class ScreenRecordPermissionDialog(
 
     /**
      * Starts screen capture after some countdown
+     *
      * @param captureTarget target to capture (could be e.g. a task) or null to record the whole
-     * screen
+     *   screen
      */
     private fun requestScreenCapture(captureTarget: MediaProjectionCaptureTarget?) {
         val userContext = userContextProvider.userContext

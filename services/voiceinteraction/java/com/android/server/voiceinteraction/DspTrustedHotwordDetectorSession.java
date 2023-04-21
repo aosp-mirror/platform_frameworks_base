@@ -16,6 +16,10 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_DETECT_TIMEOUT;
+import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION;
+import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE;
+
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_DETECTED_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_PROCESS_RESTARTED_EXCEPTION;
@@ -135,9 +139,10 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION,
                                 mVoiceInteractionServiceUid);
                         try {
-                            externalCallback.onDetectionFailure(new HotwordDetectionServiceFailure(
-                                    CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION,
-                                    "Security exception occurs in #onDetected method."));
+                            externalCallback.onHotwordDetectionServiceFailure(
+                                    new HotwordDetectionServiceFailure(
+                                            ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION,
+                                            "Security exception occurs in #onDetected method."));
                         } catch (RemoteException e1) {
                             notifyOnDetectorRemoteException();
                             HotwordMetricsLogger.writeDetectorEvent(
@@ -155,9 +160,10 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                     } catch (IOException e) {
                         try {
                             Slog.w(TAG, "Ignoring #onDetected due to a IOException", e);
-                            externalCallback.onDetectionFailure(new HotwordDetectionServiceFailure(
-                                    CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
-                                    "Copy audio stream failure."));
+                            externalCallback.onHotwordDetectionServiceFailure(
+                                    new HotwordDetectionServiceFailure(
+                                            ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE,
+                                            "Copy audio stream failure."));
                         } catch (RemoteException e1) {
                             notifyOnDetectorRemoteException();
                             throw e1;
@@ -242,8 +248,8 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                                 HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT,
                                 mVoiceInteractionServiceUid);
                         try {
-                            externalCallback.onDetectionFailure(
-                                    new HotwordDetectionServiceFailure(CALLBACK_DETECT_TIMEOUT,
+                            externalCallback.onHotwordDetectionServiceFailure(
+                                    new HotwordDetectionServiceFailure(ERROR_CODE_DETECT_TIMEOUT,
                                             "Timeout to response to the detection result."));
                         } catch (RemoteException e) {
                             Slog.w(TAG, "Failed to report onError status: ", e);

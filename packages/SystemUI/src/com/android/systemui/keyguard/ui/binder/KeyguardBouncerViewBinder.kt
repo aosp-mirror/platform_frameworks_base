@@ -27,14 +27,13 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityView
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.dagger.KeyguardBouncerComponent
-import com.android.settingslib.Utils
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ActivityStarter
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -44,6 +43,7 @@ object KeyguardBouncerViewBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardBouncerViewModel,
+        primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
         componentFactory: KeyguardBouncerComponent.Factory
     ) {
         // Builds the KeyguardSecurityContainerController from bouncer view group.
@@ -95,34 +95,47 @@ object KeyguardBouncerViewBinder {
                 override fun willDismissWithActions(): Boolean {
                     return securityContainerController.hasDismissActions()
                 }
+
+                override fun willRunDismissFromKeyguard(): Boolean {
+                    return securityContainerController.willRunDismissFromKeyguard()
+                }
+
+                override fun showPromptReason(reason: Int) {
+                    securityContainerController.showPromptReason(reason)
+                }
             }
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 try {
                     viewModel.setBouncerViewDelegate(delegate)
                     launch {
-                        viewModel.show.collect {
-                            // Reset Security Container entirely.
-                            securityContainerController.reinflateViewFlipper()
-                            securityContainerController.showPromptReason(it.promptReason)
-                            it.errorMessage?.let { errorMessage ->
-                                securityContainerController.showMessage(
-                                    errorMessage,
-                                    Utils.getColorError(view.context)
+                        viewModel.isShowing.collect { isShowing ->
+                            view.visibility = if (isShowing) View.VISIBLE else View.INVISIBLE
+                            if (isShowing) {
+                                // Reset Security Container entirely.
+                                view.visibility = View.VISIBLE
+                                securityContainerController.reinflateViewFlipper {
+                                    // Reset Security Container entirely.
+                                    securityContainerController.onBouncerVisibilityChanged(
+                                        /* isVisible= */ true
+                                    )
+                                    securityContainerController.showPrimarySecurityScreen(
+                                        /* turningOff= */ false
+                                    )
+                                    securityContainerController.setInitialMessage()
+                                    securityContainerController.appear()
+                                    securityContainerController.onResume(
+                                        KeyguardSecurityView.SCREEN_ON
+                                    )
+                                }
+                            } else {
+                                securityContainerController.onBouncerVisibilityChanged(
+                                    /* isVisible= */ false
                                 )
+                                securityContainerController.cancelDismissAction()
+                                securityContainerController.reset()
+                                securityContainerController.onPause()
                             }
-                            securityContainerController.showPrimarySecurityScreen(
-                                /* turningOff= */ false
-                            )
-                            securityContainerController.appear()
-                            securityContainerController.onResume(KeyguardSecurityView.SCREEN_ON)
-                        }
-                    }
-
-                    launch {
-                        viewModel.hide.collect {
-                            securityContainerController.cancelDismissAction()
-                            securityContainerController.reset()
                         }
                     }
 
@@ -145,25 +158,18 @@ object KeyguardBouncerViewBinder {
                     }
 
                     launch {
+                        primaryBouncerToGoneTransitionViewModel.bouncerAlpha.collect { alpha ->
+                            securityContainerController.setAlpha(alpha)
+                        }
+                    }
+
+                    launch {
                         viewModel.bouncerExpansionAmount
                             .filter { it == EXPANSION_VISIBLE }
                             .collect {
                                 securityContainerController.onResume(KeyguardSecurityView.SCREEN_ON)
                                 view.announceForAccessibility(securityContainerController.title)
                             }
-                    }
-
-                    launch {
-                        viewModel.isBouncerVisible.collect { isVisible ->
-                            view.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
-                            securityContainerController.onBouncerVisibilityChanged(isVisible)
-                        }
-                    }
-
-                    launch {
-                        viewModel.isBouncerVisible
-                            .filter { !it }
-                            .collect { securityContainerController.onPause() }
                     }
 
                     launch {
@@ -187,7 +193,11 @@ object KeyguardBouncerViewBinder {
 
                     launch {
                         viewModel.bouncerShowMessage.collect {
-                            securityContainerController.showMessage(it.message, it.colorStateList)
+                            securityContainerController.showMessage(
+                                it.message,
+                                it.colorStateList,
+                                /* animated= */ true
+                            )
                             viewModel.onMessageShown()
                         }
                     }

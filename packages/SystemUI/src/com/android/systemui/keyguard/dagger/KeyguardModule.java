@@ -44,9 +44,12 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
+import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -79,6 +82,7 @@ import dagger.Provides;
             KeyguardDataQuickAffordanceModule.class,
             KeyguardQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
+            KeyguardFaceAuthModule.class,
             StartKeyguardTransitionModule.class,
         })
 public class KeyguardModule {
@@ -113,11 +117,11 @@ public class KeyguardModule {
             ScreenOnCoordinator screenOnCoordinator,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
-            FeatureFlags featureFlags,
             Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
-            Lazy<ScrimController> scrimControllerLazy) {
+            Lazy<ScrimController> scrimControllerLazy,
+            FeatureFlags featureFlags) {
         return new KeyguardViewMediator(
                 context,
                 userTracker,
@@ -144,16 +148,22 @@ public class KeyguardModule {
                 screenOnCoordinator,
                 interactionJankMonitor,
                 dreamOverlayStateController,
-                featureFlags,
                 shadeController,
                 notificationShadeWindowController,
                 activityLaunchAnimator,
-                scrimControllerLazy);
+                scrimControllerLazy,
+                featureFlags);
     }
 
     /** */
     @Provides
     public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
+    }
+
+    /** */
+    @Provides
+    public KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
+        return new KeyguardQuickAffordancesMetricsLoggerImpl();
     }
 }

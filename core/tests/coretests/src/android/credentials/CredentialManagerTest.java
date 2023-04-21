@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.Activity;
 import android.app.slice.Slice;
 import android.content.Context;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -47,6 +48,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -58,6 +61,17 @@ public class CredentialManagerTest {
 
     @Mock
     private Activity mMockActivity;
+
+    private static final int TEST_USER_ID = 1;
+    private static final CredentialProviderInfo TEST_CREDENTIAL_PROVIDER_INFO =
+                new CredentialProviderInfo.Builder(new ServiceInfo())
+                        .setSystemProvider(true)
+                        .setOverrideLabel("test")
+                        .addCapabilities(Arrays.asList("passkey"))
+                        .setEnabled(true)
+                        .build();
+    private static final List<CredentialProviderInfo> TEST_CREDENTIAL_PROVIDER_INFO_LIST =
+                Arrays.asList(TEST_CREDENTIAL_PROVIDER_INFO);
 
     private GetCredentialRequest mGetRequest;
     private CreateCredentialRequest mCreateRequest;
@@ -101,8 +115,9 @@ public class CredentialManagerTest {
         mGetRequest = new GetCredentialRequest.Builder(Bundle.EMPTY).addCredentialOption(
                 new CredentialOption(Credential.TYPE_PASSWORD_CREDENTIAL, Bundle.EMPTY,
                         Bundle.EMPTY, false)).build();
-        mCreateRequest = new CreateCredentialRequest.Builder(Bundle.EMPTY, Bundle.EMPTY)
-                .setType(Credential.TYPE_PASSWORD_CREDENTIAL)
+        mCreateRequest = new CreateCredentialRequest.Builder(
+                Credential.TYPE_PASSWORD_CREDENTIAL,
+                Bundle.EMPTY, Bundle.EMPTY)
                 .setIsSystemProviderRequired(false)
                 .setAlwaysSendAppInfoToProvider(false)
                 .build();
@@ -112,11 +127,11 @@ public class CredentialManagerTest {
                 null, List.of(Slice.HINT_TITLE)).build();
         mRegisterRequest = new RegisterCredentialDescriptionRequest(
                 new CredentialDescription(Credential.TYPE_PASSWORD_CREDENTIAL,
-                        "{ \"foo\": \"bar\" }",
+                        new HashSet<>(List.of("{ \"foo\": \"bar\" }")),
                         List.of(new CredentialEntry(Credential.TYPE_PASSWORD_CREDENTIAL, slice))));
         mUnregisterRequest = new UnregisterCredentialDescriptionRequest(
                 new CredentialDescription(Credential.TYPE_PASSWORD_CREDENTIAL,
-                        "{ \"foo\": \"bar\" }",
+                        new HashSet<>(List.of("{ \"foo\": \"bar\" }")),
                         List.of(new CredentialEntry(Credential.TYPE_PASSWORD_CREDENTIAL, slice))));
 
         final Context context = InstrumentationRegistry.getInstrumentation().getContext();
@@ -127,8 +142,9 @@ public class CredentialManagerTest {
 
     @Test
     public void testGetCredential_nullRequest() {
+        GetCredentialRequest nullRequest = null;
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.getCredential(null, mMockActivity, null, mExecutor,
+                () -> mCredentialManager.getCredential(mMockActivity, nullRequest, null, mExecutor,
                         result -> {
                         }));
     }
@@ -136,7 +152,7 @@ public class CredentialManagerTest {
     @Test
     public void testGetCredential_nullActivity() {
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.getCredential(mGetRequest, null, null, mExecutor,
+                () -> mCredentialManager.getCredential(null, mGetRequest, null, mExecutor,
                         result -> {
                         }));
     }
@@ -144,7 +160,7 @@ public class CredentialManagerTest {
     @Test
     public void testGetCredential_nullExecutor() {
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.getCredential(mGetRequest, mMockActivity, null, null,
+                () -> mCredentialManager.getCredential(mMockActivity, mGetRequest, null, null,
                         result -> {
                         }));
     }
@@ -152,7 +168,7 @@ public class CredentialManagerTest {
     @Test
     public void testGetCredential_nullCallback() {
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.getCredential(mGetRequest, mMockActivity, null, null,
+                () -> mCredentialManager.getCredential(mMockActivity, mGetRequest, null, null,
                         null));
     }
 
@@ -168,7 +184,7 @@ public class CredentialManagerTest {
 
         when(mMockCredentialManagerService.executeGetCredential(any(), callbackCaptor.capture(),
                 any())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.getCredential(mGetRequest, mMockActivity, null, mExecutor, callback);
+        mCredentialManager.getCredential(mMockActivity, mGetRequest, null, mExecutor, callback);
         verify(mMockCredentialManagerService).executeGetCredential(any(), any(), eq(mPackageName));
 
         callbackCaptor.getValue().onError(GetCredentialException.TYPE_NO_CREDENTIAL,
@@ -184,7 +200,7 @@ public class CredentialManagerTest {
         final CancellationSignal cancellation = new CancellationSignal();
         cancellation.cancel();
 
-        mCredentialManager.getCredential(mGetRequest, mMockActivity, cancellation, mExecutor,
+        mCredentialManager.getCredential(mMockActivity, mGetRequest, cancellation, mExecutor,
                 result -> {
                 });
 
@@ -202,7 +218,7 @@ public class CredentialManagerTest {
         when(mMockCredentialManagerService.executeGetCredential(any(), any(), any())).thenReturn(
                 serviceSignal);
 
-        mCredentialManager.getCredential(mGetRequest, mMockActivity, cancellation, mExecutor,
+        mCredentialManager.getCredential(mMockActivity, mGetRequest, cancellation, mExecutor,
                 callback);
 
         verify(mMockCredentialManagerService).executeGetCredential(any(), any(), eq(mPackageName));
@@ -225,7 +241,7 @@ public class CredentialManagerTest {
 
         when(mMockCredentialManagerService.executeGetCredential(any(), callbackCaptor.capture(),
                 any())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.getCredential(mGetRequest, mMockActivity, null, mExecutor, callback);
+        mCredentialManager.getCredential(mMockActivity, mGetRequest, null, mExecutor, callback);
         verify(mMockCredentialManagerService).executeGetCredential(any(), any(), eq(mPackageName));
 
         callbackCaptor.getValue().onResponse(new GetCredentialResponse(cred));
@@ -237,7 +253,7 @@ public class CredentialManagerTest {
     @Test
     public void testCreateCredential_nullRequest() {
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.createCredential(null, mMockActivity, null, mExecutor,
+                () -> mCredentialManager.createCredential(mMockActivity, null, null, mExecutor,
                         result -> {
                         }));
     }
@@ -245,7 +261,7 @@ public class CredentialManagerTest {
     @Test
     public void testCreateCredential_nullActivity() {
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.createCredential(mCreateRequest, null, null, mExecutor,
+                () -> mCredentialManager.createCredential(null, mCreateRequest, null, mExecutor,
                         result -> {
                         }));
     }
@@ -253,7 +269,7 @@ public class CredentialManagerTest {
     @Test
     public void testCreateCredential_nullExecutor() {
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.createCredential(mCreateRequest, mMockActivity, null, null,
+                () -> mCredentialManager.createCredential(mMockActivity, mCreateRequest, null, null,
                         result -> {
                         }));
     }
@@ -261,7 +277,7 @@ public class CredentialManagerTest {
     @Test
     public void testCreateCredential_nullCallback() {
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.createCredential(mCreateRequest, mMockActivity, null,
+                () -> mCredentialManager.createCredential(mMockActivity, mCreateRequest, null,
                         mExecutor, null));
     }
 
@@ -270,7 +286,7 @@ public class CredentialManagerTest {
         final CancellationSignal cancellation = new CancellationSignal();
         cancellation.cancel();
 
-        mCredentialManager.createCredential(mCreateRequest, mMockActivity, cancellation, mExecutor,
+        mCredentialManager.createCredential(mMockActivity, mCreateRequest, cancellation, mExecutor,
                 result -> {
                 });
 
@@ -288,7 +304,7 @@ public class CredentialManagerTest {
         when(mMockCredentialManagerService.executeCreateCredential(any(), any(), any())).thenReturn(
                 serviceSignal);
 
-        mCredentialManager.createCredential(mCreateRequest, mMockActivity, cancellation, mExecutor,
+        mCredentialManager.createCredential(mMockActivity, mCreateRequest, cancellation, mExecutor,
                 callback);
 
         verify(mMockCredentialManagerService).executeCreateCredential(any(), any(),
@@ -310,7 +326,7 @@ public class CredentialManagerTest {
 
         when(mMockCredentialManagerService.executeCreateCredential(any(), callbackCaptor.capture(),
                 any())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.createCredential(mCreateRequest, mMockActivity, null, mExecutor,
+        mCredentialManager.createCredential(mMockActivity, mCreateRequest, null, mExecutor,
                 callback);
         verify(mMockCredentialManagerService).executeCreateCredential(any(), any(),
                 eq(mPackageName));
@@ -337,7 +353,7 @@ public class CredentialManagerTest {
 
         when(mMockCredentialManagerService.executeCreateCredential(any(), callbackCaptor.capture(),
                 any())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.createCredential(mCreateRequest, mMockActivity, null, mExecutor,
+        mCredentialManager.createCredential(mMockActivity, mCreateRequest, null, mExecutor,
                 callback);
         verify(mMockCredentialManagerService).executeCreateCredential(any(), any(),
                 eq(mPackageName));
@@ -437,95 +453,53 @@ public class CredentialManagerTest {
     }
 
     @Test
-    public void testListEnabledProviders_nullExecutor() {
-        assertThrows(NullPointerException.class,
-                () -> mCredentialManager.listEnabledProviders(null, null, result -> {
-                }));
-
+    public void testGetCredentialProviderServices_allProviders() throws RemoteException {
+        verifyGetCredentialProviderServices(CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS);
     }
 
     @Test
-    public void testListEnabledProviders_nullCallback() {
-        assertThrows(NullPointerException.class,
-                () -> mCredentialManager.listEnabledProviders(null, mExecutor, null));
-
+    public void testGetCredentialProviderServices_userProviders() throws RemoteException {
+        verifyGetCredentialProviderServices(CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY);
     }
 
     @Test
-    public void testListEnabledProviders_alreadyCancelled() throws RemoteException {
-        final CancellationSignal cancellation = new CancellationSignal();
-        cancellation.cancel();
-
-        mCredentialManager.listEnabledProviders(cancellation, mExecutor, result -> {
-        });
-
-        verify(mMockCredentialManagerService, never()).listEnabledProviders(any());
+    public void testGetCredentialProviderServices_systemProviders() throws RemoteException {
+        verifyGetCredentialProviderServices(CredentialManager.PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY);
     }
 
     @Test
-    public void testListEnabledProviders_cancel() throws RemoteException {
-        final ICancellationSignal serviceSignal = mock(ICancellationSignal.class);
-        final CancellationSignal cancellation = new CancellationSignal();
-
-        OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException> callback =
-                mock(OutcomeReceiver.class);
-
-        when(mMockCredentialManagerService.listEnabledProviders(any())).thenReturn(serviceSignal);
-
-        mCredentialManager.listEnabledProviders(cancellation, mExecutor, callback);
-
-        verify(mMockCredentialManagerService).listEnabledProviders(any());
-
-        cancellation.cancel();
-        verify(serviceSignal).cancel();
+    public void testGetCredentialProviderServicesForTesting_allProviders() throws RemoteException {
+        verifyGetCredentialProviderServicesForTesting(CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS);
     }
 
     @Test
-    public void testListEnabledProviders_failed() throws RemoteException {
-        ArgumentCaptor<IListEnabledProvidersCallback> callbackCaptor = ArgumentCaptor.forClass(
-                IListEnabledProvidersCallback.class);
-        ArgumentCaptor<ListEnabledProvidersException> errorCaptor = ArgumentCaptor.forClass(
-                ListEnabledProvidersException.class);
-
-        OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException> callback =
-                mock(OutcomeReceiver.class);
-
-        when(mMockCredentialManagerService.listEnabledProviders(
-                callbackCaptor.capture())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.listEnabledProviders(null, mExecutor, callback);
-        verify(mMockCredentialManagerService).listEnabledProviders(any());
-
-        final String errorType = "type";
-        callbackCaptor.getValue().onError("type", "unknown error");
-        verify(callback).onError(errorCaptor.capture());
-
-        assertThat(errorCaptor.getValue().getType()).isEqualTo(errorType);
+    public void testGetCredentialProviderServicesForTesting_userProviders() throws RemoteException {
+        verifyGetCredentialProviderServicesForTesting(CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY);
     }
 
     @Test
-    public void testListEnabledProviders_success() throws RemoteException {
-        ListEnabledProvidersResponse response = ListEnabledProvidersResponse.create(
-                List.of("foo", "bar", "baz"));
+    public void testGetCredentialProviderServicesForTesting_systemProviders() throws RemoteException {
+        verifyGetCredentialProviderServicesForTesting(CredentialManager.PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY);
+    }
 
-        OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException> callback =
-                mock(OutcomeReceiver.class);
+    private void verifyGetCredentialProviderServices(int testFilter) throws RemoteException {
+        when(mMockCredentialManagerService.getCredentialProviderServices(
+                TEST_USER_ID, testFilter)).thenReturn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
 
-        ArgumentCaptor<IListEnabledProvidersCallback> callbackCaptor = ArgumentCaptor.forClass(
-                IListEnabledProvidersCallback.class);
-        ArgumentCaptor<ListEnabledProvidersResponse> responseCaptor = ArgumentCaptor.forClass(
-                ListEnabledProvidersResponse.class);
+        List<CredentialProviderInfo> output =
+                mCredentialManager.getCredentialProviderServices(TEST_USER_ID, testFilter);
 
-        when(mMockCredentialManagerService.listEnabledProviders(
-                callbackCaptor.capture())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.listEnabledProviders(null, mExecutor, callback);
+        assertThat(output).containsExactlyElementsIn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
+    }
 
-        verify(mMockCredentialManagerService).listEnabledProviders(any());
+    private void verifyGetCredentialProviderServicesForTesting(int testFilter) throws RemoteException {
+        when(mMockCredentialManagerService.getCredentialProviderServicesForTesting(
+                testFilter)).thenReturn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
 
-        callbackCaptor.getValue().onResponse(response);
+        List<CredentialProviderInfo> output =
+                mCredentialManager.getCredentialProviderServicesForTesting(testFilter);
 
-        verify(callback).onResult(responseCaptor.capture());
-        assertThat(responseCaptor.getValue().getProviderComponentNames()).containsExactlyElementsIn(
-                response.getProviderComponentNames());
+        assertThat(output).containsExactlyElementsIn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
     }
 
     @Test

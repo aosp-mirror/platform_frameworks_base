@@ -16,16 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import org.junit.Assume
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -42,12 +37,13 @@ import org.junit.runners.Parameterized
  *     Expand [pipApp] app to full screen by clicking on the pip window and
  *     then on the expand button
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
  * ```
@@ -72,19 +68,4 @@ open class ExitPipToAppViaExpandButtonTest(flicker: FlickerTest) : ExitPipToAppT
                 wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
             }
         }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 197726610)
-    @Test
-    override fun pipLayerExpands() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.pipLayerExpands()
-    }
-
-    @Presubmit
-    @Test
-    fun pipLayerExpands_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        super.pipLayerExpands()
-    }
 }

@@ -18,16 +18,14 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
@@ -52,11 +50,10 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
     private lateinit var deviceEntryFingerprintAuthRepository:
         FakeDeviceEntryFingerprintAuthRepository
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var systemClock: SystemClock
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var bouncerLogger: TableLogBuffer
-    private lateinit var featureFlags: FakeFeatureFlags
 
     @Before
     fun setup() {
@@ -70,16 +67,14 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
             )
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
-        featureFlags = FakeFeatureFlags().apply { this.set(Flags.MODERN_ALTERNATE_BOUNCER, true) }
         underTest =
             AlternateBouncerInteractor(
+                statusBarStateController,
                 keyguardStateController,
                 bouncerRepository,
                 biometricSettingsRepository,
                 deviceEntryFingerprintAuthRepository,
                 systemClock,
-                keyguardUpdateMonitor,
-                featureFlags,
             )
     }
 

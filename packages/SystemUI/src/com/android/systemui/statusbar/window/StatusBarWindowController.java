@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.window;
 
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
-import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
+import static android.view.WindowInsets.Type.mandatorySystemGestures;
+import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowInsets.Type.tappableElement;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -85,6 +85,7 @@ public class StatusBarWindowController {
     private final ViewGroup mLaunchAnimationContainer;
     private WindowManager.LayoutParams mLp;
     private final WindowManager.LayoutParams mLpChanged;
+    private final Binder mInsetsSourceOwner = new Binder();
 
     @Inject
     public StatusBarWindowController(
@@ -231,16 +232,16 @@ public class StatusBarWindowController {
         lp.packageName = mContext.getPackageName();
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         final InsetsFrameProvider gestureInsetsProvider =
-                new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES);
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, mandatorySystemGestures());
         final int safeTouchRegionHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.display_cutout_touchable_region_size);
         if (safeTouchRegionHeight > 0) {
-            gestureInsetsProvider.minimalInsetsSizeInDisplayCutoutSafe =
-                    Insets.of(0, safeTouchRegionHeight, 0, 0);
+            gestureInsetsProvider.setMinimalInsetsSizeInDisplayCutoutSafe(
+                    Insets.of(0, safeTouchRegionHeight, 0, 0));
         }
         lp.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_STATUS_BAR),
-                new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, statusBars()),
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, tappableElement()),
                 gestureInsetsProvider
         };
         return lp;

@@ -29,10 +29,10 @@ import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.battery.BatteryMeterViewController;
-import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.settings.UserTracker;
@@ -43,16 +43,19 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationsQuickSettingsContainer;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
-import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
+import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModelModule;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
-import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -73,43 +76,25 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.util.concurrent.Executor;
-
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 
-@Module(subcomponents = StatusBarFragmentComponent.class)
+import java.util.concurrent.Executor;
+
+import javax.inject.Named;
+import javax.inject.Provider;
+
+@Module(subcomponents = StatusBarFragmentComponent.class,
+        includes = {
+                ActivatableNotificationViewModelModule.class,
+                NotificationListViewModelModule.class,
+        })
 public abstract class StatusBarViewModule {
 
     public static final String SHADE_HEADER = "large_screen_shade_header";
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationShadeWindowView providesNotificationShadeWindowView(
-            LayoutInflater layoutInflater) {
-        NotificationShadeWindowView notificationShadeWindowView = (NotificationShadeWindowView)
-                layoutInflater.inflate(R.layout.super_notification_shade, /* root= */ null);
-        if (notificationShadeWindowView == null) {
-            throw new IllegalStateException(
-                    "R.layout.super_notification_shade could not be properly inflated");
-        }
-
-        return notificationShadeWindowView;
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationStackScrollLayout providesNotificationStackScrollLayout(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller);
-    }
 
     /** */
     @Provides
@@ -130,25 +115,29 @@ public abstract class StatusBarViewModule {
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationShelfController providesStatusBarWindowView(
+            FeatureFlags featureFlags,
+            Provider<NotificationShelfViewBinderWrapperControllerImpl> newImpl,
             NotificationShelfComponent.Builder notificationShelfComponentBuilder,
             NotificationShelf notificationShelf) {
-        NotificationShelfComponent component = notificationShelfComponentBuilder
-                .notificationShelf(notificationShelf)
-                .build();
-        NotificationShelfController notificationShelfController =
-                component.getNotificationShelfController();
-        notificationShelfController.init();
+        if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            return newImpl.get();
+        } else {
+            NotificationShelfComponent component = notificationShelfComponentBuilder
+                    .notificationShelf(notificationShelf)
+                    .build();
+            LegacyNotificationShelfControllerImpl notificationShelfController =
+                    component.getNotificationShelfController();
+            notificationShelfController.init();
 
-        return notificationShelfController;
+            return notificationShelfController;
+        }
     }
 
     /** */
-    @Provides
+    @Binds
     @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationPanelView getNotificationPanelView(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.getNotificationPanelView();
-    }
+    abstract ShadeViewController bindsShadeViewController(
+            NotificationPanelViewController notificationPanelViewController);
 
     /** */
     @Provides
@@ -156,15 +145,6 @@ public abstract class StatusBarViewModule {
     public static LockIconView getLockIconView(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.lock_icon_view);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    @Nullable
-    public static AuthRippleView getAuthRippleView(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.auth_ripple);
     }
 
     /** */
@@ -255,12 +235,6 @@ public abstract class StatusBarViewModule {
 
     @Binds
     @IntoSet
-    abstract OnStatusBarViewInitializedListener statusBarInitializedListener(
-            LetterboxAppearanceCalculator letterboxAppearanceCalculator
-    );
-
-    @Binds
-    @IntoSet
     abstract StatusBarBoundsProvider.BoundsChangeListener sysBarAttrsListenerAsBoundsListener(
             SystemBarAttributesListener systemBarAttributesListener);
 
@@ -289,7 +263,7 @@ public abstract class StatusBarViewModule {
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
             CarrierConfigTracker carrierConfigTracker,
@@ -312,7 +286,7 @@ public abstract class StatusBarViewModule {
                 darkIconManagerFactory,
                 statusBarHideIconsForBouncerManager,
                 keyguardStateController,
-                notificationPanelViewController,
+                shadeViewController,
                 statusBarStateController,
                 commandQueue,
                 carrierConfigTracker,

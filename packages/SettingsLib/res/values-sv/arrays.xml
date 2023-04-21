@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Aktiverad"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"Filtrerade rubriker"</item>
-    <item msgid="4818549483446395865">"Filtrerade A2DP-mediapaket"</item>
-    <item msgid="8207123990453243311">"Filtrerad RFCOMM-kanal"</item>
+    <item msgid="195768089203590086">"Lämna bara ACL-rubriker"</item>
+    <item msgid="2776218217644557831">"Filtrera A2DP-mediepaket"</item>
+    <item msgid="8163235976612675092">"Filtrera RFCOMM-kanal"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"Inaktiverad"</item>
-    <item msgid="5884245882825346396">"Magi"</item>
-    <item msgid="6569400572915342949">"Rubrik"</item>
-    <item msgid="1239386221416967664">"Fullständigt filter"</item>
+    <item msgid="3961868665260627524">"Inaktivera"</item>
+    <item msgid="2505973306504851132">"Fyll med en sträng med tecken"</item>
+    <item msgid="5883011000629613855">"Lämna bara rubriken"</item>
+    <item msgid="1051534112762023603">"Ta bort fullständigt"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (standard)"</item>

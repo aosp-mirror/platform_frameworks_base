@@ -401,8 +401,9 @@ public final class Bitmap implements Parcelable {
     /**
      * This is called by methods that want to throw an exception if the bitmap
      * has already been recycled.
+     * @hide
      */
-    private void checkRecycled(String errorMessage) {
+    void checkRecycled(String errorMessage) {
         if (mRecycled) {
             throw new IllegalStateException(errorMessage);
         }
@@ -1921,6 +1922,7 @@ public final class Bitmap implements Parcelable {
      */
     public void setGainmap(@Nullable Gainmap gainmap) {
         checkRecycled("Bitmap is recycled");
+        mGainmap = null;
         nativeSetGainmap(mNativePtr, gainmap == null ? 0 : gainmap.mNativePtr);
     }
 
@@ -2001,7 +2003,7 @@ public final class Bitmap implements Parcelable {
         checkPixelAccess(x, y);
 
         final ColorSpace cs = getColorSpace();
-        if (cs.equals(ColorSpace.get(ColorSpace.Named.SRGB))) {
+        if (cs == null || cs.equals(ColorSpace.get(ColorSpace.Named.SRGB))) {
             return Color.valueOf(nativeGetPixel(mNativePtr, x, y));
         }
         // The returned value is in kRGBA_F16_SkColorType, which is packed as

@@ -301,8 +301,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             return true;
         }
 
-        // check if no-animation and skip animation if so.
-        if (Transitions.isAllNoAnimation(info)) {
+        // Early check if the transition doesn't warrant an animation.
+        if (Transitions.isAllNoAnimation(info) || Transitions.isAllOrderOnly(info)) {
             startTransaction.apply();
             finishTransaction.apply();
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
@@ -327,6 +327,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         @ColorInt int backgroundColorForTransition = 0;
         final int wallpaperTransit = getWallpaperTransitType(info);
+        boolean isDisplayRotationAnimationStarted = false;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.hasAllFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY
@@ -350,6 +351,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         startRotationAnimation(startTransaction, change, info, anim, animations,
                                 onAnimFinish);
+                        isDisplayRotationAnimationStarted = true;
                         continue;
                     }
                 } else {
@@ -383,9 +385,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     continue;
                 }
                 // No default animation for this, so just update bounds/position.
+                final int rootIdx = TransitionUtil.rootIndexFor(change, info);
                 startTransaction.setPosition(change.getLeash(),
-                        change.getEndAbsBounds().left - info.getRootOffset().x,
-                        change.getEndAbsBounds().top - info.getRootOffset().y);
+                        change.getEndAbsBounds().left - info.getRoot(rootIdx).getOffset().x,
+                        change.getEndAbsBounds().top - info.getRoot(rootIdx).getOffset().y);
                 // Seamless display transition doesn't need to animate.
                 if (isSeamlessDisplayChange) continue;
                 if (isTask || (change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)
@@ -402,6 +405,14 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             ROTATION_ANIMATION_ROTATE, animations, onAnimFinish);
                     continue;
                 }
+            }
+
+            // Hide the invisible surface directly without animating it if there is a display
+            // rotation animation playing.
+            if (isDisplayRotationAnimationStarted && TransitionUtil.isClosingType(
+                    change.getMode())) {
+                startTransaction.hide(change.getLeash());
+                continue;
             }
 
             // The back gesture has animated this change before transition happen, so here we don't
@@ -474,8 +485,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
 
         if (backgroundColorForTransition != 0) {
-            addBackgroundToTransition(info.getRootLeash(), backgroundColorForTransition,
-                    startTransaction, finishTransaction);
+            for (int i = 0; i < info.getRootCount(); ++i) {
+                addBackgroundToTransition(info.getRoot(i).getLeash(), backgroundColorForTransition,
+                        startTransaction, finishTransaction);
+            }
         }
 
         if (postStartTransactionCallbacks.size() > 0) {
@@ -520,8 +533,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private void startRotationAnimation(SurfaceControl.Transaction startTransaction,
             TransitionInfo.Change change, TransitionInfo info, int animHint,
             ArrayList<Animator> animations, Runnable onAnimFinish) {
+        final int rootIdx = TransitionUtil.rootIndexFor(change, info);
         final ScreenRotationAnimation anim = new ScreenRotationAnimation(mContext, mSurfaceSession,
-                mTransactionPool, startTransaction, change, info.getRootLeash(), animHint);
+                mTransactionPool, startTransaction, change, info.getRoot(rootIdx).getLeash(),
+                animHint);
         // The rotation animation may consist of 3 animations: fade-out screenshot, fade-in real
         // content, and background color. The item of "animGroup" will be removed if the sub
         // animation is finished. Then if the list becomes empty, the rotation animation is done.

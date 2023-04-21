@@ -231,22 +231,20 @@ public class KeyguardService extends Service {
                 );
             }
 
-            public void mergeAnimation(IBinder transition, TransitionInfo info,
-                    SurfaceControl.Transaction t, IBinder mergeTarget,
-                    IRemoteTransitionFinishedCallback finishCallback) {
+            public void mergeAnimation(IBinder candidateTransition, TransitionInfo candidateInfo,
+                    SurfaceControl.Transaction candidateT, IBinder currentTransition,
+                    IRemoteTransitionFinishedCallback candidateFinishCallback) {
                 try {
-                    final IRemoteTransitionFinishedCallback origFinishCB;
+                    final IRemoteTransitionFinishedCallback currentFinishCB;
                     synchronized (mFinishCallbacks) {
-                        origFinishCB = mFinishCallbacks.remove(transition);
+                        currentFinishCB = mFinishCallbacks.remove(currentTransition);
                     }
-                    info.releaseAllSurfaces();
-                    t.close();
-                    if (origFinishCB == null) {
-                        // already finished (or not started yet), so do nothing.
+                    if (currentFinishCB == null) {
+                        Slog.e(TAG, "Called mergeAnimation, but finish callback is missing");
                         return;
                     }
                     runner.onAnimationCancelled(false /* isKeyguardOccluded */);
-                    origFinishCB.onTransitionFinished(null /* wct */, null /* t */);
+                    currentFinishCB.onTransitionFinished(null /* wct */, null /* t */);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
                 }
@@ -304,13 +302,13 @@ public class KeyguardService extends Service {
         Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
         TransitionFilter f = new TransitionFilter();
         f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-        mShellTransitions.registerRemote(f,
-                new RemoteTransition(wrap(mExitAnimationRunner), getIApplicationThread()));
+        mShellTransitions.registerRemote(f, new RemoteTransition(
+                wrap(mExitAnimationRunner), getIApplicationThread(), "ExitKeyguard"));
 
         Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
         // Register for occluding
         final RemoteTransition occludeTransition = new RemoteTransition(
-                mOccludeAnimation, getIApplicationThread());
+                mOccludeAnimation, getIApplicationThread(), "KeyguardOcclude");
         f = new TransitionFilter();
         f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
         f.mRequirements = new TransitionFilter.Requirement[]{
@@ -329,7 +327,7 @@ public class KeyguardService extends Service {
 
         // Now register for un-occlude.
         final RemoteTransition unoccludeTransition = new RemoteTransition(
-                mUnoccludeAnimation, getIApplicationThread());
+                mUnoccludeAnimation, getIApplicationThread(), "KeyguardUnocclude");
         f = new TransitionFilter();
         f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
         f.mRequirements = new TransitionFilter.Requirement[]{
@@ -384,7 +382,7 @@ public class KeyguardService extends Service {
         f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
         mShellTransitions.registerRemote(f, new RemoteTransition(
                 wrap(mKeyguardViewMediator.getOccludeByDreamAnimationRunner()),
-                getIApplicationThread()));
+                getIApplicationThread(), "KeyguardOccludeByDream"));
     }
 
     @Override

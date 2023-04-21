@@ -16,70 +16,100 @@
 
 package android.net.wifi.sharedconnectivity.app;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Parcel;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
 /**
- * Unit tests for {@link android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState}.
+ * Unit tests for {@link SharedConnectivitySettingsState}.
  */
 @SmallTest
 public class SharedConnectivitySettingsStateTest {
     private static final boolean INSTANT_TETHER_STATE = true;
+    private static final String INTENT_ACTION = "instant.tether.settings";
 
     private static final boolean INSTANT_TETHER_STATE_1 = false;
-    /**
-     * Verifies parcel serialization/deserialization.
-     */
+    private static final String INTENT_ACTION_1 = "instant.tether.settings1";
+
     @Test
-    public void testParcelOperation() {
-        SharedConnectivitySettingsState state = buildSettingsStateBuilder().build();
+    public void pendingIntentMutable_buildShouldThrow() {
+        SharedConnectivitySettingsState.Builder builder =
+                new SharedConnectivitySettingsState.Builder()
+                        .setInstantTetherEnabled(INSTANT_TETHER_STATE)
+                        .setInstantTetherSettingsPendingIntent(PendingIntent.getActivity(
+                                ApplicationProvider.getApplicationContext(), 0,
+                                new Intent(INTENT_ACTION).setComponent(new ComponentName(
+                                        "com.test.package", "TestClass")),
+                                PendingIntent.FLAG_MUTABLE));
 
-        Parcel parcelW = Parcel.obtain();
-        state.writeToParcel(parcelW, 0);
-        byte[] bytes = parcelW.marshall();
-        parcelW.recycle();
+        Exception e = assertThrows(IllegalArgumentException.class, builder::build);
+        assertThat(e.getMessage()).contains("Pending intent must be immutable");
+    }
 
-        Parcel parcelR = Parcel.obtain();
-        parcelR.unmarshall(bytes, 0, bytes.length);
-        parcelR.setDataPosition(0);
+    @Test
+    public void parcelOperation() {
+        SharedConnectivitySettingsState state = buildSettingsStateBuilder(INTENT_ACTION).build();
+
+        Parcel parcel = Parcel.obtain();
+        state.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
         SharedConnectivitySettingsState fromParcel =
-                SharedConnectivitySettingsState.CREATOR.createFromParcel(parcelR);
+                SharedConnectivitySettingsState.CREATOR.createFromParcel(parcel);
 
-        assertEquals(state, fromParcel);
-        assertEquals(state.hashCode(), fromParcel.hashCode());
+        assertThat(fromParcel).isEqualTo(state);
+        assertThat(fromParcel.hashCode()).isEqualTo(state.hashCode());
     }
 
-    /**
-     * Verifies the Equals operation
-     */
     @Test
-    public void testEqualsOperation() {
-        SharedConnectivitySettingsState state1 = buildSettingsStateBuilder().build();
-        SharedConnectivitySettingsState state2 = buildSettingsStateBuilder().build();
-        assertEquals(state1, state2);
+    public void equalsOperation() {
+        SharedConnectivitySettingsState state1 = buildSettingsStateBuilder(INTENT_ACTION).build();
+        SharedConnectivitySettingsState state2 = buildSettingsStateBuilder(INTENT_ACTION).build();
+        assertThat(state1).isEqualTo(state2);
 
-        SharedConnectivitySettingsState.Builder builder = buildSettingsStateBuilder()
+        SharedConnectivitySettingsState.Builder builder = buildSettingsStateBuilder(INTENT_ACTION)
                 .setInstantTetherEnabled(INSTANT_TETHER_STATE_1);
-        assertNotEquals(state1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(state1);
+
+        builder = buildSettingsStateBuilder(INTENT_ACTION_1);
+        assertThat(builder.build()).isNotEqualTo(state1);
     }
 
-    /**
-     * Verifies the get methods return the expected data.
-     */
     @Test
-    public void testGetMethods() {
-        SharedConnectivitySettingsState state = buildSettingsStateBuilder().build();
-        assertEquals(state.isInstantTetherEnabled(), INSTANT_TETHER_STATE);
+    public void getMethods() {
+        SharedConnectivitySettingsState state = buildSettingsStateBuilder(INTENT_ACTION).build();
+
+        assertThat(state.isInstantTetherEnabled()).isEqualTo(INSTANT_TETHER_STATE);
+        assertThat(state.getInstantTetherSettingsPendingIntent())
+                .isEqualTo(buildPendingIntent(INTENT_ACTION));
     }
 
-    private SharedConnectivitySettingsState.Builder buildSettingsStateBuilder() {
+    @Test
+    public void hashCodeCalculation() {
+        SharedConnectivitySettingsState state1 = buildSettingsStateBuilder(INTENT_ACTION).build();
+        SharedConnectivitySettingsState state2 = buildSettingsStateBuilder(INTENT_ACTION).build();
+
+        assertThat(state1.hashCode()).isEqualTo(state2.hashCode());
+    }
+
+    private SharedConnectivitySettingsState.Builder buildSettingsStateBuilder(String intentAction) {
         return new SharedConnectivitySettingsState.Builder()
-                .setInstantTetherEnabled(INSTANT_TETHER_STATE);
+                .setInstantTetherEnabled(INSTANT_TETHER_STATE)
+                .setInstantTetherSettingsPendingIntent(buildPendingIntent(intentAction));
+    }
+
+    private PendingIntent buildPendingIntent(String intentAction) {
+        return PendingIntent.getActivity(
+                ApplicationProvider.getApplicationContext(), 0,
+                new Intent(intentAction), PendingIntent.FLAG_IMMUTABLE);
     }
 }

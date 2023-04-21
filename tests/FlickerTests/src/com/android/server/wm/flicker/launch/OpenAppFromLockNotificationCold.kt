@@ -16,17 +16,14 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -68,12 +65,6 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
         }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 203538234)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
     @Test @Ignore("Display is off at the start") override fun navBarLayerPositionAtStartAndEnd() {}
 
     /** {@inheritDoc} */
@@ -89,6 +80,11 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
     /** {@inheritDoc} */
     @Test
     @Ignore("Display is off at the start")
+    override fun taskBarWindowIsAlwaysVisible() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is off at the start")
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
         super.statusBarLayerIsVisibleAtStartAndEnd()
 
@@ -96,14 +92,6 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
     @Test
     @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
     override fun navBarWindowIsVisibleAtStartAndEnd() = super.navBarWindowIsVisibleAtStartAndEnd()
-
-    /**
-     * Checks the position of the [ComponentNameMatcher.STATUS_BAR] at the start and end of the
-     * transition
-     */
-    @Presubmit
-    @Test
-    override fun statusBarLayerPositionAtEnd() = super.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Test
@@ -135,14 +123,15 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
         }
 
         /**
-         * Ensures that posted notifications will be visible on the lockscreen and not
-         * suppressed due to being marked as seen.
+         * Ensures that posted notifications will be visible on the lockscreen and not suppressed
+         * due to being marked as seen.
          */
         @ClassRule
         @JvmField
-        val disableUnseenNotifFilterRule = SettingOverrideRule(
-            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            /* value= */ "0",
-        )
+        val disableUnseenNotifFilterRule =
+            SettingOverrideRule(
+                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                /* value = */ "0",
+            )
     }
 }

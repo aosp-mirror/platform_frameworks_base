@@ -90,6 +90,14 @@ public class SparseArrayMap<K, V> {
     }
 
     /**
+     * Removes the data for the keyIndex and mapIndex, if there was any.
+     * @hide
+     */
+    public void deleteAt(int keyIndex, int mapIndex) {
+        mData.valueAt(keyIndex).removeAt(mapIndex);
+    }
+
+    /**
      * Get the value associated with the int-K pair.
      */
     @Nullable

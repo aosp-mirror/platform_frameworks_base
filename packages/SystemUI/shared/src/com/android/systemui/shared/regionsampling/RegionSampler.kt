@@ -91,6 +91,22 @@ constructor(
         val sampledRegion = calculateSampledRegion(sampledView)
         val regions = ArrayList<RectF>()
         val sampledRegionWithOffset = convertBounds(sampledRegion)
+
+        if (
+            sampledRegionWithOffset.left < 0.0 ||
+                sampledRegionWithOffset.right > 1.0 ||
+                sampledRegionWithOffset.top < 0.0 ||
+                sampledRegionWithOffset.bottom > 1.0
+        ) {
+            android.util.Log.e(
+                "RegionSampler",
+                "view out of bounds: $sampledRegion | " +
+                    "screen width: ${displaySize.x}, screen height: ${displaySize.y}",
+                Exception()
+            )
+            return
+        }
+
         regions.add(sampledRegionWithOffset)
 
         wallpaperManager?.removeOnColorsChangedListener(this)

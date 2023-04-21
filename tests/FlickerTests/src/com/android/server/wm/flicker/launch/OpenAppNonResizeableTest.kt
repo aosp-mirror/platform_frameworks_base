@@ -17,16 +17,16 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.tools.common.NavBar
+import android.tools.common.Rotation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.annotation.FlickerServiceCompatible
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -69,7 +69,7 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
      * Checks that the [ComponentNameMatcher.NAV_BAR] layer starts invisible, becomes visible during
      * unlocking animation and remains visible at the end
      */
-    @FlakyTest(bugId = 227083463)
+    @Presubmit
     @Test
     fun navBarLayerVisibilityChanges() {
         Assume.assumeFalse(flicker.scenario.isTablet)
@@ -154,8 +154,19 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarWindowIsAlwaysVisible() {}
 
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesFirstAndOnlyTopWindow() =
+        super.appWindowBecomesFirstAndOnlyTopWindow()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+
     /** Checks the [ComponentNameMatcher.NAV_BAR] is visible at the end of the transition */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerIsVisibleAtEnd() {
         Assume.assumeFalse(flicker.scenario.isTablet)
@@ -184,17 +195,10 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
         super.appLayerBecomesVisible()
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest @Test override fun entireScreenCovered() = super.entireScreenCovered()
-
-    @FlakyTest(bugId = 218470989)
+    @Presubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest(bugId = 227143265)
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     @FlakyTest(bugId = 251217585)
     @Test
@@ -213,8 +217,8 @@ open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTrans
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL),
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL),
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

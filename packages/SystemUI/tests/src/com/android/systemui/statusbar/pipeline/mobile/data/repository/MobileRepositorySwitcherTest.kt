@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
-import android.net.ConnectivityManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
@@ -27,14 +26,17 @@ import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoModeMobileConnectionDataSource
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.validMobileEvent
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
-import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeSubscriptionManagerProxy
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.util.mockito.any
@@ -77,8 +79,8 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var wifiDataSource: DemoModeWifiDataSource
     private lateinit var logFactory: TableLogBufferFactory
     private lateinit var wifiRepository: FakeWifiRepository
+    private lateinit var connectivityRepository: ConnectivityRepository
 
-    @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: MobileInputLogger
@@ -88,6 +90,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
 
     private val fakeNetworkEventsFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val mobileMappings = FakeMobileMappingsProxy()
+    private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
 
     private val scope = CoroutineScope(IMMEDIATE)
 
@@ -110,10 +113,13 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
             }
         wifiRepository = FakeWifiRepository()
 
+        connectivityRepository = FakeConnectivityRepository()
+
         realRepo =
             MobileConnectionsRepositoryImpl(
-                connectivityManager,
+                connectivityRepository,
                 subscriptionManager,
+                subscriptionManagerProxy,
                 telephonyManager,
                 logger,
                 summaryLogger,
@@ -150,7 +156,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     }
 
     @Test
-    fun `active repo matches demo mode setting`() =
+    fun activeRepoMatchesDemoModeSetting() =
         runBlocking(IMMEDIATE) {
             whenever(demoModeController.isInDemoMode).thenReturn(false)
 
@@ -171,7 +177,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         }
 
     @Test
-    fun `subscription list updates when demo mode changes`() =
+    fun subscriptionListUpdatesWhenDemoModeChanges() =
         runBlocking(IMMEDIATE) {
             whenever(demoModeController.isInDemoMode).thenReturn(false)
 

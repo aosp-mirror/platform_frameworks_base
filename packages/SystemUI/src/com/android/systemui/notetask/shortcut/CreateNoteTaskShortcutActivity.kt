@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+@file:OptIn(InternalNoteTaskApi::class)
+
 package com.android.systemui.notetask.shortcut
 
 import android.app.Activity
-import android.content.Intent
+import android.app.role.RoleManager
+import android.content.pm.ShortcutManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.annotation.DrawableRes
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
-import com.android.systemui.R
+import com.android.systemui.notetask.InternalNoteTaskApi
+import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import javax.inject.Inject
 
 /**
@@ -33,47 +33,23 @@ import javax.inject.Inject
  * launched, creating a new shortcut for [CreateNoteTaskShortcutActivity], and will finish.
  *
  * @see <a
- * href="https://developer.android.com/develop/ui/views/launch/shortcuts/creating-shortcuts#custom-pinned">Creating
- * a custom shortcut activity</a>
+ *   href="https://developer.android.com/develop/ui/views/launch/shortcuts/creating-shortcuts#custom-pinned">Creating
+ *   a custom shortcut activity</a>
  */
-internal class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentActivity() {
+class CreateNoteTaskShortcutActivity
+@Inject
+constructor(
+    private val roleManager: RoleManager,
+    private val shortcutManager: ShortcutManager,
+) : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val intent =
-            createShortcutIntent(
-                id = SHORTCUT_ID,
-                shortLabel = getString(R.string.note_task_button_label),
-                intent = LaunchNoteTaskActivity.newIntent(context = this),
-                iconResource = R.drawable.ic_note_task_shortcut_widget,
-            )
-        setResult(Activity.RESULT_OK, intent)
+        val shortcutInfo = roleManager.createNoteShortcutInfoAsUser(context = this, user)
+        val shortcutIntent = shortcutManager.createShortcutResultIntent(shortcutInfo)
+        setResult(Activity.RESULT_OK, shortcutIntent)
 
         finish()
-    }
-
-    private fun createShortcutIntent(
-        id: String,
-        shortLabel: String,
-        intent: Intent,
-        @DrawableRes iconResource: Int,
-    ): Intent {
-        val shortcutInfo =
-            ShortcutInfoCompat.Builder(this, id)
-                .setIntent(intent)
-                .setShortLabel(shortLabel)
-                .setLongLived(true)
-                .setIcon(IconCompat.createWithResource(this, iconResource))
-                .build()
-
-        return ShortcutManagerCompat.createShortcutResultIntent(
-            this,
-            shortcutInfo,
-        )
-    }
-
-    private companion object {
-        private const val SHORTCUT_ID = "note-task-shortcut-id"
     }
 }

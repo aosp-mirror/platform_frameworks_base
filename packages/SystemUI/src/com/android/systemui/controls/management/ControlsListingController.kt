@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.management
 
+import android.annotation.WorkerThread
 import android.content.ComponentName
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.util.UserAwareController
@@ -32,6 +33,9 @@ interface ControlsListingController :
      * @return the current list of services that satisfies the [ServiceListing].
      */
     fun getCurrentServices(): List<ControlsServiceInfo>
+
+    @WorkerThread
+    fun forceReload()
 
     /**
      * Get the app label for a given component.

@@ -31,6 +31,7 @@ import com.android.systemui.plugins.log.LogcatEchoTrackerDebug;
 import com.android.systemui.plugins.log.LogcatEchoTrackerProd;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.wakelock.WakeLockLog;
 
 import dagger.Module;
 import dagger.Provides;
@@ -60,6 +61,15 @@ public class LogModule {
             maxSize *= 10;
         }
         return factory.create("NotifLog", maxSize, false /* systrace */);
+    }
+
+    /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
+    @Provides
+    @SysUISingleton
+    @NotificationLockscreenLog
+    public static LogBuffer provideNotificationLockScreenLogBuffer(
+            LogBufferFactory factory) {
+        return factory.create("NotifLockscreenLog", 50, false /* systrace */);
     }
 
     /** Provides a logging buffer for logs related to heads up presentation of notifications. */
@@ -110,21 +120,28 @@ public class LogModule {
         return factory.create("ShadeLog", 500, false);
     }
 
-    /** Provides a logging buffer for Shade height messages. */
-    @Provides
-    @SysUISingleton
-    @ShadeHeightLog
-    public static LogBuffer provideShadeHeightLogBuffer(LogBufferFactory factory) {
-        return factory.create("ShadeHeightLog", 500 /* maxSize */);
-    }
-
-
     /** Provides a logging buffer for all logs related to managing notification sections. */
     @Provides
     @SysUISingleton
     @NotificationSectionLog
     public static LogBuffer provideNotificationSectionLogBuffer(LogBufferFactory factory) {
         return factory.create("NotifSectionLog", 1000 /* maxSize */, false /* systrace */);
+    }
+
+    /** Provides a logging buffer for all logs related to remote input controller. */
+    @Provides
+    @SysUISingleton
+    @NotificationRemoteInputLog
+    public static LogBuffer provideNotificationRemoteInputLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
+    }
+
+    /** Provides a logging buffer for all logs related to unseen notifications. */
+    @Provides
+    @SysUISingleton
+    @UnseenNotificationLog
+    public static LogBuffer provideUnseenNotificationLogBuffer(LogBufferFactory factory) {
+        return factory.create("UnseenNotifLog", 20 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
@@ -143,6 +160,14 @@ public class LogModule {
         return factory.create("QSLog", 700 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for logs related to Quick Settings configuration. */
+    @Provides
+    @SysUISingleton
+    @QSConfigLog
+    public static LogBuffer provideQSConfigLogBuffer(LogBufferFactory factory) {
+        return factory.create("QSConfigLog", 100 /* maxSize */, true /* systrace */);
+    }
+
     /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
     @Provides
     @SysUISingleton
@@ -150,6 +175,14 @@ public class LogModule {
     public static LogBuffer provideBroadcastDispatcherLogBuffer(LogBufferFactory factory) {
         return factory.create("BroadcastDispatcherLog", 500 /* maxSize */,
                 false /* systrace */);
+    }
+
+    /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastSender} */
+    @Provides
+    @SysUISingleton
+    @WakeLockLog
+    public static LogBuffer provideWakeLockLog(LogBufferFactory factory) {
+        return factory.create("WakeLockLog", 500 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to Toasts shown by SystemUI. */
@@ -351,13 +384,23 @@ public class LogModule {
 
     /**
      * Provides a {@link LogBuffer} for use by
-     *  {@link com.android.keyguard.faceauth.KeyguardFaceAuthManagerImpl}.
+     *  {@link com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepositoryImpl}.
      */
     @Provides
     @SysUISingleton
     @FaceAuthLog
     public static LogBuffer provideFaceAuthLog(LogBufferFactory factory) {
-        return factory.create("KeyguardFaceAuthManagerLog", 300);
+        return factory.create("DeviceEntryFaceAuthRepositoryLog", 300);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for Device State Auto-Rotation logs.
+     */
+    @Provides
+    @SysUISingleton
+    @DeviceStateAutoRotationLog
+    public static LogBuffer provideDeviceStateAutoRotationLogBuffer(LogBufferFactory factory) {
+        return factory.create("DeviceStateAutoRotationLog", 100);
     }
 
     /**

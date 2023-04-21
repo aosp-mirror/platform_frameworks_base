@@ -19,17 +19,15 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.Rotation
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.service.PlatformConsts
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,17 +63,9 @@ open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(f
 
     @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
     @FlakyTest(bugId = 246284124)
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
@@ -83,7 +73,16 @@ open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(f
     @Test
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {
-        super.cujCompleted()
+        runAndIgnoreAssumptionViolation { entireScreenCovered() }
+        runAndIgnoreAssumptionViolation { statusBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { statusBarLayerPositionAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { statusBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { visibleWindowsShownMoreThanOneConsecutiveEntry() }
+        runAndIgnoreAssumptionViolation { taskBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { taskBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { navBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarWindowIsVisibleAtStartAndEnd() }
         imeLayerBecomesInvisible()
         imeWindowBecomesInvisible()
     }
@@ -93,7 +92,7 @@ open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(f
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

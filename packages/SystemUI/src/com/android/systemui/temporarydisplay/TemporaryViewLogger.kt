@@ -16,6 +16,7 @@
 
 package com.android.systemui.temporarydisplay
 
+import android.view.View
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 
@@ -140,5 +141,47 @@ open class TemporaryViewLogger<T : TemporaryViewInfo>(
             },
             { "Removal of view with id=$str2 is ignored because $str1" }
         )
+    }
+
+    fun logViewAddedToWindowManager(info: T, view: View) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = view.javaClass.name
+                int1 = view.getIdForLogging()
+            },
+            {
+                "Adding view to window manager. " +
+                    "id=$str1 window=$str2 view=$str3(id=${Integer.toHexString(int1)})"
+            }
+        )
+    }
+
+    fun logViewRemovedFromWindowManager(info: T, view: View, isReinflation: Boolean = false) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = view.javaClass.name
+                int1 = view.getIdForLogging()
+                bool1 = isReinflation
+            },
+            {
+                "Removing view from window manager${if (bool1) " due to reinflation" else ""}. " +
+                    "id=$str1 window=$str2 view=$str3(id=${Integer.toHexString(int1)})"
+            }
+        )
+    }
+
+    companion object {
+        private fun View.getIdForLogging(): Int {
+            // The identityHashCode is guaranteed to be constant for the lifetime of the object.
+            return System.identityHashCode(this)
+        }
     }
 }

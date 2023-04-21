@@ -17,13 +17,12 @@
 package android.net.wifi.sharedconnectivity.app;
 
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
 import static android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.CONNECTION_STATUS_SAVED;
 import static android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.CONNECTION_STATUS_SAVE_FAILED;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Bundle;
 import android.os.Parcel;
@@ -32,19 +31,23 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 /**
- * Unit tests for {@link android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus}.
+ * Unit tests for {@link KnownNetworkConnectionStatus}.
  */
 @SmallTest
 public class KnownNetworkConnectionStatusTest {
     private static final int NETWORK_SOURCE = NETWORK_SOURCE_NEARBY_SELF;
     private static final String SSID = "TEST_SSID";
     private static final int[] SECURITY_TYPES = {SECURITY_TYPE_WEP};
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder("TEST_NAME", "TEST_MODEL")
+                    .setDeviceType(DEVICE_TYPE_TABLET).setConnectionStrength(2)
+                    .setBatteryPercentage(50).build();
     private static final String SSID_1 = "TEST_SSID1";
     private static final String BUNDLE_KEY = "INT-KEY";
+    private static final int BUNDLE_VALUE = 1;
 
     /**
      * Verifies parcel serialization/deserialization.
@@ -64,8 +67,8 @@ public class KnownNetworkConnectionStatusTest {
         KnownNetworkConnectionStatus fromParcel =
                 KnownNetworkConnectionStatus.CREATOR.createFromParcel(parcelR);
 
-        assertEquals(status, fromParcel);
-        assertEquals(status.hashCode(), fromParcel.hashCode());
+        assertThat(fromParcel).isEqualTo(status);
+        assertThat(fromParcel.hashCode()).isEqualTo(status.hashCode());
     }
 
     /**
@@ -75,15 +78,15 @@ public class KnownNetworkConnectionStatusTest {
     public void testEqualsOperation() {
         KnownNetworkConnectionStatus status1 = buildConnectionStatusBuilder().build();
         KnownNetworkConnectionStatus status2 = buildConnectionStatusBuilder().build();
-        assertEquals(status2, status2);
+        assertThat(status1).isEqualTo(status2);
 
         KnownNetworkConnectionStatus.Builder builder = buildConnectionStatusBuilder()
                 .setStatus(CONNECTION_STATUS_SAVE_FAILED);
-        assertNotEquals(status1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(status1);
 
         builder = buildConnectionStatusBuilder()
                 .setKnownNetwork(buildKnownNetworkBuilder().setSsid(SSID_1).build());
-        assertNotEquals(status1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(status1);
     }
 
     /**
@@ -92,9 +95,17 @@ public class KnownNetworkConnectionStatusTest {
     @Test
     public void testGetMethods() {
         KnownNetworkConnectionStatus status = buildConnectionStatusBuilder().build();
-        assertEquals(status.getStatus(), CONNECTION_STATUS_SAVED);
-        assertEquals(status.getKnownNetwork(), buildKnownNetworkBuilder().build());
-        assertEquals(status.getExtras().getInt(BUNDLE_KEY), buildBundle().getInt(BUNDLE_KEY));
+        assertThat(status.getStatus()).isEqualTo(CONNECTION_STATUS_SAVED);
+        assertThat(status.getKnownNetwork()).isEqualTo(buildKnownNetworkBuilder().build());
+        assertThat(status.getExtras().getInt(BUNDLE_KEY)).isEqualTo(BUNDLE_VALUE);
+    }
+
+    @Test
+    public void testHashCode() {
+        KnownNetworkConnectionStatus status1 = buildConnectionStatusBuilder().build();
+        KnownNetworkConnectionStatus status2 = buildConnectionStatusBuilder().build();
+
+        assertThat(status1.hashCode()).isEqualTo(status2.hashCode());
     }
 
     private KnownNetworkConnectionStatus.Builder buildConnectionStatusBuilder() {
@@ -106,13 +117,15 @@ public class KnownNetworkConnectionStatusTest {
 
     private Bundle buildBundle() {
         Bundle bundle = new Bundle();
-        bundle.putInt(BUNDLE_KEY, 1);
+        bundle.putInt(BUNDLE_KEY, BUNDLE_VALUE);
         return bundle;
     }
 
     private KnownNetwork.Builder buildKnownNetworkBuilder() {
-        return new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE).setSsid(SSID)
-                .setSecurityTypes(SECURITY_TYPES).setDeviceInfo(DEVICE_INFO);
+        KnownNetwork.Builder builder = new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
+                .setSsid(SSID).setNetworkProviderInfo(NETWORK_PROVIDER_INFO);
+        Arrays.stream(SECURITY_TYPES).forEach(builder::addSecurityType);
+        return builder;
     }
 
 }

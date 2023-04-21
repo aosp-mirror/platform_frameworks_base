@@ -22,7 +22,7 @@ import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -429,7 +429,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         /**
          * Called when a uid goes into cached, so its alarms using a listener should be removed.
          */
-        public void removeListenerAlarmsForCachedUid(int uid) {
+        public void handleUidCachedChanged(int uid, boolean cached) {
         }
     }
 
@@ -716,11 +716,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         return true;
     }
 
-    private final class UidObserver extends IUidObserver.Stub {
-        @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
-        }
-
+    private final class UidObserver extends android.app.UidObserver {
         @Override
         public void onUidActive(int uid) {
             mHandler.onUidActive(uid);
@@ -739,10 +735,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
             mHandler.onUidCachedChanged(uid, cached);
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     }
 
@@ -870,9 +862,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         public void onUidCachedChanged(int uid, boolean cached) {
-            if (cached) {
-                obtainMessage(MSG_ON_UID_CACHED, uid, 0).sendToTarget();
-            }
+            obtainMessage(MSG_ON_UID_CACHED, uid, cached ? 1 : 0).sendToTarget();
         }
 
         @Override
@@ -969,14 +959,14 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     }
                     return;
                 case MSG_ON_UID_CACHED:
-                    handleUidCached(msg.arg1);
+                    handleUidCached(msg.arg1, (msg.arg2 != 0));
                     return;
             }
         }
 
-        private void handleUidCached(int uid) {
+        private void handleUidCached(int uid, boolean cached) {
             for (Listener l : cloneListeners()) {
-                l.removeListenerAlarmsForCachedUid(uid);
+                l.handleUidCachedChanged(uid, cached);
             }
         }
 

@@ -572,41 +572,14 @@ public class BatteryStatsImplTest {
         mBatteryStatsImpl.noteBluetoothScanStoppedFromSourceLocked(ws, true, 9000, 9000);
         mBatteryStatsImpl.noteBluetoothScanResultsFromSourceLocked(ws, 42, 9000, 9000);
 
-
-
-        final Parcel uidTrafficParcel1 = Parcel.obtain();
-        final Parcel uidTrafficParcel2 = Parcel.obtain();
-
-        uidTrafficParcel1.writeInt(10042);
-        uidTrafficParcel1.writeLong(3000);
-        uidTrafficParcel1.writeLong(4000);
-        uidTrafficParcel1.setDataPosition(0);
-        uidTrafficParcel2.writeInt(10043);
-        uidTrafficParcel2.writeLong(5000);
-        uidTrafficParcel2.writeLong(8000);
-        uidTrafficParcel2.setDataPosition(0);
-
-        List<UidTraffic> uidTrafficList = ImmutableList.of(
-                UidTraffic.CREATOR.createFromParcel(uidTrafficParcel1),
-                UidTraffic.CREATOR.createFromParcel(uidTrafficParcel2));
-
-        final Parcel btActivityEnergyInfoParcel = Parcel.obtain();
-        btActivityEnergyInfoParcel.writeLong(1000);
-        btActivityEnergyInfoParcel.writeInt(
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE);
-        btActivityEnergyInfoParcel.writeLong(9000);
-        btActivityEnergyInfoParcel.writeLong(8000);
-        btActivityEnergyInfoParcel.writeLong(12000);
-        btActivityEnergyInfoParcel.writeLong(0);
-        btActivityEnergyInfoParcel.writeTypedList(uidTrafficList);
-        btActivityEnergyInfoParcel.setDataPosition(0);
-
-        BluetoothActivityEnergyInfo info = BluetoothActivityEnergyInfo.CREATOR
-                .createFromParcel(btActivityEnergyInfoParcel);
-
-        uidTrafficParcel1.recycle();
-        uidTrafficParcel2.recycle();
-        btActivityEnergyInfoParcel.recycle();
+        BluetoothActivityEnergyInfo info = createBluetoothActivityEnergyInfo(
+                /* timestamp= */ 1000,
+                /* controllerTxTimeMs= */ 9000,
+                /* controllerRxTimeMs= */ 8000,
+                /* controllerIdleTimeMs= */ 12000,
+                /* controllerEnergyUsed= */ 0,
+                createUidTraffic(/* appUid= */ 10042, /* rxBytes= */ 3000, /* txBytes= */ 4000),
+                createUidTraffic(/* appUid= */ 10043, /* rxBytes= */ 5000, /* txBytes= */ 8000));
 
         mBatteryStatsImpl.updateBluetoothStateLocked(info, -1, 1000, 1000);
 
@@ -621,5 +594,106 @@ public class BatteryStatsImplTest {
         assertThat(uidStats.scanResultCount).isEqualTo(42);
         assertThat(uidStats.rxTimeMs).isEqualTo(7375);  // Some scan time is treated as RX
         assertThat(uidStats.txTimeMs).isEqualTo(7666);  // Some scan time is treated as TX
+    }
+
+    /** A regression test for b/266128651 */
+    @Test
+    public void testGetNetworkActivityBytes_multipleUpdates() {
+        when(mPowerProfile.getAveragePower(
+                PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE)).thenReturn(3.0);
+        mBatteryStatsImpl.setOnBatteryInternal(true);
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        BluetoothActivityEnergyInfo info1 = createBluetoothActivityEnergyInfo(
+                /* timestamp= */ 10000,
+                /* controllerTxTimeMs= */ 9000,
+                /* controllerRxTimeMs= */ 8000,
+                /* controllerIdleTimeMs= */ 2000,
+                /* controllerEnergyUsed= */ 0,
+                createUidTraffic(/* appUid= */ 10042, /* rxBytes= */ 3000, /* txBytes= */ 4000),
+                createUidTraffic(/* appUid= */ 10043, /* rxBytes= */ 5000, /* txBytes= */ 8000));
+
+        mBatteryStatsImpl.updateBluetoothStateLocked(info1, -1, 1000, 1000);
+
+        long totalRx1 = mBatteryStatsImpl.getNetworkActivityBytes(
+                BatteryStats.NETWORK_BT_RX_DATA, BatteryStats.STATS_SINCE_CHARGED);
+        long totalTx1 = mBatteryStatsImpl.getNetworkActivityBytes(
+                BatteryStats.NETWORK_BT_TX_DATA, BatteryStats.STATS_SINCE_CHARGED);
+
+        assertThat(totalRx1).isEqualTo(8000);  // 3000 + 5000
+        assertThat(totalTx1).isEqualTo(12000);  // 4000 + 8000
+
+        BluetoothActivityEnergyInfo info2 = createBluetoothActivityEnergyInfo(
+                /* timestamp= */ 20000,
+                /* controllerTxTimeMs= */ 19000,
+                /* controllerRxTimeMs= */ 18000,
+                /* controllerIdleTimeMs= */ 3000,
+                /* controllerEnergyUsed= */ 0,
+                createUidTraffic(/* appUid= */ 10043, /* rxBytes= */ 6000, /* txBytes= */ 9500),
+                createUidTraffic(/* appUid= */ 10044, /* rxBytes= */ 7000, /* txBytes= */ 9000));
+
+        mBatteryStatsImpl.updateBluetoothStateLocked(info2, -1, 2000, 2000);
+
+        long totalRx2 = mBatteryStatsImpl.getNetworkActivityBytes(
+                BatteryStats.NETWORK_BT_RX_DATA, BatteryStats.STATS_SINCE_CHARGED);
+        long totalTx2 = mBatteryStatsImpl.getNetworkActivityBytes(
+                BatteryStats.NETWORK_BT_TX_DATA, BatteryStats.STATS_SINCE_CHARGED);
+
+        assertThat(totalRx2).isEqualTo(16000);  // 3000 + 6000 (updated) + 7000 (new)
+        assertThat(totalTx2).isEqualTo(22500);  // 4000 + 9500 (updated) + 9000 (new)
+
+        BluetoothActivityEnergyInfo info3 = createBluetoothActivityEnergyInfo(
+                /* timestamp= */ 30000,
+                /* controllerTxTimeMs= */ 20000,
+                /* controllerRxTimeMs= */ 20000,
+                /* controllerIdleTimeMs= */ 4000,
+                /* controllerEnergyUsed= */ 0,
+                createUidTraffic(/* appUid= */ 10043, /* rxBytes= */ 7000, /* txBytes= */ 9900),
+                createUidTraffic(/* appUid= */ 10044, /* rxBytes= */ 8000, /* txBytes= */ 10000));
+
+        mBatteryStatsImpl.updateBluetoothStateLocked(info3, -1, 2000, 2000);
+
+        long totalRx3 = mBatteryStatsImpl.getNetworkActivityBytes(
+                BatteryStats.NETWORK_BT_RX_DATA, BatteryStats.STATS_SINCE_CHARGED);
+        long totalTx3 = mBatteryStatsImpl.getNetworkActivityBytes(
+                BatteryStats.NETWORK_BT_TX_DATA, BatteryStats.STATS_SINCE_CHARGED);
+
+        assertThat(totalRx3).isEqualTo(18000);  // 3000 + 7000 (updated) + 8000 (updated)
+        assertThat(totalTx3).isEqualTo(23900);  // 4000 + 9900 (updated) + 10000 (updated)
+    }
+
+    private UidTraffic createUidTraffic(int appUid, long rxBytes, long txBytes) {
+        final Parcel parcel = Parcel.obtain();
+        parcel.writeInt(appUid); // mAppUid
+        parcel.writeLong(rxBytes); // mRxBytes
+        parcel.writeLong(txBytes); // mTxBytes
+        parcel.setDataPosition(0);
+        UidTraffic uidTraffic = UidTraffic.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return uidTraffic;
+    }
+
+    private BluetoothActivityEnergyInfo createBluetoothActivityEnergyInfo(
+            long timestamp,
+            long controllerTxTimeMs,
+            long controllerRxTimeMs,
+            long controllerIdleTimeMs,
+            long controllerEnergyUsed,
+            UidTraffic... uidTraffic) {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeLong(timestamp); // mTimestamp
+        parcel.writeInt(
+                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE); // mBluetoothStackState
+        parcel.writeLong(controllerTxTimeMs); // mControllerTxTimeMs;
+        parcel.writeLong(controllerRxTimeMs); // mControllerRxTimeMs;
+        parcel.writeLong(controllerIdleTimeMs); // mControllerIdleTimeMs;
+        parcel.writeLong(controllerEnergyUsed); // mControllerEnergyUsed;
+        parcel.writeTypedList(ImmutableList.copyOf(uidTraffic)); // mUidTraffic
+        parcel.setDataPosition(0);
+
+        BluetoothActivityEnergyInfo info =
+                BluetoothActivityEnergyInfo.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return info;
     }
 }

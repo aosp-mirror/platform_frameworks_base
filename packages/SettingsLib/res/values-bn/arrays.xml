@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"চালু করা আছে"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"হেডার ফিল্টার করা হয়েছে"</item>
-    <item msgid="4818549483446395865">"A2DP মিডিয়া প্যাকেট ফিল্টার করা হয়েছে"</item>
-    <item msgid="8207123990453243311">"RFCOMM চ্যানেল ফিল্টার করা হয়েছে"</item>
+    <item msgid="195768089203590086">"শুধু ACL হেডার রাখুন"</item>
+    <item msgid="2776218217644557831">"A2DP মিডিয়া প্যাকেট ফিল্টার করুন"</item>
+    <item msgid="8163235976612675092">"RFCOMM চ্যানেল ফিল্টার করুন"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"বন্ধ করা আছে"</item>
-    <item msgid="5884245882825346396">"ম্যাজিক"</item>
-    <item msgid="6569400572915342949">"হেডার"</item>
-    <item msgid="1239386221416967664">"সম্পূর্ণ ফিল্টার"</item>
+    <item msgid="3961868665260627524">"বন্ধ করুন"</item>
+    <item msgid="2505973306504851132">"অক্ষরের স্ট্রিং ব্যবহার করে পূরণ করুন"</item>
+    <item msgid="5883011000629613855">"শুধু হেডার রেখে দিন"</item>
+    <item msgid="1051534112762023603">"সম্পূর্ণভাবে সরান"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (ডিফল্ট)"</item>

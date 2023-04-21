@@ -22,7 +22,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
-import android.os.Trace;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -476,26 +475,19 @@ public class LineBreaker {
             @NonNull MeasuredText measuredPara,
             @NonNull ParagraphConstraints constraints,
             @IntRange(from = 0) int lineNumber) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "compute line break");
-        long result = 0;
-        try {
-            result = nComputeLineBreaks(
-                    mNativePtr,
+        return new Result(nComputeLineBreaks(
+                mNativePtr,
 
-                    // Inputs
-                    measuredPara.getChars(),
-                    measuredPara.getNativePtr(),
-                    measuredPara.getChars().length,
-                    constraints.mFirstWidth,
-                    constraints.mFirstWidthLineCount,
-                    constraints.mWidth,
-                    constraints.mVariableTabStops,
-                    constraints.mDefaultTabStop,
-                    lineNumber);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
-        return new Result(result);
+                // Inputs
+                measuredPara.getChars(),
+                measuredPara.getNativePtr(),
+                measuredPara.getChars().length,
+                constraints.mFirstWidth,
+                constraints.mFirstWidthLineCount,
+                constraints.mWidth,
+                constraints.mVariableTabStops,
+                constraints.mDefaultTabStop,
+                lineNumber));
     }
 
     @FastNative

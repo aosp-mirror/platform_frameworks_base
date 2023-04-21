@@ -21,6 +21,7 @@ import com.android.systemui.statusbar.notification.collection.PipelineDumpable
 import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import javax.inject.Inject
 
 /**
@@ -31,31 +32,33 @@ interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
-    notifPipelineFlags: NotifPipelineFlags,
-    dataStoreCoordinator: DataStoreCoordinator,
-    hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
-    hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
-    keyguardCoordinator: KeyguardCoordinator,
-    rankingCoordinator: RankingCoordinator,
-    appOpsCoordinator: AppOpsCoordinator,
-    deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
-    bubbleCoordinator: BubbleCoordinator,
-    headsUpCoordinator: HeadsUpCoordinator,
-    gutsCoordinator: GutsCoordinator,
-    conversationCoordinator: ConversationCoordinator,
-    debugModeCoordinator: DebugModeCoordinator,
-    groupCountCoordinator: GroupCountCoordinator,
-    mediaCoordinator: MediaCoordinator,
-    preparationCoordinator: PreparationCoordinator,
-    remoteInputCoordinator: RemoteInputCoordinator,
-    rowAppearanceCoordinator: RowAppearanceCoordinator,
-    stackCoordinator: StackCoordinator,
-    shadeEventCoordinator: ShadeEventCoordinator,
-    smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
-    viewConfigCoordinator: ViewConfigCoordinator,
-    visualStabilityCoordinator: VisualStabilityCoordinator,
-    sensitiveContentCoordinator: SensitiveContentCoordinator,
-    dismissibilityCoordinator: DismissibilityCoordinator
+        notifPipelineFlags: NotifPipelineFlags,
+        sectionStyleProvider: SectionStyleProvider,
+        dataStoreCoordinator: DataStoreCoordinator,
+        hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
+        hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
+        keyguardCoordinator: KeyguardCoordinator,
+        rankingCoordinator: RankingCoordinator,
+        appOpsCoordinator: AppOpsCoordinator,
+        deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
+        bubbleCoordinator: BubbleCoordinator,
+        headsUpCoordinator: HeadsUpCoordinator,
+        gutsCoordinator: GutsCoordinator,
+        conversationCoordinator: ConversationCoordinator,
+        debugModeCoordinator: DebugModeCoordinator,
+        groupCountCoordinator: GroupCountCoordinator,
+        groupWhenCoordinator: GroupWhenCoordinator,
+        mediaCoordinator: MediaCoordinator,
+        preparationCoordinator: PreparationCoordinator,
+        remoteInputCoordinator: RemoteInputCoordinator,
+        rowAppearanceCoordinator: RowAppearanceCoordinator,
+        stackCoordinator: StackCoordinator,
+        shadeEventCoordinator: ShadeEventCoordinator,
+        smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
+        viewConfigCoordinator: ViewConfigCoordinator,
+        visualStabilityCoordinator: VisualStabilityCoordinator,
+        sensitiveContentCoordinator: SensitiveContentCoordinator,
+        dismissibilityCoordinator: DismissibilityCoordinator,
 ) : NotifCoordinators {
 
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
@@ -82,6 +85,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(debugModeCoordinator)
         mCoordinators.add(conversationCoordinator)
         mCoordinators.add(groupCountCoordinator)
+        mCoordinators.add(groupWhenCoordinator)
         mCoordinators.add(mediaCoordinator)
         mCoordinators.add(rowAppearanceCoordinator)
         mCoordinators.add(stackCoordinator)
@@ -97,13 +101,20 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(dismissibilityCoordinator)
 
         // Manually add Ordered Sections
-        // HeadsUp > FGS > People > Alerting > Silent > Minimized > Unknown/Default
-        mOrderedSections.add(headsUpCoordinator.sectioner)
+        mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
         mOrderedSections.add(appOpsCoordinator.sectioner) // ForegroundService
-        mOrderedSections.add(conversationCoordinator.sectioner) // People
+        mOrderedSections.add(conversationCoordinator.peopleAlertingSectioner) // People Alerting
+        mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
         mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
+
+        sectionStyleProvider.setMinimizedSections(setOf(rankingCoordinator.minimizedSectioner))
+        sectionStyleProvider.setSilentSections(listOf(
+                conversationCoordinator.peopleSilentSectioner,
+                rankingCoordinator.silentSectioner,
+                rankingCoordinator.minimizedSectioner,
+        ))
     }
 
     /**

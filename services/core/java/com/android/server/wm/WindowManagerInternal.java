@@ -444,6 +444,11 @@ public abstract class WindowManagerInternal {
     public abstract IBinder getFocusedWindowTokenFromWindowStates();
 
     /**
+     * Moves the given display to the top.
+     */
+    public abstract void moveDisplayToTopIfAllowed(int displayId);
+
+    /**
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();
@@ -740,7 +745,7 @@ public abstract class WindowManagerInternal {
     /**
      * Show IME on imeTargetWindow once IME has finished layout.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be shown.
+     * @param imeTargetWindowToken token of the (IME target) window which IME should be shown.
      * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
     public abstract void showImePostLayout(IBinder imeTargetWindowToken,
@@ -749,7 +754,7 @@ public abstract class WindowManagerInternal {
     /**
      * Hide IME using imeTargetWindow when requested.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
+     * @param imeTargetWindowToken token of the (IME target) window on which requests hiding IME.
      * @param displayId the id of the display the IME is on.
      * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
@@ -846,6 +851,16 @@ public abstract class WindowManagerInternal {
             this.imeSurfaceParentName = imeSurfaceParentName;
         }
     }
+
+    /**
+     * Sets by the {@link com.android.server.inputmethod.InputMethodManagerService} to monitor
+     * the visibility change of the IME targeted windows.
+     *
+     * @see ImeTargetChangeListener#onImeTargetOverlayVisibilityChanged
+     * @see ImeTargetChangeListener#onImeInputTargetVisibilityChanged
+     */
+    public abstract void setInputMethodTargetChangeListener(
+            @NonNull ImeTargetChangeListener listener);
 
     /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.

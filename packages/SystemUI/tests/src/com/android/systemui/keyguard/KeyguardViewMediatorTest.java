@@ -29,7 +29,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -67,7 +66,8 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -136,7 +136,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock SysuiColorExtractor mColorExtractor;
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
-    private @Mock FeatureFlags mFeatureFlags;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -144,6 +143,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private FalsingCollectorFake mFalsingCollector;
 
     private @Mock CentralSurfaces mCentralSurfaces;
+
+    private FakeFeatureFlags mFeatureFlags;
 
     @Before
     public void setUp() throws Exception {
@@ -163,6 +164,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mColorExtractor, mDumpManager, mKeyguardStateController,
                 mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
                 mShadeWindowLogger);
+        mFeatureFlags = new FakeFeatureFlags();
+
 
         DejankUtils.setImmediate(true);
 
@@ -499,7 +502,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertTrue(mViewMediator.isShowingAndNotOccluded());
-        verify(mStatusBarKeyguardViewManager).reset(anyBoolean());
+        verify(mStatusBarKeyguardViewManager).reset(false);
     }
 
     @Test
@@ -516,6 +519,28 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         assertTrue(mViewMediator.isShowingAndNotOccluded());
         verify(mStatusBarKeyguardViewManager, never()).reset(anyBoolean());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testNotStartingKeyguardWhenFlagIsDisabled() {
+        mViewMediator.setShowingLocked(false);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, false);
+        mViewMediator.onDreamingStarted();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testStartingKeyguardWhenFlagIsEnabled() {
+        mViewMediator.setShowingLocked(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, true);
+        mViewMediator.onDreamingStarted();
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
     private void createAndStartViewMediator() {
@@ -545,11 +570,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOnCoordinator,
                 mInteractionJankMonitor,
                 mDreamOverlayStateController,
-                mFeatureFlags,
                 () -> mShadeController,
                 () -> mNotificationShadeWindowController,
                 () -> mActivityLaunchAnimator,
-                () -> mScrimController);
+                () -> mScrimController,
+                mFeatureFlags);
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);

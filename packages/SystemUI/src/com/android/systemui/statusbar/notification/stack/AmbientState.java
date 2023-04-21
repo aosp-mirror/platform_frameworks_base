@@ -29,10 +29,11 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
@@ -55,13 +56,14 @@ public class AmbientState implements Dumpable {
 
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
+    private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final FeatureFlags mFeatureFlags;
     /**
      *  Used to read bouncer states.
      */
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
     private boolean mDimmed;
-    private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private boolean mDozing;
@@ -84,7 +86,7 @@ public class AmbientState implements Dumpable {
     private float mExpandingVelocity;
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
-    private boolean mPanelFullWidth;
+    private boolean mIsSmallScreen;
     private boolean mPulsing;
     private boolean mUnlockHintRunning;
     private float mHideAmount;
@@ -252,10 +254,14 @@ public class AmbientState implements Dumpable {
             @NonNull DumpManager dumpManager,
             @NonNull SectionProvider sectionProvider,
             @NonNull BypassController bypassController,
-            @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            @NonNull FeatureFlags featureFlags) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mFeatureFlags = featureFlags;
         reload(context);
         dumpManager.registerDumpable(this);
     }
@@ -352,14 +358,6 @@ public class AmbientState implements Dumpable {
         mHideSensitive = hideSensitive;
     }
 
-    /**
-     * In dimmed mode, a child can be activated, which happens on the first tap of the double-tap
-     * interaction. This child is then scaled normally and its background is fully opaque.
-     */
-    public void setActivatedChild(ActivatableNotificationView activatedChild) {
-        mActivatedChild = activatedChild;
-    }
-
     public boolean isDimmed() {
         // While we are expanding from pulse, we want the notifications not to be dimmed, otherwise
         // you'd see the difference to the pulsing notification
@@ -372,10 +370,6 @@ public class AmbientState implements Dumpable {
 
     public boolean isHideSensitive() {
         return mHideSensitive;
-    }
-
-    public ActivatableNotificationView getActivatedChild() {
-        return mActivatedChild;
     }
 
     public void setOverScrollAmount(float amount, boolean onTop) {
@@ -574,12 +568,12 @@ public class AmbientState implements Dumpable {
         return mPanelTracking;
     }
 
-    public boolean isPanelFullWidth() {
-        return mPanelFullWidth;
+    public boolean isSmallScreen() {
+        return mIsSmallScreen;
     }
 
-    public void setPanelFullWidth(boolean panelFullWidth) {
-        mPanelFullWidth = panelFullWidth;
+    public void setSmallScreen(boolean smallScreen) {
+        mIsSmallScreen = smallScreen;
     }
 
     public void setUnlockHintRunning(boolean unlockHintRunning) {
@@ -736,6 +730,14 @@ public class AmbientState implements Dumpable {
         return mIsClosing;
     }
 
+    public LargeScreenShadeInterpolator getLargeScreenShadeInterpolator() {
+        return mLargeScreenShadeInterpolator;
+    }
+
+    public FeatureFlags getFeatureFlags() {
+        return mFeatureFlags;
+    }
+
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("mTopPadding=" + mTopPadding);
@@ -751,7 +753,7 @@ public class AmbientState implements Dumpable {
         pw.println("mDimmed=" + mDimmed);
         pw.println("mStatusBarState=" + mStatusBarState);
         pw.println("mExpansionChanging=" + mExpansionChanging);
-        pw.println("mPanelFullWidth=" + mPanelFullWidth);
+        pw.println("mPanelFullWidth=" + mIsSmallScreen);
         pw.println("mPulsing=" + mPulsing);
         pw.println("mPulseHeight=" + mPulseHeight);
         pw.println("mTrackedHeadsUpRow.key=" + logKey(mTrackedHeadsUpRow));

@@ -40,7 +40,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
@@ -317,7 +316,6 @@ public final class PowerManagerService extends SystemService
     private SettingsObserver mSettingsObserver;
     private DreamManagerInternal mDreamManager;
     private LogicalLight mAttentionLight;
-    private ActivityManagerInternal mAmInternal;
 
     private final InattentiveSleepWarningController mInattentiveSleepWarningOverlayController;
     private final AmbientDisplaySuppressionController mAmbientDisplaySuppressionController;
@@ -669,15 +667,15 @@ public final class PowerManagerService extends SystemService
     // but the DreamService has not yet been told to start (it's an async process).
     private boolean mDozeStartInProgress;
 
-    // Whether to keep dreaming when the device is undocked.
-    private boolean mKeepDreamingWhenUndocked;
+    // Whether to keep dreaming when the device is unplugging.
+    private boolean mKeepDreamingWhenUnplugging;
 
     private final class DreamManagerStateListener implements
             DreamManagerInternal.DreamManagerStateListener {
         @Override
-        public void onKeepDreamingWhenUndockedChanged(boolean keepDreaming) {
+        public void onKeepDreamingWhenUnpluggingChanged(boolean keepDreaming) {
             synchronized (mLock) {
-                mKeepDreamingWhenUndocked = keepDreaming;
+                mKeepDreamingWhenUnplugging = keepDreaming;
             }
         }
     }
@@ -1244,7 +1242,6 @@ public final class PowerManagerService extends SystemService
             mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
             mPolicy = getLocalService(WindowManagerPolicy.class);
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
-            mAmInternal = getLocalService(ActivityManagerInternal.class);
             mAttentionDetector.systemReady(mContext);
 
             SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
@@ -2507,14 +2504,12 @@ public final class PowerManagerService extends SystemService
             return false;
         }
 
-        // Don't wake when undocking while dreaming if configured not to.
-        if (mKeepDreamingWhenUndocked
+        // Don't wake when unplugging while dreaming if configured not to.
+        if (mKeepDreamingWhenUnplugging
                 && getGlobalWakefulnessLocked() == WAKEFULNESS_DREAMING
-                && wasPowered && !mIsPowered
-                && oldPlugType == BatteryManager.BATTERY_PLUGGED_DOCK) {
+                && wasPowered && !mIsPowered) {
             return false;
         }
-
         // Don't wake when undocked from wireless charger.
         // See WirelessChargerDetector for justification.
         if (wasPowered && !mIsPowered
@@ -4088,8 +4083,9 @@ public final class PowerManagerService extends SystemService
                     final UidState state = wakeLock.mUidState;
                     if (Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
                             Arrays.binarySearch(mDeviceIdleTempWhitelist, appid) < 0 &&
-                            (mAmInternal != null && !mAmInternal.canHoldWakeLocksInDeepDoze(
-                                    state.mUid, state.mProcState))) {
+                            state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT &&
+                            state.mProcState >
+                                    ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
                         disabled = true;
                     }
                 }
@@ -4479,7 +4475,7 @@ public final class PowerManagerService extends SystemService
                     + mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig);
             pw.println("  mTheaterModeEnabled="
                     + mTheaterModeEnabled);
-            pw.println("  mKeepDreamingWhenUndocked=" + mKeepDreamingWhenUndocked);
+            pw.println("  mKeepDreamingWhenUnplugging=" + mKeepDreamingWhenUnplugging);
             pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
                     + mSuspendWhenScreenOffDueToProximityConfig);
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);
@@ -5695,6 +5691,7 @@ public final class PowerManagerService extends SystemService
             }
 
             if (eventTime > now) {
+                Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
                 throw new IllegalArgumentException("event time must not be in the future");
             }
 
@@ -5710,7 +5707,9 @@ public final class PowerManagerService extends SystemService
         @Override // Binder call
         public void wakeUp(long eventTime, @WakeReason int reason, String details,
                 String opPackageName) {
-            if (eventTime > mClock.uptimeMillis()) {
+            final long now = mClock.uptimeMillis();
+            if (eventTime > now) {
+                Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
                 throw new IllegalArgumentException("event time must not be in the future");
             }
 
@@ -5762,7 +5761,9 @@ public final class PowerManagerService extends SystemService
 
         @Override // Binder call
         public void nap(long eventTime) {
-            if (eventTime > mClock.uptimeMillis()) {
+            final long now = mClock.uptimeMillis();
+            if (eventTime > now) {
+                Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
                 throw new IllegalArgumentException("event time must not be in the future");
             }
 
@@ -6527,7 +6528,9 @@ public final class PowerManagerService extends SystemService
 
         @Override // Binder call
         public void boostScreenBrightness(long eventTime) {
+            final long now = mClock.uptimeMillis();
             if (eventTime > mClock.uptimeMillis()) {
+                Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
                 throw new IllegalArgumentException("event time must not be in the future");
             }
 
@@ -6686,7 +6689,9 @@ public final class PowerManagerService extends SystemService
 
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     private void goToSleepInternal(IntArray groupIds, long eventTime, int reason, int flags) {
-        if (eventTime > mClock.uptimeMillis()) {
+        final long now = mClock.uptimeMillis();
+        if (eventTime > now) {
+            Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
             throw new IllegalArgumentException("event time must not be in the future");
         }
 

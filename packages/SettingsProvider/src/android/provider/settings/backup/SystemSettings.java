@@ -97,5 +97,9 @@ public class SystemSettings {
         Settings.System.TOUCHPAD_NATURAL_SCROLLING,
         Settings.System.TOUCHPAD_TAP_TO_CLICK,
         Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE,
+        Settings.System.CAMERA_FLASH_NOTIFICATION,
+        Settings.System.SCREEN_FLASH_NOTIFICATION,
+        Settings.System.SCREEN_FLASH_NOTIFICATION_COLOR,
+        Settings.System.SMOOTH_DISPLAY
     };
 }

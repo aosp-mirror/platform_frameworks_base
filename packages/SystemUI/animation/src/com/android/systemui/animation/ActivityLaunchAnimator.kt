@@ -39,9 +39,9 @@ import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
-import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityLaunchAnimator"
@@ -419,7 +419,7 @@ class ActivityLaunchAnimator(
         internal val delegate: AnimationDelegate
 
         init {
-            delegate = AnimationDelegate(controller, callback, launchAnimator, listener)
+            delegate = AnimationDelegate(controller, callback, listener, launchAnimator)
         }
 
         @BinderThread
@@ -446,10 +446,10 @@ class ActivityLaunchAnimator(
     constructor(
         private val controller: Controller,
         private val callback: Callback,
-        /** The animator to use to animate the window launch. */
-        private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
         /** Listener for animation lifecycle events. */
-        private val listener: Listener? = null
+        private val listener: Listener? = null,
+        /** The animator to use to animate the window launch. */
+        private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR
     ) : RemoteAnimationDelegate<IRemoteAnimationFinishedCallback> {
         private val launchContainer = controller.launchContainer
         private val context = launchContainer.context

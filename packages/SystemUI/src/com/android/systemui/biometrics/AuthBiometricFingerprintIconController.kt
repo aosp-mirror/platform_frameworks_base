@@ -97,7 +97,6 @@ open class AuthBiometricFingerprintIconController(
         val iconContentDescription = getIconContentDescription(newState)
         if (iconContentDescription != null) {
             iconView.contentDescription = iconContentDescription
-            iconViewOverlay.contentDescription = iconContentDescription
         }
 
         iconView.frame = 0
@@ -152,7 +151,7 @@ open class AuthBiometricFingerprintIconController(
             STATE_AUTHENTICATING_ANIMATING_IN,
             STATE_AUTHENTICATING,
             STATE_PENDING_CONFIRMATION,
-            STATE_AUTHENTICATED -> R.string.accessibility_fingerprint_dialog_fingerprint_icon
+            STATE_AUTHENTICATED -> R.string.security_settings_sfps_enroll_find_sensor_message
             STATE_ERROR,
             STATE_HELP -> R.string.biometric_dialog_try_again
             else -> null
@@ -231,29 +230,21 @@ open class AuthBiometricFingerprintIconController(
             if (isReverseDefaultRotation) (rotation + 1) % 4 else rotation
 
     @RawRes
-    private fun getSideFpsAnimationForTransition(rotation: Int): Int {
-        when (rotation) {
-            Surface.ROTATION_90 -> if (context.isInRearDisplayMode()) {
-                return R.raw.biometricprompt_rear_portrait_reverse_base
-            } else if (isDeviceFolded) {
-                return R.raw.biometricprompt_folded_base_topleft
-            } else {
-                return R.raw.biometricprompt_portrait_base_topleft
-            }
-            Surface.ROTATION_270 -> if (context.isInRearDisplayMode()) {
-                return R.raw.biometricprompt_rear_portrait_base
-            } else if (isDeviceFolded) {
-                return R.raw.biometricprompt_folded_base_bottomright
-            } else {
-                return R.raw.biometricprompt_portrait_base_bottomright
-            }
-            else -> if (context.isInRearDisplayMode()) {
-                return R.raw.biometricprompt_rear_landscape_base
-            } else if (isDeviceFolded) {
-                return R.raw.biometricprompt_folded_base_default
-            } else {
-                return R.raw.biometricprompt_landscape_base
-            }
+    private fun getSideFpsAnimationForTransition(rotation: Int): Int = when (rotation) {
+        Surface.ROTATION_90 -> if (isDeviceFolded) {
+            R.raw.biometricprompt_folded_base_topleft
+        } else {
+            R.raw.biometricprompt_portrait_base_topleft
+        }
+        Surface.ROTATION_270 -> if (isDeviceFolded) {
+            R.raw.biometricprompt_folded_base_bottomright
+        } else {
+            R.raw.biometricprompt_portrait_base_bottomright
+        }
+        else -> if (isDeviceFolded) {
+            R.raw.biometricprompt_folded_base_default
+        } else {
+            R.raw.biometricprompt_landscape_base
         }
     }
 

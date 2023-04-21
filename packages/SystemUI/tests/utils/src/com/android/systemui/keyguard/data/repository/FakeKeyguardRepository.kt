@@ -47,6 +47,9 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
 
+    private val _isKeyguardUnlocked = MutableStateFlow(false)
+    override val isKeyguardUnlocked: Flow<Boolean> = _isKeyguardUnlocked
+
     private val _isKeyguardOccluded = MutableStateFlow(false)
     override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
 
@@ -124,6 +127,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setKeyguardShowing(isShowing: Boolean) {
         _isKeyguardShowing.value = isShowing
+    }
+
+    fun setKeyguardGoingAway(isGoingAway: Boolean) {
+        _isKeyguardGoingAway.value = isGoingAway
     }
 
     fun setKeyguardOccluded(isOccluded: Boolean) {

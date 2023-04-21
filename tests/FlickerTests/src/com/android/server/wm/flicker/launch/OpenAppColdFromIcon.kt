@@ -16,13 +16,14 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.tools.common.NavBar
+import android.tools.common.Rotation
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -38,6 +39,7 @@ import org.junit.runners.Parameterized
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] by clicking it's icon on all apps and wait animation to complete
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -52,7 +54,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(flicker) {
+open class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -61,7 +63,7 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
                 if (flicker.scenario.isTablet) {
                     tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 } else {
-                    tapl.setExpectedRotation(PlatformConsts.Rotation.ROTATION_0.value)
+                    tapl.setExpectedRotation(Rotation.ROTATION_0.value)
                 }
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
             }
@@ -87,7 +89,7 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
         fun getParams(): Collection<FlickerTest> {
             // TAPL fails on landscape mode b/240916028
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_3BUTTON)
+                supportedNavigationModes = listOf(NavBar.MODE_3BUTTON)
             )
         }
     }

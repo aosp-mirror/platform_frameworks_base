@@ -35,6 +35,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
@@ -141,14 +142,118 @@ public class LocaleStoreTest {
 
         HashMap<String, LocaleInfo> result =
                 LocaleStore.convertExplicitLocales(locales, supportedLocale);
-
         assertEquals("en", result.get("en").getId());
         assertEquals("en-US", result.get("en-US").getId());
         assertNull(result.get("en-Latn-US"));
     }
 
+    @Test
+    public void getLevelLocales_languageTier_returnAllSupportLanguages() {
+        LocaleList testSupportedLocales =
+                LocaleList.forLanguageTags(
+                        "en-US,zh-Hant-TW,ja-JP,en-GB,bn-IN-u-nu-arab,ks-Arab-IN,bn-IN");
+
+        Set<String> ignorableLocales = new HashSet<>();
+        ignorableLocales.add("zh-Hant-HK");
+        LocaleInfo parent = null;
+
+        Set<LocaleInfo> localeInfos = LocaleStore.getLevelLocales(
+                null, ignorableLocales, parent, false, testSupportedLocales);
+
+        assertEquals(5, localeInfos.size());
+        localeInfos.forEach(localeInfo -> {
+            assertTrue(localeInfo.getLocale().getCountry().isEmpty());
+        });
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("en")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("zh-Hant")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("ja")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("bn")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("ks-Arab")));
+    }
+
+    @Test
+    public void getLevelLocales_regionTierAndParentIsEn_returnEnLocales() {
+        LocaleList testSupportedLocales =
+                LocaleList.forLanguageTags(
+                        "en-US,en-GB,bn-IN-u-nu-arab,ks-Arab-IN,en-ZA,bn-IN");
+        Set<String> ignorableLocales = new HashSet<>();
+        ignorableLocales.add("zh-Hant-HK");
+        LocaleInfo parent = LocaleStore.fromLocale(Locale.forLanguageTag("en"));
+
+        Set<LocaleInfo> localeInfos = LocaleStore.getLevelLocales(
+                null, ignorableLocales, parent, false, testSupportedLocales);
+
+        assertEquals(3, localeInfos.size());
+        localeInfos.forEach(localeInfo -> {
+            assertEquals("en", localeInfo.getLocale().getLanguage());
+        });
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("en-US")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("en-GB")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("en-ZA")));
+    }
+
+    @Test
+    public void getLevelLocales_numberingTierAndParentIsBnIn_returnBnInLocales() {
+        LocaleList testSupportedLocales =
+                LocaleList.forLanguageTags(
+                        "en-US,zh-Hant-TW,bn-IN-u-nu-arab,ks-Arab-IN,en-ZA,bn-IN,bn-IN-u-nu-adlm");
+        Set<String> ignorableLocales = new HashSet<>();
+        ignorableLocales.add("zh-Hant-HK");
+        LocaleInfo parent = LocaleStore.fromLocale(Locale.forLanguageTag("bn"));
+
+        Set<LocaleInfo> localeInfos = LocaleStore.getLevelLocales(
+                null, ignorableLocales, parent, false, testSupportedLocales);
+
+        assertEquals(1, localeInfos.size());
+        assertEquals("bn-IN", localeInfos.iterator().next().getLocale().toLanguageTag());
+    }
+
+    @Test
+    public void getLevelLocales_regionTierAndParentIsBnInAndIgnoreBn_returnEmpty() {
+        LocaleList testSupportedLocales =
+                LocaleList.forLanguageTags(
+                        "en-US,zh-Hant-TW,bn-IN-u-nu-arab,ks-Arab-IN,en-ZA,bn-IN,bn-IN-u-nu-adlm");
+        Set<String> ignorableLocales = new HashSet<>();
+        ignorableLocales.add("bn-IN");
+        LocaleInfo parent = LocaleStore.fromLocale(Locale.forLanguageTag("bn-IN"));
+
+        Set<LocaleInfo> localeInfos = LocaleStore.getLevelLocales(
+                null, ignorableLocales, parent, false, testSupportedLocales);
+
+        assertEquals(0, localeInfos.size());
+    }
+
+    @Test
+    public void getLevelLocales_regionTierAndParentIsBnIn_returnBnLocaleFamily() {
+        LocaleList testSupportedLocales =
+                LocaleList.forLanguageTags(
+                        "en-US,zh-Hant-TW,bn-IN-u-nu-arab,ks-Arab-IN,en-ZA,bn-IN,bn-IN-u-nu-adlm");
+        Set<String> ignorableLocales = new HashSet<>();
+        ignorableLocales.add("en-US");
+        LocaleInfo parent = LocaleStore.fromLocale(Locale.forLanguageTag("bn-IN"));
+
+        Set<LocaleInfo> localeInfos = LocaleStore.getLevelLocales(
+                null, ignorableLocales, parent, false, testSupportedLocales);
+
+        assertEquals(3, localeInfos.size());
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("bn-IN-u-nu-adlm")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("bn-IN-u-nu-arab")));
+        assertTrue(localeInfos.stream().anyMatch(
+                info -> info.getLocale().toLanguageTag().equals("bn-IN")));
+    }
+
     private ArrayList<LocaleInfo> getFakeSupportedLocales() {
-        String[] locales = {"en-US", "zh-Hant-TW", "ja-JP", "en-GB"};
+        String[] locales = {"en-US", "zh-Hant-TW", "ja-JP", "en-GB", "en-US-u-nu-arab"};
         ArrayList<LocaleInfo> supportedLocales = new ArrayList<>();
         for (String localeTag : locales) {
             supportedLocales.add(LocaleStore.fromLocale(Locale.forLanguageTag(localeTag)));

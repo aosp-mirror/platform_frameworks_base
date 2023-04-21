@@ -16,8 +16,8 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
+import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.content.Context.DEVICE_ID_INVALID;
 
 import static com.google.common.truth.Truth.assertThat;
 

@@ -76,11 +76,10 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             ViewConfiguration viewConfiguration,
             FalsingManager falsingManager,
             FeatureFlags featureFlags,
-            int swipeDirection,
             NotificationCallback callback,
             NotificationMenuRowPlugin.OnMenuEventListener menuListener,
             NotificationRoundnessManager notificationRoundnessManager) {
-        super(swipeDirection, callback, resources, viewConfiguration, falsingManager, featureFlags);
+        super(callback, resources, viewConfiguration, falsingManager, featureFlags);
         mNotificationRoundnessManager = notificationRoundnessManager;
         mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mMenuListener = menuListener;
@@ -135,11 +134,15 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     @Override
     protected void onChildSnappedBack(View animView, float targetLeft) {
+        super.onChildSnappedBack(animView, targetLeft);
+
         final NotificationMenuRowPlugin menuRow = getCurrentMenuRow();
         if (menuRow != null && targetLeft == 0) {
             menuRow.resetMenu();
             clearCurrentMenuRow();
         }
+
+        InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_SWIPE);
     }
 
     @Override
@@ -251,13 +254,13 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
                 || (isFastNonDismissGesture && isAbleToShowMenu);
         int menuSnapTarget = menuRow.getMenuSnapTarget();
         boolean isNonFalseMenuRevealingGesture =
-                !isFalseGesture() && isMenuRevealingGestureAwayFromMenu;
+                isMenuRevealingGestureAwayFromMenu && !isFalseGesture();
         if ((isNonDismissGestureTowardsMenu || isNonFalseMenuRevealingGesture)
                 && menuSnapTarget != 0) {
             // Menu has not been snapped to previously and this is menu revealing gesture
             snapOpen(animView, menuSnapTarget, velocity);
             menuRow.onSnapOpen();
-        } else if (isDismissGesture(ev) && !gestureTowardsMenu) {
+        } else if (isDismissGesture && !gestureTowardsMenu) {
             dismiss(animView, velocity);
             menuRow.onDismiss();
         } else {
@@ -348,18 +351,13 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         super.dismissChild(view, velocity, useAccelerateInterpolator);
     }
 
-    @Override
-    protected void onSnapChildWithAnimationFinished() {
-        InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_SWIPE);
-    }
-
     @VisibleForTesting
     protected void superSnapChild(final View animView, final float targetLeft, float velocity) {
         super.snapChild(animView, targetLeft, velocity);
     }
 
     @Override
-    public void snapChild(final View animView, final float targetLeft, float velocity) {
+    protected void snapChild(final View animView, final float targetLeft, float velocity) {
         superSnapChild(animView, targetLeft, velocity);
         mCallback.onDragCancelled(animView);
         if (targetLeft == 0) {
@@ -380,20 +378,18 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         }
     }
 
+    @Override
     @VisibleForTesting
-    protected Animator superGetViewTranslationAnimator(View v, float target,
+    protected Animator getViewTranslationAnimator(View view, float target,
             ValueAnimator.AnimatorUpdateListener listener) {
-        return super.getViewTranslationAnimator(v, target, listener);
+        return super.getViewTranslationAnimator(view, target, listener);
     }
 
     @Override
-    public Animator getViewTranslationAnimator(View v, float target,
+    @VisibleForTesting
+    protected Animator createTranslationAnimation(View view, float newPos,
             ValueAnimator.AnimatorUpdateListener listener) {
-        if (v instanceof ExpandableNotificationRow) {
-            return ((ExpandableNotificationRow) v).getTranslateViewAnimator(target, listener);
-        } else {
-            return superGetViewTranslationAnimator(v, target, listener);
-        }
+        return super.createTranslationAnimation(view, newPos, listener);
     }
 
     @Override
@@ -419,19 +415,9 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     }
 
     @Override
-    public boolean swipedFastEnough(float translation, float viewSize) {
-        return swipedFastEnough();
-    }
-
-    @Override
     @VisibleForTesting
     protected boolean swipedFastEnough() {
         return super.swipedFastEnough();
-    }
-
-    @Override
-    public boolean swipedFarEnough(float translation, float viewSize) {
-        return swipedFarEnough();
     }
 
     @Override
@@ -557,7 +543,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         private final ViewConfiguration mViewConfiguration;
         private final FalsingManager mFalsingManager;
         private final FeatureFlags mFeatureFlags;
-        private int mSwipeDirection;
         private NotificationCallback mNotificationCallback;
         private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
         private NotificationRoundnessManager mNotificationRoundnessManager;
@@ -573,11 +558,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             mNotificationRoundnessManager = notificationRoundnessManager;
         }
 
-        Builder setSwipeDirection(int swipeDirection) {
-            mSwipeDirection = swipeDirection;
-            return this;
-        }
-
         Builder setNotificationCallback(NotificationCallback notificationCallback) {
             mNotificationCallback = notificationCallback;
             return this;
@@ -591,7 +571,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
         NotificationSwipeHelper build() {
             return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
-                    mFeatureFlags, mSwipeDirection, mNotificationCallback, mOnMenuEventListener,
+                    mFeatureFlags, mNotificationCallback, mOnMenuEventListener,
                     mNotificationRoundnessManager);
         }
     }

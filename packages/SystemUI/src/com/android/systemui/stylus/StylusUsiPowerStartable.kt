@@ -37,7 +37,7 @@ constructor(
     private val inputManager: InputManager,
     private val stylusUsiPowerUi: StylusUsiPowerUI,
     private val featureFlags: FeatureFlags,
-) : CoreStartable, StylusManager.StylusCallback, StylusManager.StylusBatteryCallback {
+) : CoreStartable, StylusManager.StylusCallback {
 
     override fun onStylusAdded(deviceId: Int) {
         // On some devices, the addition of a new internal stylus indicates the use of a
@@ -74,7 +74,6 @@ constructor(
 
         stylusUsiPowerUi.init()
         stylusManager.registerCallback(this)
-        stylusManager.registerBatteryCallback(this)
         stylusManager.startListener()
     }
 

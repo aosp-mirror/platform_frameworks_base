@@ -334,9 +334,9 @@ constructor(
         }
 
         val ssView = plugin.getView(parent)
+        configPlugin?.let { ssView.registerConfigProvider(it) }
         ssView.setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         ssView.registerDataProvider(plugin)
-        configPlugin?.let { ssView.registerConfigProvider(it) }
 
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
             override fun startIntent(view: View, intent: Intent, showOnLockscreen: Boolean) {
@@ -353,7 +353,11 @@ constructor(
                 }
             }
 
-            override fun startPendingIntent(pi: PendingIntent, showOnLockscreen: Boolean) {
+            override fun startPendingIntent(
+                    view: View,
+                    pi: PendingIntent,
+                    showOnLockscreen: Boolean
+            ) {
                 if (showOnLockscreen) {
                     pi.send()
                 } else {
@@ -501,8 +505,10 @@ constructor(
 
     private fun updateTextColorFromRegionSampler() {
         smartspaceViews.forEach {
-            val textColor = regionSamplers.getValue(it).currentForegroundColor()
-            it.setPrimaryTextColor(textColor)
+            val textColor = regionSamplers.get(it)?.currentForegroundColor()
+            if (textColor != null) {
+                it.setPrimaryTextColor(textColor)
+            }
         }
     }
 

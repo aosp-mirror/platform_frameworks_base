@@ -36,15 +36,15 @@
 #include <SkStream.h>
 #include <SkString.h>
 #include <SkTypeface.h>
-#include "include/gpu/GpuTypes.h" // from Skia
 #include <android-base/properties.h>
+#include <gui/TraceUtils.h>
 #include <unistd.h>
 
 #include <sstream>
 
-#include <gui/TraceUtils.h>
 #include "LightingInfo.h"
 #include "VectorDrawable.h"
+#include "include/gpu/GpuTypes.h"  // from Skia
 #include "thread/CommonPool.h"
 #include "tools/SkSharingProc.h"
 #include "utils/Color.h"
@@ -499,8 +499,7 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
     }
     canvas->concat(preTransform);
 
-    // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
-    if (!opaque || getSurfaceColorType() == kRGBA_F16_SkColorType) {
+    if (!opaque) {
         canvas->clear(SK_ColorTRANSPARENT);
     }
 

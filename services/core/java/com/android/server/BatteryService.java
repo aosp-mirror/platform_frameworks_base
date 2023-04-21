@@ -192,20 +192,21 @@ public final class BatteryService extends SystemService {
     private ArrayDeque<Bundle> mBatteryLevelsEventQueue;
     private long mLastBatteryLevelChangedSentMs;
 
-    private Bundle mBatteryChangedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_CHANGED)).setDeferUntilActive(true)
+    private Bundle mBatteryChangedOptions = BroadcastOptions.makeBasic()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
-    private Bundle mPowerConnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_POWER_DISCONNECTED)).setDeferUntilActive(true)
+    /** Used for both connected/disconnected, so match using key */
+    private Bundle mPowerOptions = BroadcastOptions.makeBasic()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .setDeliveryGroupMatchingKey("android", Intent.ACTION_POWER_CONNECTED)
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
-    private Bundle mPowerDisconnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_POWER_CONNECTED)).setDeferUntilActive(true)
-            .toBundle();
-    private Bundle mBatteryLowOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_OKAY)).setDeferUntilActive(true)
-            .toBundle();
-    private Bundle mBatteryOkayOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_LOW)).setDeferUntilActive(true)
+    /** Used for both low/okay, so match using key */
+    private Bundle mBatteryOptions = BroadcastOptions.makeBasic()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .setDeliveryGroupMatchingKey("android", Intent.ACTION_BATTERY_OKAY)
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
 
     private MetricsLogger mMetricsLogger;
@@ -636,7 +637,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mPowerConnectedOptions);
+                                mPowerOptions);
                     }
                 });
             }
@@ -648,7 +649,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mPowerDisconnectedOptions);
+                                mPowerOptions);
                     }
                 });
             }
@@ -662,7 +663,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mBatteryLowOptions);
+                                mBatteryOptions);
                     }
                 });
             } else if (mSentLowBatteryBroadcast &&
@@ -675,7 +676,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mBatteryOkayOptions);
+                                mBatteryOptions);
                     }
                 });
             }
@@ -1210,6 +1211,11 @@ public final class BatteryService extends SystemService {
     }
 
     private final class Led {
+        // must match: config_notificationsBatteryLowBehavior in config.xml
+        static final int LOW_BATTERY_BEHAVIOR_DEFAULT = 0;
+        static final int LOW_BATTERY_BEHAVIOR_SOLID = 1;
+        static final int LOW_BATTERY_BEHAVIOR_FLASHING = 2;
+
         private final LogicalLight mBatteryLight;
 
         private final int mBatteryLowARGB;
@@ -1217,6 +1223,7 @@ public final class BatteryService extends SystemService {
         private final int mBatteryFullARGB;
         private final int mBatteryLedOn;
         private final int mBatteryLedOff;
+        private final int mBatteryLowBehavior;
 
         public Led(Context context, LightsManager lights) {
             mBatteryLight = lights.getLight(LightsManager.LIGHT_ID_BATTERY);
@@ -1233,6 +1240,8 @@ public final class BatteryService extends SystemService {
                     com.android.internal.R.integer.config_notificationsBatteryLedOff);
             mBatteryNearlyFullLevel = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryNearlyFullLevel);
+            mBatteryLowBehavior = context.getResources().getInteger(
+                    com.android.internal.R.integer.config_notificationsBatteryLowBehavior);
         }
 
         /**
@@ -1245,13 +1254,26 @@ public final class BatteryService extends SystemService {
             final int level = mHealthInfo.batteryLevel;
             final int status = mHealthInfo.batteryStatus;
             if (level < mLowBatteryWarningLevel) {
-                if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                    // Solid red when battery is charging
-                    mBatteryLight.setColor(mBatteryLowARGB);
-                } else {
-                    // Flash red when battery is low and not charging
-                    mBatteryLight.setFlashing(mBatteryLowARGB, LogicalLight.LIGHT_FLASH_TIMED,
-                            mBatteryLedOn, mBatteryLedOff);
+                switch (mBatteryLowBehavior) {
+                    case LOW_BATTERY_BEHAVIOR_SOLID:
+                        // Solid red when low battery
+                        mBatteryLight.setColor(mBatteryLowARGB);
+                        break;
+                    case LOW_BATTERY_BEHAVIOR_FLASHING:
+                        // Flash red when battery is low and not charging
+                        mBatteryLight.setFlashing(mBatteryLowARGB, LogicalLight.LIGHT_FLASH_TIMED,
+                                mBatteryLedOn, mBatteryLedOff);
+                        break;
+                    default:
+                        if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                            // Solid red when battery is charging
+                            mBatteryLight.setColor(mBatteryLowARGB);
+                        } else {
+                            // Flash red when battery is low and not charging
+                            mBatteryLight.setFlashing(mBatteryLowARGB,
+                                    LogicalLight.LIGHT_FLASH_TIMED, mBatteryLedOn, mBatteryLedOff);
+                        }
+                        break;
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status == BatteryManager.BATTERY_STATUS_FULL) {

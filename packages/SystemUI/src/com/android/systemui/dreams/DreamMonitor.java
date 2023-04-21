@@ -23,6 +23,7 @@ import android.util.Log;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.callbacks.DreamStatusBarStateCallback;
 import com.android.systemui.dreams.conditions.DreamCondition;
+import com.android.systemui.flags.RestartDozeListener;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
 
@@ -39,17 +40,19 @@ public class DreamMonitor extends ConditionalCoreStartable {
     private final Monitor mConditionMonitor;
     private final DreamCondition mDreamCondition;
     private final DreamStatusBarStateCallback mCallback;
+    private RestartDozeListener mRestartDozeListener;
 
 
     @Inject
     public DreamMonitor(Monitor monitor, DreamCondition dreamCondition,
             @Named(DREAM_PRETEXT_MONITOR) Monitor pretextMonitor,
-            DreamStatusBarStateCallback callback) {
+            DreamStatusBarStateCallback callback,
+            RestartDozeListener restartDozeListener) {
         super(pretextMonitor);
         mConditionMonitor = monitor;
         mDreamCondition = dreamCondition;
         mCallback = callback;
-
+        mRestartDozeListener = restartDozeListener;
     }
 
     @Override
@@ -61,5 +64,8 @@ public class DreamMonitor extends ConditionalCoreStartable {
         mConditionMonitor.addSubscription(new Monitor.Subscription.Builder(mCallback)
                 .addCondition(mDreamCondition)
                 .build());
+
+        mRestartDozeListener.init();
+        mRestartDozeListener.maybeRestartSleep();
     }
 }

@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.RecordingCanvas;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -371,6 +372,90 @@ public class IconTest extends AndroidTestCase {
         }
     }
 
+    private int getMaxWidth(int origWidth, int origHeight, int maxNumPixels) {
+        float aspRatio = (float) origWidth / (float) origHeight;
+        int newHeight = (int) Math.sqrt(maxNumPixels / aspRatio);
+        return (int) (newHeight * aspRatio);
+    }
+
+    private int getMaxHeight(int origWidth, int origHeight, int maxNumPixels) {
+        float aspRatio = (float) origWidth / (float) origHeight;
+        return (int) Math.sqrt(maxNumPixels / aspRatio);
+    }
+
+    @SmallTest
+    public void testScaleDownMaxSizeWithBitmap() throws Exception {
+        final int bmpWidth = 13_000;
+        final int bmpHeight = 10_000;
+        final int bmpBpp = 4;
+        final int maxNumPixels = RecordingCanvas.MAX_BITMAP_SIZE / bmpBpp;
+        final int maxWidth = getMaxWidth(bmpWidth, bmpHeight, maxNumPixels);
+        final int maxHeight = getMaxHeight(bmpWidth, bmpHeight, maxNumPixels);
+
+        final Bitmap bm = Bitmap.createBitmap(bmpWidth, bmpHeight, Bitmap.Config.ARGB_8888);
+        final Icon ic = Icon.createWithBitmap(bm);
+        final Drawable drawable = ic.loadDrawable(mContext);
+
+        assertThat(drawable.getIntrinsicWidth()).isEqualTo(maxWidth);
+        assertThat(drawable.getIntrinsicHeight()).isEqualTo(maxHeight);
+    }
+
+    @SmallTest
+    public void testScaleDownMaxSizeWithAdaptiveBitmap() throws Exception {
+        final int bmpWidth = 20_000;
+        final int bmpHeight = 10_000;
+        final int bmpBpp = 4;
+        final int maxNumPixels = RecordingCanvas.MAX_BITMAP_SIZE / bmpBpp;
+        final int maxWidth = getMaxWidth(bmpWidth, bmpHeight, maxNumPixels);
+        final int maxHeight = getMaxHeight(bmpWidth, bmpHeight, maxNumPixels);
+
+        final Bitmap bm = Bitmap.createBitmap(bmpWidth, bmpHeight, Bitmap.Config.ARGB_8888);
+        final Icon ic = Icon.createWithAdaptiveBitmap(bm);
+        final AdaptiveIconDrawable adaptiveDrawable = (AdaptiveIconDrawable) ic.loadDrawable(
+                mContext);
+        final Drawable drawable = adaptiveDrawable.getForeground();
+
+        assertThat(drawable.getIntrinsicWidth()).isEqualTo(maxWidth);
+        assertThat(drawable.getIntrinsicHeight()).isEqualTo(maxHeight);
+    }
+
+    @SmallTest
+    public void testScaleDownMaxSizeWithResource() throws Exception {
+        final Icon ic = Icon.createWithResource(getContext(), R.drawable.test_too_big);
+        final BitmapDrawable drawable = (BitmapDrawable) ic.loadDrawable(mContext);
+
+        assertThat(drawable.getBitmap().getByteCount()).isAtMost(RecordingCanvas.MAX_BITMAP_SIZE);
+    }
+
+    @SmallTest
+    public void testScaleDownMaxSizeWithFile() throws Exception {
+        final Bitmap bit1 = ((BitmapDrawable) getContext().getDrawable(R.drawable.test_too_big))
+                .getBitmap();
+        final File dir = getContext().getExternalFilesDir(null);
+        final File file1 = new File(dir, "file1-too-big.png");
+        bit1.compress(Bitmap.CompressFormat.PNG, 100,
+                new FileOutputStream(file1));
+
+        final Icon ic = Icon.createWithFilePath(file1.toString());
+        final BitmapDrawable drawable = (BitmapDrawable) ic.loadDrawable(mContext);
+
+        assertThat(drawable.getBitmap().getByteCount()).isAtMost(RecordingCanvas.MAX_BITMAP_SIZE);
+    }
+
+    @SmallTest
+    public void testScaleDownMaxSizeWithData() throws Exception {
+        final int bmpBpp = 4;
+        final Bitmap originalBits = ((BitmapDrawable) getContext().getDrawable(
+                R.drawable.test_too_big)).getBitmap();
+        final ByteArrayOutputStream ostream = new ByteArrayOutputStream(
+                originalBits.getWidth() * originalBits.getHeight() * bmpBpp);
+        originalBits.compress(Bitmap.CompressFormat.PNG, 100, ostream);
+        final byte[] pngdata = ostream.toByteArray();
+        final Icon ic = Icon.createWithData(pngdata, 0, pngdata.length);
+        final BitmapDrawable drawable = (BitmapDrawable) ic.loadDrawable(mContext);
+
+        assertThat(drawable.getBitmap().getByteCount()).isAtMost(RecordingCanvas.MAX_BITMAP_SIZE);
+    }
 
     // ======== utils ========
 

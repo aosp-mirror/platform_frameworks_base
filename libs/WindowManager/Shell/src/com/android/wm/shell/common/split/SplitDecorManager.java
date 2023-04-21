@@ -165,6 +165,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
             t.remove(mGapBackgroundLeash);
             mGapBackgroundLeash = null;
         }
+        if (mScreenshot != null) {
+            t.remove(mScreenshot);
+            mScreenshot = null;
+        }
         mHostLeash = null;
         mIcon = null;
         mResizingIconView = null;
@@ -248,11 +252,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Stops showing resizing hint. */
     public void onResized(SurfaceControl.Transaction t, Runnable animFinishedCallback) {
-        if (mScreenshot != null) {
-            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
-                mScreenshotAnimator.cancel();
-            }
+        if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+            mScreenshotAnimator.cancel();
+        }
 
+        if (mScreenshot != null) {
             t.setPosition(mScreenshot, mOffsetX, mOffsetY);
 
             final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
@@ -322,6 +326,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /** Screenshot host leash and attach on it if meet some conditions */
     public void screenshotIfNeeded(SurfaceControl.Transaction t) {
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            } else if (mScreenshot != null) {
+                t.remove(mScreenshot);
+            }
+
             mTempRect.set(mOldBounds);
             mTempRect.offsetTo(0, 0);
             mScreenshot = ScreenshotUtils.takeScreenshot(t, mHostLeash, mTempRect,
@@ -334,6 +344,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (screenshot == null || !screenshot.isValid()) return;
 
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            } else if (mScreenshot != null) {
+                t.remove(mScreenshot);
+            }
+
             mScreenshot = screenshot;
             t.reparent(screenshot, mHostLeash);
             t.setLayer(screenshot, Integer.MAX_VALUE - 1);

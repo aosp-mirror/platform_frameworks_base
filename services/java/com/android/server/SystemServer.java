@@ -125,6 +125,7 @@ import com.android.server.compat.PlatformCompatNative;
 import com.android.server.connectivity.PacProxyService;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
+import com.android.server.cpu.CpuMonitorService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.devicestate.DeviceStateManagerService;
 import com.android.server.display.DisplayManagerService;
@@ -1405,6 +1406,15 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RemoteProvisioningService.class);
         t.traceEnd();
 
+        // TODO(b/277600174): Start CpuMonitorService on all builds and not just on debuggable
+        // builds once the Android JobScheduler starts using this service.
+        if (Build.IS_DEBUGGABLE || Build.IS_ENG) {
+          // Service for CPU monitor.
+          t.traceBegin("CpuMonitorService");
+          mSystemServiceManager.startService(CpuMonitorService.class);
+          t.traceEnd();
+        }
+
         t.traceEnd(); // startCoreServices
     }
 
@@ -1559,7 +1569,7 @@ public final class SystemServer implements Dumpable {
             ServiceManager.addService("dynamic_system", dynamicSystem);
             t.traceEnd();
 
-            if (!isWatch) {
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CONSUMER_IR)) {
                 t.traceBegin("StartConsumerIrService");
                 consumerIr = new ConsumerIrService(context);
                 ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
@@ -1791,6 +1801,10 @@ public final class SystemServer implements Dumpable {
         } catch (Throwable e) {
             reportWtf("starting GrammarInflectionService service", e);
         }
+        t.traceEnd();
+
+        t.traceBegin("StartAppHibernationService");
+        mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
         t.traceEnd();
 
         t.traceBegin("ArtManagerLocal");
@@ -2200,9 +2214,11 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("StartDockObserver");
-            mSystemServiceManager.startService(DockObserver.class);
-            t.traceEnd();
+            if (!isTv) {
+                t.traceBegin("StartDockObserver");
+                mSystemServiceManager.startService(DockObserver.class);
+                t.traceEnd();
+            }
 
             if (isWatch) {
                 t.traceBegin("StartThermalObserver");
@@ -2312,10 +2328,6 @@ public final class SystemServer implements Dumpable {
             // based on that feature.
             t.traceBegin("StartVoiceRecognitionManager");
             mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
-
-            t.traceBegin("StartAppHibernationService");
-            mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
             t.traceEnd();
 
             if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
@@ -2719,7 +2731,7 @@ public final class SystemServer implements Dumpable {
         // on it in their setup, but likely needs to be done after LockSettingsService is ready.
         final HsumBootUserInitializer hsumBootUserInitializer =
                 HsumBootUserInitializer.createInstance(
-                        mActivityManagerService, mContentResolver,
+                        mActivityManagerService, mPackageManagerService, mContentResolver,
                         context.getResources().getBoolean(R.bool.config_isMainUserPermanentAdmin));
         if (hsumBootUserInitializer != null) {
             t.traceBegin("HsumBootUserInitializer.init");
@@ -2736,6 +2748,14 @@ public final class SystemServer implements Dumpable {
             wm.systemReady();
         } catch (Throwable e) {
             reportWtf("making Window Manager Service ready", e);
+        }
+        t.traceEnd();
+
+        t.traceBegin("RegisterLogMteState");
+        try {
+            LogMteState.register(context);
+        } catch (Throwable e) {
+            reportWtf("RegisterLogMteState", e);
         }
         t.traceEnd();
 
@@ -3011,8 +3031,7 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startBootPhase(t, SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
             t.traceEnd();
 
-            if (hsumBootUserInitializer != null && !isAutomotive) {
-                // TODO(b/261924826): remove isAutomotive check once the workflow is finalized
+            if (hsumBootUserInitializer != null) {
                 t.traceBegin("HsumBootUserInitializer.systemRunning");
                 hsumBootUserInitializer.systemRunning(t);
                 t.traceEnd();

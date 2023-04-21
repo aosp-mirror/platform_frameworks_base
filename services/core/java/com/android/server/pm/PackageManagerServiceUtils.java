@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.content.IntentFilter.BLOCK_NULL_ACTION_INTENTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
@@ -25,6 +24,7 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
@@ -32,16 +32,18 @@ import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
 import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
+import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Disabled;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -95,6 +97,8 @@ import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.Watchdog;
+import com.android.server.am.ActivityManagerUtils;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -186,7 +190,7 @@ public class PackageManagerServiceUtils {
      * allow 3P apps to trigger internal-only functionality.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @Disabled  /* Revert enforcement: b/274147456 */
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -1166,19 +1170,16 @@ public class PackageManagerServiceUtils {
         return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
+    // Static to give access to ComputeEngine
     public static void applyEnforceIntentFilterMatching(
-            Computer computer, List<ResolveInfo> resolveInfos, boolean isReceiver,
+            PlatformCompat compat, ComponentResolverApi resolver,
+            List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
 
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
-
-        final boolean callerBlocksNullAction = computer.isChangeEnabled(
-                BLOCK_NULL_ACTION_INTENTS, filterCallingUid);
-
-        final ComponentResolverApi resolver = computer.getComponentResolver();
 
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
@@ -1188,16 +1189,6 @@ public class PackageManagerServiceUtils {
                     info.applicationInfo.uid, false) == PackageManager.PERMISSION_GRANTED) {
                 continue;
             }
-
-            // Only enforce filter matching if target app's target SDK >= T
-            if (!computer.isChangeEnabled(
-                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo)) {
-                continue;
-            }
-
-            // Block null action intent if either source or target app's target SDK >= U
-            final boolean blockNullAction = callerBlocksNullAction
-                    || computer.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS, info.applicationInfo);
 
             final ParsedMainComponent comp;
             if (info instanceof ActivityInfo) {
@@ -1217,24 +1208,32 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
+            // Only enforce filter matching if target app's target SDK >= T
+            final boolean enforce = compat.isChangeEnabledInternal(
+                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo);
+
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(
-                        intentFilter, intent, resolvedType, blockNullAction)) {
+                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
                     match = true;
                     break;
                 }
             }
             if (!match) {
-                Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
-                Slog.w(TAG, "Access blocked: " + comp.getComponentName());
-                if (DEBUG_INTENT_MATCHING) {
-                    Slog.v(TAG, "Component intent filters:");
-                    comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
-                    Slog.v(TAG, "-----------------------------");
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
+                        filterCallingUid, intent, resolvedType, enforce);
+                if (enforce) {
+                    Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
+                    Slog.w(TAG, "Access blocked: " + comp.getComponentName());
+                    if (DEBUG_INTENT_MATCHING) {
+                        Slog.v(TAG, "Component intent filters:");
+                        comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
+                        Slog.v(TAG, "-----------------------------");
+                    }
+                    resolveInfos.remove(i);
                 }
-                resolveInfos.remove(i);
             }
         }
     }
@@ -1391,6 +1390,14 @@ public class PackageManagerServiceUtils {
     }
 
     /**
+     * Check if a UID is non-system UID adopted shell permission.
+     */
+    public static boolean isAdoptedShell(int uid, Context context) {
+        return uid != Process.SYSTEM_UID && context.checkCallingOrSelfPermission(
+                Manifest.permission.USE_SYSTEM_DATA_LOADERS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
      * Check if a UID is system UID or shell's UID.
      */
     public static boolean isRootOrShell(int uid) {
@@ -1518,5 +1525,12 @@ public class PackageManagerServiceUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Check if package name is com.android.shell or is null.
+     */
+    public static boolean isInstalledByAdb(String initiatingPackageName) {
+        return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
     }
 }

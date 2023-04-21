@@ -53,6 +53,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.display.LocalDisplayAdapter.BacklightAdapter;
+import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 

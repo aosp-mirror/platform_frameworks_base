@@ -17,11 +17,11 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
+import android.tools.common.Rotation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Test
 import org.junit.runners.Parameterized
 
@@ -137,7 +137,7 @@ abstract class ExitPipToAppTransition(flicker: FlickerTest) : PipTransition(flic
         @JvmStatic
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

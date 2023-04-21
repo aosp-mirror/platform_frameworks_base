@@ -298,7 +298,8 @@ public class PhonePipMenuController implements PipMenuController {
         }
 
         // Sync the menu bounds before showing it in case it is out of sync.
-        movePipMenu(null /* pipLeash */, null /* transaction */, stackBounds);
+        movePipMenu(null /* pipLeash */, null /* transaction */, stackBounds,
+                PipMenuController.ALPHA_NO_CHANGE);
         updateMenuBounds(stackBounds);
 
         mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
@@ -311,7 +312,7 @@ public class PhonePipMenuController implements PipMenuController {
     @Override
     public void movePipMenu(@Nullable SurfaceControl pipLeash,
             @Nullable SurfaceControl.Transaction t,
-            Rect destinationBounds) {
+            Rect destinationBounds, float alpha) {
         if (destinationBounds.isEmpty()) {
             return;
         }

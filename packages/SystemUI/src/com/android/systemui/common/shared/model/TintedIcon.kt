@@ -21,5 +21,5 @@ import androidx.annotation.AttrRes
 /** Models an icon with a specific tint. */
 data class TintedIcon(
     val icon: Icon,
-    @AttrRes val tintAttr: Int?,
+    @AttrRes val tint: Int?,
 )

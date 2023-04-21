@@ -18,10 +18,12 @@ package com.android.systemui.biometrics
 
 import android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE
 import android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT
-import android.testing.AndroidTestingRunner
+import android.hardware.biometrics.BiometricConstants
+import android.hardware.face.FaceManager
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -34,9 +36,11 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.times
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
@@ -97,7 +101,7 @@ class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun ignoresFaceErrors() {
+    fun ignoresFaceErrors_faceIsNotClass3_notLockoutError() {
         biometricView.onDialogAnimatedIn()
         biometricView.onError(TYPE_FACE, "not a face")
         waitForIdleSync()
@@ -111,6 +115,48 @@ class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
 
         verify(callback).onAction(AuthBiometricView.Callback.ACTION_ERROR)
     }
+
+    @Test
+    fun doNotIgnoresFaceErrors_faceIsClass3_notLockoutError() {
+        biometricView.isFaceClass3 = true
+        biometricView.onDialogAnimatedIn()
+        biometricView.onError(TYPE_FACE, "not a face")
+        waitForIdleSync()
+
+        assertThat(biometricView.isAuthenticating).isTrue()
+        verify(callback, never()).onAction(AuthBiometricView.Callback.ACTION_ERROR)
+
+        biometricView.onError(TYPE_FINGERPRINT, "that's a nope")
+        TestableLooper.get(this).moveTimeForward(1000)
+        waitForIdleSync()
+
+        verify(callback).onAction(AuthBiometricView.Callback.ACTION_ERROR)
+    }
+
+    @Test
+    fun doNotIgnoresFaceErrors_faceIsClass3_lockoutError() {
+        biometricView.isFaceClass3 = true
+        biometricView.onDialogAnimatedIn()
+        biometricView.onError(
+            TYPE_FACE,
+            FaceManager.getErrorString(
+                biometricView.context,
+                BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+                0 /*vendorCode */
+            )
+        )
+        waitForIdleSync()
+
+        assertThat(biometricView.isAuthenticating).isTrue()
+        verify(callback).onAction(AuthBiometricView.Callback.ACTION_ERROR)
+
+        biometricView.onError(TYPE_FINGERPRINT, "that's a nope")
+        TestableLooper.get(this).moveTimeForward(1000)
+        waitForIdleSync()
+
+        verify(callback, times(2)).onAction(AuthBiometricView.Callback.ACTION_ERROR)
+    }
+
 
     override fun waitForIdleSync() = TestableLooper.get(this).processAllMessages()
 }

@@ -33,6 +33,7 @@
 #include <errno.h>
 
 using android::InputEvent;
+using android::InputEventType;
 using android::InputQueue;
 using android::KeyEvent;
 using android::Looper;
@@ -41,7 +42,8 @@ using android::sp;
 using android::Vector;
 
 int32_t AInputEvent_getType(const AInputEvent* event) {
-    return static_cast<const InputEvent*>(event)->getType();
+    const InputEventType eventType = static_cast<const InputEvent*>(event)->getType();
+    return static_cast<int32_t>(eventType);
 }
 
 int32_t AInputEvent_getDeviceId(const AInputEvent* event) {
@@ -149,7 +151,8 @@ int32_t AMotionEvent_getPointerId(const AInputEvent* motion_event, size_t pointe
 }
 
 int32_t AMotionEvent_getToolType(const AInputEvent* motion_event, size_t pointer_index) {
-    return static_cast<const MotionEvent*>(motion_event)->getToolType(pointer_index);
+    const MotionEvent& motion = static_cast<const MotionEvent&>(*motion_event);
+    return static_cast<int32_t>(motion.getToolType(pointer_index));
 }
 
 float AMotionEvent_getRawX(const AInputEvent* motion_event, size_t pointer_index) {

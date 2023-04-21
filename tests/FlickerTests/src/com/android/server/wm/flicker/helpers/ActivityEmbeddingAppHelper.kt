@@ -17,6 +17,12 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.wm.WindowManagerState.Companion.STATE_RESUMED
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -24,10 +30,6 @@ import androidx.window.extensions.WindowExtensions
 import androidx.window.extensions.WindowExtensionsProvider
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.windowmanager.WindowManagerState.Companion.STATE_RESUMED
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume.assumeNotNull
 
 class ActivityEmbeddingAppHelper

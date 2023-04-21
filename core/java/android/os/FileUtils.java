@@ -1295,19 +1295,31 @@ public final class FileUtils {
      * value, such as 256MB or 32GB. This avoids showing weird values like
      * "29.5GB" in UI.
      *
+     * Some storage devices are still using GiB (powers of 1024) over
+     * GB (powers of 1000) measurements and this method takes it into account.
+     *
+     * Round ranges:
+     * ...
+     * [256 GiB + 1; 512 GiB] -> 512 GB
+     * [512 GiB + 1; 1 TiB]   -> 1 TB
+     * [1 TiB + 1; 2 TiB]     -> 2 TB
+     * etc
+     *
      * @hide
      */
     public static long roundStorageSize(long size) {
         long val = 1;
-        long pow = 1;
-        while ((val * pow) < size) {
+        long kiloPow = 1;
+        long kibiPow = 1;
+        while ((val * kibiPow) < size) {
             val <<= 1;
             if (val > 512) {
                 val = 1;
-                pow *= 1000;
+                kibiPow *= 1024;
+                kiloPow *= 1000;
             }
         }
-        return val * pow;
+        return val * kiloPow;
     }
 
     private static long toBytes(long value, String unit) {

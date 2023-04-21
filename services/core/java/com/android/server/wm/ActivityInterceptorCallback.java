@@ -84,6 +84,7 @@ public interface ActivityInterceptorCallback {
             PERMISSION_POLICY_ORDERED_ID,
             VIRTUAL_DEVICE_SERVICE_ORDERED_ID,
             DREAM_MANAGER_ORDERED_ID,
+            PRODUCT_ORDERED_ID,
             SYSTEM_LAST_ORDERED_ID, // Update this when adding new ids
             // Order Ids for mainline module services
             MAINLINE_FIRST_ORDERED_ID,
@@ -119,11 +120,18 @@ public interface ActivityInterceptorCallback {
     int DREAM_MANAGER_ORDERED_ID = 4;
 
     /**
+     * The identifier for an interceptor which is specific to the type of android product like
+     * automotive, wear, TV etc.
+     * @hide
+     */
+    int PRODUCT_ORDERED_ID = 5;
+
+    /**
      * The final id, used by the framework to determine the valid range of ids. Update this when
      * adding new ids.
      * @hide
      */
-    int SYSTEM_LAST_ORDERED_ID = DREAM_MANAGER_ORDERED_ID;
+    int SYSTEM_LAST_ORDERED_ID = PRODUCT_ORDERED_ID;
 
     /**
      * The first mainline module id, used by the framework to determine the valid range of ids

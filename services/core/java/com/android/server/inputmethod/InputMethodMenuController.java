@@ -19,7 +19,6 @@ package com.android.server.inputmethod;
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
 import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
 
-import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -66,8 +65,8 @@ final class InputMethodMenuController {
     private boolean mShowImeWithHardKeyboard;
 
     @GuardedBy("ImfLock.class")
-    @Nullable
-    private InputMethodDialogWindowContext mDialogWindowContext;
+    private final InputMethodDialogWindowContext mDialogWindowContext =
+            new InputMethodDialogWindowContext();
 
     InputMethodMenuController(InputMethodManagerService service) {
         mService = service;
@@ -125,13 +124,11 @@ final class InputMethodMenuController {
                 }
             }
 
-            if (mDialogWindowContext == null) {
-                mDialogWindowContext = new InputMethodDialogWindowContext();
-            }
             final Context dialogWindowContext = mDialogWindowContext.get(displayId);
             mDialogBuilder = new AlertDialog.Builder(dialogWindowContext);
             mDialogBuilder.setOnCancelListener(dialog -> hideInputMethodMenu());
 
+            // TODO(b/277061090): refactor UI components should not be created while holding a lock.
             final Context dialogContext = mDialogBuilder.getContext();
             final TypedArray a = dialogContext.obtainStyledAttributes(null,
                     com.android.internal.R.styleable.DialogPreference,
@@ -199,10 +196,11 @@ final class InputMethodMenuController {
             attrs.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
+            // TODO(b/277062834) decouple/remove dependency on IMMS
             mService.updateSystemUiLocked();
             mService.sendOnNavButtonFlagsChangedLocked();
-            mSwitchingDialog.show();
         }
+        mSwitchingDialog.show();
     }
 
     private boolean isScreenLocked() {
@@ -276,6 +274,7 @@ final class InputMethodMenuController {
         private final int mTextViewResourceId;
         private final List<ImeSubtypeListItem> mItemsList;
         public int mCheckedItem;
+
         private ImeSubtypeListAdapter(Context context, int textViewResourceId,
                 List<ImeSubtypeListItem> itemsList, int checkedItem) {
             super(context, textViewResourceId, itemsList);

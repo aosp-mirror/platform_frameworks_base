@@ -20,19 +20,20 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <input/InputTransport.h>
+#include <inttypes.h>
 #include <log/log.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <utils/Looper.h>
+
+#include <optional>
+#include <unordered_map>
+
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
 #include "core_jni_helpers.h"
-
-#include <inttypes.h>
-#include <unordered_map>
-
 
 using android::base::Result;
 
@@ -67,7 +68,7 @@ private:
     jobject mSenderWeakGlobal;
     InputPublisher mInputPublisher;
     sp<MessageQueue> mMessageQueue;
-    std::unordered_map<uint32_t, uint32_t> mPublishedSeqMap;
+    std::unordered_map<uint32_t, std::optional<uint32_t>> mPublishedSeqMap;
 
     uint32_t mNextPublishedSeq;
 
@@ -165,8 +166,14 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
                     getInputChannelName().c_str(), status);
             return status;
         }
+        // mPublishedSeqMap tracks all sequences published from this sender. Only the last
+        // sequence number is used to signal this motion event is finished.
+        if (i == event->getHistorySize()) {
+            mPublishedSeqMap.emplace(publishedSeq, seq);
+        } else {
+            mPublishedSeqMap.emplace(publishedSeq, std::nullopt);
+        }
     }
-    mPublishedSeqMap.emplace(publishedSeq, seq);
     return OK;
 }
 
@@ -277,8 +284,16 @@ bool NativeInputEventSender::notifyConsumerResponse(
         // does something wrong and sends bad data. Just ignore and process other events.
         return true;
     }
-    const uint32_t seq = it->second;
+
+    const std::optional<uint32_t> seqOptional = it->second;
     mPublishedSeqMap.erase(it);
+    // If this optional does not have a value, it means we are processing an event that had history
+    // and was split. There are more events coming, so we can't call 'dispatchInputEventFinished'
+    // yet. The final split event will have a valid sequence number.
+    if (!seqOptional.has_value()) {
+        return true;
+    }
+    const uint32_t seq = seqOptional.value();
 
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, pendingEvents=%zu.",

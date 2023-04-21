@@ -111,8 +111,6 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mDeviceConfigProxyFake = new DeviceConfigProxyFake();
-        mDeviceConfigProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED, "true", false);
         mSystemClock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(mSystemClock);
         mBackgroundExecutor = new FakeExecutor(mSystemClock);

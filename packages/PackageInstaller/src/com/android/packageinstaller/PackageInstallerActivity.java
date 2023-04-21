@@ -148,10 +148,11 @@ public class PackageInstallerActivity extends AlertActivity {
                     && mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
                 viewToEnable.setText(
                         getString(R.string.install_confirm_question_update_owner_reminder,
-                                existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
+                                requestedUpdateOwnerLabel, existingUpdateOwnerLabel));
+                mOk.setText(R.string.update_anyway);
+            } else {
+                mOk.setText(R.string.update);
             }
-
-            mOk.setText(R.string.update);
         } else {
             // This is a new application with no permissions.
             viewToEnable = requireViewById(R.id.install_confirm_question);

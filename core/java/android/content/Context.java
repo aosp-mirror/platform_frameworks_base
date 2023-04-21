@@ -135,6 +135,15 @@ public abstract class Context {
     @VisibleForTesting
     public static final long OVERRIDABLE_COMPONENT_CALLBACKS = 193247900L;
 
+    /**
+     * The default device ID, which is the ID of the primary (non-virtual) device.
+     */
+    public static final int DEVICE_ID_DEFAULT = 0;
+    /**
+     * Invalid device ID.
+     */
+    public static final int DEVICE_ID_INVALID = -1;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "MODE_" }, value = {
             MODE_PRIVATE,
@@ -307,10 +316,13 @@ public abstract class Context {
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
             BIND_SHARED_ISOLATED_PROCESS,
-            // Intentionally not included, because it'd cause sign-extension.
+            // Intentionally not include BIND_EXTERNAL_SERVICE, because it'd cause sign-extension.
             // This would allow Android Studio to show a warning, if someone tries to use
             // BIND_EXTERNAL_SERVICE BindServiceFlags.
-            BIND_EXTERNAL_SERVICE_LONG
+            BIND_EXTERNAL_SERVICE_LONG,
+            // Make sure no flag uses the sign bit (most significant bit) of the long integer,
+            // to avoid future confusion.
+            BIND_BYPASS_USER_NETWORK_RESTRICTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlagsLongBits {}
@@ -329,6 +341,7 @@ public abstract class Context {
 
         /**
          * @return Return flags in 64 bits long integer.
+         * @hide
          */
         public long getValue() {
             return mValue;
@@ -519,7 +532,7 @@ public abstract class Context {
 
     /**
      * Flag for {@link #bindService}: allow the process hosting the target service to gain
-     * {@link ActivityManager#PROCESS_CAPABILITY_NETWORK}, which allows it be able
+     * {@link ActivityManager#PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK}, which allows it be able
      * to access network regardless of any power saving restrictions.
      *
      * @hide
@@ -669,12 +682,20 @@ public abstract class Context {
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
-
     /**
      * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a (@code long)
      * value that is compatible to {@link BindServiceFlags}.
      */
-    public static final long BIND_EXTERNAL_SERVICE_LONG = 0x8000_0000_0000_0000L;
+    public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
+
+    /**
+     * Flag for {@link #bindService}: allow the process hosting the target service to gain
+     * {@link ActivityManager#PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK}, which allows it be able
+     * to access network regardless of any user restrictions.
+     *
+     * @hide
+     */
+    public static final long BIND_BYPASS_USER_NETWORK_RESTRICTIONS = 0x1_0000_0000L;
 
 
     /**
@@ -2389,7 +2410,6 @@ public abstract class Context {
         sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions, null);
     }
 
-
     /**
      * Like {@link #sendBroadcastMultiplePermissions(Intent, String[], String[])}, but also allows
      * specification of a list of excluded packages.
@@ -2399,6 +2419,19 @@ public abstract class Context {
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
             @Nullable String[] excludedPackages) {
+        sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions,
+                excludedPackages, null);
+    }
+
+    /**
+     * Like {@link #sendBroadcastMultiplePermissions(Intent, String[], String[], String[])}, but
+     * also allows specification of options generated from {@link android.app.BroadcastOptions}.
+     *
+     * @hide
+     */
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
+            @Nullable String[] excludedPackages, @Nullable BroadcastOptions options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -4267,7 +4300,7 @@ public abstract class Context {
      * <p>Note: When implementing this method, keep in mind that new services can be added on newer
      * Android releases, so if you're looking for just the explicit names mentioned above, make sure
      * to return {@code null} when you don't recognize the name &mdash; if you throw a
-     * {@link RuntimeException} exception instead, you're app might break on new Android releases.
+     * {@link RuntimeException} exception instead, your app might break on new Android releases.
      *
      * @param name The name of the desired service.
      *
@@ -5693,6 +5726,9 @@ public abstract class Context {
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.companion.virtual.VirtualDeviceManager} for managing virtual devices.
+     *
+     * On devices without {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP}
+     * system feature the {@link #getSystemService(String)} will return {@code null}.
      *
      * @see #getSystemService(String)
      * @see android.companion.virtual.VirtualDeviceManager
@@ -7175,7 +7211,7 @@ public abstract class Context {
      * <p>
      * Applications that run on virtual devices may use this method to access the default device
      * capabilities and functionality (by passing
-     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}. Similarly,
+     * {@link Context#DEVICE_ID_DEFAULT}. Similarly,
      * applications running on the default device may access the functionality of virtual devices.
      * </p>
      * <p>
@@ -7542,7 +7578,7 @@ public abstract class Context {
      * determine whether they are running on a virtual device and identify that device.
      *
      * The device ID of the host device is
-     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}
+     * {@link Context#DEVICE_ID_DEFAULT}
      *
      * <p>
      * If the underlying device ID is changed by the system, for example, when an
@@ -7577,7 +7613,7 @@ public abstract class Context {
      * the device association is changed by the system.
      * <p>
      * The callback can be called when an app is moved to a different device and the {@code Context}
-     * is not explicily associated with a specific device.
+     * is not explicitly associated with a specific device.
      * </p>
      * <p> When an application receives a device id update callback, this Context is guaranteed to
      * also have an updated display ID(if any) and {@link Configuration}.
@@ -7846,6 +7882,17 @@ public abstract class Context {
      * @hide
      */
     public boolean isConfigurationContext() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Closes temporary system dialogs. Some examples of temporary system dialogs are the
+     * notification window-shade and the recent tasks dialog.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
+    public void closeSystemDialogs() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 }

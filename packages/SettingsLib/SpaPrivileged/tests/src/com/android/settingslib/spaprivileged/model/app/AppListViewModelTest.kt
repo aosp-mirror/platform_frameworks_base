@@ -85,7 +85,11 @@ class AppListViewModelTest {
     }
 
     private object FakeAppListRepository : AppListRepository {
-        override suspend fun loadApps(userId: Int, showInstantApps: Boolean) = listOf(APP)
+        override suspend fun loadApps(
+            userId: Int,
+            showInstantApps: Boolean,
+            matchAnyUserForAdmin: Boolean,
+        ) = listOf(APP)
 
         override fun showSystemPredicate(
             userIdFlow: Flow<Int>,
@@ -103,13 +107,20 @@ class AppListViewModelTest {
 
         @Composable
         override fun produceIcon(app: ApplicationInfo) = stateOf(null)
+
+        @Composable
+        override fun produceIconContentDescription(app: ApplicationInfo) = stateOf(null)
     }
 
     private companion object {
         const val USER_ID = 0
         const val PACKAGE_NAME = "package.name"
         const val LABEL = "Label"
-        val CONFIG = AppListConfig(userIds = listOf(USER_ID), showInstantApps = false)
+        val CONFIG = AppListConfig(
+            userIds = listOf(USER_ID),
+            showInstantApps = false,
+            matchAnyUserForAdmin = false,
+        )
         val APP = ApplicationInfo().apply {
             packageName = PACKAGE_NAME
         }

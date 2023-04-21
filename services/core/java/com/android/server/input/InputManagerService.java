@@ -547,6 +547,10 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.systemRunning();
         mKeyboardBacklightController.systemRunning();
         mKeyRemapper.systemRunning();
+
+        mNative.setStylusPointerIconEnabled(
+                Objects.requireNonNull(mContext.getSystemService(InputManager.class))
+                        .isStylusPointerIconEnabled());
     }
 
     private void reloadDeviceAliases() {
@@ -682,13 +686,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @NonNull
     private InputChannel createSpyWindowGestureMonitor(IBinder monitorToken, String name,
-            int displayId, int pid, int uid) {
-        final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
-                displayId);
-        if (sc == null) {
-            throw new IllegalArgumentException(
-                    "Could not create gesture monitor surface on display: " + displayId);
-        }
+            SurfaceControl sc, int displayId, int pid, int uid) {
         final InputChannel channel = createInputChannel(name);
 
         try {
@@ -745,9 +743,18 @@ public class InputManagerService extends IInputManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            final InputChannel inputChannel =
-                            createSpyWindowGestureMonitor(monitorToken, name, displayId, pid, uid);
-            return new InputMonitor(inputChannel, new InputMonitorHost(inputChannel.getToken()));
+            final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
+                    displayId);
+            if (sc == null) {
+                throw new IllegalArgumentException(
+                        "Could not create gesture monitor surface on display: " + displayId);
+            }
+
+            final InputChannel inputChannel = createSpyWindowGestureMonitor(
+                    monitorToken, name, sc, displayId, pid, uid);
+            return new InputMonitor(inputChannel,
+                new InputMonitorHost(inputChannel.getToken()),
+                new SurfaceControl(sc, "IMS.monitorGestureInput"));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -2749,13 +2756,6 @@ public class InputManagerService extends IInputManager.Stub
         return null;
     }
 
-    // Native callback.
-    @SuppressWarnings("unused")
-    private boolean isStylusPointerIconEnabled() {
-        return Objects.requireNonNull(mContext.getSystemService(InputManager.class))
-                .isStylusPointerIconEnabled();
-    }
-
     private static class PointerDisplayIdChangedArgs {
         final int mPointerDisplayId;
         final float mXPosition;
@@ -2862,9 +2862,6 @@ public class InputManagerService extends IInputManager.Stub
         int getPointerLayer();
 
         int getPointerDisplayId();
-
-        /** Gets the x and y coordinates of the cursor's current position. */
-        PointF getCursorPosition();
 
         /**
          * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event
@@ -3189,7 +3186,11 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public PointF getCursorPosition() {
-            return mWindowManagerCallbacks.getCursorPosition();
+            final float[] p = mNative.getMouseCursorPosition();
+            if (p == null || p.length != 2) {
+                throw new IllegalStateException("Failed to get mouse cursor position");
+            }
+            return new PointF(p[0], p[1]);
         }
 
         @Override

@@ -24,7 +24,14 @@ import static android.content.Intent.ACTION_TIME_CHANGED;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_ALL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
-import static com.android.server.am.BroadcastRecord.calculateBlockedUntilTerminalCount;
+import static com.android.server.am.BroadcastRecord.DELIVERY_DEFERRED;
+import static com.android.server.am.BroadcastRecord.DELIVERY_DELIVERED;
+import static com.android.server.am.BroadcastRecord.DELIVERY_PENDING;
+import static com.android.server.am.BroadcastRecord.DELIVERY_SKIPPED;
+import static com.android.server.am.BroadcastRecord.DELIVERY_TIMEOUT;
+import static com.android.server.am.BroadcastRecord.calculateBlockedUntilBeyondCount;
+import static com.android.server.am.BroadcastRecord.calculateDeferUntilActive;
+import static com.android.server.am.BroadcastRecord.calculateUrgent;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -38,6 +45,7 @@ import static org.mockito.Mockito.doReturn;
 import android.app.ActivityManagerInternal;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -75,6 +83,7 @@ import java.util.function.BiFunction;
 @SmallTest
 @RunWith(MockitoJUnitRunner.class)
 public class BroadcastRecordTest {
+    private static final String TAG = "BroadcastRecordTest";
 
     private static final int USER0 = UserHandle.USER_SYSTEM;
     private static final int USER1 = USER0 + 1;
@@ -85,6 +94,15 @@ public class BroadcastRecordTest {
     private static final String PACKAGE4 = "pkg4";
     private static final String[] PACKAGE_LIST = new String[] {PACKAGE1, PACKAGE2, PACKAGE3,
             PACKAGE4};
+
+    private static final int SYSTEM_UID = android.os.Process.SYSTEM_UID;
+    private static final int APP_UID = android.os.Process.FIRST_APPLICATION_UID;
+
+    private static final BroadcastOptions OPT_DEFAULT = BroadcastOptions.makeBasic();
+    private static final BroadcastOptions OPT_NONE = BroadcastOptions.makeBasic()
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_NONE);
+    private static final BroadcastOptions OPT_UNTIL_ACTIVE = BroadcastOptions.makeBasic()
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
 
     @Mock ActivityManagerInternal mActivityManagerInternal;
     @Mock BroadcastQueue mQueue;
@@ -107,13 +125,13 @@ public class BroadcastRecordTest {
         assertFalse(isPrioritized(List.of(createResolveInfo(PACKAGE1, getAppId(1), 10))));
 
         assertArrayEquals(new int[] {-1},
-                calculateBlockedUntilTerminalCount(List.of(
+                calculateBlockedUntilBeyondCount(List.of(
                         createResolveInfo(PACKAGE1, getAppId(1), 0)), false));
         assertArrayEquals(new int[] {-1},
-                calculateBlockedUntilTerminalCount(List.of(
+                calculateBlockedUntilBeyondCount(List.of(
                         createResolveInfo(PACKAGE1, getAppId(1), -10)), false));
         assertArrayEquals(new int[] {-1},
-                calculateBlockedUntilTerminalCount(List.of(
+                calculateBlockedUntilBeyondCount(List.of(
                         createResolveInfo(PACKAGE1, getAppId(1), 10)), false));
     }
 
@@ -129,12 +147,12 @@ public class BroadcastRecordTest {
                 createResolveInfo(PACKAGE3, getAppId(3), 10))));
 
         assertArrayEquals(new int[] {-1,-1,-1},
-                calculateBlockedUntilTerminalCount(List.of(
+                calculateBlockedUntilBeyondCount(List.of(
                         createResolveInfo(PACKAGE1, getAppId(1), 0),
                         createResolveInfo(PACKAGE2, getAppId(2), 0),
                         createResolveInfo(PACKAGE3, getAppId(3), 0)), false));
         assertArrayEquals(new int[] {-1,-1,-1},
-                calculateBlockedUntilTerminalCount(List.of(
+                calculateBlockedUntilBeyondCount(List.of(
                         createResolveInfo(PACKAGE1, getAppId(1), 10),
                         createResolveInfo(PACKAGE2, getAppId(2), 10),
                         createResolveInfo(PACKAGE3, getAppId(3), 10)), false));
@@ -143,26 +161,176 @@ public class BroadcastRecordTest {
     @Test
     public void testIsPrioritized_Yes() {
         assertTrue(isPrioritized(List.of(
-                createResolveInfo(PACKAGE1, getAppId(1), -10),
+                createResolveInfo(PACKAGE1, getAppId(1), 10),
                 createResolveInfo(PACKAGE2, getAppId(2), 0),
-                createResolveInfo(PACKAGE3, getAppId(3), 10))));
+                createResolveInfo(PACKAGE3, getAppId(3), -10))));
         assertTrue(isPrioritized(List.of(
-                createResolveInfo(PACKAGE1, getAppId(1), 0),
+                createResolveInfo(PACKAGE1, getAppId(1), 10),
                 createResolveInfo(PACKAGE2, getAppId(2), 0),
-                createResolveInfo(PACKAGE3, getAppId(3), 10))));
+                createResolveInfo(PACKAGE3, getAppId(3), 0))));
 
         assertArrayEquals(new int[] {0,1,2},
-                calculateBlockedUntilTerminalCount(List.of(
-                        createResolveInfo(PACKAGE1, getAppId(1), -10),
+                calculateBlockedUntilBeyondCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), 10),
                         createResolveInfo(PACKAGE2, getAppId(2), 0),
-                        createResolveInfo(PACKAGE3, getAppId(3), 10)), false));
+                        createResolveInfo(PACKAGE3, getAppId(3), -10)), false));
         assertArrayEquals(new int[] {0,0,2,3,3},
-                calculateBlockedUntilTerminalCount(List.of(
-                        createResolveInfo(PACKAGE1, getAppId(1), 0),
-                        createResolveInfo(PACKAGE2, getAppId(2), 0),
+                calculateBlockedUntilBeyondCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), 20),
+                        createResolveInfo(PACKAGE2, getAppId(2), 20),
                         createResolveInfo(PACKAGE3, getAppId(3), 10),
-                        createResolveInfo(PACKAGE3, getAppId(3), 20),
-                        createResolveInfo(PACKAGE3, getAppId(3), 20)), false));
+                        createResolveInfo(PACKAGE3, getAppId(3), 0),
+                        createResolveInfo(PACKAGE3, getAppId(3), 0)), false));
+    }
+
+    @Test
+    public void testSetDeliveryState_Single() {
+        final BroadcastRecord r = createBroadcastRecord(
+                new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED), List.of(
+                        createResolveInfoWithPriority(0)));
+        assertEquals(DELIVERY_PENDING, r.getDeliveryState(0));
+        assertBlocked(r, false);
+        assertTerminalDeferredBeyond(r, 0, 0, 0);
+
+        r.setDeliveryState(0, DELIVERY_DEFERRED, TAG);
+        assertEquals(DELIVERY_DEFERRED, r.getDeliveryState(0));
+        assertBlocked(r, false);
+        assertTerminalDeferredBeyond(r, 0, 1, 1);
+
+        // Identical state change has no effect
+        r.setDeliveryState(0, DELIVERY_DEFERRED, TAG);
+        assertEquals(DELIVERY_DEFERRED, r.getDeliveryState(0));
+        assertBlocked(r, false);
+        assertTerminalDeferredBeyond(r, 0, 1, 1);
+
+        // Moving to terminal state updates counters
+        r.setDeliveryState(0, DELIVERY_DELIVERED, TAG);
+        assertEquals(DELIVERY_DELIVERED, r.getDeliveryState(0));
+        assertBlocked(r, false);
+        assertTerminalDeferredBeyond(r, 1, 0, 1);
+
+        // Trying to change terminal state has no effect
+        r.setDeliveryState(0, DELIVERY_TIMEOUT, TAG);
+        assertEquals(DELIVERY_DELIVERED, r.getDeliveryState(0));
+        assertBlocked(r, false);
+        assertTerminalDeferredBeyond(r, 1, 0, 1);
+    }
+
+    @Test
+    public void testSetDeliveryState_Unordered() {
+        final BroadcastRecord r = createBroadcastRecord(
+                new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED), List.of(
+                        createResolveInfoWithPriority(0),
+                        createResolveInfoWithPriority(0),
+                        createResolveInfoWithPriority(0)));
+        assertBlocked(r, false, false, false);
+        assertTerminalDeferredBeyond(r, 0, 0, 0);
+
+        // Even though we finish a middle item in the tranche, we're not
+        // "beyond" it because there is still unfinished work before it
+        r.setDeliveryState(1, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false);
+        assertTerminalDeferredBeyond(r, 1, 0, 0);
+
+        r.setDeliveryState(0, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false);
+        assertTerminalDeferredBeyond(r, 2, 0, 2);
+
+        r.setDeliveryState(2, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false);
+        assertTerminalDeferredBeyond(r, 3, 0, 3);
+    }
+
+    @Test
+    public void testSetDeliveryState_Ordered() {
+        final BroadcastRecord r = createOrderedBroadcastRecord(
+                new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED), List.of(
+                        createResolveInfoWithPriority(0),
+                        createResolveInfoWithPriority(0),
+                        createResolveInfoWithPriority(0)));
+        assertBlocked(r, false, true, true);
+        assertTerminalDeferredBeyond(r, 0, 0, 0);
+
+        r.setDeliveryState(0, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, true);
+        assertTerminalDeferredBeyond(r, 1, 0, 1);
+
+        r.setDeliveryState(1, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false);
+        assertTerminalDeferredBeyond(r, 2, 0, 2);
+
+        r.setDeliveryState(2, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false);
+        assertTerminalDeferredBeyond(r, 3, 0, 3);
+    }
+
+    @Test
+    public void testSetDeliveryState_DeferUntilActive() {
+        final BroadcastRecord r = createBroadcastRecord(
+                new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED), List.of(
+                        createResolveInfoWithPriority(10),
+                        createResolveInfoWithPriority(10),
+                        createResolveInfoWithPriority(10),
+                        createResolveInfoWithPriority(0),
+                        createResolveInfoWithPriority(0),
+                        createResolveInfoWithPriority(0),
+                        createResolveInfoWithPriority(-10),
+                        createResolveInfoWithPriority(-10),
+                        createResolveInfoWithPriority(-10)));
+        assertBlocked(r, false, false, false, true, true, true, true, true, true);
+        assertTerminalDeferredBeyond(r, 0, 0, 0);
+
+        r.setDeliveryState(0, DELIVERY_PENDING, TAG);
+        r.setDeliveryState(1, DELIVERY_DEFERRED, TAG);
+        r.setDeliveryState(2, DELIVERY_PENDING, TAG);
+        r.setDeliveryState(3, DELIVERY_DEFERRED, TAG);
+        r.setDeliveryState(4, DELIVERY_DEFERRED, TAG);
+        r.setDeliveryState(5, DELIVERY_DEFERRED, TAG);
+        r.setDeliveryState(6, DELIVERY_DEFERRED, TAG);
+        r.setDeliveryState(7, DELIVERY_PENDING, TAG);
+        r.setDeliveryState(8, DELIVERY_DEFERRED, TAG);
+
+        // Verify deferred counts ratchet up, but we're not "beyond" the first
+        // still-pending receiver
+        assertBlocked(r, false, false, false, true, true, true, true, true, true);
+        assertTerminalDeferredBeyond(r, 0, 6, 0);
+
+        // We're still not "beyond" the first still-pending receiver, even when
+        // we finish a receiver later in the first tranche
+        r.setDeliveryState(2, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false, true, true, true, true, true, true);
+        assertTerminalDeferredBeyond(r, 1, 6, 0);
+
+        // Completing that last item in first tranche means we now unblock the
+        // second tranche, and since it's entirely deferred, the third traunche
+        // is unblocked too
+        r.setDeliveryState(0, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false, false, false, false, false, false, false);
+        assertTerminalDeferredBeyond(r, 2, 6, 7);
+
+        // Moving a deferred item in an earlier tranche back to being pending
+        // doesn't change the fact that we've already moved beyond it
+        r.setDeliveryState(1, DELIVERY_PENDING, TAG);
+        assertBlocked(r, false, false, false, false, false, false, false, false, false);
+        assertTerminalDeferredBeyond(r, 2, 5, 7);
+        r.setDeliveryState(1, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false, false, false, false, false, false, false);
+        assertTerminalDeferredBeyond(r, 3, 5, 7);
+
+        // Completing middle pending item is enough to fast-forward to end
+        r.setDeliveryState(7, DELIVERY_DELIVERED, TAG);
+        assertBlocked(r, false, false, false, false, false, false, false, false, false);
+        assertTerminalDeferredBeyond(r, 4, 5, 9);
+
+        // Moving everyone else directly into a finished state updates all the
+        // terminal counters
+        r.setDeliveryState(3, DELIVERY_SKIPPED, TAG);
+        r.setDeliveryState(4, DELIVERY_SKIPPED, TAG);
+        r.setDeliveryState(5, DELIVERY_SKIPPED, TAG);
+        r.setDeliveryState(6, DELIVERY_SKIPPED, TAG);
+        r.setDeliveryState(8, DELIVERY_SKIPPED, TAG);
+        assertBlocked(r, false, false, false, false, false, false, false, false, false);
+        assertTerminalDeferredBeyond(r, 9, 0, 9);
     }
 
     @Test
@@ -210,6 +378,75 @@ public class BroadcastRecordTest {
         assertTrue(isReceiverEquals(info, info));
         assertTrue(isReceiverEquals(info, createResolveInfo(PACKAGE1, getAppId(1))));
         assertFalse(isReceiverEquals(info, createResolveInfo(PACKAGE2, getAppId(2))));
+    }
+
+    @Test
+    public void testCalculateUrgent() {
+        final Intent intent = new Intent();
+        final Intent intentForeground = new Intent()
+                .setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+        assertFalse(calculateUrgent(intent, null));
+        assertTrue(calculateUrgent(intentForeground, null));
+
+        {
+            final BroadcastOptions opts = BroadcastOptions.makeBasic();
+            assertFalse(calculateUrgent(intent, opts));
+        }
+        {
+            final BroadcastOptions opts = BroadcastOptions.makeBasic();
+            opts.setInteractive(true);
+            assertTrue(calculateUrgent(intent, opts));
+        }
+        {
+            final BroadcastOptions opts = BroadcastOptions.makeBasic();
+            opts.setAlarmBroadcast(true);
+            assertTrue(calculateUrgent(intent, opts));
+        }
+    }
+
+    @Test
+    public void testCalculateDeferUntilActive_App() {
+        // Verify non-urgent behavior
+        assertFalse(calculateDeferUntilActive(APP_UID, null, null, false, false));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_DEFAULT, null, false, false));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_NONE, null, false, false));
+        assertTrue(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, null, false, false));
+
+        // Verify urgent behavior
+        assertFalse(calculateDeferUntilActive(APP_UID, null, null, false, true));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_DEFAULT, null, false, true));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_NONE, null, false, true));
+        assertTrue(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, null, false, true));
+    }
+
+    @Test
+    public void testCalculateDeferUntilActive_System() {
+        BroadcastRecord.CORE_DEFER_UNTIL_ACTIVE = true;
+
+        // Verify non-urgent behavior
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, null, null, false, false));
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, OPT_DEFAULT, null, false, false));
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, OPT_NONE, null, false, false));
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, OPT_UNTIL_ACTIVE, null, false, false));
+
+        // Verify urgent behavior
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, null, null, false, true));
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, OPT_DEFAULT, null, false, true));
+        assertFalse(calculateDeferUntilActive(SYSTEM_UID, OPT_NONE, null, false, true));
+        assertTrue(calculateDeferUntilActive(SYSTEM_UID, OPT_UNTIL_ACTIVE, null, false, true));
+    }
+
+    @Test
+    public void testCalculateDeferUntilActive_Overrides() {
+        final IIntentReceiver resultTo = new IIntentReceiver.Default();
+
+        // Ordered broadcasts never deferred; requested option is ignored
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, null, true, false));
+        assertFalse(calculateDeferUntilActive(APP_UID, OPT_UNTIL_ACTIVE, resultTo, true, false));
+
+        // Unordered with result is always deferred; requested option is ignored
+        assertTrue(calculateDeferUntilActive(APP_UID, OPT_NONE, resultTo, false, false));
     }
 
     @Test
@@ -606,6 +843,10 @@ public class BroadcastRecordTest {
                 : errorMsg.insert(0, "Contains unexpected receiver: ").toString();
     }
 
+    private static ResolveInfo createResolveInfoWithPriority(int priority) {
+        return createResolveInfo(PACKAGE1, getAppId(1), priority);
+    }
+
     private static ResolveInfo createResolveInfo(String packageName, int uid) {
         return createResolveInfo(packageName, uid, 0);
     }
@@ -656,21 +897,40 @@ public class BroadcastRecordTest {
         return excludedList;
     }
 
+    private BroadcastRecord createBroadcastRecord(Intent intent,
+            List<ResolveInfo> receivers) {
+        return createBroadcastRecord(receivers, USER0, intent, null /* filterExtrasForReceiver */,
+                null /* options */, false);
+    }
+
+    private BroadcastRecord createOrderedBroadcastRecord(Intent intent,
+            List<ResolveInfo> receivers) {
+        return createBroadcastRecord(receivers, USER0, intent, null /* filterExtrasForReceiver */,
+                null /* options */, true);
+    }
+
     private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
             Intent intent) {
         return createBroadcastRecord(receivers, userId, intent, null /* filterExtrasForReceiver */,
-                null /* options */);
+                null /* options */, false);
     }
 
     private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
             Intent intent, BroadcastOptions options) {
         return createBroadcastRecord(receivers, userId, intent, null /* filterExtrasForReceiver */,
-                options);
+                options, false);
     }
 
     private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
             Intent intent, BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
             BroadcastOptions options) {
+        return createBroadcastRecord(receivers, userId, intent, filterExtrasForReceiver,
+                options, false);
+    }
+
+    private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
+            Intent intent, BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            BroadcastOptions options, boolean ordered) {
         return new BroadcastRecord(
                 mQueue /* queue */,
                 intent,
@@ -692,7 +952,7 @@ public class BroadcastRecordTest {
                 0 /* resultCode */,
                 null /* resultData */,
                 null /* resultExtras */,
-                false /* serialized */,
+                ordered /* serialized */,
                 false /* sticky */,
                 false /* initialSticky */,
                 userId,
@@ -707,6 +967,20 @@ public class BroadcastRecordTest {
 
     private static boolean isPrioritized(List<Object> receivers) {
         return BroadcastRecord.isPrioritized(
-                calculateBlockedUntilTerminalCount(receivers, false), false);
+                calculateBlockedUntilBeyondCount(receivers, false), false);
+    }
+
+    private static void assertBlocked(BroadcastRecord r, boolean... blocked) {
+        assertEquals(r.receivers.size(), blocked.length);
+        for (int i = 0; i < blocked.length; i++) {
+            assertEquals("blocked " + i, blocked[i], r.isBlocked(i));
+        }
+    }
+
+    private static void assertTerminalDeferredBeyond(BroadcastRecord r,
+            int expectedTerminalCount, int expectedDeferredCount, int expectedBeyondCount) {
+        assertEquals("terminal", expectedTerminalCount, r.terminalCount);
+        assertEquals("deferred", expectedDeferredCount, r.deferredCount);
+        assertEquals("beyond", expectedBeyondCount, r.beyondCount);
     }
 }

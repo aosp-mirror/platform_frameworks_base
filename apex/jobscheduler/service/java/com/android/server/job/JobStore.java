@@ -236,7 +236,8 @@ public final class JobStore {
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
                 JobStatus newJob = new JobStatus(job,
                         elapsedRuntimes.first, elapsedRuntimes.second,
-                        0, 0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
+                        0, 0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime(),
+                        job.getCumulativeExecutionTimeMs());
                 newJob.prepareLocked();
                 toAdd.add(newJob);
                 toRemove.add(job);
@@ -786,7 +787,7 @@ public final class JobStore {
          * Write out a tag with data comprising the required fields and bias of this job and
          * its client.
          */
-        private void addAttributesToJobTag(XmlSerializer out, JobStatus jobStatus)
+        private void addAttributesToJobTag(TypedXmlSerializer out, JobStatus jobStatus)
                 throws IOException {
             out.attribute(null, "jobid", Integer.toString(jobStatus.getJobId()));
             out.attribute(null, "package", jobStatus.getServiceComponent().getPackageName());
@@ -813,6 +814,9 @@ public final class JobStore {
                     String.valueOf(jobStatus.getLastSuccessfulRunTime()));
             out.attribute(null, "lastFailedRunTime",
                     String.valueOf(jobStatus.getLastFailedRunTime()));
+
+            out.attributeLong(null, "cumulativeExecutionTime",
+                    jobStatus.getCumulativeExecutionTimeMs());
         }
 
         private void writeBundleToXml(PersistableBundle extras, XmlSerializer out)
@@ -882,6 +886,15 @@ public final class JobStore {
             }
             if (job.isRequireStorageNotLow()) {
                 out.attribute(null, "storage-not-low", Boolean.toString(true));
+            }
+            if (job.isPreferBatteryNotLow()) {
+                out.attributeBoolean(null, "prefer-battery-not-low", true);
+            }
+            if (job.isPreferCharging()) {
+                out.attributeBoolean(null, "prefer-charging", true);
+            }
+            if (job.isPreferDeviceIdle()) {
+                out.attributeBoolean(null, "prefer-idle", true);
             }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);
         }
@@ -1181,6 +1194,7 @@ public final class JobStore {
             int uid, sourceUserId;
             long lastSuccessfulRunTime;
             long lastFailedRunTime;
+            long cumulativeExecutionTime;
             int internalFlags = 0;
 
             // Read out job identifier attributes and bias.
@@ -1221,6 +1235,9 @@ public final class JobStore {
 
                 val = parser.getAttributeValue(null, "lastFailedRunTime");
                 lastFailedRunTime = val == null ? 0 : Long.parseLong(val);
+
+                cumulativeExecutionTime =
+                        parser.getAttributeLong(null, "cumulativeExecutionTime", 0);
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;
@@ -1393,7 +1410,7 @@ public final class JobStore {
                     builtJob, uid, sourcePackageName, sourceUserId,
                     appBucket, namespace, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
-                    lastSuccessfulRunTime, lastFailedRunTime,
+                    lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTime,
                     (rtcIsGood) ? null : rtcRuntimes, internalFlags, /* dynamicConstraints */ 0);
             if (jobWorkItems != null) {
                 for (int i = 0; i < jobWorkItems.size(); ++i) {
@@ -1538,6 +1555,13 @@ public final class JobStore {
             if (val != null) {
                 jobBuilder.setRequiresStorageNotLow(true);
             }
+
+            jobBuilder.setPrefersBatteryNotLow(
+                    parser.getAttributeBoolean(null, "prefer-battery-not-low", false));
+            jobBuilder.setPrefersCharging(
+                    parser.getAttributeBoolean(null, "prefer-charging", false));
+            jobBuilder.setPrefersDeviceIdle(
+                    parser.getAttributeBoolean(null, "prefer-idle", false));
         }
 
         /**

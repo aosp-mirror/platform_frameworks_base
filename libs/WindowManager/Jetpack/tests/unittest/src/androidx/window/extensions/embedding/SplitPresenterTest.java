@@ -678,7 +678,8 @@ public class SplitPresenterTest {
                 .setShouldClearTop(false)
                 .build();
 
-        mPresenter.createNewSplitContainer(mTransaction, mActivity, secondaryActivity, rule);
+        mPresenter.createNewSplitContainer(mTransaction, mActivity, secondaryActivity, rule,
+                SPLIT_ATTRIBUTES);
 
         assertEquals(primaryTf, mController.getContainerWithActivity(mActivity));
         final TaskFragmentContainer secondaryTf = mController.getContainerWithActivity(
@@ -726,6 +727,27 @@ public class SplitPresenterTest {
 
         assertEquals(splitAttributes, mPresenter.computeSplitAttributes(taskProperties,
                 splitPairRule, SPLIT_ATTRIBUTES, null /* minDimensionsPair */));
+    }
+
+    @Test
+    public void testComputeSplitAttributesOnHingeSplitTypeOnDeviceWithoutFoldingFeature() {
+        final SplitAttributes hingeSplitAttrs = new SplitAttributes.Builder()
+                .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
+                        SplitAttributes.SplitType.RatioSplitType.splitEqually()))
+                .build();
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
+                activityPair -> true,
+                activityIntentPair -> true,
+                windowMetrics -> windowMetrics.getBounds().equals(TASK_BOUNDS))
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setDefaultSplitAttributes(hingeSplitAttrs)
+                .build();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
+        doReturn(null).when(mPresenter).getFoldingFeature(any());
+
+        assertEquals(hingeSplitAttrs, mPresenter.computeSplitAttributes(taskProperties,
+                splitPairRule, hingeSplitAttrs, null /* minDimensionsPair */));
     }
 
     @Test

@@ -18,6 +18,7 @@ package com.android.internal.jank;
 
 import static android.Manifest.permission.READ_DEVICE_CONFIG;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.provider.DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR;
 
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
@@ -35,8 +36,10 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_SEARCH_RESULT;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_OCCLUSION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_APPEAR;
@@ -94,6 +97,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
 import android.Manifest;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -101,6 +105,7 @@ import android.annotation.UiThread;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -127,6 +132,7 @@ import com.android.internal.util.PerfettoTrigger;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -138,6 +144,14 @@ import java.util.concurrent.TimeUnit;
  *
  * adb shell device_config put interaction_jank_monitor enabled true
  * adb shell device_config put interaction_jank_monitor sampling_interval 1
+ *
+ * On debuggable builds, an overlay can be used to display the name of the
+ * currently running cuj using:
+ *
+ * adb shell device_config put interaction_jank_monitor debug_overlay_enabled true
+ *
+ * NOTE: The overlay will interfere with metrics, so it should only be used
+ * for understanding which UI events correspeond to which CUJs.
  *
  * @hide
  */
@@ -155,6 +169,7 @@ public class InteractionJankMonitor {
             "trace_threshold_missed_frames";
     private static final String SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY =
             "trace_threshold_frame_time_millis";
+    private static final String SETTINGS_DEBUG_OVERLAY_ENABLED_KEY = "debug_overlay_enabled";
     /** Default to being enabled on debug builds. */
     private static final boolean DEFAULT_ENABLED = Build.IS_DEBUGGABLE;
     /** Default to collecting data for all CUJs. */
@@ -162,6 +177,7 @@ public class InteractionJankMonitor {
     /** Default to triggering trace if 3 frames are missed OR a frame takes at least 64ms */
     private static final int DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES = 3;
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
+    private static final boolean DEFAULT_DEBUG_OVERLAY_ENABLED = false;
 
     @VisibleForTesting
     public static final int MAX_LENGTH_OF_CUJ_NAME = 80;
@@ -240,6 +256,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE = 67;
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME = 68;
     public static final int CUJ_IME_INSETS_ANIMATION = 69;
+    public static final int CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION = 70;
+    public static final int CUJ_LAUNCHER_OPEN_SEARCH_RESULT = 71;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -318,6 +336,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_SEARCH_RESULT,
     };
 
     private static class InstanceHolder {
@@ -335,6 +355,9 @@ public class InteractionJankMonitor {
     private final HandlerThread mWorker;
     private final DisplayResolutionTracker mDisplayResolutionTracker;
     private final Object mLock = new Object();
+    private @ColorInt int mDebugBgColor = Color.CYAN;
+    private double mDebugYOffset = 0.1;
+    private InteractionMonitorDebugOverlay mDebugOverlay;
 
     private volatile boolean mEnabled = DEFAULT_ENABLED;
     private int mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
@@ -412,6 +435,8 @@ public class InteractionJankMonitor {
             CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE,
             CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
             CUJ_IME_INSETS_ANIMATION,
+            CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION,
+            CUJ_LAUNCHER_OPEN_SEARCH_RESULT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -443,17 +468,7 @@ public class InteractionJankMonitor {
         mEnabled = DEFAULT_ENABLED;
 
         final Context context = ActivityThread.currentApplication();
-        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) == PERMISSION_GRANTED) {
-            // Post initialization to the background in case we're running on the main thread.
-            mWorker.getThreadHandler().post(
-                    () -> mPropertiesChangedListener.onPropertiesChanged(
-                            DeviceConfig.getProperties(
-                                    DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR)));
-            DeviceConfig.addOnPropertiesChangedListener(
-                    DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR,
-                    new HandlerExecutor(mWorker.getThreadHandler()),
-                    mPropertiesChangedListener);
-        } else {
+        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {
             if (DEBUG) {
                 Log.d(TAG, "Initialized the InteractionJankMonitor."
                         + " (No READ_DEVICE_CONFIG permission to change configs)"
@@ -462,7 +477,25 @@ public class InteractionJankMonitor {
                         + ", frameTimeThreshold=" + mTraceThresholdFrameTimeMillis
                         + ", package=" + context.getPackageName());
             }
+            return;
         }
+
+        // Post initialization to the background in case we're running on the main thread.
+        mWorker.getThreadHandler().post(
+                () -> {
+                    try {
+                        mPropertiesChangedListener.onPropertiesChanged(
+                                DeviceConfig.getProperties(NAMESPACE_INTERACTION_JANK_MONITOR));
+                        DeviceConfig.addOnPropertiesChangedListener(
+                                NAMESPACE_INTERACTION_JANK_MONITOR,
+                                new HandlerExecutor(mWorker.getThreadHandler()),
+                                mPropertiesChangedListener);
+                    } catch (SecurityException ex) {
+                        Log.d(TAG, "Can't get properties: READ_DEVICE_CONFIG granted="
+                                + context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
+                                + ", package=" + context.getPackageName());
+                    }
+                });
     }
 
     /**
@@ -515,7 +548,7 @@ public class InteractionJankMonitor {
         if (needRemoveTasks(action, session)) {
             getTracker(session.getCuj()).getHandler().runWithScissors(() -> {
                 removeTimeout(session.getCuj());
-                removeTracker(session.getCuj());
+                removeTracker(session.getCuj(), session.getReason());
             }, EXECUTOR_TASK_TIMEOUT);
         }
     }
@@ -574,8 +607,10 @@ public class InteractionJankMonitor {
     public boolean begin(@NonNull Configuration.Builder builder) {
         try {
             final Configuration config = builder.build();
-            EventLogTags.writeJankCujEventsBeginRequest(
-                    config.mCujType, SystemClock.elapsedRealtimeNanos(), SystemClock.uptimeNanos());
+            postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+                EventLogTags.writeJankCujEventsBeginRequest(
+                        config.mCujType, unixNanos, elapsedNanos, realtimeNanos, config.mTag);
+            });
             final TrackerResult result = new TrackerResult();
             final boolean success = config.getHandler().runWithScissors(
                     () -> result.mResult = beginInternal(config), EXECUTOR_TASK_TIMEOUT);
@@ -649,8 +684,10 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsEndRequest(cujType, SystemClock.elapsedRealtimeNanos(),
-                SystemClock.uptimeNanos());
+        postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+            EventLogTags.writeJankCujEventsEndRequest(
+                    cujType, unixNanos, elapsedNanos, realtimeNanos);
+        });
         FrameTracker tracker = getTracker(cujType);
         // Skip this call since we haven't started a trace yet.
         if (tracker == null) return false;
@@ -677,7 +714,7 @@ public class InteractionJankMonitor {
         if (tracker == null) return false;
         // if the end call doesn't return true, another thread is handling end of the cuj.
         if (tracker.end(REASON_END_NORMAL)) {
-            removeTracker(cujType);
+            removeTracker(cujType, REASON_END_NORMAL);
         }
         return true;
     }
@@ -688,8 +725,10 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsCancelRequest(cujType, SystemClock.elapsedRealtimeNanos(),
-                SystemClock.uptimeNanos());
+        postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+            EventLogTags.writeJankCujEventsCancelRequest(
+                    cujType, unixNanos, elapsedNanos, realtimeNanos);
+        });
         return cancel(cujType, REASON_CANCEL_NORMAL);
     }
 
@@ -726,7 +765,7 @@ public class InteractionJankMonitor {
         if (tracker == null) return false;
         // if the cancel call doesn't return true, another thread is handling cancel of the cuj.
         if (tracker.cancel(reason)) {
-            removeTracker(cujType);
+            removeTracker(cujType, reason);
         }
         return true;
     }
@@ -734,6 +773,13 @@ public class InteractionJankMonitor {
     private void putTracker(@CujType int cuj, @NonNull FrameTracker tracker) {
         synchronized (mLock) {
             mRunningTrackers.put(cuj, tracker);
+            if (mDebugOverlay != null) {
+                mDebugOverlay.onTrackerAdded(cuj, tracker.getViewRoot());
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Added tracker for " + getNameOfCuj(cuj)
+                        + ". mRunningTrackers=" + listNamesOfCujs(mRunningTrackers));
+            }
         }
     }
 
@@ -743,9 +789,16 @@ public class InteractionJankMonitor {
         }
     }
 
-    private void removeTracker(@CujType int cuj) {
+    private void removeTracker(@CujType int cuj, int reason) {
         synchronized (mLock) {
             mRunningTrackers.remove(cuj);
+            if (mDebugOverlay != null) {
+                mDebugOverlay.onTrackerRemoved(cuj, reason, mRunningTrackers);
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Removed tracker for " + getNameOfCuj(cuj)
+                        + ". mRunningTrackers=" + listNamesOfCujs(mRunningTrackers));
+            }
         }
     }
 
@@ -758,6 +811,16 @@ public class InteractionJankMonitor {
         mTraceThresholdFrameTimeMillis = properties.getInt(
                 SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY,
                 DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS);
+        // Never allow the debug overlay to be used on user builds
+        boolean debugOverlayEnabled = Build.IS_DEBUGGABLE && properties.getBoolean(
+                SETTINGS_DEBUG_OVERLAY_ENABLED_KEY,
+                DEFAULT_DEBUG_OVERLAY_ENABLED);
+        if (debugOverlayEnabled && mDebugOverlay == null) {
+            mDebugOverlay = new InteractionMonitorDebugOverlay(mDebugBgColor, mDebugYOffset);
+        } else if (!debugOverlayEnabled && mDebugOverlay != null) {
+            mDebugOverlay.dispose();
+            mDebugOverlay = null;
+        }
         // The memory visibility is powered by the volatile field, mEnabled.
         mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
     }
@@ -795,6 +858,39 @@ public class InteractionJankMonitor {
      */
     private static int getCujTypeFromInteraction(int interactionType) {
         return interactionType - 1;
+    }
+
+    /**
+     * Configures the debug overlay used for displaying interaction names on the screen while they
+     * occur.
+     *
+     * @param bgColor the background color of the box used to display the CUJ names
+     * @param yOffset number between 0 and 1 to indicate where the top of the box should be relative
+     *                to the height of the screen
+     */
+    public void configDebugOverlay(@ColorInt int bgColor, double yOffset) {
+        mDebugBgColor = bgColor;
+        mDebugYOffset = yOffset;
+    }
+
+    /**
+     * A helper method for getting a string representation of all running CUJs. For example,
+     * "(LOCKSCREEN_TRANSITION_FROM_AOD, IME_INSETS_ANIMATION)"
+     */
+    private static String listNamesOfCujs(SparseArray<FrameTracker> trackers) {
+        if (!DEBUG) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        for (int i = 0; i < trackers.size(); i++) {
+            sb.append(getNameOfCuj(trackers.keyAt(i)));
+            if (i < trackers.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(')');
+        return sb.toString();
     }
 
     /**
@@ -946,6 +1042,10 @@ public class InteractionJankMonitor {
                 return "LAUNCHER_CLOSE_ALL_APPS_TO_HOME";
             case CUJ_IME_INSETS_ANIMATION:
                 return "IME_INSETS_ANIMATION";
+            case CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION:
+                return "LOCKSCREEN_CLOCK_MOVE_ANIMATION";
+            case CUJ_LAUNCHER_OPEN_SEARCH_RESULT:
+                return "LAUNCHER_OPEN_SEARCH_RESULT";
         }
         return "UNKNOWN";
     }
@@ -1277,5 +1377,22 @@ public class InteractionJankMonitor {
         public int getReason() {
             return mReason;
         }
+    }
+
+    @FunctionalInterface
+    private interface TimeFunction {
+        void invoke(long unixNanos, long elapsedNanos, long realtimeNanos);
+    }
+
+    private void postEventLogToWorkerThread(TimeFunction logFunction) {
+        final Instant now = Instant.now();
+        final long unixNanos = TimeUnit.NANOSECONDS.convert(now.getEpochSecond(), TimeUnit.SECONDS)
+                + now.getNano();
+        final long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        final long realtimeNanos = SystemClock.uptimeNanos();
+
+        mWorker.getThreadHandler().post(() -> {
+            logFunction.invoke(unixNanos, elapsedNanos, realtimeNanos);
+        });
     }
 }

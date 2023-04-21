@@ -132,14 +132,15 @@ final class PackageHandler extends Handler {
                     // Not found or complete.
                     break;
                 }
-                if (!streaming && state.timeoutExtended()) {
+
+                final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
+                if (!streaming && state.timeoutExtended(response.callerUid)) {
                     // Timeout extended.
                     break;
                 }
 
-                final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
-                VerificationUtils.processVerificationResponse(verificationId, state, response,
-                        "Verification timed out", mPm);
+                VerificationUtils.processVerificationResponseOnTimeout(verificationId, state,
+                        response, mPm);
 
                 break;
             }
@@ -195,8 +196,7 @@ final class PackageHandler extends Handler {
                 }
 
                 final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
-                VerificationUtils.processVerificationResponse(verificationId, state, response,
-                        "Install not allowed", mPm);
+                VerificationUtils.processVerificationResponse(verificationId, state, response, mPm);
 
                 break;
             }

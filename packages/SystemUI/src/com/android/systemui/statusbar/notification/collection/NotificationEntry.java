@@ -22,7 +22,6 @@ import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
@@ -71,6 +70,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
+import com.android.systemui.util.ListenerSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +163,8 @@ public final class NotificationEntry extends ListEntry {
     private boolean hasSentReply;
 
     private boolean mSensitive = true;
-    private List<OnSensitivityChangedListener> mOnSensitivityChangedListeners = new ArrayList<>();
+    private ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
+            new ListenerSet<>();
 
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
@@ -317,6 +318,15 @@ public final class NotificationEntry extends ListEntry {
 
     void setDismissState(@NonNull DismissState dismissState) {
         mDismissState = requireNonNull(dismissState);
+    }
+
+    /**
+     * True if the notification has been canceled by system server. Usually, such notifications are
+     * immediately removed from the collection, but can sometimes stick around due to lifetime
+     * extenders.
+     */
+    public boolean isCanceled() {
+        return mCancellationReason != REASON_NOT_CANCELED;
     }
 
     @Nullable public NotifFilter getExcludingFilter() {
@@ -814,8 +824,7 @@ public final class NotificationEntry extends ListEntry {
             return false;
         }
 
-        if ((mSbn.getNotification().flags
-                & FLAG_FOREGROUND_SERVICE) != 0) {
+        if (mSbn.getNotification().isFgsOrUij()) {
             return true;
         }
         if (mSbn.getNotification().isMediaNotification()) {
@@ -932,8 +941,9 @@ public final class NotificationEntry extends ListEntry {
         getRow().setSensitive(sensitive, deviceSensitive);
         if (sensitive != mSensitive) {
             mSensitive = sensitive;
-            for (int i = 0; i < mOnSensitivityChangedListeners.size(); i++) {
-                mOnSensitivityChangedListeners.get(i).onSensitivityChanged(this);
+            for (NotificationEntry.OnSensitivityChangedListener listener :
+                    mOnSensitivityChangedListeners) {
+                listener.onSensitivityChanged(this);
             }
         }
     }
@@ -944,7 +954,7 @@ public final class NotificationEntry extends ListEntry {
 
     /** Add a listener to be notified when the entry's sensitivity changes. */
     public void addOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
-        mOnSensitivityChangedListeners.add(listener);
+        mOnSensitivityChangedListeners.addIfAbsent(listener);
     }
 
     /** Remove a listener that was registered above. */

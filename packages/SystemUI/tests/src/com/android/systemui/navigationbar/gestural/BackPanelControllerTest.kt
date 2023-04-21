@@ -124,10 +124,10 @@ class BackPanelControllerTest : SysuiTestCase() {
         continueTouch(START_X + touchSlop.toFloat() + 1)
         continueTouch(
             START_X + touchSlop + triggerThreshold -
-                mBackPanelController.params.deactivationSwipeTriggerThreshold
+                mBackPanelController.params.deactivationTriggerThreshold
         )
         clearInvocations(backCallback)
-        Thread.sleep(MIN_DURATION_ACTIVE_ANIMATION)
+        Thread.sleep(MIN_DURATION_ACTIVE_BEFORE_INACTIVE_ANIMATION)
         // Move in the opposite direction to cross the deactivation threshold and cancel back
         continueTouch(START_X)
 

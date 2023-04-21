@@ -18,9 +18,11 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.app.AppOpsManager;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.PermissionChecker;
+import android.content.pm.PackageManager;
 import android.permission.PermissionCheckerManager;
 
 /**
@@ -40,6 +42,7 @@ import android.permission.PermissionCheckerManager;
 public class PermissionEnforcer {
 
     private final Context mContext;
+    private static final String ACCESS_DENIED = "Access denied, requires: ";
 
     /** Protected constructor. Allows subclasses to instantiate an object
      *  without using a Context.
@@ -59,11 +62,42 @@ public class PermissionEnforcer {
             mContext, permission, PermissionChecker.PID_UNKNOWN, source, "" /* message */);
     }
 
+    @SuppressWarnings("AndroidFrameworkClientSidePermissionCheck")
+    @PermissionCheckerManager.PermissionResult
+    protected int checkPermission(@NonNull String permission, int pid, int uid) {
+        if (mContext.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_GRANTED) {
+            return PermissionCheckerManager.PERMISSION_GRANTED;
+        }
+        return PermissionCheckerManager.PERMISSION_HARD_DENIED;
+    }
+
+    private boolean anyAppOps(@NonNull String[] permissions) {
+        for (String permission : permissions) {
+            if (AppOpsManager.permissionToOpCode(permission) != AppOpsManager.OP_NONE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void enforcePermission(@NonNull String permission, @NonNull
             AttributionSource source) throws SecurityException {
         int result = checkPermission(permission, source);
         if (result != PermissionCheckerManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Access denied, requires: " + permission);
+            throw new SecurityException(ACCESS_DENIED + permission);
+        }
+    }
+
+    public void enforcePermission(@NonNull String permission, int pid, int uid)
+            throws SecurityException {
+        if (AppOpsManager.permissionToOpCode(permission) != AppOpsManager.OP_NONE) {
+            AttributionSource source = new AttributionSource(uid, null, null);
+            enforcePermission(permission, source);
+            return;
+        }
+        int result = checkPermission(permission, pid, uid);
+        if (result != PermissionCheckerManager.PERMISSION_GRANTED) {
+            throw new SecurityException(ACCESS_DENIED + permission);
         }
     }
 
@@ -72,7 +106,23 @@ public class PermissionEnforcer {
         for (String permission : permissions) {
             int result = checkPermission(permission, source);
             if (result != PermissionCheckerManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Access denied, requires: allOf={"
+                throw new SecurityException(ACCESS_DENIED + "allOf={"
+                        + String.join(", ", permissions) + "}");
+            }
+        }
+    }
+
+    public void enforcePermissionAllOf(@NonNull String[] permissions,
+            int pid, int uid) throws SecurityException {
+        if (anyAppOps(permissions)) {
+            AttributionSource source = new AttributionSource(uid, null, null);
+            enforcePermissionAllOf(permissions, source);
+            return;
+        }
+        for (String permission : permissions) {
+            int result = checkPermission(permission, pid, uid);
+            if (result != PermissionCheckerManager.PERMISSION_GRANTED) {
+                throw new SecurityException(ACCESS_DENIED + "allOf={"
                         + String.join(", ", permissions) + "}");
             }
         }
@@ -86,7 +136,24 @@ public class PermissionEnforcer {
                 return;
             }
         }
-        throw new SecurityException("Access denied, requires: anyOf={"
+        throw new SecurityException(ACCESS_DENIED + "anyOf={"
+                + String.join(", ", permissions) + "}");
+    }
+
+    public void enforcePermissionAnyOf(@NonNull String[] permissions,
+            int pid, int uid) throws SecurityException {
+        if (anyAppOps(permissions)) {
+            AttributionSource source = new AttributionSource(uid, null, null);
+            enforcePermissionAnyOf(permissions, source);
+            return;
+        }
+        for (String permission : permissions) {
+            int result = checkPermission(permission, pid, uid);
+            if (result == PermissionCheckerManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+        throw new SecurityException(ACCESS_DENIED + "anyOf={"
                 + String.join(", ", permissions) + "}");
     }
 

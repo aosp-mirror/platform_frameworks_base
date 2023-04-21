@@ -121,29 +121,34 @@ class DeviceStateToLayoutMap {
                 final Layout layout = createLayout(state);
                 for (com.android.server.display.config.layout.Display d: l.getDisplay()) {
                     assert layout != null;
-                    Layout.Display display = layout.createDisplayLocked(
+                    int position = getPosition(d.getPosition());
+                    layout.createDisplayLocked(
                             DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
                             d.isDefaultDisplay(),
                             d.isEnabled(),
                             d.getDisplayGroup(),
                             mIdProducer,
+                            position,
+                            leadDisplayId,
                             d.getBrightnessThrottlingMapId(),
-                            leadDisplayId);
-
-                    if (FRONT_STRING.equals(d.getPosition())) {
-                        display.setPosition(POSITION_FRONT);
-                    } else if (REAR_STRING.equals(d.getPosition())) {
-                        display.setPosition(POSITION_REAR);
-                    } else {
-                        display.setPosition(POSITION_UNKNOWN);
-                    }
-                    display.setRefreshRateZoneId(d.getRefreshRateZoneId());
+                            d.getRefreshRateZoneId(),
+                            d.getRefreshRateThermalThrottlingMapId());
                 }
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing display layout config file: "
                     + configFile, e);
         }
+    }
+
+    private int getPosition(@NonNull String position) {
+        int positionInt = POSITION_UNKNOWN;
+        if (FRONT_STRING.equals(position)) {
+            positionInt = POSITION_FRONT;
+        } else if (REAR_STRING.equals(position)) {
+            positionInt = POSITION_REAR;
+        }
+        return positionInt;
     }
 
     private Layout createLayout(int state) {

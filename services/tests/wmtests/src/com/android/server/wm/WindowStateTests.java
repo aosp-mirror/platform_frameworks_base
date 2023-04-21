@@ -20,9 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -45,6 +44,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -85,17 +86,25 @@ import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.util.MergedConfiguration;
 import android.view.Gravity;
+import android.view.IWindow;
+import android.view.IWindowSessionCallback;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizer;
 
@@ -425,15 +434,16 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState app = mAppWindow;
         statusBar.mHasSurface = true;
         assertTrue(statusBar.isVisible());
+        final int statusBarId = InsetsSource.createId(null, 0, statusBars());
         mDisplayContent.getInsetsStateController()
-                .getOrCreateSourceProvider(ITYPE_STATUS_BAR, statusBars())
+                .getOrCreateSourceProvider(statusBarId, statusBars())
                 .setWindowContainer(statusBar, null /* frameProvider */,
                         null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
         app.setRequestedVisibleTypes(0, statusBars());
         mDisplayContent.getInsetsStateController()
-                .getOrCreateSourceProvider(ITYPE_STATUS_BAR, statusBars())
+                .getOrCreateSourceProvider(statusBarId, statusBars())
                 .updateClientVisibility(app);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
@@ -692,6 +702,7 @@ public class WindowStateTests extends WindowTestsBase {
         // Child window without scale (e.g. different app) should apply inverse scale of parent.
         doReturn(1f).when(cmp).getCompatScale(anyString(), anyInt());
         final WindowState child2 = createWindow(w, TYPE_APPLICATION_SUB_PANEL, "child2");
+        makeWindowVisible(w, child2);
         clearInvocations(t);
         child2.prepareSurfaces();
         verify(t).setMatrix(child2.mSurfaceControl, w.mInvGlobalScale, 0, 0, w.mInvGlobalScale);
@@ -914,15 +925,15 @@ public class WindowStateTests extends WindowTestsBase {
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app", uid);
         app.mActivityRecord.setVisible(false);
-        app.mActivityRecord.setVisibility(false /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(false);
         assertFalse(mAtm.hasActiveVisibleWindow(uid));
 
-        app.mActivityRecord.setVisibility(true /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(true);
         assertTrue(mAtm.hasActiveVisibleWindow(uid));
 
         // Make the activity invisible and add a visible toast. The uid should have no active
         // visible window because toast can be misused by legacy app to bypass background check.
-        app.mActivityRecord.setVisibility(false /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(false);
         final WindowState overlay = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay", uid);
         final WindowState toast = createWindow(null, TYPE_TOAST, app.mToken, "toast", uid);
         toast.onSurfaceShownChanged(true);
@@ -969,6 +980,33 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
 
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @Test
+    public void testNeedsRelativeLayeringToIme_systemDialog() {
+        WindowState systemDialogWindow = createWindow(null, TYPE_SECURE_SYSTEM_OVERLAY,
+                mDisplayContent,
+                "SystemDialog", true);
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
+        mAppWindow.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        makeWindowVisible(mImeWindow);
+        systemDialogWindow.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+        assertTrue(systemDialogWindow.needsRelativeLayeringToIme());
+    }
+
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testNeedsRelativeLayeringToIme_notificationShadeShouldNotHideSystemDialog() {
+        WindowState systemDialogWindow = createWindow(null, TYPE_SECURE_SYSTEM_OVERLAY,
+                mDisplayContent,
+                "SystemDialog", true);
+        mDisplayContent.setImeLayeringTarget(systemDialogWindow);
+        makeWindowVisible(mImeWindow);
+        WindowState notificationShade = createWindow(null, TYPE_NOTIFICATION_SHADE,
+                mDisplayContent, "NotificationShade", true);
+        notificationShade.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+        assertFalse(notificationShade.needsRelativeLayeringToIme());
+    }
+
     @Test
     public void testSetFreezeInsetsState() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -1004,21 +1042,18 @@ public class WindowStateTests extends WindowTestsBase {
     @SetupWindows(addWindows = { W_INPUT_METHOD, W_ACTIVITY })
     @Test
     public void testImeAlwaysReceivesVisibleNavigationBarInsets() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
+        final int navId = InsetsSource.createId(null, 0, navigationBars());
+        final InsetsSource navSource = new InsetsSource(navId, navigationBars());
         mImeWindow.mAboveInsetsState.addSource(navSource);
         mAppWindow.mAboveInsetsState.addSource(navSource);
 
         navSource.setVisible(false);
-        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
-        assertFalse(mAppWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
+        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
+        assertFalse(mAppWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
 
         navSource.setVisible(true);
-        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
-        assertTrue(mAppWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
+        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
+        assertTrue(mAppWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
     }
 
     @Test
@@ -1157,12 +1192,12 @@ public class WindowStateTests extends WindowTestsBase {
     public void testRequestedVisibility() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mActivityRecord.setVisible(false);
-        app.mActivityRecord.setVisibility(false /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(false);
         assertFalse(app.isVisibleRequested());
 
         // It doesn't have a surface yet, but should still be visible requested.
         app.setHasSurface(false);
-        app.mActivityRecord.setVisibility(true /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(true);
 
         assertFalse(app.isVisible());
         assertTrue(app.isVisibleRequested());
@@ -1253,5 +1288,119 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(Collections.emptySet(), new ArraySet(restrictedKeepClearAreas));
         assertEquals(new ArraySet(Arrays.asList(expectedArea1, expectedArea2)),
                      new ArraySet(unrestrictedKeepClearAreas));
+    }
+
+    @Test
+    public void testImeTargetChangeListener_OnImeInputTargetVisibilityChanged() {
+        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
+        mWm.mImeTargetChangeListener = listener;
+
+        final WindowState imeTarget = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
+                createActivityRecord(mDisplayContent), "imeTarget");
+
+        imeTarget.mActivityRecord.setVisibleRequested(true);
+        makeWindowVisible(imeTarget);
+        mDisplayContent.setImeInputTarget(imeTarget);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeInputTarget).isTrue();
+
+        imeTarget.mActivityRecord.setVisibleRequested(false);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+
+        imeTarget.removeImmediately();
+        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
+        assertThat(listener.mIsRemoved).isTrue();
+        assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+    }
+
+    @SetupWindows(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
+        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
+        mWm.mImeTargetChangeListener = listener;
+
+        // Scenario 1: test addWindow/relayoutWindow to add Ime layering overlay window as visible.
+        final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
+                mDisplayContent);
+        final IWindow client = new TestIWindow();
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float v) throws RemoteException {
+
+            }
+        });
+        final ClientWindowFrames outFrames = new ClientWindowFrames();
+        final MergedConfiguration outConfig = new MergedConfiguration();
+        final SurfaceControl outSurfaceControl = new SurfaceControl();
+        final InsetsState outInsetsState = new InsetsState();
+        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
+        final Bundle outBundle = new Bundle();
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_OVERLAY);
+        params.setTitle("imeLayeringTargetOverlay");
+        params.token = windowToken.token;
+        params.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+
+        mWm.addWindow(session, client, params, View.VISIBLE, DEFAULT_DISPLAY,
+                0 /* userUd */, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+        mWm.relayoutWindow(session, client, params, 100, 200, View.VISIBLE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        waitHandlerIdle(mWm.mH);
+
+        final WindowState imeLayeringTargetOverlay = mDisplayContent.getWindow(
+                w -> w.mClient.asBinder() == client.asBinder());
+        assertThat(imeLayeringTargetOverlay.isVisible()).isTrue();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isTrue();
+
+        // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
+        mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(imeLayeringTargetOverlay.isVisible()).isFalse();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+
+        // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
+        mWm.removeWindow(session, client);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isTrue();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+    }
+
+    private static class TestImeTargetChangeListener implements ImeTargetChangeListener {
+        private IBinder mImeTargetToken;
+        private boolean mIsRemoved;
+        private boolean mIsVisibleForImeTargetOverlay;
+        private boolean mIsVisibleForImeInputTarget;
+
+        @Override
+        public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken, boolean visible,
+                boolean removed) {
+            mImeTargetToken = overlayWindowToken;
+            mIsVisibleForImeTargetOverlay = visible;
+            mIsRemoved = removed;
+        }
+
+        @Override
+        public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
+                boolean visibleRequested, boolean removed) {
+            mImeTargetToken = imeInputTarget;
+            mIsVisibleForImeInputTarget = visibleRequested;
+            mIsRemoved = removed;
+        }
     }
 }

@@ -38,6 +38,8 @@ import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Trace;
@@ -928,6 +930,8 @@ public final class ImageDecoder implements AutoCloseable {
             case "image/x-pentax-pef":
             case "image/x-samsung-srw":
                 return true;
+            case "image/avif":
+                return isP010SupportedForAV1();
             default:
                 return false;
         }
@@ -2061,6 +2065,70 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src) throws IOException {
         return decodeBitmapImpl(src, null);
+    }
+
+    private static boolean sIsP010SupportedForAV1 = false;
+    private static boolean sIsP010SupportedForHEVC = false;
+    private static boolean sIsP010SupportedFlagsInitialized = false;
+    private static final Object sIsP010SupportedLock = new Object();
+
+    /**
+     * Checks if the device supports decoding 10-bit AV1.
+     */
+    @SuppressWarnings("AndroidFrameworkCompatChange")  // This is not an app-visible API.
+    private static boolean isP010SupportedForAV1() {
+        synchronized (sIsP010SupportedLock) {
+            if (sIsP010SupportedFlagsInitialized) {
+                return sIsP010SupportedForAV1;
+            }
+            checkP010SupportforAV1HEVC();
+            return sIsP010SupportedForAV1;
+        }
+    }
+
+    /**
+     * Checks if the device supports decoding 10-bit HEVC.
+     * This method is called by JNI.
+     */
+    @SuppressWarnings("unused")
+    private static boolean isP010SupportedForHEVC() {
+        synchronized (sIsP010SupportedLock) {
+            if (sIsP010SupportedFlagsInitialized) {
+                return sIsP010SupportedForHEVC;
+            }
+            checkP010SupportforAV1HEVC();
+            return sIsP010SupportedForHEVC;
+        }
+    }
+
+    /**
+     * Checks if the device supports decoding 10-bit for the given mime type.
+     */
+    private static void checkP010SupportforAV1HEVC() {
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+        for (MediaCodecInfo mediaCodecInfo : codecList.getCodecInfos()) {
+            if (mediaCodecInfo.isEncoder()) {
+                continue;
+            }
+            for (String mediaType : mediaCodecInfo.getSupportedTypes()) {
+                if (mediaType.equalsIgnoreCase("video/av01")
+                        || mediaType.equalsIgnoreCase("video/hevc")) {
+                    MediaCodecInfo.CodecCapabilities codecCapabilities =
+                        mediaCodecInfo.getCapabilitiesForType(mediaType);
+                    for (int i = 0; i < codecCapabilities.colorFormats.length; ++i) {
+                        if (codecCapabilities.colorFormats[i]
+                            == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010) {
+                            if (mediaType.equalsIgnoreCase("video/av01")) {
+                                sIsP010SupportedForAV1 = true;
+                            } else {
+                                sIsP010SupportedForHEVC = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        sIsP010SupportedFlagsInitialized = true;
     }
 
     /**

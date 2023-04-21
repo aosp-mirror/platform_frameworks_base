@@ -23,13 +23,14 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.POWER_SAVER;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
-import android.app.AlarmManager;
 import android.app.StatsManager;
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -37,6 +38,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
@@ -49,6 +52,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
+import android.os.BatteryStatsInternal.CpuWakeupSubsystem;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Binder;
@@ -66,6 +70,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
@@ -107,8 +112,8 @@ import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
 import com.android.server.power.stats.BatteryUsageStatsStore;
-import com.android.server.power.stats.CpuWakeupStats;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.wakeups.CpuWakeupStats;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -140,6 +145,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         BatteryStatsImpl.EnergyStatsRetriever,
         Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
+    static final String TRACE_TRACK_WAKEUP_REASON = "wakeup_reason";
     static final boolean DBG = false;
     private static final boolean BATTERY_USAGE_STORE_ENABLED = true;
 
@@ -147,7 +153,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private final PowerProfile mPowerProfile;
     final BatteryStatsImpl mStats;
-    @GuardedBy("mWakeupStats")
     final CpuWakeupStats mCpuWakeupStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
@@ -401,6 +406,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void systemServicesReady() {
         mStats.systemServicesReady(mContext);
+        mCpuWakeupStats.systemServicesReady();
         mWorker.systemServicesReady();
         final INetworkManagementService nms = INetworkManagementService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
@@ -411,18 +417,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not register INetworkManagement event observer " + e);
         }
-
-        final AlarmManager am = mContext.getSystemService(AlarmManager.class);
-        mHandler.post(() -> {
-            synchronized (mStats) {
-                mStats.setLongPlugInAlarmInterface(new AlarmInterface(am, () -> {
-                    synchronized (mStats) {
-                        if (mStats.isOnBattery()) return;
-                        mStats.maybeResetWhilePluggedInLocked();
-                    }
-                }));
-            }
-        });
 
         synchronized (mPowerStatsLock) {
             mPowerStatsInternal = LocalServices.getService(PowerStatsInternal.class);
@@ -479,9 +473,31 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             BatteryStatsService.this.noteJobsDeferred(uid, numDeferred, sinceLast);
         }
 
+        private int transportToSubsystem(NetworkCapabilities nc) {
+            if (nc.hasTransport(TRANSPORT_WIFI)) {
+                return CPU_WAKEUP_SUBSYSTEM_WIFI;
+            } else if (nc.hasTransport(TRANSPORT_CELLULAR)) {
+                return CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
+            }
+            return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
+        }
+
         @Override
         public void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid) {
-            Slog.d(TAG, "Wakeup due to incoming packet on network " + network + " to uid " + uid);
+            if (uid < 0) {
+                Slog.e(TAG, "Invalid uid for waking network packet: " + uid);
+                return;
+            }
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+            final NetworkCapabilities nc = cm.getNetworkCapabilities(network);
+            final int subsystem = transportToSubsystem(nc);
+
+            if (subsystem == CPU_WAKEUP_SUBSYSTEM_UNKNOWN) {
+                Slog.wtf(TAG, "Could not map transport for network: " + network
+                        + " while attributing wakeup by packet sent to uid: " + uid);
+                return;
+            }
+            noteCpuWakingActivity(subsystem, elapsedMillis, uid);
         }
 
         @Override
@@ -502,16 +518,32 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         @Override
-        public void noteCpuWakingActivity(int subsystem, long elapsedMillis, int... uids) {
-            Objects.requireNonNull(uids);
-            mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids);
+        public void noteWakingSoundTrigger(long elapsedMillis, int uid) {
+            noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER, elapsedMillis, uid);
         }
 
         @Override
-        public void noteWakingSoundTrigger(long elapsedMillis, int uid) {
-            // TODO(b/267717665): Pipe to noteCpuWakingActivity once SoundTrigger starts using this.
-            Slog.w(TAG, "Sound trigger event dispatched to uid " + uid);
+        public void noteWakingAlarmBatch(long elapsedMillis, int... uids) {
+            noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, elapsedMillis, uids);
         }
+    }
+
+    /**
+     * Reports any activity that could potentially have caused the CPU to wake up.
+     * Accepts a timestamp to allow free ordering between the event and its reporting.
+     *
+     * <p>
+     * This method can be called multiple times for the same wakeup and then all attribution
+     * reported will be unioned as long as all reports are made within a small amount of cpu uptime
+     * after the wakeup is reported to batterystats.
+     *
+     * @param subsystem The subsystem this activity should be attributed to.
+     * @param elapsedMillis The time when this activity happened in the elapsed timebase.
+     * @param uids The uid (or uids) that should be blamed for this activity.
+     */
+    void noteCpuWakingActivity(@CpuWakeupSubsystem int subsystem, long elapsedMillis, int... uids) {
+        Objects.requireNonNull(uids);
+        mHandler.post(() -> mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids));
     }
 
     @Override
@@ -643,6 +675,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             mHandler.post(() -> {
+                mCpuWakeupStats.onUidRemoved(uid);
                 synchronized (mStats) {
                     mStats.removeUidStatsLocked(uid, elapsedRealtime);
                 }
@@ -753,6 +786,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
+                mCpuWakeupStats.noteUidProcessState(uid, state);
                 synchronized (mStats) {
                     mStats.noteUidProcessStateLocked(uid, state, elapsedRealtime, uptime);
                 }
@@ -834,7 +868,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
-                    final long sessionEnd = mStats.getStartClockTime();
+                    final long sessionEnd;
+                    synchronized (mStats) {
+                        sessionEnd = mStats.getStartClockTime();
+                    }
                     final BatteryUsageStatsQuery queryBeforeReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)
@@ -1244,6 +1281,29 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SENSOR_STATE_CHANGED, uid,
                 null, sensor, FrameworkStatsLog.SENSOR_STATE_CHANGED__STATE__ON);
+    }
+
+    @Override
+    public void noteWakeupSensorEvent(long elapsedNanos, int uid, int sensorHandle) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Calling uid " + callingUid + " is not system uid");
+        }
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(elapsedNanos);
+
+        final SensorManager sm = mContext.getSystemService(SensorManager.class);
+        final Sensor sensor = sm.getSensorByHandle(sensorHandle);
+        if (sensor == null) {
+            Slog.w(TAG, "Unknown sensor handle " + sensorHandle
+                    + " received in noteWakeupSensorEvent");
+            return;
+        }
+        if (uid < 0) {
+            Slog.wtf(TAG, "Invalid uid " + uid + " for sensor event with sensor: " + sensor);
+            return;
+        }
+        // TODO (b/278319756): Also pipe in Sensor type for more usefulness.
+        noteCpuWakingActivity(BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SENSOR, elapsedMillis, uid);
     }
 
     @Override
@@ -2470,6 +2530,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 while ((reason = waitWakeup()) != null) {
                     final long nowElapsed = SystemClock.elapsedRealtime();
                     final long nowUptime = SystemClock.uptimeMillis();
+
+                    Trace.instantForTrack(Trace.TRACE_TAG_POWER, TRACE_TRACK_WAKEUP_REASON,
+                            nowElapsed + " " + reason);
+
                     // Wait for the completion of pending works if there is any
                     awaitCompletion();
                     mCpuWakeupStats.noteWakeupTimeAndReason(nowElapsed, nowUptime, reason);
@@ -2504,32 +2568,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
             // Create a String from the UTF-16 buffer.
             return mUtf16Buffer.toString();
-        }
-    }
-
-    final class AlarmInterface implements BatteryStatsImpl.AlarmInterface,
-            AlarmManager.OnAlarmListener {
-        private AlarmManager mAm;
-        private Runnable mOnAlarm;
-
-        AlarmInterface(AlarmManager am, Runnable onAlarm) {
-            mAm = am;
-            mOnAlarm = onAlarm;
-        }
-
-        @Override
-        public void schedule(long rtcTimeMs, long windowLengthMs) {
-            mAm.setWindow(AlarmManager.RTC, rtcTimeMs, windowLengthMs, TAG, this, mHandler);
-        }
-
-        @Override
-        public void cancel() {
-            mAm.cancel(this);
-        }
-
-        @Override
-        public void onAlarm() {
-            mOnAlarm.run();
         }
     }
 

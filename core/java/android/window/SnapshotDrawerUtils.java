@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
@@ -223,6 +224,11 @@ public class SnapshotDrawerUtils {
                         PixelFormat.RGBA_8888,
                         GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
                                 | GraphicBuffer.USAGE_SW_WRITE_RARELY);
+                if (background == null) {
+                    Log.e(TAG, "Unable to draw snapshot: failed to allocate graphic buffer for "
+                            + mTitle);
+                    return;
+                }
                 // TODO: Support this on HardwareBuffer
                 final Canvas c = background.lockCanvas();
                 drawBackgroundAndBars(c, frame);
@@ -410,6 +416,7 @@ public class SnapshotDrawerUtils {
         layoutParams.setFitInsetsIgnoringVisibility(attrs.isFitInsetsIgnoringVisibility());
 
         layoutParams.setTitle(title);
+        layoutParams.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
         return layoutParams;
     }
 

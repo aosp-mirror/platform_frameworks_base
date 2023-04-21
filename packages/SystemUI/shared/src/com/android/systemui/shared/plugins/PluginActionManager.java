@@ -210,12 +210,12 @@ public class PluginActionManager<T extends Plugin> {
     private void onPluginConnected(PluginInstance<T> pluginInstance) {
         if (DEBUG) Log.d(TAG, "onPluginConnected");
         PluginPrefs.setHasPlugins(mContext);
-        pluginInstance.onCreate(mContext, mListener);
+        pluginInstance.onCreate();
     }
 
     private void onPluginDisconnected(PluginInstance<T> pluginInstance) {
         if (DEBUG) Log.d(TAG, "onPluginDisconnected");
-        pluginInstance.onDestroy(mListener);
+        pluginInstance.onDestroy();
     }
 
     private void queryAll() {
@@ -312,7 +312,7 @@ public class PluginActionManager<T extends Plugin> {
             try {
                 return mPluginInstanceFactory.create(
                         mContext, appInfo, component,
-                        mPluginClass);
+                        mPluginClass, mListener);
             } catch (InvalidVersionException e) {
                 reportInvalidVersion(component, component.getClassName(), e);
             }

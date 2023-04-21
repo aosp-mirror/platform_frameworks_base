@@ -18,13 +18,22 @@ package com.android.systemui.monet;
 
 import static com.android.systemui.monet.utils.ArgbSubject.assertThat;
 
+import static org.junit.Assert.assertTrue;
+
+
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.monet.contrast.Contrast;
 import com.android.systemui.monet.dynamiccolor.DynamicColor;
+import com.android.systemui.monet.dynamiccolor.MaterialDynamicColors;
 import com.android.systemui.monet.dynamiccolor.ToneDeltaConstraint;
 import com.android.systemui.monet.dynamiccolor.TonePolarity;
 import com.android.systemui.monet.hct.Hct;
+import com.android.systemui.monet.scheme.DynamicScheme;
+import com.android.systemui.monet.scheme.SchemeContent;
+import com.android.systemui.monet.scheme.SchemeFidelity;
+import com.android.systemui.monet.scheme.SchemeMonochrome;
 import com.android.systemui.monet.scheme.SchemeTonalSpot;
 
 import org.junit.Test;
@@ -89,5 +98,120 @@ public final class DynamicColorTest extends SysuiTestCase {
 
         final SchemeTonalSpot darkScheme = new SchemeTonalSpot(Hct.fromInt(0xff4285f4), true, 0.0);
         assertThat(dynamicColor.getArgb(darkScheme)).isSameColorAs(0x33ffffff);
+    }
+
+    @Test
+    public void respectsContrast() {
+        final Hct[] seedColors =
+                new Hct[]{
+                        Hct.fromInt(0xFFFF0000),
+                        Hct.fromInt(0xFFFFFF00),
+                        Hct.fromInt(0xFF00FF00),
+                        Hct.fromInt(0xFF0000FF)
+                };
+
+        final double[] contrastLevels = {-1.0, -0.5, 0.0, 0.5, 1.0};
+
+        for (Hct seedColor : seedColors) {
+            for (double contrastLevel : contrastLevels) {
+                for (boolean isDark : new boolean[]{false, true}) {
+                    final DynamicScheme[] schemes =
+                            new DynamicScheme[]{
+                                    new SchemeContent(seedColor, isDark, contrastLevel),
+                                    new SchemeMonochrome(seedColor, isDark, contrastLevel),
+                                    new SchemeTonalSpot(seedColor, isDark, contrastLevel),
+                                    new SchemeFidelity(seedColor, isDark, contrastLevel)
+                            };
+                    for (final DynamicScheme scheme : schemes) {
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme, MaterialDynamicColors.onPrimary,
+                                        MaterialDynamicColors.primary));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme,
+                                        MaterialDynamicColors.onPrimaryContainer,
+                                        MaterialDynamicColors.primaryContainer));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme, MaterialDynamicColors.onSecondary,
+                                        MaterialDynamicColors.secondary));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme,
+                                        MaterialDynamicColors.onSecondaryContainer,
+                                        MaterialDynamicColors.secondaryContainer));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme, MaterialDynamicColors.onTertiary,
+                                        MaterialDynamicColors.tertiary));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme,
+                                        MaterialDynamicColors.onTertiaryContainer,
+                                        MaterialDynamicColors.tertiaryContainer));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme, MaterialDynamicColors.onError,
+                                        MaterialDynamicColors.error));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme,
+                                        MaterialDynamicColors.onErrorContainer,
+                                        MaterialDynamicColors.errorContainer));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme, MaterialDynamicColors.onBackground,
+                                        MaterialDynamicColors.background));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme,
+                                        MaterialDynamicColors.onSurfaceVariant,
+                                        MaterialDynamicColors.surfaceVariant));
+                        assertTrue(
+                                pairSatisfiesContrast(
+                                        scheme,
+                                        MaterialDynamicColors.onSurfaceInverse,
+                                        MaterialDynamicColors.surfaceInverse));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void valuesAreCorrect() {
+        // Checks that the values of certain dynamic colors match Dart results.
+        assertThat(
+                MaterialDynamicColors.onPrimaryContainer.getArgb(
+                        new SchemeFidelity(Hct.fromInt(0xFFFF0000), false, 0.5)))
+                .isSameColorAs(0xFFFFE5E1);
+        assertThat(
+                MaterialDynamicColors.onSecondaryContainer.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFF0000FF), false, 0.5)))
+                .isSameColorAs(0xFFFFFCFF);
+        assertThat(
+                MaterialDynamicColors.onTertiaryContainer.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFFFFFF00), true, -0.5)))
+                .isSameColorAs(0xFF616600);
+        assertThat(
+                MaterialDynamicColors.surfaceInverse.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFF0000FF), false, 0.0)))
+                .isSameColorAs(0xFF464652);
+        assertThat(
+                MaterialDynamicColors.primaryInverse.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFFFF0000), false, -0.5)))
+                .isSameColorAs(0xFFFF8C7A);
+        assertThat(
+                MaterialDynamicColors.outlineVariant.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFFFFFF00), true, 0.0)))
+                .isSameColorAs(0xFF484831);
+    }
+
+    private boolean pairSatisfiesContrast(DynamicScheme scheme, DynamicColor fg, DynamicColor bg) {
+        double fgTone = fg.getHct(scheme).getTone();
+        double bgTone = bg.getHct(scheme).getTone();
+        double minimumRequirement = scheme.contrastLevel >= 0.0 ? 4.5 : 3.0;
+        return Contrast.ratioOfTones(fgTone, bgTone) >= minimumRequirement;
     }
 }

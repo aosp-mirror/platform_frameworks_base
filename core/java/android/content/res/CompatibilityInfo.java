@@ -557,15 +557,25 @@ public class CompatibilityInfo implements Parcelable {
             boolean applyToSize) {
         inoutDm.density = inoutDm.noncompatDensity * invertedRatio;
         inoutDm.densityDpi = (int) ((inoutDm.noncompatDensityDpi * invertedRatio) + .5f);
+        // Note: since this is changing the scaledDensity, you might think we also need to change
+        // inoutDm.fontScaleConverter to accurately calculate non-linear font scaling. But we're not
+        // going to do that, for a couple of reasons (see b/265695259 for details):
+        // 1. The first case is only for apps targeting SDK < 4. These ancient apps will just have
+        //    to live with linear font scaling. We don't want to make anything more unpredictable.
+        // 2. The second case where this is called is for scaling down games. But it is called in
+        //    two situations:
+        //    a. When from ResourcesImpl.updateConfiguration(), we will set the fontScaleConverter
+        //       *after* this method is called. That's the only place where the app will actually
+        //       use the DisplayMetrics for scaling fonts in its resources.
+        //    b. Sometime later by WindowManager in onResume or other windowing events. In this case
+        //       the DisplayMetrics object is never used by the app/resources, so it's ok if
+        //       fontScaleConverter is null because it's not being used to scale fonts anyway.
         inoutDm.scaledDensity = inoutDm.noncompatScaledDensity * invertedRatio;
         inoutDm.xdpi = inoutDm.noncompatXdpi * invertedRatio;
         inoutDm.ydpi = inoutDm.noncompatYdpi * invertedRatio;
         if (applyToSize) {
             inoutDm.widthPixels = (int) (inoutDm.widthPixels * invertedRatio + 0.5f);
             inoutDm.heightPixels = (int) (inoutDm.heightPixels * invertedRatio + 0.5f);
-
-            float fontScale = inoutDm.scaledDensity / inoutDm.density;
-            inoutDm.fontScaleConverter = FontScaleConverterFactory.forScale(fontScale);
         }
     }
 

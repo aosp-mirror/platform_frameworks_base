@@ -65,6 +65,7 @@ import com.android.server.LocalServices;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.RuleMetadata;
+import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -383,7 +384,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private String getInstallerPackageName(Intent intent) {
         String installer =
                 intent.getStringExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_PACKAGE);
-        if (installer == null) {
+        if (PackageManagerServiceUtils.isInstalledByAdb(installer)) {
             return ADB_INSTALLER;
         }
         int installerUid = intent.getIntExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_UID, -1);

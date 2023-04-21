@@ -289,9 +289,21 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    public void testRegisterProxyWithoutPermission() throws Exception {
+    public void testRegisterProxyWithoutA11yPermission() throws Exception {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+                any(), any(), any());
+    }
+
+    @SmallTest
+    @Test
+    public void testRegisterProxyWithoutDevicePermission() throws Exception {
+        doThrow(SecurityException.class).when(mMockSecurityPolicy)
+                .enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
@@ -328,9 +340,20 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    public void testUnRegisterProxyWithoutPermission() throws Exception {
+    public void testUnRegisterProxyWithoutA11yPermission() {
         doThrow(SecurityException.class).when(mMockSecurityPolicy)
                 .enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.unregisterProxyForDisplay(TEST_DISPLAY));
+        verify(mProxyManager, never()).unregisterProxy(TEST_DISPLAY);
+    }
+
+    @SmallTest
+    @Test
+    public void testUnRegisterProxyWithoutDevicePermission() {
+        doThrow(SecurityException.class).when(mMockSecurityPolicy)
+                .enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.unregisterProxyForDisplay(TEST_DISPLAY));

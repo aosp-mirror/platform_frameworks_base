@@ -38,7 +38,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -55,10 +58,10 @@ import java.util.Set;
  *
  * @attr ref android.R.styleable#LocaleConfig_Locale_name
  * @attr ref android.R.styleable#AndroidManifestApplication_localeConfig
- *
- * <p>For more information about the LocaleConfig overridden by the application, see
- * TODO(b/261528306): add link to guide
  */
+// Add following to last Note: when guide is written:
+// For more information about the LocaleConfig overridden by the application, see TODO(b/261528306):
+// add link to guide
 public class LocaleConfig implements Parcelable {
     private static final String TAG = "LocaleConfig";
     public static final String TAG_LOCALE_CONFIG = "locale-config";
@@ -261,6 +264,43 @@ public class LocaleConfig implements Parcelable {
                     return new LocaleConfig[size];
                 }
             };
+
+    /**
+     * Compare whether the LocaleConfig is the same.
+     *
+     * <p>If the elements of {@code mLocales} in LocaleConfig are the same but arranged in different
+     * positions, they are also considered to be the same LocaleConfig.
+     *
+     * @param other The {@link LocaleConfig} to compare for.
+     *
+     * @return true if the LocaleConfig is the same, false otherwise.
+     *
+     * @hide
+     */
+    public boolean isSameLocaleConfig(@Nullable LocaleConfig other) {
+        if (other == this) {
+            return true;
+        }
+
+        if (other != null) {
+            if (mStatus != other.mStatus) {
+                return false;
+            }
+            LocaleList otherLocales = other.mLocales;
+            if (mLocales == null && otherLocales == null) {
+                return true;
+            } else if (mLocales != null && otherLocales != null) {
+                List<String> hostStrList = Arrays.asList(mLocales.toLanguageTags().split(","));
+                List<String> targetStrList = Arrays.asList(
+                        otherLocales.toLanguageTags().split(","));
+                Collections.sort(hostStrList);
+                Collections.sort(targetStrList);
+                return hostStrList.equals(targetStrList);
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Compare whether the locale is existed in the {@code mLocales} of the LocaleConfig.

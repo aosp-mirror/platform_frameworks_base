@@ -18,11 +18,14 @@ package android.media.soundtrigger;
 
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -45,6 +48,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -56,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides management of non-voice (general sound trigger) based sound recognition
@@ -71,6 +76,7 @@ public final class SoundTriggerManager {
     private static final String TAG = "SoundTriggerManager";
 
     private final Context mContext;
+    private final ISoundTriggerService mSoundTriggerService;
     private final ISoundTriggerSession mSoundTriggerSession;
     private final IBinder mBinderToken = new Binder();
 
@@ -94,22 +100,111 @@ public final class SoundTriggerManager {
             originatorIdentity.packageName = ActivityThread.currentOpPackageName();
 
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-                List<ModuleProperties> modulePropertiesList = soundTriggerService
-                        .listModuleProperties(originatorIdentity);
-                if (!modulePropertiesList.isEmpty()) {
+                ModuleProperties moduleProperties = soundTriggerService
+                        .listModuleProperties(originatorIdentity)
+                        .stream()
+                        .filter(prop -> !prop.getSupportedModelArch()
+                                .equals(SoundTrigger.FAKE_HAL_ARCH))
+                        .findFirst()
+                        .orElse(null);
+                if (moduleProperties != null) {
                     mSoundTriggerSession = soundTriggerService.attachAsOriginator(
                                                 originatorIdentity,
-                                                modulePropertiesList.get(0),
+                                                moduleProperties,
                                                 mBinderToken);
                 } else {
                     mSoundTriggerSession = null;
                 }
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
         mContext = context;
+        mSoundTriggerService = soundTriggerService;
         mReceiverInstanceMap = new HashMap<UUID, SoundTriggerDetector>();
+    }
+
+    /**
+     * Construct a {@link SoundTriggerManager} which connects to a specified module.
+     *
+     * @param moduleProperties - Properties representing the module to attach to
+     * @return - A new {@link SoundTriggerManager} which interfaces with the test module.
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("ManagerLookup")
+    public @NonNull SoundTriggerManager createManagerForModule(
+            @NonNull ModuleProperties moduleProperties) {
+        return new SoundTriggerManager(mContext, mSoundTriggerService,
+                Objects.requireNonNull(moduleProperties));
+    }
+
+    /**
+     * Construct a {@link SoundTriggerManager} which connects to a ST module
+     * which is available for instrumentation through {@link attachInstrumentation}.
+     *
+     * @return - A new {@link SoundTriggerManager} which interfaces with the test module.
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("ManagerLookup")
+    public @NonNull SoundTriggerManager createManagerForTestModule() {
+        return new SoundTriggerManager(mContext, mSoundTriggerService, getTestModuleProperties());
+    }
+
+    private final @NonNull SoundTrigger.ModuleProperties getTestModuleProperties() {
+        var moduleProps = listModuleProperties()
+                .stream()
+                .filter((SoundTrigger.ModuleProperties prop)
+                        -> prop.getSupportedModelArch().equals(SoundTrigger.FAKE_HAL_ARCH))
+                .findFirst()
+                .orElse(null);
+        if (moduleProps == null) {
+            throw new IllegalStateException("Fake ST HAL should always be available");
+        }
+        return moduleProps;
+    }
+
+    // Helper constructor to create a manager object attached to a specific ST module.
+    private SoundTriggerManager(@NonNull Context context,
+            @NonNull ISoundTriggerService soundTriggerService,
+            @NonNull ModuleProperties properties) {
+        try {
+            Identity originatorIdentity = new Identity();
+            originatorIdentity.packageName = ActivityThread.currentOpPackageName();
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                mSoundTriggerSession = soundTriggerService.attachAsOriginator(
+                                            originatorIdentity,
+                                            Objects.requireNonNull(properties),
+                                            mBinderToken);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        mContext = Objects.requireNonNull(context);
+        mSoundTriggerService = Objects.requireNonNull(soundTriggerService);
+        mReceiverInstanceMap = new HashMap<UUID, SoundTriggerDetector>();
+    }
+
+    /**
+     * Enumerate the available ST modules. Use {@link createManagerForModule(ModuleProperties)} to
+     * receive a {@link SoundTriggerManager} attached to a specified ST module.
+     * @return - List of available ST modules to attach to.
+     * @hide
+     */
+    @TestApi
+    public static @NonNull List<ModuleProperties> listModuleProperties() {
+        try {
+            ISoundTriggerService service = ISoundTriggerService.Stub.asInterface(
+                    ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE));
+            Identity originatorIdentity = new Identity();
+            originatorIdentity.packageName = ActivityThread.currentOpPackageName();
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                return service.listModuleProperties(originatorIdentity);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -309,6 +404,17 @@ public final class SoundTriggerManager {
         SoundTrigger.GenericSoundModel getGenericSoundModel() {
             return mGenericSoundModel;
         }
+
+        /**
+         * Return a {@link SoundTrigger.SoundModel} view of the model for
+         * test purposes.
+         * @hide
+         */
+        @TestApi
+        public @NonNull SoundTrigger.SoundModel getSoundModel() {
+            return mGenericSoundModel;
+        }
+
     }
 
 
@@ -361,7 +467,8 @@ public final class SoundTriggerManager {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     @UnsupportedAppUsage
-    public int loadSoundModel(SoundModel soundModel) {
+    @TestApi
+    public int loadSoundModel(@NonNull SoundModel soundModel) {
         if (soundModel == null || mSoundTriggerSession == null) {
             return STATUS_ERROR;
         }
@@ -604,4 +711,24 @@ public final class SoundTriggerManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Create a {@link SoundTriggerInstrumentation} for test purposes, which instruments a fake
+     * STHAL. Clients must attach to the appropriate underlying ST module.
+     * @param executor - Executor to dispatch global callbacks on
+     * @param callback - Callback for unsessioned events received by the fake STHAL
+     * @return - A {@link SoundTriggerInstrumentation} for observation/injection.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    @NonNull
+    public static SoundTriggerInstrumentation attachInstrumentation(
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull SoundTriggerInstrumentation.GlobalCallback callback) {
+        ISoundTriggerService service = ISoundTriggerService.Stub.asInterface(
+                    ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE));
+        return new SoundTriggerInstrumentation(service, executor, callback);
+    }
+
 }

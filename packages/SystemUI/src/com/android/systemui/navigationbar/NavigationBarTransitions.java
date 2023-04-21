@@ -21,11 +21,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static com.android.systemui.util.Utils.isGesturalModeOnDefaultDisplay;
 
 import android.graphics.Rect;
-import android.os.Handler;
-import android.os.RemoteException;
 import android.util.SparseArray;
-import android.view.IWallpaperVisibilityListener;
-import android.view.IWindowManager;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -36,7 +32,6 @@ import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,8 +58,6 @@ public final class NavigationBarTransitions extends BarTransitions implements
     }
 
     private final NavigationBarView mView;
-    @org.jetbrains.annotations.NotNull
-    private final IWindowManager mWindowManagerService;
     private final LightBarTransitionsController mLightTransitionsController;
     private final DisplayTracker mDisplayTracker;
     private final boolean mAllowAutoDimWallpaperNotVisible;
@@ -76,51 +69,20 @@ public final class NavigationBarTransitions extends BarTransitions implements
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private List<DarkIntensityListener> mDarkIntensityListeners;
 
-    private final Handler mHandler = Handler.getMain();
-
-    static final class WallpaperVisibilityListener extends IWallpaperVisibilityListener.Stub {
-        private final WeakReference<NavigationBarTransitions> mSelf;
-
-        WallpaperVisibilityListener(NavigationBarTransitions self) {
-            mSelf = new WeakReference<>(self);
-        }
-
-        @Override
-        public void onWallpaperVisibilityChanged(boolean newVisibility,
-                int displayId) throws RemoteException {
-            NavigationBarTransitions self = mSelf.get();
-            if (self == null) {
-                return;
-            }
-            self.mWallpaperVisible = newVisibility;
-            self.mHandler.post(() -> self.applyLightsOut(true, false));
-        }
-    }
-
-    private final IWallpaperVisibilityListener mWallpaperVisibilityListener;
-
     @Inject
     public NavigationBarTransitions(
             NavigationBarView view,
-            IWindowManager windowManagerService,
             LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
             DisplayTracker displayTracker) {
         super(view, R.drawable.nav_background);
 
         mView = view;
-        mWindowManagerService = windowManagerService;
         mLightTransitionsController = lightBarTransitionsControllerFactory.create(this);
         mDisplayTracker = displayTracker;
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
         mDarkIntensityListeners = new ArrayList();
 
-        mWallpaperVisibilityListener = new WallpaperVisibilityListener(this);
-        try {
-            mWallpaperVisible = mWindowManagerService.registerWallpaperVisibilityListener(
-                    mWallpaperVisibilityListener, mDisplayTracker.getDefaultDisplayId());
-        } catch (RemoteException e) {
-        }
         mView.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     View currentView = mView.getCurrentView();
@@ -142,12 +104,12 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     @Override
     public void destroy() {
-        try {
-            mWindowManagerService.unregisterWallpaperVisibilityListener(mWallpaperVisibilityListener,
-                    mDisplayTracker.getDefaultDisplayId());
-        } catch (RemoteException e) {
-        }
         mLightTransitionsController.destroy();
+    }
+
+    void setWallpaperVisibility(boolean visible) {
+        mWallpaperVisible = visible;
+        applyLightsOut(true, false);
     }
 
     @Override

@@ -33,12 +33,19 @@ public interface BackAnimation {
      *
      * @param touchX the X touch position of the {@link MotionEvent}.
      * @param touchY the Y touch position of the {@link MotionEvent}.
+     * @param velocityX the X velocity computed from the {@link MotionEvent}.
+     * @param velocityY the Y velocity computed from the {@link MotionEvent}.
      * @param keyAction the original {@link KeyEvent#getAction()} when the event was dispatched to
      *               the process. This is forwarded separately because the input pipeline may mutate
      *               the {#event} action state later.
      * @param swipeEdge the edge from which the swipe begins.
      */
-    void onBackMotion(float touchX, float touchY, int keyAction,
+    void onBackMotion(
+            float touchX,
+            float touchY,
+            float velocityX,
+            float velocityY,
+            int keyAction,
             @BackEvent.SwipeEdge int swipeEdge);
 
     /**
@@ -52,4 +59,10 @@ public interface BackAnimation {
      * @param progressThreshold the max threshold to keep progressing back animation.
      */
     void setSwipeThresholds(float triggerThreshold, float progressThreshold);
+
+    /**
+     * Sets the system bar listener to control the system bar color.
+     * @param customizer the controller to control system bar color.
+     */
+    void setStatusBarCustomizer(StatusBarCustomizer customizer);
 }

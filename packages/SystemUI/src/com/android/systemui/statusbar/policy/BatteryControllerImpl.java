@@ -21,6 +21,8 @@ import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.EXTRA_HEALTH;
 import static android.os.BatteryManager.EXTRA_PRESENT;
 
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
+
 import android.annotation.WorkerThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -56,6 +58,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.concurrent.GuardedBy;
 
 /**
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
@@ -94,7 +98,10 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mTestMode = false;
     @VisibleForTesting
     boolean mHasReceivedBattery = false;
+    @GuardedBy("mEstimateLock")
     private Estimate mEstimate;
+    private final Object mEstimateLock = new Object();
+
     private boolean mFetchingEstimate = false;
 
     // Use AtomicReference because we may request it from a different thread
@@ -164,7 +171,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public void setPowerSaveMode(boolean powerSave, View view) {
         if (powerSave) mPowerSaverStartView.set(new WeakReference<>(view));
-        BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true);
+        BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true,
+                SAVER_ENABLED_QS);
     }
 
     @Override
@@ -321,7 +329,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @Nullable
     private String generateTimeRemainingString() {
-        synchronized (mFetchCallbacks) {
+        synchronized (mEstimateLock) {
             if (mEstimate == null) {
                 return null;
             }
@@ -340,7 +348,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         mFetchingEstimate = true;
         mBgHandler.post(() -> {
             // Only fetch the estimate if they are enabled
-            synchronized (mFetchCallbacks) {
+            synchronized (mEstimateLock) {
                 mEstimate = null;
                 if (mEstimates.isHybridNotificationEnabled()) {
                     updateEstimate();
@@ -363,6 +371,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @WorkerThread
+    @GuardedBy("mEstimateLock")
     private void updateEstimate() {
         Assert.isNotMainThread();
         // if the estimate has been cached we can just use that, otherwise get a new one and

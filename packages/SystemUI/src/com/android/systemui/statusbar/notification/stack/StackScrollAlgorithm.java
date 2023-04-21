@@ -29,6 +29,9 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.LegacySourceType;
@@ -123,7 +126,7 @@ public class StackScrollAlgorithm {
         updateHeadsUpStates(algorithmState, ambientState);
         updatePulsingStates(algorithmState, ambientState);
 
-        updateDimmedActivatedHideSensitive(ambientState, algorithmState);
+        updateDimmedAndHideSensitive(ambientState, algorithmState);
         updateClipping(algorithmState, ambientState);
         updateSpeedBumpState(algorithmState, speedBumpIndex);
         updateShelfState(algorithmState, ambientState);
@@ -135,7 +138,6 @@ public class StackScrollAlgorithm {
                                   AmbientState ambientState) {
         for (ExpandableView view : algorithmState.visibleChildren) {
             final ViewState viewState = view.getViewState();
-
             final boolean isHunGoingToShade = ambientState.isShadeExpanded()
                     && view == ambientState.getTrackedHeadsUpRow();
 
@@ -148,9 +150,14 @@ public class StackScrollAlgorithm {
             } else if (ambientState.isExpansionChanging()) {
                 // Adjust alpha for shade open & close.
                 float expansion = ambientState.getExpansionFraction();
-                viewState.setAlpha(ambientState.isBouncerInTransit()
-                        ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion)
-                        : ShadeInterpolation.getContentAlpha(expansion));
+                if (ambientState.isBouncerInTransit()) {
+                    viewState.setAlpha(
+                            BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion));
+                } else if (view instanceof FooterView) {
+                    viewState.setAlpha(interpolateFooterAlpha(ambientState));
+                } else {
+                    viewState.setAlpha(interpolateNotificationContentAlpha(ambientState));
+                }
             }
 
             // For EmptyShadeView if on keyguard, we need to control the alpha to create
@@ -180,6 +187,28 @@ public class StackScrollAlgorithm {
                 }
             }
         }
+    }
+
+    private float interpolateFooterAlpha(AmbientState ambientState) {
+        float expansion = ambientState.getExpansionFraction();
+        FeatureFlags flags = ambientState.getFeatureFlags();
+        if (ambientState.isSmallScreen()
+                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+            return ShadeInterpolation.getContentAlpha(expansion);
+        }
+        LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
+        return interpolator.getNotificationFooterAlpha(expansion);
+    }
+
+    private float interpolateNotificationContentAlpha(AmbientState ambientState) {
+        float expansion = ambientState.getExpansionFraction();
+        FeatureFlags flags = ambientState.getFeatureFlags();
+        if (ambientState.isSmallScreen()
+                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+            return ShadeInterpolation.getContentAlpha(expansion);
+        }
+        LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
+        return interpolator.getNotificationContentAlpha(expansion);
     }
 
     /**
@@ -312,25 +341,17 @@ public class StackScrollAlgorithm {
         }
     }
 
-    /**
-     * Updates the dimmed, activated and hiding sensitive states of the children.
-     */
-    private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
-                                                    StackScrollAlgorithmState algorithmState) {
+    /** Updates the dimmed and hiding sensitive states of the children. */
+    private void updateDimmedAndHideSensitive(AmbientState ambientState,
+            StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
         boolean hideSensitive = ambientState.isHideSensitive();
-        View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState childViewState = child.getViewState();
             childViewState.dimmed = dimmed;
             childViewState.hideSensitive = hideSensitive;
-            boolean isActivatedChild = activatedChild == child;
-            if (dimmed && isActivatedChild) {
-                childViewState.setZTranslation(childViewState.getZTranslation()
-                        + 2.0f * ambientState.getZDistanceBetweenElements());
-            }
         }
     }
 
@@ -734,7 +755,7 @@ public class StackScrollAlgorithm {
             float unmodifiedEndLocation = childState.getYTranslation() + childState.height;
             if (mIsExpanded) {
                 if (row.mustStayOnScreen() && !childState.headsUpIsVisible
-                        && !row.showingPulsing()) {
+                        && !row.showingPulsing() && !ambientState.isOnKeyguard()) {
                     // Ensure that the heads up is always visible even when scrolled off
                     clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
                             row.getCollapsedHeight(), childState);

@@ -465,7 +465,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         BaseClientMonitor clientMonitor,
                         boolean success) {
                     mAuthSessionCoordinator.authEndedFor(userId, Utils.getCurrentStrength(sensorId),
-                            sensorId, requestId, success);
+                            sensorId, requestId, client.wasAuthSuccessful());
                 }
             });
         });
@@ -597,14 +597,13 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     public void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments) {
         mHandler.post(() -> {
-            final List<Face> enrolledList = getEnrolledFaces(sensorId, userId);
             final FaceInternalCleanupClient client =
                     new FaceInternalCleanupClient(mContext,
                             mSensors.get(sensorId).getLazySession(), userId,
                             mContext.getOpPackageName(), sensorId,
                             createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
                                     BiometricsProtoEnums.CLIENT_UNKNOWN),
-                            mBiometricContext, enrolledList,
+                            mBiometricContext,
                             FaceUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
             if (favorHalEnrollments) {

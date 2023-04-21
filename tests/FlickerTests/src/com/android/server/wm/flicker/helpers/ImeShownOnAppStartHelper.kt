@@ -17,26 +17,28 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.Rotation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.datatypes.component.IComponentMatcher
+import android.tools.common.traces.Condition
+import android.tools.common.traces.DeviceStateDump
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.helpers.IME_PACKAGE
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.Condition
-import com.android.server.wm.traces.common.DeviceStateDump
-import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import java.util.regex.Pattern
 
 class ImeShownOnAppStartHelper
 @JvmOverloads
 constructor(
     instr: Instrumentation,
-    private val rotation: PlatformConsts.Rotation,
+    private val rotation: Rotation,
     private val imePackageName: String = IME_PACKAGE,
     launcherName: String = ActivityOptions.Ime.AutoFocusActivity.LABEL,
     component: ComponentNameMatcher =
@@ -55,7 +57,12 @@ constructor(
         waitConditions: Array<Condition<DeviceStateDump>>
     ) {
         super.launchViaIntent(
-            wmHelper, launchedAppComponentMatcherOverride, action, stringExtras, waitConditions)
+            wmHelper,
+            launchedAppComponentMatcherOverride,
+            action,
+            stringExtras,
+            waitConditions
+        )
         waitIMEShown(wmHelper)
     }
 

@@ -2935,13 +2935,14 @@ public class PackageInstaller {
          *             <li>The {@link InstallSourceInfo#getUpdateOwnerPackageName() update owner}
          *             of an existing version of the app (in other words, this install session is
          *             an app update) if the update ownership enforcement is enabled.</li>
-         *             <li>The {@link InstallSourceInfo#getInstallingPackageName() installer of
-         *             record} of an existing version of the app (in other words, this install
+         *             <li>The
+         *             {@link InstallSourceInfo#getInstallingPackageName() installer of record}
+         *             of an existing version of the app (in other words, this install
          *             session is an app update) if the update ownership enforcement isn't
          *             enabled.</li>
          *             <li>Updating itself.</li>
          *         </ul>
-         *     </li>>
+         *     </li>
          *     <li>The installer declares the
          *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION
          *     UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>
@@ -2989,6 +2990,10 @@ public class PackageInstaller {
          *
          * The update ownership enforcement can only be enabled on initial installation. Set
          * this to {@code true} on package update is a no-op.
+         *
+         * Apps may opt themselves out of update ownership by setting the
+         * <a href="https://developer.android.com/guide/topics/manifest/manifest-element.html#allowupdateownership">android:alllowUpdateOwnership</a>
+         * attribute in their manifest to <code>false</code>.
          *
          * Note: To enable the update ownership enforcement, the installer must have the
          * {@link android.Manifest.permission#ENFORCE_UPDATE_OWNERSHIP ENFORCE_UPDATE_OWNERSHIP}
