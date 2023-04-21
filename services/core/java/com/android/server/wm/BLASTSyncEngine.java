@@ -27,7 +27,6 @@ import android.os.Handler;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -61,6 +60,26 @@ import java.util.ArrayList;
  * This works primarily by setting-up state and then watching/waiting for the registered subtrees
  * to enter into a "finished" state (either by receiving drawn content or by disappearing). This
  * checks the subtrees during surface-placement.
+ *
+ * By default, all Syncs will be serialized (and it is an error to start one while another is
+ * active). However, a sync can be explicitly started in "parallel". This does not guarantee that
+ * it will run in parallel; however, it will run in parallel as long as it's watched hierarchy
+ * doesn't overlap with any other syncs' watched hierarchies.
+ *
+ * Currently, a sync that is started as "parallel" implicitly ignores the subtree below it's
+ * direct members unless those members are activities (WindowStates are considered "part of" the
+ * activity). This allows "stratified" parallelism where, eg, a sync that is only at Task-level
+ * can run in parallel with another sync that includes only the task's activities.
+ *
+ * If, at any time, a container is added to a parallel sync that *is* watched by another sync, it
+ * will be forced to serialize with it. This is done by adding a dependency. A sync will only
+ * finish if it has no active dependencies. At this point it is effectively not parallel anymore.
+ *
+ * To avoid dependency cycles, if a sync B ultimately depends on a sync A and a container is added
+ * to A which is watched by B, that container will, instead, be moved from B to A instead of
+ * creating a cyclic dependency.
+ *
+ * When syncs overlap, this will attempt to finish everything in the order they were started.
  */
 class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
@@ -104,6 +123,18 @@ class BLASTSyncEngine {
         private SurfaceControl.Transaction mOrphanTransaction = null;
         private String mTraceName;
 
+        private static final ArrayList<SyncGroup> NO_DEPENDENCIES = new ArrayList<>();
+
+        /**
+         * When `true`, this SyncGroup will only wait for mRootMembers to draw; otherwise,
+         * it waits for the whole subtree(s) rooted at the mRootMembers.
+         */
+        boolean mIgnoreIndirectMembers = false;
+
+        /** List of SyncGroups that must finish before this one can. */
+        @NonNull
+        ArrayList<SyncGroup> mDependencies = NO_DEPENDENCIES;
+
         private SyncGroup(TransactionReadyListener listener, int id, String name) {
             mSyncId = id;
             mListener = listener;
@@ -133,19 +164,43 @@ class BLASTSyncEngine {
             return mOrphanTransaction;
         }
 
-        private void tryFinish() {
-            if (!mReady) return;
+        /**
+         * Check if the sync-group ignores a particular container. This is used to allow syncs at
+         * different levels to run in parallel. The primary example is Recents while an activity
+         * sync is happening.
+         */
+        boolean isIgnoring(WindowContainer wc) {
+            // Some heuristics to avoid unnecessary work:
+            // 1. For now, require an explicit acknowledgement of potential "parallelism" across
+            //    hierarchy levels (horizontal).
+            if (!mIgnoreIndirectMembers) return false;
+            // 2. Don't check WindowStates since they are below the relevant abstraction level (
+            //    anything activity/token and above).
+            if (wc.asWindowState() != null) return false;
+            // Obviously, don't ignore anything that is directly part of this group.
+            return wc.mSyncGroup != this;
+        }
+
+        /** @return `true` if it finished. */
+        private boolean tryFinish() {
+            if (!mReady) return false;
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: onSurfacePlacement checking %s",
                     mSyncId, mRootMembers);
+            if (!mDependencies.isEmpty()) {
+                ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d:  Unfinished dependencies: %s",
+                        mSyncId, mDependencies);
+                return false;
+            }
             for (int i = mRootMembers.size() - 1; i >= 0; --i) {
                 final WindowContainer wc = mRootMembers.valueAt(i);
-                if (!wc.isSyncFinished()) {
+                if (!wc.isSyncFinished(this)) {
                     ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d:  Unfinished container: %s",
                             mSyncId, wc);
-                    return;
+                    return false;
                 }
             }
             finishNow();
+            return true;
         }
 
         private void finishNow() {
@@ -158,7 +213,7 @@ class BLASTSyncEngine {
                 merged.merge(mOrphanTransaction);
             }
             for (WindowContainer wc : mRootMembers) {
-                wc.finishSync(merged, false /* cancel */);
+                wc.finishSync(merged, this, false /* cancel */);
             }
 
             final ArraySet<WindowContainer> wcAwaitingCommit = new ArraySet<>();
@@ -204,7 +259,7 @@ class BLASTSyncEngine {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            mActiveSyncs.remove(mSyncId);
+            mActiveSyncs.remove(this);
             mHandler.removeCallbacks(mOnTimeout);
 
             // Immediately start the next pending sync-transaction if there is one.
@@ -230,26 +285,80 @@ class BLASTSyncEngine {
             }
         }
 
-        private void setReady(boolean ready) {
+        /** returns true if readiness changed. */
+        private boolean setReady(boolean ready) {
             if (mReady == ready) {
-                return;
+                return false;
             }
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready %b", mSyncId, ready);
             mReady = ready;
-            if (!ready) return;
-            mWm.mWindowPlacerLocked.requestTraversal();
+            if (ready) {
+                mWm.mWindowPlacerLocked.requestTraversal();
+            }
+            return true;
         }
 
         private void addToSync(WindowContainer wc) {
-            if (!mRootMembers.add(wc)) {
+            if (mRootMembers.contains(wc)) {
                 return;
             }
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Adding to group: %s", mSyncId, wc);
-            wc.setSyncGroup(this);
+            final SyncGroup dependency = wc.getSyncGroup();
+            if (dependency != null && dependency != this && !dependency.isIgnoring(wc)) {
+                // This syncgroup now conflicts with another one, so the whole group now must
+                // wait on the other group.
+                Slog.w(TAG, "SyncGroup " + mSyncId + " conflicts with " + dependency.mSyncId
+                        + ": Making " + mSyncId + " depend on " + dependency.mSyncId);
+                if (mDependencies.contains(dependency)) {
+                    // nothing, it's already a dependency.
+                } else if (dependency.dependsOn(this)) {
+                    Slog.w(TAG, " Detected dependency cycle between " + mSyncId + " and "
+                            + dependency.mSyncId + ": Moving " + wc + " to " + mSyncId);
+                    // Since dependency already depends on this, make this now `wc`'s watcher
+                    if (wc.mSyncGroup == null) {
+                        wc.setSyncGroup(this);
+                    } else {
+                        // Explicit replacement.
+                        wc.mSyncGroup.mRootMembers.remove(wc);
+                        mRootMembers.add(wc);
+                        wc.mSyncGroup = this;
+                    }
+                } else {
+                    if (mDependencies == NO_DEPENDENCIES) {
+                        mDependencies = new ArrayList<>();
+                    }
+                    mDependencies.add(dependency);
+                }
+            } else {
+                mRootMembers.add(wc);
+                wc.setSyncGroup(this);
+            }
             wc.prepareSync();
             if (mReady) {
                 mWm.mWindowPlacerLocked.requestTraversal();
             }
+        }
+
+        private boolean dependsOn(SyncGroup group) {
+            if (mDependencies.isEmpty()) return false;
+            // BFS search with membership check. We don't expect cycle here (since this is
+            // explicitly called to avoid cycles) but just to be safe.
+            final ArrayList<SyncGroup> fringe = mTmpFringe;
+            fringe.clear();
+            fringe.add(this);
+            for (int head = 0; head < fringe.size(); ++head) {
+                final SyncGroup next = fringe.get(head);
+                if (next == group) {
+                    fringe.clear();
+                    return true;
+                }
+                for (int i = 0; i < next.mDependencies.size(); ++i) {
+                    if (fringe.contains(next.mDependencies.get(i))) continue;
+                    fringe.add(next.mDependencies.get(i));
+                }
+            }
+            fringe.clear();
+            return false;
         }
 
         void onCancelSync(WindowContainer wc) {
@@ -257,27 +366,34 @@ class BLASTSyncEngine {
         }
 
         private void onTimeout() {
-            if (!mActiveSyncs.contains(mSyncId)) return;
+            if (!mActiveSyncs.contains(this)) return;
             boolean allFinished = true;
             for (int i = mRootMembers.size() - 1; i >= 0; --i) {
                 final WindowContainer<?> wc = mRootMembers.valueAt(i);
-                if (!wc.isSyncFinished()) {
+                if (!wc.isSyncFinished(this)) {
                     allFinished = false;
                     Slog.i(TAG, "Unfinished container: " + wc);
                 }
+            }
+            for (int i = mDependencies.size() - 1; i >= 0; --i) {
+                allFinished = false;
+                Slog.i(TAG, "Unfinished dependency: " + mDependencies.get(i).mSyncId);
             }
             if (allFinished && !mReady) {
                 Slog.w(TAG, "Sync group " + mSyncId + " timed-out because not ready. If you see "
                         + "this, please file a bug.");
             }
             finishNow();
+            removeFromDependencies(this);
         }
     }
 
     private final WindowManagerService mWm;
     private final Handler mHandler;
     private int mNextSyncId = 0;
-    private final SparseArray<SyncGroup> mActiveSyncs = new SparseArray<>();
+
+    /** Currently active syncs. Intentionally ordered by start time. */
+    private final ArrayList<SyncGroup> mActiveSyncs = new ArrayList<>();
 
     /**
      * A queue of pending sync-sets waiting for their turn to run.
@@ -287,6 +403,9 @@ class BLASTSyncEngine {
     private final ArrayList<PendingSyncSet> mPendingSyncSets = new ArrayList<>();
 
     private final ArrayList<Runnable> mOnIdleListeners = new ArrayList<>();
+
+    private final ArrayList<SyncGroup> mTmpFinishQueue = new ArrayList<>();
+    private final ArrayList<SyncGroup> mTmpFringe = new ArrayList<>();
 
     BLASTSyncEngine(WindowManagerService wms) {
         this(wms, wms.mH);
@@ -306,32 +425,39 @@ class BLASTSyncEngine {
         return new SyncGroup(listener, mNextSyncId++, name);
     }
 
-    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
+    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name,
+            boolean parallel) {
         final SyncGroup s = prepareSyncSet(listener, name);
-        startSyncSet(s, timeoutMs);
+        startSyncSet(s, timeoutMs, parallel);
         return s.mSyncId;
     }
 
     void startSyncSet(SyncGroup s) {
-        startSyncSet(s, BLAST_TIMEOUT_DURATION);
+        startSyncSet(s, BLAST_TIMEOUT_DURATION, false /* parallel */);
     }
 
-    void startSyncSet(SyncGroup s, long timeoutMs) {
-        if (mActiveSyncs.size() != 0) {
-            // We currently only support one sync at a time, so start a new SyncGroup when there is
-            // another may cause issue.
+    void startSyncSet(SyncGroup s, long timeoutMs, boolean parallel) {
+        final boolean alreadyRunning = mActiveSyncs.size() > 0;
+        if (!parallel && alreadyRunning) {
+            // We only support overlapping syncs when explicitly declared `parallel`.
             Slog.e(TAG, "SyncGroup " + s.mSyncId
                     + ": Started when there is other active SyncGroup");
         }
-        mActiveSyncs.put(s.mSyncId, s);
-        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s",
-                s.mSyncId, s.mListener);
+        mActiveSyncs.add(s);
+        // For now, parallel implies this.
+        s.mIgnoreIndirectMembers = parallel;
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started %sfor listener: %s",
+                s.mSyncId, (parallel && alreadyRunning ? "(in parallel) " : ""), s.mListener);
         scheduleTimeout(s, timeoutMs);
     }
 
     @Nullable
     SyncGroup getSyncSet(int id) {
-        return mActiveSyncs.get(id);
+        for (int i = 0; i < mActiveSyncs.size(); ++i) {
+            if (mActiveSyncs.get(i).mSyncId != id) continue;
+            return mActiveSyncs.get(i);
+        }
+        return null;
     }
 
     boolean hasActiveSync() {
@@ -356,8 +482,8 @@ class BLASTSyncEngine {
         syncGroup.mSyncMethod = method;
     }
 
-    void setReady(int id, boolean ready) {
-        getSyncGroup(id).setReady(ready);
+    boolean setReady(int id, boolean ready) {
+        return getSyncGroup(id).setReady(ready);
     }
 
     void setReady(int id) {
@@ -372,21 +498,68 @@ class BLASTSyncEngine {
      * Aborts the sync (ie. it doesn't wait for ready or anything to finish)
      */
     void abort(int id) {
-        getSyncGroup(id).finishNow();
+        final SyncGroup group = getSyncGroup(id);
+        group.finishNow();
+        removeFromDependencies(group);
     }
 
     private SyncGroup getSyncGroup(int id) {
-        final SyncGroup syncGroup = mActiveSyncs.get(id);
+        final SyncGroup syncGroup = getSyncSet(id);
         if (syncGroup == null) {
             throw new IllegalStateException("SyncGroup is not started yet id=" + id);
         }
         return syncGroup;
     }
 
+    /**
+     * Just removes `group` from any dependency lists. Does not try to evaluate anything. However,
+     * it will schedule traversals if any groups were changed in a way that could make them ready.
+     */
+    private void removeFromDependencies(SyncGroup group) {
+        boolean anyChange = false;
+        for (int i = 0; i < mActiveSyncs.size(); ++i) {
+            final SyncGroup active = mActiveSyncs.get(i);
+            if (!active.mDependencies.remove(group)) continue;
+            if (!active.mDependencies.isEmpty()) continue;
+            anyChange = true;
+        }
+        if (!anyChange) return;
+        mWm.mWindowPlacerLocked.requestTraversal();
+    }
+
     void onSurfacePlacement() {
-        // backwards since each state can remove itself if finished
-        for (int i = mActiveSyncs.size() - 1; i >= 0; --i) {
-            mActiveSyncs.valueAt(i).tryFinish();
+        if (mActiveSyncs.isEmpty()) return;
+        // queue in-order since we want interdependent syncs to become ready in the same order they
+        // started in.
+        mTmpFinishQueue.addAll(mActiveSyncs);
+        // There shouldn't be any dependency cycles or duplicates, but add an upper-bound just
+        // in case. Assuming absolute worst case, each visit will try and revisit everything
+        // before it, so n + (n-1) + (n-2) ... = (n+1)*n/2
+        int visitBounds = ((mActiveSyncs.size() + 1) * mActiveSyncs.size()) / 2;
+        while (!mTmpFinishQueue.isEmpty()) {
+            if (visitBounds <= 0) {
+                Slog.e(TAG, "Trying to finish more syncs than theoretically possible. This "
+                        + "should never happen. Most likely a dependency cycle wasn't detected.");
+            }
+            --visitBounds;
+            final SyncGroup group = mTmpFinishQueue.remove(0);
+            final int grpIdx = mActiveSyncs.indexOf(group);
+            // Skip if it's already finished:
+            if (grpIdx < 0) continue;
+            if (!group.tryFinish()) continue;
+            // Finished, so update dependencies of any prior groups and retry if unblocked.
+            int insertAt = 0;
+            for (int i = 0; i < mActiveSyncs.size(); ++i) {
+                final SyncGroup active = mActiveSyncs.get(i);
+                if (!active.mDependencies.remove(group)) continue;
+                // Anything afterwards is already in queue.
+                if (i >= grpIdx) continue;
+                if (!active.mDependencies.isEmpty()) continue;
+                // `active` became unblocked so it can finish, since it started earlier, it should
+                // be checked next to maintain order.
+                mTmpFinishQueue.add(insertAt, mActiveSyncs.get(i));
+                insertAt += 1;
+            }
         }
     }
 

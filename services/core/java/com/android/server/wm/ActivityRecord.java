@@ -10551,8 +10551,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    boolean isSyncFinished() {
-        if (!super.isSyncFinished()) return false;
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
+        if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
                 .isVisibilityUnknown(this)) {
             return false;
@@ -10572,11 +10572,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+    void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
+            boolean cancel) {
         // This override is just for getting metrics. allFinished needs to be checked before
         // finish because finish resets all the states.
+        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
+        if (syncGroup != null && group != getSyncGroup()) return;
         mLastAllReadyAtSync = allSyncFinished();
-        super.finishSync(outMergedTransaction, cancel);
+        super.finishSync(outMergedTransaction, group, cancel);
     }
 
     @Nullable
