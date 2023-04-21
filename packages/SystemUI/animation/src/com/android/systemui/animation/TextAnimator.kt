@@ -24,10 +24,8 @@ import android.graphics.Canvas
 import android.graphics.Typeface
 import android.graphics.fonts.Font
 import android.text.Layout
-import android.util.LruCache
 
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
-private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
 
 typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
 /**
@@ -116,7 +114,7 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
 
     private val fontVariationUtils = FontVariationUtils()
 
-    private val typefaceCache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
+    private val typefaceCache = HashMap<String, Typeface?>()
 
     fun updateLayout(layout: Layout) {
         textInterpolator.layout = layout
@@ -220,12 +218,12 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         }
 
         if (!fvar.isNullOrBlank()) {
-            textInterpolator.targetPaint.typeface = typefaceCache.get(fvar) ?: run {
-                textInterpolator.targetPaint.fontVariationSettings = fvar
-                textInterpolator.targetPaint.typeface?.also {
+            textInterpolator.targetPaint.typeface =
+                typefaceCache.getOrElse(fvar) {
+                    textInterpolator.targetPaint.fontVariationSettings = fvar
                     typefaceCache.put(fvar, textInterpolator.targetPaint.typeface)
+                    textInterpolator.targetPaint.typeface
                 }
-            }
         }
 
         if (color != null) {
