@@ -134,13 +134,14 @@ class DragResizeInputListener implements AutoCloseable {
      * @param cornerSize The size of the resize handle centered in each corner.
      * @param touchSlop The distance in pixels user has to drag with touch for it to register as
      *                  a resize action.
+     * @return whether the geometry has changed or not
      */
-    void setGeometry(int taskWidth, int taskHeight, int resizeHandleThickness, int cornerSize,
+    boolean setGeometry(int taskWidth, int taskHeight, int resizeHandleThickness, int cornerSize,
             int touchSlop) {
         if (mTaskWidth == taskWidth && mTaskHeight == taskHeight
                 && mResizeHandleThickness == resizeHandleThickness
                 && mCornerSize == cornerSize) {
-            return;
+            return false;
         }
 
         mTaskWidth = taskWidth;
@@ -220,6 +221,19 @@ class DragResizeInputListener implements AutoCloseable {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+        return true;
+    }
+
+    /**
+     * Generate a Region that encapsulates all 4 corner handles
+     */
+    Region getCornersRegion() {
+        Region region = new Region();
+        region.union(mLeftTopCornerBounds);
+        region.union(mLeftBottomCornerBounds);
+        region.union(mRightTopCornerBounds);
+        region.union(mRightBottomCornerBounds);
+        return region;
     }
 
     @Override
