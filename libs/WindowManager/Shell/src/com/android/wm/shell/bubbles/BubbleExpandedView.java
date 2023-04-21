@@ -27,6 +27,7 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPAND
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.MAX_HEIGHT;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -1057,13 +1058,21 @@ public class BubbleExpandedView extends LinearLayout {
             Log.d(TAG, "cleanUpExpandedState: bubble=" + getBubbleKey() + " task=" + mTaskId);
         }
         if (getTaskId() != INVALID_TASK_ID) {
-            try {
-                ActivityTaskManager.getService().removeTask(getTaskId());
-            } catch (RemoteException e) {
-                Log.w(TAG, e.getMessage());
+            // Ensure the task is removed from WM
+            if (ENABLE_SHELL_TRANSITIONS) {
+                if (mTaskView != null) {
+                    mTaskView.removeTask();
+                }
+            } else {
+                try {
+                    ActivityTaskManager.getService().removeTask(getTaskId());
+                } catch (RemoteException e) {
+                    Log.w(TAG, e.getMessage());
+                }
             }
         }
         if (mTaskView != null) {
+            // Release the surface & other task view related things
             mTaskView.release();
             removeView(mTaskView);
             mTaskView = null;

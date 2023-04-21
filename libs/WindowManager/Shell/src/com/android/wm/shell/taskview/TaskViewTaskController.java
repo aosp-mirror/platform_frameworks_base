@@ -98,7 +98,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     }
 
     /** Until all users are converted, we may have mixed-use (eg. Car). */
-    private boolean isUsingShellTransitions() {
+    public boolean isUsingShellTransitions() {
         return mTaskViewTransitions != null && mTaskViewTransitions.isEnabled();
     }
 
@@ -395,6 +395,15 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mTaskToken, boundsOnScreen);
         mSyncQueue.queue(wct);
+    }
+
+    /**
+     * Call to remove the task from window manager. This task will not appear in recents.
+     */
+    void removeTask() {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.removeTask(mTaskToken);
+        mTaskViewTransitions.closeTaskView(wct, this);
     }
 
     /** Should be called when the client surface is destroyed. */
