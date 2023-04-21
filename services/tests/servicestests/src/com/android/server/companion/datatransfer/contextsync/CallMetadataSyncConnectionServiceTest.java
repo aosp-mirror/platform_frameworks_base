@@ -45,16 +45,22 @@ public class CallMetadataSyncConnectionServiceTest {
     @Test
     public void createPhoneAccount_success() {
         final PhoneAccount phoneAccount = mSyncConnectionService.createPhoneAccount(
-                "com.google.test", "Test App");
+                new CallMetadataSyncConnectionService.PhoneAccountHandleIdentifier(/*
+                associationId= */
+                        0, "com.google.test"), "Test App");
         assertWithMessage("Could not create phone account").that(phoneAccount).isNotNull();
     }
 
     @Test
     public void createPhoneAccount_alreadyExists_doesNotCreateAnother() {
         final PhoneAccount phoneAccount = mSyncConnectionService.createPhoneAccount(
-                "com.google.test", "Test App");
+                new CallMetadataSyncConnectionService.PhoneAccountHandleIdentifier(/*
+                associationId= */
+                        0, "com.google.test"), "Test App");
         final PhoneAccount phoneAccount2 = mSyncConnectionService.createPhoneAccount(
-                "com.google.test", "Test App #2");
+                new CallMetadataSyncConnectionService.PhoneAccountHandleIdentifier(/*
+                associationId= */
+                        0, "com.google.test"), "Test App #2");
         assertWithMessage("Could not create phone account").that(phoneAccount).isNotNull();
         assertWithMessage("Unexpectedly created second phone account").that(phoneAccount2).isNull();
     }
