@@ -116,7 +116,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 .thenReturn(TEST_AUTO_DISMISS_TIME);
         when(mVSProvider.isReorderingAllowed()).thenReturn(true);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
-        mDependency.injectMockDependency(ConfigurationController.class);
         super.setUp();
 
         mHeadsUpManager = new TestableHeadsUpManagerPhone(
