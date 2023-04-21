@@ -141,6 +141,7 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
@@ -157,7 +158,7 @@ class UserController implements Handler.Callback {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserController" : TAG_AM;
 
     // Amount of time we wait for observers to handle a user switch before
-    // giving up on them and unfreezing the screen.
+    // giving up on them and dismissing the user switching dialog.
     static final int DEFAULT_USER_SWITCH_TIMEOUT_MS = 3 * 1000;
 
     /**
@@ -207,7 +208,7 @@ class UserController implements Handler.Callback {
     /**
      * Amount of time waited for {@link WindowManagerService#dismissKeyguard} callbacks to be
      * called after dismissing the keyguard.
-     * Otherwise, we should move on to unfreeze the screen {@link #unfreezeScreen}
+     * Otherwise, we should move on to dismiss the dialog {@link #dismissUserSwitchDialog()}
      * and report user switch is complete {@link #REPORT_USER_SWITCH_COMPLETE_MSG}.
      */
     private static final int DISMISS_KEYGUARD_TIMEOUT_MS = 2 * 1000;
@@ -1695,14 +1696,6 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
-            if (foreground && isUserSwitchUiEnabled()) {
-                t.traceBegin("startFreezingScreen");
-                mInjector.getWindowManager().startFreezingScreen(
-                        R.anim.screen_user_exit, R.anim.screen_user_enter);
-                t.traceEnd();
-            }
-            dismissUserSwitchDialog(); // so that we don't hold a reference to mUserSwitchingDialog
-
             boolean needStart = false;
             boolean updateUmState = false;
             UserState uss;
@@ -1877,7 +1870,7 @@ class UserController implements Handler.Callback {
         if (!success) {
             mInjector.getWindowManager().setSwitchingUser(false);
             mTargetUserId = UserHandle.USER_NULL;
-            dismissUserSwitchDialog();
+            dismissUserSwitchDialog(null);
         }
     }
 
@@ -2015,22 +2008,26 @@ class UserController implements Handler.Callback {
             mUiHandler.sendMessage(mUiHandler.obtainMessage(
                     START_USER_SWITCH_UI_MSG, userNames));
         } else {
-            mHandler.removeMessages(START_USER_SWITCH_FG_MSG);
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    START_USER_SWITCH_FG_MSG, targetUserId, 0));
+            sendStartUserSwitchFgMessage(targetUserId);
         }
         return true;
     }
 
-    private void dismissUserSwitchDialog() {
-        mInjector.dismissUserSwitchingDialog();
+    private void sendStartUserSwitchFgMessage(int targetUserId) {
+        mHandler.removeMessages(START_USER_SWITCH_FG_MSG);
+        mHandler.sendMessage(mHandler.obtainMessage(START_USER_SWITCH_FG_MSG, targetUserId, 0));
+    }
+
+    private void dismissUserSwitchDialog(Runnable onDismissed) {
+        mInjector.dismissUserSwitchingDialog(onDismissed);
     }
 
     private void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {
         // The dialog will show and then initiate the user switch by calling startUserInForeground
         mInjector.showUserSwitchingDialog(fromToUserPair.first, fromToUserPair.second,
                 getSwitchingFromSystemUserMessageUnchecked(),
-                getSwitchingToSystemUserMessageUnchecked());
+                getSwitchingToSystemUserMessageUnchecked(),
+                /* onShown= */ () -> sendStartUserSwitchFgMessage(fromToUserPair.second.id));
     }
 
     private void dispatchForegroundProfileChanged(@UserIdInt int userId) {
@@ -2236,7 +2233,7 @@ class UserController implements Handler.Callback {
 
         EventLog.writeEvent(EventLogTags.UC_CONTINUE_USER_SWITCH, oldUserId, newUserId);
 
-        // Do the keyguard dismiss and unfreeze later
+        // Do the keyguard dismiss and dismiss the user switching dialog later
         mHandler.removeMessages(COMPLETE_USER_SWITCH_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(
                 COMPLETE_USER_SWITCH_MSG, oldUserId, newUserId));
@@ -2251,35 +2248,31 @@ class UserController implements Handler.Callback {
     @VisibleForTesting
     void completeUserSwitch(int oldUserId, int newUserId) {
         final boolean isUserSwitchUiEnabled = isUserSwitchUiEnabled();
-        final Runnable runnable = () -> {
-            if (isUserSwitchUiEnabled) {
-                unfreezeScreen();
-            }
-            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
-        };
-
-        // If there is no challenge set, dismiss the keyguard right away
-        if (isUserSwitchUiEnabled && !mInjector.getKeyguardManager().isDeviceSecure(newUserId)) {
-            // Wait until the keyguard is dismissed to unfreeze
-            mInjector.dismissKeyguard(runnable);
-        } else {
-            runnable.run();
-        }
+        // serialize each conditional step
+        await(
+                // STEP 1 - If there is no challenge set, dismiss the keyguard right away
+                isUserSwitchUiEnabled && !mInjector.getKeyguardManager().isDeviceSecure(newUserId),
+                mInjector::dismissKeyguard,
+                () -> await(
+                        // STEP 2 - If user switch ui was enabled, dismiss user switch dialog
+                        isUserSwitchUiEnabled,
+                        this::dismissUserSwitchDialog,
+                        () -> {
+                            // STEP 3 - Send REPORT_USER_SWITCH_COMPLETE_MSG to broadcast
+                            // ACTION_USER_SWITCHED & call UserSwitchObservers.onUserSwitchComplete
+                            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
+                            mHandler.sendMessage(mHandler.obtainMessage(
+                                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
+                        }
+                ));
     }
 
-    /**
-     * Tell WindowManager we're ready to unfreeze the screen, at its leisure. Note that there is
-     * likely a lot going on, and WM won't unfreeze until the drawing is all done, so
-     * the actual unfreeze may still not happen for a long time; this is expected.
-     */
-    @VisibleForTesting
-    void unfreezeScreen() {
-        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-        t.traceBegin("stopFreezingScreen");
-        mInjector.getWindowManager().stopFreezingScreen();
-        t.traceEnd();
+    private void await(boolean condition, Consumer<Runnable> conditionalStep, Runnable nextStep) {
+        if (condition) {
+            conditionalStep.accept(nextStep);
+        } else {
+            nextStep.run();
+        }
     }
 
     private void moveUserToForeground(UserState uss, int newUserId) {
@@ -3731,17 +3724,18 @@ class UserController implements Handler.Callback {
             mService.mCpHelper.installEncryptionUnawareProviders(userId);
         }
 
-        void dismissUserSwitchingDialog() {
+        void dismissUserSwitchingDialog(@Nullable Runnable onDismissed) {
             synchronized (mUserSwitchingDialogLock) {
                 if (mUserSwitchingDialog != null) {
-                    mUserSwitchingDialog.dismiss();
+                    mUserSwitchingDialog.dismiss(onDismissed);
                     mUserSwitchingDialog = null;
                 }
             }
         }
 
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
-                String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
+                String switchingFromSystemUserMessage, String switchingToSystemUserMessage,
+                @NonNull Runnable onShown) {
             if (mService.mContext.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
                 // config_customUserSwitchUi is set to true on Automotive as CarSystemUI is
@@ -3751,11 +3745,10 @@ class UserController implements Handler.Callback {
                         + "condition if it's shown by CarSystemUI as well");
             }
             synchronized (mUserSwitchingDialogLock) {
-                dismissUserSwitchingDialog();
-                mUserSwitchingDialog = new UserSwitchingDialog(mService, mService.mContext,
-                        fromUser, toUser, true /* above system */, switchingFromSystemUserMessage,
-                        switchingToSystemUserMessage);
-                mUserSwitchingDialog.show();
+                dismissUserSwitchingDialog(null);
+                mUserSwitchingDialog = new UserSwitchingDialog(mService.mContext, fromUser, toUser,
+                        switchingFromSystemUserMessage, switchingToSystemUserMessage);
+                mUserSwitchingDialog.show(onShown);
             }
         }
 

@@ -66,14 +66,14 @@ public class MagnificationThumbnailTest {
 
     @Test
     public void updateThumbnailShows() {
-        runOnMainSync(() -> mMagnificationThumbnail.updateThumbNail(
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
                 /* scale=   */ 2f,
                 /* centerX= */ 5,
                 /* centerY= */ 10
         ));
         idle();
 
-        runOnMainSync(() -> mMagnificationThumbnail.updateThumbNail(
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
                 /* scale=   */ 2.2f,
                 /* centerX= */ 15,
                 /* centerY= */ 50
@@ -86,7 +86,7 @@ public class MagnificationThumbnailTest {
 
     @Test
     public void updateThumbnailLingersThenHidesAfterTimeout() throws InterruptedException {
-        runOnMainSync(() -> mMagnificationThumbnail.updateThumbNail(
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
                 /* scale=   */ 2f,
                 /* centerX= */ 5,
                 /* centerY= */ 10
@@ -103,14 +103,14 @@ public class MagnificationThumbnailTest {
 
     @Test
     public void hideThumbnailRemoves() throws InterruptedException {
-        runOnMainSync(() -> mMagnificationThumbnail.updateThumbNail(
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
                 /* scale=   */ 2f,
                 /* centerX= */ 5,
                 /* centerY= */ 10
         ));
         idle();
 
-        runOnMainSync(() -> mMagnificationThumbnail.hideThumbNail());
+        runOnMainSync(() -> mMagnificationThumbnail.hideThumbnail());
         idle();
 
         // Wait for the fade out animation
@@ -122,10 +122,10 @@ public class MagnificationThumbnailTest {
 
     @Test
     public void hideShowHideShowHideRemoves() throws InterruptedException {
-        runOnMainSync(() -> mMagnificationThumbnail.hideThumbNail());
+        runOnMainSync(() -> mMagnificationThumbnail.hideThumbnail());
         idle();
 
-        runOnMainSync(() -> mMagnificationThumbnail.updateThumbNail(
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
                 /* scale=   */ 2f,
                 /* centerX= */ 5,
                 /* centerY= */ 10
@@ -135,17 +135,17 @@ public class MagnificationThumbnailTest {
         // Wait for the fade in animation
         Thread.sleep(200L);
 
-        runOnMainSync(() -> mMagnificationThumbnail.hideThumbNail());
+        runOnMainSync(() -> mMagnificationThumbnail.hideThumbnail());
         idle();
 
-        runOnMainSync(() -> mMagnificationThumbnail.updateThumbNail(
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
                 /* scale=   */ 2f,
                 /* centerX= */ 5,
                 /* centerY= */ 10
         ));
         idle();
 
-        runOnMainSync(() -> mMagnificationThumbnail.hideThumbNail());
+        runOnMainSync(() -> mMagnificationThumbnail.hideThumbnail());
         idle();
 
 
@@ -158,7 +158,7 @@ public class MagnificationThumbnailTest {
 
     @Test
     public void hideWithoutShowDoesNothing() throws InterruptedException {
-        runOnMainSync(() -> mMagnificationThumbnail.hideThumbNail());
+        runOnMainSync(() -> mMagnificationThumbnail.hideThumbnail());
         idle();
 
         // Wait for the fade out animation
@@ -172,7 +172,7 @@ public class MagnificationThumbnailTest {
 
     @Test
     public void whenHidden_setBoundsDoesNotShow() throws InterruptedException {
-        runOnMainSync(() -> mMagnificationThumbnail.setThumbNailBounds(
+        runOnMainSync(() -> mMagnificationThumbnail.setThumbnailBounds(
                 new Rect(),
                 /* scale=   */ 2f,
                 /* centerX= */ 5,

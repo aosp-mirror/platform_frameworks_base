@@ -1690,8 +1690,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Similar to auto-enter-pip transition, we use content overlay when there is no
             // source rect hint to enter PiP use bounds animation.
             if (sourceHintRect == null) {
+                // We use content overlay when there is no source rect hint to enter PiP use bounds
+                // animation.
+                // TODO(b/272819817): cleanup the null-check and extra logging.
+                final boolean hasTopActivityInfo = mTaskInfo.topActivityInfo != null;
+                if (!hasTopActivityInfo) {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "%s: TaskInfo.topActivityInfo is null", TAG);
+                }
                 if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", true)) {
+                        "persist.wm.debug.enable_pip_app_icon_overlay", true)
+                        && hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, mTaskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());

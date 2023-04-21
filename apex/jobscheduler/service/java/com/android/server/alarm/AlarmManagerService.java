@@ -4873,8 +4873,7 @@ public class AlarmManagerService extends SystemService {
                                 }
                             }
                             if (wakeupUids.size() > 0 && mBatteryStatsInternal != null) {
-                                mBatteryStatsInternal.noteCpuWakingActivity(
-                                        BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM, nowELAPSED,
+                                mBatteryStatsInternal.noteWakingAlarmBatch(nowELAPSED,
                                         wakeupUids.toArray());
                             }
                             deliverAlarmsLocked(triggerList, nowELAPSED);

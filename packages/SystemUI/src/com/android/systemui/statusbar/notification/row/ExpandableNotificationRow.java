@@ -3649,16 +3649,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 pw.println("no viewState!!!");
             }
-            pw.println("Roundness: " + getRoundableState().debugString());
+            pw.println(getRoundableState().debugString());
 
             int transientViewCount = mChildrenContainer == null
                     ? 0 : mChildrenContainer.getTransientViewCount();
             if (mIsSummaryWithChildren || transientViewCount > 0) {
-                pw.println();
-                pw.print("ChildrenContainer");
-                pw.print(" visibility: " + mChildrenContainer.getVisibility());
-                pw.print(", alpha: " + mChildrenContainer.getAlpha());
-                pw.print(", translationY: " + mChildrenContainer.getTranslationY());
+                pw.println(mChildrenContainer.debugString());
                 pw.println();
                 List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
                 pw.print("Children: " + notificationChildren.size() + " {");
@@ -3723,12 +3719,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mChildrenContainer != null) {
             mChildrenContainer.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
         }
-    }
-
-    @Override
-    public String toString() {
-        String roundableStateDebug = "RoundableState = " + getRoundableState().debugString();
-        return "ExpandableNotificationRow:" + hashCode() + " { " + roundableStateDebug + " }";
     }
 
     @Override

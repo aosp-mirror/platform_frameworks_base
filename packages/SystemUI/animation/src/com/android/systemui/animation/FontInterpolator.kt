@@ -18,8 +18,10 @@ package com.android.systemui.animation
 
 import android.graphics.fonts.Font
 import android.graphics.fonts.FontVariationAxis
+import android.util.LruCache
 import android.util.MathUtils
 import android.util.MathUtils.abs
+import androidx.annotation.VisibleForTesting
 import java.lang.Float.max
 import java.lang.Float.min
 
@@ -33,6 +35,10 @@ private const val FONT_ITALIC_MAX = 1f
 private const val FONT_ITALIC_MIN = 0f
 private const val FONT_ITALIC_ANIMATION_STEP = 0.1f
 private const val FONT_ITALIC_DEFAULT_VALUE = 0f
+
+// Benchmarked via Perfetto, difference between 10 and 50 entries is about 0.3ms in
+// frame draw time on a Pixel 6.
+@VisibleForTesting const val FONT_CACHE_MAX_ENTRIES = 10
 
 /** Provide interpolation of two fonts by adjusting font variation settings. */
 class FontInterpolator {
@@ -81,8 +87,8 @@ class FontInterpolator {
     // Font interpolator has two level caches: one for input and one for font with different
     // variation settings. No synchronization is needed since FontInterpolator is not designed to be
     // thread-safe and can be used only on UI thread.
-    private val interpCache = hashMapOf<InterpKey, Font>()
-    private val verFontCache = hashMapOf<VarFontKey, Font>()
+    private val interpCache = LruCache<InterpKey, Font>(FONT_CACHE_MAX_ENTRIES)
+    private val verFontCache = LruCache<VarFontKey, Font>(FONT_CACHE_MAX_ENTRIES)
 
     // Mutable keys for recycling.
     private val tmpInterpKey = InterpKey(null, null, 0f)
@@ -152,7 +158,7 @@ class FontInterpolator {
         tmpVarFontKey.set(start, newAxes)
         val axesCachedFont = verFontCache[tmpVarFontKey]
         if (axesCachedFont != null) {
-            interpCache[InterpKey(start, end, progress)] = axesCachedFont
+            interpCache.put(InterpKey(start, end, progress), axesCachedFont)
             return axesCachedFont
         }
 
@@ -160,8 +166,8 @@ class FontInterpolator {
         // Font.Builder#build won't throw IOException since creating fonts from existing fonts will
         // not do any IO work.
         val newFont = Font.Builder(start).setFontVariationSettings(newAxes.toTypedArray()).build()
-        interpCache[InterpKey(start, end, progress)] = newFont
-        verFontCache[VarFontKey(start, newAxes)] = newFont
+        interpCache.put(InterpKey(start, end, progress), newFont)
+        verFontCache.put(VarFontKey(start, newAxes), newFont)
         return newFont
     }
 

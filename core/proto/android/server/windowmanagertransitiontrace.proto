@@ -55,12 +55,14 @@ message Transition {
   optional int64 finish_time_ns = 6; // consider aborted if not provided
   required int32 type = 7;
   repeated Target targets = 8;
+  optional int32 flags = 9;
 }
 
 message Target {
   required int32 mode = 1;
   required int32 layer_id = 2;
   optional int32 window_id = 3;  // Not dumped in always on tracing
+  optional int32 flags = 4;
 }
 
 message TransitionState {

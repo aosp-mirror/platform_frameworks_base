@@ -55,6 +55,7 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfC
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModelModule;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
@@ -87,7 +88,10 @@ import javax.inject.Named;
 import javax.inject.Provider;
 
 @Module(subcomponents = StatusBarFragmentComponent.class,
-        includes = { ActivatableNotificationViewModelModule.class })
+        includes = {
+                ActivatableNotificationViewModelModule.class,
+                NotificationListViewModelModule.class,
+        })
 public abstract class StatusBarViewModule {
 
     public static final String SHADE_HEADER = "large_screen_shade_header";
@@ -117,9 +121,7 @@ public abstract class StatusBarViewModule {
             NotificationShelfComponent.Builder notificationShelfComponentBuilder,
             NotificationShelf notificationShelf) {
         if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-            NotificationShelfViewBinderWrapperControllerImpl impl = newImpl.get();
-            impl.init();
-            return impl;
+            return newImpl.get();
         } else {
             NotificationShelfComponent component = notificationShelfComponentBuilder
                     .notificationShelf(notificationShelf)

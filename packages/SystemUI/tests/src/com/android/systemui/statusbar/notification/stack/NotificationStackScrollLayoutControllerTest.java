@@ -72,9 +72,11 @@ import com.android.systemui.statusbar.notification.collection.render.SectionHead
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -91,6 +93,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /**
  * Tests for {@link NotificationStackScrollLayoutController}.
@@ -138,6 +142,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;
+    @Mock private NotificationIconAreaController mIconAreaController;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -247,6 +252,34 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
                 /* notifVisibleInShade= */ false);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_bouncerShowing_hideEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ false,
+                /* areNotificationsHiddenInShade= */ false);
+    }
+
+    @Test
+    public void testUpdateEmptyShadeView_bouncerNotShowing_showEmptyView() {
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
+        initController(/* viewIsAttached= */ true);
+
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
+        setupShowEmptyShadeViewState(true);
+        reset(mNotificationStackScrollLayout);
+        mController.updateShowEmptyShadeView();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
+                /* visible= */ true,
+                /* areNotificationsHiddenInShade= */ false);
     }
 
     @Test
@@ -430,6 +463,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mKeyguardBypassController,
                 mZenModeController,
                 mNotificationLockscreenUserManager,
+                Optional.<NotificationListViewModel>empty(),
                 mMetricsLogger,
                 mDumpManager,
                 new FalsingCollectorFake(),
@@ -453,6 +487,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mStackLogger,
                 mLogger,
                 mNotificationStackSizeCalculator,
+                mIconAreaController,
                 mFeatureFlags,
                 mNotificationTargetsHelper,
                 mSecureSettings,

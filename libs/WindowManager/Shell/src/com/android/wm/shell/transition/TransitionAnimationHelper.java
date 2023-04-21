@@ -122,14 +122,14 @@ public class TransitionAnimationHelper {
                     ? R.styleable.WindowAnimation_taskToFrontEnterAnimation
                     : R.styleable.WindowAnimation_taskToFrontExitAnimation;
         } else if (type == TRANSIT_CLOSE) {
-            if (isTask) {
+            if ((changeFlags & FLAG_TRANSLUCENT) != 0 && !enter) {
+                translucent = true;
+            }
+            if (isTask && !translucent) {
                 animAttr = enter
                         ? R.styleable.WindowAnimation_taskCloseEnterAnimation
                         : R.styleable.WindowAnimation_taskCloseExitAnimation;
             } else {
-                if ((changeFlags & FLAG_TRANSLUCENT) != 0 && !enter) {
-                    translucent = true;
-                }
                 animAttr = enter
                         ? R.styleable.WindowAnimation_activityCloseEnterAnimation
                         : R.styleable.WindowAnimation_activityCloseExitAnimation;

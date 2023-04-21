@@ -16,76 +16,31 @@
 
 package com.android.server.accessibility.magnification;
 
-import android.annotation.NonNull;
 import android.provider.DeviceConfig;
-
-import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.concurrent.Executor;
 
 /**
  * Encapsulates the feature flags for always on magnification. {@see DeviceConfig}
  *
  * @hide
  */
-public class AlwaysOnMagnificationFeatureFlag {
+public class AlwaysOnMagnificationFeatureFlag extends MagnificationFeatureFlagBase {
 
     private static final String NAMESPACE = DeviceConfig.NAMESPACE_WINDOW_MANAGER;
     private static final String FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION =
             "AlwaysOnMagnifier__enable_always_on_magnifier";
 
-    private AlwaysOnMagnificationFeatureFlag() {}
-
-    /** Returns true if the feature flag is enabled for always on magnification */
-    public static boolean isAlwaysOnMagnificationEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE,
-                FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION,
-                /* defaultValue= */ false);
+    @Override
+    String getNamespace() {
+        return NAMESPACE;
     }
 
-    /** Sets the feature flag. Only used for testing; requires shell permissions. */
-    @VisibleForTesting
-    public static boolean setAlwaysOnMagnificationEnabled(boolean isEnabled) {
-        return DeviceConfig.setProperty(
-                NAMESPACE,
-                FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION,
-                Boolean.toString(isEnabled),
-                /* makeDefault= */ false);
+    @Override
+    String getFeatureName() {
+        return FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION;
     }
 
-    /**
-     * Adds a listener for when the feature flag changes.
-     *
-     * <p>{@see DeviceConfig#addOnPropertiesChangedListener(
-     * String, Executor, DeviceConfig.OnPropertiesChangedListener)}
-     */
-    @NonNull
-    public static DeviceConfig.OnPropertiesChangedListener addOnChangedListener(
-            @NonNull Executor executor, @NonNull Runnable listener) {
-        DeviceConfig.OnPropertiesChangedListener onChangedListener =
-                properties -> {
-                    if (properties.getKeyset().contains(
-                            FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION)) {
-                        listener.run();
-                    }
-                };
-        DeviceConfig.addOnPropertiesChangedListener(
-                NAMESPACE,
-                executor,
-                onChangedListener);
-
-        return onChangedListener;
-    }
-
-    /**
-     * Remove a listener for when the feature flag changes.
-     *
-     * <p>{@see DeviceConfig#addOnPropertiesChangedListener(String, Executor,
-     * DeviceConfig.OnPropertiesChangedListener)}
-     */
-    public static void removeOnChangedListener(
-            @NonNull DeviceConfig.OnPropertiesChangedListener onChangedListener) {
-        DeviceConfig.removeOnPropertiesChangedListener(onChangedListener);
+    @Override
+    boolean getDefaultValue() {
+        return false;
     }
 }

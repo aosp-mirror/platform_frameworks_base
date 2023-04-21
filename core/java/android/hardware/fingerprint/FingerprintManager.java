@@ -712,6 +712,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             return;
         }
 
+        if (hardwareAuthToken == null) {
+            callback.onEnrollmentError(FINGERPRINT_ERROR_UNABLE_TO_PROCESS,
+                    getErrorString(mContext, FINGERPRINT_ERROR_UNABLE_TO_PROCESS,
+                            0 /* vendorCode */));
+            return;
+        }
+
         if (mService != null) {
             try {
                 mEnrollmentCallback = callback;
@@ -832,7 +839,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * Removes all face templates for the given user.
+     * Removes all fingerprint templates for the given user.
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)

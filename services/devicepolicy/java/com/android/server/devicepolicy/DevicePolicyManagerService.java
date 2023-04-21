@@ -160,6 +160,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.app.admin.DevicePolicyManager.PERSONAL_APPS_NOT_SUSPENDED;
 import static android.app.admin.DevicePolicyManager.PERSONAL_APPS_SUSPENDED_EXPLICITLY;
@@ -533,7 +534,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -1186,9 +1186,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         // Resume logging if all remaining users are affiliated.
                         maybeResumeDeviceWideLoggingLocked();
                     }
-                    if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
-                        mDevicePolicyEngine.handleUserRemoved(userHandle);
-                    }
+                }
+                if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
+                    mDevicePolicyEngine.handleUserRemoved(userHandle);
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STARTED, userHandle);
@@ -4157,8 +4157,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_REMOVE_ACTIVE_ADMIN);
         enforceUserUnlocked(userHandle);
 
+        ActiveAdmin admin;
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
+            admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
             if (admin == null) {
                 return;
             }
@@ -4169,14 +4170,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         + adminReceiver);
                 return;
             }
-
             mInjector.binderWithCleanCallingIdentity(() ->
                     removeActiveAdminLocked(adminReceiver, userHandle));
-            if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
-                mDevicePolicyEngine.removePoliciesForAdmin(
-                        EnforcingAdmin.createEnterpriseEnforcingAdmin(
-                                adminReceiver, userHandle, admin));
-            }
+        }
+        if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
+            mDevicePolicyEngine.removePoliciesForAdmin(
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            adminReceiver, userHandle, admin));
         }
     }
 
@@ -13804,8 +13804,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         admin,
                         new BooleanPolicyValue(hidden),
                         userId);
-                Boolean resolvedPolicy = mDevicePolicyEngine.getResolvedPolicy(
-                        PolicyDefinition.APPLICATION_HIDDEN(packageName), userId);
                 result = mInjector.binderWithCleanCallingIdentity(() -> {
                     try {
                         // This is a best effort to continue returning the same value that was
@@ -16549,11 +16547,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 hasCallingOrSelfPermission(permission.NOTIFY_PENDING_SYSTEM_UPDATE),
                 "Only the system update service can broadcast update information");
 
-        if (UserHandle.getCallingUserId() != UserHandle.USER_SYSTEM) {
-            Slogf.w(LOG_TAG, "Only the system update service in the system user can broadcast "
-                    + "update information.");
-            return;
-        }
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            if (!mUserManager.getUserInfo(UserHandle.getCallingUserId()).isMain()) {
+                Slogf.w(LOG_TAG, "Only the system update service in the main user can broadcast "
+                        + "update information.");
+                return;
+            }
+        });
 
         if (!mOwners.saveSystemUpdateInfo(info)) {
             // Pending system update hasn't changed, don't send duplicate notification.
@@ -16661,8 +16661,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
             }
         }
+        EnforcingAdmin enforcingAdmin;
         if (isPermissionCheckFlagEnabled()) {
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+            enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,
                     callerPackage,
@@ -16686,17 +16687,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 callback.sendResult(null);
                 return;
             }
-            // TODO(b/266924257): decide how to handle the internal state if the package doesn't
-            //  exist, or the permission isn't requested by the app, because we could end up with
-            //  inconsistent state between the policy engine and package manager. Also a package
-            //  might get removed or has it's permission updated after we've set the policy.
-            mDevicePolicyEngine.setLocalPolicy(
-                    PolicyDefinition.PERMISSION_GRANT(packageName, permission),
-                    enforcingAdmin,
-                    new IntegerPolicyValue(grantState),
-                    caller.getUserId());
-            // TODO: update javadoc to reflect that callback no longer return success/failure
-            callback.sendResult(Bundle.EMPTY);
         } else {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)
@@ -16704,51 +16694,81 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     || (caller.hasPackage() && isCallerDelegate(caller,
                     DELEGATION_PERMISSION_GRANT)));
             synchronized (getLockObject()) {
-            long ident = mInjector.binderClearCallingIdentity();
-            try {
-                boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
-                        >= android.os.Build.VERSION_CODES.Q;
-                if (!isPostQAdmin) {
-                    // Legacy admins assume that they cannot control pre-M apps
-                    if (getTargetSdk(packageName, caller.getUserId())
-                            < android.os.Build.VERSION_CODES.M) {
+                long ident = mInjector.binderClearCallingIdentity();
+                try {
+                    boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
+                            >= android.os.Build.VERSION_CODES.Q;
+                    if (!isPostQAdmin) {
+                        // Legacy admins assume that they cannot control pre-M apps
+                        if (getTargetSdk(packageName, caller.getUserId())
+                                < android.os.Build.VERSION_CODES.M) {
+                            callback.sendResult(null);
+                            return;
+                        }
+                    }
+                    if (!isRuntimePermission(permission)) {
                         callback.sendResult(null);
                         return;
                     }
-                }
-                if (!isRuntimePermission(permission)) {
+                } catch (SecurityException e) {
+                    Slogf.e(LOG_TAG, "Could not set permission grant state", e);
                     callback.sendResult(null);
-                    return;
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(ident);
                 }
-                if (grantState == PERMISSION_GRANT_STATE_GRANTED
-                        || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
-                        || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
-                    AdminPermissionControlParams permissionParams =
-                            new AdminPermissionControlParams(packageName, permission,
-                                    grantState,
-                                    canAdminGrantSensorsPermissions());
-                    mInjector.getPermissionControllerManager(caller.getUserHandle())
-                            .setRuntimePermissionGrantStateByDeviceAdmin(
-                                    caller.getPackageName(),
-                                    permissionParams, mContext.getMainExecutor(),
-                                    (permissionWasSet) -> {
-                                        if (isPostQAdmin && !permissionWasSet) {
-                                            callback.sendResult(null);
-                                            return;
-                                        }
-
-                                        DevicePolicyEventLogger
-                                                .createEvent(DevicePolicyEnums
-                                                        .SET_PERMISSION_GRANT_STATE)
-                                                .setAdmin(caller.getPackageName())
-                                                .setStrings(permission)
-                                                .setInt(grantState)
-                                                .setBoolean(
-                                                        /* isDelegate */ isCallerDelegate(caller))
-                                                .write();
-
-                                        callback.sendResult(Bundle.EMPTY);
-                                    });
+            }
+        }
+        // TODO(b/278710449): enable when we stop policy enforecer callback from blocking the main
+        //  thread
+        if (false) {
+            // TODO(b/266924257): decide how to handle the internal state if the package doesn't
+            //  exist, or the permission isn't requested by the app, because we could end up with
+            //  inconsistent state between the policy engine and package manager. Also a package
+            //  might get removed or has it's permission updated after we've set the policy.
+            if (grantState == PERMISSION_GRANT_STATE_DEFAULT) {
+                mDevicePolicyEngine.removeLocalPolicy(
+                        PolicyDefinition.PERMISSION_GRANT(packageName, permission),
+                        enforcingAdmin,
+                        caller.getUserId());
+            } else {
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.PERMISSION_GRANT(packageName, permission),
+                        enforcingAdmin,
+                        new IntegerPolicyValue(grantState),
+                        caller.getUserId());
+            }
+            int newState = mInjector.binderWithCleanCallingIdentity(() ->
+                    getPermissionGrantStateForUser(
+                            packageName, permission, caller, caller.getUserId()));
+            if (newState == grantState) {
+                callback.sendResult(Bundle.EMPTY);
+            } else {
+                callback.sendResult(null);
+            }
+        } else {
+            synchronized (getLockObject()) {
+                long ident = mInjector.binderClearCallingIdentity();
+                try {
+                    boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
+                            >= android.os.Build.VERSION_CODES.Q;
+                    if (grantState == PERMISSION_GRANT_STATE_GRANTED
+                            || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
+                            || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
+                        AdminPermissionControlParams permissionParams =
+                                new AdminPermissionControlParams(packageName, permission,
+                                        grantState,
+                                        canAdminGrantSensorsPermissions());
+                        mInjector.getPermissionControllerManager(caller.getUserHandle())
+                                .setRuntimePermissionGrantStateByDeviceAdmin(
+                                        caller.getPackageName(),
+                                        permissionParams, mContext.getMainExecutor(),
+                                        (permissionWasSet) -> {
+                                            if (isPostQAdmin && !permissionWasSet) {
+                                                callback.sendResult(null);
+                                                return;
+                                            }
+                                            callback.sendResult(Bundle.EMPTY);
+                                        });
                     }
                 } catch (SecurityException e) {
                     Slogf.e(LOG_TAG, "Could not set permission grant state", e);
@@ -16759,6 +16779,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         }
+        DevicePolicyEventLogger.createEvent(DevicePolicyEnums.SET_PERMISSION_GRANT_STATE)
+                .setAdmin(caller.getPackageName())
+                .setStrings(permission)
+                .setInt(grantState)
+                .setBoolean(/* isDelegate */ isCallerDelegate(caller))
+                .write();
     }
 
     private static final List<String> SENSOR_PERMISSIONS = new ArrayList<>();
@@ -16822,10 +16848,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (isFinancedDeviceOwner(caller)) {
                 enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
             }
-            return mInjector.binderWithCleanCallingIdentity(() -> {
-                return getPermissionGrantStateForUser(
-                        packageName, permission, caller, caller.getUserId());
-            });
+            return mInjector.binderWithCleanCallingIdentity(() -> getPermissionGrantStateForUser(
+                    packageName, permission, caller, caller.getUserId()));
         }
     }
 
@@ -18952,7 +18976,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19016,7 +19040,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19062,7 +19086,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19114,7 +19138,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
                     caller.getPackageName(),
-                    UserHandle.USER_ALL);
+                    userId);
             Long currentTokenHandle = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
@@ -19140,10 +19164,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (result) {
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
-                    .setAdmin(caller.getComponentName())
-                    .write();
+            if (isPermissionCheckFlagEnabled()) {
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
+                        .setAdmin(callerPackageName)
+                        .write();
+            } else {
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
+                        .setAdmin(caller.getComponentName())
+                        .write();
+            }
         }
         return result;
     }

@@ -2839,6 +2839,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param listener callback for notification removed
      */
     public void setOnNotificationRemovedListener(OnNotificationRemovedListener listener) {
+        NotificationShelfController.assertRefactorFlagDisabled(mAmbientState.getFeatureFlags());
         mOnNotificationRemovedListener = listener;
     }
 
@@ -2852,10 +2853,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!mChildTransferInProgress) {
             onViewRemovedInternal(expandableView, this);
         }
-        if (mOnNotificationRemovedListener != null) {
-            mOnNotificationRemovedListener.onNotificationRemoved(
-                    expandableView,
-                    mChildTransferInProgress);
+        if (mAmbientState.getFeatureFlags().isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            mShelf.requestRoundnessResetFor(expandableView);
+        } else {
+            if (mOnNotificationRemovedListener != null) {
+                mOnNotificationRemovedListener.onNotificationRemoved(
+                        expandableView,
+                        mChildTransferInProgress);
+            }
         }
     }
 
@@ -4741,13 +4746,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFooterView.setVisible(visible, animate);
         mFooterView.setSecondaryVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
-        if (mHasFilteredOutSeenNotifications) {
-            mFooterView.setFooterLabelTextAndIcon(
-                    R.string.unlock_to_see_notif_text,
-                    R.drawable.ic_friction_lock_closed);
-        } else {
-            mFooterView.setFooterLabelTextAndIcon(0, 0);
-        }
+        mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
