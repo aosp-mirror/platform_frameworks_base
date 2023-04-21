@@ -128,7 +128,7 @@ public class WMShellTest extends SysuiTestCase {
     @Test
     public void initDesktopMode_registersListener() {
         mWMShell.initDesktopMode(mDesktopMode);
-        verify(mDesktopMode).addListener(
+        verify(mDesktopMode).addVisibleTasksListener(
                 any(DesktopModeTaskRepository.VisibleTasksListener.class),
                 any(Executor.class));
     }

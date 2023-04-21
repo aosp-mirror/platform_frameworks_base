@@ -16,9 +16,12 @@
 
 package com.android.wm.shell.desktopmode;
 
+import android.graphics.Region;
+
 import com.android.wm.shell.common.annotations.ExternalThread;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Interface to interact with desktop mode feature in shell.
@@ -32,7 +35,16 @@ public interface DesktopMode {
      * @param listener the listener to add.
      * @param callbackExecutor the executor to call the listener on.
      */
-    void addListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+    void addVisibleTasksListener(DesktopModeTaskRepository.VisibleTasksListener listener,
             Executor callbackExecutor);
+
+    /**
+     * Adds a consumer to listen for Desktop task corner changes. This is used for gesture
+     * exclusion. The SparseArray contains a list of four corner resize handles mapped to each
+     * desktop task's taskId. The resize handle Rects are stored in the following order:
+     * left-top, left-bottom, right-top, right-bottom.
+     */
+    default void addDesktopGestureExclusionRegionListener(Consumer<Region> listener,
+            Executor callbackExecutor) { }
 
 }
