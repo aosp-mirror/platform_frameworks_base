@@ -1297,37 +1297,38 @@ void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t ev
 
 bool NativeInputManager::filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) {
     ATRACE_CALL();
-    jobject inputEventObj;
-
     JNIEnv* env = jniEnv();
+
+    ScopedLocalRef<jobject> inputEventObj(env);
     switch (inputEvent.getType()) {
         case InputEventType::KEY:
-            inputEventObj =
+            inputEventObj.reset(
                     android_view_KeyEvent_fromNative(env,
-                                                     static_cast<const KeyEvent*>(&inputEvent));
+                                                     static_cast<const KeyEvent*>(&inputEvent)));
             break;
         case InputEventType::MOTION:
-            inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
-                                                                  static_cast<const MotionEvent&>(
-                                                                          inputEvent));
+            inputEventObj.reset(
+                    android_view_MotionEvent_obtainAsCopy(env,
+                                                          static_cast<const MotionEvent&>(
+                                                                  inputEvent)));
             break;
         default:
             return true; // dispatch the event normally
     }
 
-    if (!inputEventObj) {
+    if (!inputEventObj.get()) {
         ALOGE("Failed to obtain input event object for filterInputEvent.");
         return true; // dispatch the event normally
     }
 
     // The callee is responsible for recycling the event.
-    jboolean pass = env->CallBooleanMethod(mServiceObj, gServiceClassInfo.filterInputEvent,
-            inputEventObj, policyFlags);
+    const jboolean continueEventDispatch =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.filterInputEvent,
+                                   inputEventObj.get(), policyFlags);
     if (checkAndClearExceptionFromCallback(env, "filterInputEvent")) {
-        pass = true;
+        return true; // dispatch the event normally
     }
-    env->DeleteLocalRef(inputEventObj);
-    return pass;
+    return continueEventDispatch;
 }
 
 void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
@@ -1337,35 +1338,33 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
     // - Ignore untrusted events and pass them along.
     // - Ask the window manager what to do with normal events and trusted injected events.
     // - For normal events wake and brighten the screen if currently off or dim.
-    bool interactive = mInteractive.load();
+    const bool interactive = mInteractive.load();
     if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
-    if ((policyFlags & POLICY_FLAG_TRUSTED)) {
-        nsecs_t when = keyEvent.getEventTime();
-        JNIEnv* env = jniEnv();
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, &keyEvent);
-        jint wmActions;
-        if (keyEventObj) {
-            wmActions = env->CallIntMethod(mServiceObj,
-                    gServiceClassInfo.interceptKeyBeforeQueueing,
-                    keyEventObj, policyFlags);
-            if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
-                wmActions = 0;
-            }
-            android_view_KeyEvent_recycle(env, keyEventObj);
-            env->DeleteLocalRef(keyEventObj);
-        } else {
-            ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
-            wmActions = 0;
-        }
 
-        handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
-    } else {
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0) {
         if (interactive) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
         }
+        return;
     }
+
+    const nsecs_t when = keyEvent.getEventTime();
+    JNIEnv* env = jniEnv();
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, &keyEvent));
+    if (!keyEventObj.get()) {
+        ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
+        return;
+    }
+
+    jint wmActions = env->CallIntMethod(mServiceObj, gServiceClassInfo.interceptKeyBeforeQueueing,
+                                        keyEventObj.get(), policyFlags);
+    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
+        wmActions = 0;
+    }
+    android_view_KeyEvent_recycle(env, keyEventObj.get());
+    handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
 }
 
 void NativeInputManager::interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
@@ -1376,30 +1375,32 @@ void NativeInputManager::interceptMotionBeforeQueueing(int32_t displayId, nsecs_
     // - No special filtering for injected events required at this time.
     // - Filter normal events based on screen state.
     // - For normal events brighten (but do not wake) the screen if currently dim.
-    bool interactive = mInteractive.load();
+    const bool interactive = mInteractive.load();
     if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
-    if ((policyFlags & POLICY_FLAG_TRUSTED) && !(policyFlags & POLICY_FLAG_INJECTED)) {
-        if (policyFlags & POLICY_FLAG_INTERACTIVE) {
-            policyFlags |= POLICY_FLAG_PASS_TO_USER;
-        } else {
-            JNIEnv* env = jniEnv();
-            jint wmActions = env->CallIntMethod(mServiceObj,
-                        gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive,
-                        displayId, when, policyFlags);
-            if (checkAndClearExceptionFromCallback(env,
-                    "interceptMotionBeforeQueueingNonInteractive")) {
-                wmActions = 0;
-            }
 
-            handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
-        }
-    } else {
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0 || (policyFlags & POLICY_FLAG_INJECTED)) {
         if (interactive) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
         }
+        return;
     }
+
+    if (policyFlags & POLICY_FLAG_INTERACTIVE) {
+        policyFlags |= POLICY_FLAG_PASS_TO_USER;
+        return;
+    }
+
+    JNIEnv* env = jniEnv();
+    const jint wmActions =
+            env->CallIntMethod(mServiceObj,
+                               gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive,
+                               displayId, when, policyFlags);
+    if (checkAndClearExceptionFromCallback(env, "interceptMotionBeforeQueueingNonInteractive")) {
+        return;
+    }
+    handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
 }
 
 void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
@@ -1421,34 +1422,29 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& tok
     // - Ignore untrusted events and pass them along.
     // - Filter normal events and trusted injected events through the window manager policy to
     //   handle the HOME key and the like.
-    nsecs_t result = 0;
-    if (policyFlags & POLICY_FLAG_TRUSTED) {
-        JNIEnv* env = jniEnv();
-        ScopedLocalFrame localFrame(env);
-
-        // Token may be null
-        jobject tokenObj = javaObjectForIBinder(env, token);
-
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, &keyEvent);
-        if (keyEventObj) {
-            jlong delayMillis = env->CallLongMethod(mServiceObj,
-                    gServiceClassInfo.interceptKeyBeforeDispatching,
-                    tokenObj, keyEventObj, policyFlags);
-            bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
-            android_view_KeyEvent_recycle(env, keyEventObj);
-            env->DeleteLocalRef(keyEventObj);
-            if (!error) {
-                if (delayMillis < 0) {
-                    result = -1;
-                } else if (delayMillis > 0) {
-                    result = milliseconds_to_nanoseconds(delayMillis);
-                }
-            }
-        } else {
-            ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
-        }
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0) {
+        return 0;
     }
-    return result;
+
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+
+    // Token may be null
+    ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, &keyEvent));
+    if (!keyEventObj.get()) {
+        ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
+        return 0;
+    }
+
+    const jlong delayMillis =
+            env->CallLongMethod(mServiceObj, gServiceClassInfo.interceptKeyBeforeDispatching,
+                                tokenObj.get(), keyEventObj.get(), policyFlags);
+    android_view_KeyEvent_recycle(env, keyEventObj.get());
+    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching")) {
+        return 0;
+    }
+    return delayMillis < 0 ? -1 : milliseconds_to_nanoseconds(delayMillis);
 }
 
 std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
@@ -1457,38 +1453,39 @@ std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinde
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and do not perform default handling.
-    std::optional<KeyEvent> result;
-    if (policyFlags & POLICY_FLAG_TRUSTED) {
-        JNIEnv* env = jniEnv();
-        ScopedLocalFrame localFrame(env);
-
-        // Note: tokenObj may be null.
-        jobject tokenObj = javaObjectForIBinder(env, token);
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, &keyEvent);
-        if (keyEventObj) {
-            jobject fallbackKeyEventObj = env->CallObjectMethod(mServiceObj,
-                    gServiceClassInfo.dispatchUnhandledKey,
-                    tokenObj, keyEventObj, policyFlags);
-            if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey")) {
-                fallbackKeyEventObj = nullptr;
-            }
-            android_view_KeyEvent_recycle(env, keyEventObj);
-            env->DeleteLocalRef(keyEventObj);
-
-            if (fallbackKeyEventObj) {
-                // Note: outFallbackKeyEvent may be the same object as keyEvent.
-                result = KeyEvent();
-                if (android_view_KeyEvent_toNative(env, fallbackKeyEventObj, &(*result)) != OK) {
-                    result.reset();
-                }
-                android_view_KeyEvent_recycle(env, fallbackKeyEventObj);
-                env->DeleteLocalRef(fallbackKeyEventObj);
-            }
-        } else {
-            ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
-        }
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0) {
+        return {};
     }
-    return result;
+
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+
+    // Note: tokenObj may be null.
+    ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, &keyEvent));
+    if (!keyEventObj.get()) {
+        ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
+        return {};
+    }
+
+    ScopedLocalRef<jobject>
+            fallbackKeyEventObj(env,
+                                env->CallObjectMethod(mServiceObj,
+                                                      gServiceClassInfo.dispatchUnhandledKey,
+                                                      tokenObj.get(), keyEventObj.get(),
+                                                      policyFlags));
+
+    android_view_KeyEvent_recycle(env, keyEventObj.get());
+    if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey") ||
+        !fallbackKeyEventObj.get()) {
+        return {};
+    }
+
+    KeyEvent fallbackEvent;
+    LOG_ALWAYS_FATAL_IF(
+            android_view_KeyEvent_toNative(env, fallbackKeyEventObj.get(), &fallbackEvent) != OK);
+    android_view_KeyEvent_recycle(env, fallbackKeyEventObj.get());
+    return fallbackEvent;
 }
 
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType, int32_t displayId) {
