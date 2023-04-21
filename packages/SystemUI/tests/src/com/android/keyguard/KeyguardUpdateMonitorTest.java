@@ -383,6 +383,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void setupFingerprintAuth(boolean isClass3) throws RemoteException {
+        when(mAuthController.isFingerprintEnrolled(anyInt())).thenReturn(true);
         when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         mFingerprintSensorProperties = List.of(
@@ -2692,33 +2693,42 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
     @Test
     public void testFingerprintSensorProperties() throws RemoteException {
+        // GIVEN no fingerprint sensor properties
+        when(mAuthController.isFingerprintEnrolled(anyInt())).thenReturn(true);
         mFingerprintAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(
                 new ArrayList<>());
 
+        // THEN fingerprint is not possible
         assertThat(mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(
                 KeyguardUpdateMonitor.getCurrentUser())).isFalse();
 
+        // WHEN there are fingerprint sensor properties
         mFingerprintAuthenticatorsRegisteredCallback
                 .onAllAuthenticatorsRegistered(mFingerprintSensorProperties);
 
-        verifyFingerprintAuthenticateCall();
+        // THEN unlock with fp is possible & fingerprint starts listening
         assertThat(mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(
                 KeyguardUpdateMonitor.getCurrentUser())).isTrue();
+        verifyFingerprintAuthenticateCall();
     }
     @Test
     public void testFaceSensorProperties() throws RemoteException {
+        // GIVEN no face sensor properties
+        when(mAuthController.isFaceAuthEnrolled(anyInt())).thenReturn(true);
         mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(new ArrayList<>());
 
-        assertThat(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(
+        // THEN face is not possible
+        assertThat(mKeyguardUpdateMonitor.isUnlockWithFacePossible(
                 KeyguardUpdateMonitor.getCurrentUser())).isFalse();
 
+        // WHEN there are face sensor properties
         mFaceAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(mFaceSensorProperties);
-        biometricsEnabledForCurrentUser();
 
+        // THEN face is possible but face does NOT start listening immediately
+        assertThat(mKeyguardUpdateMonitor.isUnlockWithFacePossible(
+                KeyguardUpdateMonitor.getCurrentUser())).isTrue();
         verifyFaceAuthenticateNeverCalled();
         verifyFaceDetectNeverCalled();
-        assertThat(mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(
-                KeyguardUpdateMonitor.getCurrentUser())).isTrue();
     }
 
     @Test
@@ -2791,9 +2801,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void mockCanBypassLockscreen(boolean canBypass) {
-        // force update the isFaceEnrolled cache:
-        mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(getCurrentUser());
-
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         when(mKeyguardBypassController.canBypass()).thenReturn(canBypass);
     }

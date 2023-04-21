@@ -396,7 +396,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private int mFaceRunningState = BIOMETRIC_STATE_STOPPED;
     private boolean mIsDreaming;
     private boolean mLogoutEnabled;
-    private boolean mIsFaceEnrolled;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private int mPostureState = DEVICE_POSTURE_UNKNOWN;
     private FingerprintInteractiveToAuthProvider mFingerprintInteractiveToAuthProvider;
@@ -2573,16 +2572,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
-    private void updateFaceEnrolled(int userId) {
-        final Boolean isFaceEnrolled = isFaceSupported()
-                && mBiometricEnabledForUser.get(userId)
-                && mAuthController.isFaceAuthEnrolled(userId);
-        if (mIsFaceEnrolled != isFaceEnrolled) {
-            mLogger.logFaceEnrolledUpdated(mIsFaceEnrolled, isFaceEnrolled);
-        }
-        mIsFaceEnrolled = isFaceEnrolled;
-    }
-
     private boolean isFaceSupported() {
         return mFaceManager != null && !mFaceSensorProperties.isEmpty();
     }
@@ -2622,10 +2611,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * @return true if there's at least one face enrolled
+     * @return true if there's at least one face enrolled for the given user
+     */
+    private boolean isFaceEnrolled(int userId) {
+        return mAuthController.isFaceAuthEnrolled(userId);
+    }
+
+    /**
+     * @return true if there's at least one face enrolled for the current user
      */
     public boolean isFaceEnrolled() {
-        return mIsFaceEnrolled;
+        return isFaceEnrolled(getCurrentUser());
     }
 
     private final UserTracker.Callback mUserChangedCallback = new UserTracker.Callback() {
@@ -3284,14 +3280,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @SuppressLint("MissingPermission")
     @VisibleForTesting
     boolean isUnlockWithFingerprintPossible(int userId) {
-        // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
-        boolean newFpEnrolled = isFingerprintSupported()
-                && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId);
-        Boolean oldFpEnrolled = mIsUnlockWithFingerprintPossible.getOrDefault(userId, false);
-        if (oldFpEnrolled != newFpEnrolled) {
-            mLogger.logFpEnrolledUpdated(userId, oldFpEnrolled, newFpEnrolled);
+        boolean newFpPossible = isFingerprintSupported()
+                && !isFingerprintDisabled(userId) && mAuthController.isFingerprintEnrolled(userId);
+        Boolean oldFpPossible = mIsUnlockWithFingerprintPossible.getOrDefault(userId, false);
+        if (oldFpPossible != newFpPossible) {
+            mLogger.logFpPossibleUpdated(userId, oldFpPossible, newFpPossible);
         }
-        mIsUnlockWithFingerprintPossible.put(userId, newFpEnrolled);
+        mIsUnlockWithFingerprintPossible.put(userId, newFpPossible);
         return mIsUnlockWithFingerprintPossible.get(userId);
     }
 
@@ -3306,24 +3301,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * @deprecated This is being migrated to use modern architecture.
      */
+    @VisibleForTesting
     @Deprecated
-    private boolean isUnlockWithFacePossible(int userId) {
+    public boolean isUnlockWithFacePossible(int userId) {
         if (isFaceAuthInteractorEnabled()) {
             return getFaceAuthInteractor().canFaceAuthRun();
         }
-        return isFaceAuthEnabledForUser(userId) && !isFaceDisabled(userId);
-    }
-
-    /**
-     * If face hardware is available, user has enrolled and enabled auth via setting.
-     *
-     * @deprecated This is being migrated to use modern architecture.
-     */
-    @Deprecated
-    public boolean isFaceAuthEnabledForUser(int userId) {
-        // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
-        updateFaceEnrolled(userId);
-        return mIsFaceEnrolled;
+        return isFaceSupported() && isFaceEnrolled(userId) && !isFaceDisabled(userId);
     }
 
     private void stopListeningForFingerprint() {

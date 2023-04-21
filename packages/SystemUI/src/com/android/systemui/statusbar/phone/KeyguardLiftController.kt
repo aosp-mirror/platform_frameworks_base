@@ -115,9 +115,7 @@ class KeyguardLiftController @Inject constructor(
         val onKeyguard = keyguardUpdateMonitor.isKeyguardVisible &&
                 !statusBarStateController.isDozing
 
-        val userId = KeyguardUpdateMonitor.getCurrentUser()
-        val isFaceEnabled = keyguardUpdateMonitor.isFaceAuthEnabledForUser(userId)
-        val shouldListen = (onKeyguard || bouncerVisible) && isFaceEnabled
+        val shouldListen = (onKeyguard || bouncerVisible) && keyguardUpdateMonitor.isFaceEnrolled
         if (shouldListen != isListening) {
             isListening = shouldListen
 
