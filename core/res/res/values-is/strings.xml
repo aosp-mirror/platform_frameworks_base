@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Veitir forritinu aðgang að stöðu titrings."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"hringja beint í símanúmer"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Leyfir forriti að hringja í símanúmer án íhlutunar notanda. Þetta getur haft í för með sér óumbeðin gjöld og símtöl. Athugaðu að þetta leyfir forritinu ekki að hringja í neyðarnúmer. Spilliforrit geta stofnað til kostnaðar fyrir þig með því að hringja símtöl án þinnar heimildar."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"fá aðgang að IMS-símtalsþjónustu"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Leyfir forriti að nota IMS-þjónustu til að hringja án inngrips frá þér."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lesa stöðu símans og auðkenni"</string>
@@ -2159,8 +2160,10 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Ekki er hægt að opna þetta efni með vinnuforritum"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Ekki er hægt að deila þessu efni með forritum til einkanota"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Ekki er hægt að opna þetta efni með forritum til einkanota"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Hlé gert á vinnusniði"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Ýttu til að kveikja"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Engin vinnuforrit"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Engin forrit til einkanota"</string>
     <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->

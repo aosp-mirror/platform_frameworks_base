@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tətbiqə vibratoru idarə etmə icazəsi verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Tətbiqə vibrasiya vəziyyətinə daxil olmaq imkanı verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon nömrələrinə birbaşa zəng edir"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Tətbiqə Sizin müdaxiləniz olmadan telefon zəngləri etməyə imkan verir. Zərərli tətbiqlər Sizdən xəbərsiz şəkildə müxtəlif zənglər edərək, Sizə maddi ziyan vura bilər. Qeyd: Bu, tətbiqlərə təcili nömrələrə zəng etməyə icazə vermir."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS zəng xidmətinə giriş"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Tətbiqə müdaxilə olmadan zəng etmək üçün IMS xidmətindən istifadə etməyə imkan verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefon statusunu və identifikasiyanı oxuyur"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Üz əməliyyatı ləğv edildi."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"İstifadəçi üz ilə kiliddən çıxarmanı ləğv edib"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Həddindən çox cəhd. Sonraya saxlayın."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Çox cəhd edilib. Üz ilə Kiliddən Açma əlçatan deyil."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Həddindən çox cəhd. Əvəzində ekran kilidi daxil edin."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Üz doğrulanmadı. Yenidən cəhd edin."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Üz ilə kiliddən çıxarma ayarlamamısınız"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu kontenti iş tətbiqləri ilə açmaq mümkün deyil"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu kontenti şəxsi tətbiqlər ilə paylaşmaq mümkün deyil"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu kontenti şəxsi tətbiqlər ilə açmaq mümkün deyil"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"İş profilinə fasilə verilib"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Aktiv etmək üçün toxunun"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş tətbiqi yoxdur"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Şəxsi tətbiq yoxdur"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Açın: <xliff:g id="APP">%s</xliff:g> (şəxsi)"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Açın: <xliff:g id="APP">%s</xliff:g> (iş)"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Şəxsi brauzerdən istifadə edin"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"İş brauzerindən istifadə edin"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM şəbəkəsi kilidaçma PİN\'i"</string>

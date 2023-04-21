@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ilovaga tebranish holatini aniqlash ruxsatini beradi."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon raqamlariga tog‘ridan to‘g‘ri qo‘ng‘iroq qilish"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Ilovaga sizning yordamingizsiz telefonga qo‘ng‘iroq qilish imkonini beradi. Bu kutilmagan qo‘ng‘iroqlarni amalga oshirishi yoki ortiqcha to‘lovlarni yuzaga keltirishi mumkin. Shunga e’tibor qilinki, u favqulodda telefon raqamlariga qo‘ng‘iroqlar qilishga ruxsat bermaydi. Zararli ilovalar sizdan so‘ramasdan qo‘ng‘iroqlarni amalga oshirib, pulingizni sarflashi mumkin."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS qo‘ng‘iroq xizmatiga kirish"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ilovaga sizning ishtirokingizsiz qo‘ng‘iroqlarni amalga oshirish uchun IMS xizmatidan foydalanishga ruxsat beradi."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefon holati haqidagi ma’lumotlarni olish"</string>
@@ -684,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonni chaproq tuting"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonni oʻngroq tuting"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Qurilmaga tik qarang."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yuzingiz koʻrinmayapti. Telefonni koʻz balandligida tuting."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yuz koʻrinmayapti. Telefonni koʻz darajasida tuting."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ortiqcha harakatlanmoqda. Qimirlatmasdan ushlang."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Yuzingizni qaytadan qayd qildiring."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Yuz aniqlanmadi. Qayta urining."</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Yuzni aniqlash bekor qilindi."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Yuz bilan ochishni foydalanuvchi bekor qildi"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Juda ko‘p urinildi. Keyinroq qaytadan urining."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Urinishlar soni oshib ketdi. Yuz bilan ochilmaydi."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Juda koʻp urinildi. Ekran qulfi bilan oching."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Yuzingiz tasdiqlanmadi. Qaytadan urining."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hali yuz bilan ochishni sozlamagansiz"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu kontent ishga oid ilovalar bilan ochilmaydi"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu kontent shaxsiy ilovalar bilan ulashilmaydi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu kontent shaxsiy ilovalar bilan ochilmaydi"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Ish profili pauzada"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Yoqish uchun bosing"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ishga oid ilovalar topilmadi"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Shaxsiy ilovalar topilmadi"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Shaxsiy <xliff:g id="APP">%s</xliff:g> ochish"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Ishdagi <xliff:g id="APP">%s</xliff:g> ochish"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Shaxsiy brauzerdan foydalanish"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ishga oid brauzerdan foydalanish"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM kartaning tarmoqdagi qulfini ochish uchun PIN kod"</string>
