@@ -22,7 +22,6 @@
 #include <SkData.h>
 #include <SkImage.h>
 #include <SkImageAndroid.h>
-#include <SkImageEncoder.h>
 #include <SkImageInfo.h>
 #include <SkMatrix.h>
 #include <SkMultiPictureDocument.h>
