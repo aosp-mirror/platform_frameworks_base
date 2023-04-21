@@ -2547,8 +2547,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    boolean isSyncFinished() {
-        return super.isSyncFinished() && isReadyToTransit();
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
+        return super.isSyncFinished(group) && isReadyToTransit();
     }
 
     @Override
