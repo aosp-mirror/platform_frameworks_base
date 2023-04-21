@@ -184,6 +184,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *        <defaultRefreshRateInHbmSunlight>75</defaultRefreshRateInHbmSunlight>
  *        <lowerBlockingZoneConfigs>
  *          <defaultRefreshRate>75</defaultRefreshRate>
+ *          <refreshRateThermalThrottlingId>id_of_a_throttling_map</refreshRateThermalThrottlingId>
  *          <blockingZoneThreshold>
  *            <displayBrightnessPoint>
  *              <lux>50</lux>
@@ -721,6 +722,12 @@ public class DisplayDeviceConfig {
      */
     private float[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
     private float[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+
+    /**
+     * Thermal throttling maps for the low and high blocking zones.
+     */
+    private String mLowBlockingZoneThermalMapId = null;
+    private String mHighBlockingZoneThermalMapId = null;
 
     private final HashMap<String, ThermalBrightnessThrottlingData>
             mThermalBrightnessThrottlingDataMapByThrottlingId = new HashMap<>();
@@ -1526,6 +1533,13 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return The refresh rate thermal map for low blocking zone.
+     */
+    public SparseArray<SurfaceControl.RefreshRateRange> getLowBlockingZoneThermalMap() {
+        return getThermalRefreshRateThrottlingData(mLowBlockingZoneThermalMapId);
+    }
+
+    /**
      * @return An array of high display brightness thresholds. This, in combination with high
      * ambient brightness thresholds help define buckets in which the refresh rate switching is not
      * allowed.
@@ -1545,6 +1559,13 @@ public class DisplayDeviceConfig {
      */
     public float[] getHighAmbientBrightnessThresholds() {
         return mHighAmbientBrightnessThresholds;
+    }
+
+    /**
+     * @return The refresh rate thermal map for high blocking zone.
+     */
+    public SparseArray<SurfaceControl.RefreshRateRange> getHighBlockingZoneThermalMap() {
+        return getThermalRefreshRateThrottlingData(mHighBlockingZoneThermalMapId);
     }
 
     /**
@@ -1664,6 +1685,8 @@ public class DisplayDeviceConfig {
                 + ", mDefaultRefreshRateInHbmHdr= " + mDefaultRefreshRateInHbmHdr
                 + ", mDefaultRefreshRateInHbmSunlight= " + mDefaultRefreshRateInHbmSunlight
                 + ", mRefreshRateThrottlingMap= " + mRefreshRateThrottlingMap
+                + ", mLowBlockingZoneThermalMapId= " + mLowBlockingZoneThermalMapId
+                + ", mHighBlockingZoneThermalMapId= " + mHighBlockingZoneThermalMapId
                 + "\n"
                 + ", mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
@@ -2114,9 +2137,13 @@ public class DisplayDeviceConfig {
     }
 
     /**
-     * Loads the refresh rate configurations pertaining to the upper blocking zones.
+     * Loads the refresh rate configurations pertaining to the lower blocking zones.
      */
     private void loadLowerRefreshRateBlockingZones(BlockingZoneConfig lowerBlockingZoneConfig) {
+        if (lowerBlockingZoneConfig != null) {
+            mLowBlockingZoneThermalMapId =
+                    lowerBlockingZoneConfig.getRefreshRateThermalThrottlingId();
+        }
         loadLowerBlockingZoneDefaultRefreshRate(lowerBlockingZoneConfig);
         loadLowerBrightnessThresholds(lowerBlockingZoneConfig);
     }
@@ -2125,6 +2152,10 @@ public class DisplayDeviceConfig {
      * Loads the refresh rate configurations pertaining to the upper blocking zones.
      */
     private void loadHigherRefreshRateBlockingZones(BlockingZoneConfig upperBlockingZoneConfig) {
+        if (upperBlockingZoneConfig != null) {
+            mHighBlockingZoneThermalMapId =
+                    upperBlockingZoneConfig.getRefreshRateThermalThrottlingId();
+        }
         loadHigherBlockingZoneDefaultRefreshRate(upperBlockingZoneConfig);
         loadHigherBrightnessThresholds(upperBlockingZoneConfig);
     }

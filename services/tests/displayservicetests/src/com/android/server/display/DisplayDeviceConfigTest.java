@@ -268,6 +268,14 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, 1.25f),
                 SMALL_DELTA);
 
+        // Low/High zone thermal maps
+        assertEquals(new SurfaceControl.RefreshRateRange(30, 40),
+                mDisplayDeviceConfig.getLowBlockingZoneThermalMap()
+                .get(Temperature.THROTTLING_CRITICAL));
+        assertEquals(new SurfaceControl.RefreshRateRange(40, 60),
+                mDisplayDeviceConfig.getHighBlockingZoneThermalMap()
+                .get(Temperature.THROTTLING_EMERGENCY));
+
         // Todo: Add asserts for DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
@@ -527,6 +535,24 @@ public final class DisplayDeviceConfigTest {
                + "        <refreshRateRange>\n"
                + "            <minimum>0</minimum>\n"
                + "            <maximum>30</maximum>\n"
+               + "        </refreshRateRange>\n"
+               + "    </refreshRateThrottlingPoint>\n"
+               + "</refreshRateThrottlingMap>\n"
+               + "<refreshRateThrottlingMap id=\"thermalLow\">\n"
+               + "    <refreshRateThrottlingPoint>\n"
+               + "        <thermalStatus>critical</thermalStatus>\n"
+               + "        <refreshRateRange>\n"
+               + "            <minimum>30</minimum>\n"
+               + "            <maximum>40</maximum>\n"
+               + "        </refreshRateRange>\n"
+               + "    </refreshRateThrottlingPoint>\n"
+               + "</refreshRateThrottlingMap>\n"
+               + "<refreshRateThrottlingMap id=\"thermalHigh\">\n"
+               + "    <refreshRateThrottlingPoint>\n"
+               + "        <thermalStatus>emergency</thermalStatus>\n"
+               + "        <refreshRateRange>\n"
+               + "            <minimum>40</minimum>\n"
+               + "            <maximum>60</maximum>\n"
                + "        </refreshRateRange>\n"
                + "    </refreshRateThrottlingPoint>\n"
                + "</refreshRateThrottlingMap>\n"
@@ -822,6 +848,8 @@ public final class DisplayDeviceConfigTest {
                 +       "<defaultRefreshRateInHbmSunlight>83</defaultRefreshRateInHbmSunlight>\n"
                 +       "<lowerBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>75</defaultRefreshRate>\n"
+                +           "<refreshRateThermalThrottlingId>thermalLow"
+                +           "</refreshRateThermalThrottlingId>\n"
                 +           "<blockingZoneThreshold>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>50</lux>\n"
@@ -843,6 +871,8 @@ public final class DisplayDeviceConfigTest {
                 +       "</lowerBlockingZoneConfigs>\n"
                 +       "<higherBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>90</defaultRefreshRate>\n"
+                +           "<refreshRateThermalThrottlingId>thermalHigh"
+                +           "</refreshRateThermalThrottlingId>\n"
                 +           "<blockingZoneThreshold>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>70</lux>\n"

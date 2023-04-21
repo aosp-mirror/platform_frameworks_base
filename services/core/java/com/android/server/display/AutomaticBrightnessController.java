@@ -366,9 +366,10 @@ public class AutomaticBrightnessController {
     }
 
     /**
-     * @return The current brightness recommendation calculated from the current conditions.
-     * @param brightnessEvent Event object to populate with details about why the specific
-     *                        brightness was chosen.
+     * @param brightnessEvent Holds details about how the brightness is calculated.
+     *
+     * @return The current automatic brightness recommended value. Populates brightnessEvent
+     *         parameters with details about how the brightness was calculated.
      */
     public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
         if (brightnessEvent != null) {
