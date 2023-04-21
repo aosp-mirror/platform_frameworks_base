@@ -493,7 +493,7 @@ public class Build {
          * @hide
          */
         @TestApi
-        public static final int RESOURCES_SDK_INT = SDK_INT;
+        public static final int RESOURCES_SDK_INT = SDK_INT + ACTIVE_CODENAMES.length;
 
         /**
          * The current lowest supported value of app target SDK. Applications targeting
