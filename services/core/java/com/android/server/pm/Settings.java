@@ -4932,6 +4932,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             date.setTime(ps.getLoadingCompletedTime());
             pw.print(prefix); pw.println("  loadingCompletedTime=" + sdf.format(date));
         }
+        pw.print(prefix); pw.print("  appMetadataFilePath=");
+        pw.println(ps.getAppMetadataFilePath());
         if (ps.getVolumeUuid() != null) {
             pw.print(prefix); pw.print("  volumeUuid=");
                     pw.println(ps.getVolumeUuid());
