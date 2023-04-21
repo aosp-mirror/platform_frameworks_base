@@ -648,7 +648,7 @@ class AnimatableClockView @JvmOverloads constructor(
         private const val DIGITS_PER_LINE = 2
 
         // How much of "fraction" to spend on canceling the animation, if needed
-        private const val ANIMATION_CANCELLATION_TIME = 0.4f
+        private const val ANIMATION_CANCELLATION_TIME = 0f
 
         // Delays. Each digit's animation should have a slight delay, so we get a nice
         // "stepping" effect. When moving right, the second digit of the hour should move first.
