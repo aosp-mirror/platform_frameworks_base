@@ -57,6 +57,7 @@ import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
+import android.hardware.soundtrigger.SoundTriggerModule;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -134,6 +135,8 @@ public class SoundTriggerService extends SystemService {
     private Object mLock;
     private final SoundTriggerServiceStub mServiceStub;
     private final LocalSoundTriggerService mLocalSoundTriggerService;
+
+    private ISoundTriggerMiddlewareService mMiddlewareService;
     private SoundTriggerDbHelper mDbHelper;
 
     private final EventLogger mServiceEventLogger = new EventLogger(256, "Service");
@@ -241,17 +244,18 @@ public class SoundTriggerService extends SystemService {
         if (PHASE_THIRD_PARTY_APPS_CAN_START == phase) {
             mDbHelper = new SoundTriggerDbHelper(mContext);
         }
+        mMiddlewareService = ISoundTriggerMiddlewareService.Stub.asInterface(
+                ServiceManager.waitForService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE));
+
     }
 
     // Must be called with cleared binder context.
-    private static List<ModuleProperties> listUnderlyingModuleProperties(
+    private List<ModuleProperties> listUnderlyingModuleProperties(
             Identity originatorIdentity) {
         Identity middlemanIdentity = new Identity();
         middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
-        var service = ISoundTriggerMiddlewareService.Stub.asInterface(
-                ServiceManager.waitForService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE));
         try {
-            return Arrays.stream(service.listModulesAsMiddleman(middlemanIdentity,
+            return Arrays.stream(mMiddlewareService.listModulesAsMiddleman(middlemanIdentity,
                                                                 originatorIdentity))
                     .map(desc -> ConversionUtil.aidl2apiModuleDescriptor(desc))
                     .collect(Collectors.toList());
@@ -282,10 +286,9 @@ public class SoundTriggerService extends SystemService {
         return new SoundTriggerHelper(
                 mContext,
                 eventLogger,
-                (SoundTrigger.StatusListener statusListener) ->
-                                        SoundTrigger.attachModuleAsMiddleman(
-                                        moduleId, statusListener, null /* handler */,
-                                        middlemanIdentity, originatorIdentity),
+                (SoundTrigger.StatusListener statusListener) -> new SoundTriggerModule(
+                        mMiddlewareService, moduleId, statusListener,
+                        Looper.getMainLooper(), middlemanIdentity, originatorIdentity),
                 moduleId,
                 () -> listUnderlyingModuleProperties(originatorIdentity)
                 );

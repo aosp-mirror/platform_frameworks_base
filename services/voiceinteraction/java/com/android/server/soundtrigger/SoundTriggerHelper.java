@@ -1043,7 +1043,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             internalClearGlobalStateLocked();
             if (mModule != null) {
                 mModule.detach();
-                mModule = mModuleProvider.apply(this);
+                try {
+                    // This is best effort
+                    // TODO (b/279507851)
+                    mModule = mModuleProvider.apply(this);
+                } catch (Exception e) {
+                    mModule = null;
+                }
             }
         }
     }
