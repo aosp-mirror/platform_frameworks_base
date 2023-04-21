@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"به برنامه اجازه می‌دهد تا به وضعیت لرزاننده دسترسی داشته باشد."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"تماس مستقیم با شماره تلفن‌ها"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"به برنامه اجازه می‌دهد بدون دخالت شما با شماره‌های تلفن تماس بگیرد. این ممکن است باعث ایجاد هزینه یا تماس‌های پیش‌بینی نشده شود. توجه داشته باشید که این به برنامه اجازه نمی‌دهد به برقراری تماس‌های اضطراری بپردازد. برنامه‌های مخرب ممکن است با برقراری تماس بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"‏دسترسی به سرویس تماس IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏به برنامه اجازه می‌دهد از سرویس IMS برای برقراری تماس‌ها بدون دخالت شما استفاده کند."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"خواندن وضعیت تلفن و شناسه"</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"عملیات شناسایی چهره لغو شد."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"کاربر «قفل‌گشایی با چهره» را لغو کرد"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"تلاش‌ها بیش از حدمجاز شده است. «قفل‌گشایی با چهره» غیرفعال است."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"تعداد تلاش‌ها از حد مجاز بیشتر شده است. قفل‌گشایی با چهره دردسترس نیست."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"تلاش‌ها بیش از حدمجاز شده است. درعوض قفل صفحه را وارد کنید."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چهره تأیید نشد. دوباره امتحان کنید."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"«قفل‌گشایی با چهره» را راه‌اندازی نکرده‌اید"</string>
@@ -1475,7 +1476,7 @@
     <string name="ime_action_default" msgid="8265027027659800121">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"شماره گیری \nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"ایجاد مخاطب\nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست مجوز کرده‌اند."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست اجازه کرده‌اند."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"نمی‌توان این محتوا را با برنامه‌های کاری باز کرد"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"نمی‌توان این محتوا را با برنامه‌های شخصی هم‌رسانی کرد"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"نمی‌توان این محتوا را با برنامه‌های شخصی باز کرد"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"نمایه کاری موقتاً متوقف شده است"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"برای روشن کردن، ضربه بزنید"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> در نمایه شخصی باز شود؟"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> در نمایه کاری باز شود؟"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"باز کردن <xliff:g id="APP">%s</xliff:g> شخصی"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"باز کردن <xliff:g id="APP">%s</xliff:g> کاری"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استفاده از مرورگر شخصی"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استفاده از مرورگر کاری"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"پین باز کردن قفل شبکه سیم‌کارت"</string>

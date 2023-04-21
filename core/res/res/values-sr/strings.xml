@@ -248,10 +248,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Напајање"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Рестартуј"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Хитан позив"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај о грешци"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Јави грешку"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Заврши сесију"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Снимак екрана"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Извештај о грешци"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Јави грешку"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Овим ће се прикупити информације о тренутном стању уређаја како би биле послате у поруци е-поште. Од започињања извештаја о грешци до тренутка за његово слање проћи ће неко време; будите стрпљиви."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактив. извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Користите ово у већини случајева. То вам омогућава да пратите напредак извештаја, да уносите додатне детаље о проблему и да снимате снимке екрана. Вероватно ће изоставити неке мање коришћене одељке за које прављење извештаја дуго траје."</string>
@@ -504,7 +504,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дозвољава апликацији да приступа стању вибрирања."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно позивање бројева телефона"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Дозвољава апликацији да позива бројеве телефона без ваше дозволе. Ово може да доведе до неочекиваних трошкова или позива. Имајте на уму да ово не дозвољава апликацији да позива бројеве за хитне случајеве. Злонамерне апликације могу да позивају без ваше потврде, што може да доведе до трошкова."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"приступ услузи позива помоћу размене тренутних порука"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Дозвољава апликацији да користи услугу размене тренутних порука да би упућивала позиве без ваше интервенције."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"читање статуса и идентитета телефона"</string>
@@ -710,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Обрада лица је отказана."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Корисник је отказао откључавање лицем"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Превише покушаја. Пробајте поново касније."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Превише покушаја. Откључавање лицем је онемогућено."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Превише покушаја. Откључавање лицем није доступно."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Превише покушаја. Користите закључавање екрана за то."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Провера лица није успела. Пробајте поново."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Нисте подесили откључавање лицем"</string>
@@ -1715,7 +1716,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Инверзија боја"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Корекција боја"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим једном руком"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додатно затамњено"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додатно затамни"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слушни апарати"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је укључена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је искључена."</string>
@@ -2159,12 +2160,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овај садржај не може да се отвара помоћу пословних апликација"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овај садржај не може да се дели помоћу личних апликација"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Овај садржај не може да се отвара помоћу личних апликација"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Пословни профил је паузиран"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Додирните да бисте укључили"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема пословних апликација"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема личних апликација"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Желите да на личном профилу отворите: <xliff:g id="APP">%s</xliff:g>?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Желите да на пословном профилу отворите: <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Отворите личну апликацију <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Отворите пословну апликацију <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи лични прегледач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи пословни прегледач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за откључавање SIM мреже"</string>

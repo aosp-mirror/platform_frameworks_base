@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Hiermee kan de app de trilstand beheren."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Hiermee heeft de app toegang tot de status van de trilstand."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefoonnummers rechtstreeks bellen"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Hiermee kan de app zonder je tussenkomst telefoonnummers bellen. Dit kan tot onverwachte kosten of gesprekken leiden. De app kan hiermee geen noodnummers bellen. Schadelijke apps kunnen u geld kosten door nummers te bellen zonder om je bevestiging te vragen."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"toegang tot IMS-service voor bellen"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Hiermee kan de app de IMS-service gebruiken om te bellen zonder je tussenkomst."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefoonstatus en -identiteit lezen"</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Bewerking voor gezichtsherkenning geannuleerd."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Ontgrendelen via gezichtsherkenning geannuleerd door gebruiker"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Te veel pogingen. Probeer het later opnieuw."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Te veel pogingen. Ontgrendelen via gezichtsherkenning uitgezet."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Te veel pogingen. Ontgrendelen via gezichtsherkenning is niet beschikbaar."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Te veel pogingen. Gebruik schermvergrendeling."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan gezicht niet verifiëren. Probeer het nog eens."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Je hebt Ontgrendelen via gezichtsherkenning niet ingesteld."</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Deze content kan niet worden geopend met werk-apps"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Deze content kan niet worden gedeeld met persoonlijke apps"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Deze content kan niet worden geopend met persoonlijke apps"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Werkprofiel is onderbroken"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tik om aan te zetten"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Geen werk-apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Geen persoonlijke apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> openen in je persoonlijke profiel?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> openen in je werkprofiel?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Persoonlijke <xliff:g id="APP">%s</xliff:g> openen"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"<xliff:g id="APP">%s</xliff:g> voor het werk openen"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Persoonlijke browser gebruiken"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Werkbrowser gebruiken"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Ontgrendelingspincode voor SIM-netwerk"</string>

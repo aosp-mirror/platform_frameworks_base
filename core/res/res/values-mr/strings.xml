@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"अ‍ॅपला व्हायब्रेटर स्थितीचा अ‍ॅक्सेस करण्याची अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"आपल्या हस्तक्षेपाशिवाय फोन नंबरवर कॉल करण्यासाठी अ‍ॅप ला अनुमती देते. यामुळे अनपेक्षित शुल्क किंवा कॉल लागू शकतात. लक्षात ठेवा की हे आणीबाणीच्या नंबरवर कॉल करण्यासाठी अ‍ॅप ला अनुमती देत नाही. दुर्भावनापूर्ण अ‍ॅप्स नी आपल्या पुष्टिकरणाशिवाय कॉल केल्यामुळे तुमचे पैसे खर्च होऊ शकतात."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS कॉल सेवा अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"फोन स्थिती आणि ओळख वाचा"</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"चेहरा ऑपरेशन रद्द केले गेले."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"वापरकर्त्याने फेस अनलॉक रद्द केले आहे"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"बरेच प्रयत्न. फेस अनलॉक बंद केले आहे."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"खूप वेळा प्रयत्न केले आहेत. फेस अनलॉक उपलब्ध नाही."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"बरेच प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा पडताळणी करू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"तुम्ही फेस अनलॉक सेट केले नाही"</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"हा आशय कार्य ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"हा आशय वैयक्तिक ॲप्ससह शेअर केला जाऊ शकत नाही"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"हा आशय वैयक्तिक ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"कार्य प्रोफाइल थांबवली आहे"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"सुरू करण्यासाठी टॅप करा"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"कोणतीही कार्य ॲप्स सपोर्ट करत नाहीत"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"कोणतीही वैयक्तिक ॲप्स सपोर्ट करत नाहीत"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"तुमच्या वैयक्तिक प्रोफाइलमध्ये <xliff:g id="APP">%s</xliff:g> उघडायचे आहे का?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"तुमच्या कार्य प्रोफाइलमध्ये <xliff:g id="APP">%s</xliff:g> उघडायचे आहे का?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"वैयक्तिक <xliff:g id="APP">%s</xliff:g> उघडा"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"ऑफिसचे <xliff:g id="APP">%s</xliff:g> उघडा"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"वैयक्तिक ब्राउझर वापरा"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउझर वापरा"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क अनलॉक पिन"</string>

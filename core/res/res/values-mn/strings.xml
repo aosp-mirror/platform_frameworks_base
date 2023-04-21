@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Апп нь чичиргээг удирдах боломжтой."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Аппыг чичиргээний төлөвт хандахыг зөвшөөрдөг."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"утасны дугаарт шууд дуудлага хийх"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Апп нь таны оролцоогүйгээр дуудлага хийх боломжтой. Энэ нь төлөвлөгдөөгүй төлбөрт оруулах эсвэл дуудлага хийнэ. Энэ нь апп-г яаралтай дугаарт дуудлага хийхйг зөвшөөрөхгүй. Хортой апп нь таны зөвшөөрөлгүйгээр дуудлага хийж таныг төлбөрт оруулж болзошгүй"</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS дуудлагын үйлчилгээнд хандах"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Апп нь дуудлага хийхдээ таны оролцоогүйгээр IMS үйлчилгээг ашиглах боломжтой."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"утасны статус ба таниулбарыг унших"</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Царайны үйл ажиллагааг цуцаллаа."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Хэрэглэгч Царайгаар түгжээ тайлахыг цуцалсан"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Хэт олон удаа оролдлоо. Дараа дахин оролдоно уу."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Хэт олон удаа оролдлоо. Царайгаар түгжээ тайлахыг идэвхгүй болгосон."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Хэт олон удаа оролдлоо. Царайгаар түгжээ тайлах боломжгүй."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Хэт олон удаа оролдлоо. Оронд нь дэлгэцийн түгжээ оруулна уу."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Царайг бататгаж чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Та Царайгаар түгжээ тайлахыг тохируулаагүй байна"</string>
@@ -1505,7 +1506,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Сүлжээ эсвэл VPN тохиргоог өөрчлөх"</string>
     <string name="upload_file" msgid="8651942222301634271">"Файл сонгох"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Сонгосон файл байхгүй"</string>
-    <string name="reset" msgid="3865826612628171429">"Бүгдийг цэвэрлэх"</string>
+    <string name="reset" msgid="3865826612628171429">"Шинэчлэх"</string>
     <string name="submit" msgid="862795280643405865">"Илгээх"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Жолоо барих апп ажиллаж байна"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Жолооны аппаас гарахын тулд товшино уу."</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Энэ контентыг ажлын аппуудаар нээх боломжгүй"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Энэ контентыг хувийн аппуудаар хуваалцах боломжгүй"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Энэ контентыг хувийн аппуудаар нээх боломжгүй"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Ажлын профайлыг түр зогсоосон"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Асаахын тулд товших"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ямар ч ажлын апп байхгүй байна"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ямар ч хувийн апп байхгүй байна"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Хувийн профайл дээрээ <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Ажлын профайл дээрээ <xliff:g id="APP">%s</xliff:g>-г нээх үү?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Хувийн <xliff:g id="APP">%s</xliff:g>-г нээх"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Ажлын <xliff:g id="APP">%s</xliff:g>-г нээх"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Хувийн хөтөч ашиглах"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ажлын хөтөч ашиглах"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Сүлжээний SIM-н түгжээг тайлах ПИН"</string>

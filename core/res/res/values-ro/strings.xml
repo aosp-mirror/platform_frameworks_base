@@ -504,7 +504,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite aplicației să controleze mecanismul de vibrare."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite aplicației să acceseze modul de vibrații."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"să sune direct la numere de telefon"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Permite aplicației să apeleze numere de telefon fără intervenția ta. Acest lucru poate determina apariția unor taxe sau a unor apeluri neașteptate. Cu această permisiune aplicația nu poate apela numerele de urgență. Aplicațiile rău intenționate pot acumula costuri prin efectuarea unor apeluri fără confirmare."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accesează serviciul de apelare IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite aplicației să folosească serviciul IMS pentru apeluri, fără intervenția ta."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"citește starea și identitatea telefonului"</string>
@@ -710,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operațiunea privind chipul a fost anulată."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Deblocarea facială a fost anulată de utilizator"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Prea multe încercări. Reîncearcă mai târziu."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Prea multe încercări. Deblocarea facială este dezactivată."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Prea multe încercări. Deblocarea facială nu este disponibilă."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Prea multe încercări. Folosește blocarea ecranului."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nu se poate confirma fața. Încearcă din nou."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nu ai configurat Deblocarea facială"</string>
@@ -2159,12 +2160,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Acest conținut nu poate fi deschis cu aplicații pentru lucru"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Acest conținut nu poate fi trimis cu aplicații personale"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Acest conținut nu poate fi deschis cu aplicații personale"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profilul de serviciu este întrerupt"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Atinge pentru a activa"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nicio aplicație pentru lucru"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nicio aplicație personală"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Deschizi <xliff:g id="APP">%s</xliff:g> în profilul personal?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Deschizi <xliff:g id="APP">%s</xliff:g> în profilul de serviciu?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Deschide <xliff:g id="APP">%s</xliff:g> personal"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Deschide <xliff:g id="APP">%s</xliff:g> de serviciu"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Folosește browserul personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Folosește browserul de serviciu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Codul PIN de deblocare SIM privind rețeaua"</string>

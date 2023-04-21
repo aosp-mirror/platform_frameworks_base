@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Cho phép ứng dụng truy cập vào trạng thái bộ rung."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"gọi trực tiếp số điện thoại"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Cho phép ứng dụng gọi các số điện thoại mà không cần sự can thiệp của bạn. Việc này có thể dẫn đến các khoản phí hoặc cuộc gọi không mong muốn. Lưu ý rằng quyền này không cho phép ứng dụng gọi các số khẩn cấp. Các ứng dụng độc hại có thể khiến bạn tốn tiền do thực hiện cuộc gọi mà không cần sự xác nhận của bạn."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"truy cập dịch vụ gọi điện qua IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Cho phép ứng dụng sử dụng dịch vụ IMS để thực hiện cuộc gọi mà không có sự can thiệp của bạn."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"đọc trạng thái và nhận dạng của điện thoại"</string>
@@ -623,7 +624,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Lỗi khi xác thực"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Dùng phương thức khóa màn hình"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Hãy nhập phương thức khóa màn hình của bạn để tiếp tục"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Nhấn chắc trên cảm biến"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Nhấn chắc chắn trên cảm biến"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Không nhận dạng được vân tay. Hãy thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hãy vệ sinh cảm biến vân tay rồi thử lại"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vệ sinh cảm biến rồi thử lại"</string>
@@ -684,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Đưa điện thoại sang bên trái"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Đưa điện thoại sang bên phải"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Vui lòng nhìn thẳng vào thiết bị."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không phát hiện thấy khuôn mặt của bạn. Hãy cầm điện thoại ngang tầm mắt"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không thấy khuôn mặt. Hãy cầm điện thoại ngang tầm mắt"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Thiết bị di chuyển quá nhiều. Giữ yên thiết bị."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Không thể nhận dạng khuôn mặt. Hãy thử lại."</string>
@@ -709,7 +710,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Đã hủy thao tác dùng khuôn mặt."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Người dùng đã hủy thao tác Mở khóa bằng khuôn mặt"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Bạn đã thử quá nhiều lần. Thao tác Mở khóa bằng khuôn mặt đã bị vô hiệu hóa."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Bạn đã thử quá nhiều lần. Hãy nhập phương thức khóa màn hình."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Không thể xác minh khuôn mặt. Hãy thử lại."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Bạn chưa thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
@@ -2158,12 +2160,16 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bạn không thể mở nội dung này bằng ứng dụng công việc"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bạn không thể chia sẻ nội dung này bằng ứng dụng cá nhân"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bạn không thể mở nội dung này bằng ứng dụng cá nhân"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Hồ sơ công việc đã bị tạm dừng"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Nhấn để bật"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Không có ứng dụng công việc"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Không có ứng dụng cá nhân"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Mở <xliff:g id="APP">%s</xliff:g> trong hồ sơ cá nhân của bạn?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Mở <xliff:g id="APP">%s</xliff:g> trong hồ sơ công việc của bạn?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Dùng trình duyệt cá nhân"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Dùng trình duyệt công việc"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Mã PIN mở khóa mạng SIM"</string>

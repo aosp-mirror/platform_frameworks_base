@@ -504,7 +504,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Consente all\'app di accedere allo stato di vibrazione."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"chiamata diretta n. telefono"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Consente all\'applicazione di chiamare numeri di telefono senza il tuo intervento. Ciò può comportare chiamate o addebiti imprevisti. Tieni presente che ciò non consente all\'applicazione di chiamare numeri di emergenza. Applicazioni dannose potrebbero generare dei costi effettuando chiamate senza la tua conferma."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accesso al servizio di chiamata IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Consente all\'app di utilizzare il servizio IMS per fare chiamate senza il tuo intervento."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lettura stato e identità telefono"</string>
@@ -710,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operazione associata al volto annullata."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Sblocco con il volto annullato dall\'utente"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Troppi tentativi. Riprova più tardi."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Troppi tentativi. Sblocco con il volto disattivato."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Troppi tentativi. Sblocco con il volto non disponibile."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Troppi tentativi. Inserisci il blocco schermo."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossibile verificare il volto. Riprova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Non hai configurato lo sblocco con il volto"</string>
@@ -2159,12 +2160,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Questi contenuti non possono essere aperti con app di lavoro"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Questi contenuti non possono essere condivisi con app personali"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Questi contenuti non possono essere aperti con app personali"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profilo di lavoro in pausa"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tocca per attivare"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nessuna app di lavoro"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nessuna app personale"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Aprire <xliff:g id="APP">%s</xliff:g> nel tuo profilo personale?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Aprire <xliff:g id="APP">%s</xliff:g> nel tuo profilo di lavoro?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Apri l\'app <xliff:g id="APP">%s</xliff:g> personale"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Apri l\'app <xliff:g id="APP">%s</xliff:g> di lavoro"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usa il browser personale"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usa il browser di lavoro"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN di sblocco rete SIM"</string>

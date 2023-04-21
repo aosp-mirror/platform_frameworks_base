@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ermöglicht der App, auf den Vibrationsstatus zuzugreifen."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Telefonnummern direkt anrufen"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Ermöglicht der App, ohne dein Eingreifen Telefonnummern zu wählen. Dies kann zu unerwarteten Kosten und Anrufen führen. Beachte, dass die App keine Notrufnummern wählen kann. Schädliche Apps verursachen möglicherweise Kosten, indem sie Anrufe ohne deine Bestätigung tätigen."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"Zugriff auf IMS-Anrufdienst"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ermöglicht der App die Verwendung des IMS-Dienstes zum Tätigen von Anrufen ohne Nutzereingriffe"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefonstatus und Identität abrufen"</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Gesichtserkennung abgebrochen."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Entsperrung per Gesichtserkennung vom Nutzer abgebrochen"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Zu viele Versuche. Die Entsperrung per Gesichtserkennung wurde deaktiviert."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Zu oft versucht. Entsperrung per Gesichtserkennung nicht verfügbar."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Zu viele Versuche. Verwende stattdessen die Displaysperre."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Gesichtsprüfung nicht möglich. Noch mal versuchen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Entsperrung per Gesichtserkennung ist nicht eingerichtet"</string>
@@ -1850,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Zum Beenden von oben nach unten wischen"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ok"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Drehen, um die Ansicht zu verbessern"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Modus für geteilten Bildschirm beenden, um die Ansicht zu verbessern"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Splitscreen-Modus beenden, um die Ansicht zu verbessern"</string>
     <string name="done_label" msgid="7283767013231718521">"Fertig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kreisförmiger Schieberegler für Stunden"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kreisförmiger Schieberegler für Minuten"</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Diese Art von Inhalt kann nicht mit geschäftlichen Apps geöffnet werden"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Diese Art von Inhalt kann nicht über private Apps geteilt werden"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Diese Art von Inhalt kann nicht mit privaten Apps geöffnet werden"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Arbeitsprofil pausiert"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Zum Aktivieren tippen"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Keine geschäftlichen Apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Keine privaten Apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> in deinem privaten Profil öffnen?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> in deinem Arbeitsprofil öffnen?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Private App „<xliff:g id="APP">%s</xliff:g>“ öffnen"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Geschäftliche App „<xliff:g id="APP">%s</xliff:g>“ öffnen"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Privaten Browser verwenden"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Arbeitsbrowser verwenden"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Entsperr-PIN für netzgebundenes Gerät"</string>
