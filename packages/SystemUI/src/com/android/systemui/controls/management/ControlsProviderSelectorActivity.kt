@@ -91,7 +91,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
 
         setContentView(R.layout.controls_management)
 
-        getLifecycle().addObserver(
+        lifecycle.addObserver(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.controls_management_root),
                 window,
