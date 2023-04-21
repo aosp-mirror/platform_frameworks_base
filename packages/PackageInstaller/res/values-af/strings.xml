@@ -79,7 +79,7 @@
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Dié program word vir sommige gebruikers of profiele vereis en is vir ander gedeïnstalleer"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Hierdie program is nodig vir jou profiel en kan nie gedeïnstalleer word nie."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Jou toesteladministrateur vereis die program; kan nie gedeïnstalleer word nie."</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"Bestuur toesteladministrasieprogramme"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Bestuur toesteladministrasie-apps"</string>
     <string name="manage_users" msgid="1243995386982560813">"Bestuur gebruikers"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> kon nie gedeïnstalleer word nie."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Kon nie die pakket ontleed nie."</string>
