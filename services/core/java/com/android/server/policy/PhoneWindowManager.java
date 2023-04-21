@@ -710,7 +710,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     final int deviceId = msg.arg1;
                     final Long eventTime = (Long) msg.obj;
                     launchAssistAction(null /* hint */, deviceId, eventTime,
-                            AssistUtils.INVOCATION_TYPE_UNKNOWN);
+                            AssistUtils.INVOCATION_TYPE_ASSIST_BUTTON);
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock();
