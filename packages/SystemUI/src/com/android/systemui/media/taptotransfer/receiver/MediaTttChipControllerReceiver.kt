@@ -36,7 +36,7 @@ import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
 import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
