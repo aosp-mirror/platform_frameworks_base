@@ -26,10 +26,10 @@
 
     <style name="AuthCredentialPatternContainerStyle">
         <item name="android:gravity">center</item>
-        <item name="android:maxHeight">420dp</item>
-        <item name="android:maxWidth">420dp</item>
-        <item name="android:minHeight">200dp</item>
-        <item name="android:minWidth">200dp</item>
+        <item name="android:maxHeight">@dimen/biometric_auth_pattern_view_max_size</item>
+        <item name="android:maxWidth">@dimen/biometric_auth_pattern_view_max_size</item>
+        <item name="android:minHeight">@dimen/biometric_auth_pattern_view_size</item>
+        <item name="android:minWidth">@dimen/biometric_auth_pattern_view_size</item>
         <item name="android:paddingHorizontal">240dp</item>
         <item name="android:paddingVertical">120dp</item>
     </style>

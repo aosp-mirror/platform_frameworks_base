@@ -47,13 +47,13 @@ import kotlinx.coroutines.launch
  * fresh one.
  *
  * @param coroutineContext An optional [CoroutineContext] to replace the dispatcher [block] is
- * invoked on.
+ *   invoked on.
  * @param block The block of code that should be run when the view becomes attached. It can end up
- * being invoked multiple times if the view is reattached after being detached.
+ *   being invoked multiple times if the view is reattached after being detached.
  * @return A [DisposableHandle] to invoke when the caller of the function destroys its [View] and is
- * no longer interested in the [block] being run the next time its attached. Calling this is an
- * optional optimization as the logic will be properly cleaned up and destroyed each time the view
- * is detached. Using this is not *thread-safe* and should only be used on the main thread.
+ *   no longer interested in the [block] being run the next time its attached. Calling this is an
+ *   optional optimization as the logic will be properly cleaned up and destroyed each time the view
+ *   is detached. Using this is not *thread-safe* and should only be used on the main thread.
  */
 @MainThread
 fun View.repeatWhenAttached(
@@ -125,7 +125,6 @@ private fun createLifecycleOwnerAndRun(
  * The implementation requires the caller to call [onCreate] and [onDestroy] when the view is
  * attached to or detached from a view hierarchy. After [onCreate] and before [onDestroy] is called,
  * the implementation monitors window state in the following way
- *
  * * If the window is not visible, we are in the [Lifecycle.State.CREATED] state
  * * If the window is visible but not focused, we are in the [Lifecycle.State.STARTED] state
  * * If the window is visible and focused, we are in the [Lifecycle.State.RESUMED] state
@@ -145,7 +144,7 @@ private fun createLifecycleOwnerAndRun(
  * └───────────────┴───────────────────┴──────────────┴─────────────────┘
  * ```
  */
-private class ViewLifecycleOwner(
+class ViewLifecycleOwner(
     private val view: View,
 ) : LifecycleOwner {
 

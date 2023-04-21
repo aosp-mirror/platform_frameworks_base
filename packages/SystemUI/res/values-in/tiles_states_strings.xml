@@ -58,8 +58,8 @@
   </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Tidak tersedia"</item>
-    <item msgid="5044688398303285224">"Mati"</item>
-    <item msgid="8527389108867454098">"Nyala"</item>
+    <item msgid="5044688398303285224">"Nonaktif"</item>
+    <item msgid="8527389108867454098">"Aktif"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Tidak tersedia"</item>
@@ -170,10 +170,5 @@
     <item msgid="8189342855739930015">"Tidak tersedia"</item>
     <item msgid="146088982397753810">"Nonaktif"</item>
     <item msgid="460891964396502657">"Aktif"</item>
-  </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"Tidak tersedia"</item>
-    <item msgid="8014986104355098744">"Nonaktif"</item>
-    <item msgid="5966994759929723339">"Aktif"</item>
   </string-array>
 </resources>

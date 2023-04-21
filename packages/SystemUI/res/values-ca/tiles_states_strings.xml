@@ -88,7 +88,7 @@
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"No disponible"</item>
-    <item msgid="1909756493418256167">"Desactivat"</item>
+    <item msgid="1909756493418256167">"Desactivada"</item>
     <item msgid="4531508423703413340">"Activada"</item>
   </string-array>
   <string-array name="tile_states_inversion">
@@ -170,10 +170,5 @@
     <item msgid="8189342855739930015">"No disponible"</item>
     <item msgid="146088982397753810">"Desactivat"</item>
     <item msgid="460891964396502657">"Activat"</item>
-  </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"No disponible"</item>
-    <item msgid="8014986104355098744">"Desactivat"</item>
-    <item msgid="5966994759929723339">"Activat"</item>
   </string-array>
 </resources>

@@ -33,14 +33,14 @@
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Xeyr, təşəkkür"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Ekranın avtomatik dönməsi"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə <xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazına giriş icazəsi verilsin?"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə <xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazına giriş verilsin?\nTətbiqə qeydə almaq icazəsi verilməsə də, bu USB vasitəsilə səsi qeydə ala bilər."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə <xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazına giriş icazəsi verilsin?\nBu tətbiqə qeydə almaq icazəsi verilməyib lakin, bu USB vasitəsilə səs yaza bilər."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə <xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazına giriş icazəsi verilsin?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazını idarə etmək üçün <xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqi açılsın?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Tətbiqə qeydə almaq icazəsi verilməsə də, bu USB vasitəsilə səsi qeydə ala bilər. <xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinin bu cihazla istifadəsi zənglərin və bildirişlərin eşidilməməsinə səbəb ola bilər."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Bu tətbiqə yazmaq icazəsi verilməyib, lakin, bu USB vasitəsilə səs yaza bilər. <xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqindən bu cihazla istifadə etsəniz zənglər, bildirişlər və siqnallar eşidilməyə bilər."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqindən bu cihazla istifadə etsəniz zənglər, bildirişlər və siqnallar eşidilməyə bilər."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> cihazına giriş icazəsi verilsin?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazını idarə etmək üçün <xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqi açılsın?"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə <xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazına giriş verilsin?\nTətbiqə qeydə almaq icazəsi verilməsə də, bu USB vasitəsilə səsi qeydə ala bilər."</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazını idarə etmək üçün <xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqi açılsın?\nBu tətbiqə yazmaq icazəsi verilməyib, lakin, bu USB vasitəsilə səs yaza bilər."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> cihazını idarə etmək üçün <xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqi açılsın?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Heç bir quraşdırılmış tətbiq bu USB aksesuar ilə işləmir. Bu aksesuar haqqında daha ətraflı məlumatı <xliff:g id="URL">%1$s</xliff:g> adresindən öyrənin"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB aksesuar"</string>
@@ -72,20 +72,17 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock deaktivdir"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"şəkil göndərdi"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinşot yadda saxlanır..."</string>
-    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"İş profili skrinşotu saxlanılır…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skrinşot yadda saxlandı"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Skrinşotu yadda saxlamaq alınmadı"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skrinşotu saxlamazdan əvvəl cihaz kiliddən çıxarılmalıdır"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Skrinşotu yenidən çəkin"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Skrinşotu yadda saxlamaq mümkün olmadı"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Skrinşot çəkməyə tətbiq və ya təşkilat tərəfindən icazə verilmir"</string>
-    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Skrinşot çəkilməsi İT admininiz tərəfindən bloklanıb"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Redaktə edin"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Skrinşota düzəliş edin"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Skrinşotu paylaşın"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Genişləndirin"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran şəklini ötürün"</string>
-    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"İş profili mesajını qapadın"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran şəklinə önbaxış"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yuxarı sərhəd <xliff:g id="PERCENT">%1$d</xliff:g> faiz"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Aşağı sərhəd <xliff:g id="PERCENT">%1$d</xliff:g> faiz"</string>
@@ -96,11 +93,6 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekranın video çəkimi ərzində silinməyən bildiriş"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Yazmağa başlanılsın?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Ekranda görünən və ya cihazda oxudulan şəxsi məlumat (parol, bank hesabı, mesaj, fotoşəkil və sair) videoyazıya düşə bilər."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Bütün ekranı qeydə alın"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Bir tətbiqi qeydə alın"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Qeydə aldığınız zaman Android ekranınızda görünən və ya cihazınızda oxudulan hər şeyə giriş edə bilir. Odur ki, parollar, ödəniş detalları, mesajlar və ya digər həssas məlumatlarla bağlı diqqətli olun."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Tətbiqi qeydə aldığınız zaman Android həmin tətbiqdə göstərilən və ya oxudulan hər şeyə giriş edə bilir. Odur ki, parollar, ödəniş detalları, mesajlar və ya digər həssas məlumatlarla bağlı diqqətli olun."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Qeydə almağa başlayın"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio yazın"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Cihaz audiosu"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Cihazınızdan gələn musiqi, zənglər və zəng melodiyaları kimi səslər"</string>
@@ -127,10 +119,13 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Səs Yardımçısı"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Pulqabı"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR Kodu Skaneri"</string>
-    <string name="accessibility_unlock_button" msgid="3613812140816244310">"Kiliddən çıxarılmış"</string>
+    <string name="accessibility_unlock_button" msgid="122785427241471085">"Kiliddən çıxarın"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Cihaz kilidlənib"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Üzün skan edilməsi"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Göndərin"</string>
+    <string name="phone_label" msgid="5715229948920451352">"telefonu açın"</string>
+    <string name="voice_assist_label" msgid="3725967093735929020">"səs yardımçısını açın"</string>
+    <string name="camera_label" msgid="8253821920931143699">"kemaranı açın"</string>
     <string name="cancel" msgid="1089011503403416730">"Ləğv edin"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Təsdiq"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Yenidən cəhd edin"</string>
@@ -168,23 +163,18 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Tanımaq olmur. Barmaq izini işlədin."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"Üzü tanımaq olmur"</string>
-    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Barmaq izi istifadə edin"</string>
-    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Üz ilə kiliddən çıxarma əlçatan deyil"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth qoşulub."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batareyanın faizi naməlumdur."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> cihazına qoşulub."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Qoşulu deyil."</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Rouminq"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Rominq"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Deaktiv"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Uçuş rejimi"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN aktivdir."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batareya <xliff:g id="NUMBER">%d</xliff:g> faizdir."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Batareya <xliff:g id="PERCENTAGE">%1$d</xliff:g> faizdir, <xliff:g id="TIME">%2$s</xliff:g>."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batareya <xliff:g id="PERCENTAGE">%1$s</xliff:g> faizdir, istifadəyə əsasən təxminən <xliff:g id="TIME">%2$s</xliff:g> qalıb"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batareya doldurulur, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%% faiz."</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Batareya <xliff:g id="PERCENTAGE">%d</xliff:g> faizdir, batareyanın qorunması üçün şarj durdurulub."</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Batareya <xliff:g id="PERCENTAGE">%1$d</xliff:g> faizdir, <xliff:g id="TIME">%2$s</xliff:g>, batareyanın qorunması üçün şarj durdurulub."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Bütün bildirişlərə baxın"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter aktivləşdirilib."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Zəng vibrasiyası"</string>
@@ -214,7 +204,10 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"\"Deaktiv sensorlar\" aktivdir"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Bütün bildirişləri sil."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{Daha # bildiriş daxildir.}other{Daha # bildiriş daxildir.}}"</string>
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
+      <item quantity="other">Daxilində daha <xliff:g id="NUMBER_1">%s</xliff:g> bildiriş.</item>
+      <item quantity="one">Daxilində daha <xliff:g id="NUMBER_0">%s</xliff:g> bildiriş.</item>
+    </plurals>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Ekran landşaft orientasiyasında kilidlənib."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Ekran portret orientasiyasında kilidlənib."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Desert Qabı"</string>
@@ -232,7 +225,6 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avtodönüş"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekranın avtomatik dönməsi"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Məkan"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Ekran qoruyucu"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraya giriş"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofona giriş"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Əlçatan"</string>
@@ -253,7 +245,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Parlaqlıq"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Rəng inversiyası"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Rəng korreksiyası"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"İstifadəçiləri idarə edin"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"İstifadəçi ayarları"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hazır"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Bağlayın"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Qoşulu"</string>
@@ -262,7 +254,10 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Aktiv edilir..."</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Trafikə qənaət edilir"</string>
-    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# cihaz}other{# cihaz}}"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
+      <item quantity="other">%d cihaz</item>
+      <item quantity="one">%d cihaz</item>
+    </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Fənər"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera istifadə olunur"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobil data"</string>
@@ -319,19 +314,10 @@
     <string name="tap_again" msgid="1315420114387908655">"Yenidən toxunun"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Açmaq üçün yuxarı sürüşdürün"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"\"Kilidi aç\" ikonasına basıb açın"</string>
-    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Üz ilə kiliddən çıxarılıb. Açmaq üçün yuxarı sürüşdürün."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Üzlə kilidi açılıb. \"Kilidi aç\" ikonasına basıb açın."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Üz ilə kiliddən çıxarılıb. Açmaq üçün basın."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Üz tanınıb. Açmaq üçün basın."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Üz tanınıb. \"Kiliddən çıxar\" ikonasına basıb açın."</string>
-    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Üz ilə kiliddən çıxarılıb"</string>
-    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Üz tanınıb"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Sola köçürün"</item>
-    <item msgid="5558598599408514296">"Aşağı köçürün"</item>
-    <item msgid="4844142668312841831">"Sağa köçürün"</item>
-    <item msgid="5640521437931460125">"Yuxarı köçürün"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Yenidən cəhd etmək üçün yuxarı sürüşdürün"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC istifadə etmək üçün kiliddən çıxarın"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu cihaz təşkilatınıza məxsusdur"</string>
@@ -351,19 +337,18 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Şarj edilir • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> sonra dolacaq"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sürətlə şarj edilir • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> sonra dolacaq"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Asta şarj edilir • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> sonra dolacaq"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Şarj edilir • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> sonra dolacaq"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Şarj Doku • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> sonra dolacaq"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Switch user"</string>
-    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"aşağı çəkilən menyu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bu sessiyada bütün tətbiqlər və data silinəcək."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Xoş gəlmisiniz!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Sessiya davam etsin?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Yenidən başlayın"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Bəli, davam edin"</string>
-    <string name="guest_notification_app_name" msgid="2110425506754205509">"Qonaq rejimi"</string>
-    <string name="guest_notification_session_active" msgid="5567273684713471450">"Qonaq rejimindəsiniz"</string>
-    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Yeni istifadəçi əlavə edildikdə qonaq rejimindən çıxılacaq və cari qonaq sessiyasındakı bütün tətbiqlər və data silinəcək."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"İstifadəçi limitinə çatmısınız"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Yalnız bir istifadəçi yaradıla bilər.}other{Maksimum # istifadəçi əlavə edə bilərsiniz.}}"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
+      <item quantity="other">Maksimum <xliff:g id="COUNT">%d</xliff:g> istifadəçi əlavə edə bilərsiniz.</item>
+      <item quantity="one">Yalnız bir istifadəçi yaradıla bilər.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"İstifadəçi silinsin?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Bu istifadəçinin bütün tətbiqləri və datası silinəcək."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Silin"</string>
@@ -371,18 +356,6 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Bu funksiyanı təmin edən xidmətin yazma və ya yayım zamanı ekranda görünən və ya cihazdan oxudulan bütün bilgilərə girişi olacaq. Buraya parollar, ödəniş detalları, fotolar, mesajlar və oxudulan audio kimi məlumatlar daxildir."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Yazma və ya yayımlama başladılsın?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilə yazma və ya yayımlama başladılsın?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tətbiqinə paylaşmaq və ya qeydə almaq üçün icazə verilsin?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Bütün ekran"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Vahid tətbiq"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Paylaşdığınız, qeydə aldığınız və ya yayımladığınız zaman <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tətbiqi ekranınızda görünən və ya cihazınızda oxudulan hər şeyə giriş edə bilir. Odur ki, parollar, ödəniş detalları, mesajlar və ya digər həssas məlumatlarla bağlı diqqətli olun."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Paylaşdığınız, qeydə aldığınız və ya yayımladığınız zaman <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tətbiqi həmin tətbiqdə göstərilən və ya oxudulan hər şeyə giriş edə bilir. Odur ki, parollar, ödəniş detalları, mesajlar və ya digər həssas məlumatlarla bağlı diqqətli olun."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Davam edin"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Tətbiqi paylaşın və ya qeydə alın"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Bu tətbiqə paylaşmağa və ya yazmağa icazə verilsin?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Paylaşdığınız, yazdığınız və ya yayımladığınız zaman bu tətbiq ekranınızda görünən və ya cihazınızda oxudulan hər şeyə giriş edə bilir. Odur ki, parollar, ödəniş detalları, mesajlar və ya digər həssas məlumatlarla bağlı diqqətli olun."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Paylaşdığınız, qeydə aldığınız və ya yayımladığınız zaman bu tətbiq həmin tətbiqdə göstərilən və ya oxudulan hər şeyə giriş edə bilir. Odur ki, parollar, ödəniş detalları, mesajlar və ya digər həssas məlumatlarla bağlı diqqətli olun."</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"İT admininiz tərəfindən bloklanıb"</string>
-    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Ekran çəkimi cihaz siyasəti ilə deaktiv edilib"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hamısını silin"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"İdarə edin"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Tarixçə"</string>
@@ -394,26 +367,24 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bildirişlər \"Narahat Etməyin\" rejimi tərəfindən dayandırıldı"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"İndi başlayın"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Heç bir bildiriş yoxdur"</string>
-    <string name="no_unseen_notif_text" msgid="395512586119868682">"Yeni bildiriş yoxdur"</string>
-    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Köhnə bildirişləri görmək üçün kilidi açın"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Bu cihaz valideyniniz tərəfindən idarə olunur"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Təşkilatınız bu cihazın sahibidir və şəbəkə trafikinə nəzarət edə bilər"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> bu cihazın sahibidir və şəbəkə trafikinə nəzarət edə bilər"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tərəfindən təmin edilib"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Bu cihaz təşkilatınıza məxsusdur və <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> təşkilatına məxsusdur və <xliff:g id="VPN_APP">%2$s</xliff:g> vasitəsilə internetə qoşulub"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Bu cihaz təşkilatınıza məxsusdur və <xliff:g id="VPN_APP">%1$s</xliff:g> şəbəkəsinə qoşulub"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> təşkilatına məxsusdur və <xliff:g id="VPN_APP">%2$s</xliff:g> şəbəkəsinə qoşulub"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Bu cihaz təşkilatınıza məxsusdur"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> təşkilatına məxsusdur"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Bu cihaz təşkilatınıza məxsusdur və VPN vasitəsilə internetə qoşulub"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> təşkilatına məxsusdur və VPN vasitəsilə internetə qoşulub"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Bu cihaz təşkilatınıza məxsusdur və VPN şəbəkəsinə qoşulub"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> təşkilatına məxsusdur və VPN şəbəkəsinə qoşulub"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Təşkilat iş profilində şəbəkə ötürülməsinə nəzarət edə bilər"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> iş profilində şəbəkə ötürülməsinə nəzarət edə bilər"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"İş profili şəbəkəsi fəalliyyətini IT admini görə bilir"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Şəbəkəyə nəzarət edilə bilər"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Bu cihaz VPN vasitəsilə internetə qoşulub"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"İş tətbiqləriniz <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Şəxsi tətbiqləriniz <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Bu cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Bu cihaz VPN şəbəkəsinə qoşulub"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"İş profiliniz <xliff:g id="VPN_APP">%1$s</xliff:g> şəbəkəsinə qoşulub"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Şəxsi profiliniz <xliff:g id="VPN_APP">%1$s</xliff:g> şəbəkəsinə qoşulub"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Bu cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> şəbəkəsinə qoşulub"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tərəfindən təmin edilib"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Cihaz idarəetməsi"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN (Virtual Şəxsi Şəbəkələr)"</string>
@@ -429,10 +400,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Bu cihazda sertifikat səlahiyyəti quraşdırıldı. Təhlükəsiz şəbəkə ötürülməsinə nəzarət edilə və ya dəyişdirilə bilər."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin cihazda şəbəkə ötürülməsinə nəzarət edən şəbəkə qeydlərini aktiv etdi."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Admininiz şəxsi profilinizdəki deyil, iş profilinizdəki trafikə nəzarət edən şəbəkə qeydiyyatını aktiv edib."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Bu cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub. E-məktublar və baxış datası daxil olmaqla, iş tətbiqlərindəki şəbəkə fəaliyyətiniz İT admininiz görünür."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Bu cihaz <xliff:g id="VPN_APP_0">%1$s</xliff:g> və <xliff:g id="VPN_APP_1">%2$s</xliff:g> vasitəsilə internetə qoşulub. E-məktublar və baxış datası daxil olmaqla, iş tətbiqlərindəki şəbəkə fəaliyyətiniz İT admininiz görünür."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"İş tətbiqləriniz <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub. E-məktublar və baxış datası daxil olmaqla, iş tətbiqlərindəki şəbəkə fəaliyyətiniz İT admininiz və VPN provayderinizə görünür."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Şəxsi tətbiqləriniz <xliff:g id="VPN_APP">%1$s</xliff:g> vasitəsilə internetə qoşulub. E-məktublar və baxış datası daxil olmaqla, iş tətbiqlərindəki şəbəkə fəaliyyətiniz VPN provayderinizə görünür."</string>
+    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"E-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşulusunuz."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"E-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP_0">%1$s</xliff:g> və <xliff:g id="VPN_APP_1">%2$s</xliff:g> tətbiqlərinə qoşulusunuz."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"İş profili e-poçt, tətbiq və veb saytlar da daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşuludur."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Şəxsi profil e-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşuludur."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" ("</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ayarlarını açın"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Bu cihaz valideyniniz tərəfindən idarə olunur. Valideyniniz işlətdiyiniz tətbiqlər, məkanınız və ekran vaxtınız kimi bilgiləri görə və idarə edə bilər."</string>
@@ -445,8 +416,6 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Subtitr başlığı"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktiv edin"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiv edin"</string>
-    <string name="sound_settings" msgid="8874581353127418308">"Səs və vibrasiya"</string>
-    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Ayarlar"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Tətbiq bərkidilib"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və İcmal düymələrinə basıb saxlayın."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"\"Geri\" və \"Əsas ekran\" düymələrinin davamlı basılması ilə çıxarılana qədər tətbiq göz önündə qalır."</string>
@@ -495,13 +464,12 @@
     <string name="wallet_title" msgid="5369767670735827105">"Pulqabı"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Telefonunuzla daha sürətli və təhlükəsiz satınalmalar etmək üçün ayarlayın"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hamısını göstər"</string>
-    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Açmaq üçün toxunun"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Kart əlavə edin"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Güncəllənir"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"İstifadə etmək üçün kiliddən çıxarın"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Kartların əldə edilməsində problem oldu, sonra yenidən cəhd edin"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Kilid ekranı ayarları"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR kod skaneri"</string>
-    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Güncəllənir"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR kodu skanlayın"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"İş profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Təyyarə rejimi"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g> zaman növbəti xəbərdarlığınızı eşitməyəcəksiniz"</string>
@@ -566,8 +534,14 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Mənə xatırladın"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Geri qaytarın"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> üçün təxirə salınıb"</string>
-    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# saat}=2{# saat}other{# saat}}"</string>
-    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# dəqiqə}other{# dəqiqə}}"</string>
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
+      <item quantity="other"> %d saat</item>
+      <item quantity="one">%d saat</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
+      <item quantity="other">%d dəqiqə</item>
+      <item quantity="one">%d dəqiqə</item>
+    </plurals>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Enerjiyə qənaət"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Düymə <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Əsas səhifə"</string>
@@ -623,7 +597,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Aktiv"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Deaktiv"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Əlçatan deyil"</string>
-    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"ətraflı məlumat"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"Deaktiv edilib"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Naviqasiya paneli"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Tərtibat"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Əlavə sol düymə növü"</string>
@@ -632,7 +606,7 @@
     <item msgid="2681220472659720036">"Mübadilə buferi"</item>
     <item msgid="4795049793625565683">"Açar kodu"</item>
     <item msgid="80697951177515644">"Çevirin, klaviatura dəyişdirici"</item>
-    <item msgid="7626977989589303588">"Heç biri"</item>
+    <item msgid="7626977989589303588">"Heç bir"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="9156773083127904112">"Normal"</item>
@@ -696,8 +670,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Telefon soyuyana kimi bəzi funksiyalar məhdudlaşdırılır.\nƏtraflı məlumat üçün toxunun"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefonunuz avtomatik olaraq soyumağa başlayacaq. Telefon istifadəsinə davam edə bilərsiniz, lakin sürəti yavaşlaya bilər.\n\nTelefonunuz soyuduqdan sonra normal işləyəcək."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
-    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Cihazınızı ayırın"</string>
-    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Cihazınız şarj portunun yaxınlığında qızmağa başlayır. Şarj cihazına və ya USB aksesuarına qoşulubsa, onu ayırın və diqqətli olun, çünki kabel də qıza bilər."</string>
+    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Adapteri cərəyandan ayırın"</string>
+    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Bu cihazın batareya yığmasında problem var. Adapteri cərəyandan ayırın. Ehtiyatlı olun, kabel isti ola bilər."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Ehtiyat tədbiri mərhələlərinə baxın"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Sol qısayol"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Sağ qısayol"</string>
@@ -716,8 +690,7 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Xəbərdarlıqlar"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batareya"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skrinşotlar"</string>
-    <string name="notification_channel_instant" msgid="7556135423486752680">"Ani Tətbiqlər"</string>
-    <string name="notification_channel_setup" msgid="7660580986090760350">"Ayarlama"</string>
+    <string name="notification_channel_general" msgid="4384774889645929705">"Ümumi Mesajlar"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Yaddaş"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Məsləhətlər"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Ani Tətbiqlər"</string>
@@ -732,7 +705,6 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi deaktivdir"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth deaktivdir"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"\"Narahat Etməyin\" deaktivdir"</string>
-    <string name="dnd_is_on" msgid="7009368176361546279">"\"Narahat Etməyin\" rejimi aktivdir"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"Narahat etməyin\" rejimi (<xliff:g id="ID_1">%s</xliff:g>) avtomatik qaydası tərəfindən aktiv edildi."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"Narahat etməyin\" rejimi (<xliff:g id="ID_1">%s</xliff:g>) tətbiqi tərəfindən aktiv edildi."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"Narahat etməyin\" rejimi avtomatik qayda və ya tətbiq tərəfindən aktiv edildi."</string>
@@ -741,10 +713,6 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Mobil data söndürülsün?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> ilə data və ya internetə daxil ola bilməyəcəksiniz. İnternet yalnız Wi-Fi ilə əlçatan olacaq."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operatorunuz"</string>
-    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> operatoruna keçirilsin?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobil data əlçatımlıq əsasında avtomatik olaraq keçirilməyəcək"</string>
-    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Xeyr, təşəkkürlər"</string>
-    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Bəli, keçirin"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Tətbiq icazə sorğusunu gizlətdiyi üçün Ayarlar cavabınızı doğrulaya bilməz."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> tətbiqinə <xliff:g id="APP_2">%2$s</xliff:g> hissələrini göstərmək üçün icazə verilsin?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- <xliff:g id="APP">%1$s</xliff:g> tətbiqindən məlumat oxuya bilər"</string>
@@ -756,7 +724,6 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Batareya bitmək üzrə olduqda aktiv edin"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Xeyr, təşəkkür"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"İstifadə olunur"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Tətbiqlər <xliff:g id="TYPES_LIST">%s</xliff:g> istifadə edir."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" və "</string>
@@ -770,7 +737,6 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"məkan"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
-    <string name="privacy_type_media_projection" msgid="8136723828804251547">"ekran çəkimi"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Başlıq yoxdur"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Gözləmə rejimi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Böyütmə Pəncərəsi"</string>
@@ -796,7 +762,10 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"keçirin"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz kontrolları"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Kontrol əlavə etmək üçün tətbiq seçin"</string>
-    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# nizamlayıcı əlavə edilib.}other{# nizamlayıcı əlavə edilib.}}"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> nizamlayıcı əlavə edilib.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> nizamlayıcı əlavə edilib.</item>
+    </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Silinib"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Sevimlilərə əlavə edilib"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Sevimlilərə əlavə edilib, sıra: <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -852,8 +821,8 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oxutmaq üçün yaxınlaşın"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Burada oxutmaq üçün <xliff:g id="DEVICENAME">%1$s</xliff:g> cihazına yaxınlaşın"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oxudulur"</string>
+    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Bu telefonda oxudulur"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Xəta oldu. Yenə cəhd edin."</string>
-    <string name="media_transfer_loading" msgid="5544017127027152422">"Yüklənir"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Aktiv deyil, tətbiqi yoxlayın"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tapılmadı"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Nəzarət əlçatan deyil"</string>
@@ -869,14 +838,10 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> cihaz seçilib"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(bağlantı kəsildi)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Dəyişmək olmur. Yenidən cəhd etmək üçün toxunun."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Cihaz qoşun"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Cihaz əlavə edin"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Bu sessiyanı yayımlamaq üçün tətbiqi açın."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Naməlum tətbiq"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Yayımı dayandırın"</string>
-    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Audio çıxış üçün əlçatan cihazlar."</string>
-    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Səs"</string>
-    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Dinamiklər &amp; Displeylər"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Yayım necə işləyir"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Yayım"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Uyğun Bluetooth cihazları olan yaxınlığınızdakı insanlar yayımladığınız medianı dinləyə bilər"</string>
@@ -884,12 +849,6 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Yayım Adı"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Parol"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Saxlayın"</string>
-    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Başlanır…"</string>
-    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Yayımlamaq mümkün deyil"</string>
-    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Yadda saxlamaq mümkün deyil. Yenə cəhd edin."</string>
-    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Yadda saxlamaq mümkün deyil."</string>
-    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Ən azı 4 simvoldan istifadə edin"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Maksimum 16 simvoldan istifadə edin"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Montaj nömrəsi"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versiya nömrəsi mübadilə buferinə kopyalandı."</string>
     <string name="basic_status" msgid="2315371112182658176">"Açıq söhbət"</string>
@@ -940,8 +899,6 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil data"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Qoşulub"</string>
-    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Müvəqqəti qoşulub"</string>
-    <string name="mobile_data_poor_connection" msgid="819617772268371434">"Zəif bağlantı"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobil data avtomatik qoşulmayacaq"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Bağlantı yoxdur"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Heç bir başqa şəbəkə əlçatan deyil"</string>
@@ -960,61 +917,26 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Mozaik əlavə edin"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Mozaik əlavə etməyin"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"İstifadəçi seçin"</string>
-    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# tətbiq aktivdir}other{# tətbiq aktivdir}}"</string>
+    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Yeni məlumat"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiv tətbiqlər"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"İstifadə etmədiyiniz zaman belə bu tətbiqlər aktiv olur və işləyir. Bu, onların funksionallığını yaxşılaşdırır, lakin bu, batareyanın ömrünə də təsir edə bilər."</string>
+    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Dayandırın"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Dayandırılıb"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Oldu"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopyalandı"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Mənbə: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Kopyalanmış mətni qapadın"</string>
+    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"UI kopyalanmasını qapadın"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Kopyalanmış mətni redaktə edin"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Kopyalanmış şəkli redaktə edin"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Yaxınlıqdakı cihaza göndərin"</string>
-    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Baxmaq üçün toxunun"</string>
-    <string name="clipboard_text_copied" msgid="5100836834278976679">"Mətn kopyalanıb"</string>
-    <string name="clipboard_image_copied" msgid="3793365360174328722">"Şəkil Kopyalanıb"</string>
-    <string name="clipboard_content_copied" msgid="144452398567828145">"Məzmun kopyalanıb"</string>
-    <string name="clipboard_editor" msgid="2971197550401892843">"Mübadilə Buferi Redaktoru"</string>
-    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Mübadilə buferi"</string>
-    <string name="clipboard_image_preview" msgid="2156475174343538128">"Şəkil önizləməsi"</string>
-    <string name="clipboard_edit" msgid="4500155216174011640">"redaktə"</string>
     <string name="add" msgid="81036585205287996">"Əlavə edin"</string>
     <string name="manage_users" msgid="1823875311934643849">"İstifadəçiləri idarə edin"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Bu bildiriş Ayrılmış ekrana sürüşdürməyi dəstəkləmir."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi əlçatan deyil"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritet rejimi"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Siqnal ayarlanıb"</string>
-    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera deaktivdir"</string>
-    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon deaktivdir"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera və mikrofon deaktivdir"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# bildiriş}other{# bildiriş}}"</string>
-    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Qeyd tutma"</string>
-    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Yayım"</string>
-    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqinin yayımlanması dayandırılsın?"</string>
-    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> tətbiqini yayımlasanız və ya nəticəni dəyişsəniz, cari yayımınız dayandırılacaq"</string>
-    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> tətbiqini yayımlayın"</string>
-    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Nəticəni dəyişdirin"</string>
-    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Naməlum"</string>
-    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"s:dd"</string>
-    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"ss:dd"</string>
-    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> tətbiqini açın"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Tətbiq ayarlanmalıdır"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Pulqabına ən azı bir kart əlavə edilməlidir"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera tətbiqini quraşdırın"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Tətbiq ayarlanmalıdır"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ən azı bir cihaz əlçatandır"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Qısayola toxunub saxlayın"</string>
-    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Ləğv edin"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"İndi fırladın"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Daha yaxşı selfi üçün telefonu açın"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Daha yaxşı selfi üçün ön displeyə çevrilsin?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Daha yüksək ayırdetmə dəqiqliyi ilə daha geniş şəkil üçün arxaya baxan kameradan istifadə edin."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran deaktiv ediləcək"</b></string>
-    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Qatlana bilən cihaz açılır"</string>
-    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Qatlana bilən cihaz fırladılır"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Qələm enerjisi azdır"</string>
 </resources>

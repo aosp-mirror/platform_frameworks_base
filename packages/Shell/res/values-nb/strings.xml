@@ -18,8 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Kommandoliste"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"Feilrapporter"</string>
-    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Feilrapport <xliff:g id="ID">#%d</xliff:g> blir generert"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"Feilrapport <xliff:g id="ID">#%d</xliff:g> er fullført"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Feilrapporten <xliff:g id="ID">#%d</xliff:g> blir generert"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Feilrapporten <xliff:g id="ID">#%d</xliff:g> er fullført"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Legger til detaljer i feilrapporten"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vent litt"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Feilrapporten vises snart på telefonen"</string>
@@ -38,7 +38,7 @@
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skjermdump"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Skjermdumpen er tatt."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Skjermdumpen kunne ikke tas."</string>
-    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Detaljer om feilrapport <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Detaljer om feilrapporten <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Filnavn"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"Navn på feil"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Oppsummering av feil"</string>

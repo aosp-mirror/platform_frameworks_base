@@ -23,11 +23,11 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Տվյալների ավելացում վրիպակի զեկույցում"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Խնդրում ենք սպասել…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Վրիպակների մասին հաշվետվությունը շուտով կստանաք հեռախոսին"</string>
-    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Ընտրեք՝ վրիպակի մասին հաղորդումն ուղարկելու համար"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Հպեք՝ վրիպակի մասին հաղորդմամբ կիսվելու համար"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Ընտրեք՝ վրիպակի մասին հաղորդումն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Հպեք՝ վրիպակի մասին հաղորդումն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Հպեք՝ վրիպակի մասին հաղորդումն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Ընտրեք՝ վրիպակի զեկույցն ուղարկելու համար"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Հպեք՝ վրիպակի զեկույցը տրամադրելու համար"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Ընտրեք՝ վրիպակի զեկույցն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Հպեք՝ վրիպակի զեկույցն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Հպեք՝ վրիպակի զեկույցն առանց սքրինշոթի ուղարկելու համար կամ սպասեք սքրինշոթի ստեղծմանը"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Վրիպակի զեկույցները պարունակում են տվյալներ համակարգի տարբեր մատյաններից և կարող են ներառել տեղեկություններ, որոնք դուք գաղտնի եք համարում (օրինակ՝ հավելվածի օգտագործման կամ տեղադրության մասին): Վրիպակի զեկույցները տրամադրեք միայն վստահելի մարդկանց և հավելվածներին:"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Այլևս ցույց չտալ"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Վրիպակների հաշվետվություններ"</string>
@@ -43,5 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Վրիպակի զեկույցի վերնագիրը"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Վրիպակի զեկույցի ամփոփագիրը"</string>
     <string name="save" msgid="4781509040564835759">"Պահել"</string>
-    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Կիսվե՞լ վրիպակի մասին հաղորդմամբ"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Տրամադրե՞լ վրիպակի զեկույցը"</string>
 </resources>

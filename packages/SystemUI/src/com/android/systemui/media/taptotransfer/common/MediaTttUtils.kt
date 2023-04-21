@@ -19,13 +19,13 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import androidx.annotation.AttrRes
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.TintedIcon
-import com.android.systemui.temporarydisplay.TemporaryViewInfo
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo.Companion.DEFAULT_ICON_TINT
 
 /** Utility methods for media tap-to-transfer. */
 class MediaTttUtils {
@@ -43,40 +43,61 @@ class MediaTttUtils {
          * default name and icon if we can't find the app name/icon.
          *
          * @param appPackageName the package name of the app playing the media.
-         * @param logger the logger to use for any errors.
+         * @param onPackageNotFoundException a function run if a
+         *   [PackageManager.NameNotFoundException] occurs.
+         * @param isReceiver indicates whether the icon is displayed in a receiver view.
          */
         fun getIconInfoFromPackageName(
             context: Context,
             appPackageName: String?,
-            logger: MediaTttLogger<out TemporaryViewInfo>
+            isReceiver: Boolean,
+            onPackageNotFoundException: () -> Unit,
         ): IconInfo {
             if (appPackageName != null) {
                 val packageManager = context.packageManager
                 try {
+                    val appName =
+                        packageManager
+                            .getApplicationInfo(
+                                appPackageName,
+                                PackageManager.ApplicationInfoFlags.of(0),
+                            )
+                            .loadLabel(packageManager)
+                            .toString()
                     val contentDescription =
-                        ContentDescription.Loaded(
-                            packageManager
-                                .getApplicationInfo(
-                                    appPackageName,
-                                    PackageManager.ApplicationInfoFlags.of(0)
+                        if (isReceiver) {
+                            ContentDescription.Loaded(
+                                context.getString(
+                                    R.string
+                                        .media_transfer_receiver_content_description_with_app_name,
+                                    appName
                                 )
-                                .loadLabel(packageManager)
-                                .toString()
-                        )
+                            )
+                        } else {
+                            ContentDescription.Loaded(appName)
+                        }
                     return IconInfo(
                         contentDescription,
                         MediaTttIcon.Loaded(packageManager.getApplicationIcon(appPackageName)),
-                        tintAttr = null,
+                        tint = null,
                         isAppIcon = true
                     )
                 } catch (e: PackageManager.NameNotFoundException) {
-                    logger.logPackageNotFound(appPackageName)
+                    onPackageNotFoundException.invoke()
                 }
             }
             return IconInfo(
-                ContentDescription.Resource(R.string.media_output_dialog_unknown_launch_app_name),
+                if (isReceiver) {
+                    ContentDescription.Resource(
+                        R.string.media_transfer_receiver_content_description_unknown_app
+                    )
+                } else {
+                    ContentDescription.Resource(
+                        R.string.media_output_dialog_unknown_launch_app_name
+                    )
+                },
                 MediaTttIcon.Resource(R.drawable.ic_cast),
-                tintAttr = android.R.attr.textColorPrimary,
+                tint = DEFAULT_ICON_TINT,
                 isAppIcon = false
             )
         }
@@ -87,7 +108,7 @@ class MediaTttUtils {
 data class IconInfo(
     val contentDescription: ContentDescription,
     val icon: MediaTttIcon,
-    @AttrRes val tintAttr: Int?,
+    @ColorRes val tint: Int?,
     /**
      * True if [drawable] is the app's icon, and false if [drawable] is some generic default icon.
      */
@@ -100,7 +121,7 @@ data class IconInfo(
                 is MediaTttIcon.Loaded -> Icon.Loaded(icon.drawable, contentDescription)
                 is MediaTttIcon.Resource -> Icon.Resource(icon.res, contentDescription)
             }
-        return TintedIcon(iconOutput, tintAttr)
+        return TintedIcon(iconOutput, tint)
     }
 }
 

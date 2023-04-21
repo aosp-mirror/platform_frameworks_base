@@ -25,17 +25,21 @@ import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -63,10 +67,12 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
     private val testScope = TestScope(testDispatcher)
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
+    private val fakeWifiEventFlow = MutableStateFlow<FakeWifiEventModel?>(null)
 
     private lateinit var connectionsRepo: DemoMobileConnectionsRepository
     private lateinit var underTest: DemoMobileConnectionRepository
     private lateinit var mockDataSource: DemoModeMobileConnectionDataSource
+    private lateinit var mockWifiDataSource: DemoModeWifiDataSource
 
     @Before
     fun setUp() {
@@ -75,10 +81,15 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             mock<DemoModeMobileConnectionDataSource>().also {
                 whenever(it.mobileEvents).thenReturn(fakeNetworkEventFlow)
             }
+        mockWifiDataSource =
+            mock<DemoModeWifiDataSource>().also {
+                whenever(it.wifiEvents).thenReturn(fakeWifiEventFlow)
+            }
 
         connectionsRepo =
             DemoMobileConnectionsRepository(
-                dataSource = mockDataSource,
+                mobileDataSource = mockDataSource,
+                wifiDataSource = mockWifiDataSource,
                 scope = testScope.backgroundScope,
                 context = context,
                 logFactory = logFactory,
@@ -114,33 +125,49 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             assertConnection(underTest, networkModel)
         }
 
-    private fun assertConnection(
+    private fun TestScope.startCollection(conn: DemoMobileConnectionRepository): Job {
+        val job = launch {
+            launch { conn.cdmaLevel.collect {} }
+            launch { conn.primaryLevel.collect {} }
+            launch { conn.dataActivityDirection.collect {} }
+            launch { conn.carrierNetworkChangeActive.collect {} }
+            launch { conn.isRoaming.collect {} }
+            launch { conn.networkName.collect {} }
+            launch { conn.isEmergencyOnly.collect {} }
+            launch { conn.dataConnectionState.collect {} }
+        }
+        return job
+    }
+
+    private fun TestScope.assertConnection(
         conn: DemoMobileConnectionRepository,
         model: FakeNetworkEventModel
     ) {
+        val job = startCollection(underTest)
         when (model) {
             is FakeNetworkEventModel.Mobile -> {
-                val connectionInfo: MobileConnectionModel = conn.connectionInfo.value
                 assertThat(conn.subId).isEqualTo(model.subId)
-                assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.dataActivityDirection)
+                assertThat(conn.cdmaLevel.value).isEqualTo(model.level)
+                assertThat(conn.primaryLevel.value).isEqualTo(model.level)
+                assertThat(conn.dataActivityDirection.value)
                     .isEqualTo((model.activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel())
-                assertThat(connectionInfo.carrierNetworkChangeActive)
+                assertThat(conn.carrierNetworkChangeActive.value)
                     .isEqualTo(model.carrierNetworkChange)
-                assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
-                assertThat(conn.networkName.value).isEqualTo(NetworkNameModel.Derived(model.name))
+                assertThat(conn.isRoaming.value).isEqualTo(model.roaming)
+                assertThat(conn.networkName.value)
+                    .isEqualTo(NetworkNameModel.IntentDerived(model.name))
 
                 // TODO(b/261029387): check these once we start handling them
-                assertThat(connectionInfo.isEmergencyOnly).isFalse()
-                assertThat(connectionInfo.isGsm).isFalse()
-                assertThat(connectionInfo.dataConnectionState)
-                    .isEqualTo(DataConnectionState.Connected)
+                assertThat(conn.isEmergencyOnly.value).isFalse()
+                assertThat(conn.isGsm.value).isFalse()
+                assertThat(conn.dataConnectionState.value).isEqualTo(DataConnectionState.Connected)
             }
             // MobileDisabled isn't combinatorial in nature, and is tested in
             // DemoMobileConnectionsRepositoryTest.kt
             else -> {}
         }
+
+        job.cancel()
     }
 
     /** Matches [FakeNetworkEventModel] */
@@ -229,6 +256,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
          *    list2 = [false, true]
          *    list3 = [a, b, c]
          * ```
+         *
          * We'll generate test cases for:
          *
          * Test (1, false, a) Test (2, false, a) Test (3, false, a) Test (1, true, a) Test (1,

@@ -52,6 +52,15 @@ A picker experience may:
 * Unselect an already-selected quick affordance from a slot
 * Unselect all already-selected quick affordances from a slot
 
+## Device Policy
+Returning `DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL` or
+`DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL` from
+`DevicePolicyManager#getKeyguardDisabledFeatures` will disable the keyguard quick affordance feature on the device.
+
+## Testing
+* Add a unit test for your implementation of `KeyguardQuickAffordanceConfig`
+* Manually verify that your implementation works in multi-user environments from both the main user and a secondary user
+
 ## Debugging
 To see the current state of the system, you can run `dumpsys`:
 

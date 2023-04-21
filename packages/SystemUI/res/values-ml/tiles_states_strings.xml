@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"ഓഫാണ്"</item>
     <item msgid="460891964396502657">"ഓണാണ്"</item>
   </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"ലഭ്യമല്ല"</item>
-    <item msgid="8014986104355098744">"ഓഫാണ്"</item>
-    <item msgid="5966994759929723339">"ഓണാണ്"</item>
-  </string-array>
 </resources>

@@ -39,12 +39,12 @@ public class FlagCommand implements Command {
     private final List<String> mOffCommands = List.of("false", "off", "0", "disable");
     private final List<String> mSetCommands = List.of("set", "put");
     private final FeatureFlagsDebug mFeatureFlags;
-    private final Map<Integer, Flag<?>> mAllFlags;
+    private final Map<String, Flag<?>> mAllFlags;
 
     @Inject
     FlagCommand(
             FeatureFlagsDebug featureFlags,
-            @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags
+            @Named(ALL_FLAGS) Map<String, Flag<?>> allFlags
     ) {
         mFeatureFlags = featureFlags;
         mAllFlags = allFlags;
@@ -53,30 +53,22 @@ public class FlagCommand implements Command {
     @Override
     public void execute(@NonNull PrintWriter pw, @NonNull List<String> args) {
         if (args.size() == 0) {
-            pw.println("Error: no flag id supplied");
+            pw.println("Error: no flag name supplied");
             help(pw);
             pw.println();
             printKnownFlags(pw);
             return;
         }
 
-        int id = 0;
-        try {
-            id = Integer.parseInt(args.get(0));
-            if (!mAllFlags.containsKey(id)) {
-                pw.println("Unknown flag id: " + id);
-                pw.println();
-                printKnownFlags(pw);
-                return;
-            }
-        } catch (NumberFormatException e) {
-            id = flagNameToId(args.get(0));
-            if (id == 0) {
-                pw.println("Invalid flag. Must an integer id or flag name: " + args.get(0));
-                return;
-            }
+        String name = args.get(0);
+        if (!mAllFlags.containsKey(name)) {
+            pw.println("Unknown flag name: " + name);
+            pw.println();
+            printKnownFlags(pw);
+            return;
         }
-        Flag<?> flag = mAllFlags.get(id);
+
+        Flag<?> flag = mAllFlags.get(name);
 
         String cmd = "";
         if (args.size() > 1) {
@@ -117,7 +109,7 @@ public class FlagCommand implements Command {
                 return;
             }
 
-            pw.println("Flag " + id + " is " + newValue);
+            pw.println("Flag " + name + " is " + newValue);
             pw.flush();  // Next command will restart sysui, so flush before we do so.
             if (shouldSet) {
                 mFeatureFlags.setBooleanFlagInternal(flag, newValue);
@@ -136,11 +128,11 @@ public class FlagCommand implements Command {
                     return;
                 }
                 String value = args.get(2);
-                pw.println("Setting Flag " + id + " to " + value);
+                pw.println("Setting Flag " + name + " to " + value);
                 pw.flush();  // Next command will restart sysui, so flush before we do so.
                 mFeatureFlags.setStringFlagInternal(flag, args.get(2));
             } else {
-                pw.println("Flag " + id + " is " + getStringFlag(flag));
+                pw.println("Flag " + name + " is " + getStringFlag(flag));
             }
             return;
         } else if (isIntFlag(flag)) {
@@ -155,11 +147,11 @@ public class FlagCommand implements Command {
                     return;
                 }
                 int value = Integer.parseInt(args.get(2));
-                pw.println("Setting Flag " + id + " to " + value);
+                pw.println("Setting Flag " + name + " to " + value);
                 pw.flush();  // Next command will restart sysui, so flush before we do so.
                 mFeatureFlags.setIntFlagInternal(flag, value);
             } else {
-                pw.println("Flag " + id + " is " + getIntFlag(flag));
+                pw.println("Flag " + name + " is " + getIntFlag(flag));
             }
             return;
         }
@@ -182,8 +174,7 @@ public class FlagCommand implements Command {
     private boolean isBooleanFlag(Flag<?> flag) {
         return (flag instanceof BooleanFlag)
                 || (flag instanceof ResourceBooleanFlag)
-                || (flag instanceof SysPropFlag)
-                || (flag instanceof DeviceConfigBooleanFlag);
+                || (flag instanceof SysPropFlag);
     }
 
     private boolean isBooleanFlagEnabled(Flag<?> flag) {
@@ -252,15 +243,14 @@ public class FlagCommand implements Command {
         for (int i = 0; i < longestFieldName - "Flag Name".length() + 1; i++) {
             pw.print(" ");
         }
-        pw.println("ID   Value");
+        pw.println(" Value");
         for (int i = 0; i < longestFieldName; i++) {
             pw.print("=");
         }
-        pw.println(" ==== ========");
+        pw.println(" ========");
         for (String fieldName : fields.keySet()) {
             Flag<?> flag = fields.get(fieldName);
-            int id = flag.getId();
-            if (id == 0 || !mAllFlags.containsKey(id)) {
+            if (!mAllFlags.containsKey(flag.getName())) {
                 continue;
             }
             pw.print(fieldName);
@@ -268,9 +258,9 @@ public class FlagCommand implements Command {
             for (int i = 0; i < longestFieldName - fieldWidth + 1; i++) {
                 pw.print(" ");
             }
-            pw.printf("%-4d ", id);
+            pw.print(" ");
             if (isBooleanFlag(flag)) {
-                pw.println(isBooleanFlagEnabled(mAllFlags.get(id)));
+                pw.println(isBooleanFlagEnabled(flag));
             } else if (isStringFlag(flag)) {
                 pw.println(getStringFlag(flag));
             } else if (isIntFlag(flag)) {

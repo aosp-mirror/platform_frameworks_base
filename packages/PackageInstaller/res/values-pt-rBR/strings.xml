@@ -53,7 +53,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Desinstalar app"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar atualização"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> é parte do seguinte app:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Você quer desinstalar este app?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Quer desinstalar este app?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Quer desinstalar este app para "<b>"todos"</b>" os usuários? O aplicativo e os dados dele serão removidos para "<b>"todos"</b>" os usuários do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Quer desinstalar este app para o usuário <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Você quer desinstalar esse app do seu perfil de trabalho?"</string>
@@ -84,9 +84,9 @@
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Para sua segurança, o tablet não tem permissão para instalar apps desconhecidos dessa fonte. Você pode mudar isso nas configurações."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Para sua segurança, a TV não tem permissão para instalar apps desconhecidos dessa fonte. Você pode mudar isso nas configurações."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Para sua segurança, o smartphone não tem permissão para instalar apps desconhecidos dessa fonte. Você pode mudar isso nas configurações."</string>
-    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Seu smartphone e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer perda de dados ou dano ao dispositivo causados pelo uso desses apps."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Seu tablet e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer perda de dados ou dano ao dispositivo causados pelo uso desses apps."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sua TV e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer perda de dados ou dano ao dispositivo causados pelo uso desses apps."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Seu smartphone e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer dano causado ao seu smartphone ou pela perda de dados que possa resultar do uso do app."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Seu tablet e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer dano causado ao seu tablet ou pela perda de dados que possa resultar do uso do app."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sua TV e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer dano à sua TV ou pela perda de dados que possa resultar do uso do app."</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continuar"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Configurações"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalando/desinstalando apps do Wear"</string>

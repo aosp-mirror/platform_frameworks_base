@@ -41,7 +41,7 @@
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"ገጽ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> ከ<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"ማጠቃለያ፣ ቅጂዎች <xliff:g id="COPIES">%1$s</xliff:g>፣ የወረቀት መጠን <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"እጀታን ወደ ውጭ ላክ"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"እጀታን ወደ ውጪ ላክ"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"እጀታን ሰብስብ"</string>
     <string name="print_button" msgid="645164566271246268">"አትም"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"ወደ ፔዲኤፍ አስቀምጥ"</string>

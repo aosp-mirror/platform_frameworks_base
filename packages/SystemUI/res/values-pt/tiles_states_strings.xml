@@ -138,8 +138,8 @@
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"Indisponível"</item>
-    <item msgid="4765607635752003190">"Desligada"</item>
-    <item msgid="1697460731949649844">"Ligada"</item>
+    <item msgid="4765607635752003190">"Desativada"</item>
+    <item msgid="1697460731949649844">"Ativada"</item>
   </string-array>
   <string-array name="tile_states_mictoggle">
     <item msgid="6895831614067195493">"Indisponível"</item>
@@ -170,10 +170,5 @@
     <item msgid="8189342855739930015">"Indisponível"</item>
     <item msgid="146088982397753810">"Desativado"</item>
     <item msgid="460891964396502657">"Ativado"</item>
-  </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"Indisponível"</item>
-    <item msgid="8014986104355098744">"Desativado"</item>
-    <item msgid="5966994759929723339">"Ativado"</item>
   </string-array>
 </resources>

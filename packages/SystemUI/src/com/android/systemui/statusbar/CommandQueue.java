@@ -20,10 +20,7 @@ import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-
-import static com.android.systemui.statusbar.phone.CentralSurfacesImpl.ONLY_CORE_APPS;
 
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
@@ -40,17 +37,19 @@ import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -60,6 +59,7 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IAddTileResultCallback;
@@ -70,6 +70,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.dump.DumpHandler;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -89,8 +90,7 @@ import java.util.ArrayList;
  * are coalesced, note that they are all idempotent.
  */
 public class CommandQueue extends IStatusBar.Stub implements
-        CallbackController<Callbacks>,
-        DisplayManager.DisplayListener {
+        CallbackController<Callbacks> {
     private static final String TAG = CommandQueue.class.getSimpleName();
 
     private static final int INDEX_MASK = 0xffff;
@@ -168,6 +168,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SHOW_REAR_DISPLAY_DIALOG = 69 << MSG_SHIFT;
     private static final int MSG_GO_TO_FULLSCREEN_FROM_SPLIT = 70 << MSG_SHIFT;
     private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
+    private static final int MSG_SHOW_MEDIA_OUTPUT_SWITCHER = 72 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -191,6 +192,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private ProtoTracer mProtoTracer;
     private final @Nullable CommandRegistry mRegistry;
     private final @Nullable DumpHandler mDumpHandler;
+    private final @Nullable DisplayTracker mDisplayTracker;
 
     /**
      * These methods are called back on the main thread.
@@ -334,7 +336,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         /**
          * @see IStatusBar#setBiometicContextListener(IBiometricContextListener)
          */
-        default void setBiometicContextListener(IBiometricContextListener listener) {
+        default void setBiometricContextListener(IBiometricContextListener listener) {
         }
 
         /**
@@ -350,7 +352,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
 
         /**
-         * @see DisplayManager.DisplayListener#onDisplayRemoved(int)
+         * @see DisplayTracker.Callback#onDisplayRemoved(int)
          */
         default void onDisplayRemoved(int displayId) {
         }
@@ -492,14 +494,21 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#enterStageSplitFromRunningApp
          */
         default void enterStageSplitFromRunningApp(boolean leftOrTop) {}
+
+        /**
+         * @see IStatusBar#showMediaOutputSwitcher
+         */
+        default void showMediaOutputSwitcher(String packageName) {}
     }
 
-    public CommandQueue(Context context) {
-        this(context, null, null, null);
+    @VisibleForTesting
+    public CommandQueue(Context context, DisplayTracker displayTracker) {
+        this(context, displayTracker, null, null, null);
     }
 
     public CommandQueue(
             Context context,
+            DisplayTracker displayTracker,
             ProtoTracer protoTracer,
             CommandRegistry registry,
             DumpHandler dumpHandler
@@ -507,36 +516,30 @@ public class CommandQueue extends IStatusBar.Stub implements
         mProtoTracer = protoTracer;
         mRegistry = registry;
         mDumpHandler = dumpHandler;
-        context.getSystemService(DisplayManager.class).registerDisplayListener(this, mHandler);
+        mDisplayTracker = displayTracker;
+        mDisplayTracker.addDisplayChangeCallback(new DisplayTracker.Callback() {
+            @Override
+            public void onDisplayRemoved(int displayId) {
+                synchronized (mLock) {
+                    mDisplayDisabled.remove(displayId);
+                }
+                // This callback is registered with {@link #mHandler} that already posts to run
+                // on main thread, so it is safe to dispatch directly.
+                for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                    mCallbacks.get(i).onDisplayRemoved(displayId);
+                }
+            }
+        }, new HandlerExecutor(mHandler));
         // We always have default display.
-        setDisabled(DEFAULT_DISPLAY, DISABLE_NONE, DISABLE2_NONE);
+        setDisabled(mDisplayTracker.getDefaultDisplayId(), DISABLE_NONE, DISABLE2_NONE);
     }
-
-    @Override
-    public void onDisplayAdded(int displayId) { }
-
-    @Override
-    public void onDisplayRemoved(int displayId) {
-        synchronized (mLock) {
-            mDisplayDisabled.remove(displayId);
-        }
-        // This callback is registered with {@link #mHandler} that already posts to run on main
-        // thread, so it is safe to dispatch directly.
-        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-            mCallbacks.get(i).onDisplayRemoved(displayId);
-        }
-    }
-
-    @Override
-    public void onDisplayChanged(int displayId) { }
 
     // TODO(b/118592525): add multi-display support if needed.
     public boolean panelsEnabled() {
-        final int disabled1 = getDisabled1(DEFAULT_DISPLAY);
-        final int disabled2 = getDisabled2(DEFAULT_DISPLAY);
+        final int disabled1 = getDisabled1(mDisplayTracker.getDefaultDisplayId());
+        final int disabled2 = getDisabled2(mDisplayTracker.getDefaultDisplayId());
         return (disabled1 & StatusBarManager.DISABLE_EXPAND) == 0
-                && (disabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0
-                && !ONLY_CORE_APPS;
+                && (disabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0;
     }
 
     @Override
@@ -1262,6 +1265,19 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void showMediaOutputSwitcher(String packageName) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Call only allowed from system server.");
+        }
+        synchronized (mLock) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = packageName;
+            mHandler.obtainMessage(MSG_SHOW_MEDIA_OUTPUT_SWITCHER, args).sendToTarget();
+        }
+    }
+
+    @Override
     public void requestAddTile(
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
@@ -1583,7 +1599,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                 }
                 case MSG_SET_BIOMETRICS_LISTENER:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).setBiometicContextListener(
+                        mCallbacks.get(i).setBiometricContextListener(
                                 (IBiometricContextListener) msg.obj);
                     }
                     break;
@@ -1775,6 +1791,13 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).enterStageSplitFromRunningApp((Boolean) msg.obj);
+                    }
+                    break;
+                case MSG_SHOW_MEDIA_OUTPUT_SWITCHER:
+                    args = (SomeArgs) msg.obj;
+                    String clientPackageName = (String) args.arg1;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName);
                     }
                     break;
             }

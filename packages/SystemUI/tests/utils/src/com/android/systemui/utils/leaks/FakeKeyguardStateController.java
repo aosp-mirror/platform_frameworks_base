@@ -49,7 +49,7 @@ public class FakeKeyguardStateController implements KeyguardStateController {
     }
 
     @Override
-    public boolean isBouncerShowing() {
+    public boolean isPrimaryBouncerShowing() {
         return false;
     }
 
