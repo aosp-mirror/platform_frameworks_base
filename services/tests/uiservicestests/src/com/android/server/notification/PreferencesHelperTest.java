@@ -140,6 +140,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -169,6 +170,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     private static final Uri CANONICAL_SOUND_URI =
             Uri.parse("content://" + TEST_AUTHORITY
                     + "/internal/audio/media/10?title=Test&canonical=1");
+
+    private static final Uri ANDROID_RES_SOUND_URI =
+            Uri.parse("android.resource://" + TEST_AUTHORITY + "/raw/test");
+
+    private static final Uri FILE_SOUND_URI =
+            Uri.parse("file://" + TEST_AUTHORITY + "/product/media/test.ogg");
 
     @Mock PermissionHelper mPermissionHelper;
     @Mock RankingHandler mHandler;
@@ -1338,6 +1345,57 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, actualChannel.getSound());
     }
 
+    /**
+     * Test sound Uri restore retry behavior when channel is restored before package
+     *  and then package is installed.
+     */
+    @Test
+    public void testRestoreXml_withNonExistentCanonicalizedSoundUriAndMissingPackage()
+            throws Exception {
+        // canonicalization returns CANONICAL_SOUND_URI for getSoundForBackup (backup part)
+        doReturn(CANONICAL_SOUND_URI)
+                .when(mTestIContentProvider).canonicalize(any(), eq(SOUND_URI));
+
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_LOW);
+        channel.setSound(SOUND_URI, mAudioAttributes);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false);
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, true,
+                USER_SYSTEM, channel.getId());
+
+        // canonicalization / uncanonicalization returns null for the restore part
+        doReturn(null)
+                .when(mTestIContentProvider).canonicalize(any(), eq(CANONICAL_SOUND_URI));
+        doReturn(null)
+                .when(mTestIContentProvider).uncanonicalize(any(), any());
+
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_N_MR1, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_N_MR1), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+
+        loadStreamXml(baos, true, USER_SYSTEM);
+
+        // 1st restore pass fails
+        NotificationChannel actualChannel = mHelper.getNotificationChannel(
+                PKG_N_MR1, UNKNOWN_UID, channel.getId(), false);
+        // sound is CANONICAL_SOUND_URI, unchanged from backup
+        assertEquals(CANONICAL_SOUND_URI, actualChannel.getSound());
+        // sound is flagged as not restored
+        assertFalse(actualChannel.isSoundRestored());
+
+        // package is "installed"
+        when(mPm.getPackageUidAsUser(PKG_N_MR1, USER_SYSTEM)).thenReturn(UID_N_MR1);
+
+        // Trigger 2nd restore pass
+        mHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_N_MR1},
+                new int[]{UID_N_MR1});
+
+        // sound is flagged as restored and set to default URI
+        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, actualChannel.getSound());
+        assertTrue(actualChannel.isSoundRestored());
+    }
+
 
     /**
      * Although we don't make backups with uncanonicalized uris anymore, we used to, so we have to
@@ -1363,7 +1421,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 backupWithUncanonicalizedSoundUri.getBytes(), true, USER_SYSTEM);
 
         NotificationChannel actualChannel = mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, id, false);
+
         assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, actualChannel.getSound());
+        assertTrue(actualChannel.isSoundRestored());
     }
 
     @Test
@@ -1386,6 +1446,73 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         NotificationChannel actualChannel = mHelper.getNotificationChannel(
                 PKG_N_MR1, UID_N_MR1, channel.getId(), false);
         assertEquals(null, actualChannel.getSound());
+    }
+
+    @Test
+    public void testBackupRestoreXml_withAndroidResourceSoundUri() throws Exception {
+        // Mock ContentResolver.getResourceId:
+        // throw exception on restore 1st pass => simulate app not installed yet
+        // then return a valid resource on package update => sim. app installed
+        ContentResolver contentResolver = mock(ContentResolver.class);
+        when(mContext.getContentResolver()).thenReturn(contentResolver);
+        ContentResolver.OpenResourceIdResult resId = mock(
+                ContentResolver.OpenResourceIdResult.class);
+        when(contentResolver.getResourceId(ANDROID_RES_SOUND_URI)).thenReturn(resId).thenThrow(
+                new FileNotFoundException("")).thenReturn(resId);
+
+        mHelper = new PreferencesHelper(mContext, mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory, false);
+
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_LOW);
+        channel.setSound(ANDROID_RES_SOUND_URI, mAudioAttributes);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false);
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, true,
+                USER_SYSTEM, channel.getId());
+
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_N_MR1, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_N_MR1), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+
+        loadStreamXml(baos, true, USER_SYSTEM);
+
+        NotificationChannel actualChannel = mHelper.getNotificationChannel(
+                PKG_N_MR1, UNKNOWN_UID, channel.getId(), false);
+        // sound is ANDROID_RES_SOUND_URI, unchanged from backup
+        assertEquals(ANDROID_RES_SOUND_URI, actualChannel.getSound());
+        // sound is flagged as not restored
+        assertFalse(actualChannel.isSoundRestored());
+
+        // package is "installed"
+        when(mPm.getPackageUidAsUser(PKG_N_MR1, USER_SYSTEM)).thenReturn(UID_N_MR1);
+
+        // Trigger 2nd restore pass
+        mHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_N_MR1},
+                new int[]{UID_N_MR1});
+
+        // sound is flagged as restored
+        assertEquals(ANDROID_RES_SOUND_URI, actualChannel.getSound());
+        assertTrue(actualChannel.isSoundRestored());
+    }
+
+    @Test
+    public void testBackupRestoreXml_withFileResourceSoundUri() throws Exception {
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_LOW);
+        channel.setSound(FILE_SOUND_URI, mAudioAttributes);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false);
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, true,
+                USER_SYSTEM, channel.getId());
+
+        loadStreamXml(baos, true, USER_SYSTEM);
+
+        NotificationChannel actualChannel = mHelper.getNotificationChannel(
+                PKG_N_MR1, UID_N_MR1, channel.getId(), false);
+        // sound is FILE_SOUND_URI, unchanged from backup
+        assertEquals(FILE_SOUND_URI, actualChannel.getSound());
+        // sound is flagged as restored
+        assertTrue(actualChannel.isSoundRestored());
     }
 
     @Test
