@@ -341,9 +341,6 @@ public final class DisplayInfo implements Parcelable {
     @Nullable
     public DisplayShape displayShape;
 
-    /**
-     * Refresh rate range limitation based on the current device layout
-     */
     @Nullable
     public SurfaceControl.RefreshRateRange layoutLimitedRefreshRate;
 
@@ -357,7 +354,7 @@ public final class DisplayInfo implements Parcelable {
      * RefreshRateRange limitation for @Temperature.ThrottlingStatus
      */
     @NonNull
-    public SparseArray<SurfaceControl.RefreshRateRange> thermalRefreshRateThrottling =
+    public SparseArray<SurfaceControl.RefreshRateRange> refreshRateThermalThrottling =
             new SparseArray<>();
 
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
@@ -437,7 +434,7 @@ public final class DisplayInfo implements Parcelable {
                 && Objects.equals(displayShape, other.displayShape)
                 && Objects.equals(layoutLimitedRefreshRate, other.layoutLimitedRefreshRate)
                 && BrightnessSynchronizer.floatEquals(hdrSdrRatio, other.hdrSdrRatio)
-                && thermalRefreshRateThrottling.contentEquals(other.thermalRefreshRateThrottling);
+                && refreshRateThermalThrottling.contentEquals(other.refreshRateThermalThrottling);
     }
 
     @Override
@@ -494,7 +491,7 @@ public final class DisplayInfo implements Parcelable {
         displayShape = other.displayShape;
         layoutLimitedRefreshRate = other.layoutLimitedRefreshRate;
         hdrSdrRatio = other.hdrSdrRatio;
-        thermalRefreshRateThrottling = other.thermalRefreshRateThrottling;
+        refreshRateThermalThrottling = other.refreshRateThermalThrottling;
     }
 
     public void readFromParcel(Parcel source) {
@@ -557,7 +554,7 @@ public final class DisplayInfo implements Parcelable {
         displayShape = source.readTypedObject(DisplayShape.CREATOR);
         layoutLimitedRefreshRate = source.readTypedObject(SurfaceControl.RefreshRateRange.CREATOR);
         hdrSdrRatio = source.readFloat();
-        thermalRefreshRateThrottling = source.readSparseArray(null,
+        refreshRateThermalThrottling = source.readSparseArray(null,
                 SurfaceControl.RefreshRateRange.class);
     }
 
@@ -619,7 +616,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeTypedObject(displayShape, flags);
         dest.writeTypedObject(layoutLimitedRefreshRate, flags);
         dest.writeFloat(hdrSdrRatio);
-        dest.writeSparseArray(thermalRefreshRateThrottling);
+        dest.writeSparseArray(refreshRateThermalThrottling);
     }
 
     @Override
@@ -887,8 +884,8 @@ public final class DisplayInfo implements Parcelable {
         } else {
             sb.append(hdrSdrRatio);
         }
-        sb.append(", thermalRefreshRateThrottling ");
-        sb.append(thermalRefreshRateThrottling);
+        sb.append(", refreshRateThermalThrottling ");
+        sb.append(refreshRateThermalThrottling);
         sb.append("}");
         return sb.toString();
     }
