@@ -346,6 +346,15 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             setSystemGestureExclusion();
             mIsVisible = true;
             mCallback.onSettingsPanelVisibilityChanged(/* shown= */ true);
+
+            if (resetPosition) {
+                // We could not put focus on the settings panel automatically
+                // since it is an inactive window. Therefore, we announce the existence of
+                // magnification settings for accessibility when it is opened.
+                mSettingView.announceForAccessibility(
+                        mContext.getResources().getString(
+                                R.string.accessibility_magnification_settings_panel_description));
+            }
         }
         mContext.registerReceiver(mScreenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
