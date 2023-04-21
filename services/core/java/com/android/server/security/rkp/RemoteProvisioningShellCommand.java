@@ -134,7 +134,9 @@ class RemoteProvisioningShellCommand extends ShellCommand {
             pw.println("supportedEekCurve=" + info.supportedEekCurve);
         }
         pw.println("uniqueId=" + info.uniqueId);
-        pw.println("supportedNumKeysInCsr=" + info.supportedNumKeysInCsr);
+        if (info.versionNumber >= 3) {
+            pw.println("supportedNumKeysInCsr=" + info.supportedNumKeysInCsr);
+        }
     }
 
     private int list() throws RemoteException {
@@ -153,7 +155,7 @@ class RemoteProvisioningShellCommand extends ShellCommand {
                     challenge = Base64.getDecoder().decode(getNextArgRequired());
                     break;
                 default:
-                    getErrPrintWriter().println("error: unknown option");
+                    getErrPrintWriter().println("error: unknown option " + opt);
                     return ERROR;
             }
         }
