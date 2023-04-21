@@ -127,7 +127,8 @@ public class DisplayModeDirectorTest {
     private static final String TAG = "DisplayModeDirectorTest";
     private static final boolean DEBUG = false;
     private static final float FLOAT_TOLERANCE = 0.01f;
-    private static final int DISPLAY_ID = 0;
+    private static final int DISPLAY_ID = Display.DEFAULT_DISPLAY;
+    private static final int MODE_ID = 1;
     private static final float TRANSITION_POINT = 0.763f;
 
     private static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;
@@ -2644,6 +2645,33 @@ public class DisplayModeDirectorTest {
         assertNull(vote);
     }
 
+    @Test
+    public void testUpdateLayoutLimitedRefreshRate() {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        director.start(createMockSensorManager());
+
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
+        float refreshRate = 60;
+        mInjector.mDisplayInfo.layoutLimitedRefreshRate =
+                new RefreshRateRange(refreshRate, refreshRate);
+        displayListener.onDisplayChanged(DISPLAY_ID);
+
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        assertVoteForPhysicalRefreshRate(vote, /* refreshRate= */ refreshRate);
+
+        mInjector.mDisplayInfo.layoutLimitedRefreshRate = null;
+        displayListener.onDisplayChanged(DISPLAY_ID);
+
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        assertNull(vote);
+    }
+
     private Temperature getSkinTemp(@Temperature.ThrottlingStatus int status) {
         return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
     }
@@ -2850,12 +2878,19 @@ public class DisplayModeDirectorTest {
 
     public static class FakesInjector implements DisplayModeDirector.Injector {
         private final FakeDeviceConfig mDeviceConfig;
+        private final DisplayInfo mDisplayInfo;
+        private final Display mDisplay;
         private ContentObserver mBrightnessObserver;
         private ContentObserver mSmoothDisplaySettingObserver;
         private ContentObserver mForcePeakRefreshRateSettingObserver;
 
         FakesInjector() {
             mDeviceConfig = new FakeDeviceConfig();
+            mDisplayInfo = new DisplayInfo();
+            mDisplayInfo.defaultModeId = MODE_ID;
+            mDisplayInfo.supportedModes = new Display.Mode[] {new Display.Mode(MODE_ID,
+                    800, 600, /* refreshRate= */ 60)};
+            mDisplay = createDisplay(DISPLAY_ID);
         }
 
         @NonNull
@@ -2876,16 +2911,25 @@ public class DisplayModeDirectorTest {
         }
 
         @Override
+        public void registerDisplayListener(DisplayListener listener, Handler handler) {}
+
+        @Override
         public void registerDisplayListener(DisplayListener listener, Handler handler, long flag) {}
 
         @Override
+        public Display getDisplay(int displayId) {
+            return mDisplay;
+        }
+
+        @Override
         public Display[] getDisplays() {
-            return new Display[] { createDisplay(DISPLAY_ID) };
+            return new Display[] { mDisplay };
         }
 
         @Override
         public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
-            return false;
+            displayInfo.copyFrom(mDisplayInfo);
+            return true;
         }
 
         @Override
@@ -2909,7 +2953,7 @@ public class DisplayModeDirectorTest {
         }
 
         protected Display createDisplay(int id) {
-            return new Display(DisplayManagerGlobal.getInstance(), id, new DisplayInfo(),
+            return new Display(DisplayManagerGlobal.getInstance(), id, mDisplayInfo,
                     ApplicationProvider.getApplicationContext().getResources());
         }
 
