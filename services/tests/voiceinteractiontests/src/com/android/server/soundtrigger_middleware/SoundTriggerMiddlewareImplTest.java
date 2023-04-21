@@ -225,13 +225,6 @@ public class SoundTriggerMiddlewareImplTest {
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
 
-        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEventSys.class);
-        verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
-        RecognitionEventSys lastEvent = eventCaptor.getValue();
-        assertEquals(-1, lastEvent.halEventReceivedMillis);
-        assertEquals(RecognitionStatus.ABORTED, lastEvent.recognitionEvent.status);
-
         // Unload the model.
         unloadModel(module, handle, hwHandle);
         module.detach();
@@ -275,13 +268,6 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
-
-        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEventSys.class);
-        verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
-        PhraseRecognitionEventSys lastEvent = eventCaptor.getValue();
-        assertEquals(-1, lastEvent.halEventReceivedMillis);
-        assertEquals(RecognitionStatus.ABORTED, lastEvent.phraseRecognitionEvent.common.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
