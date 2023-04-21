@@ -299,12 +299,42 @@ public class SettingsHelperTest {
                         LocaleList.forLanguageTags("en-US"),  // current
                         new String[] { "en-US", "zh-Hans-CN" }));  // supported
 
-        // Old langauge code should be updated.
+        // Old language code should be updated.
         assertEquals(LocaleList.forLanguageTags("en-US,he-IL,id-ID,yi"),
                 SettingsHelper.resolveLocales(
                         LocaleList.forLanguageTags("iw-IL,in-ID,ji"),  // restore
                         LocaleList.forLanguageTags("en-US"),  // current
                         new String[] { "he-IL", "id-ID", "yi" }));  // supported
+
+        // No matter the current locale has "nu" extension or not, if the restored locale has fw
+        // (first day of week) or mu(temperature unit) extension, we should restore fw or mu
+        // extensions as well and append these to restore and current locales.
+        assertEquals(LocaleList.forLanguageTags(
+                "en-US-u-fw-mon-mu-celsius,zh-Hant-TW-u-fw-mon-mu-celsius"),
+                SettingsHelper.resolveLocales(
+                        LocaleList.forLanguageTags("zh-Hant-TW-u-fw-mon-mu-celsius"),  // restore
+                        LocaleList.forLanguageTags("en-US"),  // current
+                        new String[] { "en-US", "zh-Hant-TW" }));  // supported
+
+        // No matter the current locale has "nu" extension or not, if the restored locale has fw
+        // (first day of week) or mu(temperature unit) extension, we should restore fw or mu
+        // extensions as well and append these to restore and current locales.
+        assertEquals(LocaleList.forLanguageTags(
+                "fa-Arab-AF-u-nu-latn-fw-mon-mu-celsius,zh-Hant-TW-u-fw-mon-mu-celsius"),
+                SettingsHelper.resolveLocales(
+                        LocaleList.forLanguageTags("zh-Hant-TW-u-fw-mon-mu-celsius"),  // restore
+                        LocaleList.forLanguageTags("fa-Arab-AF-u-nu-latn"),  // current
+                        new String[] { "fa-Arab-AF-u-nu-latn", "zh-Hant-TW" }));  // supported
+
+        // If the restored locale only has nu extension, we should not restore the nu extensions to
+        // current locales.
+        assertEquals(LocaleList.forLanguageTags("zh-Hant-TW,fa-Arab-AF-u-nu-latn"),
+                SettingsHelper.resolveLocales(
+                        LocaleList.forLanguageTags("fa-Arab-AF-u-nu-latn"),  // restore
+                        LocaleList.forLanguageTags("zh-Hant-TW"),  // current
+                        new String[] { "fa-Arab-AF-u-nu-latn", "zh-Hant-TW" }));  // supported
+
+
     }
 
     @Test
