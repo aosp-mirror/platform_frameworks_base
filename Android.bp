@@ -345,6 +345,7 @@ java_defaults {
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
         "audiopolicy-types-aidl-java",
+        "modules-utils-expresslog",
     ],
 }
 
