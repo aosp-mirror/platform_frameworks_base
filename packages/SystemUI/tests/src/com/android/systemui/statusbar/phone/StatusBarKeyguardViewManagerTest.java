@@ -83,6 +83,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import com.google.common.truth.Truth;
@@ -149,13 +150,15 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor
     private ArgumentCaptor<OnBackInvokedCallback> mBackCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallback;
 
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
-        when(mKeyguardMessageAreaFactory.create(any(KeyguardMessageArea.class)))
+        when(mKeyguardMessageAreaFactory.create(any()))
                 .thenReturn(mKeyguardMessageAreaController);
         when(mBouncerView.getDelegate()).thenReturn(mBouncerViewDelegate);
         when(mBouncerViewDelegate.getBackCallback()).thenReturn(mBouncerViewDelegateBackCallback);
@@ -904,5 +907,27 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         // THEN the alternateBouncer doesn't hide
         verify(mAlternateBouncerInteractor, never()).hide();
+    }
+
+    @Test
+    public void onDeviceUnlocked_hideAlternateBouncerAndClearMessageArea() {
+        reset(mKeyguardUpdateMonitor);
+        reset(mKeyguardMessageAreaController);
+
+        // GIVEN keyguard state controller callback is registered
+        verify(mKeyguardStateController).addCallback(mKeyguardStateControllerCallback.capture());
+
+        // GIVEN alternate bouncer state = not visible
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
+
+        // WHEN the device is unlocked
+        mKeyguardStateControllerCallback.getValue().onUnlockedChanged();
+
+        // THEN the false visibility state is propagated to the keyguardUpdateMonitor
+        verify(mKeyguardUpdateMonitor).setAlternateBouncerShowing(eq(false));
+
+        // THEN message area visibility updated to FALSE with empty message
+        verify(mKeyguardMessageAreaController).setIsVisible(eq(false));
+        verify(mKeyguardMessageAreaController).setMessage(eq(""));
     }
 }
