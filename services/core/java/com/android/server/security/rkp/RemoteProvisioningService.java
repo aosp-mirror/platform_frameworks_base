@@ -19,14 +19,18 @@ package com.android.server.security.rkp;
 import android.content.Context;
 import android.os.Binder;
 import android.os.OutcomeReceiver;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.security.rkp.IGetRegistrationCallback;
 import android.security.rkp.IRemoteProvisioning;
 import android.security.rkp.service.RegistrationProxy;
 import android.util.Log;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.concurrent.Executor;
 
@@ -96,6 +100,19 @@ public class RemoteProvisioningService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+            new RemoteProvisioningShellCommand().dump(pw);
+        }
+
+        @Override
+        public int handleShellCommand(ParcelFileDescriptor in, ParcelFileDescriptor out,
+                ParcelFileDescriptor err, String[] args) {
+            return new RemoteProvisioningShellCommand().exec(this, in.getFileDescriptor(),
+                    out.getFileDescriptor(), err.getFileDescriptor(), args);
         }
     }
 }
