@@ -2222,6 +2222,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             pw.println("  mDisplayId=" + mDisplayId);
             pw.println("  mLeadDisplayId=" + mLeadDisplayId);
             pw.println("  mLightSensor=" + mLightSensor);
+            pw.println("  mDisplayBrightnessFollowers=" + mDisplayBrightnessFollowers);
 
             pw.println();
             pw.println("Display Power Controller Locked State:");
