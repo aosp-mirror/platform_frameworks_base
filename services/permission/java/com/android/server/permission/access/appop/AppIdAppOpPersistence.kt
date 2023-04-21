@@ -51,7 +51,7 @@ class AppIdAppOpPersistence : BaseAppOpPersistence() {
         }
         userState.appIdAppOpModes.forEachReversedIndexed { appIdIndex, appId, _ ->
             // Non-application UIDs may not have an Android package but may still have app op state.
-            if (appId !in state.systemState.appIdPackageNames &&
+            if (appId !in state.externalState.appIdPackageNames &&
                 appId >= Process.FIRST_APPLICATION_UID) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing app-op state")
                 appIdAppOpModes.removeAt(appIdIndex)

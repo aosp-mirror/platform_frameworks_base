@@ -65,7 +65,7 @@ class AppIdPermissionMigration {
         val userState = state.mutateUserState(userId)!!
         val appIdPermissionFlags = userState.mutateAppIdPermissionFlags()
         legacyAppIdPermissionStates.forEach { (appId, legacyPermissionStates) ->
-            val packageNames = state.systemState.appIdPackageNames[appId]
+            val packageNames = state.externalState.appIdPackageNames[appId]
             if (packageNames == null) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when migrating permission state")
                 return@forEach

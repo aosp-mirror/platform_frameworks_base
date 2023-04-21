@@ -60,7 +60,7 @@ class AccessPersistence(
      */
     fun read(state: MutableAccessState) {
         readSystemState(state)
-        state.systemState.userIds.forEachIndexed { _, userId ->
+        state.externalState.userIds.forEachIndexed { _, userId ->
             readUserState(state, userId)
         }
     }

@@ -33,7 +33,7 @@ class PackageAppOpMigration {
         val userState = state.mutateUserState(userId)!!
         val packageAppOpModes = userState.mutatePackageAppOpModes()
         legacyPackageAppOpModes.forEach { (packageName, legacyAppOpModes) ->
-            if (packageName !in state.systemState.packageStates) {
+            if (packageName !in state.externalState.packageStates) {
                 Log.w(LOG_TAG, "Dropping unknown package $packageName when migrating app op state")
                 return@forEach
             }
