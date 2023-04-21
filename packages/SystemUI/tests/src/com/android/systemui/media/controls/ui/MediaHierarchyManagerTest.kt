@@ -470,6 +470,21 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             )
     }
 
+    @Test
+    fun testQsExpandedChanged_noQqsMedia() {
+        // When we are looking at QQS with active media
+        whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
+        whenever(statusBarStateController.isExpanded).thenReturn(true)
+
+        // When there is no longer any active media
+        whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(false)
+        mediaHierarchyManager.qsExpanded = false
+
+        // Then the carousel is set to not visible
+        verify(mediaCarouselScrollHandler).visibleToUser = false
+        assertThat(mediaCarouselScrollHandler.visibleToUser).isFalse()
+    }
+
     private fun enableSplitShade() {
         context
             .getOrCreateTestableResources()
