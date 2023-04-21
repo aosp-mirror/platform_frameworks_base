@@ -197,7 +197,8 @@ public class DreamOverlayStateController implements
                     if (mShouldShowComplications) {
                         return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                     }
-                    return (requiredTypes & mSupportedTypes) == requiredTypes;
+                    final int typesToAlwaysShow = mSupportedTypes & getAvailableComplicationTypes();
+                    return (requiredTypes & typesToAlwaysShow) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);
