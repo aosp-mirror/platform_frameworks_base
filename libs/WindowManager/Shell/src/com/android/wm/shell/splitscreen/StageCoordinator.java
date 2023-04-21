@@ -2419,12 +2419,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     }
                 }
             }
-            // If the size of dismissStages > 0, the task is closed without prepare pending
+            // If the size of dismissStages == 1, one of the task is closed without prepare pending
             // transition, which could happen if all activities were finished after finish top
             // activity in a task, so the trigger task is null when handleRequest.
+            // Note if the size of dismissStages == 2, it's starting a new task, so don't handle it.
             final ArraySet<StageTaskListener> dismissStages = record.getShouldDismissedStage();
             if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0
-                    || dismissStages.size() > 0) {
+                    || dismissStages.size() == 1) {
                 Log.e(TAG, "Somehow removed the last task in a stage outside of a proper "
                         + "transition.");
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
