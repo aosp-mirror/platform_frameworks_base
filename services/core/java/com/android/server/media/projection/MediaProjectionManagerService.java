@@ -19,9 +19,19 @@ package com.android.server.media.projection;
 import static android.Manifest.permission.MANAGE_MEDIA_PROJECTION;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.media.projection.IMediaProjectionManager.EXTRA_PACKAGE_REUSING_GRANTED_CONSENT;
+import static android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW_GRANTED_CONSENT;
+import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
+import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
+import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_TASK;
+import static android.media.projection.ReviewGrantedConsentResult.UNKNOWN;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -30,7 +40,9 @@ import android.app.IProcessObserver;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -45,11 +57,13 @@ import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjectionWatcherCallback;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
+import android.media.projection.ReviewGrantedConsentResult;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -57,6 +71,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.ContentRecordingSession;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -69,6 +84,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Manages MediaProjection sessions.
@@ -161,10 +177,9 @@ public final class MediaProjectionManagerService extends SystemService
         }
     }
 
-
     @Override
     public void onStart() {
-        publishBinderService(Context.MEDIA_PROJECTION_SERVICE, new BinderService(),
+        publishBinderService(Context.MEDIA_PROJECTION_SERVICE, new BinderService(mContext),
                 false /*allowIsolated*/);
         mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback,
                 MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
@@ -305,6 +320,10 @@ public final class MediaProjectionManagerService extends SystemService
                 }
                 return false;
             }
+            if (mProjectionGrant != null) {
+                // Cache the session details.
+                mProjectionGrant.mSession = incomingSession;
+            }
             return true;
         }
     }
@@ -323,9 +342,8 @@ public final class MediaProjectionManagerService extends SystemService
         }
     }
 
-
     /**
-     * Reshows the permisison dialog for the user to review consent they've already granted in
+     * Re-shows the permission dialog for the user to review consent they've already granted in
      * the given projection instance.
      *
      * <p>Preconditions:
@@ -337,18 +355,111 @@ public final class MediaProjectionManagerService extends SystemService
      * <p>Returns immediately but waits to start recording until user has reviewed their consent.
      */
     @VisibleForTesting
-    void requestConsentForInvalidProjection(IMediaProjection projection) {
+    void requestConsentForInvalidProjection() {
         synchronized (mLock) {
             Slog.v(TAG, "Reusing token: Reshow dialog for due to invalid projection.");
-            // TODO(b/274790702): Trigger the permission dialog again in SysUI.
+            // Trigger the permission dialog again in SysUI
+            // Do not handle the result; SysUI will update us when the user has consented.
+            mContext.startActivityAsUser(buildReviewGrantedConsentIntent(),
+                    UserHandle.getUserHandleForUid(mProjectionGrant.uid));
+        }
+    }
+
+    /**
+     * Returns an intent to re-show the consent dialog in SysUI. Should only be used for the
+     * scenario where the host app has re-used the consent token.
+     *
+     * <p>Consent dialog result handled in
+     * {@link BinderService#setUserReviewGrantedConsentResult(int)}.
+     */
+    private Intent buildReviewGrantedConsentIntent() {
+        final String permissionDialogString = mContext.getResources().getString(
+                R.string.config_mediaProjectionPermissionDialogComponent);
+        final ComponentName mediaProjectionPermissionDialogComponent =
+                ComponentName.unflattenFromString(permissionDialogString);
+        // We can use mProjectionGrant since we already checked that it matches the given token.
+        return new Intent().setComponent(mediaProjectionPermissionDialogComponent)
+                .putExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, true)
+                .putExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT, mProjectionGrant.packageName)
+                .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    }
+
+    /**
+     * Handles result of dialog shown from {@link BinderService#buildReviewGrantedConsentIntent()}.
+     *
+     * <p>Tears down session if user did not consent, or starts mirroring if user did consent.
+     */
+    @VisibleForTesting
+    void setUserReviewGrantedConsentResult(@ReviewGrantedConsentResult int consentResult,
+            @Nullable IMediaProjection projection) {
+        synchronized (mLock) {
+            final boolean consentGranted =
+                    consentResult == RECORD_CONTENT_DISPLAY || consentResult == RECORD_CONTENT_TASK;
+            if (consentGranted && projection == null || !isCurrentProjection(
+                    projection.asBinder())) {
+                Slog.v(TAG, "Reusing token: Ignore consent result of " + consentResult + " for a "
+                        + "token that isn't current");
+                return;
+            }
+            if (mProjectionGrant == null) {
+                Slog.w(TAG, "Reusing token: Can't review consent with no ongoing projection.");
+                return;
+            }
+            if (mProjectionGrant.mSession == null
+                    || !mProjectionGrant.mSession.isWaitingToRecord()) {
+                Slog.w(TAG, "Reusing token: Ignore consent result " + consentResult
+                        + " if not waiting for the result.");
+                return;
+            }
+            Slog.v(TAG, "Reusing token: Handling user consent result " + consentResult);
+            switch (consentResult) {
+                case UNKNOWN:
+                case RECORD_CANCEL:
+                    // Pass in null to stop mirroring.
+                    setReviewedConsentSessionLocked(/* session= */ null);
+                    // The grant may now be null if setting the session failed.
+                    if (mProjectionGrant != null) {
+                        // Always stop the projection.
+                        mProjectionGrant.stop();
+                    }
+                    break;
+                case RECORD_CONTENT_DISPLAY:
+                    // TODO(270118861) The app may have specified a particular id in the virtual
+                    //  display config. However - below will always return INVALID since it checks
+                    //  that window manager mirroring is not enabled (it is always enabled for MP).
+                    setReviewedConsentSessionLocked(ContentRecordingSession.createDisplaySession(
+                            DEFAULT_DISPLAY));
+                    break;
+                case RECORD_CONTENT_TASK:
+                    setReviewedConsentSessionLocked(ContentRecordingSession.createTaskSession(
+                            mProjectionGrant.getLaunchCookie()));
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Updates the session after the user has reviewed consent. There must be a current session.
+     *
+     * @param session The new session details, or {@code null} to stop recording.
+     */
+    private void setReviewedConsentSessionLocked(@Nullable ContentRecordingSession session) {
+        if (session != null) {
+            session.setWaitingToRecord(false);
+            session.setVirtualDisplayId(mProjectionGrant.mVirtualDisplayId);
+        }
+
+        Slog.v(TAG, "Reusing token: Processed consent so set the session " + session);
+        if (!setContentRecordingSession(session)) {
+            Slog.e(TAG, "Reusing token: Failed to set session for reused consent, so stop");
+            // Do not need to invoke stop; updating the session does it for us.
         }
     }
 
     // TODO(b/261563516): Remove internal method and test aidl directly, here and elsewhere.
     @VisibleForTesting
     MediaProjection createProjectionInternal(int uid, String packageName, int type,
-            boolean isPermanentGrant, UserHandle callingUser,
-            boolean packageAttemptedReusingGrantedConsent) {
+            boolean isPermanentGrant, UserHandle callingUser) {
         MediaProjection projection;
         ApplicationInfo ai;
         try {
@@ -369,6 +480,34 @@ public final class MediaProjectionManagerService extends SystemService
             Binder.restoreCallingIdentity(callingToken);
         }
         return projection;
+    }
+
+    // TODO(b/261563516): Remove internal method and test aidl directly, here and elsewhere.
+    @VisibleForTesting
+    MediaProjection getProjectionInternal(int uid, String packageName) {
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            // Supposedly the package has re-used the user's consent; confirm the provided details
+            // against the current projection token before re-using the current projection.
+            if (mProjectionGrant == null || mProjectionGrant.mSession == null
+                    || !mProjectionGrant.mSession.isWaitingToRecord()) {
+                Slog.e(TAG, "Reusing token: Not possible to reuse the current projection "
+                        + "instance");
+                return null;
+            }
+                // The package matches, go ahead and re-use the token for this request.
+            if (mProjectionGrant.uid == uid
+                    && Objects.equals(mProjectionGrant.packageName, packageName)) {
+                Slog.v(TAG, "Reusing token: getProjection can reuse the current projection");
+                return mProjectionGrant;
+            } else {
+                Slog.e(TAG, "Reusing token: Not possible to reuse the current projection "
+                        + "instance due to package details mismatching");
+                return null;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
     }
 
     @VisibleForTesting
@@ -394,6 +533,10 @@ public final class MediaProjectionManagerService extends SystemService
     }
 
     private final class BinderService extends IMediaProjectionManager.Stub {
+
+        BinderService(Context context) {
+            super(PermissionEnforcer.fromContext(context));
+        }
 
         @Override // Binder call
         public boolean hasProjectionPermission(int uid, String packageName) {
@@ -424,7 +567,25 @@ public final class MediaProjectionManagerService extends SystemService
             }
             final UserHandle callingUser = Binder.getCallingUserHandle();
             return createProjectionInternal(uid, packageName, type, isPermanentGrant,
-                    callingUser, false);
+                    callingUser);
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public IMediaProjection getProjection(int uid, String packageName) {
+            getProjection_enforcePermission();
+            if (packageName == null || packageName.isEmpty()) {
+                throw new IllegalArgumentException("package name must not be empty");
+            }
+
+            MediaProjection projection;
+            final long callingToken = Binder.clearCallingIdentity();
+            try {
+                projection = getProjectionInternal(uid, packageName);
+            } finally {
+                Binder.restoreCallingIdentity(callingToken);
+            }
+            return projection;
         }
 
         @Override // Binder call
@@ -562,7 +723,7 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override
-        public void requestConsentForInvalidProjection(IMediaProjection projection) {
+        public void requestConsentForInvalidProjection(@NonNull IMediaProjection projection) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to check if the given"
@@ -577,7 +738,22 @@ public final class MediaProjectionManagerService extends SystemService
             // Remove calling app identity before performing any privileged operations.
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaProjectionManagerService.this.requestConsentForInvalidProjection(projection);
+                MediaProjectionManagerService.this.requestConsentForInvalidProjection();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void setUserReviewGrantedConsentResult(@ReviewGrantedConsentResult int consentResult,
+                @Nullable IMediaProjection projection) {
+            setUserReviewGrantedConsentResult_enforcePermission();
+            // Remove calling app identity before performing any privileged operations.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.setUserReviewGrantedConsentResult(consentResult,
+                        projection);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -593,7 +769,6 @@ public final class MediaProjectionManagerService extends SystemService
                 Binder.restoreCallingIdentity(token);
             }
         }
-
 
         private boolean checkPermission(String packageName, String permission) {
             return mContext.getPackageManager().checkPermission(permission, packageName)
@@ -630,6 +805,8 @@ public final class MediaProjectionManagerService extends SystemService
         // Set if MediaProjection#createVirtualDisplay has been invoked previously (it
         // should only be called once).
         private int mVirtualDisplayId = INVALID_DISPLAY;
+        // The associated session details already sent to WindowManager.
+        private ContentRecordingSession mSession;
 
         MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
                 boolean isPrivileged) {
@@ -883,6 +1060,18 @@ public final class MediaProjectionManagerService extends SystemService
             }
             synchronized (mLock) {
                 mVirtualDisplayId = displayId;
+
+                // If prior session was does not have a valid display id, then update the display
+                // so recording can start.
+                if (mSession != null && mSession.getVirtualDisplayId() == INVALID_DISPLAY) {
+                    Slog.v(TAG, "Virtual display now created, so update session with the virtual "
+                            + "display id");
+                    mSession.setVirtualDisplayId(mVirtualDisplayId);
+                    if (!setContentRecordingSession(mSession)) {
+                        Slog.e(TAG, "Failed to set session for virtual display id");
+                        // Do not need to invoke stop; updating the session does it for us.
+                    }
+                }
             }
         }
 
