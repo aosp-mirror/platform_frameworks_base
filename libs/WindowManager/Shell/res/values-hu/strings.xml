@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Félretevés megszüntetése"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ez az alkalmazás csak egy ablakban nyitható meg."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Az alkalmazást nem lehet másodlagos kijelzőn elindítani."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Elválasztó az osztott nézetben"</string>
@@ -46,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Felső 50%-ra"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Felső 30%-ra"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Alsó teljes képernyőre"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Osztás a képernyő bal oldalán"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Osztás a képernyő jobb oldalán"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Osztás a képernyő tetején"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Osztás alul"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Egykezes mód használata"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"A kilépéshez csúsztasson felfelé a képernyő aljáról, vagy koppintson az alkalmazás felett a képernyő bármelyik részére"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Egykezes mód indítása"</string>
@@ -72,13 +77,34 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Buborék"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kezelés"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Buborék elvetve."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Koppintson az alkalmazás újraindításához és a teljes képernyős mód elindításához."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"A jobb nézet érdekében koppintson az alkalmazás újraindításához."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamerával kapcsolatos problémába ütközött?\nKoppintson a megoldáshoz."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nem sikerült a hiba kijavítása?\nKoppintson a visszaállításhoz."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nincsenek problémái kamerával? Koppintson az elvetéshez."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Egyes alkalmazások álló tájolásban működnek a leghatékonyabban"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Próbálja ki az alábbi beállítások egyikét, hogy a legjobban ki tudja használni képernyő területét"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"A teljes képernyős mód elindításához forgassa el az eszközt"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Koppintson duplán az alkalmazás mellett az áthelyezéséhez"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Több mindent láthat és tehet"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Húzzon ide egy másik alkalmazást az osztott képernyő használatához"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Koppintson duplán az alkalmazáson kívül az áthelyezéséhez"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Értem"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Kibontással további információkhoz juthat."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Újraindítja a jobb megjelenítés érdekében?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Újraindíthatja az alkalmazást a képernyőn való jobb megjelenítés érdekében, de elveszítheti az előrehaladását és az esetleges nem mentett változásokat"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Mégse"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Újraindítás"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne jelenjen meg többé"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Koppintson duplán\naz alkalmazás áthelyezéséhez"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Teljes méret"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Kis méret"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Bezárás"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Vissza"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Fogópont"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Alkalmazásikon"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Teljes képernyő"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Asztali üzemmód"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Osztott képernyő"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Továbbiak"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Lebegő"</string>
+    <string name="select_text" msgid="5139083974039906583">"Kiválasztás"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Képernyőkép"</string>
+    <string name="close_text" msgid="4986518933445178928">"Bezárás"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Menü bezárása"</string>
 </resources>
