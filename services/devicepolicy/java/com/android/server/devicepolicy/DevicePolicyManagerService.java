@@ -5865,8 +5865,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // would allow bypassing of the maximum time to lock.
                 mInjector.settingsGlobalPutInt(Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             }
-            getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
-                    UserHandle.USER_SYSTEM, timeMs);
+            getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(parentId, timeMs);
         });
     }
 
@@ -9199,9 +9198,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_CAMERA,
                     caller.getPackageName(),
                     getProfileParentUserIfRequested(userId, parent));
-
-            setBackwardCompatibleUserRestriction(
-                    caller, enforcingAdmin, UserManager.DISALLOW_CAMERA, disabled, parent);
+            try {
+                setBackwardCompatibleUserRestriction(
+                        caller, enforcingAdmin, UserManager.DISALLOW_CAMERA, disabled, parent);
+            } catch (IllegalStateException e) {
+                throw new IllegalStateException(
+                        "Please use addUserRestriction or addUserRestrictionGlobally using the key"
+                                + " UserManager.DISALLOW_CAMERA to disable the camera locally or"
+                                + " globally, respectively");
+            }
         } else {
             Objects.requireNonNull(who, "ComponentName is null");
             if (parent) {
@@ -15465,11 +15470,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
-                    "Admin " + who
-                            + " is neither the device owner or affiliated user's profile owner.");
-            if (isManagedProfile(userId)) {
-                throw new SecurityException("Managed profile cannot disable status bar");
+            if (!isPermissionCheckFlagEnabled()) {
+                Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
+                        "Admin " + who + " is neither the device owner or affiliated "
+                                + "user's profile owner.");
+                if (isManagedProfile(userId)) {
+                    throw new SecurityException("Managed profile cannot disable status bar");
+                }
             }
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_STATUS_BAR_DISABLED);
 
@@ -15522,16 +15529,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isStatusBarDisabled(String callerPackage) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(
-                isProfileOwner(caller) || isDefaultDeviceOwner(caller));
+        if (isPermissionCheckFlagEnabled()) {
+            enforceCanQuery(
+                    MANAGE_DEVICE_POLICY_STATUS_BAR, caller.getPackageName(), caller.getUserId());
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isProfileOwner(caller) || isDefaultDeviceOwner(caller));
+        }
 
         int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
-                    "Admin " + callerPackage
-                            + " is neither the device owner or affiliated user's profile owner.");
-            if (isManagedProfile(userId)) {
-                throw new SecurityException("Managed profile cannot disable status bar");
+            if (!isPermissionCheckFlagEnabled()) {
+                Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
+                        "Admin " + callerPackage
+                                + " is neither the device owner or affiliated user's profile owner.");
+                if (isManagedProfile(userId)) {
+                    throw new SecurityException("Managed profile cannot disable status bar");
+                }
             }
             DevicePolicyData policy = getUserData(userId);
             return policy.mStatusBarDisabled;
@@ -22753,6 +22767,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_AUTOFILL,
                     MANAGE_DEVICE_POLICY_BLUETOOTH,
                     MANAGE_DEVICE_POLICY_CALLS,
+                    MANAGE_DEVICE_POLICY_CAMERA,
                     MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES,
                     MANAGE_DEVICE_POLICY_DISPLAY,
                     MANAGE_DEVICE_POLICY_FACTORY_RESET,
@@ -22788,7 +22803,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_ACROSS_USERS,
                     MANAGE_DEVICE_POLICY_AIRPLANE_MODE,
                     MANAGE_DEVICE_POLICY_APPS_CONTROL,
-                    MANAGE_DEVICE_POLICY_CAMERA,
                     MANAGE_DEVICE_POLICY_CERTIFICATES,
                     MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE,
                     MANAGE_DEVICE_POLICY_DEFAULT_SMS,
@@ -22816,7 +22830,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final List<String> ADDITIONAL_PROFILE_OWNER_ON_USER_0_PERMISSIONS =
             List.of(
                     MANAGE_DEVICE_POLICY_AIRPLANE_MODE,
-                    MANAGE_DEVICE_POLICY_CAMERA,
                     MANAGE_DEVICE_POLICY_DISPLAY,
                     MANAGE_DEVICE_POLICY_FUN,
                     MANAGE_DEVICE_POLICY_LOCK_TASK,
@@ -22827,7 +22840,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_PROFILE_INTERACTION,
                     MANAGE_DEVICE_POLICY_SAFE_BOOT,
                     MANAGE_DEVICE_POLICY_SMS,
-                    MANAGE_DEVICE_POLICY_STATUS_BAR,
                     MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS,
                     MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER,
                     MANAGE_DEVICE_POLICY_USERS,
@@ -22848,7 +22860,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * All the additional permissions granted to a Profile Owner on an affiliated user.
      */
     private static final List<String> ADDITIONAL_AFFILIATED_PROFILE_OWNER_ON_USER_PERMISSIONS =
-            List.of();
+            List.of(
+                    MANAGE_DEVICE_POLICY_STATUS_BAR
+            );
 
     /**
      * Combination of {@link PROFILE_OWNER_PERMISSIONS} and

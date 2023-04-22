@@ -73,6 +73,8 @@ public class CandidatePhaseMetric {
     private int mAuthenticationEntryCount = -1;
     // Gathered to pass on to chosen provider when required
     private final IntArray mAvailableEntries = new IntArray();
+    // The *framework only* exception held by this provider, empty string by default
+    private String mFrameworkException = "";
 
     public CandidatePhaseMetric() {
     }
@@ -82,27 +84,27 @@ public class CandidatePhaseMetric {
     /* -- Timestamps -- */
 
     public void setServiceBeganTimeNanoseconds(long serviceBeganTimeNanoseconds) {
-        this.mServiceBeganTimeNanoseconds = serviceBeganTimeNanoseconds;
+        mServiceBeganTimeNanoseconds = serviceBeganTimeNanoseconds;
     }
 
     public void setStartQueryTimeNanoseconds(long startQueryTimeNanoseconds) {
-        this.mStartQueryTimeNanoseconds = startQueryTimeNanoseconds;
+        mStartQueryTimeNanoseconds = startQueryTimeNanoseconds;
     }
 
     public void setQueryFinishTimeNanoseconds(long queryFinishTimeNanoseconds) {
-        this.mQueryFinishTimeNanoseconds = queryFinishTimeNanoseconds;
+        mQueryFinishTimeNanoseconds = queryFinishTimeNanoseconds;
     }
 
     public long getServiceBeganTimeNanoseconds() {
-        return this.mServiceBeganTimeNanoseconds;
+        return mServiceBeganTimeNanoseconds;
     }
 
     public long getStartQueryTimeNanoseconds() {
-        return this.mStartQueryTimeNanoseconds;
+        return mStartQueryTimeNanoseconds;
     }
 
     public long getQueryFinishTimeNanoseconds() {
-        return this.mQueryFinishTimeNanoseconds;
+        return mQueryFinishTimeNanoseconds;
     }
 
     /* -- Actual time delta latencies (for local utility) -- */
@@ -111,8 +113,8 @@ public class CandidatePhaseMetric {
      * Returns the latency in microseconds for the query phase.
      */
     public int getQueryLatencyMicroseconds() {
-        return (int) ((this.getQueryFinishTimeNanoseconds()
-                - this.getStartQueryTimeNanoseconds()) / 1000);
+        return (int) ((getQueryFinishTimeNanoseconds()
+                - getStartQueryTimeNanoseconds()) / 1000);
     }
 
     /* --- Time Stamp Conversion to Microseconds from Reference --- */
@@ -126,32 +128,32 @@ public class CandidatePhaseMetric {
      * @return the microsecond integer timestamp from service start to query began
      */
     public int getTimestampFromReferenceStartMicroseconds(long specificTimestamp) {
-        if (specificTimestamp < this.mServiceBeganTimeNanoseconds) {
+        if (specificTimestamp < mServiceBeganTimeNanoseconds) {
             Log.i(TAG, "The timestamp is before service started, falling back to default int");
             return MetricUtilities.DEFAULT_INT_32;
         }
         return (int) ((specificTimestamp
-                - this.mServiceBeganTimeNanoseconds) / 1000);
+                - mServiceBeganTimeNanoseconds) / 1000);
     }
 
     /* ------------- Provider Query Status ------------ */
 
     public void setProviderQueryStatus(int providerQueryStatus) {
-        this.mProviderQueryStatus = providerQueryStatus;
+        mProviderQueryStatus = providerQueryStatus;
     }
 
     public int getProviderQueryStatus() {
-        return this.mProviderQueryStatus;
+        return mProviderQueryStatus;
     }
 
     /* -------------- Candidate Uid ---------------- */
 
     public void setCandidateUid(int candidateUid) {
-        this.mCandidateUid = candidateUid;
+        mCandidateUid = candidateUid;
     }
 
     public int getCandidateUid() {
-        return this.mCandidateUid;
+        return mCandidateUid;
     }
 
     /* -------------- Session Id ---------------- */
@@ -254,7 +256,7 @@ public class CandidatePhaseMetric {
      *          collector
      */
     public void addEntry(EntryEnum e) {
-        this.mAvailableEntries.add(e.getMetricCode());
+        mAvailableEntries.add(e.getMetricCode());
     }
 
     /**
@@ -266,5 +268,15 @@ public class CandidatePhaseMetric {
      */
     public List<Integer> getAvailableEntries() {
         return Arrays.stream(mAvailableEntries.toArray()).boxed().collect(Collectors.toList());
+    }
+
+    /* ------ Framework Exception for this Candidate ------ */
+
+    public void setFrameworkException(String frameworkException) {
+        mFrameworkException = frameworkException;
+    }
+
+    public String getFrameworkException() {
+        return mFrameworkException;
     }
 }

@@ -75,6 +75,7 @@ import android.view.animation.Interpolator;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -86,7 +87,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -4746,13 +4746,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFooterView.setVisible(visible, animate);
         mFooterView.setSecondaryVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
-        if (mHasFilteredOutSeenNotifications) {
-            mFooterView.setFooterLabelTextAndIcon(
-                    R.string.unlock_to_see_notif_text,
-                    R.drawable.ic_friction_lock_closed);
-        } else {
-            mFooterView.setFooterLabelTextAndIcon(0, 0);
-        }
+        mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

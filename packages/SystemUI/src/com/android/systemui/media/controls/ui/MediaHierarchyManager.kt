@@ -33,9 +33,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import androidx.annotation.VisibleForTesting
+import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -257,7 +257,7 @@ constructor(
             if (value && (isLockScreenShadeVisibleToUser() || isHomeScreenShadeVisibleToUser())) {
                 mediaCarouselController.logSmartspaceImpression(value)
             }
-            mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
+            updateUserVisibility()
         }
 
     /**
@@ -460,8 +460,7 @@ constructor(
                     ) {
                         mediaCarouselController.logSmartspaceImpression(qsExpanded)
                     }
-                    mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
-                        isVisibleToUser()
+                    updateUserVisibility()
                 }
 
                 override fun onDozeAmountChanged(linear: Float, eased: Float) {
@@ -480,8 +479,7 @@ constructor(
                         qsExpanded = false
                         closeGuts()
                     }
-                    mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
-                        isVisibleToUser()
+                    updateUserVisibility()
                 }
 
                 override fun onExpandedChanged(isExpanded: Boolean) {
@@ -489,8 +487,7 @@ constructor(
                     if (isHomeScreenShadeVisibleToUser()) {
                         mediaCarouselController.logSmartspaceImpression(qsExpanded)
                     }
-                    mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
-                        isVisibleToUser()
+                    updateUserVisibility()
                 }
             }
         )
@@ -532,9 +529,7 @@ constructor(
             }
         )
 
-        mediaCarouselController.updateUserVisibility = {
-            mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = isVisibleToUser()
-        }
+        mediaCarouselController.updateUserVisibility = this::updateUserVisibility
         mediaCarouselController.updateHostVisibility = {
             mediaHosts.forEach { it?.updateViewVisibility() }
         }
@@ -1180,11 +1175,15 @@ constructor(
         return isCrossFadeAnimatorRunning
     }
 
-    /** Returns true when the media card could be visible to the user if existed. */
-    private fun isVisibleToUser(): Boolean {
-        return isLockScreenVisibleToUser() ||
-            isLockScreenShadeVisibleToUser() ||
-            isHomeScreenShadeVisibleToUser()
+    /** Update whether or not the media carousel could be visible to the user */
+    private fun updateUserVisibility() {
+        val shadeVisible =
+            isLockScreenVisibleToUser() ||
+                isLockScreenShadeVisibleToUser() ||
+                isHomeScreenShadeVisibleToUser()
+        val mediaVisible = qsExpanded || hasActiveMediaOrRecommendation
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
+            shadeVisible && mediaVisible
     }
 
     private fun isLockScreenVisibleToUser(): Boolean {

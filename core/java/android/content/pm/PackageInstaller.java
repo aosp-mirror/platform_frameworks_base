@@ -3554,6 +3554,18 @@ public class PackageInstaller {
         }
 
         /**
+         * @return the path to the validated base APK for this session, which may point at an
+         * APK inside the session (when the session defines the base), or it may
+         * point at the existing base APK (when adding splits to an existing app).
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+        public @Nullable String getResolvedBaseApkPath() {
+            return resolvedBaseCodePath;
+        }
+
+        /**
          * Get the value set in {@link SessionParams#setGrantedRuntimePermissions(String[])}.
          *
          * @hide

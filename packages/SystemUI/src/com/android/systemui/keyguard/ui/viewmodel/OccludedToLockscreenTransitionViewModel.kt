@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE
+import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor

@@ -23,6 +23,7 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -196,17 +197,19 @@ public final class AutoFillUI {
      * @param serviceLabel label of autofill service
      * @param serviceIcon icon of autofill service
      * @param callback identifier for the caller
+     * @param userId the user associated wit the session
      * @param sessionId id of the autofill session
      * @param compatMode whether the app is being autofilled in compatibility mode.
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable String servicePackageName,
             @NonNull ComponentName componentName, @NonNull CharSequence serviceLabel,
-            @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback, int sessionId,
-            boolean compatMode) {
+            @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback,
+            @UserIdInt int userId, int sessionId, boolean compatMode) {
         if (sDebug) {
             final int size = filterText == null ? 0 : filterText.length();
-            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars");
+            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars, userId="
+                    + userId);
         }
         final LogMaker log = Helper
                 .newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, componentName, servicePackageName,
@@ -221,7 +224,7 @@ public final class AutoFillUI {
                 return;
             }
             hideAllUiThread(callback);
-            mFillUi = new FillUi(mContext, response, focusedId,
+            mFillUi = new FillUi(mContext, userId, response, focusedId,
                     filterText, mOverlayControl, serviceLabel, serviceIcon,
                     mUiModeMgr.isNightMode(),
                     new FillUi.Callback() {

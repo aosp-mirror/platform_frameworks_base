@@ -18,7 +18,7 @@ package com.android.systemui.temporarydisplay.chipbar
 
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.children

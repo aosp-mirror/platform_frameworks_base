@@ -345,6 +345,7 @@ final class DreamController {
         if (!mCurrentDream.mIsPreviewMode && !mSentStartBroadcast) {
             mContext.sendBroadcastAsUser(mDreamingStartedIntent, UserHandle.ALL,
                     null /* receiverPermission */, mDreamingStartedStoppedOptions);
+            mListener.onDreamStarted(mCurrentDream.mToken);
             mSentStartBroadcast = true;
         }
     }
@@ -353,6 +354,7 @@ final class DreamController {
      * Callback interface to be implemented by the {@link DreamManagerService}.
      */
     public interface Listener {
+        void onDreamStarted(Binder token);
         void onDreamStopped(Binder token);
     }
 

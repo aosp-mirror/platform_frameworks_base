@@ -285,6 +285,7 @@ public:
         JNIEnv* env = getenv();
         env->CallVoidMethod(mTransactionCommittedListenerObject,
                             gTransactionCommittedListenerClassInfo.onTransactionCommitted);
+        DieIfException(env, "Uncaught exception in TransactionCommittedListener.");
     }
 
     static void transactionCallbackThunk(void* context, nsecs_t /*latchTime*/,
@@ -325,6 +326,7 @@ public:
     binder::Status onWindowInfosReported() override {
         JNIEnv* env = getenv();
         env->CallVoidMethod(mListener, gRunnableClassInfo.run);
+        DieIfException(env, "Uncaught exception in WindowInfosReportedListener.");
         return binder::Status::ok();
     }
 
@@ -356,6 +358,7 @@ public:
         env->CallVoidMethod(mTrustedPresentationCallback,
                             gTrustedPresentationCallbackClassInfo.onTrustedPresentationChanged,
                             inTrustedPresentationState);
+        DieIfException(env, "Uncaught exception in TrustedPresentationCallback.");
     }
 
     void addCallbackRef(const sp<SurfaceComposerClient::PresentationCallbackRAII>& callbackRef) {
@@ -611,6 +614,12 @@ static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlo
     }
     transaction->setBuffer(ctrl, graphicBuffer, optFence, std::nullopt, 0 /* producerId */,
                            genReleaseCallback(env, releaseCallback));
+}
+
+static void nativeUnsetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->unsetBuffer(ctrl);
 }
 
 static void nativeSetBufferTransform(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2195,6 +2204,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetGeometry },
     {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;JLjava/util/function/Consumer;)V",
             (void*)nativeSetBuffer },
+    {"nativeUnsetBuffer", "(JJ)V", (void*)nativeUnsetBuffer },
+
     {"nativeSetBufferTransform", "(JJI)V", (void*) nativeSetBufferTransform},
     {"nativeSetDataSpace", "(JJI)V",
             (void*)nativeSetDataSpace },

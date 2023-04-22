@@ -26,9 +26,9 @@ import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import com.android.app.animation.Interpolators
 import com.android.internal.R.interpolator.fast_out_extra_slow_in
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
 
 /** Animates constraint layout changes for the security view. */
 class KeyguardSecurityViewTransition : Transition() {

@@ -84,6 +84,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
  * Service api for managing dreams.
@@ -341,10 +342,24 @@ public final class DreamManagerService extends SystemService {
     }
 
     private void reportKeepDreamingWhenUnpluggingChanged(boolean keepDreaming) {
+        notifyDreamStateListeners(
+                listener -> listener.onKeepDreamingWhenUnpluggingChanged(keepDreaming));
+    }
+
+    private void reportDreamingStarted() {
+        notifyDreamStateListeners(listener -> listener.onDreamingStarted());
+    }
+
+    private void reportDreamingStopped() {
+        notifyDreamStateListeners(listener -> listener.onDreamingStopped());
+    }
+
+    private void notifyDreamStateListeners(
+            Consumer<DreamManagerInternal.DreamManagerStateListener> notifier) {
         mHandler.post(() -> {
             for (DreamManagerInternal.DreamManagerStateListener listener
                     : mDreamManagerStateListeners) {
-                listener.onKeepDreamingWhenUnpluggingChanged(keepDreaming);
+                notifier.accept(listener);
             }
         });
     }
@@ -767,12 +782,23 @@ public final class DreamManagerService extends SystemService {
 
     private final DreamController.Listener mControllerListener = new DreamController.Listener() {
         @Override
+        public void onDreamStarted(Binder token) {
+            // Note that this event is distinct from DreamManagerService#startDreamLocked as it
+            // tracks the DreamService attach point from DreamController, closest to the broadcast
+            // of ACTION_DREAMING_STARTED.
+
+            reportDreamingStarted();
+        }
+
+        @Override
         public void onDreamStopped(Binder token) {
             synchronized (mLock) {
                 if (mCurrentDream != null && mCurrentDream.token == token) {
                     cleanupDreamLocked();
                 }
             }
+
+            reportDreamingStopped();
         }
     };
 

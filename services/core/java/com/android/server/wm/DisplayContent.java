@@ -1755,7 +1755,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @Override
-    boolean isSyncFinished() {
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
         // Do not consider children because if they are requested to be synced, they should be
         // added to sync group explicitly.
         return !mRemoteDisplayChangeController.isWaitingForRemoteDisplayChange();

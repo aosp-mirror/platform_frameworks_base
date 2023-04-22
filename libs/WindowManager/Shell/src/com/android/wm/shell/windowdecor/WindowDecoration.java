@@ -458,7 +458,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         SurfaceControlViewHost mWindowViewHost;
         Supplier<SurfaceControl.Transaction> mTransactionSupplier;
 
-        private AdditionalWindow(SurfaceControl surfaceControl,
+        AdditionalWindow(SurfaceControl surfaceControl,
                 SurfaceControlViewHost surfaceControlViewHost,
                 Supplier<SurfaceControl.Transaction> transactionSupplier) {
             mWindowSurface = surfaceControl;

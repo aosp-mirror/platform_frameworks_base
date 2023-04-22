@@ -12,17 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.statusbar.phone.dagger;
+package com.android.systemui.shared.quickaffordance.shared.model
 
-import dagger.Module;
-import dagger.multibindings.Multibinds;
-
-import java.util.Set;
-
-@Module
-interface CentralSurfacesStartableModule {
-    @Multibinds
-    Set<CentralSurfacesComponent.Startable> multibindStartables();
+object KeyguardPreviewConstants {
+    const val MESSAGE_ID_HIDE_SMART_SPACE = 1111
+    const val KEY_HIDE_SMART_SPACE = "hide_smart_space"
+    const val MESSAGE_ID_SLOT_SELECTED = 1337
+    const val KEY_SLOT_ID = "slot_id"
+    const val KEY_INITIALLY_SELECTED_SLOT_ID = "initially_selected_slot_id"
+    const val KEY_HIGHLIGHT_QUICK_AFFORDANCES = "highlight_quick_affordances"
 }

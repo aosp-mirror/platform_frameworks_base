@@ -620,6 +620,38 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         }
     }
 
+    // region onRoleHoldersChanged
+    @Test
+    fun onRoleHoldersChanged_notNotesRole_doNothing() {
+        val user = UserHandle.of(0)
+
+        createNoteTaskController(isEnabled = true).onRoleHoldersChanged("NOT_NOTES", user)
+
+        verifyZeroInteractions(context)
+    }
+
+    @Test
+    fun onRoleHoldersChanged_notesRole_sameUser_shouldUpdateShortcuts() {
+        val user = userTracker.userHandle
+        val controller = spy(createNoteTaskController())
+        doNothing().whenever(controller).updateNoteTaskAsUser(any())
+
+        controller.onRoleHoldersChanged(ROLE_NOTES, user)
+
+        verify(controller).updateNoteTaskAsUser(user)
+    }
+
+    @Test
+    fun onRoleHoldersChanged_notesRole_differentUser_shouldUpdateShortcutsInUserProcess() {
+        // FakeUserTracker will default to UserHandle.SYSTEM.
+        val user = UserHandle.CURRENT
+
+        createNoteTaskController(isEnabled = true).onRoleHoldersChanged(ROLE_NOTES, user)
+
+        verify(context).startServiceAsUser(any(), eq(user))
+    }
+    // endregion
+
     // region updateNoteTaskAsUser
     @Test
     fun updateNoteTaskAsUser_withNotesRole_withShortcuts_shouldUpdateShortcuts() {

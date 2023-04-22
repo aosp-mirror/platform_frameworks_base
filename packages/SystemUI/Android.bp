@@ -173,6 +173,7 @@ android_library {
         "androidx.palette_palette",
         "androidx.legacy_legacy-preference-v14",
         "androidx.leanback_leanback",
+        "androidx.tracing_tracing",
         "androidx.slice_slice-core",
         "androidx.slice_slice-view",
         "androidx.slice_slice-builders",
