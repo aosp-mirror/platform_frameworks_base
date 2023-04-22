@@ -20,7 +20,7 @@
     <string name="restore_confirm_title" msgid="5469365809567486602">"Restauro completo"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"Foi solicitada uma cópia de segurança completa de todos os dados para um computador. Permitir esta operação?\n\nCaso não tenha solicitado a cópia de segurança, não permita que a operação prossiga."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Fazer cópia de seg. dos dados"</string>
-    <string name="deny_backup_button_label" msgid="6009119115581097708">"Não efetuar cópia de seg."</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Não fazer cópia de seg."</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Foi solicitado um restauro completo de todos os dados a partir de um computador. Permitir esta operação?\n\nCaso não tenha solicitado o restauro, não permita que a operação prossiga. Isto substituirá os dados existentes no equipamento!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restaurar os meus dados"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Não restaurar"</string>
