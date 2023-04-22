@@ -16,7 +16,8 @@
 
 package com.android.settingslib.fuelgauge;
 
-import static com.android.settingslib.fuelgauge.BatterySaverLogging.ACTION_SAVER_MANUAL_ENABLED_REASON;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.ACTION_SAVER_STATE_MANUAL_UPDATE;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.SaverManualEnabledReason;
 
@@ -152,9 +153,8 @@ public class BatterySaverUtils {
                     sendSystemUiBroadcast(context, ACTION_SHOW_AUTO_SAVER_SUGGESTION,
                             confirmationExtras);
                 }
-                recordBatterySaverEnabledReason(context, reason);
             }
-
+            recordBatterySaverEnabledReason(context, enable, reason);
             return true;
         }
         return false;
@@ -185,11 +185,12 @@ public class BatterySaverUtils {
         return true;
     }
 
-    private static void recordBatterySaverEnabledReason(Context context,
+    private static void recordBatterySaverEnabledReason(Context context, boolean enable,
             @SaverManualEnabledReason int reason) {
-        final Bundle enabledReasonExtras = new Bundle(1);
+        final Bundle enabledReasonExtras = new Bundle(2);
         enabledReasonExtras.putInt(EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON, reason);
-        sendSystemUiBroadcast(context, ACTION_SAVER_MANUAL_ENABLED_REASON, enabledReasonExtras);
+        enabledReasonExtras.putBoolean(EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED, enable);
+        sendSystemUiBroadcast(context, ACTION_SAVER_STATE_MANUAL_UPDATE, enabledReasonExtras);
     }
 
     private static void sendSystemUiBroadcast(Context context, String action, Bundle extras) {

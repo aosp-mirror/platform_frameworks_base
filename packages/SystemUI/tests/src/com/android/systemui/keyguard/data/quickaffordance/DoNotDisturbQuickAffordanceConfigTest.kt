@@ -26,6 +26,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.EnableZenModeDialog
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
@@ -60,6 +61,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
 

@@ -4189,10 +4189,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mCentralSurfaces.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
-            if (mSwipeHelper.isSwiping()) {
-                mSwipeHelper.resetSwipeState();
-                updateContinuousShadowDrawing();
-            }
+            cancelActiveSwipe();
         }
     }
 
@@ -4264,6 +4261,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (!mIsExpanded) {
                 mGroupExpansionManager.collapseGroups();
                 mExpandHelper.cancelImmediately();
+                if (!mIsExpansionChanging) {
+                    cancelActiveSwipe();
+                }
             }
             updateNotificationAnimationStates();
             updateChronometers();
@@ -6113,7 +6113,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
+    private void cancelActiveSwipe() {
+        mSwipeHelper.resetSwipeState();
+        updateContinuousShadowDrawing();
+    }
+
     void updateContinuousShadowDrawing() {
         boolean continuousShadowUpdate = mAnimationRunning
                 || mSwipeHelper.isSwiping();

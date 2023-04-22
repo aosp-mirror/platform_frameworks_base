@@ -240,7 +240,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
                 || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
-        boolean faceAuthEnabled = mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(user);
+        boolean faceAuthEnabled = mKeyguardUpdateMonitor.isFaceEnrolled();
         boolean changed = secure != mSecure || canDismissLockScreen != mCanDismissLockScreen
                 || trustManaged != mTrustManaged || mTrusted != trusted
                 || mFaceAuthEnabled != faceAuthEnabled;

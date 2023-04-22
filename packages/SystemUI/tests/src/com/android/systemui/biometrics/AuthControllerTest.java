@@ -89,6 +89,7 @@ import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.udfps.UdfpsUtils;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
@@ -120,6 +121,7 @@ import java.util.Random;
 @RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
+@RoboPilotTest
 public class AuthControllerTest extends SysuiTestCase {
 
     private static final long REQUEST_ID = 22;
