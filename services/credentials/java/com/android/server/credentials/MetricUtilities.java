@@ -266,7 +266,9 @@ public class MetricUtilities {
                     /* request_unique_classtypes */
                     initialPhaseMetric.getUniqueRequestStrings(),
                     /* per_classtype_counts */
-                    initialPhaseMetric.getUniqueRequestCounts()
+                    initialPhaseMetric.getUniqueRequestCounts(),
+                    /* api_name */
+                    initialPhaseMetric.getApiName()
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during candidate provider uid metric emit: " + e);
@@ -274,36 +276,22 @@ public class MetricUtilities {
     }
 
     /**
-     * This is useful just to record an API calls' final event, and for no other purpose. It will
-     * contain default values for all other optional parameters.
-     *
-     * TODO(b/271135048) - given space requirements, this may be a good candidate for another atom
-     * TODO immediately remove and carry over TODO to new log for this setup
+     * This is useful just to record an API calls' final event, and for no other purpose.
      *
      * @param apiName    the api name to log
      * @param apiStatus  the status to log
      * @param callingUid the calling uid
      */
-    public static void logApiCalledSimpleV1(ApiName apiName, ApiStatus apiStatus,
+    public static void logApiCalledSimpleV2(ApiName apiName, ApiStatus apiStatus,
             int callingUid) {
         try {
             if (!LOG_FLAG) {
                 return;
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_APIV2_CALLED,
                     /* api_name */apiName.getMetricCode(),
                     /* caller_uid */ callingUid,
-                    /* api_status */ apiStatus.getMetricCode(),
-                    /* repeated_candidate_provider_uid */  DEFAULT_REPEATED_INT_32,
-                    /* repeated_candidate_provider_round_trip_time_query_microseconds */
-                    DEFAULT_REPEATED_INT_32,
-                    /* repeated_candidate_provider_status */ DEFAULT_REPEATED_INT_32,
-                    /* chosen_provider_uid */ DEFAULT_INT_32,
-                    /* chosen_provider_round_trip_time_overall_microseconds */
-                    DEFAULT_INT_32,
-                    /* chosen_provider_final_phase_microseconds */
-                    DEFAULT_INT_32,
-                    /* chosen_provider_status */ DEFAULT_INT_32);
+                    /* api_status */ apiStatus.getMetricCode());
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }

@@ -748,7 +748,7 @@ public final class CredentialManagerService
                     if (serviceComponentName.equals(componentName)) {
                         if (!s.getServicePackageName().equals(callingPackage)) {
                             // The component name and the package name do not match.
-                            MetricUtilities.logApiCalledSimpleV1(
+                            MetricUtilities.logApiCalledSimpleV2(
                                     ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                     ApiStatus.FAILURE, callingUid);
                             Slog.w(
@@ -757,10 +757,9 @@ public final class CredentialManagerService
                                             + "not match package name.");
                             return false;
                         }
-                        MetricUtilities.logApiCalledSimpleV1(
+                        MetricUtilities.logApiCalledSimpleV2(
                                 ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                 ApiStatus.SUCCESS, callingUid);
-                        // TODO(b/271135048) - Update asap to use the new logging types
                         return true;
                     }
                 }
