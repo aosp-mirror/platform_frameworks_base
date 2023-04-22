@@ -32,9 +32,13 @@ public final class BatterySaverLogging {
     public static final String EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON =
             "extra_power_save_mode_manual_enabled_reason";
 
+    /** Record the event while enabling power save mode manually. */
+    public static final String EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED =
+            "extra_power_save_mode_manual_enabled";
+
     /** Broadcast action to record battery saver manual enabled reason. */
-    public static final String ACTION_SAVER_MANUAL_ENABLED_REASON =
-            "com.android.settingslib.fuelgauge.ACTION_SAVER_MANUAL_ENABLED_REASON";
+    public static final String ACTION_SAVER_STATE_MANUAL_UPDATE =
+            "com.android.settingslib.fuelgauge.ACTION_SAVER_STATE_MANUAL_UPDATE";
 
     /** An interface for the battery saver manual enable reason. */
     @Retention(RetentionPolicy.SOURCE)
