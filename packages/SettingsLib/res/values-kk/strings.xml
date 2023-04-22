@@ -473,7 +473,7 @@
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды."</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядталуда"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядтау"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Баяу зарядталуда"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталуда"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Зарядталып жатыр."</string>
@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Көбірек уақыт."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Азырақ уақыт."</string>
     <string name="cancel" msgid="5665114069455378395">"Бас тарту"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Келесі"</string>
+    <string name="back" msgid="5554327870352703710">"Артқа"</string>
+    <string name="save" msgid="3745809743277153149">"Сақтау"</string>
     <string name="okay" msgid="949938843324579502">"Жарайды"</string>
     <string name="done" msgid="381184316122520313">"Дайын"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Оятқыш және еске салғыш"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Осы пайдаланушыны әкімші ету керек пе?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Әкімшілер басқа пайдаланушыларда болмайтын арнайы өкілеттерге ие. Әкімші мына әрекеттерді орындай алады: барлық пайдаланушыны басқару, осы құрылғыны жаңарту не бастапқы күйге қайтару, параметрлерді өзгерту, орнатылған құрылғының барлығын көру және әкімші өкілеттерін басқа пайдаланушыларға беру не қайтару."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Әкімші ету"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профиль құру керек пе?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пайдаланушы құрылғыны алып, өз профилін реттеуі керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл қазір жасақталсын ба?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Мұндайда жаңа қонақ сеансы басталады және ағымдағы сеанстағы барлық қолданба мен дерек жойылады."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Қонақ режимінен шығу керек пе?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ағымдағы қонақ сеансындағы барлық қолданба мен дерек жойылады."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Иә, пайдаланушы әкімші етілсін"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Жоқ, пайдаланушы әкімші етілмесін"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Шығу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Қонақ әрекетін сақтау керек пе?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ағымдағы сеанстағы әрекетті сақтай не барлық қолданба мен деректі жоя аласыз."</string>
