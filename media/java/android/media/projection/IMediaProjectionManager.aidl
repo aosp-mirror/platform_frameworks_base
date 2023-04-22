@@ -20,11 +20,23 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionWatcherCallback;
 import android.media.projection.MediaProjectionInfo;
+import android.media.projection.ReviewGrantedConsentResult;
 import android.os.IBinder;
 import android.view.ContentRecordingSession;
 
 /** {@hide} */
 interface IMediaProjectionManager {
+    /**
+     * Intent extra indicating if user must review access to the consent token already granted.
+     */
+    const String EXTRA_USER_REVIEW_GRANTED_CONSENT = "extra_media_projection_user_consent_required";
+
+    /**
+     * Intent extra indicating the package attempting to re-use granted consent.
+     */
+    const String EXTRA_PACKAGE_REUSING_GRANTED_CONSENT =
+            "extra_media_projection_package_reusing_consent";
+
     @UnsupportedAppUsage
     boolean hasProjectionPermission(int uid, String packageName);
 
@@ -35,6 +47,21 @@ interface IMediaProjectionManager {
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     IMediaProjection createProjection(int uid, String packageName, int type,
             boolean permanentGrant);
+
+    /**
+     * Returns the current {@link IMediaProjection} instance associated with the given
+     * package, or {@code null} if it is not possible to re-use the current projection.
+     *
+     * <p>Should only be invoked when the user has reviewed consent for a re-used projection token.
+     * Requires that there is a prior session waiting for the user to review consent, and the given
+     * package details match those on the current projection.
+     *
+     * @see {@link #isCurrentProjection}
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    IMediaProjection getProjection(int uid, String packageName);
 
     /**
      * Returns {@code true} if the given {@link IMediaProjection} corresponds to the current
@@ -58,7 +85,7 @@ interface IMediaProjectionManager {
      */
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
-    void requestConsentForInvalidProjection(IMediaProjection projection);
+    void requestConsentForInvalidProjection(in IMediaProjection projection);
 
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
@@ -94,9 +121,32 @@ interface IMediaProjectionManager {
      *
      * @param incomingSession the nullable incoming content recording session
      * @param projection      the non-null projection the session describes
+     * @throws SecurityException If the provided projection is not current.
      */
   @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     boolean setContentRecordingSession(in ContentRecordingSession incomingSession,
             in IMediaProjection projection);
+
+    /**
+     * Sets the result of the user reviewing the recording permission, when the host app is re-using
+     * the consent token.
+     *
+     * <p>Ignores the provided result if the given projection is not the current projection.
+     *
+     * <p>Based on the given result:
+     * <ul>
+     *   <li>If UNKNOWN or RECORD_CANCEL, then tear down the recording.</li>
+     *   <li>If RECORD_CONTENT_DISPLAY, then record the default display.</li>
+     *   <li>If RECORD_CONTENT_TASK, record the task indicated by
+     *     {@link IMediaProjection#getLaunchCookie}.</li>
+     * </ul>
+     * @param projection The projection associated with the consent result. Must be the current
+     * projection instance, unless the given result is RECORD_CANCEL.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void setUserReviewGrantedConsentResult(ReviewGrantedConsentResult consentResult,
+            in @nullable IMediaProjection projection);
 }
