@@ -408,9 +408,9 @@ class TransitionController {
         return false;
     }
 
-    /** Returns {@code true} if the `wc` is a participant of the finishing transition. */
+    /** Returns {@code true} if the finishing transition contains `wc`. */
     boolean inFinishingTransition(WindowContainer<?> wc) {
-        return mFinishingTransition != null && mFinishingTransition.mParticipants.contains(wc);
+        return mFinishingTransition != null && mFinishingTransition.isInTransition(wc);
     }
 
     /** @return {@code true} if a transition is running */
@@ -823,6 +823,16 @@ class TransitionController {
             // Can reset track-count now that everything is idle.
             mTrackCount = 0;
             validateStates();
+        }
+    }
+
+    /** Called by {@link Transition#finishTransition} if it committed invisible to any activities */
+    void onCommittedInvisibles() {
+        if (mCollectingTransition != null) {
+            mCollectingTransition.mPriorVisibilityMightBeDirty = true;
+        }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            mWaitingTransitions.get(i).mPriorVisibilityMightBeDirty = true;
         }
     }
 

@@ -244,6 +244,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private IContainerFreezer mContainerFreezer = null;
     private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
 
+    /**
+     * {@code true} if some other operation may have caused the originally-recorded state (in
+     * mChanges) to be dirty. This is usually due to finishTransition being called mid-collect;
+     * and, the reason that finish can alter the "start" state of other transitions is because
+     * setVisible(false) is deferred until then.
+     * Instead of adding this conditional, we could re-check always; but, this situation isn't
+     * common so it'd be wasted work.
+     */
+    boolean mPriorVisibilityMightBeDirty = false;
+
     final TransitionController.Logger mLogger = new TransitionController.Logger();
 
     /** Whether this transition was forced to play early (eg for a SLEEP signal). */
@@ -959,28 +969,30 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mFinishingTransition = this;
 
         if (mTransientHideTasks != null && !mTransientHideTasks.isEmpty()) {
-            // Record all the now-hiding activities so that they are committed after
-            // recalculating visibilities. We just use mParticipants because we can and it will
-            // ensure proper reporting of `isInFinishTransition`.
-            for (int i = 0; i < mTransientHideTasks.size(); ++i) {
-                mTransientHideTasks.get(i).forAllActivities(r -> {
-                    // Only check leaf-tasks that were collected
-                    if (!mParticipants.contains(r.getTask())) return;
-                    // Only concern ourselves with anything that can become invisible
-                    if (!r.isVisible()) return;
-                    mParticipants.add(r);
-                });
-            }
             // The transient hide tasks could be occluded now, e.g. returning to home. So trigger
             // the update to make the activities in the tasks invisible-requested, then the next
             // step can continue to commit the visibility.
             mController.mAtm.mRootWindowContainer.ensureActivitiesVisible(null /* starting */,
                     0 /* configChanges */, true /* preserveWindows */);
+            // Record all the now-hiding activities so that they are committed. Just use
+            // mParticipants because we can avoid a new list this way.
+            for (int i = 0; i < mTransientHideTasks.size(); ++i) {
+                // Only worry about tasks that were actually hidden. Otherwise, we could end-up
+                // committing visibility for activity-level changes that aren't part of this
+                // transition.
+                if (mTransientHideTasks.get(i).isVisibleRequested()) continue;
+                mTransientHideTasks.get(i).forAllActivities(r -> {
+                    // Only check leaf-tasks that were collected
+                    if (!mParticipants.contains(r.getTask())) return;
+                    mParticipants.add(r);
+                });
+            }
         }
 
         boolean hasParticipatedDisplay = false;
         boolean hasVisibleTransientLaunch = false;
         boolean enterAutoPip = false;
+        boolean committedSomeInvisible = false;
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
             final WindowContainer<?> participant = mParticipants.valueAt(i);
@@ -1016,6 +1028,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
                                 true /* fromTransition */);
+                        committedSomeInvisible = true;
                     } else {
                         enterAutoPip = true;
                     }
@@ -1073,6 +1086,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     });
                 }
             }
+        }
+        if (committedSomeInvisible) {
+            mController.onCommittedInvisibles();
         }
 
         if (hasVisibleTransientLaunch) {
@@ -1286,6 +1302,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // leftover order changes.
         collectOrderChanges(mController.mWaitingTransitions.isEmpty());
 
+        if (mPriorVisibilityMightBeDirty) {
+            updatePriorVisibility();
+        }
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
         // Check whether the participants were animated from back navigation.
@@ -1796,6 +1815,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         } else {
             // Non-filling without adjacent is considered as translucent.
             return !wc.fillsParent();
+        }
+    }
+
+    private void updatePriorVisibility() {
+        for (int i = 0; i < mChanges.size(); ++i) {
+            final ChangeInfo chg = mChanges.valueAt(i);
+            // For task/activity, recalculate the current "real" visibility.
+            if (chg.mContainer.asActivityRecord() == null && chg.mContainer.asTask() == null) {
+                continue;
+            }
+            // This ONLY works in the visible -> invisible case (and is only needed for this case)
+            // because commitVisible(false) is deferred until finish.
+            if (!chg.mVisible) continue;
+            chg.mVisible = chg.mContainer.isVisible();
         }
     }
 
