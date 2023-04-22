@@ -1933,7 +1933,6 @@ public class WallpaperManager {
                     mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
-                boolean ok = false;
                 try {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
                     copyStreamToWallpaperFile(resources.openRawResource(resid), fos);
