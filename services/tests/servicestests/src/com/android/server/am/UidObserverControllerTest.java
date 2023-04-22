@@ -217,7 +217,8 @@ public class UidObserverControllerTest {
     private void registerObserver(IUidObserver observer, int which, int cutpoint,
             String callingPackage, int callingUid) {
         when(observer.asBinder()).thenReturn((IBinder) observer);
-        mUidObserverController.register(observer, which, cutpoint, callingPackage, callingUid);
+        mUidObserverController.register(observer, which, cutpoint, callingPackage, callingUid,
+                /*uids*/null);
         Mockito.reset(observer);
     }
 
