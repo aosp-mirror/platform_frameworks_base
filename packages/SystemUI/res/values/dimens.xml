@@ -396,7 +396,7 @@
     <dimen name="navigation_key_width">70dp</dimen>
 
     <!-- The width/height of the icon of a navigation button -->
-    <dimen name="navigation_icon_size">32dp</dimen>
+    <dimen name="navigation_icon_size">24dp</dimen>
 
     <!-- The padding on the side of the navigation bar. Must be greater than or equal to
          navigation_extra_key_width -->
