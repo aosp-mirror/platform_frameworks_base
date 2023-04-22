@@ -1495,6 +1495,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-741766551": {
+      "message": "Content Recording: Ignoring session on invalid virtual display",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecordingController.java"
+    },
     "-732715767": {
       "message": "Unable to retrieve window container to start recording for display %d",
       "level": "VERBOSE",
