@@ -133,6 +133,10 @@
     <string name="config_pointing_ui_package" translatable="false"></string>
     <java-symbol type="string" name="config_pointing_ui_package" />
 
+    <!-- Telephony pointing UI class name to be launched. -->
+    <string name="config_pointing_ui_class" translatable="false"></string>
+    <java-symbol type="string" name="config_pointing_ui_class" />
+
     <!-- Telephony resends received satellite datagram to listener
          if ack is not received within this timeout -->
     <integer name="config_timeout_to_receive_delivered_ack_millis">300000</integer>

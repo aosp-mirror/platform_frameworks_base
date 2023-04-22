@@ -16,11 +16,16 @@
 
 package com.android.systemui.media;
 
+import static android.media.projection.IMediaProjectionManager.EXTRA_PACKAGE_REUSING_GRANTED_CONSENT;
+import static android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW_GRANTED_CONSENT;
+import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
+import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import static com.android.systemui.screenrecord.ScreenShareOptionKt.ENTIRE_SCREEN;
 import static com.android.systemui.screenrecord.ScreenShareOptionKt.SINGLE_APP;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -30,12 +35,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.media.projection.IMediaProjection;
-import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjectionManager;
+import android.media.projection.ReviewGrantedConsentResult;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.text.BidiFormatter;
 import android.text.SpannableString;
@@ -55,9 +58,9 @@ import com.android.systemui.screenrecord.ScreenShareOption;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.Utils;
 
-import javax.inject.Inject;
-
 import dagger.Lazy;
+
+import javax.inject.Inject;
 
 public class MediaProjectionPermissionActivity extends Activity
         implements DialogInterface.OnClickListener {
@@ -70,9 +73,12 @@ public class MediaProjectionPermissionActivity extends Activity
 
     private String mPackageName;
     private int mUid;
-    private IMediaProjectionManager mService;
 
     private AlertDialog mDialog;
+
+    // Indicates if user must review already-granted consent that the MediaProjection app is
+    // attempting to re-use.
+    private boolean mReviewGrantedConsentRequired = false;
 
     @Inject
     public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
@@ -85,13 +91,23 @@ public class MediaProjectionPermissionActivity extends Activity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mPackageName = getCallingPackage();
-        IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
-        mService = IMediaProjectionManager.Stub.asInterface(b);
+        final Intent launchingIntent = getIntent();
+        mReviewGrantedConsentRequired = launchingIntent.getBooleanExtra(
+                EXTRA_USER_REVIEW_GRANTED_CONSENT, false);
 
+        mPackageName = getCallingPackage();
+
+        // This activity is launched directly by an app, or system server. System server provides
+        // the package name through the intent if so.
         if (mPackageName == null) {
-            finish();
-            return;
+            if (launchingIntent.hasExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT)) {
+                mPackageName = launchingIntent.getStringExtra(
+                        EXTRA_PACKAGE_REUSING_GRANTED_CONSENT);
+            } else {
+                setResult(RESULT_CANCELED);
+                finish(RECORD_CANCEL, /* projection= */ null);
+                return;
+            }
         }
 
         PackageManager packageManager = getPackageManager();
@@ -100,25 +116,36 @@ public class MediaProjectionPermissionActivity extends Activity
             aInfo = packageManager.getApplicationInfo(mPackageName, 0);
             mUid = aInfo.uid;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "unable to look up package name", e);
-            finish();
+            Log.e(TAG, "Unable to look up package name", e);
+            setResult(RESULT_CANCELED);
+            finish(RECORD_CANCEL, /* projection= */ null);
             return;
         }
 
         try {
-            if (mService.hasProjectionPermission(mUid, mPackageName)) {
-                setResult(RESULT_OK, getMediaProjectionIntent(mUid, mPackageName));
-                finish();
+            if (MediaProjectionServiceHelper.hasProjectionPermission(mUid, mPackageName)) {
+                final IMediaProjection projection =
+                        MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
+                                mReviewGrantedConsentRequired);
+                // Automatically grant consent if a system-privileged component is recording.
+                final Intent intent = new Intent();
+                intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
+                        projection.asBinder());
+                setResult(RESULT_OK, intent);
+                finish(RECORD_CONTENT_DISPLAY, projection);
                 return;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error checking projection permissions", e);
-            finish();
+            setResult(RESULT_CANCELED);
+            finish(RECORD_CANCEL, /* projection= */ null);
             return;
         }
 
         if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
             if (showScreenCaptureDisabledDialogIfNeeded()) {
+                setResult(RESULT_CANCELED);
+                finish(RECORD_CANCEL, /* projection= */ null);
                 return;
             }
         }
@@ -178,7 +205,7 @@ public class MediaProjectionPermissionActivity extends Activity
                 ScreenShareOption selectedOption =
                         ((MediaProjectionPermissionDialog) mDialog).getSelectedScreenShareOption();
                 grantMediaProjectionPermission(selectedOption.getMode());
-            }, appName);
+            }, () -> finish(RECORD_CANCEL, /* projection= */ null), appName);
         } else {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this,
                     R.style.Theme_SystemUI_Dialog)
@@ -191,7 +218,6 @@ public class MediaProjectionPermissionActivity extends Activity
         }
 
         setUpDialog(mDialog);
-
         mDialog.show();
     }
 
@@ -207,6 +233,12 @@ public class MediaProjectionPermissionActivity extends Activity
     public void onClick(DialogInterface dialog, int which) {
         if (which == AlertDialog.BUTTON_POSITIVE) {
             grantMediaProjectionPermission(ENTIRE_SCREEN);
+        } else {
+            if (mDialog != null) {
+                mDialog.dismiss();
+            }
+            setResult(RESULT_CANCELED);
+            finish(RECORD_CANCEL, /* projection= */ null);
         }
     }
 
@@ -240,15 +272,25 @@ public class MediaProjectionPermissionActivity extends Activity
     private void grantMediaProjectionPermission(int screenShareMode) {
         try {
             if (screenShareMode == ENTIRE_SCREEN) {
-                setResult(RESULT_OK, getMediaProjectionIntent(mUid, mPackageName));
+                final IMediaProjection projection =
+                        MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
+                                mReviewGrantedConsentRequired);
+                final Intent intent = new Intent();
+                intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
+                        projection.asBinder());
+                setResult(RESULT_OK, intent);
+                finish(RECORD_CONTENT_DISPLAY, projection);
             }
             if (isPartialScreenSharingEnabled() && screenShareMode == SINGLE_APP) {
-                IMediaProjection projection = createProjection(mUid, mPackageName);
-                final Intent intent = new Intent(this, MediaProjectionAppSelectorActivity.class);
+                IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
+                        mUid, mPackageName, mReviewGrantedConsentRequired);
+                final Intent intent = new Intent(this,
+                        MediaProjectionAppSelectorActivity.class);
                 intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
                         projection.asBinder());
                 intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
                         getHostUserHandle());
+                intent.putExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, mReviewGrantedConsentRequired);
                 intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
 
                 // Start activity from the current foreground user to avoid creating a separate
@@ -259,11 +301,11 @@ public class MediaProjectionPermissionActivity extends Activity
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
             setResult(RESULT_CANCELED);
+            finish(RECORD_CANCEL, /* projection= */ null);
         } finally {
             if (mDialog != null) {
                 mDialog.dismiss();
             }
-            finish();
         }
     }
 
@@ -271,22 +313,22 @@ public class MediaProjectionPermissionActivity extends Activity
         return UserHandle.getUserHandleForUid(getLaunchedFromUid());
     }
 
-    private IMediaProjection createProjection(int uid, String packageName) throws RemoteException {
-        return mService.createProjection(uid, packageName,
-                MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */);
+    @Override
+    public void finish() {
+        // Default to cancelling recording when user needs to review consent.
+        finish(RECORD_CANCEL, /* projection= */ null);
     }
 
-    private Intent getMediaProjectionIntent(int uid, String packageName)
-            throws RemoteException {
-        IMediaProjection projection = createProjection(uid, packageName);
-        Intent intent = new Intent();
-        intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION, projection.asBinder());
-        return intent;
+    private void finish(@ReviewGrantedConsentResult int consentResult,
+            @Nullable IMediaProjection projection) {
+        MediaProjectionServiceHelper.setReviewedConsentIfNeeded(
+                consentResult, mReviewGrantedConsentRequired, projection);
+        super.finish();
     }
 
     private void onDialogDismissedOrCancelled(DialogInterface dialogInterface) {
         if (!isFinishing()) {
-            finish();
+            finish(RECORD_CANCEL, /* projection= */ null);
         }
     }
 
