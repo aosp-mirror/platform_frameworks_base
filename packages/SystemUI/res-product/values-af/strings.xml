@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Herbelyn foon om draadloos te laai"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Die Android TV-toestel sal binnekort afskakel; druk \'n knoppie om dit aan te hou."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Die toestel gaan binnekort afskakel; druk om dit aan te hou."</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Geen SIM-kaart in tablet nie."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"Geen SIM-kaart in foon nie."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Geen SIM in tablet nie."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Geen SIM in foon nie."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN-kodes stem nie ooreen nie"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Jy het die tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal hierdie tablet teruggestel word, wat al sy data sal uitvee."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Jy het die foon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd probeer ontsluit. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal hierdie foon teruggestel word, wat al sy data sal uitvee."</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Jy het die foon <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Die werkprofiel sal verwyder word, wat alle profieldata sal uitvee."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd geteken. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal jy gevra word om jou e-posrekening te gebruik om jou tablet te ontsluit.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%3$d</xliff:g> sekondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd geteken. Na nóg <xliff:g id="NUMBER_1">%2$d</xliff:g> onsuksesvolle pogings sal jy gevra word om jou e-posrekening te gebruik om jou foon te ontsluit.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%3$d</xliff:g> sekondes."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"Die vingerafdruksensor is op die aan/af-skakelaar. Dit is die plat knoppie langs die verhewe volumeknoppie aan die kant van die tablet."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"Die vingerafdruksensor is op die aan/af-skakelaar. Dit is die plat knoppie langs die verhewe volumeknoppie aan die kant van die toestel."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"Die vingerafdruksensor is op die aan/af-skakelaar. Dit is die plat knoppie langs die verhewe volumeknoppie aan die kant van die foon."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Ontsluit jou foon vir meer opsies"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Ontsluit jou tablet vir meer opsies"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Ontsluit jou toestel vir meer opsies"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Speel tans op hierdie foon"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Speel tans op hierdie tablet"</string>
 </resources>
