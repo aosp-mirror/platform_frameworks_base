@@ -48,7 +48,7 @@
     <string name="always_use_device" msgid="210535878779644679">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"Digitalni otisak RSA ključa računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Uvijek dozvoli sa ovog računara"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem USB-a nije dozvoljeno"</string>
@@ -925,7 +925,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi se trenutno ne može automatski povezati"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da promijenite mrežu, isključite ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu bilo kada skenirati WiFi mreže, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama skeniranja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu tražiti WiFi mreže bilo kada, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama traženja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi način rada u avionu"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću karticu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj karticu"</string>

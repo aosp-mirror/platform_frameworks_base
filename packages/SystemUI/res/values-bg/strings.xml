@@ -239,9 +239,9 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"Предава се"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Устройство без име"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Няма налични устройства"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"не е установена връзка с Wi-Fi"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Не е установена връзка с Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркост"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Цветове: инверт."</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекция на цветове"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Потребителски настройки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -266,7 +266,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничение от <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Служебни приложения"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветл."</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нощно осветление"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ще се вкл. по залез"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изгрев"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ще се включи в <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -593,7 +593,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Отваряне на настройките"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Слушалките (без микрофон) са свързани"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Слушалките са свързани"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Данни: икономия"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Икономия на данни"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Функцията „Икономия на данни“ е включена"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Изкл."</string>
@@ -920,7 +920,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Вижте всички"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"За да превключите мрежите, прекъснете връзката с Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"С цел подобряване на практическата работа с устройството приложенията и услугите пак могат да сканират за Wi‑Fi мрежи по всяко време дори когато функцията за Wi‑Fi e изключена. Можете да промените съответното поведение от настройките за сканиране за Wi‑Fi. "<annotation id="link">"Промяна"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Изключване на самолетния режим"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Изключване на режима"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> иска да добави следния панел към бързите настройки"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавяне на панел"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Отмяна на добавянето"</string>

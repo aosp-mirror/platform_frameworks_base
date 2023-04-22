@@ -649,7 +649,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Keyboard fisik"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Pilih tata letak keyboard"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Default"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Aktifkan layar"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Mengaktifkan layar"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Izinkan pengaktifan layar"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Mengizinkan aplikasi mengaktifkan layar. Jika diizinkan, aplikasi dapat mengaktifkan layar kapan saja tanpa izin Anda."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

@@ -232,14 +232,14 @@
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Интернет"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Мрежите се достапни"</string>
-    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Мрежите се недостапни"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Не се достапни мрежи"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Нема достапни Wi-Fi мрежи"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Се вклучува…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Емитување на екранот"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Емитување екран"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Емитување"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Неименуван уред"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Нема достапни уреди"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi не е поврзано"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Нема Wi-Fi врска"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Осветленост"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверзија на боите"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекција на боите"</string>
@@ -920,7 +920,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Прикажи ги сите"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"За промена на мрежата, прекинете ја врската со етернетот"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"За да се подобри доживувањето на уредот, апликациите и услугите може сѐ уште да скенираат за Wi‑Fi мрежи во секое време, дури и кога Wi‑Fi е исклучено. Може да го промените ова во поставките за „Скенирање за Wi-Fi“. "<annotation id="link">"Промени"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Исклучи го авионскиот режим"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Исклучи „Авионски режим“"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> сака да ја додаде следнава плочка на „Брзите поставки“"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Додајте плочка"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не додавајте плочка"</string>

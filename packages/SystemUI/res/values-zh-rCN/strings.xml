@@ -624,7 +624,7 @@
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列功能块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
     <string name="qs_edit" msgid="5583565172803472437">"编辑"</string>
