@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Több idő."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kevesebb idő."</string>
     <string name="cancel" msgid="5665114069455378395">"Mégse"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Tovább"</string>
+    <string name="back" msgid="5554327870352703710">"Vissza"</string>
+    <string name="save" msgid="3745809743277153149">"Mentés"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Kész"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ébresztések és emlékeztetők"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Hozzáad új felhasználót?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"További felhasználók létrehozásával megoszthatja ezt az eszközt másokkal. Minden felhasználó saját felülettel rendelkezik, amelyet személyre szabhat saját alkalmazásaival, háttérképével stb. A felhasználók módosíthatják az eszköz beállításait is, például a Wi‑Fi használatát, amely mindenkit érint.\n\nHa új felhasználót ad hozzá, az illetőnek be kell állítania saját felületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára. Előfordulhat, hogy a kisegítő lehetőségekkel kapcsolatos beállításokat és szolgáltatásokat nem viszi át a rendszer az új felhasználóhoz."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ha új felhasználót ad hozzá, az illetőnek be kell állítania saját tárterületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Beállítja ezt a felhasználót adminisztrátornak?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Az adminisztrátorok olyan speciális jogosultságokkal rendelkeznek, amelyekkel a többi felhasználó nem. Az adminisztrátorok kezelhetik az összes felhasználót, frissíthetik vagy visszaállíthatják az eszközt, módosíthatják a beállításokat, megnézhetik az összes telepített alkalmazást, valamint megadhatnak és visszavonhatnak adminisztrátori jogosultságokat más felhasználóknál."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Adminisztrátori jogosultság megadása"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Beállít most egy felhasználót?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Győződjön meg arról, hogy a személy hozzá tud férni az eszközhöz, hogy beállíthassa a területét"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Létrehoz most egy profilt?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"A művelettel új vendégmunkamenetet indít, valamint az összes alkalmazást és adatot törli az aktuális munkamenetből"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Kilép a vendég módból?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"A művelettel törlődnek az aktuális vendégmunkamenet alkalmazásai és adatai"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Igen, legyen adminisztrátor"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nem, ne legyen adminisztrátor"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Kilépés"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Menti a vendégtevékenységeket?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Tevékenységeket menthet az aktuális munkamenetből, vagy minden appot és adatot törölhet"</string>

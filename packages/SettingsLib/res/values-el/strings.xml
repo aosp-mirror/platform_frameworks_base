@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Περισσότερη ώρα."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Λιγότερη ώρα."</string>
     <string name="cancel" msgid="5665114069455378395">"Ακύρωση"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Επόμενο"</string>
+    <string name="back" msgid="5554327870352703710">"Πίσω"</string>
+    <string name="save" msgid="3745809743277153149">"Αποθήκευση"</string>
     <string name="okay" msgid="949938843324579502">"ΟΚ"</string>
     <string name="done" msgid="381184316122520313">"Τέλος"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ξυπνητήρια και ειδοποιήσεις"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Προσθήκη νέου χρήστη;"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Μπορείτε να μοιραστείτε αυτήν τη συσκευή με άλλα άτομα, δημιουργώντας επιπλέον χρήστες. Κάθε χρήστης θα έχει το δικό του χώρο, τον οποίο μπορεί να προσαρμόσει με τις δικές του εφαρμογές, ταπετσαρία κ.λπ. Οι χρήστες μπορούν επίσης να προσαρμόσουν ρυθμίσεις της συσκευής, όπως το Wi‑Fi, που επηρεάζουν τους πάντες.\n\nΚατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες. Οι ρυθμίσεις και οι υπηρεσίες προσβασιμότητας ενδέχεται να μην μεταφερθούν στον νέο χρήστη."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Να εκχωρηθούν δικαιώματα διαχειριστή σε αυτόν τον χρήστη;"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Οι διαχειριστές έχουν ειδικά προνόμια που δεν έχουν οι υπόλοιποι χρήστες Ένας διαχειριστής μπορεί να διαχειριστεί όλους τους χρήστες, να ενημερώσει ή να επαναφέρει αυτήν τη συσκευή, να τροποποιήσει τις ρυθμίσεις, να δει όλες τις εγκατεστημένες εφαρμογές και να εκχωρήσει ή να ανακαλέσει προνόμια διαχειριστή άλλων χρηστών."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Εκχώρηση δικαιωμάτων διαχειριστή"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Να γίνει ρύθμιση χρήστη τώρα;"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Βεβαιωθείτε ότι ο χρήστης μπορεί να πάρει τη συσκευή και ρυθμίστε το χώρο του"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Να γίνει ρύθμιση προφίλ τώρα;"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Με αυτόν τον τρόπο θα ξεκινήσει μια νέα περίοδος σύνδεσης επισκέπτη και θα διαγραφούν όλες οι εφαρμογές και τα δεδομένα από την τρέχουσα περίοδο σύνδεσης"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Έξοδος από λειτ. επισκέπτη;"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Θα διαγραφούν εφαρμογές και δεδομένα από την τρέχουσα περίοδο σύνδεσης επισκέπτη"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ναι, να γίνει εκχώρηση δικαιωμάτων διαχειριστή"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Όχι, να μην γίνει εκχώρηση δικαιωμάτων διαχειριστή"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Έξοδος"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Αποθήκευση δραστ. επισκέπτη;"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Αποθήκευση δραστ. τρέχουσας περιόδου σύνδεσης ή διαγραφή εφαρμογών και δεδομένων"</string>
