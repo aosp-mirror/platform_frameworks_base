@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Odustani"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Uparivanje omogućuje pristup vašim kontaktima i povijesti poziva dok ste povezani."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije bilo moguće."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije uspjelo zbog netočnog PIN-a ili zaporke."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije uspjelo zbog netočnog PIN-a ili pristupnog ključa."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Komunikacija s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguća."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Uparivanje odbio uređaj <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Računalo"</string>
@@ -486,7 +486,7 @@
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dopušteno"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nije dopušteno"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih apl."</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih aplikacija"</string>
     <string name="home" msgid="973834627243661438">"Početni zaslon postavki"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -519,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Više vremena."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Manje vremena."</string>
     <string name="cancel" msgid="5665114069455378395">"Odustani"</string>
+    <string name="next" msgid="2699398661093607009">"Dalje"</string>
+    <string name="back" msgid="5554327870352703710">"Natrag"</string>
+    <string name="save" msgid="3745809743277153149">"Spremi"</string>
     <string name="okay" msgid="949938843324579502">"U redu"</string>
     <string name="done" msgid="381184316122520313">"Gotovo"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
@@ -537,7 +540,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trajanje"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pitaj svaki put"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Dok ne isključite"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Do isključivanja"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo sad"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ovaj tablet"</string>
@@ -573,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodati novog korisnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Da biste ovaj uređaj dijelili s drugima, možete napraviti dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi pomoću vlastitih aplikacija, pozadine i tako dalje. Korisnici mogu prilagoditi i postavke uređaja koje utječu na sve ostale korisnike, na primjer Wi‑Fi.\n\nKada dodate novog korisnika, ta osoba mora postaviti svoj prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba mora postaviti vlastiti prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Dati korisniku administratorske ovlasti?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Kao administrator moći će upravljati drugim korisnicima, mijenjati postavke uređaja i vraćati uređaj na tvorničke postavke."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Želite li ovom korisniku dodijeliti status administratora?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratori imaju posebne ovlasti koje drugi korisnici nemaju. Administrator može upravljati svim korisnicima, ažurirati ili vratiti ovaj uređaj na zadano, izmijeniti postavke, vidjeti sve instalirane aplikacije i dodijeliti ili oduzeti drugima administratorske ovlasti."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Dodijeli status administratora"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Želite li postaviti korisnika?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Uređaj morate dati toj osobi da sama postavi svoj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Želite li sada postaviti profil?"</string>
@@ -606,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time će se pokrenuti nova gostujuća sesija i izbrisati sve aplikacije i podaci iz trenutačne sesije."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Napustiti način rada za goste?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time će se izbrisati aplikacije i podaci iz trenutačne gostujuće sesije."</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Daj ovom korisniku administratorske ovlasti"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Nemoj dati korisniku administratorske ovlasti"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Da, dodijeli status administratora"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Ne, nemoj dodijeliti status administratora"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izlaz"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Spremiti aktivnosti gosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Možete spremiti aktivnosti iz ove sesije ili izbrisati sve aplikacije i podatke"</string>
