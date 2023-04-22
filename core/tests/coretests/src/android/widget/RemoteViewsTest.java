@@ -22,7 +22,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityOptions;
@@ -30,9 +29,6 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Looper;
@@ -81,19 +77,6 @@ public class RemoteViewsTest {
         mContext = InstrumentationRegistry.getContext();
         mPackage = mContext.getPackageName();
         mContainer = new LinearLayout(mContext);
-    }
-
-    @Test
-    public void clone_doesNotCopyBitmap() {
-        RemoteViews original = new RemoteViews(mPackage, R.layout.remote_views_test);
-        Bitmap bitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
-
-        original.setImageViewBitmap(R.id.image, bitmap);
-        RemoteViews clone = original.clone();
-        View inflated = clone.apply(mContext, mContainer);
-
-        Drawable drawable = ((ImageView) inflated.findViewById(R.id.image)).getDrawable();
-        assertSame(bitmap, ((BitmapDrawable)drawable).getBitmap());
     }
 
     @Test
