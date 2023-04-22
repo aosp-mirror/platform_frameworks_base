@@ -253,7 +253,7 @@ public class SkinThermalStatusObserverTest {
         public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
             SparseArray<SurfaceControl.RefreshRateRange> config = mOverriddenConfig.get(displayId);
             if (config != null) {
-                displayInfo.thermalRefreshRateThrottling = config;
+                displayInfo.refreshRateThermalThrottling = config;
                 return true;
             }
             return false;
