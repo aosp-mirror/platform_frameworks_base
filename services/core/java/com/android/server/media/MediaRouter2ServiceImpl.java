@@ -764,7 +764,7 @@ class MediaRouter2ServiceImpl {
                         userRecord.mHandler, routerRecord));
 
         Slog.i(TAG, TextUtils.formatSimple(
-                "registerRouter2 | package: %s, uid: %d, pid: %d, router: %d",
+                "registerRouter2 | package: %s, uid: %d, pid: %d, router id: %d",
                 packageName, uid, pid, routerRecord.mRouterId));
     }
 
@@ -776,10 +776,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "unregisterRouter2 | package: %s, router: %d",
-                routerRecord.mPackageName,
-                routerRecord.mRouterId));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "unregisterRouter2 | package: %s, router id: %d",
+                        routerRecord.mPackageName, routerRecord.mRouterId));
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
@@ -806,9 +807,14 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "setDiscoveryRequestWithRouter2 | router: %d, discovery request: %s",
-                routerRecord.mRouterId, discoveryRequest.toString()));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "setDiscoveryRequestWithRouter2 | router: %s(id: %d), discovery request:"
+                            + " %s",
+                        routerRecord.mPackageName,
+                        routerRecord.mRouterId,
+                        discoveryRequest.toString()));
 
         routerRecord.mDiscoveryPreference = discoveryRequest;
         routerRecord.mUserRecord.mHandler.sendMessage(
@@ -832,10 +838,12 @@ class MediaRouter2ServiceImpl {
                                 .collect(Collectors.joining(","))
                         : null;
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "setRouteListingPreference | router: %d, route listing preference: [%s]",
-                routerRecord.mRouterId,
-                routeListingAsString));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "setRouteListingPreference | router: %s(id: %d), route listing preference:"
+                            + " [%s]",
+                        routerRecord.mPackageName, routerRecord.mRouterId, routeListingAsString));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(
@@ -851,9 +859,11 @@ class MediaRouter2ServiceImpl {
         RouterRecord routerRecord = mAllRouterRecords.get(binder);
 
         if (routerRecord != null) {
-            Slog.i(TAG, TextUtils.formatSimple(
-                    "setRouteVolumeWithRouter2 | router: %d, volume: %d",
-                    routerRecord.mRouterId, volume));
+            Slog.i(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "setRouteVolumeWithRouter2 | router: %s(id: %d), volume: %d",
+                            routerRecord.mPackageName, routerRecord.mRouterId, volume));
 
             routerRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::setRouteVolumeOnHandler,
@@ -935,9 +945,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "selectRouteWithRouter2 | router: %d, route: %s",
-                routerRecord.mRouterId, route.getId()));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "selectRouteWithRouter2 | router: %s(id: %d), route: %s",
+                        routerRecord.mPackageName, routerRecord.mRouterId, route.getId()));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::selectRouteOnHandler,
@@ -954,9 +966,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "deselectRouteWithRouter2 | router: %d, route: %s",
-                routerRecord.mRouterId, route.getId()));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "deselectRouteWithRouter2 | router: %s(id: %d), route: %s",
+                        routerRecord.mPackageName, routerRecord.mRouterId, route.getId()));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::deselectRouteOnHandler,
@@ -973,9 +987,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "transferToRouteWithRouter2 | router: %d, route: %s",
-                routerRecord.mRouterId, route.getId()));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "transferToRouteWithRouter2 | router: %s(id: %d), route: %s",
+                        routerRecord.mPackageName, routerRecord.mRouterId, route.getId()));
 
         String defaultRouteId =
                 routerRecord.mUserRecord.mHandler.mSystemProvider.getDefaultRoute().getId();
@@ -1002,9 +1018,14 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "setSessionVolumeWithRouter2 | router: %d, session: %s, volume: %d",
-                routerRecord.mRouterId,  uniqueSessionId, volume));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "setSessionVolumeWithRouter2 | router: %s(id: %d), session: %s, volume: %d",
+                        routerRecord.mPackageName,
+                        routerRecord.mRouterId,
+                        uniqueSessionId,
+                        volume));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::setSessionVolumeOnHandler,
@@ -1021,9 +1042,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "releaseSessionWithRouter2 | router: %d, session: %s",
-                routerRecord.mRouterId,  uniqueSessionId));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "releaseSessionWithRouter2 | router: %s(id: %d), session: %s",
+                        routerRecord.mPackageName, routerRecord.mRouterId, uniqueSessionId));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::releaseSessionOnHandler,
