@@ -24,8 +24,8 @@ import android.content.Intent
 import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED
@@ -33,6 +33,7 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.coroutines.collectLastValue
@@ -69,8 +70,9 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class BiometricSettingsRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: BiometricSettingsRepository
 
