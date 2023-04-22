@@ -2340,6 +2340,10 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         @Override
         public void binderDied() {
+            synchronized (mLock) {
+                mSession = null;
+                clearSessionAndNotifyClientLocked(this);
+            }
         }
     }
 
