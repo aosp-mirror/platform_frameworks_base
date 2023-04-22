@@ -3267,31 +3267,31 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin1, 0);
-        verifyScreenTimeoutCall(null, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(null, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(false);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin1, 1);
-        verifyScreenTimeoutCall(1L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(1L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, 10);
-        verifyScreenTimeoutCall(null, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(null, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(false);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin1, 5);
-        verifyScreenTimeoutCall(5L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(5L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, 4);
-        verifyScreenTimeoutCall(4L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(4L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
@@ -3301,20 +3301,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, Long.MAX_VALUE);
-        verifyScreenTimeoutCall(Long.MAX_VALUE, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(Long.MAX_VALUE, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, 10);
-        verifyScreenTimeoutCall(10L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(10L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         // There's no restriction; should be set to MAX.
         dpm.setMaximumTimeToLock(admin2, 0);
-        verifyScreenTimeoutCall(Long.MAX_VALUE, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(Long.MAX_VALUE, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(false);
     }
 

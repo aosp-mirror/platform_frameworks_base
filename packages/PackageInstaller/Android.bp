@@ -39,8 +39,7 @@ android_app {
 
     certificate: "platform",
     privileged: true,
-    platform_apis: false,
-    sdk_version: "system_current",
+    platform_apis: true,
     rename_resources_package: false,
     static_libs: [
         "xz-java",
@@ -57,8 +56,7 @@ android_app {
 
     certificate: "platform",
     privileged: true,
-    platform_apis: false,
-    sdk_version: "system_current",
+    platform_apis: true,
     rename_resources_package: false,
     overrides: ["PackageInstaller"],
 
@@ -77,8 +75,7 @@ android_app {
 
     certificate: "platform",
     privileged: true,
-    platform_apis: false,
-    sdk_version: "system_current",
+    platform_apis: true,
     rename_resources_package: false,
     overrides: ["PackageInstaller"],
 

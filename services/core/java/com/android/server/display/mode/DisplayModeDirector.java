@@ -65,6 +65,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.display.RefreshRateSettingsUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.display.DisplayDeviceConfig;
@@ -1171,7 +1172,7 @@ public class DisplayModeDirector {
         public static final int PRIORITY_HIGH_BRIGHTNESS_MODE = 2;
 
         // SETTING_MIN_RENDER_FRAME_RATE is used to propose a lower bound of the render frame rate.
-        // It votes [MIN_REFRESH_RATE, Float.POSITIVE_INFINITY]
+        // It votes [minRefreshRate, Float.POSITIVE_INFINITY]
         public static final int PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE = 3;
 
         // APP_REQUEST_RENDER_FRAME_RATE_RANGE is used to for internal apps to limit the render
@@ -1376,10 +1377,10 @@ public class DisplayModeDirector {
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
-        private final Uri mPeakRefreshRateSetting =
-                Settings.System.getUriFor(Settings.System.PEAK_REFRESH_RATE);
-        private final Uri mMinRefreshRateSetting =
-                Settings.System.getUriFor(Settings.System.MIN_REFRESH_RATE);
+        private final Uri mSmoothDisplaySetting =
+                Settings.System.getUriFor(Settings.System.SMOOTH_DISPLAY);
+        private final Uri mForcePeakRefreshRateSetting =
+                Settings.System.getUriFor(Settings.System.FORCE_PEAK_REFRESH_RATE);
         private final Uri mLowPowerModeSetting =
                 Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE);
         private final Uri mMatchContentFrameRateSetting =
@@ -1415,9 +1416,8 @@ public class DisplayModeDirector {
 
         public void observe() {
             final ContentResolver cr = mContext.getContentResolver();
-            mInjector.registerPeakRefreshRateObserver(cr, this);
-            cr.registerContentObserver(mMinRefreshRateSetting, false /*notifyDescendants*/, this,
-                    UserHandle.USER_SYSTEM);
+            mInjector.registerSmoothDisplayObserver(cr, this);
+            mInjector.registerForcePeakRefreshRateObserver(cr, this);
             cr.registerContentObserver(mLowPowerModeSetting, false /*notifyDescendants*/, this,
                     UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mMatchContentFrameRateSetting, false /*notifyDescendants*/,
@@ -1459,8 +1459,8 @@ public class DisplayModeDirector {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             synchronized (mLock) {
-                if (mPeakRefreshRateSetting.equals(uri)
-                        || mMinRefreshRateSetting.equals(uri)) {
+                if (mSmoothDisplaySetting.equals(uri)
+                        || mForcePeakRefreshRateSetting.equals(uri)) {
                     updateRefreshRateSettingLocked();
                 } else if (mLowPowerModeSetting.equals(uri)) {
                     updateLowPowerModeSettingLocked();
@@ -1515,12 +1515,9 @@ public class DisplayModeDirector {
         }
 
         private void updateRefreshRateSettingLocked() {
-            final ContentResolver cr = mContext.getContentResolver();
-            float minRefreshRate = Settings.System.getFloatForUser(cr,
-                    Settings.System.MIN_REFRESH_RATE, 0f, cr.getUserId());
-            float peakRefreshRate = Settings.System.getFloatForUser(cr,
-                    Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate, cr.getUserId());
-            updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate);
+            updateRefreshRateSettingLocked(RefreshRateSettingsUtils.getMinRefreshRate(mContext),
+                    RefreshRateSettingsUtils.getPeakRefreshRate(mContext, mDefaultPeakRefreshRate),
+                    mDefaultRefreshRate);
         }
 
         private void updateRefreshRateSettingLocked(
@@ -1708,14 +1705,13 @@ public class DisplayModeDirector {
         }
 
         public void observe() {
-            DisplayManager dm = mContext.getSystemService(DisplayManager.class);
-            dm.registerDisplayListener(this, mHandler);
+            mInjector.registerDisplayListener(this, mHandler);
 
             // Populate existing displays
             SparseArray<Display.Mode[]> modes = new SparseArray<>();
             SparseArray<Display.Mode> defaultModes = new SparseArray<>();
             DisplayInfo info = new DisplayInfo();
-            Display[] displays = dm.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+            Display[] displays = mInjector.getDisplays();
             for (Display d : displays) {
                 final int displayId = d.getDisplayId();
                 d.getDisplayInfo(info);
@@ -1754,17 +1750,9 @@ public class DisplayModeDirector {
             updateLayoutLimitedFrameRate(displayId, displayInfo);
         }
 
-        @Nullable
         private DisplayInfo getDisplayInfo(int displayId) {
-            Display d = mContext.getSystemService(DisplayManager.class).getDisplay(displayId);
-            if (d == null) {
-                // We can occasionally get a display added or changed event for a display that was
-                // subsequently removed, which means this returns null. Check this case and bail
-                // out early; if it gets re-attached we'll eventually get another call back for it.
-                return null;
-            }
             DisplayInfo info = new DisplayInfo();
-            d.getDisplayInfo(info);
+            mInjector.getDisplayInfo(displayId, info);
             return info;
         }
 
@@ -2435,8 +2423,7 @@ public class DisplayModeDirector {
         }
 
         private void updateDefaultDisplayState() {
-            Display display = mContext.getSystemService(DisplayManager.class)
-                    .getDisplay(Display.DEFAULT_DISPLAY);
+            Display display = mInjector.getDisplay(Display.DEFAULT_DISPLAY);
             if (display == null) {
                 return;
             }
@@ -2753,8 +2740,7 @@ public class DisplayModeDirector {
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
 
             synchronized (mSensorObserverLock) {
-                for (Display d : mDisplayManager.getDisplays(
-                        DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
+                for (Display d : mInjector.getDisplays()) {
                     mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
                 }
             }
@@ -2765,8 +2751,7 @@ public class DisplayModeDirector {
         }
 
         private void recalculateVotesLocked() {
-            final Display[] displays = mDisplayManager.getDisplays(
-                    DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+            final Display[] displays = mInjector.getDisplays();
             for (Display d : displays) {
                 int displayId = d.getDisplayId();
                 Vote vote = null;
@@ -2797,7 +2782,7 @@ public class DisplayModeDirector {
 
         @Override
         public void onDisplayAdded(int displayId) {
-            boolean isDozeState = mInjector.isDozeState(mDisplayManager.getDisplay(displayId));
+            boolean isDozeState = mInjector.isDozeState(mInjector.getDisplay(displayId));
             synchronized (mSensorObserverLock) {
                 mDozeStateByDisplay.put(displayId, isDozeState);
                 recalculateVotesLocked();
@@ -2809,7 +2794,7 @@ public class DisplayModeDirector {
             boolean wasDozeState = mDozeStateByDisplay.get(displayId);
             synchronized (mSensorObserverLock) {
                 mDozeStateByDisplay.put(displayId,
-                        mInjector.isDozeState(mDisplayManager.getDisplay(displayId)));
+                        mInjector.isDozeState(mInjector.getDisplay(displayId)));
                 if (wasDozeState != mDozeStateByDisplay.get(displayId)) {
                     recalculateVotesLocked();
                 }
@@ -3165,16 +3150,26 @@ public class DisplayModeDirector {
     }
 
     interface Injector {
-        Uri PEAK_REFRESH_RATE_URI = Settings.System.getUriFor(Settings.System.PEAK_REFRESH_RATE);
+        Uri SMOOTH_DISPLAY_URI = Settings.System.getUriFor(Settings.System.SMOOTH_DISPLAY);
+        Uri FORCE_PEAK_REFRESH_RATE_URI =
+                Settings.System.getUriFor(Settings.System.FORCE_PEAK_REFRESH_RATE);
 
         @NonNull
         DeviceConfigInterface getDeviceConfig();
 
-        void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
+        void registerSmoothDisplayObserver(@NonNull ContentResolver cr,
+                @NonNull ContentObserver observer);
+
+        void registerForcePeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer);
 
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
+                Handler handler);
+
+        void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
                 Handler handler, long flags);
+
+        Display getDisplay(int displayId);
 
         Display[] getDisplays();
 
@@ -3205,16 +3200,34 @@ public class DisplayModeDirector {
         }
 
         @Override
-        public void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
+        public void registerSmoothDisplayObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer) {
-            cr.registerContentObserver(PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
+            cr.registerContentObserver(SMOOTH_DISPLAY_URI, false /*notifyDescendants*/,
                     observer, UserHandle.USER_SYSTEM);
+        }
+
+        @Override
+        public void registerForcePeakRefreshRateObserver(@NonNull ContentResolver cr,
+                @NonNull ContentObserver observer) {
+            cr.registerContentObserver(FORCE_PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
+                    observer, UserHandle.USER_SYSTEM);
+        }
+
+        @Override
+        public void registerDisplayListener(DisplayManager.DisplayListener listener,
+                Handler handler) {
+            getDisplayManager().registerDisplayListener(listener, handler);
         }
 
         @Override
         public void registerDisplayListener(DisplayManager.DisplayListener listener,
                 Handler handler, long flags) {
             getDisplayManager().registerDisplayListener(listener, handler, flags);
+        }
+
+        @Override
+        public Display getDisplay(int displayId) {
+            return getDisplayManager().getDisplay(displayId);
         }
 
         @Override
@@ -3225,10 +3238,13 @@ public class DisplayModeDirector {
         @Override
         public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
             Display display = getDisplayManager().getDisplay(displayId);
-            if (display != null) {
-                return display.getDisplayInfo(displayInfo);
+            if (display == null) {
+                // We can occasionally get a display added or changed event for a display that was
+                // subsequently removed, which means this returns null. Check this case and bail
+                // out early; if it gets re-attached we'll eventually get another call back for it.
+                return false;
             }
-            return false;
+            return display.getDisplayInfo(displayInfo);
         }
 
         @Override

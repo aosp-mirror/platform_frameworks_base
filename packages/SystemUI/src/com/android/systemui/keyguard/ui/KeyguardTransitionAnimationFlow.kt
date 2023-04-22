@@ -16,7 +16,7 @@
 package com.android.systemui.keyguard.ui
 
 import android.view.animation.Interpolator
-import com.android.systemui.animation.Interpolators.LINEAR
+import com.android.app.animation.Interpolators.LINEAR
 import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING

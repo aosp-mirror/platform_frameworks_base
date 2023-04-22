@@ -220,6 +220,7 @@ public final class SurfaceControl implements Parcelable {
             long newParentNativeObject);
     private static native void nativeSetBuffer(long transactionObj, long nativeObject,
             HardwareBuffer buffer, long fencePtr, Consumer<SyncFence> releaseCallback);
+    private static native void nativeUnsetBuffer(long transactionObj, long nativeObject);
     private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
             int transform);
     private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
@@ -3664,6 +3665,22 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Unsets the buffer for the SurfaceControl in the current Transaction. This will not clear
+         * the buffer being rendered, but resets the buffer state in the Transaction only. The call
+         * will also invoke the release callback.
+         *
+         * Note, this call is different from passing a null buffer to
+         * {@link SurfaceControl.Transaction#setBuffer} which will release the last displayed
+         * buffer.
+         *
+         * @hide
+         */
+        public Transaction unsetBuffer(SurfaceControl sc) {
+            nativeUnsetBuffer(mNativeObject, sc.mNativeObject);
+            return this;
+        }
+
+        /**
          * Updates the HardwareBuffer displayed for the SurfaceControl.
          *
          * Note that the buffer must be allocated with {@link HardwareBuffer#USAGE_COMPOSER_OVERLAY}
@@ -3682,7 +3699,8 @@ public final class SurfaceControl implements Parcelable {
          * until all presentation fences have signaled, ensuring the transaction remains consistent.
          *
          * @param sc The SurfaceControl to update
-         * @param buffer The buffer to be displayed
+         * @param buffer The buffer to be displayed. Pass in a null buffer to release the last
+         * displayed buffer.
          * @param fence The presentation fence. If null or invalid, this is equivalent to
          *              {@link #setBuffer(SurfaceControl, HardwareBuffer)}
          * @return this
@@ -3846,14 +3864,14 @@ public final class SurfaceControl implements Parcelable {
          *                           100 nits and a max display brightness of 200 nits, this should
          *                           be set to 2.0f.
          *
-         *                           Default value is 1.0f.
+         *                           <p>Default value is 1.0f.
          *
-         *                           Transfer functions that encode their own brightness ranges,
+         *                           <p>Transfer functions that encode their own brightness ranges,
          *                           such as HLG or PQ, should also set this to 1.0f and instead
          *                           communicate extended content brightness information via
          *                           metadata such as CTA861_3 or SMPTE2086.
          *
-         *                           Must be finite && >= 1.0f
+         *                           <p>Must be finite && >= 1.0f
          *
          * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
@@ -3862,13 +3880,17 @@ public final class SurfaceControl implements Parcelable {
          *                     may not be able to, or may choose not to, deliver the
          *                     requested range.
          *
-         *                     If unspecified, the system will attempt to provide the best range
-         *                     it can for the given ambient conditions & device state. However,
-         *                     voluntarily reducing the requested range can help improve battery
-         *                     life as well as can improve quality by ensuring greater bit depth
-         *                     is allocated to the luminance range in use.
+         *                     <p>While requesting a large desired ratio will result in the most
+         *                     dynamic range, voluntarily reducing the requested range can help
+         *                     improve battery life as well as can improve quality by ensuring
+         *                     greater bit depth is allocated to the luminance range in use.
          *
-         *                     Must be finite && >= 1.0f
+         *                     <p>Default value is 1.0f and indicates that extended range brightness
+         *                     is not being used, so the resulting SDR or HDR behavior will be
+         *                     determined entirely by the dataspace being used (ie, typically SDR
+         *                     however PQ or HLG transfer functions will still result in HDR)
+         *
+         *                     <p>Must be finite && >= 1.0f
          * @return this
          **/
         public @NonNull Transaction setExtendedRangeBrightness(@NonNull SurfaceControl sc,

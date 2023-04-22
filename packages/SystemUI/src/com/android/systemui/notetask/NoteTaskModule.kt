@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+@file:OptIn(InternalNoteTaskApi::class)
+
 package com.android.systemui.notetask
 
 import android.app.Activity
+import android.app.Service
 import android.app.role.RoleManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -33,6 +36,9 @@ import dagger.multibindings.IntoMap
 /** Compose all dependencies required by Note Task feature. */
 @Module(includes = [NoteTaskQuickAffordanceModule::class])
 interface NoteTaskModule {
+
+    @[Binds IntoMap ClassKey(NoteTaskControllerUpdateService::class)]
+    fun NoteTaskControllerUpdateService.bindNoteTaskControllerUpdateService(): Service
 
     @[Binds IntoMap ClassKey(LaunchNoteTaskActivity::class)]
     fun LaunchNoteTaskActivity.bindNoteTaskLauncherActivity(): Activity

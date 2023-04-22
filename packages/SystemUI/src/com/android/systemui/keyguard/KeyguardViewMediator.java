@@ -98,6 +98,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -121,7 +122,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
@@ -1610,8 +1610,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void doKeyguardLaterForChildProfilesLocked() {
-        UserManager um = UserManager.get(mContext);
-        for (int profileId : um.getEnabledProfileIds(UserHandle.myUserId())) {
+        for (UserInfo profile : mUserTracker.getUserProfiles()) {
+            if (!profile.isEnabled()) continue;
+            final int profileId = profile.id;
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(profileId)) {
                 long userTimeout = getLockTimeout(profileId);
                 if (userTimeout == 0) {
@@ -1634,8 +1635,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void doKeyguardForChildProfilesLocked() {
-        UserManager um = UserManager.get(mContext);
-        for (int profileId : um.getEnabledProfileIds(UserHandle.myUserId())) {
+        for (UserInfo profile : mUserTracker.getUserProfiles()) {
+            if (!profile.isEnabled()) continue;
+            final int profileId = profile.id;
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(profileId)) {
                 lockProfile(profileId);
             }

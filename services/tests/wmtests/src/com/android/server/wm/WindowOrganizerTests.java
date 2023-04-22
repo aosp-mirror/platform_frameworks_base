@@ -1006,7 +1006,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener transactionListener =
                 mock(BLASTSyncEngine.TransactionReadyListener.class);
 
-        final int id = bse.startSyncSet(transactionListener, BLAST_TIMEOUT_DURATION, "Test");
+        final int id = bse.startSyncSet(transactionListener, BLAST_TIMEOUT_DURATION, "Test",
+                false /* parallel */);
         bse.addToSyncSet(id, task);
         bse.setReady(id);
         bse.onSurfacePlacement();

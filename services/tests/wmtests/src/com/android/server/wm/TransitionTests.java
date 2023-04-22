@@ -1196,7 +1196,8 @@ public class TransitionTests extends WindowTestsBase {
 
         player.start();
         player.finish();
-        app.getTask().finishSync(mWm.mTransactionFactory.get(), false /* cancel */);
+        app.getTask().finishSync(mWm.mTransactionFactory.get(), app.getTask().getSyncGroup(),
+                false /* cancel */);
 
         // The open transition is finished. Continue to play seamless display change transition,
         // so the previous async rotation controller should still exist.

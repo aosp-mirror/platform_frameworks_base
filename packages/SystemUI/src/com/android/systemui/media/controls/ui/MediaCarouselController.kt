@@ -166,6 +166,7 @@ constructor(
             }
         }
 
+    /** Whether the media card currently has the "expanded" layout */
     @VisibleForTesting
     var currentlyExpanded = true
         set(value) {
@@ -501,6 +502,7 @@ constructor(
         mediaHostStatesManager.addCallback(
             object : MediaHostStatesManager.Callback {
                 override fun onHostStateChanged(location: Int, mediaHostState: MediaHostState) {
+                    updateUserVisibility()
                     if (location == desiredLocation) {
                         onDesiredLocationChanged(desiredLocation, mediaHostState, animate = false)
                     }
