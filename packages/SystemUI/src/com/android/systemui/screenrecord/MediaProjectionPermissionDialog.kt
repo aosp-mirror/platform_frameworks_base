@@ -23,6 +23,7 @@ import com.android.systemui.R
 class MediaProjectionPermissionDialog(
     context: Context?,
     private val onStartRecordingClicked: Runnable,
+    private val onCancelClicked: Runnable,
     private val appName: String?
 ) : BaseScreenSharePermissionDialog(context, createOptionList(appName), appName) {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +38,10 @@ class MediaProjectionPermissionDialog(
             // Note that it is important to run this callback before dismissing, so that the
             // callback can disable the dialog exit animation if it wants to.
             onStartRecordingClicked.run()
+            dismiss()
+        }
+        setCancelButtonOnClickListener {
+            onCancelClicked.run()
             dismiss()
         }
     }
