@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Odustani"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Uparivanje omogućuje pristup vašim kontaktima i povijesti poziva dok ste povezani."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije bilo moguće."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije uspjelo zbog netočnog PIN-a ili zaporke."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije uspjelo zbog netočnog PIN-a ili pristupnog ključa."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Komunikacija s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguća."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Uparivanje odbio uređaj <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Računalo"</string>
