@@ -32,9 +32,9 @@ import android.view.animation.Interpolator;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 
 /**

@@ -40,9 +40,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieProperty;

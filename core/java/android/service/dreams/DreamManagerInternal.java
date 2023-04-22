@@ -84,6 +84,19 @@ public abstract class DreamManagerInternal {
          *
          * @param keepDreaming True if the current dream should continue when undocking.
          */
-        void onKeepDreamingWhenUnpluggingChanged(boolean keepDreaming);
+        default void onKeepDreamingWhenUnpluggingChanged(boolean keepDreaming) {
+        }
+
+        /**
+         * Called when dreaming has started.
+         */
+        default void onDreamingStarted() {
+        }
+
+        /**
+         * Called when dreaming has stopped.
+         */
+        default void onDreamingStopped() {
+        }
     }
 }

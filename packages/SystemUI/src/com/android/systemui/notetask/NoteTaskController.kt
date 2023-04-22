@@ -284,7 +284,15 @@ constructor(
 
     /** @see OnRoleHoldersChangedListener */
     fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
-        if (roleName == ROLE_NOTES) updateNoteTaskAsUser(user)
+        if (roleName != ROLE_NOTES) return
+
+        if (user == userTracker.userHandle) {
+            updateNoteTaskAsUser(user)
+        } else {
+            // TODO(b/278729185): Replace fire and forget service with a bounded service.
+            val intent = NoteTaskControllerUpdateService.createIntent(context)
+            context.startServiceAsUser(intent, user)
+        }
     }
 
     companion object {

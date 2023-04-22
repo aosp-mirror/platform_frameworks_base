@@ -39,7 +39,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
-import com.android.systemui.shared.quickaffordance.shared.model.KeyguardQuickAffordancePreviewConstants
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
+import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -59,6 +60,7 @@ constructor(
     private val clockController: ClockEventController,
     private val clockRegistry: ClockRegistry,
     private val broadcastDispatcher: BroadcastDispatcher,
+    private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     @Assisted bundle: Bundle,
 ) {
 
@@ -67,7 +69,7 @@ constructor(
     private val height: Int = bundle.getInt(KEY_VIEW_HEIGHT)
     private val shouldHighlightSelectedAffordance: Boolean =
         bundle.getBoolean(
-            KeyguardQuickAffordancePreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
+            KeyguardPreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
             false,
         )
     private val shouldHideClock: Boolean =
@@ -79,6 +81,7 @@ constructor(
         get() = host.surfacePackage
 
     private var clockView: View? = null
+    private var smartSpaceView: View? = null
 
     private val disposables = mutableSetOf<DisposableHandle>()
     private var isDestroyed = false
@@ -87,7 +90,7 @@ constructor(
         bottomAreaViewModel.enablePreviewMode(
             initiallySelectedSlotId =
                 bundle.getString(
-                    KeyguardQuickAffordancePreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
                 ),
             shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
         )
@@ -108,9 +111,10 @@ constructor(
             val rootView = FrameLayout(context)
 
             setUpBottomArea(rootView)
-            if (!shouldHideClock) {
-                setUpClock(rootView)
-            }
+
+            setupSmartspace(rootView)
+
+            setUpClock(rootView)
 
             rootView.measure(
                 View.MeasureSpec.makeMeasureSpec(
@@ -147,7 +151,60 @@ constructor(
 
     fun destroy() {
         isDestroyed = true
+        lockscreenSmartspaceController.disconnect()
         disposables.forEach { it.dispose() }
+    }
+
+    fun hideSmartspace(hide: Boolean) {
+        smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE
+    }
+
+    /**
+     * This sets up and shows a non-interactive smart space
+     *
+     * The top padding is as follows:
+     *    Status bar height + clock top margin + keyguard smart space top offset
+     *
+     * The start padding is as follows:
+     *    Clock padding start + Below clock padding start
+     *
+     * The end padding is as follows:
+     *    Below clock padding end
+     */
+    private fun setupSmartspace(parentView: ViewGroup) {
+        if (!lockscreenSmartspaceController.isEnabled() ||
+                !lockscreenSmartspaceController.isDateWeatherDecoupled()) {
+            return
+        }
+
+        smartSpaceView = lockscreenSmartspaceController.buildAndConnectDateView(parentView)
+
+        val topPadding: Int = with(context.resources) {
+            getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard) +
+                    getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset) +
+                    getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
+        }
+
+        val startPadding: Int = with(context.resources) {
+            getDimensionPixelSize(R.dimen.clock_padding_start) +
+                    getDimensionPixelSize(R.dimen.below_clock_padding_start)
+        }
+
+        val endPadding: Int = context.resources
+                .getDimensionPixelSize(R.dimen.below_clock_padding_end)
+
+        smartSpaceView?.let {
+            it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
+            it.isClickable = false
+
+            parentView.addView(
+                    it,
+                    FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                    ),
+            )
+        }
     }
 
     private fun setUpBottomArea(parentView: ViewGroup) {
@@ -202,22 +259,48 @@ constructor(
         disposables.add(DisposableHandle { broadcastDispatcher.unregisterReceiver(receiver) })
 
         onClockChanged(parentView)
+
+        updateSmartspaceWithSetupClock()
     }
 
     private fun onClockChanged(parentView: ViewGroup) {
         clockController.clock = clockRegistry.createCurrentClock()
-        clockController.clock
-            ?.largeClock
-            ?.events
-            ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
-        clockView?.let { parentView.removeView(it) }
-        clockView =
-            clockController.clock?.largeClock?.view?.apply {
+
+        if (!shouldHideClock) {
+            val largeClock = clockController.clock?.largeClock
+
+            largeClock
+                ?.events
+                ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
+
+            clockView?.let { parentView.removeView(it) }
+            clockView = largeClock?.view?.apply {
                 if (shouldHighlightSelectedAffordance) {
                     alpha = DIM_ALPHA
                 }
                 parentView.addView(this)
+                visibility = View.VISIBLE
             }
+        } else {
+            clockView?.visibility = View.GONE
+        }
+    }
+
+    /**
+     * Updates smart space after clock is set up. Used to show or hide smartspace with the right
+     * opacity based on the clock after setup.
+     */
+    private fun updateSmartspaceWithSetupClock() {
+        val hasCustomWeatherDataDisplay =
+                clockController
+                        .clock
+                        ?.largeClock
+                        ?.config
+                        ?.hasCustomWeatherDataDisplay == true
+
+        hideSmartspace(hasCustomWeatherDataDisplay)
+
+        smartSpaceView?.alpha = if (shouldHighlightSelectedAffordance) DIM_ALPHA else 1.0f
     }
 
     companion object {

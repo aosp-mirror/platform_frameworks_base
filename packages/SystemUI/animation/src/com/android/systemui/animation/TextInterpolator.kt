@@ -28,8 +28,10 @@ import com.android.internal.graphics.ColorUtils
 import java.lang.Math.max
 
 /** Provide text style linear interpolation for plain text. */
-class TextInterpolator(layout: Layout) {
-
+class TextInterpolator(
+    layout: Layout,
+    var typefaceCache: TypefaceVariantCache,
+) {
     /**
      * Returns base paint used for interpolation.
      *

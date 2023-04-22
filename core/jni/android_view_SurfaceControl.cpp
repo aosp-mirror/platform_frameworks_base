@@ -616,6 +616,12 @@ static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlo
                            genReleaseCallback(env, releaseCallback));
 }
 
+static void nativeUnsetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->unsetBuffer(ctrl);
+}
+
 static void nativeSetBufferTransform(JNIEnv* env, jclass clazz, jlong transactionObj,
                                      jlong nativeObject, jint transform) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2198,6 +2204,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetGeometry },
     {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;JLjava/util/function/Consumer;)V",
             (void*)nativeSetBuffer },
+    {"nativeUnsetBuffer", "(JJ)V", (void*)nativeUnsetBuffer },
+
     {"nativeSetBufferTransform", "(JJI)V", (void*) nativeSetBufferTransform},
     {"nativeSetDataSpace", "(JJI)V",
             (void*)nativeSetDataSpace },

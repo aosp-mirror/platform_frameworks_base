@@ -61,7 +61,7 @@ class EllipseOverlapDetectorTest(val testCase: TestCase) : SysuiTestCase() {
         @JvmStatic
         fun data(): List<TestCase> =
             listOf(
-                    genTestCases(
+                    genPositiveTestCases(
                         innerXs = listOf(SENSOR.left, SENSOR.right, SENSOR.centerX()),
                         innerYs = listOf(SENSOR.top, SENSOR.bottom, SENSOR.centerY()),
                         outerXs = listOf(SENSOR.left - 1, SENSOR.right + 1),
@@ -70,9 +70,7 @@ class EllipseOverlapDetectorTest(val testCase: TestCase) : SysuiTestCase() {
                         major = 300f,
                         expected = true
                     ),
-                    genTestCases(
-                        innerXs = listOf(SENSOR.left, SENSOR.right),
-                        innerYs = listOf(SENSOR.top, SENSOR.bottom),
+                    genNegativeTestCase(
                         outerXs = listOf(SENSOR.left - 1, SENSOR.right + 1),
                         outerYs = listOf(SENSOR.top - 1, SENSOR.bottom + 1),
                         minor = 100f,
@@ -107,7 +105,7 @@ private val TOUCH_DATA =
 
 private val SENSOR = Rect(100 /* left */, 200 /* top */, 300 /* right */, 400 /* bottom */)
 
-private fun genTestCases(
+private fun genPositiveTestCases(
     innerXs: List<Int>,
     innerYs: List<Int>,
     outerXs: List<Int>,
@@ -120,5 +118,17 @@ private fun genTestCases(
         (innerYs + outerYs).map { y ->
             EllipseOverlapDetectorTest.TestCase(x, y, minor, major, expected)
         }
+    }
+}
+
+private fun genNegativeTestCase(
+    outerXs: List<Int>,
+    outerYs: List<Int>,
+    minor: Float,
+    major: Float,
+    expected: Boolean
+): List<EllipseOverlapDetectorTest.TestCase> {
+    return outerXs.flatMap { x ->
+        outerYs.map { y -> EllipseOverlapDetectorTest.TestCase(x, y, minor, major, expected) }
     }
 }

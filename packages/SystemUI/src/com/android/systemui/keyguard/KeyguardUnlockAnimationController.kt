@@ -36,7 +36,7 @@ import androidx.core.math.MathUtils
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -792,7 +792,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
             // Translate up from the bottom.
             surfaceBehindMatrix.setTranslate(
                     surfaceBehindRemoteAnimationTarget.localBounds.left.toFloat(),
-                    surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
+                    surfaceBehindRemoteAnimationTarget.localBounds.top.toFloat() +
+                            surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
             )
 
             // Scale up from a point at the center-bottom of the surface.

@@ -745,6 +745,9 @@ public final class DexOptHelper {
         applyPackageFilter(snapshot, remainingPredicate, result, remainingPkgSettings, sortTemp,
                 packageManagerService);
 
+        // Make sure the system server isn't in the result, because it can never be dexopted here.
+        result.removeIf(pkgSetting -> PLATFORM_PACKAGE_NAME.equals(pkgSetting.getPackageName()));
+
         if (debug) {
             Log.i(TAG, "Packages to be dexopted: " + packagesToString(result));
             Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgSettings));

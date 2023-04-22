@@ -192,6 +192,8 @@ class TransitionController {
 
     private void detachPlayer() {
         if (mTransitionPlayer == null) return;
+        // Immediately set to null so that nothing inadvertently starts/queues.
+        mTransitionPlayer = null;
         // Clean-up/finish any playing transitions.
         for (int i = 0; i < mPlayingTransitions.size(); ++i) {
             mPlayingTransitions.get(i).cleanUpOnFailure();
@@ -200,7 +202,6 @@ class TransitionController {
         if (mCollectingTransition != null) {
             mCollectingTransition.abort();
         }
-        mTransitionPlayer = null;
         mTransitionPlayerProc = null;
         mRemotePlayer.clear();
         mRunningLock.doNotifyLocked();

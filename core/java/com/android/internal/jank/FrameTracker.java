@@ -36,6 +36,7 @@ import android.graphics.HardwareRendererObserver;
 import android.os.Handler;
 import android.os.Trace;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
@@ -43,7 +44,9 @@ import android.view.FrameMetrics;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.JankData.JankType;
 import android.view.ThreadedRenderer;
+import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowCallbacks;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
@@ -686,6 +689,14 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         }
     }
 
+    ThreadedRendererWrapper getThreadedRenderer() {
+        return mRendererWrapper;
+    }
+
+    ViewRootWrapper getViewRoot() {
+        return mViewRoot;
+    }
+
     private boolean shouldTriggerPerfetto(int missedFramesCount, int maxFrameTimeNanos) {
         boolean overMissedFramesThreshold = mTraceThresholdMissedFrames != -1
                 && missedFramesCount >= mTraceThresholdMissedFrames;
@@ -797,6 +808,28 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
         public SurfaceControl getSurfaceControl() {
             return mViewRoot.getSurfaceControl();
+        }
+
+        void requestInvalidateRootRenderNode() {
+            mViewRoot.requestInvalidateRootRenderNode();
+        }
+
+        void addWindowCallbacks(WindowCallbacks windowCallbacks) {
+            mViewRoot.addWindowCallbacks(windowCallbacks);
+        }
+
+        void removeWindowCallbacks(WindowCallbacks windowCallbacks) {
+            mViewRoot.removeWindowCallbacks(windowCallbacks);
+        }
+
+        View getView() {
+            return mViewRoot.getView();
+        }
+
+        int dipToPx(int dip) {
+            final DisplayMetrics displayMetrics =
+                    mViewRoot.mContext.getResources().getDisplayMetrics();
+            return (int) (displayMetrics.density * dip + 0.5f);
         }
     }
 

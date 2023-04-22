@@ -30,9 +30,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.surfaceeffects.ripple.RippleShader;
 import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;

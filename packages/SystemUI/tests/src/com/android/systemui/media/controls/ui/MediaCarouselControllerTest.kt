@@ -110,6 +110,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
     @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
     @Captor lateinit var keyguardCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
+    @Captor lateinit var hostStateCallback: ArgumentCaptor<MediaHostStatesManager.Callback>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -143,6 +144,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(visualStabilityProvider)
             .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
         verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCallback))
+        verify(mediaHostStatesManager).addCallback(capture(hostStateCallback))
         whenever(mediaControlPanelFactory.get()).thenReturn(panel)
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
         whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
@@ -831,5 +833,17 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         // Verify that seekbar listening attribute in media control panel is set to false.
         verify(panel, times(MediaPlayerData.players().size)).listening = false
+    }
+
+    @Test
+    fun testOnHostStateChanged_updateVisibility() {
+        var stateUpdated = false
+        mediaCarouselController.updateUserVisibility = { stateUpdated = true }
+
+        // When the host state updates
+        hostStateCallback.value!!.onHostStateChanged(LOCATION_QS, mediaHostState)
+
+        // Then the carousel visibility is updated
+        assertTrue(stateUpdated)
     }
 }

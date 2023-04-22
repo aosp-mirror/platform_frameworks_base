@@ -8394,8 +8394,7 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call this method; if it has
-     * not, a security exception will be thrown, or the caller must hold the permission
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
+     * not, a security exception will be thrown.
      * <p>
      * <b>Note</b>, this policy type is deprecated for legacy device admins since
      * {@link android.os.Build.VERSION_CODES#Q}. On Android
@@ -8411,8 +8410,7 @@ public class DevicePolicyManager {
                      the caller is not a device admin
      * @param disabled Whether or not the camera should be disabled.
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
-     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} and the caller does not hold
-     *             the permisisons {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
     public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {

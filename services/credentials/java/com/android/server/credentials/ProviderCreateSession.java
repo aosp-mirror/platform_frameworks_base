@@ -155,6 +155,8 @@ public final class ProviderCreateSession extends ProviderSession<
         if (exception instanceof CreateCredentialException) {
             // Store query phase exception for aggregation with final response
             mProviderException = (CreateCredentialException) exception;
+            // TODO(b/271135048) : Decide on exception type length
+            mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
         updateStatusAndInvokeCallback(toStatus(errorCode),

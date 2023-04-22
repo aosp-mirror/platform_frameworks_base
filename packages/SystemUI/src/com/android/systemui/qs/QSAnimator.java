@@ -26,7 +26,7 @@ import android.view.View.OnLayoutChangeListener;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.animation.Interpolators;
+import com.android.app.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;

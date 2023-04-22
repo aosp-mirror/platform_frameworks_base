@@ -29,7 +29,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.shared.quickaffordance.shared.model.KeyguardQuickAffordancePreviewConstants
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -114,12 +114,17 @@ constructor(
             }
 
             when (message.what) {
-                KeyguardQuickAffordancePreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
+                KeyguardPreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
                     message.data
                         .getString(
-                            KeyguardQuickAffordancePreviewConstants.KEY_SLOT_ID,
+                            KeyguardPreviewConstants.KEY_SLOT_ID,
                         )
                         ?.let { slotId -> renderer.onSlotSelected(slotId = slotId) }
+                }
+                KeyguardPreviewConstants.MESSAGE_ID_HIDE_SMART_SPACE -> {
+                    message.data
+                        .getBoolean(KeyguardPreviewConstants.KEY_HIDE_SMART_SPACE)
+                        .let { hide -> renderer.hideSmartspace(hide) }
                 }
                 else -> requestDestruction(this)
             }

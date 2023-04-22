@@ -50,6 +50,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricManager;
@@ -113,12 +114,12 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 
+import dagger.Module;
+import dagger.Provides;
+
 import java.util.Optional;
 
 import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * Provides Non-SystemUI, Framework-Owned instances to the dependency graph.
@@ -277,7 +278,6 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
-    @Nullable
     static IVrManager provideIVrManager() {
         return IVrManager.Stub.asInterface(ServiceManager.getService(Context.VR_SERVICE));
     }
@@ -323,7 +323,9 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static InteractionJankMonitor provideInteractionJankMonitor() {
-        return InteractionJankMonitor.getInstance();
+        InteractionJankMonitor jankMonitor = InteractionJankMonitor.getInstance();
+        jankMonitor.configDebugOverlay(Color.YELLOW, 0.75);
+        return jankMonitor;
     }
 
     @Provides
