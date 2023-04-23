@@ -1663,6 +1663,11 @@ public class SoundTriggerService extends SystemService {
             }
 
             @Override
+            public void detach() {
+                mSoundTriggerHelper.detach();
+            }
+
+            @Override
             public int unloadKeyphraseModel(int keyphraseId) {
                 return mSoundTriggerHelper.unloadKeyphraseSoundModel(keyphraseId);
             }
