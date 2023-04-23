@@ -1333,19 +1333,24 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     @Override
     public void destroy() {
         synchronized (mLock) {
-            if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
-                try {
-                    stopRecognition();
-                } catch (Exception e) {
-                    Log.i(TAG, "failed to stopRecognition in destroy", e);
-                }
-            }
+            detachSessionLocked();
 
             mAvailability = STATE_INVALID;
             mIsAvailabilityOverriddenByTestApi = false;
             notifyStateChangedLocked();
         }
         super.destroy();
+    }
+
+    private void detachSessionLocked() {
+        try {
+            if (DBG) Slog.d(TAG, "detachSessionLocked() " + mSoundTriggerSession);
+            if (mSoundTriggerSession != null) {
+                mSoundTriggerSession.detach();
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
