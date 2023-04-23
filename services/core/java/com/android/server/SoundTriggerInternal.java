@@ -142,6 +142,12 @@ public interface SoundTriggerInternal {
                 @ModelParams int modelParam);
 
         /**
+         * Invalidates the sound trigger session and clears any associated resources. Subsequent
+         * calls to this object will throw IllegalStateException.
+         */
+        void detach();
+
+        /**
          * Unloads (and stops if running) the given keyphraseId
          */
         int unloadKeyphraseModel(int keyphaseId);

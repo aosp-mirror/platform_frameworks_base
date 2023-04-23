@@ -94,4 +94,9 @@ interface IVoiceInteractionSoundTriggerSession {
      */
     @nullable SoundTrigger.ModelParamRange queryParameter(int keyphraseId,
             in ModelParams modelParam);
+    /**
+     * Invalidates the sound trigger session and clears any associated resources. Subsequent calls
+     * to this object will throw IllegalStateException.
+     */
+    void detach();
 }

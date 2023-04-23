@@ -69,4 +69,9 @@ final class SoundTriggerSessionBinderProxy extends IVoiceInteractionSoundTrigger
     public SoundTrigger.ModelParamRange queryParameter(int i, int i1) throws RemoteException {
         return mDelegate.queryParameter(i, i1);
     }
+
+    @Override
+    public void detach() throws RemoteException {
+        mDelegate.detach();
+    }
 }
