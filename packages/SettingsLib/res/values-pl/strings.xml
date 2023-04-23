@@ -150,8 +150,8 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SPARUJ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anuluj"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Sparowanie powoduje przyznanie dostępu do historii połączeń i Twoich kontaktów w trakcie połączenia."</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nie można sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nie można sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ze względu na błędny kod PIN lub klucz."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nie udało się sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nie udało się sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ze względu na błędny kod PIN lub klucz."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nie można skomunikować się z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Powiązanie odrzucone przez urządzenie <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Komputer"</string>

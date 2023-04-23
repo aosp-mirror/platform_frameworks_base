@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"La vinculación permite acceder a tus contactos y al historial de llamadas cuando el dispositivo está conectado."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No se ha podido emparejar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se ha podido emparejar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> porque la clave de acceso o el PIN son incorrectos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se puede emparejar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> porque la llave de acceso o el PIN son incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"No se puede establecer comunicación con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vinculación rechazada por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordenador"</string>
@@ -649,7 +649,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Elige el diseño del teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predeterminado"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Encender pantalla"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Encender la pantalla"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir encender la pantalla"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permite que una aplicación encienda la pantalla. Si das este permiso, la aplicación puede encender la pantalla en cualquier momento sin que se lo pidas."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"¿Dejar de emitir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

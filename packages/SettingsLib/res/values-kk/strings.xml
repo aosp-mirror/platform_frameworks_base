@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Ажыратылуда…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Жалғауда..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Жұптауда..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Жұптасып жатыр..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды (телефонсыз)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды (аудиосыз)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды (хабарларға кіруге рұқсат жоқ)"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Бас тарту"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жұптасқан кезде, контактілеріңіз бен қоңыраулар тарихын көру мүмкіндігі беріледі."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> жұпталу орындалмады."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен жұптаса алмады, себебі PIN немесе рұқсат кілті дұрыс емес."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен жұптаса алмады, себебі PIN немесе кіру кілті дұрыс емес."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысымен қатынаса алмайды"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысы жұпталудан бас тартты."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -173,9 +173,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Алынған қолданбалар"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Алынған қолданбалар және пайдаланушылар"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Жүйелік жаңарту"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB тетеринг"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB-тетеринг"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Алынбалы хот-спот"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth тетеринг"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth-тетеринг"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Тетеринг"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Тетеринг және алынбалы хотспот"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Барлық жұмыс қолданбалары"</string>

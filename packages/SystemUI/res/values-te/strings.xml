@@ -168,7 +168,7 @@
     <string name="accessibility_not_connected" msgid="4061305616351042142">"కనెక్ట్ చేయబడలేదు."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"రోమింగ్"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ఆఫ్ చేయండి"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"ఎయిర్‌ప్లేన్ మోడ్."</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"విమానం మోడ్."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPNలో."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"బ్యాటరీ <xliff:g id="NUMBER">%d</xliff:g> శాతం."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"బ్యాటరీ <xliff:g id="PERCENTAGE">%1$s</xliff:g> శాతం ఉంది, మీ వినియోగాన్ని బట్టి <xliff:g id="TIME">%2$s</xliff:g> పని చేస్తుంది"</string>
@@ -231,7 +231,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"యూజర్"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"ఇంటర్నెట్"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"నెట్‌వర్క్‌లు అందుబాటులో ఉన్నాయి"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"అందుబాటులో ఉన్న నెట్‌వర్క్‌లు"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"నెట్‌వర్క్‌లు అందుబాటులో లేవు"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Wi-Fi నెట్‌వర్క్‌లు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ఆన్ చేస్తోంది…"</string>
@@ -472,7 +472,7 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"లాక్ స్క్రీన్ సెట్టింగ్‌లు"</string>
     <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR కోడ్‌ను స్కాన్ చేయండి"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ఆఫీస్ ప్రొఫైల్‌"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"ఎయిర్‌ప్లేన్ మోడ్"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"విమానం మోడ్"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తర్వాత అలారం మీకు వినిపించదు"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
@@ -931,7 +931,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"కొత్త సమాచారం"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"యాక్టివ్‌గా ఉన్న యాప్‌లు"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"మీరు వాటిని ఉపయోగించనప్పటికీ, ఈ యాప్‌లు యాక్టివ్‌గా ఉంటాయి, రన్ అవుతాయి. ఇది వారి ఫంక్షనాలిటీని మెరుగుపరుస్తుంది, అయితే ఇది బ్యాటరీ జీవితకాలాన్ని కూడా ప్రభావితం చేయవచ్చు."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"మీరు వాటిని ఉపయోగించనప్పటికీ, ఈ యాప్‌లు యాక్టివ్‌గా ఉంటాయి, రన్ అవుతాయి. ఇది వాటి ఫంక్షనాలిటీని మెరుగుపరుస్తుంది, అయితే ఇది బ్యాటరీ జీవితకాలాన్ని కూడా ప్రభావితం చేయవచ్చు."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ఆపివేయండి"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ఆపివేయబడింది"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"పూర్తయింది"</string>

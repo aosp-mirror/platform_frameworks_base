@@ -1494,7 +1494,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Сүлжээ эсвэл VPN тохиргоог өөрчлөх"</string>
     <string name="upload_file" msgid="8651942222301634271">"Файл сонгох"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Сонгосон файл байхгүй"</string>
-    <string name="reset" msgid="3865826612628171429">"Бүгдийг цэвэрлэх"</string>
+    <string name="reset" msgid="3865826612628171429">"Шинэчлэх"</string>
     <string name="submit" msgid="862795280643405865">"Илгээх"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Жолоо барих апп ажиллаж байна"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Жолооны аппаас гарахын тулд товшино уу."</string>

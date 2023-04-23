@@ -544,8 +544,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"တွဲချိတ်ထားသော ဘလူးတုသ်သုံးစက်များနှင့် ချိတ်ဆက်ရန် အက်ပ်ကိုခွင့်ပြုမည်"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာခြင်း"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာရန် အက်ပ်အား ခွင့်ပြုမည်"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ခြင်း"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ခြင်း"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"အနီးရှိ Wi-Fi စက်များနှင့် ပြန်လှန်တုံ့ပြန်ခြင်း"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
@@ -1350,7 +1350,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB မှတစ်ဆင့် ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ဖြင့် ဖိုင်လွှဲပြောင်းခြင်းကို ဖွင့်ထားသည်"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB မှတစ်ဆင့် PTP ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB မှတစ်ဆင့် မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးရန် ဖွင့်ထားသည်"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB သုံး၍ ချိတ်ဆက်ခြင်း ဖွင့်ထားသည်"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB မှတစ်ဆင့် MIDI ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB တွဲဖက်ပစ္စည်းကို ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
