@@ -1856,6 +1856,11 @@ public class VoiceInteractionManagerService extends SystemService {
                         "This object isn't intended to be used as a Binder.");
             }
 
+            @Override
+            public void detach() {
+                mSession.detach();
+            }
+
             private int unloadKeyphraseModel(int keyphraseId) {
                 final long caller = Binder.clearCallingIdentity();
                 try {
