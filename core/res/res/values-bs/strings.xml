@@ -1593,8 +1593,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Ističe:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Serijski broj:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Otisci prstiju:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 otisak prsta:"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 otisak prsta:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"Digitalni otisak SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"Digitalni otisak SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Prikaži sve"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Odaberite aktivnost"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Podijeliti sa"</string>
@@ -1854,7 +1854,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Uredu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupati podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Traje jednu minutu (do {formattedTime})}one{Traje # min (do {formattedTime})}few{Traje # min (do {formattedTime})}other{Traje # min (do {formattedTime})}}"</string>

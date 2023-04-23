@@ -2090,7 +2090,7 @@
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g>-helifail"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"Video"</string>
     <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g>-videofail"</string>
-    <string name="mime_type_image" msgid="2134307276151645257">"Kujutis"</string>
+    <string name="mime_type_image" msgid="2134307276151645257">"Pilt"</string>
     <string name="mime_type_image_ext" msgid="5743552697560999471">"<xliff:g id="EXTENSION">%1$s</xliff:g>-kujutisefail"</string>
     <string name="mime_type_compressed" msgid="8737300936080662063">"Arhiiv"</string>
     <string name="mime_type_compressed_ext" msgid="4775627287994475737">"<xliff:g id="EXTENSION">%1$s</xliff:g>-arhiivifail"</string>

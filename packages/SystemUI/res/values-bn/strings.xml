@@ -627,7 +627,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"টাইলগুলি আবার সাজানোর জন্য ধরে থেকে টেনে আনুন"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"সরানোর জন্য এখানে টেনে আনুন"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"আপনাকে কমপক্ষে <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>টি টাইল রাখতে হবে"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"সম্পাদনা করুন"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"এডিট করুন"</string>
     <string name="tuner_time" msgid="2450785840990529997">"সময়"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"ঘণ্টা, মিনিট, এবং সেকেন্ড দেখান"</item>
@@ -703,7 +703,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"মোবাইল ডেটা"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"ওয়াই ফাই বন্ধ আছে"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"ওয়াই-ফাই বন্ধ আছে"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ব্লুটুথ বন্ধ আছে"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"বিরক্ত করবে না বিকল্পটি বন্ধ আছে"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"বিরক্ত করবে না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>

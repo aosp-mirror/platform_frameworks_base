@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"সংযোগ বিচ্ছিন্ন কৰি থকা হৈছে…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"সংযোগ কৰি থকা হৈছে…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> সংযোগ কৰা হ’ল"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"যোৰা লগোৱা হৈছে…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"পেয়াৰ কৰি থকা হৈছে…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"সংযোগ কৰা হ’ল (ফ\'ন নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"সংযোগ কৰা হ’ল (মিডিয়া নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"সংযোগ কৰা হ’ল (বাৰ্তাৰ এক্সেছ নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -394,7 +394,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্ৰাঞ্জিশ্বন এনিমেশ্বন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"এনিমেটৰ কালদৈৰ্ঘ্য স্কেল"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"গৌণ প্ৰদৰ্শনৰ নকল বনাওক"</string>
-    <string name="debug_applications_category" msgid="5394089406638954196">"এপসমূহ"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"এপ্‌সমূহ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"কাৰ্যকলাপসমূহ নাৰাখিব"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যৱহাৰকাৰী ওলোৱাৰ লগে লগে সকলো কাৰ্যকলাপ মচক"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"নেপথ্যত চলা প্ৰক্ৰিয়াৰ সীমা"</string>
@@ -425,7 +425,7 @@
     <item msgid="4548987861791236754">"চকুৱে দেখা পোৱা ধৰণৰ প্ৰাকৃতিক ৰং"</item>
     <item msgid="1282170165150762976">"ডিজিটেল সমলৰ বাবে ৰং অপ্টিমাইজ কৰা হৈছে"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="5372523625297212320">"ষ্টেণ্ডবাইত থকা এপসমূহ"</string>
+    <string name="inactive_apps_title" msgid="5372523625297212320">"ষ্টেণ্ডবাইত থকা এপ্‌সমূহ"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"নিষ্ক্ৰিয়। ট\'গল কৰিবলৈ টিপক।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"সক্ৰিয়। ট\'গল কৰিবলৈ টিপক।"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"এপ্ ষ্টেণ্ডবাই অৱস্থাত আছে:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
