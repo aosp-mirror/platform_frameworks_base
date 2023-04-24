@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ដាក់ទូរសព្ទ​ឱ្យត្រូវកន្លែង ដើម្បីសាកថ្មដោយឥតប្រើខ្សែ"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"ឧបករណ៍ Android TV នឹង​បិទ​ក្នុងពេល​ឆាប់ៗនេះ សូមចុច​ប៊ូតុង​ដើម្បី​បន្ត​បើក​ឧបករណ៍។"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"ឧបករណ៍​នឹង​បិទ​ក្នុងពេល​ឆាប់ៗនេះ សូមចុច​ដើម្បី​បន្ត​បើក​ឧបករណ៍។"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"គ្មាន​ស៊ីម​កាត​នៅ​ក្នុង​ថេប្លេត​ទេ។"</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"គ្មាន​ស៊ីមកាត​នៅ​ក្នុង​ទូរសព្ទ​ទេ។"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"គ្មានស៊ីមក្នុងថេប្លេតទេ។"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"គ្មានស៊ីមក្នុងទូរសព្ទទេ។"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"កូដ PIN មិន​ត្រូវ​គ្នា​ទេ"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"អ្នក​បាន​ព្យាយាម​ដោះសោ​ថេប្លេត​នេះ​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង​ហើយ។ បន្ទាប់ពីមាន​ការព្យាយាម​ដោះសោ​ចំនួន <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត​មិន​ទទួល​បាន​ជោគជ័យ ថេប្លេត​នេះ​នឹង​ត្រូវ​បាន​កំណត់​ឡើងវិញ ហើយ​វា​នឹង​លុប​ទិន្នន័យ​ទាំងអស់​របស់ថេប្លេត​នេះ។"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"អ្នក​បាន​ព្យាយាម​ដោះសោ​ទូរសព្ទ​នេះ​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង​ហើយ។ បន្ទាប់ពីមាន​ការ​ព្យាយាម​ដោះ​សោ​ចំនួន <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត​មិន​ទទួល​បាន​ជោគជ័យ ទូរសព្ទ​នេះ​នឹង​ត្រូវ​បាន​កំណត់​ឡើងវិញ ហើយ​វា​នឹង​លុប​ទិន្នន័យ​ទាំងអស់​របស់ទូរសព្ទនេះ។"</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"អ្នក​បាន​ព្យាយាម​ដោះសោ​ទូរសព្ទ​នេះ​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER">%d</xliff:g> ដង​ហើយ។ កម្រង​ព័ត៌មាន​ការងារ​នេះ​នឹង​ត្រូវ​បាន​លុប ហើយ​វា​នឹង​លុប​ទិន្នន័យ​កម្រង​ព័ត៌មាន​ទាំងអស់។"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង​ហើយ។ បន្ទាប់ពីមានការ​ព្យាយាម​ដោះ​សោ​ចំនួន <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀត​មិន​ទទួល​បាន​ជោគជ័យ អ្នក​នឹង​ត្រូវ​បាន​ស្នើ​ឱ្យ​ដោះ​សោ​ថេប្លេត​របស់​អ្នក​ ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n សូមព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទី​ទៀត។"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"អ្នកបានគូរលំនាំ​ដោះសោ​របស់អ្នក​មិន​ត្រឹមត្រូវចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដងហើយ។ បន្ទាប់ពីមាន​ការព្យាយាម​ដោះសោចំនួន <xliff:g id="NUMBER_1">%2$d</xliff:g> ដងទៀតមិនទទួលបាន​ជោគជ័យ អ្នកនឹង​ត្រូវបាន​ស្នើឱ្យ​ដោះសោ​ទូរសព្ទ​របស់​អ្នកដោយ​ប្រើគណនី​អ៊ីមែល។\n\n សូមព្យាយាម​ម្ដងទៀតក្នុង​រយៈពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទីទៀត។"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"សេនស័រចាប់ស្នាមម្រាមដៃ​ស្ថិតនៅលើប៊ូតុង​ថាមពល។ វាជាប៊ូតុងរាបស្មើនៅជាប់នឹងប៊ូតុងកម្រិតសំឡេងដែលលៀនចេញមកនៅលើគែមថេប្លេត។"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"សេនស័រចាប់ស្នាមម្រាមដៃ​ស្ថិតនៅលើប៊ូតុង​ថាមពល។ វាជាប៊ូតុងរាបស្មើនៅជាប់នឹងប៊ូតុងកម្រិតសំឡេងដែលលៀនចេញមកនៅលើគែមឧបករណ៍។"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"សេនស័រចាប់ស្នាមម្រាមដៃ​ស្ថិតនៅលើប៊ូតុង​ថាមពល។ វាជាប៊ូតុងរាបស្មើនៅជាប់នឹងប៊ូតុងកម្រិតសំឡេងដែលលៀនចេញមកនៅលើគែមទូរសព្ទ។"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ដោះសោ​ទូរសព្ទរបស់អ្នក​សម្រាប់​ជម្រើសច្រើនទៀត"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ដោះសោ​ថេប្លេតរបស់អ្នក​សម្រាប់​ជម្រើសច្រើនទៀត"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ដោះសោ​ឧបករណ៍របស់អ្នក​សម្រាប់​ជម្រើសច្រើនទៀត"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"កំពុង​ចាក់​​នៅ​លើទូរសព្ទនេះ"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"កំពុង​ចាក់​នៅលើ​ថេប្លេត​នេះ"</string>
 </resources>

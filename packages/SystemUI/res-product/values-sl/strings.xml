@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Za brezžično polnjenje poravnajte telefon z nosilcem"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Naprava Android TV se bo kmalu izklopila. Če tega ne želite, pritisnite poljuben gumb."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Naprava se bo kmalu izklopila. Če tega ne želite, pritisnite."</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"V tabličnem računalniku ni kartice SIM."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"V telefonu ni kartice SIM."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"V tabličnem računalniku ni kartice SIM."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"V telefonu ni kartice SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Kodi PIN se ne ujemata"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Tablični računalnik ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo ponastavljen in vsi podatki v njem bodo izbrisani."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo ponastavljen in vsi podatki v njem bodo izbrisani."</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER">%d</xliff:g>-krat. Delovni profil bo odstranjen in vsi podatki profila bodo izbrisani."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat napačno vnesli. Če ga neuspešno poskusite vnesti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, boste pozvani, da tablični računalnik odklenete z e-poštnim računom.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat napačno vnesli. Če ga neuspešno poskusite vnesti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, boste pozvani, da telefon odklenete z e-poštnim računom.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"Tipalo prstnih odtisov je na gumbu za vklop. To je ploski gumb ob izbočenem gumbu za glasnost na robu tabličnega računalnika."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"Tipalo prstnih odtisov je na gumbu za vklop. To je ploski gumb ob izbočenem gumbu za glasnost na robu naprave."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"Tipalo prstnih odtisov je na gumbu za vklop. To je ploski gumb ob izbočenem gumbu za glasnost na robu telefona."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Za več možnosti odklenite telefon"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Za več možnosti odklenite tablični računalnik"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Za več možnosti odklenite napravo"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Predvajanje v tem telefonu"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Predvajanje v tem tabličnem računalniku"</string>
 </resources>

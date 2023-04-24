@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Realign phone to charge wirelessly"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"The Android TV device will soon turn off; press a button to keep it on."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"The device will soon turn off; press to keep it on."</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"No SIM card in tablet."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"No SIM card in phone."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"No SIM in tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"No SIM in phone."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN codes do not match"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"You have incorrectly attempted to unlock the tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, this tablet will be reset, which will delete all its data."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, this phone will be reset, which will delete all its data."</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"You have incorrectly attempted to unlock the phone <xliff:g id="NUMBER">%d</xliff:g> times. The work profile will be removed, which will delete all profile data."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your tablet using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"The fingerprint sensor is on the power button. It’s the flat button next to the raised volume button on the edge of the tablet."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"The fingerprint sensor is on the power button. It’s the flat button next to the raised volume button on the edge of the device."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"The fingerprint sensor is on the power button. It’s the flat button next to the raised volume button on the edge of the phone."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Unlock your phone for more options"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Unlock your tablet for more options"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Unlock your device for more options"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Playing on this phone"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Playing on this tablet"</string>
 </resources>

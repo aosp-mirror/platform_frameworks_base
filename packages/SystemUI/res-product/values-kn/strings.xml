@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ವೈರ್‌ಲೆಸ್ ಆಗಿ ಚಾರ್ಜ್ ಮಾಡಲು, ನಿಮ್ಮ ಫೋನ್ ಸ್ಥಾನವನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV ಸಾಧನವು ಶೀಘ್ರವೇ ಆಫ್ ಆಗುತ್ತದೆ; ಇದನ್ನು ಆನ್‌ನಲ್ಲಿಡಲು ಬಟನ್ ಅನ್ನು ಒತ್ತಿರಿ."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"ಸಾಧನವು ಶೀಘ್ರವೇ ಆಫ್ ಆಗುತ್ತದೆ; ಇದನ್ನು ಆನ್‌ನಲ್ಲಿಡಲು ಒತ್ತಿರಿ."</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"ಪೋನ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ SIM ಇಲ್ಲ."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"ಫೋನ್‌ನಲ್ಲಿ SIM ಇಲ್ಲ."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"ಪಿನ್‌ ಕೋಡ್‍ಗಳು ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಈ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ, ಇದು ಅದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ನಂತರ, ಈ ಫೋನ್ ಅನ್ನು ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ, ಇದು ಅದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ."</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್ ಅನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ, ಇದು ಪ್ರೊಫೈಲ್‌ನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಡ್ರಾ ಮಾಡಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ನಿಮ್ಮ ಇಮೇಲ್ ಖಾತೆಯನ್ನು ಬಳಸಿ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನಿಮ್ಮನ್ನು ಕೇಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ಸೆಕೆಂಡ್‌ಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%1$d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಡ್ರಾ ಮಾಡಿರುವಿರಿ. <xliff:g id="NUMBER_1">%2$d</xliff:g> ಕ್ಕೂ ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ಇಮೇಲ್ ಖಾತೆಯನ್ನು ಬಳಸಿ ನಿಮ್ಮ ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನಿಮ್ಮನ್ನು ಕೇಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ಸೆಕೆಂಡ್‌ಗಳಲ್ಲಿ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಪವರ್ ಬಟನ್‌ನಲ್ಲಿದೆ. ಇದು ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಅಂಚಿನಲ್ಲಿರುವ ಎತ್ತರಿಸಿದ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ನ ಪಕ್ಕದಲ್ಲಿರುವ ಫ್ಲಾಟ್ ಬಟನ್ ಆಗಿದೆ."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಪವರ್ ಬಟನ್‌ನಲ್ಲಿದೆ. ಇದು ಸಾಧನದ ಅಂಚಿನಲ್ಲಿರುವ ಎತ್ತರಿಸಿದ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ನ ಪಕ್ಕದಲ್ಲಿರುವ ಫ್ಲಾಟ್ ಬಟನ್ ಆಗಿದೆ."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಪವರ್ ಬಟನ್‌ನಲ್ಲಿದೆ. ಇದು ಫೋನ್‌ನ ಅಂಚಿನಲ್ಲಿರುವ ಎತ್ತರಿಸಿದ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ನ ಪಕ್ಕದಲ್ಲಿರುವ ಫ್ಲಾಟ್ ಬಟನ್ ಆಗಿದೆ."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"ಈ ಫೋನ್‌ನಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತಿದೆ"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"ಈ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
 </resources>

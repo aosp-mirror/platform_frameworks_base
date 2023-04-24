@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Jarri ondo telefonoa, haririk gabe karga dadin"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV gailua laster itzaliko da; sakatu botoi bat piztuta mantentzeko."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Gailua laster itzaliko da; sakatu piztuta mantentzeko."</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Ez dago SIM txartelik tabletan."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"Ez dago SIM txartelik telefonoan."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Ez dago SIMik tabletan."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Ez dago SIMik telefonoan."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN kodeak ez datoz bat"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"<xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz saiatu zara tableta desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%2$d</xliff:g> aldiz huts egiten baduzu, berrezarri egingo da tableta eta, ondorioz, bertako datu guztiak ezabatuko dira."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"<xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%2$d</xliff:g> aldiz huts egiten baduzu, berrezarri egingo da telefonoa eta, ondorioz, bertako datu guztiak ezabatuko dira."</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"<xliff:g id="NUMBER">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Laneko profila kendu egingo da eta, ondorioz, profileko datu guztiak ezabatuko dira."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%2$d</xliff:g> aldiz oker marrazten baduzu, tableta posta-kontu baten bidez desblokeatzeko eskatuko dizugu.\n\n Saiatu berriro <xliff:g id="NUMBER_2">%3$d</xliff:g> segundo barru."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%2$d</xliff:g> aldiz oker marrazten baduzu, telefonoa posta-kontu baten bidez desblokeatzeko eskatuko dizugu.\n\n Saiatu berriro <xliff:g id="NUMBER_2">%3$d</xliff:g> segundo barru."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"Hatz-marken sentsorea etengailuan dago. Tabletaren ertzeko bolumen-botoi goratuaren ondoan dagoen botoi laua da."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"Hatz-marken sentsorea etengailuan dago. Gailuaren ertzeko bolumen-botoi goratuaren ondoan dagoen botoi laua da."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"Hatz-marken sentsorea etengailuan dago. Telefonoaren ertzeko bolumen-botoi goratuaren ondoan dagoen botoi laua da."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Desblokeatu telefonoa aukera gehiago ikusteko"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Desblokeatu tableta aukera gehiago ikusteko"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Desblokeatu gailua aukera gehiago ikusteko"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Telefono honetan erreproduzitzen"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Tableta honetan erreproduzitzen"</string>
 </resources>

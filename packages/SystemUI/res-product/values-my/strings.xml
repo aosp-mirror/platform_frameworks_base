@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ကြိုးမဲ့အားသွင်းရန် ဖုန်းကို ပြန်၍ချိန်ပါ"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV စက်သည် မကြာမီ ပိတ်သွားပါမည်၊ ဆက်ဖွင့်ထားရန် ခလုတ်တစ်ခုကို နှိပ်ပါ။"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"စက်သည် မကြာမီ ပိတ်သွားပါမည်၊ ဆက်ဖွင့်ထားရန် နှိပ်ပါ။"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"တက်ဘလက်ထဲတွင် ဆင်းမ်ကတ် မရှိပါ။"</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"ဖုန်းထဲတွင် ဆင်းမ်ကတ် မရှိပါ။"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"တက်ဘလက်တွင် ဆင်းမ်မရှိပါ။"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"ဖုန်းတွင် ဆင်းမ်မရှိပါ။"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"ပင်နံပါတ် ကိုက်ညီမှု မရှိပါ"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤတက်ဘလက်ကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤဖုန်းကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"ဖုန်းကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"သင်သည် သင်၏ လော့ခ်ဖွင့်ခြင်းပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းပြီးသည့်နောက်တွင် သင့်အီးမေးလ်အကောင့်အား အသုံးပြု၍ တက်ဘလက်ကို လော့ခ်ဖွင့်ရန် တောင်းဆိုသွားပါမည်။\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"သင်သည် သင်၏ လော့ခ်ဖွင့်ခြင်းပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းပြီးသည့်နောက်တွင် သင့်အီးမေးလ်အကောင့်အား အသုံးပြု၍ ဖုန်းကို လော့ခ်ဖွင့်ရန် တောင်းဆိုသွားပါမည်။\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"လက်ဗွေ အာရုံခံကိရိယာသည် ဖွင့်ပိတ်ခလုတ်ပေါ်တွင် ရှိသည်။ တက်ဘလက်၏ဘေးဘက်ရှိ အသံထိန်းခလုတ်ဖုသီးနှင့် ကပ်လျက်မှ ခလုတ်ပြားဖြစ်သည်။"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"လက်ဗွေ အာရုံခံကိရိယာသည် ဖွင့်ပိတ်ခလုတ်ပေါ်တွင် ရှိသည်။ စက်၏ဘေးဘက်ရှိ အသံထိန်းခလုတ်ဖုသီးနှင့် ကပ်လျက်မှ ခလုတ်ပြားဖြစ်သည်။"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"လက်ဗွေ အာရုံခံကိရိယာသည် ဖွင့်ပိတ်ခလုတ်ပေါ်တွင် ရှိသည်။ ဖုန်း၏ဘေးဘက်ရှိ အသံထိန်းခလုတ်ဖုသီးနှင့် ကပ်လျက်မှ ခလုတ်ပြားဖြစ်သည်။"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်ဖုန်းကို လော့ခ်ဖွင့်ပါ"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်တက်ဘလက်ကို လော့ခ်ဖွင့်ပါ"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်စက်ကို လော့ခ်ဖွင့်ပါ"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"ဤဖုန်းတွင် ဖွင့်နေသည်"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"ဤတက်ဘလက်တွင် ဖွင့်နေသည်"</string>
 </resources>

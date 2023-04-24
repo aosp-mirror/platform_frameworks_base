@@ -23,8 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Чтобы телефон заряжался, поставьте его на док-станцию"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Устройство Android TV скоро выключится. Чтобы этого не произошло, нажмите любую кнопку."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Устройство скоро выключится. Чтобы этого не произошло, нажмите любую кнопку или коснитесь экрана."</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"SIM-карта не установлена."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"SIM-карта не установлена."</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"В планшете отсутствует SIM-карта."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"В телефоне отсутствует SIM-карта."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN-коды не совпадают"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Вы несколько раз (<xliff:g id="NUMBER_0">%1$d</xliff:g>) не смогли разблокировать планшет. Осталось попыток: <xliff:g id="NUMBER_1">%2$d</xliff:g>. В случае неудачи произойдет сброс настроек и все данные на устройстве будут удалены."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Вы несколько раз (<xliff:g id="NUMBER_0">%1$d</xliff:g>) не смогли разблокировать телефон. Осталось попыток: <xliff:g id="NUMBER_1">%2$d</xliff:g>. В случае неудачи произойдет сброс настроек и все данные на устройстве будут удалены."</string>
@@ -40,7 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Вы несколько раз (<xliff:g id="NUMBER">%d</xliff:g>) не смогли разблокировать телефон. Рабочий профиль и все его данные будут удалены."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Вы несколько раз (<xliff:g id="NUMBER_0">%1$d</xliff:g>) ввели неверный графический ключ. Осталось попыток: <xliff:g id="NUMBER_1">%2$d</xliff:g>. В случае неудачи вам будет предложено разблокировать планшет с помощью аккаунта электронной почты.\n\nПовторите попытку через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Вы несколько раз (<xliff:g id="NUMBER_0">%1$d</xliff:g>) ввели неверный графический ключ. Осталось попыток: <xliff:g id="NUMBER_1">%2$d</xliff:g>. В случае неудачи вам будет предложено разблокировать телефон с помощью аккаунта электронной почты.\n\nПовторите попытку через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"Сканер отпечатков пальцев находится на кнопке питания. Она плоская и расположена рядом с приподнятой кнопкой регулировки громкости на боковой стороне планшета."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"Сканер отпечатков пальцев находится на кнопке питания. Она плоская и расположена рядом с приподнятой кнопкой регулировки громкости на боковой стороне устройства."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"Сканер отпечатков пальцев находится на кнопке питания. Она плоская и расположена рядом с приподнятой кнопкой регулировки громкости на боковой стороне телефона."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Чтобы посмотреть дополнительные параметры, разблокируйте телефон."</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Чтобы посмотреть дополнительные параметры, разблокируйте планшет."</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Чтобы посмотреть дополнительные параметры, разблокируйте устройство."</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Воспроизводится на этом телефоне."</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Воспроизводится на этом планшете."</string>
 </resources>
