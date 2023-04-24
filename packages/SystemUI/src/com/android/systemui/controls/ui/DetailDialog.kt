@@ -19,6 +19,7 @@ package com.android.systemui.controls.ui
 import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.ActivityTaskManager.INVALID_TASK_ID
+import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
@@ -96,7 +97,9 @@ class DetailDialog(
                 activityContext,
                 0 /* enterResId */,
                 0 /* exitResId */
-            )
+            ).setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            options.isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+
             taskView.startActivity(
                 pendingIntent,
                 fillInIntent,
