@@ -11,6 +11,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.shade.ShadeViewController
@@ -79,6 +80,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var singleShadeOverScroller: SingleShadeLockScreenOverScroller
     @Mock lateinit var splitShadeOverScroller: SplitShadeLockScreenOverScroller
     @Mock lateinit var qsTransitionController: LockscreenShadeQsTransitionController
+    @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -124,6 +126,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                         dumpManager)
                 },
                 qsTransitionControllerFactory = { qsTransitionController },
+                activityStarter = activityStarter,
             )
         transitionController.addCallback(transitionControllerCallback)
         whenever(nsslController.view).thenReturn(stackscroller)
