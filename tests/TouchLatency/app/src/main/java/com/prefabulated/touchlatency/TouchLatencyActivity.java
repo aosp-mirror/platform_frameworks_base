@@ -16,8 +16,6 @@
 
 package com.prefabulated.touchlatency;
 
-import android.app.ActivityOptions;
-import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -105,7 +103,6 @@ public class TouchLatencyActivity extends AppCompatActivity {
             updateDisplayMode(menuItem, currentMode);
         }
         updateRefreshRateMenu(mMenu.findItem(R.id.frame_rate));
-        updateMultiDisplayMenu(mMenu.findItem(R.id.multi_display));
     }
 
     @Override
@@ -186,20 +183,6 @@ public class TouchLatencyActivity extends AppCompatActivity {
         mCurrentModeIndex = modeIndex;
     }
 
-    private void changeMultipleDisplays() {
-        Intent intent = new Intent(this, TouchLatencyActivityPresentation.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT | Intent.FLAG_ACTIVITY_NEW_TASK);
-        ActivityOptions options = ActivityOptions.makeBasic();
-        for (int i = 1; i < mDisplayManager.getDisplays().length; ++i) {
-            // We assume the first display is already displaying the TouchLatencyActivity
-            int displayId = mDisplayManager.getDisplays()[i].getDisplayId();
-            options.setLaunchDisplayId(displayId);
-            intent.putExtra(TouchLatencyActivityPresentation.DISPLAY_ID, displayId);
-            startActivity(intent, options.toBundle());
-        }
-    }
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Trace.beginSection("TouchLatencyActivity onOptionsItemSelected");
@@ -216,10 +199,6 @@ public class TouchLatencyActivity extends AppCompatActivity {
             }
             case R.id.display_mode: {
                 changeDisplayMode(item);
-                break;
-            }
-            case R.id.multi_display: {
-                changeMultipleDisplays();
                 break;
             }
         }
