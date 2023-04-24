@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ил гаргах"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Апп хуваагдсан дэлгэц дээр ажиллахгүй байж болзошгүй."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Энэ апп нь дэлгэц хуваах тохиргоог дэмждэггүй."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Энэ аппыг зөвхөн 1 цонхонд нээх боломжтой."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Апп хоёрдогч дэлгэцэд ажиллахгүй."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Аппыг хоёрдогч дэлгэцэд эхлүүлэх боломжгүй."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"\"Дэлгэц хуваах\" хуваагч"</string>
@@ -46,6 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Дээд 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Дээд 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Доод бүтэн дэлгэц"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Зүүн талд хуваах"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Баруун талд хуваах"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Дээд талд хуваах"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Доод талд хуваах"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Нэг гарын горимыг ашиглаж байна"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Гарахын тулд дэлгэцийн доод хэсгээс дээш шударч эсвэл апп дээр хүссэн газраа товшино уу"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Нэг гарын горимыг эхлүүлэх"</string>
@@ -72,13 +77,34 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Бөмбөлөг"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Удирдах"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Бөмбөлгийг үл хэрэгссэн."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Энэ аппыг дахин эхлүүлж, бүтэн дэлгэцэд орохын тулд товшино уу."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Харагдах байдлыг сайжруулахын тулд энэ аппыг товшиж, дахин эхлүүлнэ үү."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Камерын асуудал гарсан уу?\nДахин тааруулахын тулд товшино уу"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Үүнийг засаагүй юу?\nБуцаахын тулд товшино уу"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Камерын асуудал байхгүй юу? Хаахын тулд товшино уу."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Зарим апп нь босоо чиглэлд хамгийн сайн ажилладаг"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Орон зайгаа сайтар ашиглахын тулд эдгээр сонголтуудын аль нэгийг туршиж үзээрэй"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Төхөөрөмжөө бүтэн дэлгэцээр үзэхийн тулд эргүүлнэ"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Аппыг дахин байрлуулахын тулд хажууд нь хоёр товшино"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Харж илүү ихийг хий"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Дэлгэцийг хуваахын тулд өөр апп руу чирнэ үү"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Аппыг дахин байрлуулахын тулд гадна талд нь хоёр товшино"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ойлголоо"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Нэмэлт мэдээлэл авах бол дэлгэнэ үү."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Харагдах байдлыг сайжруулахын тулд дахин эхлүүлэх үү?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Та аппыг дахин эхлүүлэх боломжтой бөгөөд ингэснээр энэ нь таны дэлгэцэд илүү сайн харагдах хэдий ч та явцаа эсвэл хадгалаагүй аливаа өөрчлөлтөө алдаж магадгүй"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Цуцлах"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Дахин эхлүүлэх"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Дахиж бүү харуул"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Энэ аппыг зөөхийн тулд\nхоёр товшино уу"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Томруулах"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Багасгах"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Хаах"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Буцах"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Бариул"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Aппын дүрс тэмдэг"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Бүтэн дэлгэц"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Дэлгэцийн горим"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Дэлгэцийг хуваах"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Бусад"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Хөвөгч"</string>
+    <string name="select_text" msgid="5139083974039906583">"Сонгох"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Дэлгэцийн агшин"</string>
+    <string name="close_text" msgid="4986518933445178928">"Хаах"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Цэсийг хаах"</string>
 </resources>
