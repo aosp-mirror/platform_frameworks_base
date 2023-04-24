@@ -297,7 +297,7 @@ public class Bubble implements BubbleViewProvider {
     public BubbleInfo asBubbleBarBubble() {
         return new BubbleInfo(getKey(),
                 getFlags(),
-                getShortcutInfo().getId(),
+                getShortcutId(),
                 getIcon(),
                 getUser().getIdentifier(),
                 getPackageName());
