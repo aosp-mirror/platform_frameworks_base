@@ -563,14 +563,15 @@ public class BroadcastSkipPolicy {
 
         // Ensure that broadcasts are only sent to other apps if they are explicitly marked as
         // exported, or are System level broadcasts
+        final int originalCallingUid = r.sticky ? r.originalStickyCallingUid : r.callingUid;
         if (!filter.exported && checkComponentPermission(null, r.callingPid,
-                r.callingUid, filter.receiverList.uid, filter.exported)
+                originalCallingUid, filter.receiverList.uid, filter.exported)
                 != PackageManager.PERMISSION_GRANTED) {
             return "Exported Denial: sending "
                     + r.intent.toString()
                     + ", action: " + r.intent.getAction()
                     + " from " + r.callerPackage
-                    + " (uid=" + r.callingUid + ")"
+                    + " (uid=" + originalCallingUid + ")"
                     + " due to receiver " + filter.receiverList.app
                     + " (uid " + filter.receiverList.uid + ")"
                     + " not specifying RECEIVER_EXPORTED";
