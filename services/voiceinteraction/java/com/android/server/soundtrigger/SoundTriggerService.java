@@ -1672,11 +1672,6 @@ public class SoundTriggerService extends SystemService {
                 return mSoundTriggerHelper.unloadKeyphraseSoundModel(keyphraseId);
             }
 
-            @Override
-            public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-                mSoundTriggerHelper.dump(fd, pw, args);
-            }
-
             private void clientDied() {
                 Slog.w(TAG, "Client died, cleaning up session.");
                 sEventLogger.enqueue(new EventLogger.StringEvent(
@@ -1696,18 +1691,6 @@ public class SoundTriggerService extends SystemService {
                     originatorIdentity)) {
                 return listUnderlyingModuleProperties(originatorIdentity);
             }
-        }
-
-        @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            // log
-            sEventLogger.dump(pw);
-
-            // enrolled models
-            mDbHelper.dump(pw);
-
-            // stats
-            mSoundModelStatTracker.dump(pw);
         }
     }
 
