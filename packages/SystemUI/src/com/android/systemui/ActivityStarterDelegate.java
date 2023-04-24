@@ -92,6 +92,14 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
+    public void startActivity(Intent intent,
+            boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.startActivity(intent, dismissShade, animationController));
+    }
+
+    @Override
     public void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked) {
@@ -176,5 +184,26 @@ public class ActivityStarterDelegate implements ActivityStarter {
         mActualStarterOptionalLazy.get().ifPresent(
                 starter -> starter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone,
                         customMessage));
+    }
+
+    @Override
+    public void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
+            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
+            Callback callback, int flags,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            UserHandle userHandle) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.startActivityDismissingKeyguard(intent, onlyProvisioned,
+                        dismissShade, disallowEnterPictureInPictureWhileLaunching, callback,
+                        flags, animationController, userHandle));
+    }
+
+    @Override
+    public void executeRunnableDismissingKeyguard(Runnable runnable,
+            Runnable cancelAction, boolean dismissShade,
+            boolean afterKeyguardGone, boolean deferred) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.executeRunnableDismissingKeyguard(runnable, cancelAction,
+                        dismissShade, afterKeyguardGone, deferred));
     }
 }

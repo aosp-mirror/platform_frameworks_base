@@ -50,6 +50,7 @@ import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.settings.UserTracker;
@@ -102,6 +103,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final boolean mVibrateOnOpening;
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
     private final SystemBarAttributesListener mSystemBarAttributesListener;
+    private final ActivityStarter mActivityStarter;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
     private final QuickSettingsController mQsController;
     private final QSHost mQSHost;
@@ -138,7 +140,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             SystemBarAttributesListener systemBarAttributesListener,
             Lazy<CameraLauncher> cameraLauncherLazy,
             UserTracker userTracker,
-            QSHost qsHost) {
+            QSHost qsHost,
+            ActivityStarter activityStarter) {
         mCentralSurfaces = centralSurfaces;
         mQsController = quickSettingsController;
         mContext = context;
@@ -170,6 +173,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
                 mVibratorOptional, resources);
         mSystemBarAttributesListener = systemBarAttributesListener;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -375,7 +379,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         if (!mKeyguardStateController.isShowing()) {
             final Intent cameraIntent = CameraIntents.getInsecureCameraIntent(mContext);
             cameraIntent.putExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, source);
-            mCentralSurfaces.startActivityDismissingKeyguard(cameraIntent,
+            mActivityStarter.startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
                     null /* animationController */, mUserTracker.getUserHandle());
@@ -432,7 +436,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         // app-side haptic experimentation.
 
         if (!mKeyguardStateController.isShowing()) {
-            mCentralSurfaces.startActivityDismissingKeyguard(emergencyIntent,
+            mActivityStarter.startActivityDismissingKeyguard(emergencyIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
                     null /* animationController */, mUserTracker.getUserHandle());
