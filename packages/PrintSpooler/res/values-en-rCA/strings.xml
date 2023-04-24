@@ -23,21 +23,21 @@
     <string name="label_copies_summary" msgid="3861966063536529540">"Copies:"</string>
     <string name="label_paper_size" msgid="908654383827777759">"Paper size"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Paper size:"</string>
-    <string name="label_color" msgid="1108690305218188969">"Colour"</string>
+    <string name="label_color" msgid="1108690305218188969">"Color"</string>
     <string name="label_duplex" msgid="5370037254347072243">"Two-sided"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientation"</string>
     <string name="label_pages" msgid="7768589729282182230">"Pages"</string>
     <string name="destination_default_text" msgid="5422708056807065710">"Select a printer"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"All <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"Range of <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
-    <string name="pages_range_example" msgid="8558694453556945172">"e.g. 1–5,8,11–13"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"e.g. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Print preview"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Install PDF viewer for preview"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Printing app crashed"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Generating print job"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Save as PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"All printers…"</string>
-    <string name="print_dialog" msgid="32628687461331979">"Print dialogue"</string>
+    <string name="print_dialog" msgid="32628687461331979">"Print dialog"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"Page <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> of <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"Summary, copies <xliff:g id="COPIES">%1$s</xliff:g>, paper size <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
@@ -91,7 +91,7 @@
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Your document may pass through one or more servers on its way to the printer."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Black &amp; White"</item>
-    <item msgid="2762241247228983754">"Colour"</item>
+    <item msgid="2762241247228983754">"Color"</item>
   </string-array>
   <string-array name="duplex_mode_labels">
     <item msgid="3882302912790928315">"None"</item>
