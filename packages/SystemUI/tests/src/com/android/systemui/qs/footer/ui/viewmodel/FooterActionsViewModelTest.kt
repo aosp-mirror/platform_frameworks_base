@@ -376,13 +376,13 @@ class FooterActionsViewModelTest : SysuiTestCase() {
     @Test
     fun isVisible() {
         val underTest = utils.footerActionsViewModel()
-        assertThat(underTest.isVisible.value).isTrue()
-
-        underTest.onVisibilityChangeRequested(visible = false)
         assertThat(underTest.isVisible.value).isFalse()
 
         underTest.onVisibilityChangeRequested(visible = true)
         assertThat(underTest.isVisible.value).isTrue()
+
+        underTest.onVisibilityChangeRequested(visible = false)
+        assertThat(underTest.isVisible.value).isFalse()
     }
 
     @Test

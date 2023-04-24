@@ -23,9 +23,11 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -85,6 +87,54 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
 
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
         mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
+    }
+
+    @Test
+    public void onViewDetached_removesStatusBarStateListener() {
+        mController.onViewDetached();
+        verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
+    }
+
+    @Test
+    public void onViewDetached_removesAllScheduledIndications() {
+        // GIVEN show next indication runnable is set
+        final KeyguardIndicationRotateTextViewController.ShowNextIndication mockShowNextIndication =
+                mock(KeyguardIndicationRotateTextViewController.ShowNextIndication.class);
+        mController.mShowNextIndicationRunnable = mockShowNextIndication;
+
+        // WHEN the view is detached
+        mController.onViewDetached();
+
+        // THEN delayed execution is cancelled & runnable set to null
+        verify(mockShowNextIndication).cancelDelayedExecution();
+        assertNull(mController.mShowNextIndicationRunnable);
+    }
+
+    @Test
+    public void destroy_removesStatusBarStateListener() {
+        mController.destroy();
+        verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
+    }
+
+    @Test
+    public void destroy_removesOnAttachStateChangeListener() {
+        mController.destroy();
+        verify(mView).removeOnAttachStateChangeListener(any());
+    }
+
+    @Test
+    public void destroy_removesAllScheduledIndications() {
+        // GIVEN show next indication runnable is set
+        final KeyguardIndicationRotateTextViewController.ShowNextIndication mockShowNextIndication =
+                mock(KeyguardIndicationRotateTextViewController.ShowNextIndication.class);
+        mController.mShowNextIndicationRunnable = mockShowNextIndication;
+
+        // WHEN the controller is destroyed
+        mController.destroy();
+
+        // THEN delayed execution is cancelled & runnable set to null
+        verify(mockShowNextIndication).cancelDelayedExecution();
+        assertNull(mController.mShowNextIndicationRunnable);
     }
 
     @Test

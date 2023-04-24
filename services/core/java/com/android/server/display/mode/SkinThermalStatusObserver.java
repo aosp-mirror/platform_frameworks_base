@@ -37,7 +37,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         DisplayManager.DisplayListener {
     private static final String TAG = "SkinThermalStatusObserver";
 
-    private final DisplayModeDirector.BallotBox mBallotBox;
+    private final VotesStorage mVotesStorage;
     private final DisplayModeDirector.Injector mInjector;
 
     private boolean mLoggingEnabled;
@@ -52,15 +52,15 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
             mThermalThrottlingByDisplay = new SparseArray<>();
 
     SkinThermalStatusObserver(DisplayModeDirector.Injector injector,
-            DisplayModeDirector.BallotBox ballotBox) {
-        this(injector, ballotBox, BackgroundThread.getHandler());
+            VotesStorage votesStorage) {
+        this(injector, votesStorage, BackgroundThread.getHandler());
     }
 
     @VisibleForTesting
     SkinThermalStatusObserver(DisplayModeDirector.Injector injector,
-            DisplayModeDirector.BallotBox ballotBox, Handler handler) {
+            VotesStorage votesStorage, Handler handler) {
         mInjector = injector;
-        mBallotBox = ballotBox;
+        mVotesStorage = votesStorage;
         mHandler = handler;
     }
 
@@ -112,8 +112,8 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
     public void onDisplayRemoved(int displayId) {
         synchronized (mThermalObserverLock) {
             mThermalThrottlingByDisplay.remove(displayId);
-            mHandler.post(() -> mBallotBox.vote(displayId,
-                    DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE, null));
+            mHandler.post(() -> mVotesStorage.updateVote(displayId,
+                    Vote.PRIORITY_SKIN_TEMPERATURE, null));
         }
         if (mLoggingEnabled) {
             Slog.d(TAG, "Display removed and voted: displayId=" + displayId);
@@ -138,7 +138,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         for (Display d : displays) {
             final int displayId = d.getDisplayId();
             d.getDisplayInfo(info);
-            localMap.put(displayId, info.refreshRateThermalThrottling);
+            localMap.put(displayId, info.thermalRefreshRateThrottling);
         }
         synchronized (mThermalObserverLock) {
             for (int i = 0; i < size; i++) {
@@ -154,7 +154,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         DisplayInfo displayInfo = new DisplayInfo();
         mInjector.getDisplayInfo(displayId, displayInfo);
         SparseArray<SurfaceControl.RefreshRateRange> throttlingMap =
-                displayInfo.refreshRateThermalThrottling;
+                displayInfo.thermalRefreshRateThrottling;
 
         synchronized (mThermalObserverLock) {
             mThermalThrottlingByDisplay.put(displayId, throttlingMap);
@@ -218,11 +218,11 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         SurfaceControl.RefreshRateRange foundRange = findBestMatchingRefreshRateRange(currentStatus,
                 throttlingMap);
         // if status <= currentStatus not found in the map reset vote
-        DisplayModeDirector.Vote vote = null;
+        Vote vote = null;
         if (foundRange != null) { // otherwise vote with found range
-            vote = DisplayModeDirector.Vote.forRenderFrameRates(foundRange.min, foundRange.max);
+            vote = Vote.forRenderFrameRates(foundRange.min, foundRange.max);
         }
-        mBallotBox.vote(displayId, DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE, vote);
+        mVotesStorage.updateVote(displayId, Vote.PRIORITY_SKIN_TEMPERATURE, vote);
         if (mLoggingEnabled) {
             Slog.d(TAG, "Voted: vote=" + vote + ", display =" + displayId);
         }
@@ -244,11 +244,11 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
 
     private void fallbackReportThrottlingIfNeeded(int displayId,
             @Temperature.ThrottlingStatus int currentStatus) {
-        DisplayModeDirector.Vote vote = null;
+        Vote vote = null;
         if (currentStatus >= Temperature.THROTTLING_CRITICAL) {
-            vote = DisplayModeDirector.Vote.forRenderFrameRates(0f, 60f);
+            vote = Vote.forRenderFrameRates(0f, 60f);
         }
-        mBallotBox.vote(displayId, DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE, vote);
+        mVotesStorage.updateVote(displayId, Vote.PRIORITY_SKIN_TEMPERATURE, vote);
         if (mLoggingEnabled) {
             Slog.d(TAG, "Voted(fallback): vote=" + vote + ", display =" + displayId);
         }
