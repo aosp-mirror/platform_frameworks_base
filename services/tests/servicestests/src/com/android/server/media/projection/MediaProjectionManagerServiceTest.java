@@ -446,6 +446,25 @@ public class MediaProjectionManagerServiceTest {
     }
 
     @Test
+    public void testSetUserReviewGrantedConsentResult_projectionNull_consentNotGranted()
+            throws Exception {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        projection.start(mIMediaProjectionCallback);
+        assertThat(mService.isCurrentProjection(projection)).isTrue();
+        doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(
+                any(ContentRecordingSession.class));
+        // Some other token.
+        final IMediaProjection otherProjection = null;
+        // Waiting for user to review consent.
+        mService.setContentRecordingSession(mWaitingDisplaySession);
+        mService.setUserReviewGrantedConsentResult(RECORD_CANCEL, otherProjection);
+
+        // Display result is ignored; only the first session is set.
+        verify(mWindowManagerInternal, times(1)).setContentRecordingSession(
+                eq(mWaitingDisplaySession));
+    }
+
+    @Test
     public void testSetUserReviewGrantedConsentResult_noVirtualDisplay() throws Exception {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
         projection.start(mIMediaProjectionCallback);
