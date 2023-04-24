@@ -19,6 +19,7 @@ package com.android.credentialmanager.common.material
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -791,7 +792,12 @@ object SwipeableDefaults {
     /**
      * The default animation used by [SwipeableState].
      */
-    val AnimationSpec = SpringSpec<Float>()
+    val AnimationSpec = SpringSpec<Float>(stiffness = Spring.StiffnessMediumLow)
+
+    /**
+     * The default animation duration used by Scrim in enter/exit transitions.
+     */
+    val DefaultDurationMillis: Int = 400
 
     /**
      * The default velocity threshold (1.8 dp per millisecond) used by [swipeable].
