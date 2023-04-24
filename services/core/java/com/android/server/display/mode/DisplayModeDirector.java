@@ -1705,14 +1705,13 @@ public class DisplayModeDirector {
         }
 
         public void observe() {
-            DisplayManager dm = mContext.getSystemService(DisplayManager.class);
-            dm.registerDisplayListener(this, mHandler);
+            mInjector.registerDisplayListener(this, mHandler);
 
             // Populate existing displays
             SparseArray<Display.Mode[]> modes = new SparseArray<>();
             SparseArray<Display.Mode> defaultModes = new SparseArray<>();
             DisplayInfo info = new DisplayInfo();
-            Display[] displays = dm.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+            Display[] displays = mInjector.getDisplays();
             for (Display d : displays) {
                 final int displayId = d.getDisplayId();
                 d.getDisplayInfo(info);
@@ -1753,16 +1752,9 @@ public class DisplayModeDirector {
 
         @Nullable
         private DisplayInfo getDisplayInfo(int displayId) {
-            Display d = mContext.getSystemService(DisplayManager.class).getDisplay(displayId);
-            if (d == null) {
-                // We can occasionally get a display added or changed event for a display that was
-                // subsequently removed, which means this returns null. Check this case and bail
-                // out early; if it gets re-attached we'll eventually get another call back for it.
-                return null;
-            }
             DisplayInfo info = new DisplayInfo();
-            d.getDisplayInfo(info);
-            return info;
+            // Display info might be invalid, in this case return null
+            return mInjector.getDisplayInfo(displayId, info) ? info : null;
         }
 
         private void updateLayoutLimitedFrameRate(int displayId, @Nullable DisplayInfo info) {
@@ -2432,8 +2424,7 @@ public class DisplayModeDirector {
         }
 
         private void updateDefaultDisplayState() {
-            Display display = mContext.getSystemService(DisplayManager.class)
-                    .getDisplay(Display.DEFAULT_DISPLAY);
+            Display display = mInjector.getDisplay(Display.DEFAULT_DISPLAY);
             if (display == null) {
                 return;
             }
@@ -2750,8 +2741,7 @@ public class DisplayModeDirector {
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
 
             synchronized (mSensorObserverLock) {
-                for (Display d : mDisplayManager.getDisplays(
-                        DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
+                for (Display d : mInjector.getDisplays()) {
                     mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
                 }
             }
@@ -2762,8 +2752,7 @@ public class DisplayModeDirector {
         }
 
         private void recalculateVotesLocked() {
-            final Display[] displays = mDisplayManager.getDisplays(
-                    DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+            final Display[] displays = mInjector.getDisplays();
             for (Display d : displays) {
                 int displayId = d.getDisplayId();
                 Vote vote = null;
@@ -2794,7 +2783,7 @@ public class DisplayModeDirector {
 
         @Override
         public void onDisplayAdded(int displayId) {
-            boolean isDozeState = mInjector.isDozeState(mDisplayManager.getDisplay(displayId));
+            boolean isDozeState = mInjector.isDozeState(mInjector.getDisplay(displayId));
             synchronized (mSensorObserverLock) {
                 mDozeStateByDisplay.put(displayId, isDozeState);
                 recalculateVotesLocked();
@@ -2806,7 +2795,7 @@ public class DisplayModeDirector {
             boolean wasDozeState = mDozeStateByDisplay.get(displayId);
             synchronized (mSensorObserverLock) {
                 mDozeStateByDisplay.put(displayId,
-                        mInjector.isDozeState(mDisplayManager.getDisplay(displayId)));
+                        mInjector.isDozeState(mInjector.getDisplay(displayId)));
                 if (wasDozeState != mDozeStateByDisplay.get(displayId)) {
                     recalculateVotesLocked();
                 }
@@ -3176,7 +3165,12 @@ public class DisplayModeDirector {
                 @NonNull ContentObserver observer);
 
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
+                Handler handler);
+
+        void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
                 Handler handler, long flags);
+
+        Display getDisplay(int displayId);
 
         Display[] getDisplays();
 
@@ -3222,8 +3216,19 @@ public class DisplayModeDirector {
 
         @Override
         public void registerDisplayListener(DisplayManager.DisplayListener listener,
+                Handler handler) {
+            getDisplayManager().registerDisplayListener(listener, handler);
+        }
+
+        @Override
+        public void registerDisplayListener(DisplayManager.DisplayListener listener,
                 Handler handler, long flags) {
             getDisplayManager().registerDisplayListener(listener, handler, flags);
+        }
+
+        @Override
+        public Display getDisplay(int displayId) {
+            return getDisplayManager().getDisplay(displayId);
         }
 
         @Override
@@ -3234,10 +3239,13 @@ public class DisplayModeDirector {
         @Override
         public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
             Display display = getDisplayManager().getDisplay(displayId);
-            if (display != null) {
-                return display.getDisplayInfo(displayInfo);
+            if (display == null) {
+                // We can occasionally get a display added or changed event for a display that was
+                // subsequently removed, which means this returns null. Check this case and bail
+                // out early; if it gets re-attached we'll eventually get another call back for it.
+                return false;
             }
-            return false;
+            return display.getDisplayInfo(displayInfo);
         }
 
         @Override
