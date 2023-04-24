@@ -3575,7 +3575,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void handleStartUser(int userId) {
         synchronized (getLockObject()) {
             pushScreenCapturePolicy(userId);
-            pushUserControlDisabledPackagesLocked(userId);
+            if (!isPolicyEngineForFinanceFlagEnabled()) {
+                pushUserControlDisabledPackagesLocked(userId);
+            }
         }
         pushUserRestrictions(userId);
         // When system user is started (device boot), load cache for all users.
@@ -10062,7 +10064,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         setNetworkLoggingActiveInternal(false);
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
-        pushUserControlDisabledPackagesLocked(userId);
+        if (!isPolicyEngineForFinanceFlagEnabled()) {
+            pushUserControlDisabledPackagesLocked(userId);
+        }
         setGlobalSettingDeviceOwnerType(DEVICE_OWNER_TYPE_DEFAULT);
 
         if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
