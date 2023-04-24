@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволува апликацијата да ги контролира вибрациите."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ѝ дозволува на апликацијата да пристапи до состојбата на вибрации."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно избирај телефонски броеви"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Овозможува апликацијата да повикува телефонски броеви без ваша интервенција. Ова може да предизвика неочекувани трошоци или повици. Имајте на ум дека ова не дозволува апликацијата да повикува броеви на служби за итна помош. Злонамерните апликации може да ве чинат пари поради повици без ваша потврда."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"пристапи до услугата за повици IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Дозволува апликацијата да ја користи услугата IMS за повици без ваша интервенција."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"прочитај ги статусот и идентитетот  на телефонот"</string>
@@ -665,7 +666,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатоци"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем со „Отклучување со лик“"</string>
-    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лице, а потоа повторно додајте го лицето"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лик, а потоа повторно додајте го ликот"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Поставете „Отклучување со лик“"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
@@ -2159,8 +2160,10 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Овие содржини не може да се отвораат со лични апликации"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Работниот профил е паузиран"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Допрете за да вклучите"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема работни апликации"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема лични апликации"</string>
     <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->

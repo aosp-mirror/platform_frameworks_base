@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"อนุญาตให้แอปพลิเคชันควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"อนุญาตให้แอปเข้าถึงสถานะการสั่น"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"โทรติดต่อหมายเลขโทรศัพท์โดยตรง"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"อนุญาตให้แอปพลิเคชันโทรเข้าโทรศัพท์โดยไม่ต้องให้คุณจัดการ ซึ่งอาจทำให้มีการเรียกเก็บเงินหรือการโทรที่ไม่คาดคิด โปรดทราบว่าการทำงานนี้ไม่ได้อนุญาตให้แอปพลิเคชันโทรไปหมายเลขฉุกเฉิน แอปพลิเคชันที่เป็นอันตรายอาจทำให้คุณต้องเสียค่าบริการด้วยการโทรโดยไม่ขอการยืนยันจากคุณ"</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"เข้าถึงบริการโทร IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"อนุญาตให้แอปใช้บริการ IMS เพื่อโทรออกโดยคุณไม่ต้องดำเนินการใดๆ เลย"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"อ่านสถานะและข้อมูลระบุตัวตนของโทรศัพท์"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ยกเลิกการดำเนินการกับใบหน้าแล้ว"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ผู้ใช้ยกเลิกการใช้การปลดล็อกด้วยใบหน้า"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ดำเนินการหลายครั้งเกินไป ลองอีกครั้งในภายหลัง"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ลองหลายครั้งเกินไป การปลดล็อกด้วยใบหน้าไม่พร้อมใช้งาน"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ลองหลายครั้งเกินไป ใช้การล็อกหน้าจอแทน"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ยืนยันใบหน้าไม่ได้ ลองอีกครั้ง"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"คุณยังไม่ได้ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"เปิดเนื้อหานี้โดยใช้แอปงานไม่ได้"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"แชร์เนื้อหานี้โดยใช้แอปส่วนตัวไม่ได้"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"เปิดเนื้อหานี้โดยใช้แอปส่วนตัวไม่ได้"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"โปรไฟล์งานหยุดชั่วคราว"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"แตะเพื่อเปิด"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ไม่มีแอปงาน"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ไม่มีแอปส่วนตัว"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"เปิด <xliff:g id="APP">%s</xliff:g> ในโปรไฟล์ส่วนตัว"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"เปิด <xliff:g id="APP">%s</xliff:g> ในโปรไฟล์งาน"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ใช้เบราว์เซอร์ส่วนตัว"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ใช้เบราว์เซอร์งาน"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ปลดล็อกเครือข่ายที่ใช้กับ SIM"</string>

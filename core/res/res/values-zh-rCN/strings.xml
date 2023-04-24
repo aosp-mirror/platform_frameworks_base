@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允许应用控制振动器。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允许该应用访问振动器状态。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"拨打电话"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"允许该应用在您未执行操作的情况下拨打电话号码。此权限可能会导致意外收费或呼叫。请注意，此权限不允许该应用拨打紧急电话号码。恶意应用可通过拨打电话产生相关费用，而无需您的确认。"</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"使用即时通讯通话服务"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"允许应用自行使用即时通讯服务拨打电话。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"读取手机状态和身份"</string>
@@ -684,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"请将手机向左移动"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"请将手机向右移动"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不清您的脸部，请将手机举到与眼睛齐平的位置。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到人脸，请将手机举到与眼睛齐平的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"请重新注册您的面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"无法识别人脸，请重试。"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"面孔处理操作已取消。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"用户已取消人脸解锁"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"尝试次数过多，请稍后重试。"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"尝试次数过多。无法使用人脸解锁功能。"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"尝试次数过多，请改为通过解除屏幕锁定来验证身份。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"无法验证人脸，请重试。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"您尚未设置人脸解锁"</string>
@@ -2092,7 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"确定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"关闭"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"了解详情"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以读取通知内容，包括联系人名称和消息等个人信息。该功能还可以关闭通知或对通知做出回应，例如接听来电以及控制勿扰模式。"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以读取通知内容，包括联系人姓名、消息等个人信息。该功能还可以关闭通知或对通知做出回应，例如接听来电以及控制勿扰模式。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式信息通知"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"省电模式已开启"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"降低电池用量以延长电池续航时间"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"无法使用工作应用打开该内容"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"无法使用个人应用分享该内容"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"无法使用个人应用打开该内容"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"工作资料已被暂停"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"点按即可开启"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"没有支持该内容的工作应用"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"没有支持该内容的个人应用"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"打开个人 <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"打开工作 <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用个人浏览器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作浏览器"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 网络解锁 PIN 码"</string>
