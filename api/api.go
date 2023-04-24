@@ -15,7 +15,9 @@
 package api
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/google/blueprint/proptools"
 
@@ -102,6 +104,13 @@ type fgProps struct {
 	Visibility []string
 }
 
+type defaultsProps struct {
+	Name                *string
+	Api_surface         *string
+	Api_contributions   []string
+	Defaults_visibility []string
+}
+
 type Bazel_module struct {
 	Bp2build_available *bool
 }
@@ -164,26 +173,26 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 }
 
 func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, system_server_modules []string) {
-	for _, i := range []struct{
+	for _, i := range []struct {
 		name    string
 		tag     string
 		modules []string
 	}{
 		{
-			name: "all-modules-public-annotations",
-			tag:  "{.public.annotations.zip}",
+			name:    "all-modules-public-annotations",
+			tag:     "{.public.annotations.zip}",
 			modules: modules,
 		}, {
-			name: "all-modules-system-annotations",
-			tag:  "{.system.annotations.zip}",
+			name:    "all-modules-system-annotations",
+			tag:     "{.system.annotations.zip}",
 			modules: modules,
 		}, {
-			name: "all-modules-module-lib-annotations",
-			tag:  "{.module-lib.annotations.zip}",
+			name:    "all-modules-module-lib-annotations",
+			tag:     "{.module-lib.annotations.zip}",
 			modules: modules,
 		}, {
-			name: "all-modules-system-server-annotations",
-			tag:  "{.system-server.annotations.zip}",
+			name:    "all-modules-system-server-annotations",
+			tag:     "{.system-server.annotations.zip}",
 			modules: system_server_modules,
 		},
 	} {
@@ -329,6 +338,30 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 	}
 }
 
+func createApiContributionDefaults(ctx android.LoadHookContext, modules []string) {
+	defaultsSdkKinds := []android.SdkKind{
+		android.SdkPublic, android.SdkSystem, android.SdkModule,
+	}
+	for _, sdkKind := range defaultsSdkKinds {
+		props := defaultsProps{}
+		props.Name = proptools.StringPtr(
+			sdkKind.DefaultJavaLibraryName() + "_contributions")
+		if sdkKind == android.SdkModule {
+			props.Name = proptools.StringPtr(
+				sdkKind.DefaultJavaLibraryName() + "_contributions_full")
+		}
+		props.Api_surface = proptools.StringPtr(sdkKind.String())
+		apiSuffix := ""
+		if sdkKind != android.SdkPublic {
+			apiSuffix = "." + strings.ReplaceAll(sdkKind.String(), "-", "_")
+		}
+		props.Api_contributions = transformArray(
+			modules, "", fmt.Sprintf(".stubs.source%s.api.contribution", apiSuffix))
+		props.Defaults_visibility = []string{"//visibility:public"}
+		ctx.CreateModule(java.DefaultsFactory, &props)
+	}
+}
+
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	bootclasspath := a.properties.Bootclasspath
 	system_server_classpath := a.properties.System_server_classpath
@@ -347,6 +380,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedAnnotationsFilegroups(ctx, bootclasspath, system_server_classpath)
 
 	createPublicStubsSourceFilegroup(ctx, bootclasspath)
+
+	createApiContributionDefaults(ctx, bootclasspath)
 }
 
 func combinedApisModuleFactory() android.Module {
@@ -374,7 +409,7 @@ func (a *CombinedApis) ConvertWithBp2build(ctx android.TopDownMutatorContext) {
 		"system-server": "-system-server-current.txt",
 	}
 
-	for scopeName, suffix := range scopeToSuffix{
+	for scopeName, suffix := range scopeToSuffix {
 		name := a.Name() + suffix
 
 		var scope bazel.StringAttribute
