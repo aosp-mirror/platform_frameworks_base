@@ -138,7 +138,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         for (Display d : displays) {
             final int displayId = d.getDisplayId();
             d.getDisplayInfo(info);
-            localMap.put(displayId, info.refreshRateThermalThrottling);
+            localMap.put(displayId, info.thermalRefreshRateThrottling);
         }
         synchronized (mThermalObserverLock) {
             for (int i = 0; i < size; i++) {
@@ -154,7 +154,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         DisplayInfo displayInfo = new DisplayInfo();
         mInjector.getDisplayInfo(displayId, displayInfo);
         SparseArray<SurfaceControl.RefreshRateRange> throttlingMap =
-                displayInfo.refreshRateThermalThrottling;
+                displayInfo.thermalRefreshRateThrottling;
 
         synchronized (mThermalObserverLock) {
             mThermalThrottlingByDisplay.put(displayId, throttlingMap);
