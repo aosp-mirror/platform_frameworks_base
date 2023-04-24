@@ -63,6 +63,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
@@ -198,6 +199,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
+    private final ActivityStarter mActivityStarter;
 
     private View mLongPressedView;
 
@@ -487,7 +489,7 @@ public class NotificationStackScrollLayoutController {
                     mView.addSwipedOutView(view);
                     mFalsingCollector.onNotificationDismissed();
                     if (mFalsingCollector.shouldEnforceBouncer()) {
-                        mCentralSurfaces.executeRunnableDismissingKeyguard(
+                        mActivityStarter.executeRunnableDismissingKeyguard(
                                 null,
                                 null /* cancelAction */,
                                 false /* dismissShade */,
@@ -678,7 +680,8 @@ public class NotificationStackScrollLayoutController {
             FeatureFlags featureFlags,
             NotificationTargetsHelper notificationTargetsHelper,
             SecureSettings secureSettings,
-            NotificationDismissibilityProvider dismissibilityProvider) {
+            NotificationDismissibilityProvider dismissibilityProvider,
+            ActivityStarter activityStarter) {
         mView = view;
         mStackStateLogger = stackLogger;
         mLogger = logger;
@@ -724,6 +727,7 @@ public class NotificationStackScrollLayoutController {
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
+        mActivityStarter = activityStarter;
         updateResources();
         setUpView();
     }
@@ -734,6 +738,7 @@ public class NotificationStackScrollLayoutController {
         mView.setLogger(mLogger);
         mView.setTouchHandler(new TouchHandler());
         mView.setCentralSurfaces(mCentralSurfaces);
+        mView.setActivityStarter(mActivityStarter);
         mView.setClearAllAnimationListener(this::onAnimationEnd);
         mView.setClearAllListener((selection) -> mUiEventLogger.log(
                 NotificationPanelEvent.fromSelection(selection)));
