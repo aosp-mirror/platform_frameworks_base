@@ -278,6 +278,7 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    @Nullable
     static IVrManager provideIVrManager() {
         return IVrManager.Stub.asInterface(ServiceManager.getService(Context.VR_SERVICE));
     }
