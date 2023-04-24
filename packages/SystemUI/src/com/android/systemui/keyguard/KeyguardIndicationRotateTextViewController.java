@@ -23,6 +23,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.Dumpable;
@@ -74,7 +75,9 @@ public class KeyguardIndicationRotateTextViewController extends
 
     // Executor that will show the next message after a delay
     private final DelayableExecutor mExecutor;
-    @Nullable private ShowNextIndication mShowNextIndicationRunnable;
+
+    @VisibleForTesting
+    @Nullable ShowNextIndication mShowNextIndicationRunnable;
 
     // List of indication types to show. The next indication to show is always at index 0
     private final List<Integer> mIndicationQueue = new ArrayList<>();
@@ -109,6 +112,12 @@ public class KeyguardIndicationRotateTextViewController extends
     protected void onViewDetached() {
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         cancelScheduledIndication();
+    }
+
+    /** Destroy ViewController, removing any listeners. */
+    public void destroy() {
+        super.destroy();
+        onViewDetached();
     }
 
     /**
