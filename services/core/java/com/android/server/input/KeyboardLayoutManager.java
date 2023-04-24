@@ -1313,7 +1313,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     private static boolean isLayoutCompatibleWithLanguageTag(KeyboardLayout layout,
             @NonNull String languageTag) {
         LocaleList layoutLocales = layout.getLocales();
-        if (layoutLocales.isEmpty()) {
+        if (layoutLocales.isEmpty() || TextUtils.isEmpty(languageTag)) {
             // KCM file doesn't have an associated language tag. This can be from
             // a 3rd party app so need to include it as a potential layout.
             return true;
