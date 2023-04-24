@@ -807,11 +807,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                 if (under != null) {
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
-                // Create a transition if the activity is playing in case the current activity
-                // didn't commit invisible. That's because if this activity has changed its
-                // visibility while playing transition, there won't able to commit visibility until
-                // the running transition finish.
-                final Transition transition = r.mTransitionController.inPlayingTransition(r)
+                // Create a transition to make sure the activity change is collected.
+                final Transition transition = r.mTransitionController.isShellTransitionsEnabled()
                         && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
                 final boolean changed = r.setOccludesParent(false);
