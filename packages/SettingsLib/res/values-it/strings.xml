@@ -213,8 +213,8 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Scegli profilo"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Personali"</string>
-    <string name="category_work" msgid="4014193632325996115">"Di lavoro"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personale"</string>
+    <string name="category_work" msgid="4014193632325996115">"Lavoro"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opzioni sviluppatore"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Attiva Opzioni sviluppatore"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Imposta opzioni per lo sviluppo di applicazioni"</string>
@@ -519,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Più tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Meno tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Annulla"</string>
+    <string name="next" msgid="2699398661093607009">"Avanti"</string>
+    <string name="back" msgid="5554327870352703710">"Indietro"</string>
+    <string name="save" msgid="3745809743277153149">"Salva"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Fine"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
@@ -573,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Concedere privilegi amministrativi all\'utente?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"In qualità di amministratore, l\'utente potrà gestire altri utenti, modificare le impostazioni del dispositivo e ripristinare i dati di fabbrica di quest\'ultimo."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vuoi impostare questo utente come amministratore?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Gli amministratori hanno privilegi speciali che altri utenti non hanno. Un amministratore può gestire tutti gli utenti, aggiornare o resettare questo dispositivo, modificare le impostazioni, vedere tutte le app installate e concedere o revocare privilegi amministrativi per altri utenti."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Imposta come amministratore"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurare l\'utente ora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assicurati che la persona sia disponibile a prendere il dispositivo e configurare il suo spazio"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurare il profilo ora?"</string>
@@ -606,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Verrà avviata una nuova sessione Ospite e verranno eliminati tutti i dati e le app della sessione corrente"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vuoi uscire da modalità Ospite?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Verranno eliminati i dati e le app della sessione Ospite corrente"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Concedi privilegi amministrativi all\'utente"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Non concedere privilegi amministrativi all\'utente"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Sì, imposta come amministratore"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, non impostare come amministratore"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Esci"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vuoi salvare l\'attività Ospite?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puoi salvare l\'attività della sessione corrente o eliminare tutti i dati e le app"</string>
