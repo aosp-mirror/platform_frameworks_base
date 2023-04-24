@@ -46,8 +46,10 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
+import android.os.Binder;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -74,6 +76,8 @@ import java.util.Map;
 @RunWith(MockitoJUnitRunner.class)
 public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
+    private static final int USER_ID_1 = 11;
+    private static final int USER_ID_2 = 12;
     private static final VerificationWithTimeout CALLBACK_TIMEOUT =
             timeout(/* millis= */ 200);
     private static final int SIGNAL_QUALITY = 1;
@@ -94,18 +98,25 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     private ProgramInfo mHalCurrentInfo;
     private TunerSession[] mTunerSessions;
 
-    @Mock private IBroadcastRadio mBroadcastRadioMock;
-    @Mock ITunerSession mHalTunerSessionMock;
+    @Mock
+    private UserHandle mUserHandleMock;
+    @Mock
+    private IBroadcastRadio mBroadcastRadioMock;
+    @Mock
+    ITunerSession mHalTunerSessionMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(RadioServiceUserController.class);
+        builder.spyStatic(RadioServiceUserController.class).spyStatic(Binder.class);
     }
 
     @Before
     public void setup() throws Exception {
+        when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
+        doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
         doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(USER_ID_1).when(() -> RadioServiceUserController.getCurrentUser());
 
         mRadioModule = new RadioModule(mBroadcastRadioMock,
                 TestUtils.makeDefaultModuleProperties());
@@ -384,6 +395,20 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         assertWithMessage("Unknown error HAL exception when tuning")
                 .that(thrown).hasMessageThat().contains(Result.toString(Result.UNKNOWN_ERROR));
+    }
+
+    @Test
+    public void tune_forSystemUser() throws Exception {
+        when(mUserHandleMock.getIdentifier()).thenReturn(UserHandle.USER_SYSTEM);
+        doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
+        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        ProgramSelector initialSel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo = TestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
+        openAidlClients(/* numClients= */ 1);
+
+        mTunerSessions[0].tune(initialSel);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
     }
 
     @Test
@@ -855,6 +880,19 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         assertWithMessage("Exception for getting parameters when HAL throws remote exception")
                 .that(thrown).hasMessageThat().contains(exceptionMessage);
+    }
+
+    @Test
+    public void onCurrentProgramInfoChanged_withNoncurrentUser_doesNotInvokeCallback()
+            throws Exception {
+        openAidlClients(1);
+        doReturn(USER_ID_2).when(() -> RadioServiceUserController.getCurrentUser());
+
+        mHalTunerCallback.onCurrentProgramInfoChanged(TestUtils.makeHalProgramInfo(
+                TestUtils.makeHalFmSelector(/* freq= */ 97300), SIGNAL_QUALITY));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0))
+                .onCurrentProgramInfoChanged(any());
     }
 
     @Test
