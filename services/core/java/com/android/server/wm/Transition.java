@@ -107,6 +107,11 @@ import java.util.function.Predicate;
  * Represents a logical transition. This keeps track of all the changes associated with a logical
  * WM state -> state transition.
  * @see TransitionController
+ *
+ * In addition to tracking individual container changes, this also tracks ordering-changes (just
+ * on-top for now). However, since order is a "global" property, the mechanics of order-change
+ * detection/reporting is non-trivial when transitions are collecting in parallel. See
+ * {@link #collectOrderChanges} for more details.
  */
 class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "Transition";
@@ -192,6 +197,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private final ArrayList<Task> mOnTopTasksStart = new ArrayList<>();
 
     /**
+     * The (non alwaysOnTop) tasks which were on-top of their display when this transition became
+     * ready (via setReady, not animation-ready).
+     */
+    private final ArrayList<Task> mOnTopTasksAtReady = new ArrayList<>();
+
+    /**
      * Set of participating windowtokens (activity/wallpaper) which are visible at the end of
      * the transition animation.
      */
@@ -243,6 +254,36 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * of it). Currently, this happens before the display is ready since nothing can be seen yet.
      */
     boolean mIsPlayerEnabled = true;
+
+    /** This transition doesn't run in parallel. */
+    static final int PARALLEL_TYPE_NONE = 0;
+
+    /** Any 2 transitions of this type can run in parallel with each other. Used for testing. */
+    static final int PARALLEL_TYPE_MUTUAL = 1;
+
+    @IntDef(prefix = { "PARALLEL_TYPE_" }, value = {
+            PARALLEL_TYPE_NONE,
+            PARALLEL_TYPE_MUTUAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ParallelType {}
+
+    /**
+     * What category of parallel-collect support this transition has. The value of this is used
+     * by {@link TransitionController} to determine which transitions can collect in parallel. If
+     * a transition can collect in parallel, it means that it will start collecting as soon as the
+     * prior collecting transition is {@link #isPopulated}. This is a shortcut for supporting
+     * a couple specific situations before we have full-fledged support for parallel transitions.
+     */
+    @ParallelType int mParallelCollectType = PARALLEL_TYPE_NONE;
+
+    /**
+     * A "Track" is a set of animations which must cooperate with each other to play smoothly. If
+     * animations can play independently of each other, then they can be in different tracks. If
+     * a transition must cooperate with transitions in >1 other track, then it must be marked
+     * FLAG_SYNC and it will end-up flushing all animations before it starts.
+     */
+    int mAnimationTrack = 0;
 
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
@@ -447,7 +488,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             throw new IllegalStateException("Attempting to re-use a transition");
         }
         mState = STATE_COLLECTING;
-        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG, false /* parallel */);
+        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG,
+                mParallelCollectType != PARALLEL_TYPE_NONE);
         mSyncEngine.setSyncMethod(mSyncId, TransitionController.SYNC_METHOD);
 
         mLogger.mSyncId = mSyncId;
@@ -718,8 +760,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         final boolean ready = mReadyTracker.allReady();
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Set transition ready=%b %d", ready, mSyncId);
-        mSyncEngine.setReady(mSyncId, ready);
-        if (ready) mLogger.mReadyTimeNs = SystemClock.elapsedRealtimeNanos();
+        boolean changed = mSyncEngine.setReady(mSyncId, ready);
+        if (changed && ready) {
+            mLogger.mReadyTimeNs = SystemClock.elapsedRealtimeNanos();
+            mOnTopTasksAtReady.clear();
+            for (int i = 0; i < mTargetDisplays.size(); ++i) {
+                addOnTopTasks(mTargetDisplays.get(i), mOnTopTasksAtReady);
+            }
+            mController.onTransitionPopulated(this);
+        }
     }
 
     /**
@@ -735,6 +784,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     @VisibleForTesting
     boolean allReady() {
         return mReadyTracker.allReady();
+    }
+
+    /** This transition has all of its expected participants. */
+    boolean isPopulated() {
+        return mState >= STATE_STARTED && mReadyTracker.allReady();
     }
 
     /**
@@ -1211,7 +1265,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 : mController.mAtm.mRootWindowContainer.getDefaultDisplay();
 
         if (mState == STATE_ABORT) {
-            mController.abort(this);
+            mController.onAbort(this);
             primaryDisplay.getPendingTransaction().merge(transaction);
             mSyncId = -1;
             mOverrideOptions = null;
@@ -1222,13 +1276,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mState = STATE_PLAYING;
         mStartTransaction = transaction;
         mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
-        mController.moveToPlaying(this);
 
         // Flags must be assigned before calculateTransitionInfo. Otherwise it won't take effect.
         if (primaryDisplay.isKeyguardLocked()) {
             mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
         }
-        collectOrderChanges();
+
+        // This is the only (or last) transition that is collecting, so we need to report any
+        // leftover order changes.
+        collectOrderChanges(mController.mWaitingTransitions.isEmpty());
 
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
@@ -1236,6 +1292,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mAtm.mBackNavigationController.onTransactionReady(this, mTargets);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
         info.setDebugId(mSyncId);
+        mController.assignTrack(this, info);
+
+        mController.moveToPlaying(this);
 
         // Repopulate the displays based on the resolved targets.
         mTargetDisplays.clear();
@@ -1383,24 +1442,70 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         info.releaseAnimSurfaces();
     }
 
-    /** Collect tasks which moved-to-top but didn't change otherwise. */
+    /**
+     * Collect tasks which moved-to-top as part of this transition. This also updates the
+     * controller's latest-reported when relevant.
+     *
+     * This is a non-trivial operation because transition can collect in parallel; however, it can
+     * be made tenable by acknowledging that the "setup" part of collection (phase 1) is still
+     * globally serial; so, we can build some reasonable rules around it.
+     *
+     * First, we record the "start" on-top state (to compare against). Then, when this becomes
+     * ready (via allReady, NOT onTransactionReady), we also record the "onReady" on-top state
+     * -- the idea here is that upon "allReady", all the actual WM changes should be done and we
+     * are now just waiting for window content to become ready (finish drawing).
+     *
+     * Then, in this function (during onTransactionReady), we compare the two orders and include
+     * any changes to the order in the reported transition-info. Unfortunately, because of parallel
+     * collection, the order can change in unexpected ways by now. To resolve this, we ALSO keep a
+     * global "latest reported order" in TransitionController and use that to make decisions.
+     */
     @VisibleForTesting
-    void collectOrderChanges() {
+    void collectOrderChanges(boolean reportCurrent) {
         if (mOnTopTasksStart.isEmpty()) return;
-        final ArrayList<Task> onTopTasksEnd = new ArrayList<>();
-        for (int i = 0; i < mTargetDisplays.size(); ++i) {
-            addOnTopTasks(mTargetDisplays.get(i), onTopTasksEnd);
-        }
-        for (int i = 0; i < onTopTasksEnd.size(); ++i) {
-            final Task task = onTopTasksEnd.get(i);
+        boolean includesOrderChange = false;
+        for (int i = 0; i < mOnTopTasksAtReady.size(); ++i) {
+            final Task task = mOnTopTasksAtReady.get(i);
             if (mOnTopTasksStart.contains(task)) continue;
-            mParticipants.add(task);
-            int changeIdx = mChanges.indexOfKey(task);
-            if (changeIdx < 0) {
-                mChanges.put(task, new ChangeInfo(task));
-                changeIdx = mChanges.indexOfKey(task);
+            includesOrderChange = true;
+            break;
+        }
+        if (!includesOrderChange && !reportCurrent) {
+            // This transition doesn't include an order change, so if it isn't required to report
+            // the current focus (eg. it's the last of a cluster of transitions), then don't
+            // report.
+            return;
+        }
+        // The transition included an order change, but it may not be up-to-date, so grab the
+        // latest state and compare with the last reported state (or our start state if no
+        // reported state exists).
+        ArrayList<Task> onTopTasksEnd = new ArrayList<>();
+        for (int d = 0; d < mTargetDisplays.size(); ++d) {
+            addOnTopTasks(mTargetDisplays.get(d), onTopTasksEnd);
+            final int displayId = mTargetDisplays.get(d).mDisplayId;
+            ArrayList<Task> reportedOnTop = mController.mLatestOnTopTasksReported.get(displayId);
+            for (int i = onTopTasksEnd.size() - 1; i >= 0; --i) {
+                final Task task = onTopTasksEnd.get(i);
+                if (task.getDisplayId() != displayId) continue;
+                // If it didn't change since last report, don't report
+                if (reportedOnTop == null) {
+                    if (mOnTopTasksStart.contains(task)) continue;
+                } else if (reportedOnTop.contains(task)) {
+                    continue;
+                }
+                // Need to report it.
+                mParticipants.add(task);
+                int changeIdx = mChanges.indexOfKey(task);
+                if (changeIdx < 0) {
+                    mChanges.put(task, new ChangeInfo(task));
+                    changeIdx = mChanges.indexOfKey(task);
+                }
+                mChanges.valueAt(changeIdx).mFlags |= ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP;
             }
-            mChanges.valueAt(changeIdx).mFlags |= ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP;
+            // Swap in the latest on-top tasks.
+            mController.mLatestOnTopTasksReported.put(displayId, onTopTasksEnd);
+            onTopTasksEnd = reportedOnTop != null ? reportedOnTop : new ArrayList<>();
+            onTopTasksEnd.clear();
         }
     }
 
