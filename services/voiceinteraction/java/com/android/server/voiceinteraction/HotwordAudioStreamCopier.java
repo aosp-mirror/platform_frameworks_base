@@ -339,7 +339,11 @@ final class HotwordAudioStreamCopier {
             } catch (IOException e) {
                 mAudioSource.closeWithError(e.getMessage());
                 mAudioSink.closeWithError(e.getMessage());
-                Slog.e(TAG, mStreamTaskId + ": Failed to copy audio stream", e);
+                // This is expected when VIS closes the read side of the pipe on their end,
+                // so when the HotwordAudioStreamCopier tries to write, we will get that broken
+                // pipe error. HDS is also closing the write side of the pipe (the system is on the
+                // read end of that pipe).
+                Slog.i(TAG, mStreamTaskId + ": Failed to copy audio stream", e);
                 HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
                         HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__CLOSE_ERROR_FROM_SYSTEM,
                         mUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
