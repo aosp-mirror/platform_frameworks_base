@@ -76,7 +76,7 @@
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/screenrecord_buttons_margin_top">
             <TextView
-                android:id="@+id/button_cancel"
+                android:id="@android:id/button2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
@@ -87,7 +87,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
             <TextView
-                android:id="@+id/button_start"
+                android:id="@android:id/button1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
