@@ -71,12 +71,6 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
     @Mock
     Resources mResources;
     @Mock
-    SurfaceControl.Transaction mStartT;
-    @Mock
-    SurfaceControl.Transaction mFinishT;
-    @Mock
-    SurfaceControl.Transaction mAnimationT;
-    @Mock
     Transitions.TransitionFinishCallback mTransitionFinishCallback;
     @Mock
     ShellExecutor mExecutor;
@@ -88,7 +82,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
 
         doReturn(mExecutor).when(mTransitions).getMainExecutor();
-        doReturn(mAnimationT).when(mTransactionFactory).get();
+        doReturn(new SurfaceControl.Transaction()).when(mTransactionFactory).get();
         doReturn(mResources).when(mContext).getResources();
         doReturn(mDisplayMetrics).when(mResources).getDisplayMetrics();
         when(mResources.getDisplayMetrics())
@@ -115,7 +109,9 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         runOnUiThread(() -> {
             try {
                 assertTrue(mExitDesktopTaskTransitionHandler
-                        .startAnimation(mToken, info, mStartT, mFinishT,
+                        .startAnimation(mToken, info,
+                                new SurfaceControl.Transaction(),
+                                new SurfaceControl.Transaction(),
                                 mTransitionFinishCallback));
             } catch (Exception e) {
                 exceptions.add(e);
