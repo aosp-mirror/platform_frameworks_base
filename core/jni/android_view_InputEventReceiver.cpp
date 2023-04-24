@@ -374,7 +374,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     }
                     inputEventObj =
                             android_view_KeyEvent_fromNative(env,
-                                                             static_cast<KeyEvent*>(inputEvent));
+                                                             static_cast<KeyEvent&>(*inputEvent));
                     break;
 
                 case InputEventType::MOTION: {

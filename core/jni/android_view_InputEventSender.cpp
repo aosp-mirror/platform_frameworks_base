@@ -353,8 +353,7 @@ static jboolean nativeSendKeyEvent(JNIEnv* env, jclass clazz, jlong senderPtr,
         jint seq, jobject eventObj) {
     sp<NativeInputEventSender> sender =
             reinterpret_cast<NativeInputEventSender*>(senderPtr);
-    KeyEvent event;
-    android_view_KeyEvent_toNative(env, eventObj, &event);
+    const KeyEvent event = android_view_KeyEvent_toNative(env, eventObj);
     status_t status = sender->sendKeyEvent(seq, &event);
     return !status;
 }

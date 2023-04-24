@@ -217,7 +217,7 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
         result = env->NewObjectArray(jsize(events.size()), gKeyEventClassInfo.clazz, NULL);
         if (result) {
             for (size_t i = 0; i < events.size(); i++) {
-                jobject keyEventObj = android_view_KeyEvent_fromNative(env, &events.itemAt(i));
+                jobject keyEventObj = android_view_KeyEvent_fromNative(env, events.itemAt(i));
                 if (!keyEventObj) break; // threw OOM exception
                 env->SetObjectArrayElement(result, jsize(i), keyEventObj);
                 env->DeleteLocalRef(keyEventObj);
