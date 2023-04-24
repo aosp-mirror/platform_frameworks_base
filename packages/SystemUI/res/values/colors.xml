@@ -207,11 +207,6 @@
     <color name="controls_task_view_bg">#CC191C1D</color>
     <color name="control_popup_dim">#8A000000</color>
 
-    <!-- Keyboard backlight indicator-->
-    <color name="backlight_indicator_step_filled">#F6E388</color>
-    <color name="backlight_indicator_step_empty">#494740</color>
-    <color name="backlight_indicator_background">#32302A</color>
-
     <!-- Docked misalignment message -->
     <color name="misalignment_text_color">#F28B82</color>
 
