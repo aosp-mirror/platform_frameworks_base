@@ -21548,7 +21548,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
         if (!keepAccountMigrated) {
-            removeAccount(accountToMigrate);
+            removeAccount(accountToMigrate, sourceUserId);
         }
     }
 
@@ -21592,9 +21592,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .write();
     }
 
-    private void removeAccount(Account account) {
-        final AccountManager accountManager =
-                mContext.getSystemService(AccountManager.class);
+    private void removeAccount(Account account, @UserIdInt int sourceUserId) {
+        final AccountManager accountManager = mContext.createContextAsUser(
+                        UserHandle.of(sourceUserId), /* flags= */ 0)
+                .getSystemService(AccountManager.class);
         final AccountManagerFuture<Bundle> bundle = accountManager.removeAccount(account,
                 null, null /* callback */, null /* handler */);
         try {
