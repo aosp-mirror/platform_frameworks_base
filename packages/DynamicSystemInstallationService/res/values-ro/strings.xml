@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_description" msgid="8582605799129954556">"Introduceți parola și accesați Actualizările de sistem dinamice"</string>
-    <string name="notification_install_completed" msgid="6252047868415172643">"Sistemul dinamic este pregătit. Ca să începeți să-l folosiți, reporniți dispozitivul."</string>
+    <string name="keyguard_description" msgid="8582605799129954556">"Introdu parola și accesează Actualizările de sistem dinamice"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Sistemul dinamic e pregătit. Ca să începi să-l folosești, repornește dispozitivul."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Se instalează"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Instalarea nu a reușit"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Nu s-a validat imaginea. Abandonați instalarea."</string>
-    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Rulăm un sistem dinamic. Reporniți pentru a folosi versiunea Android inițială."</string>
-    <string name="notification_action_cancel" msgid="5929299408545961077">"Anulați"</string>
-    <string name="notification_action_discard" msgid="1817481003134947493">"Renunțați"</string>
-    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"Reporniți"</string>
-    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Reporniți"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Nu s-a validat imaginea. Abandonează instalarea."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Rulăm un sistem dinamic. Repornește pentru a folosi versiunea Android inițială."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"Anulează"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"Renunță"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"Repornește"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Repornește"</string>
     <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"S-a renunțat la sistemul dinamic"</string>
     <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Nu se poate reporni sau încărca sistemul dinamic"</string>
     <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"Sistemul dinamic nu a fost dezactivat"</string>
