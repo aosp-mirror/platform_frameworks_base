@@ -19,6 +19,7 @@ package com.android.systemui.media.controls.ui
 import android.app.PendingIntent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.os.LocaleList
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
@@ -56,6 +57,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
+import java.util.Locale
 import javax.inject.Provider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
@@ -71,6 +73,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.floatThat
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -123,6 +126,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK)
         transitionRepository = FakeKeyguardTransitionRepository()
         mediaCarouselController =
             MediaCarouselController(
@@ -710,6 +714,23 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(pageIndicator).tintList =
             ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
         verify(pageIndicator, times(2)).setNumPages(any())
+    }
+
+    @Test
+    fun testOnLocaleListChanged_playersAreAddedBack() {
+        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK, Locale.CANADA)
+        testConfigurationChange(configListener.value::onLocaleListChanged)
+
+        verify(pageIndicator, never()).tintList =
+            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+
+        context.resources.configuration.locales = LocaleList(Locale.UK, Locale.US, Locale.CANADA)
+        testConfigurationChange(configListener.value::onLocaleListChanged)
+
+        verify(pageIndicator).tintList =
+            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        // When recreateMedia is set to true, page indicator is updated on removal and addition.
+        verify(pageIndicator, times(4)).setNumPages(any())
     }
 
     @Test
