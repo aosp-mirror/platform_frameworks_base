@@ -725,6 +725,7 @@ class TransitionController {
         // Run state-validation checks when no transitions are active anymore.
         if (!inTransition()) {
             validateStates();
+            mAtm.mWindowManager.onAnimationFinished();
         }
     }
 
