@@ -5780,10 +5780,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if (sizeStr != null && sizeStr.length() > 0) {
             final int pos = sizeStr.indexOf(',');
             if (pos > 0 && sizeStr.lastIndexOf(',') == pos) {
-                int width, height;
                 try {
-                    width = Integer.parseInt(sizeStr.substring(0, pos));
-                    height = Integer.parseInt(sizeStr.substring(pos + 1));
+                    final Point size = displayContent.getValidForcedSize(
+                            Integer.parseInt(sizeStr.substring(0, pos)),
+                            Integer.parseInt(sizeStr.substring(pos + 1)));
+                    final int width = size.x;
+                    final int height = size.y;
                     if (displayContent.mBaseDisplayWidth != width
                             || displayContent.mBaseDisplayHeight != height) {
                         ProtoLog.i(WM_ERROR, "FORCED DISPLAY SIZE: %dx%d", width, height);
