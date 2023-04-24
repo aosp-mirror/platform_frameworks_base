@@ -119,6 +119,16 @@ public interface ActivityStarter {
             boolean afterKeyguardGone,
             boolean deferred);
 
+    /** Execute a runnable after dismissing keyguard. */
+    void executeRunnableDismissingKeyguard(
+            Runnable runnable,
+            Runnable cancelAction,
+            boolean dismissShade,
+            boolean afterKeyguardGone,
+            boolean deferred,
+            boolean willAnimateOnKeyguard,
+            @Nullable String customMessage);
+
     interface Callback {
         void onActivityStarted(int resultCode);
     }

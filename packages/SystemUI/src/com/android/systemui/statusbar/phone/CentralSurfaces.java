@@ -54,6 +54,7 @@ import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
 
 import java.io.PrintWriter;
@@ -612,4 +613,15 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
             mDeviceId = deviceId;
         }
     }
+
+    /**
+     * Sets launching activity over LS state in central surfaces.
+     */
+    void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen);
+
+    /**
+     * Gets an animation controller from a notification row.
+     */
+    ActivityLaunchAnimator.Controller getAnimatorControllerFromNotification(
+            ExpandableNotificationRow associatedView);
 }
