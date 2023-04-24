@@ -454,7 +454,7 @@ internal fun Scrim(
     if (color.isSpecified) {
         val alpha by animateFloatAsState(
             targetValue = if (visible) 1f else 0f,
-            animationSpec = TweenSpec()
+            animationSpec = TweenSpec(durationMillis = SwipeableDefaults.DefaultDurationMillis)
         )
         LocalConfiguration.current
         val resources = LocalContext.current.resources
