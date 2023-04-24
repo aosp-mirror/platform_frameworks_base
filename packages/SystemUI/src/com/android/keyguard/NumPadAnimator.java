@@ -30,7 +30,7 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
-import com.android.app.animation.Interpolators;
+import com.android.systemui.animation.Interpolators;
 
 /**
  * Provides background color and radius animations for key pad buttons.

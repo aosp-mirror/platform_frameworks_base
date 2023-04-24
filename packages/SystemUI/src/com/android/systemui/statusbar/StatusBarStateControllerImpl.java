@@ -42,7 +42,6 @@ import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
 
-import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -50,6 +49,7 @@ import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
