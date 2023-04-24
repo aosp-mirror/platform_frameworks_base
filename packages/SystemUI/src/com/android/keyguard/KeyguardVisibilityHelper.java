@@ -21,7 +21,7 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import android.util.Property;
 import android.view.View;
 
-import com.android.app.animation.Interpolators;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
