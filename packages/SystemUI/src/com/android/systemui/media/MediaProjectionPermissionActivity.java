@@ -79,6 +79,9 @@ public class MediaProjectionPermissionActivity extends Activity
     // Indicates if user must review already-granted consent that the MediaProjection app is
     // attempting to re-use.
     private boolean mReviewGrantedConsentRequired = false;
+    // Indicates if the user has consented to record, but is continuing in another activity to
+    // select a particular task to capture.
+    private boolean mUserSelectingTask = false;
 
     @Inject
     public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
@@ -296,6 +299,7 @@ public class MediaProjectionPermissionActivity extends Activity
                 // Start activity from the current foreground user to avoid creating a separate
                 // SystemUI process without access to recent tasks because it won't have
                 // WM Shell running inside.
+                mUserSelectingTask = true;
                 startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
             }
         } catch (RemoteException e) {
@@ -316,7 +320,10 @@ public class MediaProjectionPermissionActivity extends Activity
     @Override
     public void finish() {
         // Default to cancelling recording when user needs to review consent.
-        finish(RECORD_CANCEL, /* projection= */ null);
+        // Don't send cancel if the user has moved on to the next activity.
+        if (!mUserSelectingTask) {
+            finish(RECORD_CANCEL, /* projection= */ null);
+        }
     }
 
     private void finish(@ReviewGrantedConsentResult int consentResult,
@@ -328,7 +335,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
     private void onDialogDismissedOrCancelled(DialogInterface dialogInterface) {
         if (!isFinishing()) {
-            finish(RECORD_CANCEL, /* projection= */ null);
+            finish();
         }
     }
 
