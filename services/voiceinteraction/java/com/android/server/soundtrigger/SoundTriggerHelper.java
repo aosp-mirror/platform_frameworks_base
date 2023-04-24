@@ -1116,15 +1116,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized (mLock) {
-            pw.print("  module properties=");
-            pw.print("  call active=");
-            pw.println(mCallActive);
-            pw.println("  SoundTrigger Power State=" + mSoundTriggerPowerSaveMode);
-        }
-    }
-
     private void initializeDeviceStateListeners() {
         if (mRecognitionRequested) {
             return;
