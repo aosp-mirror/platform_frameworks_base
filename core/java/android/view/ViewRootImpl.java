@@ -218,7 +218,6 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneFallbackEventHandler;
-import com.android.internal.util.Preconditions;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
@@ -808,6 +807,7 @@ public final class ViewRootImpl implements ViewParent,
     final HighContrastTextManager mHighContrastTextManager;
 
     SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
+    boolean mSendingAccessibilityWIndowContentChange = false;
 
     HashSet<View> mTempHashSet;
 
@@ -9867,7 +9867,29 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
-        postSendWindowContentChangedCallback(Preconditions.checkNotNull(source), changeType);
+        Objects.requireNonNull(source);
+        if (changeType == AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) {
+            postSendWindowContentChangedCallback(source, changeType);
+            return;
+        }
+        if (mSendingAccessibilityWIndowContentChange) {
+            // This allows re-entering this method.
+            // Some apps update views during an event dispatch, which triggers another a11y event.
+            // In order to avoid an infinite loop, postpone second event dispatch.
+            mHandler.post(() -> notifySubtreeAccessibilityStateChanged(child, source, changeType));
+            return;
+        }
+
+        AccessibilityEvent event =
+                new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        event.setContentChangeTypes(changeType);
+        event.setAction(mAccessibilityManager.getPerformingAction());
+        mSendingAccessibilityWIndowContentChange = true;
+        try {
+            source.sendAccessibilityEventUnchecked(event);
+        } finally {
+            mSendingAccessibilityWIndowContentChange = false;
+        }
     }
 
     @Override
