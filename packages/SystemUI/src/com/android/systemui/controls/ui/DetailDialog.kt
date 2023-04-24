@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.Activity
 import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.ActivityTaskManager.INVALID_TASK_ID
@@ -217,6 +218,12 @@ class DetailDialog(
         if (!isShowing()) return
         taskView.release()
 
+        val isActivityFinishing =
+            (activityContext as? Activity)?.let { it.isFinishing || it.isDestroyed }
+        if (isActivityFinishing == true) {
+            // Don't dismiss the dialog if the activity is finishing, it will get removed
+            return
+        }
         super.dismiss()
     }
 }
