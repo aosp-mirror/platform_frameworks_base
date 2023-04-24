@@ -54,6 +54,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.graphics.drawable.LayerDrawable;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -1022,11 +1023,15 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
         }
 
-        private Drawable findUserIcon(int userId) {
+        private Drawable findLargeUserIcon(int userId) {
             Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
             if (userIcon != null) {
-                return CircleFramedDrawable.getInstance(mView.getContext(),
-                        userIcon);
+                int iconSize =
+                        mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size);
+                return CircleFramedDrawable.getInstance(
+                    mView.getContext(),
+                    Icon.scaleDownIfNecessary(userIcon, iconSize, iconSize)
+                );
             }
 
             return UserIcons.getDefaultUserIcon(mResources, userId, false);
@@ -1085,7 +1090,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 return;
             }
             final String currentUserName = mUserSwitcherController.getCurrentUserName();
-            Drawable userIcon = findUserIcon(currentUser.info.id);
+            Drawable userIcon = findLargeUserIcon(currentUser.info.id);
             ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
             mUserSwitcher.setText(currentUserName);
 
