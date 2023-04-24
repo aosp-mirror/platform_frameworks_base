@@ -89,7 +89,7 @@ public class TimeDetectorInternalImplTest {
     public void testGetCapabilitiesAndConfigForDpm() throws Exception {
         final boolean autoDetectionEnabled = true;
         ConfigurationInternal testConfig = createConfigurationInternal(autoDetectionEnabled);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(testConfig);
+        mFakeServiceConfigAccessorSpy.initializeCurrentUserConfiguration(testConfig);
 
         TimeCapabilitiesAndConfig actualCapabilitiesAndConfig =
                 mTimeDetectorInternal.getCapabilitiesAndConfigForDpm();
@@ -108,7 +108,8 @@ public class TimeDetectorInternalImplTest {
         final boolean autoDetectionEnabled = false;
         ConfigurationInternal initialConfigurationInternal =
                 createConfigurationInternal(autoDetectionEnabled);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(initialConfigurationInternal);
+        mFakeServiceConfigAccessorSpy.initializeCurrentUserConfiguration(
+                initialConfigurationInternal);
 
         TimeConfiguration timeConfiguration = new TimeConfiguration.Builder()
                 .setAutoDetectionEnabled(true)

@@ -22,15 +22,16 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemClockTime;
 import com.android.server.SystemClockTime.TimeConfidence;
-import com.android.server.timezonedetector.StateChangeListener;
 
-import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -41,14 +42,11 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
     private static final String LOG_TAG = TimeDetectorService.TAG;
 
     @NonNull private final Handler mHandler;
-    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final PowerManager.WakeLock mWakeLock;
     @NonNull private final AlarmManagerInternal mAlarmManagerInternal;
 
-    EnvironmentImpl(@NonNull Context context, @NonNull Handler handler,
-            @NonNull ServiceConfigAccessor serviceConfigAccessor) {
+    EnvironmentImpl(@NonNull Context context, @NonNull Handler handler) {
         mHandler = Objects.requireNonNull(handler);
-        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
 
         PowerManager powerManager = context.getSystemService(PowerManager.class);
         mWakeLock = Objects.requireNonNull(
@@ -56,19 +54,6 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
 
         mAlarmManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(AlarmManagerInternal.class));
-    }
-
-    @Override
-    public void setConfigurationInternalChangeListener(
-            @NonNull StateChangeListener listener) {
-        StateChangeListener stateChangeListener =
-                () -> mHandler.post(listener::onChange);
-        mServiceConfigAccessor.addConfigurationInternalChangeListener(stateChangeListener);
-    }
-
-    @Override
-    public ConfigurationInternal getCurrentUserConfigurationInternal() {
-        return mServiceConfigAccessor.getCurrentUserConfigurationInternal();
     }
 
     @Override
@@ -126,8 +111,19 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
     }
 
     @Override
-    public void dumpDebugLog(@NonNull PrintWriter printWriter) {
-        SystemClockTime.dump(printWriter);
+    public void dumpDebugLog(@NonNull IndentingPrintWriter pw) {
+        long elapsedRealtimeMillis = elapsedRealtimeMillis();
+        pw.printf("elapsedRealtimeMillis()=%s (%s)\n",
+                Duration.ofMillis(elapsedRealtimeMillis), elapsedRealtimeMillis);
+        long systemClockMillis = systemClockMillis();
+        pw.printf("systemClockMillis()=%s (%s)\n",
+                Instant.ofEpochMilli(systemClockMillis), systemClockMillis);
+        pw.println("systemClockConfidence()=" + systemClockConfidence());
+
+        pw.println("SystemClockTime debug log:");
+        pw.increaseIndent();
+        SystemClockTime.dump(pw);
+        pw.decreaseIndent();
     }
 
     @Override

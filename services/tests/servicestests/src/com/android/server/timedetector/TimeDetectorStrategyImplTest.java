@@ -29,14 +29,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
 import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
+import android.util.IndentingPrintWriter;
 
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
@@ -47,14 +55,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -120,13 +126,108 @@ public class TimeDetectorStrategyImplTest {
                     .build();
 
     private FakeEnvironment mFakeEnvironment;
+    private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;
+    private TimeDetectorStrategyImpl mTimeDetectorStrategy;
 
     @Before
     public void setUp() {
         mFakeEnvironment = new FakeEnvironment();
-        mFakeEnvironment.initializeConfig(CONFIG_AUTO_DISABLED);
         mFakeEnvironment.initializeFakeClocks(
                 ARBITRARY_CLOCK_INITIALIZATION_INFO, TIME_CONFIDENCE_LOW);
+
+        mFakeServiceConfigAccessorSpy = spy(new FakeServiceConfigAccessor());
+        mFakeServiceConfigAccessorSpy.initializeCurrentUserConfiguration(CONFIG_AUTO_DISABLED);
+
+        mTimeDetectorStrategy = new TimeDetectorStrategyImpl(
+                mFakeEnvironment, mFakeServiceConfigAccessorSpy);
+    }
+
+    @Test
+    public void testChangeListenerBehavior() throws Exception {
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        mTimeDetectorStrategy.addChangeListener(stateChangeListener);
+
+        boolean bypassUserPolicyChecks = false;
+
+        // Report a config change, but not one that actually changes anything.
+        {
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    CONFIG_AUTO_DISABLED);
+            assertStateChangeNotificationsSent(stateChangeListener, 0);
+            assertEquals(CONFIG_AUTO_DISABLED,
+                    mTimeDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+
+        // Report a config change that actually changes something.
+        {
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    CONFIG_AUTO_ENABLED);
+            assertStateChangeNotificationsSent(stateChangeListener, 1);
+            assertEquals(CONFIG_AUTO_ENABLED,
+                    mTimeDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+
+        // Perform a (current user) update via the strategy.
+        {
+            TimeConfiguration requestedChanges =
+                    new TimeConfiguration.Builder().setAutoDetectionEnabled(false).build();
+            mTimeDetectorStrategy.updateConfiguration(
+                    ARBITRARY_USER_ID, requestedChanges, bypassUserPolicyChecks);
+            assertStateChangeNotificationsSent(stateChangeListener, 1);
+        }
+    }
+
+    // Current user behavior: the strategy caches and returns the latest configuration.
+    @Test
+    public void testReadAndWriteConfiguration() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_ENABLED;
+        mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                currentUserConfig);
+
+        final boolean bypassUserPolicyChecks = false;
+
+        ConfigurationInternal cachedConfigurationInternal =
+                mTimeDetectorStrategy.getCachedCapabilitiesAndConfigForTests();
+        assertEquals(currentUserConfig, cachedConfigurationInternal);
+
+        // Confirm getCapabilitiesAndConfig() does not call through to the ServiceConfigAccessor.
+        {
+            reset(mFakeServiceConfigAccessorSpy);
+            TimeCapabilitiesAndConfig actualCapabilitiesAndConfig =
+                    mTimeDetectorStrategy.getCapabilitiesAndConfig(
+                            currentUserConfig.getUserId(), bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, never()).getConfigurationInternal(
+                    currentUserConfig.getUserId());
+
+            TimeCapabilitiesAndConfig expectedCapabilitiesAndConfig =
+                    currentUserConfig.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+            assertEquals(expectedCapabilitiesAndConfig.getCapabilities(),
+                    actualCapabilitiesAndConfig.getCapabilities());
+            assertEquals(expectedCapabilitiesAndConfig.getConfiguration(),
+                    actualCapabilitiesAndConfig.getConfiguration());
+        }
+
+        // Confirm updateConfiguration() calls through to the ServiceConfigAccessor and updates
+        // the cached copy.
+        {
+            boolean newAutoDetectionEnabled =
+                    !cachedConfigurationInternal.getAutoDetectionEnabledBehavior();
+            TimeConfiguration requestedChanges = new TimeConfiguration.Builder()
+                    .setAutoDetectionEnabled(newAutoDetectionEnabled)
+                    .build();
+            ConfigurationInternal expectedConfigAfterChange =
+                    new ConfigurationInternal.Builder(cachedConfigurationInternal)
+                            .setAutoDetectionEnabledSetting(newAutoDetectionEnabled)
+                            .build();
+
+            reset(mFakeServiceConfigAccessorSpy);
+            mTimeDetectorStrategy.updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, times(1)).updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            assertEquals(expectedConfigAfterChange,
+                    mTimeDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
     }
 
     @Test
@@ -1939,34 +2040,18 @@ public class TimeDetectorStrategyImplTest {
 
         private final List<Runnable> mAsyncRunnables = new ArrayList<>();
 
-        private ConfigurationInternal mConfigurationInternal;
         private boolean mWakeLockAcquired;
         private long mElapsedRealtimeMillis;
         private long mSystemClockMillis;
         private int mSystemClockConfidence = TIME_CONFIDENCE_LOW;
-        private StateChangeListener mConfigurationInternalChangeListener;
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
-
-        void initializeConfig(ConfigurationInternal configurationInternal) {
-            mConfigurationInternal = configurationInternal;
-        }
 
         public void initializeFakeClocks(
                 TimestampedValue<Instant> timeInfo, @TimeConfidence int timeConfidence) {
             pokeElapsedRealtimeMillis(timeInfo.getReferenceTimeMillis());
             pokeSystemClockMillis(timeInfo.getValue().toEpochMilli(), timeConfidence);
-        }
-
-        @Override
-        public void setConfigurationInternalChangeListener(StateChangeListener listener) {
-            mConfigurationInternalChangeListener = Objects.requireNonNull(listener);
-        }
-
-        @Override
-        public ConfigurationInternal getCurrentUserConfigurationInternal() {
-            return mConfigurationInternal;
         }
 
         @Override
@@ -2019,7 +2104,7 @@ public class TimeDetectorStrategyImplTest {
         }
 
         @Override
-        public void dumpDebugLog(PrintWriter printWriter) {
+        public void dumpDebugLog(IndentingPrintWriter pw) {
             // No-op for tests
         }
 
@@ -2035,11 +2120,6 @@ public class TimeDetectorStrategyImplTest {
                 runnable.run();
             }
             mAsyncRunnables.clear();
-        }
-
-        void simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
-            mConfigurationInternal = configurationInternal;
-            mConfigurationInternalChangeListener.onChange();
         }
 
         void pokeElapsedRealtimeMillis(long elapsedRealtimeMillis) {
@@ -2095,13 +2175,6 @@ public class TimeDetectorStrategyImplTest {
      */
     private class Script {
 
-        private final TimeDetectorStrategyImpl mTimeDetectorStrategy;
-
-        Script() {
-            mFakeEnvironment = new FakeEnvironment();
-            mTimeDetectorStrategy = new TimeDetectorStrategyImpl(mFakeEnvironment);
-        }
-
         Script pokeFakeClocks(TimestampedValue<Instant> initialClockTime,
                 @TimeConfidence int timeConfidence) {
             mFakeEnvironment.pokeElapsedRealtimeMillis(initialClockTime.getReferenceTimeMillis());
@@ -2122,7 +2195,8 @@ public class TimeDetectorStrategyImplTest {
          * Simulates the user / user's configuration changing.
          */
         Script simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
-            mFakeEnvironment.simulateConfigurationInternalChange(configurationInternal);
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    configurationInternal);
             return this;
         }
 
@@ -2167,14 +2241,15 @@ public class TimeDetectorStrategyImplTest {
 
         Script simulateAutoTimeDetectionToggle() {
             ConfigurationInternal configurationInternal =
-                    mFakeEnvironment.getCurrentUserConfigurationInternal();
+                    mFakeServiceConfigAccessorSpy.getCurrentUserConfigurationInternal();
             boolean autoDetectionEnabledSetting =
                     !configurationInternal.getAutoDetectionEnabledSetting();
             ConfigurationInternal newConfigurationInternal =
                     new ConfigurationInternal.Builder(configurationInternal)
                             .setAutoDetectionEnabledSetting(autoDetectionEnabledSetting)
                             .build();
-            mFakeEnvironment.simulateConfigurationInternalChange(newConfigurationInternal);
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    newConfigurationInternal);
             return this;
         }
 
@@ -2388,5 +2463,13 @@ public class TimeDetectorStrategyImplTest {
             int minute, int second) {
         return LocalDateTime.of(year, monthInYear, day, hourOfDay, minute, second)
                 .toInstant(ZoneOffset.UTC);
+    }
+
+    private void assertStateChangeNotificationsSent(
+            TestStateChangeListener stateChangeListener, int expectedCount) {
+        // The fake environment needs to be told to run posted work.
+        mFakeEnvironment.runAsyncRunnables();
+
+        stateChangeListener.assertNotificationsReceivedAndReset(expectedCount);
     }
 }
