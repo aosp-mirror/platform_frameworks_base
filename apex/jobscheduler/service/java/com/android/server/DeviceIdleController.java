@@ -418,20 +418,6 @@ public class DeviceIdleController extends SystemService
     private static final int ACTIVE_REASON_FORCED = 6;
     private static final int ACTIVE_REASON_ALARM = 7;
     private static final int ACTIVE_REASON_EMERGENCY_CALL = 8;
-    @VisibleForTesting
-    static final int SET_IDLE_FACTOR_RESULT_UNINIT = -1;
-    @VisibleForTesting
-    static final int SET_IDLE_FACTOR_RESULT_IGNORED = 0;
-    @VisibleForTesting
-    static final int SET_IDLE_FACTOR_RESULT_OK = 1;
-    @VisibleForTesting
-    static final int SET_IDLE_FACTOR_RESULT_NOT_SUPPORT = 2;
-    @VisibleForTesting
-    static final int SET_IDLE_FACTOR_RESULT_INVALID = 3;
-    @VisibleForTesting
-    static final long MIN_STATE_STEP_ALARM_CHANGE = 60 * 1000;
-    @VisibleForTesting
-    static final float MIN_PRE_IDLE_FACTOR_CHANGE = 0.05f;
 
     @VisibleForTesting
     static String stateToString(int state) {
@@ -514,8 +500,6 @@ public class DeviceIdleController extends SystemService
      */
     @GuardedBy("this")
     private long mMaintenanceStartTime;
-    @GuardedBy("this")
-    private long mIdleStartTime;
 
     @GuardedBy("this")
     private int mActiveIdleOpCount;
@@ -528,17 +512,6 @@ public class DeviceIdleController extends SystemService
     @GuardedBy("this")
     private boolean mAlarmsActive;
 
-    /* Factor to apply to INACTIVE_TIMEOUT and IDLE_AFTER_INACTIVE_TIMEOUT in order to enter
-     * STATE_IDLE faster or slower. Don't apply this to SENSING_TIMEOUT or LOCATING_TIMEOUT because:
-     *   - Both of them are shorter
-     *   - Device sensor might take time be to become be stabilized
-     * Also don't apply the factor if the device is in motion because device motion provides a
-     * stronger signal than a prediction algorithm.
-     */
-    @GuardedBy("this")
-    private float mPreIdleFactor;
-    @GuardedBy("this")
-    private float mLastPreIdleFactor;
     @GuardedBy("this")
     private int mActiveReason;
 
@@ -1001,10 +974,6 @@ public class DeviceIdleController extends SystemService
          * exit doze. Default = true
          */
         private static final String KEY_WAIT_FOR_UNLOCK = "wait_for_unlock";
-        private static final String KEY_PRE_IDLE_FACTOR_LONG =
-                "pre_idle_factor_long";
-        private static final String KEY_PRE_IDLE_FACTOR_SHORT =
-                "pre_idle_factor_short";
         private static final String KEY_USE_WINDOW_ALARMS = "use_window_alarms";
 
         private long mDefaultFlexTimeShort =
@@ -1064,8 +1033,6 @@ public class DeviceIdleController extends SystemService
         private long mDefaultSmsTempAppAllowlistDurationMs = 20 * 1000L;
         private long mDefaultNotificationAllowlistDurationMs = 30 * 1000L;
         private boolean mDefaultWaitForUnlock = true;
-        private float mDefaultPreIdleFactorLong = 1.67f;
-        private float mDefaultPreIdleFactorShort = .33f;
         private boolean mDefaultUseWindowAlarms = true;
 
         /**
@@ -1299,16 +1266,6 @@ public class DeviceIdleController extends SystemService
          */
         public long NOTIFICATION_ALLOWLIST_DURATION_MS = mDefaultNotificationAllowlistDurationMs;
 
-        /**
-         * Pre idle time factor use to make idle delay longer
-         */
-        public float PRE_IDLE_FACTOR_LONG = mDefaultPreIdleFactorLong;
-
-        /**
-         * Pre idle time factor use to make idle delay shorter
-         */
-        public float PRE_IDLE_FACTOR_SHORT = mDefaultPreIdleFactorShort;
-
         public boolean WAIT_FOR_UNLOCK = mDefaultWaitForUnlock;
 
         /**
@@ -1421,10 +1378,6 @@ public class DeviceIdleController extends SystemService
                     com.android.internal.R.integer.device_idle_notification_allowlist_duration_ms);
             mDefaultWaitForUnlock = res.getBoolean(
                     com.android.internal.R.bool.device_idle_wait_for_unlock);
-            mDefaultPreIdleFactorLong = res.getFloat(
-                    com.android.internal.R.integer.device_idle_pre_idle_factor_long);
-            mDefaultPreIdleFactorShort = res.getFloat(
-                    com.android.internal.R.integer.device_idle_pre_idle_factor_short);
             mDefaultUseWindowAlarms = res.getBoolean(
                     com.android.internal.R.bool.device_idle_use_window_alarms);
 
@@ -1459,8 +1412,6 @@ public class DeviceIdleController extends SystemService
             SMS_TEMP_APP_ALLOWLIST_DURATION_MS = mDefaultSmsTempAppAllowlistDurationMs;
             NOTIFICATION_ALLOWLIST_DURATION_MS = mDefaultNotificationAllowlistDurationMs;
             WAIT_FOR_UNLOCK = mDefaultWaitForUnlock;
-            PRE_IDLE_FACTOR_LONG = mDefaultPreIdleFactorLong;
-            PRE_IDLE_FACTOR_SHORT = mDefaultPreIdleFactorShort;
             USE_WINDOW_ALARMS = mDefaultUseWindowAlarms;
         }
 
@@ -1619,14 +1570,6 @@ public class DeviceIdleController extends SystemService
                             WAIT_FOR_UNLOCK = properties.getBoolean(
                                     KEY_WAIT_FOR_UNLOCK, mDefaultWaitForUnlock);
                             break;
-                        case KEY_PRE_IDLE_FACTOR_LONG:
-                            PRE_IDLE_FACTOR_LONG = properties.getFloat(
-                                    KEY_PRE_IDLE_FACTOR_LONG, mDefaultPreIdleFactorLong);
-                            break;
-                        case KEY_PRE_IDLE_FACTOR_SHORT:
-                            PRE_IDLE_FACTOR_SHORT = properties.getFloat(
-                                    KEY_PRE_IDLE_FACTOR_SHORT, mDefaultPreIdleFactorShort);
-                            break;
                         case KEY_USE_WINDOW_ALARMS:
                             USE_WINDOW_ALARMS = properties.getBoolean(
                                     KEY_USE_WINDOW_ALARMS, mDefaultUseWindowAlarms);
@@ -1765,12 +1708,6 @@ public class DeviceIdleController extends SystemService
             pw.print("    "); pw.print(KEY_WAIT_FOR_UNLOCK); pw.print("=");
             pw.println(WAIT_FOR_UNLOCK);
 
-            pw.print("    "); pw.print(KEY_PRE_IDLE_FACTOR_LONG); pw.print("=");
-            pw.println(PRE_IDLE_FACTOR_LONG);
-
-            pw.print("    "); pw.print(KEY_PRE_IDLE_FACTOR_SHORT); pw.print("=");
-            pw.println(PRE_IDLE_FACTOR_SHORT);
-
             pw.print("    "); pw.print(KEY_USE_WINDOW_ALARMS); pw.print("=");
             pw.println(USE_WINDOW_ALARMS);
         }
@@ -1815,10 +1752,6 @@ public class DeviceIdleController extends SystemService
     static final int MSG_REPORT_STATIONARY_STATUS = 7;
     private static final int MSG_FINISH_IDLE_OP = 8;
     private static final int MSG_SEND_CONSTRAINT_MONITORING = 10;
-    @VisibleForTesting
-    static final int MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR = 11;
-    @VisibleForTesting
-    static final int MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR = 12;
     private static final int MSG_REPORT_TEMP_APP_WHITELIST_CHANGED = 13;
     private static final int MSG_REPORT_TEMP_APP_WHITELIST_ADDED_TO_NPMS = 14;
     private static final int MSG_REPORT_TEMP_APP_WHITELIST_REMOVED_TO_NPMS = 15;
@@ -1964,13 +1897,6 @@ public class DeviceIdleController extends SystemService
                     } else {
                         constraint.stopMonitoring();
                     }
-                } break;
-                case MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR: {
-                    updatePreIdleFactor();
-                } break;
-                case MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR: {
-                    updatePreIdleFactor();
-                    maybeDoImmediateMaintenance("idle factor");
                 } break;
                 case MSG_REPORT_STATIONARY_STATUS: {
                     final DeviceIdleInternal.StationaryListener newListener =
@@ -2175,28 +2101,6 @@ public class DeviceIdleController extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 exitIdleInternal(reason);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        @Override public int setPreIdleTimeoutMode(int mode) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
-                    null);
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return DeviceIdleController.this.setPreIdleTimeoutMode(mode);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        @Override public void resetPreIdleTimeoutMode() {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
-                    null);
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                DeviceIdleController.this.resetPreIdleTimeoutMode();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2564,8 +2468,6 @@ public class DeviceIdleController extends SystemService
             moveToStateLocked(STATE_ACTIVE, "boot");
             moveToLightStateLocked(LIGHT_STATE_ACTIVE, "boot");
             mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
-            mPreIdleFactor = 1.0f;
-            mLastPreIdleFactor = 1.0f;
         }
 
         mBinderService = new BinderService();
@@ -3527,9 +3429,6 @@ public class DeviceIdleController extends SystemService
                 moveToStateLocked(STATE_INACTIVE, "no activity");
                 resetIdleManagementLocked();
                 long delay = mInactiveTimeout;
-                if (shouldUseIdleTimeoutFactorLocked()) {
-                    delay = (long) (mPreIdleFactor * delay);
-                }
                 if (isUpcomingAlarmClock()) {
                     // If there's an upcoming AlarmClock alarm, we won't go into idle, so
                     // setting a wakeup alarm before the upcoming alarm is futile. Set the idle
@@ -3554,7 +3453,6 @@ public class DeviceIdleController extends SystemService
     private void resetIdleManagementLocked() {
         mNextIdlePendingDelay = 0;
         mNextIdleDelay = 0;
-        mIdleStartTime = 0;
         mQuickDozeActivatedWhileIdling = false;
         cancelAlarmLocked();
         cancelSensingTimeoutAlarmLocked();
@@ -3750,9 +3648,6 @@ public class DeviceIdleController extends SystemService
                 // for motion and sleep some more while doing so.
                 startMonitoringMotionLocked();
                 long delay = mConstants.IDLE_AFTER_INACTIVE_TIMEOUT;
-                if (shouldUseIdleTimeoutFactorLocked()) {
-                    delay = (long) (mPreIdleFactor * delay);
-                }
                 scheduleAlarmLocked(delay);
                 moveToStateLocked(STATE_IDLE_PENDING, reason);
                 break;
@@ -3826,7 +3721,6 @@ public class DeviceIdleController extends SystemService
                         " ms.");
                 mNextIdleDelay = (long)(mNextIdleDelay * mConstants.IDLE_FACTOR);
                 if (DEBUG) Slog.d(TAG, "Setting mNextIdleDelay = " + mNextIdleDelay);
-                mIdleStartTime = SystemClock.elapsedRealtime();
                 mNextIdleDelay = Math.min(mNextIdleDelay, mConstants.MAX_IDLE_TIMEOUT);
                 if (mNextIdleDelay < mConstants.IDLE_TIMEOUT) {
                     mNextIdleDelay = mConstants.IDLE_TIMEOUT;
@@ -3923,130 +3817,6 @@ public class DeviceIdleController extends SystemService
             if (!active) {
                 exitMaintenanceEarlyIfNeededLocked();
             }
-        }
-    }
-
-    @VisibleForTesting
-    int setPreIdleTimeoutMode(int mode) {
-        return setPreIdleTimeoutFactor(getPreIdleTimeoutByMode(mode));
-    }
-
-    @VisibleForTesting
-    float getPreIdleTimeoutByMode(int mode) {
-        switch (mode) {
-            case PowerManager.PRE_IDLE_TIMEOUT_MODE_LONG: {
-                return mConstants.PRE_IDLE_FACTOR_LONG;
-            }
-            case PowerManager.PRE_IDLE_TIMEOUT_MODE_SHORT: {
-                return mConstants.PRE_IDLE_FACTOR_SHORT;
-            }
-            case PowerManager.PRE_IDLE_TIMEOUT_MODE_NORMAL: {
-                return 1.0f;
-            }
-            default: {
-                Slog.w(TAG, "Invalid time out factor mode: " + mode);
-                return 1.0f;
-            }
-        }
-    }
-
-    @VisibleForTesting
-    float getPreIdleTimeoutFactor() {
-        synchronized (this) {
-            return mPreIdleFactor;
-        }
-    }
-
-    @VisibleForTesting
-    int setPreIdleTimeoutFactor(float ratio) {
-        synchronized (this) {
-            if (!mDeepEnabled) {
-                if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: Deep Idle disable");
-                return SET_IDLE_FACTOR_RESULT_NOT_SUPPORT;
-            } else if (ratio <= MIN_PRE_IDLE_FACTOR_CHANGE) {
-                if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: Invalid input");
-                return SET_IDLE_FACTOR_RESULT_INVALID;
-            } else if (Math.abs(ratio - mPreIdleFactor) < MIN_PRE_IDLE_FACTOR_CHANGE) {
-                if (DEBUG) {
-                    Slog.d(TAG, "setPreIdleTimeoutFactor: New factor same as previous factor");
-                }
-                return SET_IDLE_FACTOR_RESULT_IGNORED;
-            }
-            mLastPreIdleFactor = mPreIdleFactor;
-            mPreIdleFactor = ratio;
-        }
-        if (DEBUG) Slog.d(TAG, "setPreIdleTimeoutFactor: " + ratio);
-        postUpdatePreIdleFactor();
-        return SET_IDLE_FACTOR_RESULT_OK;
-    }
-
-    @VisibleForTesting
-    void resetPreIdleTimeoutMode() {
-        synchronized (this) {
-            mLastPreIdleFactor = mPreIdleFactor;
-            mPreIdleFactor = 1.0f;
-        }
-        if (DEBUG) Slog.d(TAG, "resetPreIdleTimeoutMode to 1.0");
-        postResetPreIdleTimeoutFactor();
-    }
-
-    private void postUpdatePreIdleFactor() {
-        mHandler.sendEmptyMessage(MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR);
-    }
-
-    private void postResetPreIdleTimeoutFactor() {
-        mHandler.sendEmptyMessage(MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR);
-    }
-
-    private void updatePreIdleFactor() {
-        synchronized (this) {
-            if (!shouldUseIdleTimeoutFactorLocked()) {
-                return;
-            }
-            if (mState == STATE_INACTIVE || mState == STATE_IDLE_PENDING) {
-                if (mNextAlarmTime == 0) {
-                    return;
-                }
-                long delay = mNextAlarmTime - SystemClock.elapsedRealtime();
-                if (delay < MIN_STATE_STEP_ALARM_CHANGE) {
-                    return;
-                }
-                long newDelay = (long) (delay / mLastPreIdleFactor * mPreIdleFactor);
-                if (Math.abs(delay - newDelay) < MIN_STATE_STEP_ALARM_CHANGE) {
-                    return;
-                }
-                scheduleAlarmLocked(newDelay);
-            }
-        }
-    }
-
-    private void maybeDoImmediateMaintenance(String reason) {
-        synchronized (this) {
-            if (mState == STATE_IDLE) {
-                long duration = SystemClock.elapsedRealtime() - mIdleStartTime;
-                // Trigger an immediate maintenance window if it has been IDLE for long enough.
-                if (duration > mConstants.IDLE_TIMEOUT) {
-                    stepIdleStateLocked(reason);
-                }
-            }
-        }
-    }
-
-    @GuardedBy("this")
-    private boolean shouldUseIdleTimeoutFactorLocked() {
-        // exclude ACTIVE_REASON_MOTION, for exclude device in pocket case
-        if (mActiveReason == ACTIVE_REASON_MOTION) {
-            return false;
-        }
-        return true;
-    }
-
-    /** Must only be used in tests. */
-    @VisibleForTesting
-    void setIdleStartTimeForTest(long idleStartTime) {
-        synchronized (this) {
-            mIdleStartTime = idleStartTime;
-            maybeDoImmediateMaintenance("testing");
         }
     }
 
@@ -4623,11 +4393,6 @@ public class DeviceIdleController extends SystemService
                 + "and any [-d] is ignored");
         pw.println("  motion");
         pw.println("    Simulate a motion event to bring the device out of deep doze");
-        pw.println("  pre-idle-factor [0|1|2]");
-        pw.println("    Set a new factor to idle time before step to idle"
-                + "(inactive_to and idle_after_inactive_to)");
-        pw.println("  reset-pre-idle-factor");
-        pw.println("    Reset factor to idle time to default");
     }
 
     class Shell extends ShellCommand {
@@ -5075,52 +4840,6 @@ public class DeviceIdleController extends SystemService
                     Binder.restoreCallingIdentity(token);
                 }
             }
-        } else if ("pre-idle-factor".equals(cmd)) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
-                    null);
-            synchronized (this) {
-                final long token = Binder.clearCallingIdentity();
-                int ret  = SET_IDLE_FACTOR_RESULT_UNINIT;
-                try {
-                    String arg = shell.getNextArg();
-                    boolean valid = false;
-                    int mode = 0;
-                    if (arg != null) {
-                        mode = Integer.parseInt(arg);
-                        ret = setPreIdleTimeoutMode(mode);
-                        if (ret == SET_IDLE_FACTOR_RESULT_OK) {
-                            pw.println("pre-idle-factor: " + mode);
-                            valid = true;
-                        } else if (ret == SET_IDLE_FACTOR_RESULT_NOT_SUPPORT) {
-                            valid = true;
-                            pw.println("Deep idle not supported");
-                        } else if (ret == SET_IDLE_FACTOR_RESULT_IGNORED) {
-                            valid = true;
-                            pw.println("Idle timeout factor not changed");
-                        }
-                    }
-                    if (!valid) {
-                        pw.println("Unknown idle timeout factor: " + arg
-                                + ",(error code: " + ret + ")");
-                    }
-                } catch (NumberFormatException e) {
-                    pw.println("Unknown idle timeout factor"
-                            + ",(error code: " + ret + ")");
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else if ("reset-pre-idle-factor".equals(cmd)) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
-                    null);
-            synchronized (this) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    resetPreIdleTimeoutMode();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
         } else {
             return shell.handleDefaultCommands(cmd);
         }
@@ -5367,9 +5086,6 @@ public class DeviceIdleController extends SystemService
             }
             if (mAlarmsActive) {
                 pw.print("  mAlarmsActive="); pw.println(mAlarmsActive);
-            }
-            if (Math.abs(mPreIdleFactor - 1.0f) > MIN_PRE_IDLE_FACTOR_CHANGE) {
-                pw.print("  mPreIdleFactor="); pw.println(mPreIdleFactor);
             }
         }
     }

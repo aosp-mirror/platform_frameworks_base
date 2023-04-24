@@ -117,12 +117,6 @@
     <!-- Default for DeviceIdleController.Constants.WAIT_FOR_UNLOCK -->
     <bool name="device_idle_wait_for_unlock">true</bool>
 
-    <!-- Default for DeviceIdleController.Constants.PRE_IDLE_FACTOR_LONG -->
-    <item name="device_idle_pre_idle_factor_long" format="float" type="integer">1.67</item>
-
-    <!-- Default for DeviceIdleController.Constants.PRE_IDLE_FACTOR_SHORT -->
-    <item name="device_idle_pre_idle_factor_short" format="float" type="integer">0.33</item>
-
     <!-- Default for DeviceIdleController.Constants.USE_WINDOW_ALARMS -->
     <bool name="device_idle_use_window_alarms">true</bool>
 </resources>

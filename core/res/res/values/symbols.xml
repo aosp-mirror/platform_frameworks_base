@@ -4465,8 +4465,6 @@
   <java-symbol type="integer" name="device_idle_sms_temp_app_allowlist_duration_ms" />
   <java-symbol type="integer" name="device_idle_notification_allowlist_duration_ms" />
   <java-symbol type="bool" name="device_idle_wait_for_unlock" />
-  <java-symbol type="integer" name="device_idle_pre_idle_factor_long" />
-  <java-symbol type="integer" name="device_idle_pre_idle_factor_short" />
   <java-symbol type="bool" name="device_idle_use_window_alarms" />
 
   <!-- Binder heavy hitter watcher configs -->

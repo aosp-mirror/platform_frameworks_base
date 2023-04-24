@@ -48,6 +48,4 @@ interface IDeviceIdleController {
     long addPowerSaveTempWhitelistAppForSms(String name, int userId, int reasonCode, String reason);
     long whitelistAppTemporarily(String name, int userId, int reasonCode, String reason);
     void exitIdle(String reason);
-    int setPreIdleTimeoutMode(int Mode);
-    void resetPreIdleTimeoutMode();
 }
