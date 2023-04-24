@@ -704,7 +704,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
 
             BiometricFrameworkStatsLogger.getInstance().authenticate(
-                    mBiometricContext.updateContext(new OperationContextExt(), isCrypto()),
+                    mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
+                            isCrypto()),
                     statsModality(),
                     BiometricsProtoEnums.ACTION_UNKNOWN,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
@@ -734,7 +735,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
             // Auth canceled
             BiometricFrameworkStatsLogger.getInstance().error(
-                    mBiometricContext.updateContext(new OperationContextExt(), isCrypto()),
+                    mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
+                            isCrypto()),
                     statsModality(),
                     BiometricsProtoEnums.ACTION_AUTHENTICATE,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,

@@ -46,15 +46,17 @@ public class OperationContextExt {
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     @Surface.Rotation private int mOrientation = Surface.ROTATION_0;
     private int mFoldState = IBiometricContextListener.FoldState.UNKNOWN;
+    private final boolean mIsBP;
 
-    /** Create a new empty context. */
-    public OperationContextExt() {
-        this(new OperationContext());
+    /** Create a context. */
+    public OperationContextExt(boolean isBP) {
+        this(new OperationContext(), isBP);
     }
 
     /** Create a wrapped context. */
-    public OperationContextExt(@NonNull OperationContext context) {
+    public OperationContextExt(@NonNull OperationContext context, boolean isBP) {
         mAidlContext = context;
+        mIsBP = isBP;
     }
 
     /**
@@ -268,18 +270,20 @@ public class OperationContextExt {
     }
 
     private void setFirstSessionId(@NonNull BiometricContext biometricContext) {
-        mSessionInfo = biometricContext.getKeyguardEntrySessionInfo();
-        if (mSessionInfo != null) {
-            mAidlContext.id = mSessionInfo.getId();
-            mAidlContext.reason = OperationReason.KEYGUARD;
-            return;
-        }
-
-        mSessionInfo = biometricContext.getBiometricPromptSessionInfo();
-        if (mSessionInfo != null) {
-            mAidlContext.id = mSessionInfo.getId();
-            mAidlContext.reason = OperationReason.BIOMETRIC_PROMPT;
-            return;
+        if (mIsBP) {
+            mSessionInfo = biometricContext.getBiometricPromptSessionInfo();
+            if (mSessionInfo != null) {
+                mAidlContext.id = mSessionInfo.getId();
+                mAidlContext.reason = OperationReason.BIOMETRIC_PROMPT;
+                return;
+            }
+        } else {
+            mSessionInfo = biometricContext.getKeyguardEntrySessionInfo();
+            if (mSessionInfo != null) {
+                mAidlContext.id = mSessionInfo.getId();
+                mAidlContext.reason = OperationReason.KEYGUARD;
+                return;
+            }
         }
 
         // no session
