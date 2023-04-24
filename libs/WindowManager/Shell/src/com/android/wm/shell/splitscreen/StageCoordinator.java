@@ -378,40 +378,18 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     boolean moveToStage(ActivityManager.RunningTaskInfo task, @SplitPosition int stagePosition,
             WindowContainerTransaction wct) {
-        StageTaskListener targetStage;
-        int sideStagePosition;
-        if (isSplitScreenVisible()) {
-            // If the split screen is foreground, retrieves target stage based on position.
-            targetStage = stagePosition == mSideStagePosition ? mSideStage : mMainStage;
-            sideStagePosition = mSideStagePosition;
+        prepareEnterSplitScreen(wct, task, stagePosition);
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mSplitTransitions.startEnterTransition(TRANSIT_TO_FRONT, wct,
+                    null, this, null /* consumedCallback */, null /* finishedCallback */,
+                    isSplitScreenVisible()
+                            ? TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE : TRANSIT_SPLIT_SCREEN_PAIR_OPEN);
         } else {
-            targetStage = mSideStage;
-            sideStagePosition = stagePosition;
-        }
-
-        if (!isSplitActive()) {
-            mSplitLayout.init();
-            prepareEnterSplitScreen(wct, task, stagePosition);
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> {
                 updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
-                setDividerVisibility(true, t);
             });
-        } else {
-            setSideStagePosition(sideStagePosition, wct);
-            targetStage.addTask(task, wct);
-            targetStage.evictAllChildren(wct);
-            if (!isSplitScreenVisible()) {
-                final StageTaskListener anotherStage = targetStage == mMainStage
-                        ? mSideStage : mMainStage;
-                anotherStage.reparentTopTask(wct);
-                anotherStage.evictAllChildren(wct);
-                wct.reorder(mRootTaskInfo.token, true);
-            }
-            setRootForceTranslucent(false, wct);
-            mSyncQueue.queue(wct);
         }
-
         // Due to drag already pip task entering split by this method so need to reset flag here.
         mIsDropEntering = false;
         return true;
@@ -1509,9 +1487,51 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      */
     void prepareEnterSplitScreen(WindowContainerTransaction wct,
             @Nullable ActivityManager.RunningTaskInfo taskInfo, @SplitPosition int startPosition) {
-        if (mMainStage.isActive()) return;
-
         onSplitScreenEnter();
+        if (isSplitActive()) {
+            prepareBringSplit(wct, taskInfo, startPosition);
+        } else {
+            prepareActiveSplit(wct, taskInfo, startPosition);
+        }
+    }
+
+    private void prepareBringSplit(WindowContainerTransaction wct,
+            @Nullable ActivityManager.RunningTaskInfo taskInfo, @SplitPosition int startPosition) {
+        StageTaskListener targetStage;
+        if (isSplitScreenVisible()) {
+            // If the split screen is foreground, retrieves target stage based on position.
+            targetStage = startPosition == mSideStagePosition ? mSideStage : mMainStage;
+        } else {
+            targetStage = mSideStage;
+        }
+
+        if (taskInfo != null) {
+            wct.startTask(taskInfo.taskId,
+                    resolveStartStage(STAGE_TYPE_UNDEFINED, startPosition, null, wct));
+            targetStage.evictAllChildren(wct);
+        }
+        // If running background, we need to reparent current top visible task to another stage
+        // and evict all tasks current under its.
+        if (!isSplitScreenVisible()) {
+            // Recreate so we need to reset position rather than keep position of background split.
+            mSplitLayout.resetDividerPosition();
+            updateWindowBounds(mSplitLayout, wct);
+            final StageTaskListener anotherStage = targetStage == mMainStage
+                    ? mSideStage : mMainStage;
+            anotherStage.evictAllChildren(wct);
+            anotherStage.reparentTopTask(wct);
+            wct.reorder(mRootTaskInfo.token, true);
+            setRootForceTranslucent(false, wct);
+        }
+    }
+
+    private void prepareActiveSplit(WindowContainerTransaction wct,
+            @Nullable ActivityManager.RunningTaskInfo taskInfo, @SplitPosition int startPosition) {
+        if (!ENABLE_SHELL_TRANSITIONS) {
+            // Legacy transition we need to create divider here, shell transition case we will
+            // create it on #finishEnterSplitScreen
+            mSplitLayout.init();
+        }
         if (taskInfo != null) {
             setSideStagePosition(startPosition, wct);
             mSideStage.addTask(taskInfo, wct);
@@ -2383,7 +2403,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
 
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                if (taskInfo == null || !taskInfo.hasParentTask()) continue;
+                if (taskInfo == null) continue;
+                if (taskInfo.token.equals(mRootTaskInfo.token)) {
+                    if (isOpeningType(change.getMode())) {
+                        // Split is opened by someone so set it as visible.
+                        setSplitsVisible(true);
+                    } else if (isClosingType(change.getMode())) {
+                        // Split is closed by someone so set it as invisible.
+                        setSplitsVisible(false);
+                    }
+                    continue;
+                }
                 final StageTaskListener stage = getStageOfTask(taskInfo);
                 if (stage == null) continue;
                 if (isOpeningType(change.getMode())) {
