@@ -117,9 +117,9 @@ class ShortcutKeyTestBase {
             throw new RuntimeException(e);
         }
 
-        for (KeyEvent event: events) {
+        for (int i = count - 1; i >= 0; i--) {
             final long eventTime = SystemClock.uptimeMillis();
-            final int keyCode = event.getKeyCode();
+            final int keyCode = keyCodes[i];
             final KeyEvent upEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_UP, keyCode,
                     0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                     InputDevice.SOURCE_KEYBOARD);

@@ -382,7 +382,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertTrue(wallpaperWindow.isVisible());
         assertTrue(token.isVisibleRequested());
         assertTrue(token.isVisible());
-        mWm.mAtmService.getTransitionController().abort(transit);
+        transit.abort();
 
         // In a transition, setting invisible should ONLY set requestedVisible false; otherwise
         // wallpaper should remain "visible" until transition is over.

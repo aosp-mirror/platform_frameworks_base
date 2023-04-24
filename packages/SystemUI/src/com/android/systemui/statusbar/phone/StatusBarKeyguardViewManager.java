@@ -68,6 +68,7 @@ import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
@@ -284,6 +285,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mIsBackAnimationEnabled;
     private final boolean mUdfpsNewTouchDetectionEnabled;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
+    private final ActivityStarter mActivityStarter;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -339,7 +341,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             PrimaryBouncerInteractor primaryBouncerInteractor,
             BouncerView primaryBouncerView,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            UdfpsOverlayInteractor udfpsOverlayInteractor
+            UdfpsOverlayInteractor udfpsOverlayInteractor,
+            ActivityStarter activityStarter
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -367,6 +370,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM);
         mUdfpsNewTouchDetectionEnabled = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION);
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -1006,7 +1010,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void dismissAndCollapse() {
-        mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, true, false, true);
+        mActivityStarter.executeRunnableDismissingKeyguard(
+                /* runnable= */ null,
+                /* cancelAction= */ null,
+                /* dismissShade= */ true,
+                /* afterKeyguardGone= */ false,
+                /* deferred= */ true
+        );
     }
 
     /**

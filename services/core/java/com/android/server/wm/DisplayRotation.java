@@ -946,6 +946,10 @@ public class DisplayRotation {
     }
 
     void freezeRotation(int rotation) {
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
+            rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
+        }
+
         rotation = (rotation == -1) ? mRotation : rotation;
         setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation);
     }

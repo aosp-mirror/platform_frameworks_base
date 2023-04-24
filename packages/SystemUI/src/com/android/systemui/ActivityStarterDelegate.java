@@ -35,6 +35,8 @@ import javax.inject.Inject;
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
  * delegates to an actual implementation (CentralSurfaces).
+ *
+ * @deprecated Migrating to ActivityStarterImpl
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @SysUISingleton
@@ -89,6 +91,14 @@ public class ActivityStarterDelegate implements ActivityStarter {
     public void startActivity(Intent intent, boolean dismissShade) {
         mActualStarterOptionalLazy.get().ifPresent(
                 starter -> starter.startActivity(intent, dismissShade));
+    }
+
+    @Override
+    public void startActivity(Intent intent,
+            boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.startActivity(intent, dismissShade, animationController));
     }
 
     @Override
@@ -175,6 +185,37 @@ public class ActivityStarterDelegate implements ActivityStarter {
             boolean afterKeyguardGone, String customMessage) {
         mActualStarterOptionalLazy.get().ifPresent(
                 starter -> starter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone,
+                        customMessage));
+    }
+
+    @Override
+    public void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
+            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
+            Callback callback, int flags,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            UserHandle userHandle) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.startActivityDismissingKeyguard(intent, onlyProvisioned,
+                        dismissShade, disallowEnterPictureInPictureWhileLaunching, callback,
+                        flags, animationController, userHandle));
+    }
+
+    @Override
+    public void executeRunnableDismissingKeyguard(Runnable runnable,
+            Runnable cancelAction, boolean dismissShade,
+            boolean afterKeyguardGone, boolean deferred) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.executeRunnableDismissingKeyguard(runnable, cancelAction,
+                        dismissShade, afterKeyguardGone, deferred));
+    }
+
+    @Override
+    public void executeRunnableDismissingKeyguard(Runnable runnable, Runnable cancelAction,
+            boolean dismissShade, boolean afterKeyguardGone, boolean deferred,
+            boolean willAnimateOnKeyguard, @Nullable String customMessage) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.executeRunnableDismissingKeyguard(runnable, cancelAction,
+                        dismissShade, afterKeyguardGone, deferred, willAnimateOnKeyguard,
                         customMessage));
     }
 }

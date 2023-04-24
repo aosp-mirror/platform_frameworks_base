@@ -2267,6 +2267,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return WmDisplayCutout.NO_CUTOUT;
         }
+        if (displayWidth == displayHeight) {
+            Slog.w(TAG, "Ignore cutout because display size is square: " + displayWidth);
+            // Avoid UnsupportedOperationException because DisplayCutout#computeSafeInsets doesn't
+            // support square size.
+            return WmDisplayCutout.NO_CUTOUT;
+        }
         if (rotation == ROTATION_0) {
             return WmDisplayCutout.computeSafeInsets(
                     cutout, displayWidth, displayHeight);
@@ -3087,13 +3093,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mIsSizeForced = mInitialDisplayWidth != width || mInitialDisplayHeight != height;
         if (mIsSizeForced) {
-            // Set some sort of reasonable bounds on the size of the display that we will try
-            // to emulate.
-            final int minSize = 200;
-            final int maxScale = 3;
-            final int maxSize = Math.max(mInitialDisplayWidth, mInitialDisplayHeight) * maxScale;
-            width = Math.min(Math.max(width, minSize), maxSize);
-            height = Math.min(Math.max(height, minSize), maxSize);
+            final Point size = getValidForcedSize(width, height);
+            width = size.x;
+            height = size.y;
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
@@ -3106,6 +3108,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             width = height = 0;
         }
         mWmService.mDisplayWindowSettings.setForcedSize(this, width, height);
+    }
+
+    /** Returns a reasonable size for setting forced display size. */
+    Point getValidForcedSize(int w, int h) {
+        final int minSize = 200;
+        final int maxScale = 3;
+        final int maxSize = Math.max(mInitialDisplayWidth, mInitialDisplayHeight) * maxScale;
+        w = Math.min(Math.max(w, minSize), maxSize);
+        h = Math.min(Math.max(h, minSize), maxSize);
+        return new Point(w, h);
     }
 
     DisplayCutout loadDisplayCutout(int displayWidth, int displayHeight) {
