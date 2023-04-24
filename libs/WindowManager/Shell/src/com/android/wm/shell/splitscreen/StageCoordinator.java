@@ -525,17 +525,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.sendPendingIntent(intent, fillInIntent, options);
 
         // If split screen is not activated, we're expecting to open a pair of apps to split.
-        final int transitType = mMainStage.isActive()
+        final int extraTransitType = mMainStage.isActive()
                 ? TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE : TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
         prepareEnterSplitScreen(wct, null /* taskInfo */, position);
 
-        mSplitTransitions.startEnterTransition(transitType, wct, null, this,
+        mSplitTransitions.startEnterTransition(TRANSIT_TO_FRONT, wct, null, this,
                 null /* consumedCallback */,
                 (finishWct, finishT) -> {
                     if (!evictWct.isEmpty()) {
                         finishWct.merge(evictWct, true);
                     }
-                } /* finishedCallback */);
+                } /* finishedCallback */, extraTransitType);
     }
 
     /** Launches an activity into split by legacy transition. */
@@ -708,7 +708,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.startTask(mainTaskId, mainOptions);
 
         mSplitTransitions.startEnterTransition(
-                TRANSIT_SPLIT_SCREEN_PAIR_OPEN, wct, remoteTransition, this, null, null);
+                TRANSIT_TO_FRONT, wct, remoteTransition, this, null, null,
+                TRANSIT_SPLIT_SCREEN_PAIR_OPEN);
         setEnterInstanceId(instanceId);
     }
 
@@ -759,7 +760,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         mSplitTransitions.startEnterTransition(
-                TRANSIT_SPLIT_SCREEN_PAIR_OPEN, wct, remoteTransition, this, null, null);
+                TRANSIT_TO_FRONT, wct, remoteTransition, this, null, null,
+                TRANSIT_SPLIT_SCREEN_PAIR_OPEN);
         setEnterInstanceId(instanceId);
     }
 
@@ -2333,7 +2335,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 out = new WindowContainerTransaction();
                 prepareEnterSplitScreen(out);
                 mSplitTransitions.setEnterTransition(transition, request.getRemoteTransition(),
-                        null /* consumedCallback */, null /* finishedCallback */);
+                        null /* consumedCallback */, null /* finishedCallback */,
+                        0 /* extraTransitType */);
             }
         }
         return out;
@@ -2572,7 +2575,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
-        if (info.getType() == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
+        if (mSplitTransitions.mPendingEnter.mExtraTransitType
+                == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
             if (mainChild == null && sideChild == null) {
                 Log.w(TAG, "Launched a task in split, but didn't receive any task in transition.");
                 mSplitTransitions.mPendingEnter.cancel(null /* finishedCb */);
