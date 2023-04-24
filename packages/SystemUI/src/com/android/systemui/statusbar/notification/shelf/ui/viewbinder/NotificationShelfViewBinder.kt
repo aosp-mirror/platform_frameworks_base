@@ -81,7 +81,6 @@ object NotificationShelfViewBinder {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.apply {
             setRefactorFlagEnabled(true)
-            useRoundnessSourceTypes(true)
             setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM))
             // TODO(278765923): Replace with eventual NotificationIconContainerViewBinder#bind()
             notificationIconAreaController.setShelfIcons(shelfIcons)
