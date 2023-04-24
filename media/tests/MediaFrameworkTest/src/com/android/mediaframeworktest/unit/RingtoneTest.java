@@ -18,6 +18,7 @@ package com.android.mediaframeworktest.unit;
 
 import static android.media.Ringtone.MEDIA_SOUND;
 import static android.media.Ringtone.MEDIA_SOUND_AND_VIBRATION;
+import static android.media.Ringtone.MEDIA_VIBRATION;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -293,7 +293,6 @@ public class RingtoneTest {
         ringtone.play();
 
         verifyLocalPlay(mockMediaPlayer);
-        verify(mockMediaPlayer).isLooping();  // When starting the vibration.
         verify(mMockVibrator).vibrate(VIBRATION_EFFECT, RINGTONE_VIB_ATTRIBUTES);
 
         // Verify dynamic controls.
@@ -303,8 +302,7 @@ public class RingtoneTest {
         // Set looping doesn't affect an already-started vibration.
         when(mockMediaPlayer.isLooping()).thenReturn(false);  // Checks original
         ringtone.setLooping(true);
-        verify(mockMediaPlayer).isPlaying();  // Vibration check.
-        verify(mockMediaPlayer, times(2)).isLooping();  // Current state, second isLooping call.
+        verify(mockMediaPlayer).isLooping();
         verify(mockMediaPlayer).setLooping(true);
 
         // This is ignored because there's a vibration effect being used.
@@ -321,6 +319,160 @@ public class RingtoneTest {
         verifyNoMoreInteractions(mockMediaPlayer);
         verifyZeroInteractions(mMockRemotePlayer);
         verifyNoMoreInteractions(mMockVibrator);
+    }
+
+    @Test
+    public void testRingtone_localMediaWithVibrationOnly() throws Exception {
+        when(mMockVibrator.hasVibrator()).thenReturn(true);
+        Ringtone ringtone =
+                newBuilder(MEDIA_VIBRATION, RINGTONE_ATTRIBUTES)
+                        // TODO: set sound uri too in diff test
+                        .setVibrationEffect(VIBRATION_EFFECT)
+                        .build();
+        assertThat(ringtone).isNotNull();
+        assertThat(ringtone.isUsingRemotePlayer()).isFalse();
+        verify(mMockVibrator).hasVibrator();
+
+        // Verify all the properties.
+        assertThat(ringtone.getEnabledMedia()).isEqualTo(MEDIA_VIBRATION);
+        assertThat(ringtone.getUri()).isNull();
+        assertThat(ringtone.getVibrationEffect()).isEqualTo(VIBRATION_EFFECT);
+
+        // Play
+        ringtone.play();
+
+        verify(mMockVibrator).vibrate(VIBRATION_EFFECT, RINGTONE_VIB_ATTRIBUTES);
+
+        // Verify dynamic controls (no-op without sound)
+        ringtone.setVolume(0.8f);
+
+        // Set looping doesn't affect an already-started vibration.
+        ringtone.setLooping(true);
+
+        // This is ignored because there's a vibration effect being used and no sound.
+        ringtone.setHapticGeneratorEnabled(true);
+
+        // Release
+        ringtone.stop();
+        verify(mMockVibrator).cancel(VibrationAttributes.USAGE_RINGTONE);
+
+        // This test is intended to strictly verify all interactions with MediaPlayer in a local
+        // playback case. This shouldn't be necessary in other tests that have the same basic
+        // setup.
+        verifyZeroInteractions(mMockRemotePlayer);
+        verifyNoMoreInteractions(mMockVibrator);
+    }
+
+    @Test
+    public void testRingtone_localMediaWithVibrationOnlyAndSoundUriNoHapticChannels()
+            throws Exception {
+        // A media player will still be created for vibration-only because the vibration can come
+        // from haptic channels on the sound file (although in this case it doesn't).
+        MediaPlayer mockMediaPlayer = mMediaPlayerRule.expectLocalMediaPlayer();
+        mMediaPlayerRule.setHasHapticChannels(mockMediaPlayer, false);
+        when(mMockVibrator.hasVibrator()).thenReturn(true);
+        Ringtone ringtone =
+                newBuilder(MEDIA_VIBRATION, RINGTONE_ATTRIBUTES)
+                        .setUri(SOUND_URI)
+                        .setVibrationEffect(VIBRATION_EFFECT)
+                        .build();
+        assertThat(ringtone).isNotNull();
+        assertThat(ringtone.isUsingRemotePlayer()).isFalse();
+        verify(mMockVibrator).hasVibrator();
+
+        // Verify all the properties.
+        assertThat(ringtone.getEnabledMedia()).isEqualTo(MEDIA_VIBRATION);
+        assertThat(ringtone.getUri()).isEqualTo(SOUND_URI);
+        assertThat(ringtone.getVibrationEffect()).isEqualTo(VIBRATION_EFFECT);
+
+        // Prepare
+        // Uses attributes with haptic channels enabled, but will abandon the MediaPlayer when it
+        // knows there aren't any.
+        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
+        verify(mockMediaPlayer).setVolume(0.0f);  // Vibration-only: sound muted.
+        verify(mockMediaPlayer).setLooping(false);
+        verify(mockMediaPlayer).prepare();
+        verify(mockMediaPlayer).release();  // abandoned: no haptic channels.
+
+        // Play
+        ringtone.play();
+
+        verify(mMockVibrator).vibrate(VIBRATION_EFFECT, RINGTONE_VIB_ATTRIBUTES);
+
+        // Verify dynamic controls (no-op without sound)
+        ringtone.setVolume(0.8f);
+
+        // Set looping doesn't affect an already-started vibration.
+        ringtone.setLooping(true);
+
+        // This is ignored because there's a vibration effect being used and no sound.
+        ringtone.setHapticGeneratorEnabled(true);
+
+        // Release
+        ringtone.stop();
+        verify(mMockVibrator).cancel(VibrationAttributes.USAGE_RINGTONE);
+
+        // This test is intended to strictly verify all interactions with MediaPlayer in a local
+        // playback case. This shouldn't be necessary in other tests that have the same basic
+        // setup.
+        verifyZeroInteractions(mMockRemotePlayer);
+        verifyNoMoreInteractions(mMockVibrator);
+        verifyNoMoreInteractions(mockMediaPlayer);
+    }
+
+    @Test
+    public void testRingtone_localMediaWithVibrationOnlyAndSoundUriWithHapticChannels()
+            throws Exception {
+        MediaPlayer mockMediaPlayer = mMediaPlayerRule.expectLocalMediaPlayer();
+        when(mMockVibrator.hasVibrator()).thenReturn(true);
+        mMediaPlayerRule.setHasHapticChannels(mockMediaPlayer, true);
+        Ringtone ringtone =
+                newBuilder(MEDIA_VIBRATION, RINGTONE_ATTRIBUTES)
+                        .setUri(SOUND_URI)
+                        .setVibrationEffect(VIBRATION_EFFECT)
+                        .build();
+        assertThat(ringtone).isNotNull();
+        assertThat(ringtone.isUsingRemotePlayer()).isFalse();
+        verify(mMockVibrator).hasVibrator();
+
+        // Verify all the properties.
+        assertThat(ringtone.getEnabledMedia()).isEqualTo(MEDIA_VIBRATION);
+        assertThat(ringtone.getUri()).isEqualTo(SOUND_URI);
+        assertThat(ringtone.getVibrationEffect()).isEqualTo(VIBRATION_EFFECT);
+
+        // Prepare
+        // Uses attributes with haptic channels enabled, but will use the effect when there aren't
+        // any present.
+        verifyLocalPlayerSetup(mockMediaPlayer, SOUND_URI, RINGTONE_ATTRIBUTES_WITH_HC);
+        verify(mockMediaPlayer).setVolume(0.0f);  // Vibration-only: sound muted.
+        verify(mockMediaPlayer).setLooping(false);
+        verify(mockMediaPlayer).prepare();
+
+        // Play
+        ringtone.play();
+        // Vibrator.vibrate isn't called because the vibration comes from the sound.
+        verifyLocalPlay(mockMediaPlayer);
+
+        // Verify dynamic controls (no-op without sound)
+        ringtone.setVolume(0.8f);
+
+        when(mockMediaPlayer.isLooping()).thenReturn(false);  // Checks original
+        ringtone.setLooping(true);
+        verify(mockMediaPlayer).isLooping();
+        verify(mockMediaPlayer).setLooping(true);
+
+        // This is ignored because it's using haptic channels.
+        ringtone.setHapticGeneratorEnabled(true);
+
+        // Release
+        ringtone.stop();
+        verifyLocalStop(mockMediaPlayer);
+
+        // This test is intended to strictly verify all interactions with MediaPlayer in a local
+        // playback case. This shouldn't be necessary in other tests that have the same basic
+        // setup.
+        verifyZeroInteractions(mMockRemotePlayer);
+        verifyZeroInteractions(mMockVibrator);
     }
 
     @Test
