@@ -1389,6 +1389,11 @@ public class ClipboardService extends SystemService {
                 callingPackage) == PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        // Don't notify if this access is coming from the privileged app which owns the device.
+        if (clipboard.deviceId != DEVICE_ID_DEFAULT && mVdmInternal.getDeviceOwnerUid(
+                clipboard.deviceId) == uid) {
+            return;
+        }
         // Don't notify if already notified for this uid and clip.
         if (clipboard.mNotifiedUids.get(uid)) {
             return;
