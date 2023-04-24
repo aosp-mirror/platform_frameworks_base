@@ -259,12 +259,6 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setVr2dDisplayId(int vr2dDisplayId);
 
-    /**
-     * Set focus on an activity.
-     * @param token The activity token.
-     */
-    public abstract void setFocusedActivity(IBinder token);
-
     public abstract void registerScreenObserver(ScreenObserver observer);
 
     /**

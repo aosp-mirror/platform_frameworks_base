@@ -449,6 +449,19 @@ public abstract class WindowManagerInternal {
     public abstract void moveDisplayToTopIfAllowed(int displayId);
 
     /**
+     * Request to move window input focus to the window with the provided window token.
+     *
+     * <p>
+     * It is necessary to move window input focus before certain actions on views in a window can
+     * be performed, such as opening an IME. Input normally requests to move focus on window touch
+     * so this method should not be necessary in most cases; only features that bypass normal touch
+     * behavior (like Accessibility actions) require this method.
+     * </p>
+     * @param windowToken The window token.
+     */
+    public abstract void requestWindowFocus(IBinder windowToken);
+
+    /**
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();

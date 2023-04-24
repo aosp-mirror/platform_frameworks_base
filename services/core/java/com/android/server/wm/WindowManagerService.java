@@ -5647,7 +5647,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 case ON_POINTER_DOWN_OUTSIDE_FOCUS: {
                     synchronized (mGlobalLock) {
                         final IBinder touchedToken = (IBinder) msg.obj;
-                        onPointerDownOutsideFocusLocked(touchedToken);
+                        onPointerDownOutsideFocusLocked(getInputTargetFromToken(touchedToken));
                     }
                     break;
                 }
@@ -7747,6 +7747,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void requestWindowFocus(IBinder windowToken) {
+            synchronized (mGlobalLock) {
+                final InputTarget inputTarget =
+                        WindowManagerService.this.getInputTargetFromWindowTokenLocked(windowToken);
+                WindowManagerService.this.onPointerDownOutsideFocusLocked(inputTarget);
+            }
+        }
+
+        @Override
         public boolean isKeyguardLocked() {
             return WindowManagerService.this.isKeyguardLocked();
         }
@@ -8585,8 +8594,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void onPointerDownOutsideFocusLocked(IBinder touchedToken) {
-        InputTarget t = getInputTargetFromToken(touchedToken);
+    private void onPointerDownOutsideFocusLocked(InputTarget t) {
         if (t == null || !t.receiveFocusFromTapOutside()) {
             // If the window that received the input event cannot receive keys, don't move the
             // display it's on to the top since that window won't be able to get focus anyway.
