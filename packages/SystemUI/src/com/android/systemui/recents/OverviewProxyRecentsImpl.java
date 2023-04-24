@@ -23,14 +23,15 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+
+import dagger.Lazy;
 
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * An implementation of the Recents interface which proxies to the OverviewProxyService.
@@ -44,13 +45,15 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private Handler mHandler;
     private final OverviewProxyService mOverviewProxyService;
+    private final ActivityStarter mActivityStarter;
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyRecentsImpl(Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            OverviewProxyService overviewProxyService) {
+            OverviewProxyService overviewProxyService, ActivityStarter activityStarter) {
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mOverviewProxyService = overviewProxyService;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -101,7 +104,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
             final Optional<CentralSurfaces> centralSurfacesOptional =
                     mCentralSurfacesOptionalLazy.get();
             if (centralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing).orElse(false)) {
-                centralSurfacesOptional.get().executeRunnableDismissingKeyguard(
+                mActivityStarter.executeRunnableDismissingKeyguard(
                         () -> mHandler.post(toggleRecents), null, true /* dismissShade */,
                         false /* afterKeyguardGone */,
                         true /* deferred */);
