@@ -77,6 +77,12 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
+    /** Makes sure notification panel is updated before the user switch is complete. */
+    // TODO(b/278873737): Tracking Bug
+    @JvmField
+    val LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE =
+            unreleasedFlag(278873737, "load_notifications_before_the_user_switch_is_complete")
+
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =
