@@ -503,7 +503,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ნებას რთავს აპს, ჰქონდეს წვდომა ვიბრაციის მდგომარეობაზე."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"პირდაპირი დარეკვა ტელეფონის ნომრებზე"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"აპს შეეძლება დარეკოს ტელეფონის ნომრებზე თქვენი ჩარევის გარეშე. ამან შესაძლოა გამოიწვიოს თქვენს სატელეფონი ქვითარზე მოულოდნელი ხარჯებისა და ზარების გაჩენა. გაითვალისწინეთ, რომ აპს გადაუდებელი დახმარების ნომრებზე დარეკვა არ შეუძლია. მავნე აპებს შეეძლება თქვენი დადასტურების გარეშე ზარების განხორციელება და შესაბამისი საფასურის გადახდაც მოგიწევთ."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"საშუალებას აძლევს აპს, დარეკოს ტელეფონის ნომრებზე თქვენი ჩარევის გარეშე. ამან შეიძლება გამოიწვიოს მოულოდნელი ზარები ან თანხის ჩამოჭრა. გაითვალისწინეთ, რომ ეს საშუალებას არ აძლევს აპს, დარეკოს საგანგებო ვითარებაში საკონტაქტო პირის ნომრებზე. მავნე აპების გამოყენებით, შესაძლოა, თანხის გადახდა მოგიწიოთ თქვენი ნებართვის გარეშე განხორციელებული ზარების გამო, ან იმ ოპერატორების კოდების აკრეფის გამო, რომლებიც ავტომატურად გადაამისამართებს შემომავალ ზარებს სხვა ნომერზე."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ზარების სერვისზე წვდომა"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"აპს შეეძლება, გამოიყენოს IMS სერვისი ზარების თქვენი ჩარევის გარეშე განსახორციელებლად."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ტელეფონის სტატუსისა და იდენტობის წაკითხვა"</string>
@@ -709,8 +709,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"სახის ამოცნობა გაუქმდა."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"სახით განბლოკვა გაუქმდა მომხმარებლის მიერ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"დაფიქსირდა ბევრი მცდელობა. ცადეთ მოგვიანებით."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"მეტისმეტად ბევრი მცდელობა იყო. სახით განბლოკვა მიუწვდომელია."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"მეტისმეტად ბევრი მცდელობა იყო. შეიყვანეთ ეკრანის დაბლოკვის პარამეტრები."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"სახის დადასტურება ვერ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"თქვენ არ დაგიყენებიათ სახით განბლოკვა."</string>
@@ -986,7 +985,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"შეწყვეტა"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"უკან გადახვევა"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"წინ გადახვევა"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი დახმარების ზარები"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი ზარები"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ქსელი ჩაკეტილია"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM დაბლოკილია PUK-ით."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"იხილეთ მომხმარებლის სახელმძღვანელო ან დაუკავშირდით კლიენტების მომსახურებას."</string>
@@ -2159,14 +2158,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ამ კონტენტის სამსახურის აპებით გახსნა შეუძლებელია"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ამ კონტენტის პირადი აპებისთვის გაზიარება შეუძლებელია"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ამ კონტენტის პირადი აპებით გახსნა შეუძლებელია"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"სამსახურის პროფილი დაპაუზებულია"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"შეეხეთ ჩასართავად"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"სამსახურის აპები დაპაუზებულია"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"პაუზის გაუქმება"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"სამსახურის აპები არ არის"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"პირადი აპები არ არის"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"გახსენით პერსონალური <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"გახსენით სამუშაო <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"პირადი ბრაუზერის გამოყენება"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"სამსახურის ბრაუზერის გამოყენება"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>

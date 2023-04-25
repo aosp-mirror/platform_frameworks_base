@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Dacă la următoarea încercare introduci un model incorect, profilul de serviciu și datele sale vor fi șterse."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Dacă la următoarea încercare introduci un cod PIN incorect, profilul de serviciu și datele sale vor fi șterse."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Dacă la următoarea încercare introduci o parolă incorectă, profilul de serviciu și datele sale vor fi șterse."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Atinge senzorul de amprente"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Chipul nu a fost recunoscut. Folosește amprenta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -223,7 +251,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Ecranul este blocat în orientarea de tip peisaj."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Ecranul este blocat în orientarea de tip portret."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Vitrina cu dulciuri"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Economizor de ecran"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Screensaver"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Nu deranja"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -1124,14 +1152,12 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Comută la profilul de serviciu"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Închide"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizează ecranul de blocare"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Deblochează pentru a personaliza ecranul de blocare"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Conexiune Wi-Fi indisponibilă"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Camera foto a fost blocată"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Camera foto și microfonul sunt blocate"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microfonul a fost blocat"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Modul Cu prioritate este activat"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Asistentul este atent"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Setează aplicația prestabilită de note din Setări"</string>
 </resources>
