@@ -3534,21 +3534,29 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // - Sanitized ServiceState sent to all other apps with READ_PHONE_STATE
         // - Sanitized ServiceState sent to all other apps with READ_PRIVILEGED_PHONE_STATE but not
         //   READ_PHONE_STATE
-        BroadcastOptions options = createServiceStateBroadcastOptions(subId, phoneId);
+        //
+        // Create a unique delivery group key for each variant for SERVICE_STATE broadcast so
+        // that a new broadcast only replaces the pending broadcasts of the same variant.
+        // In order to create a unique delivery group key, append tag of the form
+        // "I:Included-permissions[,E:Excluded-permissions][,lbp]"
+        // Note: Given that location-bypass-packages are static, we can just append "lbp" to the
+        // tag to create a unique delivery group but if location-bypass-packages become dynamic
+        // in the future, we would need to create a unique key for each group of
+        // location-bypass-packages.
         if (LocationAccessPolicy.isLocationModeEnabled(mContext, mContext.getUserId())) {
             Intent fullIntent = createServiceStateIntent(state, subId, phoneId, false);
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     fullIntent,
                     new String[]{Manifest.permission.READ_PHONE_STATE,
                             Manifest.permission.ACCESS_FINE_LOCATION},
-                    options);
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RA"));
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     fullIntent,
                     new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
                             Manifest.permission.ACCESS_FINE_LOCATION},
                     new String[]{Manifest.permission.READ_PHONE_STATE},
                     null,
-                    options);
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RPA,E:R"));
 
             Intent sanitizedIntent = createServiceStateIntent(state, subId, phoneId, true);
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
@@ -3556,14 +3564,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     new String[]{Manifest.permission.READ_PHONE_STATE},
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     null,
-                    options);
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:R,E:A"));
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     sanitizedIntent,
                     new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
                     new String[]{Manifest.permission.READ_PHONE_STATE,
                             Manifest.permission.ACCESS_FINE_LOCATION},
                     null,
-                    options);
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RP,E:RA"));
         } else {
             String[] locationBypassPackages = Binder.withCleanCallingIdentity(() ->
                     LocationAccessPolicy.getLocationBypassPackages(mContext));
@@ -3573,13 +3581,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                         fullIntent,
                         new String[]{Manifest.permission.READ_PHONE_STATE},
-                        options);
+                        createServiceStateBroadcastOptions(subId, phoneId, "I:R"));
                 mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                         fullIntent,
                         new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
                         new String[]{Manifest.permission.READ_PHONE_STATE},
                         null,
-                        options);
+                        createServiceStateBroadcastOptions(subId, phoneId, "I:RP,E:R"));
             }
 
             Intent sanitizedIntent = createServiceStateIntent(state, subId, phoneId, true);
@@ -3588,13 +3596,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     new String[]{Manifest.permission.READ_PHONE_STATE},
                     new String[]{/* no excluded permissions */},
                     locationBypassPackages,
-                    options);
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:R,lbp"));
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     sanitizedIntent,
                     new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
                     new String[]{Manifest.permission.READ_PHONE_STATE},
                     locationBypassPackages,
-                    options);
+                    createServiceStateBroadcastOptions(subId, phoneId, "I:RP,E:R,lbp"));
         }
     }
 
@@ -3616,12 +3624,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         return intent;
     }
 
-    private BroadcastOptions createServiceStateBroadcastOptions(int subId, int phoneId) {
+    private BroadcastOptions createServiceStateBroadcastOptions(int subId, int phoneId,
+            String tag) {
         return new BroadcastOptions()
                 .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
                 // Use a combination of subId and phoneId as the key so that older broadcasts
                 // with same subId and phoneId will get discarded.
-                .setDeliveryGroupMatchingKey(Intent.ACTION_SERVICE_STATE, subId + "-" + phoneId)
+                .setDeliveryGroupMatchingKey(Intent.ACTION_SERVICE_STATE,
+                        subId + "-" + phoneId + "-" + tag)
                 .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
     }
 
