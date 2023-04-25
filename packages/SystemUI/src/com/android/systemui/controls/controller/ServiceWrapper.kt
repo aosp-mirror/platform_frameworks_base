@@ -16,11 +16,11 @@
 
 package com.android.systemui.controls.controller
 
-import android.service.controls.actions.ControlAction
 import android.service.controls.IControlsActionCallback
 import android.service.controls.IControlsProvider
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
+import android.service.controls.actions.ControlAction
 import android.service.controls.actions.ControlActionWrapper
 import android.util.Log
 
