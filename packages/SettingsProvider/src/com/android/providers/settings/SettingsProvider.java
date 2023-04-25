@@ -34,7 +34,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OV
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.ACCESSIBILITY_MENU_IN_SYSTEM;
-import static com.android.internal.display.RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE;
 import static com.android.providers.settings.SettingsState.FALLBACK_FILE_SUFFIX;
 import static com.android.providers.settings.SettingsState.getTypeFromKey;
 import static com.android.providers.settings.SettingsState.getUserIdFromKey;
@@ -5674,7 +5673,7 @@ public class SettingsProvider extends ContentProvider {
                             providers.addAll(Arrays.asList(resources.getStringArray(resourceId)));
                         } catch (Resources.NotFoundException e) {
                             Slog.w(LOG_TAG,
-                                    "Get default array Cred Provider not found: " + e.toString());
+                                "Get default array Cred Provider not found: " + e.toString());
                         }
                         try {
                             final String storedValue = resources.getString(resourceId);
@@ -5683,7 +5682,7 @@ public class SettingsProvider extends ContentProvider {
                             }
                         } catch (Resources.NotFoundException e) {
                             Slog.w(LOG_TAG,
-                                    "Get default Cred Provider not found: " + e.toString());
+                                "Get default Cred Provider not found: " + e.toString());
                         }
 
                         if (!providers.isEmpty()) {
@@ -5732,8 +5731,8 @@ public class SettingsProvider extends ContentProvider {
                     final Setting currentSetting = secureSettings
                             .getSettingLocked(Settings.Secure.CREDENTIAL_SERVICE);
                     if (currentSetting.isNull()) {
-                        final int resourceId = com.android.internal.R.array
-                                .config_defaultCredentialProviderService;
+                        final int resourceId =
+                            com.android.internal.R.array.config_defaultCredentialProviderService;
                         final Resources resources = getContext().getResources();
                         // If the config has not be defined we might get an exception.
                         final List<String> providers = new ArrayList<>();
@@ -5741,7 +5740,7 @@ public class SettingsProvider extends ContentProvider {
                             providers.addAll(Arrays.asList(resources.getStringArray(resourceId)));
                         } catch (Resources.NotFoundException e) {
                             Slog.w(LOG_TAG,
-                                    "Get default array Cred Provider not found: " + e.toString());
+                                "Get default array Cred Provider not found: " + e.toString());
                         }
 
                         if (!providers.isEmpty()) {
@@ -5840,44 +5839,12 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 218;
                 }
 
-                // v218: Convert Smooth Display and Force Peak Refresh Rate to a boolean
                 if (currentVersion == 218) {
-                    final String peakRefreshRateSettingName = "peak_refresh_rate";
-                    final String minRefreshRateSettingName = "min_refresh_rate";
-
-                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
-                    final Setting peakRefreshRateSetting =
-                            systemSettings.getSettingLocked(peakRefreshRateSettingName);
-                    final Setting minRefreshRateSetting =
-                            systemSettings.getSettingLocked(minRefreshRateSettingName);
-
-                    float peakRefreshRate = DEFAULT_REFRESH_RATE;
-                    float minRefreshRate = 0;
-                    try {
-                        if (!peakRefreshRateSetting.isNull()) {
-                            peakRefreshRate = Float.parseFloat(peakRefreshRateSetting.getValue());
-                        }
-                    } catch (NumberFormatException e) {
-                        // Do nothing. Overwrite with default value.
-                    }
-                    try {
-                        if (!minRefreshRateSetting.isNull()) {
-                            minRefreshRate = Float.parseFloat(minRefreshRateSetting.getValue());
-                        }
-                    } catch (NumberFormatException e) {
-                        // Do nothing. Overwrite with default value.
-                    }
-
-                    systemSettings.deleteSettingLocked(peakRefreshRateSettingName);
-                    systemSettings.deleteSettingLocked(minRefreshRateSettingName);
-
-                    systemSettings.insertSettingLocked(Settings.System.SMOOTH_DISPLAY,
-                            peakRefreshRate > DEFAULT_REFRESH_RATE ? "1" : "0", /* tag= */ null,
-                            /* makeDefault= */ false, SettingsState.SYSTEM_PACKAGE_NAME);
-                    systemSettings.insertSettingLocked(Settings.System.FORCE_PEAK_REFRESH_RATE,
-                            minRefreshRate > 0 ? "1" : "0", /* tag= */ null,
-                            /* makeDefault= */ false, SettingsState.SYSTEM_PACKAGE_NAME);
-
+                    // Version 219: Removed
+                    // TODO(b/211737588): Back up the Smooth Display setting
+                    // Future upgrades to the `peak_refresh_rate` and `min_refresh_rate` settings
+                    // should account for the database in a non-upgraded and upgraded (change id:
+                    // Ib2cb2dd100f06f5452083b7606109a486e795a0e) state.
                     currentVersion = 219;
                 }
 
