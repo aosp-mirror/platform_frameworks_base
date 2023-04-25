@@ -127,5 +127,11 @@ abstract class ShadeModule {
             stub.layoutResource = layoutId
             return stub.inflate() as MotionLayout
         }
+
+        @Provides
+        @SysUISingleton
+        fun providesCombinedShadeHeadersConstraintManager(): CombinedShadeHeadersConstraintManager {
+            return CombinedShadeHeadersConstraintManagerImpl
+        }
     }
 }

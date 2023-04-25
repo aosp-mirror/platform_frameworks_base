@@ -35,8 +35,6 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.CombinedShadeHeadersConstraintManager;
-import com.android.systemui.shade.CombinedShadeHeadersConstraintManagerImpl;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -135,14 +133,6 @@ public abstract class StatusBarViewModule {
     @CentralSurfacesComponent.CentralSurfacesScope
     abstract ShadeViewController bindsShadeViewController(
             NotificationPanelViewController notificationPanelViewController);
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static CombinedShadeHeadersConstraintManager
-            provideCombinedShadeHeadersConstraintManager() {
-        return CombinedShadeHeadersConstraintManagerImpl.INSTANCE;
-    }
 
     /** */
     @Provides
