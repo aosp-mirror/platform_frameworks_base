@@ -25079,7 +25079,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int viewStateIndex = 0;
         if ((privateFlags & PFLAG_PRESSED) != 0) viewStateIndex |= StateSet.VIEW_STATE_PRESSED;
         if ((mViewFlags & ENABLED_MASK) == ENABLED) viewStateIndex |= StateSet.VIEW_STATE_ENABLED;
-        if (isFocused() && hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_FOCUSED;
+        if (isFocused()) viewStateIndex |= StateSet.VIEW_STATE_FOCUSED;
         if ((privateFlags & PFLAG_SELECTED) != 0) viewStateIndex |= StateSet.VIEW_STATE_SELECTED;
         if (hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_WINDOW_FOCUSED;
         if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= StateSet.VIEW_STATE_ACTIVATED;
