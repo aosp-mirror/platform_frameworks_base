@@ -209,7 +209,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Екранот е заклучен во ориентација на пејзаж."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Екранот е заклучен во ориентација на портрет."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Dessert Case"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Заштитник на екран"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Штедач на екран"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Етернет"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не вознемирувај"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -490,7 +490,7 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Вклучи"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Контроли за известувањата за напојување"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Вклучено - според лице"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Сокриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Скриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Готово"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Примени"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Исклучи известувања"</string>
@@ -804,9 +804,9 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Повлечете за да видите повеќе"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Се вчитуваат препораки"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Аудиовизуелни содржини"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Да се сокријат контролите за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="controls_media_active_session" msgid="3146882316024153337">"Аудиовизуелнава сесија не може да се сокрие."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Сокриј"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Да се скријат контролите за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Аудиовизуелнава сесија не може да се скрие."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скриј"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Продолжи"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Поставки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> од <xliff:g id="ARTIST_NAME">%2$s</xliff:g> е пуштено на <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>

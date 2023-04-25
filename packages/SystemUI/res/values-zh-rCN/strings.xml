@@ -857,8 +857,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"无法广播"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"无法保存，请重试。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"无法保存。"</string>
-    <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
-    <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build 号"</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"已将 Build 号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"对话微件"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"点按对话即可将其添加到主屏幕"</string>
