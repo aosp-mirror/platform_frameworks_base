@@ -32,6 +32,9 @@ import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
+import android.telephony.Annotation;
+import android.telephony.TelephonyManager;
 import android.text.ParcelableSpan;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -200,6 +203,32 @@ public final class AccessibilityUtils {
             }
         }
 
+        return false;
+    }
+
+    /**
+     * Intercepts the {@link AccessibilityService#GLOBAL_ACTION_KEYCODE_HEADSETHOOK} action
+     * by directly interacting with TelecomManager if a call is incoming or in progress.
+     *
+     * <p>
+     * Provided here in shared utils to be used by both the legacy and modern (SysUI)
+     * system action implementations.
+     * </p>
+     *
+     * @return True if the action was propagated to TelecomManager, otherwise false.
+     */
+    public static boolean interceptHeadsetHookForActiveCall(Context context) {
+        final TelecomManager telecomManager = context.getSystemService(TelecomManager.class);
+        @Annotation.CallState final int callState =
+                telecomManager != null ? telecomManager.getCallState()
+                        : TelephonyManager.CALL_STATE_IDLE;
+        if (callState == TelephonyManager.CALL_STATE_RINGING) {
+            telecomManager.acceptRingingCall();
+            return true;
+        } else if (callState == TelephonyManager.CALL_STATE_OFFHOOK) {
+            telecomManager.endCall();
+            return true;
+        }
         return false;
     }
 
