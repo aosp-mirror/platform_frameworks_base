@@ -79,11 +79,6 @@ import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_O
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_REQUIRED_ID_CHANGE;
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_TRIGGER_ID_SET;
 import static com.android.server.autofill.SaveEventLogger.SAVE_UI_SHOWN_REASON_UNKNOWN;
-import static com.android.server.autofill.SessionCommittedEventLogger.CommitReason;
-import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_ACTIVITY_FINISHED;
-import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_VIEW_CHANGED;
-import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_VIEW_CLICKED;
-import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_VIEW_COMMITTED;
 import static com.android.server.autofill.SessionCommittedEventLogger.COMMIT_REASON_SESSION_DESTROYED;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
@@ -3406,7 +3401,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final long saveUiDisplayStartTimestamp = SystemClock.elapsedRealtime();
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
-                        mComponentName, this, mPendingSaveUi, isUpdate, mCompatMode,
+                        mComponentName, this, userId, mPendingSaveUi, isUpdate, mCompatMode,
                         response.getShowSaveDialogIcon());
                 mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis(
                     SystemClock.elapsedRealtime()- saveUiDisplayStartTimestamp);
