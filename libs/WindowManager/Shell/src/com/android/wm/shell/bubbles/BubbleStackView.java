@@ -1007,6 +1007,7 @@ public class BubbleStackView extends FrameLayout
                         updatePointerPosition(false /* forIme */);
                         mExpandedAnimationController.expandFromStack(() -> {
                             afterExpandedViewAnimation();
+                            mExpandedViewContainer.setVisibility(VISIBLE);
                             showManageMenu(mShowingManage);
                         } /* after */);
                         PointF p = mPositioner.getExpandedBubbleXY(getBubbleIndex(mExpandedBubble),
