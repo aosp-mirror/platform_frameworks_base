@@ -15,10 +15,12 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BUTTON;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
@@ -27,6 +29,7 @@ import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 /**
@@ -95,12 +98,8 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
     public void reloadColors() {
         if (mAnimator != null) mAnimator.reloadColors(getContext());
 
-        int textColorResId = mIsTransparentMode ? android.R.attr.textColorPrimary
-                : android.R.attr.textColorPrimaryInverse;
-        int[] customAttrs = {textColorResId};
-        TypedArray a = getContext().obtainStyledAttributes(customAttrs);
-        int imageColor = a.getColor(0, 0);
-        a.recycle();
+        int textColorResId = mIsTransparentMode ? NUM_PAD_KEY : NUM_PAD_BUTTON;
+        int imageColor = Utils.getColorAttrDefaultColor(getContext(), textColorResId);
         ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(imageColor));
     }
 
@@ -119,7 +118,7 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
     public void setTransparentMode(boolean isTransparentMode) {
         mIsTransparentMode = isTransparentMode;
         if (isTransparentMode) {
-            setBackgroundColor(android.R.color.transparent);
+            setBackgroundColor(getResources().getColor(android.R.color.transparent));
         } else {
             setBackground(getContext().getDrawable(R.drawable.num_pad_key_background));
         }

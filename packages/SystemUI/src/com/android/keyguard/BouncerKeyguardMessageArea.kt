@@ -28,6 +28,7 @@ import android.util.AttributeSet
 import android.view.View
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.TITLE
 
 /** Displays security messages for the keyguard bouncer. */
 open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
@@ -56,8 +57,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun onThemeChanged() {
-        val array: TypedArray =
-            mContext.obtainStyledAttributes(intArrayOf(android.R.attr.textColorPrimary))
+        val array: TypedArray = mContext.obtainStyledAttributes(intArrayOf(TITLE))
         val newTextColors: ColorStateList = ColorStateList.valueOf(array.getColor(0, Color.RED))
         array.recycle()
         mDefaultColorState = newTextColors
@@ -65,7 +65,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun reloadColor() {
-        mDefaultColorState = Utils.getColorAttr(context, android.R.attr.textColorPrimary)
+        mDefaultColorState = Utils.getColorAttr(context, TITLE)
         super.reloadColor()
     }
 
