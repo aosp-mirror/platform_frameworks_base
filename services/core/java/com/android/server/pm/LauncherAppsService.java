@@ -1120,12 +1120,12 @@ public class LauncherAppsService extends SystemService {
                     return shortcutOverridesInfo;
                 }
 
-                List<String> packagesToOverride =
+                Map<String, String> packagesToOverride =
                         DevicePolicyCache.getInstance().getLauncherShortcutOverrides();
-                for (String packageName : packagesToOverride) {
+                for (Map.Entry<String, String> packageNames : packagesToOverride.entrySet()) {
                     Intent intent = new Intent(Intent.ACTION_MAIN)
                             .addCategory(Intent.CATEGORY_LAUNCHER)
-                            .setPackage(packageName);
+                            .setPackage(packageNames.getValue());
 
                     List<LauncherActivityInfoInternal> possibleShortcutOverrides =
                             queryIntentLauncherActivities(
@@ -1135,7 +1135,8 @@ public class LauncherAppsService extends SystemService {
                             );
 
                     if (!possibleShortcutOverrides.isEmpty()) {
-                        shortcutOverridesInfo.put(packageName, possibleShortcutOverrides.get(0));
+                        shortcutOverridesInfo.put(packageNames.getKey(),
+                                possibleShortcutOverrides.get(0));
                     }
                 }
                 return shortcutOverridesInfo;
