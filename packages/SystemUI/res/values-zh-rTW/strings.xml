@@ -95,7 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"檔案"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"「<xliff:g id="APPNAME">%1$s</xliff:g>」偵測到這張螢幕截圖。"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"「<xliff:g id="APPNAME">%1$s</xliff:g>」和其他開啟的應用程式偵測到這張螢幕截圖。"</string>
-    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"新增至記事"</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"新增至記事本"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕錄影器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示螢幕畫面錄製工作階段通知"</string>
@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"如果下次輸入的解鎖圖案仍不正確，系統將刪除你的工作資料夾和相關資料。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"如果下次輸入的 PIN 碼仍不正確，系統將刪除你的工作資料夾和相關資料。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"如果下次輸入的密碼仍不正確，系統將刪除你的工作資料夾和相關資料。"</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"請輕觸指紋感應器"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"無法辨識臉孔，請改用指紋完成驗證。"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -663,7 +691,7 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"計算機"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"地圖"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"零打擾"</string>
-    <string name="volume_dnd_silent" msgid="4154597281458298093">"音量按鈕快速鍵"</string>
+    <string name="volume_dnd_silent" msgid="4154597281458298093">"音量鍵快速鍵"</string>
     <string name="battery" msgid="769686279459897127">"電池"</string>
     <string name="headset" msgid="4485892374984466437">"耳機"</string>
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"開啟設定"</string>

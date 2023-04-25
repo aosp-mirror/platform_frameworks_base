@@ -168,6 +168,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"If you enter an incorrect pattern on the next attempt, your work profile and its data will be deleted."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"If you enter an incorrect password on the next attempt, your work profile and its data will be deleted."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Set up"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Not now"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"This is required to improve security and performance"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Set up Fingerprint Unlock again"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Fingerprint Unlock"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Set up Fingerprint Unlock"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"To set up Fingerprint Unlock again, your current fingerprint images and models will be deleted.\n\nAfter theyre deleted, youll need to set up Fingerprint Unlock again to use your fingerprint to unlock your phone or verify its you."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"To set up Fingerprint Unlock again, your current fingerprint images and model will be deleted.\n\nAfter theyre deleted, youll need to set up Fingerprint Unlock again to use your fingerprint to unlock your phone or verify its you."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Couldn’t set up fingerprint unlock. Go to Settings to try again."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Set up Face Unlock again"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Face Unlock"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Set up Face Unlock"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"To set up Face Unlock again, your current face model will be deleted.\n\nYoull need to set up this feature again to use your face to unlock your phone."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Couldn’t set up face unlock. Go to Settings to try again."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Touch the fingerprint sensor"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Can’t recognize face. Use fingerprint instead."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -465,15 +479,15 @@
     <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Lowered to safer volume"</string>
     <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"The volume has been high for longer than recommended"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App is pinned"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"This keeps it in view until you unpin. Touch &amp; hold Back and Overview to unpin."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"This keeps it in view until you unpin. Touch &amp; hold Back and Home to unpin."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"This keeps it in view until you unpin. Touch and hold Back and Overview to unpin."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"This keeps it in view until you unpin. Touch and hold Back and Home to unpin."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"This keeps it in view until you unpin. Swipe up &amp; hold to unpin."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"This keeps it in view until you unpin. Touch &amp; hold Overview to unpin."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"This keeps it in view until you unpin. Touch &amp; hold Home to unpin."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"This keeps it in view until you unpin. Touch and hold Overview to unpin."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"This keeps it in view until you unpin. Touch and hold Home to unpin."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Personal data may be accessible (such as contacts and email content)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Pinned app may open other apps."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"To unpin this app, touch &amp; hold Back and Overview buttons"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"To unpin this app, touch &amp; hold Back and Home buttons"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"To unpin this app, touch and hold the Back and Overview buttons"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"To unpin this app, touch and hold the Back and Home buttons"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"To unpin this app, swipe up &amp; hold"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Got it"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"No thanks"</string>
@@ -885,8 +899,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"unfavorite"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Move to position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Choose device controls to access quickly"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Hold &amp; drag to rearrange controls"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"All controls removed"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Changes not saved"</string>
@@ -1106,7 +1119,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Install a camera app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• The app is set up"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• At least one device is available"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Touch &amp; hold shortcut"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Touch and hold shortcut"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancel"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Switch screens now"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Unfold phone"</string>

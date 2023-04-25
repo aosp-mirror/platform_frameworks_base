@@ -168,6 +168,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"আপনি পরের বারও ভুল প্যাটার্ন দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"আপনি পরের বারও ভুল পিন দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"আপনি পরের বারও ভুল পাসওয়ার্ড দিলে আপনার অফিস প্রোফাইল এবং তার ডেটা মুছে দেওয়া হবে।"</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"সেট-আপ করুন"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"এখন নয়"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"সুরক্ষা ও পারফর্ম্যান্স উন্নত করতে এটি প্রয়োজন"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"\'ফিঙ্গারপ্রিন্ট আনলক\' আবার সেট-আপ করুন"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ফিঙ্গারপ্রিন্ট আনলক"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"\'ফিঙ্গারপ্রিন্ট আনলক\' সেট-আপ করুন"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"\'ফিঙ্গারপ্রিন্ট আনলক\' আবার সেট-আপ করতে, আপনার বর্তমানে থাকা ফিঙ্গারপ্রিন্ট ইমেজ ও মডেল মুছে ফেলা হবে।\n\nমুছে ফেলা হয়ে গেলে, আপনার ফোন আনলক করতে অথবা নিজের পরিচয় যাচাই করার জন্য ফিঙ্গারপ্রিন্ট ব্যবহার করতে হলে আপনাকে আবার \'ফিঙ্গারপ্রিন্ট আনলক\' সেট-আপ করতে হবে।"</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"\'ফিঙ্গারপ্রিন্ট আনলক\' আবার সেট-আপ করতে, আপনার বর্তমানে থাকা ফিঙ্গারপ্রিন্ট ইমেজ ও মডেল মুছে ফেলা হবে।\n\nমুছে ফেলা হয়ে গেলে, আপনার ফোন আনলক করতে অথবা নিজের পরিচয় যাচাই করার জন্য ফিঙ্গারপ্রিন্ট ব্যবহার করতে হলে আপনাকে আবার \'ফিঙ্গারপ্রিন্ট আনলক\' সেট-আপ করতে হবে।"</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"\'ফিঙ্গারপ্রিন্ট আনলক\' সেট-আপ করা যায়নি। আবার চেষ্টা করতে সেটিংসে যান।"</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"\'ফেস আনলক\' আবার সেট আপ করুন"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"ফেস আনলক"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"\'ফেস আনলক\' সেট-আপ করুন"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"\'ফেস আনলক\' আবার সেট-আপ করতে, বর্তমানে থাকা আপনার ফেস মডেলটি মুছে ফেলা হবে।\n\nফেস ব্যবহার করে আপনার ফোন আনলক করার জন্য আপনাকে আবার এই ফিচার সেট-আপ করতে হবে।"</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"\'ফেস আনলক\' সেট-আপ করা যায়নি। আবার চেষ্টা করতে সেটিংসে যান।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"মুখ শনাক্ত করতে পারছি না। পরিবর্তে আঙ্গুলের ছাপ ব্যবহার করুন।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -885,8 +899,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"পছন্দসই থেকে সরান"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> অবস্থানে সরান"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"ঝটপট অ্যাক্সেস করতে, ডিভাইস সংক্রান্ত কন্ট্রোল বেছে নিন"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"কন্ট্রোলগুলিকে আবার সাজানোর জন্য ধরে রেখে টেনে আনুন"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"সমস্ত কন্ট্রোল সরানো হয়েছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"পরিবর্তন সেভ করা হয়নি"</string>
@@ -1124,14 +1137,12 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"অফিস প্রোফাইলে পাল্টে নিন"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"বন্ধ করুন"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"লক স্ক্রিন কাস্টমাইজ করুন"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"লক স্ক্রিন কাস্টমাইজ করতে আনলক করুন"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ওয়াই-ফাই উপলভ্য নয়"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ক্যামেরার অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ক্যামেরা এবং মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\'প্রায়োরিটি\' মোড চালু করা আছে"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"অ্যাসিস্ট্যান্ট আপনার কথা শোনার জন্য চালু করা আছে"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"\'সেটিংস\' থেকে ডিফল্ট নোট নেওয়ার অ্যাপ সেট করুন"</string>
 </resources>
