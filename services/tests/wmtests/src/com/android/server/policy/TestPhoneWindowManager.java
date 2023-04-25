@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.STATE_ON;
@@ -45,6 +46,7 @@ import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAV
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -103,6 +105,8 @@ import java.util.function.Supplier;
 
 class TestPhoneWindowManager {
     private static final long SHORTCUT_KEY_DELAY_MILLIS = 150;
+    private static final long TEST_SINGLE_KEY_DELAY_MILLIS
+            = SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT + 1000L * HW_TIMEOUT_MULTIPLIER;
 
     private PhoneWindowManager mPhoneWindowManager;
     private Context mContext;
@@ -260,6 +264,7 @@ class TestPhoneWindowManager {
         overrideLaunchAccessibility();
         doReturn(false).when(mPhoneWindowManager).keyguardOn();
         doNothing().when(mContext).startActivityAsUser(any(), any());
+        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
         Mockito.reset(mContext);
     }
 
@@ -539,14 +544,14 @@ class TestPhoneWindowManager {
     void assertOpenAllAppView() {
         waitForIdle();
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext, timeout(SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT * 2))
+        verify(mContext, timeout(TEST_SINGLE_KEY_DELAY_MILLIS))
                 .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
         Assert.assertEquals(Intent.ACTION_ALL_APPS, intentCaptor.getValue().getAction());
     }
 
     void assertNotOpenAllAppView() {
         waitForIdle();
-        verify(mContext, never()).startActivityAsUser(
-                any(Intent.class), any(), any(UserHandle.class));
+        verify(mContext, after(TEST_SINGLE_KEY_DELAY_MILLIS).never())
+                .startActivityAsUser(any(Intent.class), any(), any(UserHandle.class));
     }
 }
