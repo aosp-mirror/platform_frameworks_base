@@ -491,7 +491,7 @@
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dopušteno"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nije dopušteno"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih apl."</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih aplikacija"</string>
     <string name="home" msgid="973834627243661438">"Početni zaslon postavki"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -542,7 +542,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trajanje"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pitaj svaki put"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Dok ne isključite"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Do isključivanja"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo sad"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ovaj tablet"</string>
