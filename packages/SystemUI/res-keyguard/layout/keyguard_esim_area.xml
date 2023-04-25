@@ -19,6 +19,7 @@
 
 <!-- This contains disable eSim buttons shared by sim_pin/sim_puk screens -->
 <com.android.keyguard.KeyguardEsimArea xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/keyguard_disable_esim"
     style="@style/Keyguard.TextView"
     android:layout_width="wrap_content"
@@ -26,8 +27,8 @@
     android:background="@drawable/kg_bouncer_secondary_button"
     android:drawablePadding="10dp"
     android:drawableStart="@drawable/ic_no_sim"
-    android:drawableTint="?android:attr/textColorPrimary"
+    android:drawableTint="?androidprv:attr/materialColorOnSurface"
     android:text="@string/disable_carrier_button_text"
-    android:textColor="?android:attr/textColorPrimary"
+    android:textColor="?androidprv:attr/materialColorOnSurface"
     android:textSize="@dimen/kg_status_line_font_size"
     android:visibility="gone" />
