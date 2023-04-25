@@ -88,6 +88,8 @@ public final class MediaRouter2 {
 
     private final CopyOnWriteArrayList<RouteCallbackRecord> mRouteCallbackRecords =
             new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<RouteListingPreferenceCallbackRecord>
+            mListingPreferenceCallbackRecords = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<TransferCallbackRecord> mTransferCallbackRecords =
             new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<ControllerCallbackRecord> mControllerCallbackRecords =
@@ -384,6 +386,43 @@ public final class MediaRouter2 {
     }
 
     /**
+     * Registers callback to be invoked when the {@link RouteListingPreference} of the target
+     * router changes.
+     *
+     * <p>Calls using a previously registered callback will overwrite the callback record.
+     *
+     * @see #setRouteListingPreference(RouteListingPreference)
+     * @hide
+     */
+    public void registerRouteListingPreferenceCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull RouteListingPreferenceCallback routeListingPreferenceCallback) {
+        Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(routeListingPreferenceCallback, "callback must not be null");
+
+        RouteListingPreferenceCallbackRecord record =
+                new RouteListingPreferenceCallbackRecord(executor, routeListingPreferenceCallback);
+
+        mListingPreferenceCallbackRecords.remove(record);
+        mListingPreferenceCallbackRecords.add(record);
+    }
+
+    /**
+     * Unregisters the given callback to not receive {@link RouteListingPreference} change events.
+     *
+     * @hide
+     */
+    public void unregisterRouteListingPreferenceCallback(
+            @NonNull RouteListingPreferenceCallback callback) {
+        Objects.requireNonNull(callback, "callback must not be null");
+
+        if (!mListingPreferenceCallbackRecords.remove(
+                new RouteListingPreferenceCallbackRecord(/* executor */ null, callback))) {
+            Log.w(TAG, "unregisterRouteListingPreferenceCallback: Ignoring an unknown callback");
+        }
+    }
+
+    /**
      * Shows the system output switcher dialog.
      *
      * <p>Should only be called when the context of MediaRouter2 is in the foreground and visible on
@@ -453,6 +492,20 @@ public final class MediaRouter2 {
             } catch (RemoteException ex) {
                 ex.rethrowFromSystemServer();
             }
+            notifyRouteListingPreferenceUpdated(routeListingPreference);
+        }
+    }
+
+    /**
+     * Returns the current {@link RouteListingPreference} of the target router.
+     *
+     * @see #setRouteListingPreference(RouteListingPreference)
+     * @hide
+     */
+    @Nullable
+    public RouteListingPreference getRouteListingPreference() {
+        synchronized (mLock) {
+            return mRouteListingPreference;
         }
     }
 
@@ -1078,6 +1131,15 @@ public final class MediaRouter2 {
         }
     }
 
+    private void notifyRouteListingPreferenceUpdated(@Nullable RouteListingPreference preference) {
+        for (RouteListingPreferenceCallbackRecord record : mListingPreferenceCallbackRecords) {
+            record.mExecutor.execute(
+                    () ->
+                            record.mRouteListingPreferenceCallback.onRouteListingPreferenceChanged(
+                                    preference));
+        }
+    }
+
     private void notifyTransfer(RoutingController oldController, RoutingController newController) {
         for (TransferCallbackRecord record : mTransferCallbackRecords) {
             record.mExecutor.execute(
@@ -1159,6 +1221,12 @@ public final class MediaRouter2 {
          */
         @SystemApi
         public void onPreferredFeaturesChanged(@NonNull List<String> preferredFeatures) {}
+    }
+
+    /** @hide */
+    public abstract static class RouteListingPreferenceCallback {
+        /** @hide */
+        public void onRouteListingPreferenceChanged(@Nullable RouteListingPreference preference) {}
     }
 
     /** Callback for receiving events on media transfer. */
@@ -1696,6 +1764,35 @@ public final class MediaRouter2 {
         @Override
         public int hashCode() {
             return mRouteCallback.hashCode();
+        }
+    }
+
+    private static final class RouteListingPreferenceCallbackRecord {
+        public final Executor mExecutor;
+        public final RouteListingPreferenceCallback mRouteListingPreferenceCallback;
+
+        /* package */ RouteListingPreferenceCallbackRecord(
+                @NonNull Executor executor,
+                @NonNull RouteListingPreferenceCallback routeListingPreferenceCallback) {
+            mExecutor = executor;
+            mRouteListingPreferenceCallback = routeListingPreferenceCallback;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof RouteListingPreferenceCallbackRecord)) {
+                return false;
+            }
+            return mRouteListingPreferenceCallback
+                    == ((RouteListingPreferenceCallbackRecord) obj).mRouteListingPreferenceCallback;
+        }
+
+        @Override
+        public int hashCode() {
+            return mRouteListingPreferenceCallback.hashCode();
         }
     }
 
@@ -2564,6 +2661,24 @@ public final class MediaRouter2 {
             notifyPreferredFeaturesChanged(preference.getPreferredFeatures());
         }
 
+        private void onRouteListingPreferenceChangedOnHandler(
+                @NonNull String packageName,
+                @Nullable RouteListingPreference routeListingPreference) {
+            if (!TextUtils.equals(getClientPackageName(), packageName)) {
+                return;
+            }
+
+            synchronized (mLock) {
+                if (Objects.equals(mRouteListingPreference, routeListingPreference)) {
+                    return;
+                }
+
+                mRouteListingPreference = routeListingPreference;
+            }
+
+            notifyRouteListingPreferenceUpdated(routeListingPreference);
+        }
+
         private void onRoutesUpdatedOnHandler(@NonNull List<MediaRoute2Info> routes) {
             synchronized (mLock) {
                 mRoutes.clear();
@@ -2635,7 +2750,12 @@ public final class MediaRouter2 {
             @Override
             public void notifyRouteListingPreferenceChange(
                     String packageName, RouteListingPreference routeListingPreference) {
-                // TODO(b/281067101): Add callback and getter for RouteListingPreference.
+                mHandler.sendMessage(
+                        obtainMessage(
+                                ProxyMediaRouter2Impl::onRouteListingPreferenceChangedOnHandler,
+                                ProxyMediaRouter2Impl.this,
+                                packageName,
+                                routeListingPreference));
             }
 
             @Override
