@@ -1538,7 +1538,11 @@ public class UserLifecycleTests {
     }
 
     private void waitForBroadcastIdle() {
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        try {
+            runShellCommandWithTimeout("am wait-for-broadcast-idle", TIMEOUT_IN_SECOND);
+        } catch (TimeoutException e) {
+            Log.e(TAG, "Ending waitForBroadcastIdle because it is taking too long", e);
+        }
     }
 
     private void sleep(long ms) {
