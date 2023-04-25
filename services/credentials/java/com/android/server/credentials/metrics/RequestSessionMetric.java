@@ -337,10 +337,6 @@ public class RequestSessionMetric {
      */
     public void logApiCalledAtFinish(int apiStatus) {
         try {
-            // TODO (b/270403549) - this browsing phase object is fine but also have a new emit
-            // For the returned types by authentication entries - i.e. a CandidatePhase During
-            // Browse
-            // Possibly think of adding in more atoms for other APIs as well.
             logApiCalledFinalPhase(mChosenProviderFinalPhaseMetric, mCandidateBrowsingPhaseMetric,
                     apiStatus,
                     ++mSequenceCounter);

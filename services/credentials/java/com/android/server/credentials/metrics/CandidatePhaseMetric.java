@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
  * Some types are redundant across these metric collectors, but that has debug use-cases as
  * these data-types are available at different moments of the flow (and typically, one can feed
  * into the next).
- * TODO(b/270403549) - iterate on this in V3+
  */
 public class CandidatePhaseMetric {
 
@@ -56,10 +55,7 @@ public class CandidatePhaseMetric {
     private int mProviderQueryStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
-    // Indicates the number of total entries available. We can also locally store the entries, but
-    // cannot emit them in the current split form. TODO(b/271135048) - possibly readjust candidate
-    // entries. Also, it may be okay to remove this and instead aggregate from inner counts.
-    // Defaults to -1
+    // Indicates the number of total entries available, defaults to -1
     private int mNumEntriesTotal = -1;
     // The count of action entries from this provider, defaults to -1
     private int mActionEntryCount = -1;
