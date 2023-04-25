@@ -464,7 +464,12 @@ constructor(
             // Fade out the icon if we are animating an activity launch over the lockscreen and the
             // activity didn't request the UDFPS.
             if (isLaunchingActivity && !udfpsRequested) {
-                alpha = (alpha * (1.0f - activityLaunchProgress)).toInt()
+                val udfpsActivityLaunchAlphaMultiplier =
+                    1f -
+                        (activityLaunchProgress *
+                                (ActivityLaunchAnimator.TIMINGS.totalDuration / 83))
+                            .coerceIn(0f, 1f)
+                alpha = (alpha * udfpsActivityLaunchAlphaMultiplier).toInt()
             }
 
             // Fade out alpha when a dialog is shown
