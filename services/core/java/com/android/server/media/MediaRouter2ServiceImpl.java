@@ -285,8 +285,20 @@ class MediaRouter2ServiceImpl {
                         ? routeListingPreference.getLinkedItemComponentName()
                         : null;
         if (linkedItemLandingComponent != null) {
+            int callingUid = Binder.getCallingUid();
             MediaServerUtils.enforcePackageName(
-                    linkedItemLandingComponent.getPackageName(), Binder.getCallingUid());
+                    linkedItemLandingComponent.getPackageName(), callingUid);
+            if (!MediaServerUtils.isValidActivityComponentName(
+                    mContext,
+                    linkedItemLandingComponent,
+                    RouteListingPreference.ACTION_TRANSFER_MEDIA,
+                    Binder.getCallingUserHandle())) {
+                throw new IllegalArgumentException(
+                        "Unable to resolve "
+                                + linkedItemLandingComponent
+                                + " to a valid activity for "
+                                + RouteListingPreference.ACTION_TRANSFER_MEDIA);
+            }
         }
 
         final long token = Binder.clearCallingIdentity();
