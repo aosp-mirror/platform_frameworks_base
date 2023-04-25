@@ -584,15 +584,34 @@ public final class UsbDescriptorParser {
     }
 
     /**
+     * Returns true only if there is a terminal whose subtype and terminal type are the same as
+     * the given values.
      * @hide
      */
-    public boolean hasAudioTerminal(int subType) {
+    public boolean hasAudioTerminal(int subType, int terminalType) {
         for (UsbDescriptor descriptor : mDescriptors) {
-            if (descriptor instanceof UsbACInterface) {
-                if (((UsbACInterface) descriptor).getSubclass()
-                        == UsbDescriptor.AUDIO_AUDIOCONTROL
-                        && ((UsbACInterface) descriptor).getSubtype()
-                        == subType) {
+            if (descriptor instanceof UsbACTerminal) {
+                if (((UsbACTerminal) descriptor).getSubclass() == UsbDescriptor.AUDIO_AUDIOCONTROL
+                        && ((UsbACTerminal) descriptor).getSubtype() == subType
+                        && ((UsbACTerminal) descriptor).getTerminalType() == terminalType) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true only if there is an interface whose subtype is the same as the given one and
+     * terminal type is different from the given one.
+     * @hide
+     */
+    public boolean hasAudioTerminalExcludeType(int subType, int excludedTerminalType) {
+        for (UsbDescriptor descriptor : mDescriptors) {
+            if (descriptor instanceof UsbACTerminal) {
+                if (((UsbACTerminal) descriptor).getSubclass() == UsbDescriptor.AUDIO_AUDIOCONTROL
+                        && ((UsbACTerminal) descriptor).getSubtype() == subType
+                        && ((UsbACTerminal) descriptor).getTerminalType() != excludedTerminalType) {
                     return true;
                 }
             }
@@ -604,14 +623,21 @@ public final class UsbDescriptorParser {
      * @hide
      */
     public boolean hasAudioPlayback() {
-        return hasAudioTerminal(UsbACInterface.ACI_OUTPUT_TERMINAL);
+        return hasAudioTerminalExcludeType(
+                UsbACInterface.ACI_OUTPUT_TERMINAL, UsbTerminalTypes.TERMINAL_USB_STREAMING)
+                && hasAudioTerminal(
+                        UsbACInterface.ACI_INPUT_TERMINAL, UsbTerminalTypes.TERMINAL_USB_STREAMING);
     }
 
     /**
      * @hide
      */
     public boolean hasAudioCapture() {
-        return hasAudioTerminal(UsbACInterface.ACI_INPUT_TERMINAL);
+        return hasAudioTerminalExcludeType(
+                UsbACInterface.ACI_INPUT_TERMINAL, UsbTerminalTypes.TERMINAL_USB_STREAMING)
+                && hasAudioTerminal(
+                        UsbACInterface.ACI_OUTPUT_TERMINAL,
+                        UsbTerminalTypes.TERMINAL_USB_STREAMING);
     }
 
     /**
