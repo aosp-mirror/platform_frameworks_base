@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Region;
@@ -95,7 +96,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private int mWindowingPillHeight;
     private int mMoreActionsPillHeight;
     private int mShadowRadius;
-    private int mCornerRadius;
+    private int mMenuCornerRadius;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -181,6 +182,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
+
+        final TypedArray ta = mContext.obtainStyledAttributes(
+                new int[]{android.R.attr.dialogCornerRadius});
+        mRelayoutParams.mCornerRadius = ta.getDimensionPixelSize(0, 0);
+        ta.recycle();
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
