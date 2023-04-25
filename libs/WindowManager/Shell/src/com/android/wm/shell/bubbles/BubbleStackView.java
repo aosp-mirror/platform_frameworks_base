@@ -880,6 +880,7 @@ public class BubbleStackView extends FrameLayout
 
         final Runnable onBubbleAnimatedOut = () -> {
             if (getBubbleCount() == 0) {
+                mExpandedViewTemporarilyHidden = false;
                 mBubbleController.onAllBubblesAnimatedOut();
             }
         };
