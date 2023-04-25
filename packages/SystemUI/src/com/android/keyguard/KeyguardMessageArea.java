@@ -44,11 +44,17 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     private ViewGroup mContainer;
     private int mTopMargin;
     protected boolean mAnimate;
+    private final int mStyleResId;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_HARDWARE, null); // work around nested unclipped SaveLayer bug
-
+        if (attrs != null) {
+            mStyleResId = attrs.getStyleAttribute();
+        } else {
+            // Set to default reference style if the component is used without setting "style" attr
+            mStyleResId = R.style.Keyguard_TextView;
+        }
         onThemeChanged();
     }
 
@@ -82,11 +88,15 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     }
 
     void onDensityOrFontScaleChanged() {
-        TypedArray array = mContext.obtainStyledAttributes(R.style.Keyguard_TextView, new int[] {
+        TypedArray array = mContext.obtainStyledAttributes(getStyleResId(), new int[] {
                 android.R.attr.textSize
         });
         setTextSize(TypedValue.COMPLEX_UNIT_PX, array.getDimensionPixelSize(0, 0));
         array.recycle();
+    }
+
+    protected int getStyleResId() {
+        return mStyleResId;
     }
 
     @Override
