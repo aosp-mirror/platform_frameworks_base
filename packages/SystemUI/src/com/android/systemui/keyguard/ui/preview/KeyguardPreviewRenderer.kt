@@ -155,8 +155,15 @@ constructor(
         disposables.forEach { it.dispose() }
     }
 
+    /**
+     * Hides or shows smartspace
+     *
+     * @param hide TRUE hides smartspace, FALSE shows smartspace
+     */
     fun hideSmartspace(hide: Boolean) {
-        smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE
+        runBlocking(mainDispatcher) {
+            smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE
+        }
     }
 
     /**
