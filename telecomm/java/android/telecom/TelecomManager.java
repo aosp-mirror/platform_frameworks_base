@@ -744,10 +744,6 @@ public class TelecomManager {
      * state of calls in the self-managed {@link ConnectionService}.  An example use-case is
      * exposing these calls to an automotive device via its companion app.
      * <p>
-     * This meta-data can only be set for an {@link InCallService} which also sets
-     * {@link #METADATA_IN_CALL_SERVICE_UI}. Only the default phone/dialer app, or a car-mode
-     * {@link InCallService} can see self-managed calls.
-     * <p>
      * See also {@link Connection#PROPERTY_SELF_MANAGED}.
      */
     public static final String METADATA_INCLUDE_SELF_MANAGED_CALLS =
