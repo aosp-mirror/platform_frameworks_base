@@ -20,15 +20,18 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_PER
 import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_WORK_LABEL;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyResourcesManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
@@ -76,15 +79,21 @@ public class CrossProfileAppsTest {
     private Drawable mDrawable;
     @Mock
     private PackageManager mPackageManager;
+
+    @Mock private ApplicationInfo mApplicationInfo;
+
+    private Configuration mConfiguration;
+
     private CrossProfileApps mCrossProfileApps;
 
     @Before
     public void initCrossProfileApps() {
-        mCrossProfileApps = new CrossProfileApps(mContext, mService);
+        mCrossProfileApps = spy(new CrossProfileApps(mContext, mService));
     }
 
     @Before
     public void mockContext() {
+        mConfiguration = new Configuration();
         when(mContext.getPackageName()).thenReturn(MY_PACKAGE);
         when(mContext.getSystemServiceName(UserManager.class)).thenReturn(Context.USER_SERVICE);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
@@ -94,6 +103,8 @@ public class CrossProfileAppsTest {
                 mDevicePolicyManager);
         when(mDevicePolicyManager.getResources()).thenReturn(mDevicePolicyResourcesManager);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mContext.getApplicationInfo()).thenReturn(mApplicationInfo);
+        when(mResources.getConfiguration()).thenReturn(mConfiguration);
     }
 
     @Before
@@ -115,17 +126,20 @@ public class CrossProfileAppsTest {
     @Test
     public void getProfileSwitchingLabel_managedProfile() {
         setValidTargetProfile(MANAGED_PROFILE);
+        when(mApplicationInfo.loadSafeLabel(any(), anyFloat(), anyInt())).thenReturn("app");
 
         mCrossProfileApps.getProfileSwitchingLabel(MANAGED_PROFILE);
-        verify(mDevicePolicyResourcesManager).getString(eq(SWITCH_TO_WORK_LABEL), any());
+        verify(mDevicePolicyResourcesManager).getString(eq(SWITCH_TO_WORK_LABEL), any(), eq("app"));
     }
 
     @Test
     public void getProfileSwitchingLabel_personalProfile() {
         setValidTargetProfile(PERSONAL_PROFILE);
+        when(mApplicationInfo.loadSafeLabel(any(), anyFloat(), anyInt())).thenReturn("app");
 
         mCrossProfileApps.getProfileSwitchingLabel(PERSONAL_PROFILE);
-        verify(mDevicePolicyResourcesManager).getString(eq(SWITCH_TO_PERSONAL_LABEL), any());
+        verify(mDevicePolicyResourcesManager)
+                .getString(eq(SWITCH_TO_PERSONAL_LABEL), any(), eq("app"));
     }
 
     @Test(expected = SecurityException.class)
