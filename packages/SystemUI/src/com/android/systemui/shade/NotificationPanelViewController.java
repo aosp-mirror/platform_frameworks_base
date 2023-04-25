@@ -1513,6 +1513,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mKeyguardStatusViewController.getClockBottom(mStatusBarHeaderHeightKeyguard),
                 mKeyguardStatusViewController.isClockTopAligned());
         mClockPositionAlgorithm.run(mClockPositionResult);
+        mKeyguardStatusViewController.setLockscreenClockY(
+                mClockPositionAlgorithm.getExpandedPreferredClockY());
         mKeyguardBottomAreaInteractor.setClockPosition(
                 mClockPositionResult.clockX, mClockPositionResult.clockY);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
