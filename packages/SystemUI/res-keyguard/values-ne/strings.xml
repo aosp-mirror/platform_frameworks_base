@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"आफ्नो PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN हाल्नुहोस्"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"आफ्नो ढाँचा प्रविष्टि गर्नुहोस्"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"प्याटर्न हाल्नुहोस्"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"प्याटर्न कोर्नुहोस्"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"आफ्नो पासवर्ड प्रविष्ट गर्नु…"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"पासवर्ड हाल्नुहोस्"</string>
