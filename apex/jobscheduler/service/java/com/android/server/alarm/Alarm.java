@@ -292,6 +292,10 @@ class Alarm {
                 return "permission";
             case EXACT_ALLOW_REASON_POLICY_PERMISSION:
                 return "policy_permission";
+            case EXACT_ALLOW_REASON_LISTENER:
+                return "listener";
+            case EXACT_ALLOW_REASON_PRIORITIZED:
+                return "prioritized";
             case EXACT_ALLOW_REASON_NOT_APPLICABLE:
                 return "N/A";
             default:
