@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.view.LayoutInflater
+import com.android.keyguard.LockIconView
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthRippleController
@@ -24,6 +25,7 @@ import com.android.systemui.biometrics.AuthRippleView
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.phone.TapAgainView
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -88,6 +90,24 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): AuthRippleView? {
             return notificationShadeWindowView.findViewById(R.id.auth_ripple)
+        }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
+        fun providesLockIconView(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): LockIconView {
+            return notificationShadeWindowView.findViewById(R.id.lock_icon_view)
+        }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
+        fun providesTapAgainView(
+            notificationPanelView: NotificationPanelView,
+        ): TapAgainView {
+            return notificationPanelView.findViewById(R.id.shade_falsing_tap_again)
         }
     }
 }
