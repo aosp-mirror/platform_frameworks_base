@@ -265,6 +265,16 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
     ValueHeadlinePrinter headline_printer(package.name, printer);
     ValueBodyPrinter body_printer(package.name, printer);
 
+    auto& dynamicRefTable = table.GetReferencedPackages();
+    if (!dynamicRefTable.empty()) {
+      printer->Println(StringPrintf("DynamicRefTable entryCount=%d", int(dynamicRefTable.size())));
+      printer->Indent();
+      for (auto&& [id, name] : dynamicRefTable) {
+        printer->Println(StringPrintf("0x%02x -> %s", id, name.c_str()));
+      }
+      printer->Undent();
+    }
+
     printer->Print("Package name=");
     printer->Print(package.name);
     if (package.id) {

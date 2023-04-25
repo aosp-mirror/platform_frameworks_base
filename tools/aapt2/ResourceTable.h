@@ -307,6 +307,11 @@ class ResourceTable {
   // order.
   ResourceTableView GetPartitionedView(const ResourceTableViewOptions& options = {}) const;
 
+  using ReferencedPackages = std::map<uint8_t, std::string>;
+  const ReferencedPackages& GetReferencedPackages() const {
+    return included_packages_;
+  }
+
   struct SearchResult {
     ResourceTablePackage* package;
     ResourceTableType* type;
@@ -342,7 +347,7 @@ class ResourceTable {
 
   // Set of dynamic packages that this table may reference. Their package names get encoded
   // into the resources.arsc along with their compile-time assigned IDs.
-  std::map<size_t, std::string> included_packages_;
+  ReferencedPackages included_packages_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTable);
