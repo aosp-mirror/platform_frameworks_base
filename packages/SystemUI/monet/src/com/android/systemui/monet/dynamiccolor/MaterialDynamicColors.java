@@ -16,8 +16,6 @@
 
 package com.android.systemui.monet.dynamiccolor;
 
-import android.os.SystemProperties;
-
 import com.android.systemui.monet.dislike.DislikeAnalyzer;
 import com.android.systemui.monet.hct.Hct;
 import com.android.systemui.monet.hct.ViewingConditions;
@@ -33,8 +31,7 @@ import com.android.systemui.monet.scheme.Variant;
 @SuppressWarnings({"AndroidJdkLibsChecker", "NewApi"})
 public final class MaterialDynamicColors {
     private static final double CONTAINER_ACCENT_TONE_DELTA = 15.0;
-    private static final boolean IS_FIDELITY_ON_ALL_VARIANTS = SystemProperties.getBoolean(
-            "persist.fidelity_on_theme_variants", false);
+
 
     private MaterialDynamicColors() {
     }
@@ -377,9 +374,6 @@ public final class MaterialDynamicColors {
     }
 
     private static boolean isFidelity(DynamicScheme scheme) {
-        if (IS_FIDELITY_ON_ALL_VARIANTS) {
-            return scheme.variant != Variant.NEUTRAL && scheme.variant != Variant.MONOCHROME;
-        }
         return scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT;
     }
 
