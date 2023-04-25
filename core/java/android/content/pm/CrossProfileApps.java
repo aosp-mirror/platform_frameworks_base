@@ -18,6 +18,7 @@ package android.content.pm;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_PERSONAL_LABEL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_WORK_LABEL;
+import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +41,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import com.android.internal.R;
 import com.android.internal.util.UserIcons;
@@ -329,19 +331,40 @@ public class CrossProfileApps {
 
         final boolean isManagedProfile = mUserManager.isManagedProfile(userHandle.getIdentifier());
         final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        final String callingAppLabel = getCallingApplicationLabel().toString();
         return dpm.getResources().getString(
                 getUpdatableProfileSwitchingLabelId(isManagedProfile),
-                () -> getDefaultProfileSwitchingLabel(isManagedProfile));
+                () -> getDefaultProfileSwitchingLabel(isManagedProfile, callingAppLabel),
+                callingAppLabel);
+    }
+
+    private CharSequence getCallingApplicationLabel() {
+        PackageManager pm = mContext.getPackageManager();
+        // If there is a label for the launcher intent, then use that as it is typically shorter.
+        // Otherwise, just use the top-level application name.
+        Intent launchIntent = pm.getLaunchIntentForPackage(mContext.getPackageName());
+        List<ResolveInfo> infos =
+                pm.queryIntentActivities(
+                        launchIntent, PackageManager.ResolveInfoFlags.of(MATCH_DEFAULT_ONLY));
+        if (infos.size() > 0) {
+            return infos.get(0).loadLabel(pm);
+        }
+        return mContext.getApplicationInfo()
+                .loadSafeLabel(
+                        pm,
+                        /* ellipsizeDip= */ 0,
+                        TextUtils.SAFE_STRING_FLAG_SINGLE_LINE
+                                | TextUtils.SAFE_STRING_FLAG_TRIM);
     }
 
     private String getUpdatableProfileSwitchingLabelId(boolean isManagedProfile) {
         return isManagedProfile ? SWITCH_TO_WORK_LABEL : SWITCH_TO_PERSONAL_LABEL;
     }
 
-    private String getDefaultProfileSwitchingLabel(boolean isManagedProfile) {
+    private String getDefaultProfileSwitchingLabel(boolean isManagedProfile, String label) {
         final int stringRes = isManagedProfile
-                ? R.string.managed_profile_label : R.string.user_owner_label;
-        return mResources.getString(stringRes);
+                ? R.string.managed_profile_app_label : R.string.user_owner_app_label;
+        return mResources.getString(stringRes, label);
     }
 
 
@@ -366,10 +389,18 @@ public class CrossProfileApps {
         if (isManagedProfile) {
             return mContext.getPackageManager().getUserBadgeForDensityNoBackground(
                     userHandle, /* density= */ 0);
-        } else {
-            return UserIcons.getDefaultUserIcon(
-                    mResources, UserHandle.USER_SYSTEM, true /* light */);
         }
+        Drawable personalProfileIcon = UserIcons.getDefaultUserIcon(
+                mResources, UserHandle.USER_SYSTEM,  /* light= */ true);
+        // Using the same colors as the managed profile icon.
+        int colorId = mContext.getResources().getConfiguration().isNightModeActive()
+                ? R.color.profile_badge_1_dark
+                : R.color.profile_badge_1;
+        // First set the color filter to null so that it does not override
+        // the tint.
+        personalProfileIcon.setColorFilter(null);
+        personalProfileIcon.setTint(mResources.getColor(colorId, /* theme= */ null));
+        return personalProfileIcon;
     }
 
     /**
