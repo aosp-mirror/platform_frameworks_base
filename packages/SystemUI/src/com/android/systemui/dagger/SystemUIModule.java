@@ -39,6 +39,7 @@ import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.biometrics.dagger.UdfpsModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
+import com.android.systemui.common.ui.data.repository.CommonRepositoryModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -151,6 +152,7 @@ import javax.inject.Named;
             ClipboardOverlayModule.class,
             ClockInfoModule.class,
             ClockRegistryModule.class,
+            CommonRepositoryModule.class,
             ConnectivityModule.class,
             CoroutinesModule.class,
             DreamModule.class,
