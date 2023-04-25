@@ -437,6 +437,7 @@ public final class DisplayBrightnessController {
      * persist the nit value, the nit value for the default display will be loaded.
      */
     private void loadNitBasedBrightnessSetting() {
+        float currentBrightnessSetting = Float.NaN;
         if (mDisplayId == Display.DEFAULT_DISPLAY && mPersistBrightnessNitsForDefaultDisplay) {
             float brightnessNitsForDefaultDisplay =
                     mBrightnessSetting.getBrightnessNitsForDefaultDisplay();
@@ -445,15 +446,17 @@ public final class DisplayBrightnessController {
                         brightnessNitsForDefaultDisplay);
                 if (BrightnessUtils.isValidBrightnessValue(brightnessForDefaultDisplay)) {
                     mBrightnessSetting.setBrightness(brightnessForDefaultDisplay);
-                    synchronized (mLock) {
-                        mCurrentScreenBrightness = brightnessForDefaultDisplay;
-                    }
-                    return;
+                    currentBrightnessSetting = brightnessForDefaultDisplay;
                 }
             }
         }
+
+        if (Float.isNaN(currentBrightnessSetting)) {
+            currentBrightnessSetting = getScreenBrightnessSetting();
+        }
+
         synchronized (mLock) {
-            mCurrentScreenBrightness = getScreenBrightnessSetting();
+            mCurrentScreenBrightness = currentBrightnessSetting;
         }
     }
 }
