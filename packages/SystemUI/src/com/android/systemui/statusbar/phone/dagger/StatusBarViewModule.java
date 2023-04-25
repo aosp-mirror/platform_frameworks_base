@@ -18,23 +18,18 @@ package com.android.systemui.statusbar.phone.dagger;
 
 import static com.android.systemui.shade.ShadeModule.SHADE_HEADER;
 
-import android.content.ContentResolver;
-import android.os.Handler;
 import android.view.LayoutInflater;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
-import com.android.systemui.battery.BatteryMeterView;
-import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -64,11 +59,8 @@ import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -148,39 +140,6 @@ public abstract class StatusBarViewModule {
     static StatusIconContainer providesStatusIconContainer(
             @Named(SHADE_HEADER) MotionLayout header) {
         return header.findViewById(R.id.statusIcons);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    @Named(SHADE_HEADER)
-    static BatteryMeterView getBatteryMeterView(@Named(SHADE_HEADER) MotionLayout view) {
-        return view.findViewById(R.id.batteryRemainingIcon);
-    }
-
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    @Named(SHADE_HEADER)
-    static BatteryMeterViewController getBatteryMeterViewController(
-            @Named(SHADE_HEADER) BatteryMeterView batteryMeterView,
-            UserTracker userTracker,
-            ConfigurationController configurationController,
-            TunerService tunerService,
-            @Main Handler mainHandler,
-            ContentResolver contentResolver,
-            FeatureFlags featureFlags,
-            BatteryController batteryController
-    ) {
-        return new BatteryMeterViewController(
-                batteryMeterView,
-                userTracker,
-                configurationController,
-                tunerService,
-                mainHandler,
-                contentResolver,
-                featureFlags,
-                batteryController);
-
     }
 
     /** */
