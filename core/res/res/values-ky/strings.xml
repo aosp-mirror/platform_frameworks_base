@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Колдонмого дирилдегичти көзөмөлдөө мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Колдонмого дирилдөө абалына кирүүгө уруксат берет."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"телефон номерлерине түз чалуу"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Колдонмого сиздин катышууңузсуз телефон номурларга чалуу уруксатын берет. Бул сиз күтпөгөн чыгымдарга же чалууларга алып келиши мүмкүн. Бул куткаруучулардын номурларына чалууга уруксат бербей тургандыгын эске алыңыз. Зыяндуу колдонмолор, сиздин ырастооңузсуз чалууларды аткарып, көп чыгымдарга себепкер болушу мүмкүн."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS чалуу кызматына мүмкүнчүлүк алуу"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Колдонмого сизди катыштырбай туруп, IMS кызматынын жардамы менен, чалууларды жасоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"телефондун абалын жана аныктыгын окуу"</string>
@@ -610,7 +611,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Колдонмого сүрөт жыйнагыңызды өзгөртүүгө мүмкүнчүлүк берет."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"медиа жыйнагыңыз сакталган жерлерди окуу"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Колдонмого медиа жыйнагыңыз сакталган жерлерди окууга мүмкүнчүлүк берет."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Биометрикалык жөндөөлөрдү колдонуу"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Биометрикалык параметрлерди колдонуу"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Биометрикалык жөндөөнү же экрандын кулпусун колдонуу"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Өзүңүздү ырастаңыз"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Улантуу үчүн биометрикалык жөндөөнү колдонуу"</string>
@@ -684,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонду солго жылдырыңыз"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонду оңго жылдырыңыз"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Түзмөгүңүзгө түз караңыз."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Жүзүңүз көрүнбөй жатат. Телефонду көздөрүңүздүн деңгээлинде кармаңыз."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Жүзүңүз көрүнбөй жатат. Телефонду маңдайыңызга кармаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Кыймылдап жибердиңиз. Телефонду түз кармаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Жүзүңүздү кайра таанытыңыз."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Жүз таанылбай жатат. Кайталаңыз."</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Жүздүн аныктыгын текшерүү жокко чыгарылды."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Жүзүнөн таанып ачуу функциясын колдонуучу өчүрүп салды"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Өтө көп жолу аракет жасадыңыз. Бир аздан кийин кайталап көрүңүз."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Өтө көп жолу аракет кылдыңыз. Жүзүнөн таанып ачуу функциясы өчүрүлдү."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Өтө көп жолу аракет кылдыңыз. \"Жүзүнөн таанып ачуу\" жеткиликсиз."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Өтө көп жолу аракет кылдыңыз. Эрканды кулпулоо функциясын колдонуңуз."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Жүз ырасталбай жатат. Кайталап көрүңүз."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Жүзүнөн таанып ачуу функциясын жөндөй элексиз"</string>
@@ -1079,7 +1080,7 @@
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"боштук"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"жок кылуу"</string>
+    <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"өчүрүү"</string>
     <string name="search_go" msgid="2141477624421347086">"Издөө"</string>
     <string name="search_hint" msgid="455364685740251925">"Издөө…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"Издөө"</string>
@@ -1145,7 +1146,7 @@
     <string name="paste" msgid="461843306215520225">"Чаптоо"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Жөнөкөй текст катары чаптоо"</string>
     <string name="replace" msgid="7842675434546657444">"Алмаштыруу…"</string>
-    <string name="delete" msgid="1514113991712129054">"Жок кылуу"</string>
+    <string name="delete" msgid="1514113991712129054">"Өчүрүү"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL көчүрмөлөө"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"Текст тандоо"</string>
     <string name="undo" msgid="3175318090002654673">"Артка кайтаруу"</string>
@@ -1153,14 +1154,14 @@
     <string name="autofill" msgid="511224882647795296">"Автотолтуруу"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Текст тандоо"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Сөздүккө кошуу"</string>
-    <string name="deleteText" msgid="4200807474529938112">"Жок кылуу"</string>
+    <string name="deleteText" msgid="4200807474529938112">"Өчүрүү"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст боюнча иштер"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артка"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Киргизүү ыкмасын өзгөртүү"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Системада сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> иштөөдө"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Көбүрөөк маалымат үчүн же колдонмону токтотуш үчүн таптап коюңуз."</string>
     <string name="ok" msgid="2646370155170753815">"Жарайт"</string>
@@ -1400,7 +1401,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Башка колдонмолордун үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> колдонмосун башка терезелердин үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g>: башка колдонмолордун үстүнөн"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, параметрлерди ачып туруп, аны өчүрүп коюңуз."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Өчүрүү"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> текшерилүүдө…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Учурдагы мазмун каралып жатат"</string>
@@ -1555,7 +1556,7 @@
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Кийинки ай"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Айнуу"</string>
-    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Жок кылуу"</string>
+    <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Өчүрүү"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Даяр"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Режимди өзгөртүү"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift"</string>
@@ -1712,9 +1713,9 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Кыска жолду өчүрүү"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Кыска жолду колдонуу"</string>
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Түстөрдү инверсиялоо"</string>
-    <string name="color_correction_feature_name" msgid="7975133554160979214">"Түстөрдү тууралоо"</string>
+    <string name="color_correction_feature_name" msgid="7975133554160979214">"Түсүн тууралоо"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Бир кол режими"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Кошумча караңгылатуу"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дагы караңгы"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Угуу түзмөктөрү"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Бул мазмунду жумуш колдонмолору менен ачуу мүмкүн эмес"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Бул мазмунду жеке колдонмолор менен бөлүшүү мүмкүн эмес"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Бул мазмунду жеке колдонмолор менен ачуу мүмкүн эмес"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Жумуш профили тындырылган"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Күйгүзүү үчүн таптап коюңуз"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жумуш колдонмолору жок"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке колдонмолор жок"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> колдонмосу жеке профилде ачылсынбы?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> колдонмосу жумуш профилинде ачылсынбы?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Жеке <xliff:g id="APP">%s</xliff:g> колдонмосун ачуу"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Жумуш үчүн <xliff:g id="APP">%s</xliff:g> колдонмосун ачуу"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Жеке серепчини колдонуу"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Жумуш серепчисин колдонуу"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM карта тармагынын кулпусун ачуучу PIN код"</string>

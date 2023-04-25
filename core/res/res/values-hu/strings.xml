@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Lehetővé teszi az alkalmazás számára a rezgés állapotához való hozzáférést."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefonszámok közvetlen hívása"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Lehetővé teszi az alkalmazás számára, hogy az Ön jóváhagyása nélkül hívjon fel telefonszámokat. Ennek eredményeként váratlan terhelésekkel vagy telefonhívásokkal találkozhat. Vegye figyelembe, hogy ez nem teszi lehetővé segélyhívó számok hívását az alkalmazás számára. A rosszindulatú alkalmazások az Ön jóváhagyása nélkül kezdeményezhetnek hívásokat, így költségek merülhetnek fel."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"hozzáférés az IMS-hívásszolgáltatáshoz"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Az alkalmazás az IMS-szolgáltatást használhatja híváskezdeményezéshez az Ön közbeavatkozása nélkül."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefonállapot és azonosító olvasása"</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Az arccal kapcsolatos művelet törölve."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Az Arcalapú feloldást megszakította a felhasználó"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Túl sok próbálkozás. Próbálja újra később."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Túl sok próbálkozás. Az Arcalapú feloldás letiltva."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Túl sokszor próbálkozott. Az Arcalapú feloldás nem áll rendelkezésre."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Túl sok próbálkozás. Használja inkább a képernyőzárat."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nem sikerült ellenőrizni az arcát. Próbálja újra."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nem állította be az Arcalapú feloldást"</string>
@@ -2094,7 +2095,7 @@
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"A bővített értesítések felváltják az androidos alkalmazkodó értesítéseket az Android 12-es verziójában. Ez a funkció javasolt műveleteket és válaszokat mutat, és rendszerezi az értesítéseket.\n\nA bővített értesítések minden értesítéstartalmat olvashatnak (így a személyes adatokat, mint például a névjegyek nevét és az üzeneteket is). Ez a funkció emellett elvetheti az értesítéseket, valamint reagálhat rájuk, például felveheti a telefonhívásokat, és vezérelheti a Ne zavarjanak módot."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Információs értesítés a rutinmódról"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Akkumulátorkímélő mód bekapcsolva"</string>
-    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Akkumulátorhasználat csökkentése a hosszabb akkumulátor-élettartam érdekében"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Akkuhasználat csökkentése a hosszabb akkumulátor-élettartam érdekében"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akkumulátorkímélő mód"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Akkumulátorkímélő mód kikapcsolva"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"A telefon töltöttsége elegendő. A funkciók használata már nincs korlátozva."</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Ez a tartalom nem nyitható meg munkahelyi alkalmazásokkal"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Ez a tartalom nem osztható meg személyes alkalmazásokkal"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Ez a tartalom nem nyitható meg személyes alkalmazásokkal"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"A munkaprofil használata szünetel"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Koppintson a bekapcsoláshoz"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nincs munkahelyi alkalmazás"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nincs személyes alkalmazás"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Megnyitja a(z) <xliff:g id="APP">%s</xliff:g> alkalmazást a személyes profil használatával?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Megnyitja a(z) <xliff:g id="APP">%s</xliff:g> alkalmazást a munkaprofil használatával?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Személyes <xliff:g id="APP">%s</xliff:g> megnyitása"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Munkahelyi <xliff:g id="APP">%s</xliff:g> megnyitása"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Személyes böngésző használata"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Munkahelyi böngésző használata"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Hálózati SIM feloldó PIN-kódja"</string>
@@ -2296,7 +2299,7 @@
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Háttértevékenység"</string>
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Egy alkalmazás meríti az akkumulátort"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Az egyik alkalmazás még aktív"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"A(z) <xliff:g id="APP">%1$s</xliff:g> fut a háttérben. Koppintson az akkumulátorhasználat kezeléséhez."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"A(z) <xliff:g id="APP">%1$s</xliff:g> fut a háttérben. Koppintson az akkuhasználat kezeléséhez."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A(z) <xliff:g id="APP">%1$s</xliff:g> befolyásolhatja az akkumulátor üzemidejét. Koppintson az aktív alkalmazások áttekintéséhez."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nem lehet hozzáférni a telefon kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>

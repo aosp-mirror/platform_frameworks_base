@@ -503,7 +503,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"വൈബ്രേറ്റ് ചെയ്യൽ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"നിങ്ങളുടെ ഇടപെടൽ ഇല്ലാതെ ഫോൺ നമ്പറുകളിലേക്ക് കോൾ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് അപ്രതീക്ഷിത നിരക്കുകൾക്കോ കോളുകൾക്കോ ഇടയാക്കാം. ഇത് അടിയന്തര നമ്പറുകളിലേക്ക് വിളിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ കോളുകൾ ചെയ്യുന്നത് പണച്ചെലവിനിടയാക്കാം."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"നിങ്ങളുടെ ഇടപെടലില്ലാതെ ഫോൺ നമ്പറുകളിലേക്ക് വിളിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. ഇത് അപ്രതീക്ഷിതമായ കോളുകൾക്കോ നിരക്കുകൾ നൽകേണ്ട സാഹചര്യത്തിനോ കാരണമായേക്കാം. അടിയന്തര നമ്പറുകളിലേക്ക് വിളിക്കാൻ ഇത് ആപ്പിനെ അനുവദിക്കുന്നില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക. നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ കോളുകൾ വിളിക്കുന്നതിലൂടെ ദോഷകരമായ ആപ്പുകൾ നിങ്ങൾക്ക് ധനനഷ്ടം ഉണ്ടാക്കിയേക്കാം, അല്ലെങ്കിൽ ഇൻകമിംഗ് കോളുകൾ സ്വയമേവ മറ്റൊരു നമ്പറിലേക്ക് കൈമാറാൻ കാരണമാകുന്ന കാരിയർ കോഡുകൾ ഡയൽ ചെയ്തേക്കാം."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS കോൾ സേവനം ആക്സസ് ചെയ്യുക"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"നിങ്ങളുടെ ഇടപെടൽ ഇല്ലാതെ കോളുകൾ ചെയ്യാൻ IMS സേവനം ഉപയോഗിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ഫോൺ നിലയും ഐഡന്റിറ്റിയും റീഡുചെയ്യുക"</string>
@@ -684,7 +684,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ഫോൺ നിങ്ങളുടെ ഇടതുവശത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ഫോൺ നിങ്ങളുടെ വലതുവശത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"നിങ്ങളുടെ ഉപകരണത്തിന് നേരെ കൂടുതൽ നന്നായി നോക്കുക."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"നിങ്ങളുടെ മുഖം കാണാനാകുന്നില്ല. നിങ്ങളുടെ ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"മുഖം കാണാനാകുന്നില്ല. ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"മുഖം തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
@@ -709,7 +709,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"മുഖത്തിന്റെ പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ഉപയോക്താവ് ഫെയ്‌സ് അൺലോക്ക് റദ്ദാക്കി"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"നിരവധി ശ്രമങ്ങൾ. ഫെയ്‌സ് അൺലോക്ക് പ്രവർത്തനരഹിതമാക്കി."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"നിരവധി ശ്രമങ്ങൾ. ഫെയ്‌സ് അൺലോക്ക് ലഭ്യമല്ല."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് നൽകുക."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"നിങ്ങൾ ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിച്ചിട്ടില്ല"</string>
@@ -2158,12 +2158,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് ഈ ഉള്ളടക്കം തുറക്കാനാകില്ല"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"വ്യക്തിപര ആപ്പുകൾ ഉപയോഗിച്ച് ഈ ഉള്ളടക്കം പങ്കിടാനാകില്ല"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"വ്യക്തിപര ആപ്പുകൾ ഉപയോഗിച്ച് ഈ ഉള്ളടക്കം തുറക്കാനാകില്ല"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ഔദ്യോഗിക പ്രൊഫൈൽ തൽക്കാലം നിർത്തിയിരിക്കുന്നു"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ഓണാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"ഔദ്യോഗിക ആപ്പുകൾ തൽക്കാലം നിർത്തിയിരിക്കുന്നു"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"താൽക്കാലികമായി നിർത്തിയത് മാറ്റുക"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ഔദ്യോഗിക ആപ്പുകൾ ഇല്ല"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"വ്യക്തിപര ആപ്പുകൾ ഇല്ല"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g>, നിങ്ങളുടെ വ്യക്തിപരമായ പ്രൊഫൈലിൽ തുറക്കണോ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g>, നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിൽ തുറക്കണോ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"<xliff:g id="APP">%s</xliff:g> എന്ന വ്യക്തിപര ആപ്പ് തുറക്കുക"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"<xliff:g id="APP">%s</xliff:g> എന്ന ഔദ്യോഗിക ആപ്പ് തുറക്കുക"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"സിം നെറ്റ്‌വർക്ക് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>

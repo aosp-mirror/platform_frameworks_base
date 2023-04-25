@@ -504,7 +504,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"מאפשרת לאפליקציה לשלוט ברטט."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"מאפשרת לאפליקציה לקבל גישה למצב רטט."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"חיוג ישירות למספרי טלפון"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"מאפשרת לאפליקציה להתקשר למספרי טלפון ללא התערבות המשתמש. הפעולה הזו עשויה לגרום לשיחות או לחיובים לא צפויים. ההרשאה הזו לא מאפשרת לאפליקציה להתקשר למספרי חירום. אפליקציות זדוניות עשויות לגרום לחיובים על ידי ביצוע שיחות ללא האישור שלך."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"‏גישה אל שירות שיחות IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏מאפשרת לאפליקציה להשתמש בשירות ה-IMS לביצוע שיחות ללא התערבות שלך."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"קריאת הסטטוס והזהות של הטלפון"</string>
@@ -685,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"צריך להזיז את הטלפון שמאלה"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"צריך להזיז את הטלפון ימינה"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"יש להביט ישירות אל המכשיר."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"אי אפשר לראות את הפנים שלך. צריך להחזיק את הטלפון בגובה העיניים."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"אי אפשר לראות את הפנים שלך. יש להחזיק את הטלפון בגובה העיניים."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"יש לסרוק שוב את הפנים."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"לא ניתן לזהות את הפנים. יש לנסות שוב."</string>
@@ -710,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"הפעולה לאימות הפנים בוטלה."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"הפתיחה ע\"י זיהוי הפנים בוטלה על ידי המשתמש"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"בוצעו יותר מדי ניסיונות. הושבתה הפתיחה ע\"י זיהוי הפנים."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"בוצעו יותר מדי ניסיונות. אי אפשר לפתוח בזיהוי פנים."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"בוצעו יותר מדי ניסיונות. יש להשתמש בנעילת המסך במקום."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"לא ניתן לאמת את הפנים. יש לנסות שוב."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"לא הגדרת פתיחה ע\"י זיהוי הפנים"</string>
@@ -1178,7 +1179,7 @@
     <string name="not_selected" msgid="410652016565864475">"לא נבחר"</string>
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{כוכב אחד מתוך {max}}one{# כוכבים מתוך {max}}two{# כוכבים מתוך {max}}other{# כוכבים מתוך {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"בתהליך"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"השלמת הפעולה באמצעות"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"השלמת הפעולה עם"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"‏השלמת הפעולה באמצעות %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"להשלמת הפעולה"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"פתיחה באמצעות"</string>
@@ -2159,12 +2160,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"אי אפשר לפתוח את התוכן הזה באמצעות אפליקציות לעבודה"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"אי אפשר לשתף את התוכן הזה עם אפליקציות לשימוש אישי"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"אי אפשר לפתוח את התוכן הזה באמצעות אפליקציות לשימוש אישי"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"פרופיל העבודה מושהה"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"יש להקיש כדי להפעיל את פרופיל העבודה"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"אין אפליקציות לעבודה"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"אין אפליקציות לשימוש אישי"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"לפתוח את <xliff:g id="APP">%s</xliff:g> בפרופיל האישי?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"לפתוח את <xliff:g id="APP">%s</xliff:g> בפרופיל העבודה?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"פתיחת <xliff:g id="APP">%s</xliff:g> בפרופיל האישי"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"פתיחת <xliff:g id="APP">%s</xliff:g> בפרופיל העבודה"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"בדפדפן האישי"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"בדפדפן של העבודה"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏קוד אימות לביטול הנעילה של רשת SIM"</string>

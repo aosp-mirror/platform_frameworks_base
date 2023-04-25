@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Қолданбаға діріл күйін пайдалануға мүмкіндік береді."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"нөмірлерге тікелей телефон шалу"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Қолданбаға сіздің қатысуыңызсыз қоңырау шалу мүмкіндігін береді. Нәтижесінде қосымша төлем немесе күтпеген қоңырау алуыңыз мүмкін. Есіңізде болсын, қолданба төтенше байланыстарға қоңырау шала алмайды. Залалды қолданбалар сіздің рұқсатыңызсыз қоңыраулар шалып, күтпеген төлемдерге себеп болуы мүмкін."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS қоңырау қызметін пайдалану"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Сіздің қатысуыңызсыз қоңыраулар соғу үшін қолданбаға IMS қызметін пайдалануға рұқсат етеді."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"телефон күйін оқу немесе анықтау"</string>
@@ -709,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Бетті танудан бас тартылды."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Пайдаланушы бет тану функциясынан бас тартты."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Тым көп әрекет жасалды. Кейінірек қайталаңыз."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Тым көп әрекет жасалды. Бет тану функциясы өшірілді."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Тым көп әрекет жасалды. Бет тану функциясы қолжетімді емес."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Тым көп әрекет жасалды. Оның орнына экран құлпын енгізіңіз."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Бет тану функциясы реттелмеген."</string>
@@ -1359,7 +1360,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Жалғанған құрылғы USB арқылы зарядталуда"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB арқылы файл жіберу мүмкіндігі қосылды"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP режимі USB арқылы қосылды"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB тетеринг режимі қосылды"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-тетеринг режимі қосылды"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI режимі USB арқылы қосылды"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Құрылғы веб-камера ретінде жалғанды"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB жабдығы жалғанған"</string>
@@ -1627,7 +1628,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляциялау"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Құрылғыға жалғау"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Экран трансляциясы"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғылар ізделуде…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғылар ізделіп жатыр…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Параметрлер"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Ажырату"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Тексеруде..."</string>
@@ -1872,7 +1873,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Бір минут ({formattedTime} дейін)}other{# минут ({formattedTime} дейін)}}"</string>
@@ -2158,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Бұл контентті жұмыс қолданбаларымен ашу мүмкін емес."</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Бұл контентті жеке қолданбалармен бөлісу мүмкін емес."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Бұл контентті жеке қолданбалармен ашу мүмкін емес."</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Жұмыс профилі кідіртілді."</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Қосу үшін түртіңіз"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жұмыс қолданбалары жоқ."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке қолданбалар жоқ."</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> қолданбасын жеке профиліңізде ашу керек пе?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> қолданбасын жұмыс профиліңізде ашу керек пе?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Жеке <xliff:g id="APP">%s</xliff:g> қолданбасын ашу"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Жұмыстағы <xliff:g id="APP">%s</xliff:g> қолданбасын ашу"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Жеке браузерді пайдалану"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Жұмыс браузерін пайдалану"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM желісінің құлпын ашатын PIN коды"</string>
