@@ -471,6 +471,17 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return navbar;
     }
 
+    WindowState createStatusBarWithProvidedInsets(DisplayContent dc) {
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, dc, "statusBar");
+        final Binder owner = new Binder();
+        statusBar.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars())
+                        .setInsetsSize(Insets.of(0, STATUS_BAR_HEIGHT, 0, 0))
+        };
+        dc.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        return statusBar;
+    }
+
     WindowState createAppWindow(Task task, int type, String name) {
         final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
