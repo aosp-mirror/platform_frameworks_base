@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
@@ -49,6 +50,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     private lateinit var entry: NotificationEntry
 
     @Mock private lateinit var pipeline: NotifPipeline
+    @Mock private lateinit var groupExpansionManagerImpl: GroupExpansionManagerImpl
     @Mock private lateinit var notificationIconAreaController: NotificationIconAreaController
     @Mock private lateinit var stackController: NotifStackController
     @Mock private lateinit var section: NotifSection
@@ -56,7 +58,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         initMocks(this)
-        coordinator = StackCoordinator(notificationIconAreaController)
+        coordinator = StackCoordinator(groupExpansionManagerImpl, notificationIconAreaController)
         coordinator.attach(pipeline)
         afterRenderListListener = withArgCaptor {
             verify(pipeline).addOnAfterRenderListListener(capture())
