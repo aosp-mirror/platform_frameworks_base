@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.BATTERY_STATS;
-import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.DEVICE_POWER;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.POWER_SAVER;
@@ -103,6 +102,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
@@ -426,7 +426,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
         final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
         try {
-            nms.registerObserver(mActivityChangeObserver);
+            if (!SdkLevel.isAtLeastV()) {
+                // On V+ devices, ConnectivityService calls BatteryStats API to update
+                // RadioPowerState change. So BatteryStatsService registers the callback only on
+                // pre V devices.
+                nms.registerObserver(mActivityChangeObserver);
+            }
             cm.registerDefaultNetworkCallback(mNetworkCallback);
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not register INetworkManagement event observer " + e);

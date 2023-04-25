@@ -85,14 +85,14 @@ oneway interface INetworkManagementEventObserver {
     /**
      * Interface data activity status is changed.
      *
-     * @param transportType The transport type of the data activity change.
+     * @param label label of the data activity change.
      * @param active  True if the interface is actively transmitting data, false if it is idle.
      * @param tsNanos Elapsed realtime in nanos when the state of the network interface changed.
      * @param uid Uid of this event. It represents the uid that was responsible for waking the
      *            radio. For those events that are reported by system itself, not from specific uid,
      *            use -1 for the events which means no uid.
      */
-    void interfaceClassDataActivityChanged(int transportType, boolean active, long tsNanos, int uid);
+    void interfaceClassDataActivityChanged(int label, boolean active, long tsNanos, int uid);
 
     /**
      * Information about available DNS servers has been received.
