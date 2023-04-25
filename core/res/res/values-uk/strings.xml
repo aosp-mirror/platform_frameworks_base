@@ -505,7 +505,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Надає додатку доступ до стану вібрації."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"прямо набирати номери тел."</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Дозволяє програмі набирати номери телефону без вашого відома. Це може спричинити неочікуване стягнення плати чи здійснення дзвінків. Зауважте, що це не дозволяє програмі набирати екстрені номери. Шкідливі програми можуть здійснювати дзвінки без вашого підтвердження, за що з вас стягуватимуться кошти."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"отримувати доступ до телефонної служби IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Додаток зможе телефонувати за допомогою служби IMS без вашого відома."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"читати статус та ідентифікаційну інформацію телефону"</string>
@@ -668,7 +669,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейс-контроль"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Сталася помилка з фейсконтролем"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Натисніть, щоб видалити свою модель обличчя, а потім знову додайте її"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейсконтролю"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейс-контролю"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ви зможете розблоковувати телефон, подивившись на нього"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Щоб використовувати фейсконтроль, увімкніть "<b>"Доступ до камери"</b>" в розділі \"Налаштування\" &gt; \"Конфіденційність\""</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Налаштуйте більше способів розблокування"</string>
@@ -711,8 +712,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Дію з обличчям скасовано."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Користувач скасував операцію фейсконтролю"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Забагато спроб. Повторіть пізніше."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Забагато спроб. Фейс-контроль недоступний."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Забагато спроб. Розблокуйте екран іншим способом."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ви не налаштували фейсконтроль"</string>
@@ -2161,14 +2161,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Цей контент не можна відкривати в робочих додатках"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Цим контентом не можна ділитися в особистих додатках"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Цей контент не можна відкривати в особистих додатках"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Робочий профіль призупинено"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Торкніться, щоб увімкнути"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Немає робочих додатків"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Відкрити особистий додаток <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Відкрити робочий додаток <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>

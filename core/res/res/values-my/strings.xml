@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"အက်ပ်အား တုန်ခါစက်ကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"အက်ပ်ကို တုန်ခါမှုအခြေအနေအား သုံးခွင့်ပေးပါ။"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ဖုန်းနံပါတ်များကိုတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"အပလီကေးရှင်းအား အလိုအလျောက် ဖုန်းခေါ်ခွင့် ပြုပါ။ မလိုအပ်သော ဖုန်းခ များ ဖြစ်ပေါ်နိုင်ပါသည်။ ဒီခွင့်ပြုခြင်းမှာ အရေးပေါ်ဖုန်းခေါ်ခြင်း မပါဝင်ပါ။ သံသယဖြစ်စရာ အပလီကေးရှင်းများက သင့်မသိပဲ ဖုန်းခေါ်ခြင်းဖြင့် ဖုန်းခ ပိုမိုကျနိုင်ပါသည်။"</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ဖုန်းခေါ်ဆိုမှု ဝန်ဆောင်ဌာန ဝင်ကြည့်ပါ"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"သင့်ရဲ့ဝင်ရောက်စွက်ဖက်မှုမပါဘဲ IMS ဝန်ဆောင်မှုကိုအသုံးပြုပြီး ဖုန်းခေါ်ဆိုနိုင်ရန် အပ်ဖ်ကို ခွင့်ပြုထားပါ။"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ဖုန်းရဲ့ အခြေအနေ နှင့် အမှတ်သညာအား ဖတ်ခြင်း"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"အသုံးပြုသူက မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ပယ်ဖျက်ထားသည်"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်။ မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း မရနိုင်ပါ။"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်။ ဖန်သားပြင် လော့ခ်ကို အစားထိုးထည့်သွင်းပါ။"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
@@ -1283,13 +1283,13 @@
     <string name="volume_call" msgid="7625321655265747433">"ခေါ်ဆိုနေခြင်းအသံအတိုးအကျယ်"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ဘလူးတုသ်ဖြင့် ခေါ်ဆိုနေခြင်းအသံအတိုးအကျယ်"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"နှိုးစက်သံအတိုးအကျယ်"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"အကြောင်းကြားသံအတိုးအကျယ်"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"အကြောင်းကြားသံ အတိုးအကျယ်"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"အသံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ဘလူးတုသ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ဖုန်းမြည်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ဖုန်းခေါ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"မီဒီယာအသံအတိုးအကျယ်"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"အကြောင်းကြားသံအတိုးအကျယ်"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"အကြောင်းကြားသံ အတိုးအကျယ်"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"မူရင်းမြည်သံ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"မူရင်း (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"မရှိ"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ဤအကြောင်းအရာကို အလုပ်သုံးအက်ပ်များဖြင့် မဖွင့်နိုင်ပါ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များဖြင့် မမျှဝေနိုင်ပါ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များဖြင့် မဖွင့်နိုင်ပါ"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"အလုပ်ပရိုဖိုင် ခဏရပ်ထားသည်"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ဖွင့်ရန်တို့ပါ"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"အလုပ်သုံးအက်ပ်များ မရှိပါ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ကိုယ်ပိုင်အက်ပ်များ မရှိပါ"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ကိုယ်ရေးကိုယ်တာသုံး <xliff:g id="APP">%s</xliff:g> ဖွင့်ခြင်း"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"အလုပ်သုံး <xliff:g id="APP">%s</xliff:g> ဖွင့်ခြင်း"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ကိုယ်ပိုင်ဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"အလုပ်သုံးဘရောင်ဇာ သုံးရန်"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ဆင်းမ်ကွန်ရက် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>

@@ -504,7 +504,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que o app controle a vibração."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que o app acesse o estado da vibração."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ligar diretamente para números de telefone"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Permite que o app ligue para números de telefone sem sua intervenção. Isso pode resultar em cobranças ou chamadas inesperadas. Esta opção não permite que o app ligue para números de emergência. Apps maliciosos podem gerar custos com chamadas feitas sem sua confirmação."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acessar serviço de mensagens instantâneas para chamadas"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que o app use o serviço de mensagens instantâneas para fazer chamadas sem sua intervenção."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ler status e identidade do telefone"</string>
@@ -710,8 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operação facial cancelada."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Desbloqueio facial cancelado pelo usuário"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Excesso de tentativas. Tente novamente mais tarde."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Muitas tentativas. Desbloqueio facial indisponível."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Muitas tentativas. Como alternativa, use o bloqueio de tela."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Não é possível verificar o rosto. Tente novamente."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"O Desbloqueio facial não foi configurado"</string>
@@ -2160,14 +2160,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Não é possível abrir esse conteúdo com apps de trabalho"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Não é possível compartilhar esse conteúdo com apps pessoais"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Não é possível abrir esse conteúdo com apps pessoais"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"O perfil de trabalho está pausado"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Toque para ativar"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nenhum app de trabalho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nenhum app pessoal"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Abrir <xliff:g id="APP">%s</xliff:g> no perfil pessoal"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Abrir <xliff:g id="APP">%s</xliff:g> no perfil do trabalho"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar o navegador pessoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar o navegador de trabalho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio da rede do chip"</string>

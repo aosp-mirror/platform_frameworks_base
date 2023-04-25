@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Võimaldab rakendusel juhtida vibreerimist."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Võimaldab rakendusel juurde pääseda vibreerimise olekule."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"helista otse telefoninumbritele"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Võimaldab rakendusel teie sekkumiseta telefoninumbritele helistada. See võib põhjustada ootamatuid tasusid või telefonikõnesid. Pange tähele, et see ei luba rakendusel helistada hädaabinumbritele. Pahatahtlikud rakendused võivad teile kulusid tekitada, tehes telefonikõnesid teie kinnituseta."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"juurdepääs IMS-kõneteenusele"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Võimaldab rakendusel kasutada IMS-teenust kõnede tegemiseks ilma, et peaksite sekkuma."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefoni oleku ja identiteedi lugemine"</string>
@@ -623,11 +624,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Viga autentimisel"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jätkamiseks sisestage oma ekraanilukk"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage tugevalt andurile"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage kindlalt andurile"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sõrmejälge ei õnnestu tuvastada. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhastage sõrmejäljeandur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhastage andur ja proovige uuesti"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage tugevalt andurile"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage kindlalt andurile"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Sõrm liikus liiga aeglaselt. Proovige uuesti."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proovige teist sõrmejälge"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liiga ere"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Näotuvastuse toiming tühistati."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Kasutaja tühistas näoga avamise"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liiga palju katseid. Proovige hiljem uuesti."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Liiga palju katseid. Näoga avamine pole saadaval."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Liiga palju katseid. Kasutage selle asemel ekraanilukku."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nägu ei saa kinnitada. Proovige uuesti."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Näoga avamine ei ole seadistatud"</string>
@@ -1952,7 +1952,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Lisateave"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Jätka rakendust"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"Kas jätkata töörakendusi?"</string>
-    <string name="work_mode_turn_on" msgid="5316648862401307800">"Jätka"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Lõpeta peatamine"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hädaolukord"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Rakendus ei ole saadaval"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole praegu saadaval."</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Seda sisu ei saa töörakendustega avada"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Seda sisu ei saa isiklike rakendustega jagada"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Seda sisu ei saa isiklike rakendustega avada"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Tööprofiil on peatatud"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Puudutage sisselülitamiseks"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Töörakendusi pole"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Isiklikke rakendusi pole"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Ava isikliku profiili <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Ava tööprofiili <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kasuta isiklikku brauserit"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Kasuta tööbrauserit"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kaardi võrgu avamise PIN-kood"</string>
