@@ -395,6 +395,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> {
                 updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+                setDividerVisibility(true, t);
             });
         } else {
             setSideStagePosition(sideStagePosition, wct);
