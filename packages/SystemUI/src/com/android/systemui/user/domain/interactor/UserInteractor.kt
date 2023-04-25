@@ -26,6 +26,7 @@ import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
@@ -762,8 +763,18 @@ constructor(
         }
 
         // TODO(b/246631653): cache the bitmaps to avoid the background work to fetch them.
-        // TODO(b/246631653): downscale the bitmaps to R.dimen.max_avatar_size if requested.
-        val userIcon = withContext(backgroundDispatcher) { manager.getUserIcon(userId) }
+        val userIcon = withContext(backgroundDispatcher) {
+            manager.getUserIcon(userId)
+                ?.let { bitmap ->
+                    val iconSize =
+                        applicationContext
+                            .resources
+                            .getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size)
+                    Icon.scaleDownIfNecessary(bitmap, iconSize, iconSize)
+                }
+        }
+
+
         if (userIcon != null) {
             return BitmapDrawable(userIcon)
         }
