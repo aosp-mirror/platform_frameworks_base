@@ -964,6 +964,7 @@ class TransitionController {
         if (sync) {
             info.setFlags(info.getFlags() | TransitionInfo.FLAG_SYNC);
         }
+        transition.mAnimationTrack = track;
         info.setTrack(track);
         mTrackCount = Math.max(mTrackCount, track + 1);
     }
