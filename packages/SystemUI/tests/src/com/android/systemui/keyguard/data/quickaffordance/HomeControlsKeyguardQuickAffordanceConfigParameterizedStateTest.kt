@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
@@ -46,7 +45,6 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RoboPilotTest
 @RunWith(Parameterized::class)
 class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTestCase() {
 
