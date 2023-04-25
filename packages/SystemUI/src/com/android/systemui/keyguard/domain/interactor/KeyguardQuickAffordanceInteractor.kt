@@ -27,6 +27,8 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
+import com.android.systemui.dock.DockManager
+import com.android.systemui.dock.retrieveIsDocked
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
@@ -71,6 +73,7 @@ constructor(
     private val launchAnimator: DialogLaunchAnimator,
     private val logger: KeyguardQuickAffordancesMetricsLogger,
     private val devicePolicyManager: DevicePolicyManager,
+    private val dockManager: DockManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
     private val isUsingRepository: Boolean
@@ -81,8 +84,12 @@ constructor(
      *
      * If `false`, the UI goes back to using single taps.
      */
-    val useLongPress: Boolean
-        get() = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)
+    fun useLongPress(): Flow<Boolean> =
+        if (featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)) {
+            dockManager.retrieveIsDocked().map { !it }
+        } else {
+            flowOf(false)
+        }
 
     /** Returns an observable for the quick affordance at the given position. */
     suspend fun quickAffordance(
