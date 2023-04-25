@@ -57,7 +57,7 @@ public class RemoteProvisioningService extends SystemService {
             try {
                 mCallback.onSuccess(new RemoteProvisioningRegistration(registration, mExecutor));
             } catch (RemoteException e) {
-                Log.e(TAG, "Error calling success callback " + mCallback.hashCode(), e);
+                Log.e(TAG, "Error calling success callback " + mCallback.asBinder().hashCode(), e);
             }
         }
 
@@ -66,7 +66,7 @@ public class RemoteProvisioningService extends SystemService {
             try {
                 mCallback.onError(error.toString());
             } catch (RemoteException e) {
-                Log.e(TAG, "Error calling error callback " + mCallback.hashCode(), e);
+                Log.e(TAG, "Error calling error callback " + mCallback.asBinder().hashCode(), e);
             }
         }
     }
