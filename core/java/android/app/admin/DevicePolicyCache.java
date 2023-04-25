@@ -19,8 +19,8 @@ import android.annotation.UserIdInt;
 
 import com.android.server.LocalServices;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Stores a copy of the set of device policies maintained by {@link DevicePolicyManager} that
@@ -64,10 +64,11 @@ public abstract class DevicePolicyCache {
     public abstract boolean canAdminGrantSensorsPermissions();
 
     /**
-     * Returns a list of package names for which all launcher shortcuts should be modified to be
-     * launched in the managed profile and badged accordingly.
+     * Returns a map of package names to package names, for which all launcher shortcuts which
+     * match a key package name should be modified to launch the corresponding value package
+     * name in the managed profile. The overridden shortcut should be badged accordingly.
      */
-    public abstract List<String> getLauncherShortcutOverrides();
+    public abstract Map<String, String> getLauncherShortcutOverrides();
 
     /**
      * Empty implementation.
@@ -95,8 +96,8 @@ public abstract class DevicePolicyCache {
             return false;
         }
         @Override
-        public List<String> getLauncherShortcutOverrides() {
-            return new ArrayList<>();
+        public Map<String, String>  getLauncherShortcutOverrides() {
+            return Collections.EMPTY_MAP;
         }
     }
 }
