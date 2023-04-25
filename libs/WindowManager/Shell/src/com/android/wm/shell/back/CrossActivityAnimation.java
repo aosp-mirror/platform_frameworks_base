@@ -404,7 +404,7 @@ class CrossActivityAnimation {
         }
 
         @Override
-        public void onAnimationCancelled(boolean isKeyguardOccluded) {
+        public void onAnimationCancelled() {
             finishAnimation();
         }
     }
