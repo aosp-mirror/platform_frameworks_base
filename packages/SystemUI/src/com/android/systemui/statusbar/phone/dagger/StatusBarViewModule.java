@@ -16,11 +16,7 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import static com.android.systemui.shade.ShadeModule.SHADE_HEADER;
-
 import android.view.LayoutInflater;
-
-import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
@@ -29,7 +25,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -53,7 +48,6 @@ import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
-import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
@@ -125,22 +119,6 @@ public abstract class StatusBarViewModule {
     @CentralSurfacesComponent.CentralSurfacesScope
     abstract ShadeViewController bindsShadeViewController(
             NotificationPanelViewController notificationPanelViewController);
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
-            @Named(SHADE_HEADER) MotionLayout header) {
-        return header.findViewById(R.id.privacy_chip);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    static StatusIconContainer providesStatusIconContainer(
-            @Named(SHADE_HEADER) MotionLayout header) {
-        return header.findViewById(R.id.statusIcons);
-    }
 
     /** */
     @Provides

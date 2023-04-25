@@ -31,9 +31,11 @@ import com.android.systemui.biometrics.AuthRippleView
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.TapAgainView
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -175,6 +177,24 @@ abstract class ShadeModule {
                 featureFlags,
                 batteryController,
             )
+        }
+
+        @Provides
+        @SysUISingleton
+        @Named(SHADE_HEADER)
+        fun providesOngoingPrivacyChip(
+            @Named(SHADE_HEADER) header: MotionLayout,
+        ): OngoingPrivacyChip {
+            return header.findViewById(R.id.privacy_chip)
+        }
+
+        @Provides
+        @SysUISingleton
+        @Named(SHADE_HEADER)
+        fun providesStatusIconContainer(
+            @Named(SHADE_HEADER) header: MotionLayout,
+        ): StatusIconContainer {
+            return header.findViewById(R.id.statusIcons)
         }
     }
 }
