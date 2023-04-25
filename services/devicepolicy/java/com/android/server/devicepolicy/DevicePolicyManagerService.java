@@ -7721,7 +7721,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void clearLauncherShortcutOverrides() {
-        mPolicyCache.setLauncherShortcutOverrides(new ArrayList<>());
+        mPolicyCache.setLauncherShortcutOverrides(new ArrayMap<>());
     }
 
     private void updateTelephonyCrossProfileIntentFilters(int parentUserId, int profileUserId,
@@ -23718,15 +23718,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void updateDialerAndSmsManagedShortcutsOverrideCache(
             String defaultDialerPackageName, String defaultSmsPackageName) {
-
-        List<String> shortcutOverrides = new ArrayList<>();
+        ArrayMap<String, String> shortcutOverrides = new ArrayMap<>();
 
         if (defaultDialerPackageName != null) {
-            shortcutOverrides.add(defaultDialerPackageName);
+            shortcutOverrides.put(defaultDialerPackageName, defaultDialerPackageName);
         }
 
         if (defaultSmsPackageName != null) {
-            shortcutOverrides.add(defaultSmsPackageName);
+            shortcutOverrides.put(defaultSmsPackageName, defaultSmsPackageName);
         }
         mPolicyCache.setLauncherShortcutOverrides(shortcutOverrides);
     }
