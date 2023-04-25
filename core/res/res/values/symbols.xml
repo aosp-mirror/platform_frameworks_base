@@ -5119,4 +5119,6 @@
   <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Accent" />
   <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Accent.Light" />
   <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" />
+
+  <java-symbol type="drawable" name="focus_event_pressed_key_background" />
 </resources>
