@@ -101,7 +101,7 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
     /**
-     * For apps targeting Build.VERSION_CODES.TRAMISU and above, implementors of this
+     * For apps targeting Build.VERSION_CODES.UPSIDE_DOWN_CAKE and above, implementors of this
      * service can create multiple AlwaysOnHotwordDetector instances in parallel. They will
      * also e ale to create a single SoftwareHotwordDetector in parallel with any other
      * active AlwaysOnHotwordDetector instances.
@@ -128,7 +128,7 @@ public class VoiceInteractionService extends Service {
      * @hide
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long MULTIPLE_ACTIVE_HOTWORD_DETECTORS = 193232191L;
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
