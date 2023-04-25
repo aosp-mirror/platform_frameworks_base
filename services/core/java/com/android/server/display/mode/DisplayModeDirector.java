@@ -65,7 +65,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
-import com.android.internal.display.RefreshRateSettingsUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.display.DisplayDeviceConfig;
@@ -1067,10 +1066,10 @@ public class DisplayModeDirector {
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
-        private final Uri mSmoothDisplaySetting =
-                Settings.System.getUriFor(Settings.System.SMOOTH_DISPLAY);
-        private final Uri mForcePeakRefreshRateSetting =
-                Settings.System.getUriFor(Settings.System.FORCE_PEAK_REFRESH_RATE);
+        private final Uri mPeakRefreshRateSetting =
+                Settings.System.getUriFor(Settings.System.PEAK_REFRESH_RATE);
+        private final Uri mMinRefreshRateSetting =
+                Settings.System.getUriFor(Settings.System.MIN_REFRESH_RATE);
         private final Uri mLowPowerModeSetting =
                 Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE);
         private final Uri mMatchContentFrameRateSetting =
@@ -1106,8 +1105,9 @@ public class DisplayModeDirector {
 
         public void observe() {
             final ContentResolver cr = mContext.getContentResolver();
-            mInjector.registerSmoothDisplayObserver(cr, this);
-            mInjector.registerForcePeakRefreshRateObserver(cr, this);
+            mInjector.registerPeakRefreshRateObserver(cr, this);
+            cr.registerContentObserver(mMinRefreshRateSetting, false /*notifyDescendants*/, this,
+                    UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mLowPowerModeSetting, false /*notifyDescendants*/, this,
                     UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mMatchContentFrameRateSetting, false /*notifyDescendants*/,
@@ -1149,8 +1149,8 @@ public class DisplayModeDirector {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             synchronized (mLock) {
-                if (mSmoothDisplaySetting.equals(uri)
-                        || mForcePeakRefreshRateSetting.equals(uri)) {
+                if (mPeakRefreshRateSetting.equals(uri)
+                        || mMinRefreshRateSetting.equals(uri)) {
                     updateRefreshRateSettingLocked();
                 } else if (mLowPowerModeSetting.equals(uri)) {
                     updateLowPowerModeSettingLocked();
@@ -1205,9 +1205,12 @@ public class DisplayModeDirector {
         }
 
         private void updateRefreshRateSettingLocked() {
-            updateRefreshRateSettingLocked(RefreshRateSettingsUtils.getMinRefreshRate(mContext),
-                    RefreshRateSettingsUtils.getPeakRefreshRate(mContext, mDefaultPeakRefreshRate),
-                    mDefaultRefreshRate);
+            final ContentResolver cr = mContext.getContentResolver();
+            float minRefreshRate = Settings.System.getFloatForUser(cr,
+                    Settings.System.MIN_REFRESH_RATE, 0f, cr.getUserId());
+            float peakRefreshRate = Settings.System.getFloatForUser(cr,
+                    Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate, cr.getUserId());
+            updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate);
         }
 
         private void updateRefreshRateSettingLocked(
@@ -2840,17 +2843,12 @@ public class DisplayModeDirector {
     }
 
     interface Injector {
-        Uri SMOOTH_DISPLAY_URI = Settings.System.getUriFor(Settings.System.SMOOTH_DISPLAY);
-        Uri FORCE_PEAK_REFRESH_RATE_URI =
-                Settings.System.getUriFor(Settings.System.FORCE_PEAK_REFRESH_RATE);
+        Uri PEAK_REFRESH_RATE_URI = Settings.System.getUriFor(Settings.System.PEAK_REFRESH_RATE);
 
         @NonNull
         DeviceConfigInterface getDeviceConfig();
 
-        void registerSmoothDisplayObserver(@NonNull ContentResolver cr,
-                @NonNull ContentObserver observer);
-
-        void registerForcePeakRefreshRateObserver(@NonNull ContentResolver cr,
+        void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer);
 
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
@@ -2890,16 +2888,9 @@ public class DisplayModeDirector {
         }
 
         @Override
-        public void registerSmoothDisplayObserver(@NonNull ContentResolver cr,
+        public void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer) {
-            cr.registerContentObserver(SMOOTH_DISPLAY_URI, false /*notifyDescendants*/,
-                    observer, UserHandle.USER_SYSTEM);
-        }
-
-        @Override
-        public void registerForcePeakRefreshRateObserver(@NonNull ContentResolver cr,
-                @NonNull ContentObserver observer) {
-            cr.registerContentObserver(FORCE_PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
+            cr.registerContentObserver(PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
                     observer, UserHandle.USER_SYSTEM);
         }
 
