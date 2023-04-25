@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.PIN_SHAPES;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -45,8 +47,7 @@ import com.android.systemui.animation.Interpolators;
  */
 public class PinShapeNonHintingView extends LinearLayout implements PinShapeInput {
 
-    private int mColor = Utils.getColorAttr(getContext(),
-            android.R.attr.textColorPrimary).getDefaultColor();
+    private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES).getDefaultColor();
     private int mPosition = 0;
     private final PinShapeAdapter mPinShapeAdapter;
     private ValueAnimator mValueAnimator = ValueAnimator.ofFloat(1f, 0f);

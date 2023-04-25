@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Más tiempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tiempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Siguiente"</string>
+    <string name="back" msgid="5554327870352703710">"Atrás"</string>
+    <string name="save" msgid="3745809743277153149">"Guardar"</string>
     <string name="okay" msgid="949938843324579502">"Aceptar"</string>
     <string name="done" msgid="381184316122520313">"Hecho"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas y recordatorios"</string>
@@ -546,7 +543,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que lo desactives"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"justo ahora"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Esta tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"No se puede reproducir contenido en este dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Actualiza la cuenta para cambiar"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Añadir nuevo usuario?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puedes compartir este dispositivo si creas más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con aplicaciones, un fondo de pantalla y mucho más. Los usuarios también pueden ajustar opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando añadas un usuario, tendrá que configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones de todos los usuarios. Es posible que no se transfieran los servicios y opciones de accesibilidad al nuevo usuario."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un nuevo usuario, dicha persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"¿Convertir a este usuario en administrador?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Los administradores tienen privilegios especiales que otros usuarios no tienen. Los administradores pueden gestionar todos los usuarios, actualizar o restablecer este dispositivo, modificar los ajustes, ver todas las aplicaciones instaladas y conceder o revocar privilegios de administrador a otros usuarios."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Convertir en administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar usuario ahora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona está disponible en este momento para usar el dispositivo y configurar su espacio."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar un perfil ahora?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Se iniciará una nueva sesión de invitado y se borrarán todas las aplicaciones y datos de esta sesión"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo Invitado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se eliminarán todas las aplicaciones y datos de la sesión de invitado actual"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Sí, convertir en administrador"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No convertir en administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Salir"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"¿Guardar actividad de invitado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puedes guardar la actividad de esta sesión o eliminar todas las aplicaciones y datos"</string>

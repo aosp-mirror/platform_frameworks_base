@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Más tiempo"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tiempo"</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Siguiente"</string>
+    <string name="back" msgid="5554327870352703710">"Atrás"</string>
+    <string name="save" msgid="3745809743277153149">"Guardar"</string>
     <string name="okay" msgid="949938843324579502">"Aceptar"</string>
     <string name="done" msgid="381184316122520313">"Listo"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas y recordatorios"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Agregar usuario nuevo?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Para compartir este dispositivo, crea más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con apps, un fondo de pantalla y mucho más. Los usuarios también podrán ajustar algunas opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando agregues un nuevo usuario, esa persona deberá configurar su espacio.\n\nCualquier usuario podrá actualizar las apps de otras personas. Es posible que no se transfieran los servicios ni las opciones de accesibilidad al nuevo usuario."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Cuando agregas un nuevo usuario, esa persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de los usuarios."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"¿Quieres convertir a este usuario en administrador?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Los administradores tienen privilegios especiales que no tienen otros usuarios. Un administrador puede administrar a todos los usuarios, actualizar o restablecer el dispositivo, modificar parámetros de configuración, ver todas las apps instaladas y otorgar o revocar privilegios de administrador de otros usuarios."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Convertir en administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar el usuario ahora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona pueda acceder al dispositivo y configurar su espacio."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar tu perfil ahora?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta acción comenzará una nueva sesión de invitado y borrará todas las apps y los datos de la sesión actual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo de invitado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta acción borrará todas las apps y los datos de la sesión de invitado actual"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Sí, convertir en administrador"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, no convertir en administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Salir"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"¿Guardar actividad de invitado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puedes guardar la actividad de la sesión actual o borrar las apps y los datos"</string>

@@ -7721,7 +7721,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void clearLauncherShortcutOverrides() {
-        mPolicyCache.setLauncherShortcutOverrides(new ArrayList<>());
+        mPolicyCache.setLauncherShortcutOverrides(new ArrayMap<>());
     }
 
     private void updateTelephonyCrossProfileIntentFilters(int parentUserId, int profileUserId,
@@ -20215,9 +20215,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isLockTaskFeatureEnabled(int lockTaskFeature) throws RemoteException {
-        //TODO(b/175285301): Explicitly get the user's identity to check.
-        int lockTaskFeatures =
-                getUserData(getCurrentForegroundUserId()).mLockTaskFeatures;
+        int lockTaskFeatures = 0;
+        if (isPolicyEngineForFinanceFlagEnabled()) {
+            LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.LOCK_TASK, getCurrentForegroundUserId());
+            lockTaskFeatures = policy == null
+                    // We default on the power button menu, in order to be consistent with pre-P
+                    // behaviour.
+                    ? DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS
+                    : policy.getFlags();
+        } else {
+            //TODO(b/175285301): Explicitly get the user's identity to check.
+            lockTaskFeatures =
+                    getUserData(getCurrentForegroundUserId()).mLockTaskFeatures;
+        }
         return (lockTaskFeatures & lockTaskFeature) == lockTaskFeature;
     }
 
@@ -21602,7 +21613,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
         if (!keepAccountMigrated) {
-            removeAccount(accountToMigrate);
+            removeAccount(accountToMigrate, sourceUserId);
         }
     }
 
@@ -21646,9 +21657,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .write();
     }
 
-    private void removeAccount(Account account) {
-        final AccountManager accountManager =
-                mContext.getSystemService(AccountManager.class);
+    private void removeAccount(Account account, @UserIdInt int sourceUserId) {
+        final AccountManager accountManager = mContext.createContextAsUser(
+                        UserHandle.of(sourceUserId), /* flags= */ 0)
+                .getSystemService(AccountManager.class);
         final AccountManagerFuture<Bundle> bundle = accountManager.removeAccount(account,
                 null, null /* callback */, null /* handler */);
         try {
@@ -23709,15 +23721,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void updateDialerAndSmsManagedShortcutsOverrideCache(
             String defaultDialerPackageName, String defaultSmsPackageName) {
-
-        List<String> shortcutOverrides = new ArrayList<>();
+        ArrayMap<String, String> shortcutOverrides = new ArrayMap<>();
 
         if (defaultDialerPackageName != null) {
-            shortcutOverrides.add(defaultDialerPackageName);
+            shortcutOverrides.put(defaultDialerPackageName, defaultDialerPackageName);
         }
 
         if (defaultSmsPackageName != null) {
-            shortcutOverrides.add(defaultSmsPackageName);
+            shortcutOverrides.put(defaultSmsPackageName, defaultSmsPackageName);
         }
         mPolicyCache.setLauncherShortcutOverrides(shortcutOverrides);
     }

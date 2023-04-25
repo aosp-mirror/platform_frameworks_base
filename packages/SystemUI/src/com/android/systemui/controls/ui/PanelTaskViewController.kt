@@ -41,6 +41,10 @@ class PanelTaskViewController(
     private val hide: () -> Unit = {}
 ) {
 
+    init {
+        taskView.alpha = 0f
+    }
+
     private var detailTaskId = INVALID_TASK_ID
 
     private val fillInIntent =
@@ -96,6 +100,7 @@ class PanelTaskViewController(
 
             override fun onTaskCreated(taskId: Int, name: ComponentName?) {
                 detailTaskId = taskId
+                taskView.alpha = 1f
             }
 
             override fun onReleased() {

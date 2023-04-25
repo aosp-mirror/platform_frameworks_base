@@ -54,13 +54,20 @@ import org.junit.Test
 @SmallTest
 class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     private val dumpManager: DumpManager = mock()
-    private val logFactory = TableLogBufferFactory(dumpManager, FakeSystemClock())
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val fakeWifiEventFlow = MutableStateFlow<FakeWifiEventModel?>(null)
+    private val logFactory =
+        TableLogBufferFactory(
+            dumpManager,
+            FakeSystemClock(),
+            mock(),
+            testDispatcher,
+            testScope.backgroundScope,
+        )
 
     private lateinit var underTest: DemoMobileConnectionsRepository
     private lateinit var mobileDataSource: DemoModeMobileConnectionDataSource

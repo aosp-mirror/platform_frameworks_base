@@ -79,6 +79,7 @@
                   android:turnScreenOn="true"
                   android:showWhenLocked="true" />
         <activity android:name="com.android.server.wm.ActivityOptionsTest$MainActivity"
+                  android:configChanges="screenLayout|screenSize|smallestScreenSize|orientation"
                   android:turnScreenOn="true"
                   android:showWhenLocked="true" />
         <activity android:name="com.android.server.wm.ScreenshotTests$ScreenshotActivity"
