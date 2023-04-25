@@ -154,6 +154,7 @@ constructor(
             get() = controller?.sessionToken
         private var started = false
         private var playbackType = PLAYBACK_TYPE_UNKNOWN
+        private var playbackVolumeControlId: String? = null
         private var current: MediaDeviceData? = null
             set(value) {
                 val sameWithoutIcon = value != null && value.equalsWithoutIcon(field)
@@ -181,6 +182,7 @@ constructor(
                     localMediaManager.startScan()
                     muteAwaitConnectionManager?.startListening()
                     playbackType = controller?.playbackInfo?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
+                    playbackVolumeControlId = controller?.playbackInfo?.volumeControlId
                     controller?.registerCallback(this)
                     updateCurrent()
                     started = true
@@ -209,6 +211,8 @@ constructor(
                 println("    current device is ${current?.name}")
                 val type = controller?.playbackInfo?.playbackType
                 println("    PlaybackType=$type (1 for local, 2 for remote) cached=$playbackType")
+                val volumeControlId = controller?.playbackInfo?.volumeControlId
+                println("    volumeControlId=$volumeControlId cached= $playbackVolumeControlId")
                 println("    routingSession=$routingSession")
                 println("    selectedRoutes=$selectedRoutes")
             }
@@ -217,10 +221,15 @@ constructor(
         @WorkerThread
         override fun onAudioInfoChanged(info: MediaController.PlaybackInfo?) {
             val newPlaybackType = info?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
-            if (newPlaybackType == playbackType) {
+            val newPlaybackVolumeControlId = info?.volumeControlId
+            if (
+                newPlaybackType == playbackType &&
+                    newPlaybackVolumeControlId == playbackVolumeControlId
+            ) {
                 return
             }
             playbackType = newPlaybackType
+            playbackVolumeControlId = newPlaybackVolumeControlId
             updateCurrent()
         }
 
