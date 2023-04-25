@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.controller
 
+import android.annotation.WorkerThread
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -23,7 +24,6 @@ import android.content.ServiceConnection
 import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
-import android.os.RemoteException
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.service.controls.ControlsProviderService.CALLBACK_BUNDLE
@@ -38,12 +38,16 @@ import android.util.Log
 import com.android.internal.annotations.GuardedBy
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Manager for the lifecycle of the connection to a given [ControlsProviderService].
  *
  * This class handles binding and unbinding and requests to the service. The class will queue
  * requests until the service is connected and dispatch them then.
+ *
+ * If the provider app is updated, and we are currently bound to it, it will try to rebind after
+ * update is completed.
  *
  * @property context A SystemUI context for binding to the services
  * @property executor A delayable executor for posting timeouts
@@ -59,22 +63,22 @@ class ControlsProviderLifecycleManager(
     private val executor: DelayableExecutor,
     private val actionCallbackService: IControlsActionCallback.Stub,
     val user: UserHandle,
-    val componentName: ComponentName
-) : IBinder.DeathRecipient {
+    val componentName: ComponentName,
+    packageUpdateMonitorFactory: PackageUpdateMonitor.Factory,
+) {
 
     val token: IBinder = Binder()
     private var requiresBound = false
     @GuardedBy("queuedServiceMethods")
     private val queuedServiceMethods: MutableSet<ServiceMethod> = ArraySet()
     private var wrapper: ServiceWrapper? = null
-    private var bindTryCount = 0
     private val TAG = javaClass.simpleName
     private var onLoadCanceller: Runnable? = null
 
+    private var lastForPanel = false
+
     companion object {
-        private const val BIND_RETRY_DELAY = 1000L // ms
         private const val LOAD_TIMEOUT_SECONDS = 20L // seconds
-        private const val MAX_BIND_RETRIES = 5
         private const val DEBUG = true
         private val BIND_FLAGS = Context.BIND_AUTO_CREATE or Context.BIND_FOREGROUND_SERVICE or
             Context.BIND_NOT_PERCEPTIBLE
@@ -91,60 +95,56 @@ class ControlsProviderLifecycleManager(
         })
     }
 
-    private fun bindService(bind: Boolean, forPanel: Boolean = false) {
-        executor.execute {
-            requiresBound = bind
-            if (bind) {
-                if (bindTryCount != MAX_BIND_RETRIES && wrapper == null) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Binding service $intent")
-                    }
-                    bindTryCount++
-                    try {
-                        val flags = if (forPanel) BIND_FLAGS_PANEL else BIND_FLAGS
-                        val bound = context
-                                .bindServiceAsUser(intent, serviceConnection, flags, user)
-                        if (!bound) {
-                            context.unbindService(serviceConnection)
-                        }
-                    } catch (e: SecurityException) {
-                        Log.e(TAG, "Failed to bind to service", e)
-                    }
-                }
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG, "Unbinding service $intent")
-                }
-                bindTryCount = 0
-                wrapper?.run {
-                    context.unbindService(serviceConnection)
-                }
-                wrapper = null
+    private val packageUpdateMonitor = packageUpdateMonitorFactory.create(
+        user,
+        componentName.packageName,
+    ) {
+        if (requiresBound) {
+            // Let's unbind just in case. onBindingDied should have been called and unbound before.
+            executor.execute {
+                unbindAndCleanup("package updated")
+                bindService(true, lastForPanel)
             }
         }
     }
 
+    private fun bindService(bind: Boolean, forPanel: Boolean = false) {
+        executor.execute {
+            bindServiceBackground(bind, forPanel)
+        }
+    }
+
     private val serviceConnection = object : ServiceConnection {
+
+        val connected = AtomicBoolean(false)
+
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             if (DEBUG) Log.d(TAG, "onServiceConnected $name")
-            bindTryCount = 0
             wrapper = ServiceWrapper(IControlsProvider.Stub.asInterface(service))
-            try {
-                service.linkToDeath(this@ControlsProviderLifecycleManager, 0)
-            } catch (_: RemoteException) {}
+            packageUpdateMonitor.startMonitoring()
             handlePendingServiceMethods()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             if (DEBUG) Log.d(TAG, "onServiceDisconnected $name")
             wrapper = null
-            bindService(false)
+            // No need to call unbind. We may get a new `onServiceConnected`
         }
 
         override fun onNullBinding(name: ComponentName?) {
             if (DEBUG) Log.d(TAG, "onNullBinding $name")
             wrapper = null
-            context.unbindService(this)
+            executor.execute {
+                unbindAndCleanup("null binding")
+            }
+        }
+
+        override fun onBindingDied(name: ComponentName?) {
+            super.onBindingDied(name)
+            if (DEBUG) Log.d(TAG, "onBindingDied $name")
+            executor.execute {
+                unbindAndCleanup("binder died")
+            }
         }
     }
 
@@ -159,14 +159,55 @@ class ControlsProviderLifecycleManager(
         }
     }
 
-    override fun binderDied() {
-        if (wrapper == null) return
-        wrapper = null
-        if (requiresBound) {
-            if (DEBUG) {
-                Log.d(TAG, "binderDied")
+    @WorkerThread
+    private fun bindServiceBackground(bind: Boolean, forPanel: Boolean = true) {
+        requiresBound = bind
+        if (bind) {
+            if (wrapper == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Binding service $intent")
+                }
+                try {
+                    lastForPanel = forPanel
+                    val flags = if (forPanel) BIND_FLAGS_PANEL else BIND_FLAGS
+                    var bound = false
+                    if (serviceConnection.connected.compareAndSet(false, true)) {
+                        bound = context
+                            .bindServiceAsUser(intent, serviceConnection, flags, user)
+                    }
+                    if (!bound) {
+                        Log.d(TAG, "Couldn't bind to $intent")
+                        doUnbind()
+                    }
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "Failed to bind to service", e)
+                    // Couldn't even bind. Let's reset the connected value
+                    serviceConnection.connected.set(false)
+                }
             }
-            // Try rebinding some time later
+        } else {
+            unbindAndCleanup("unbind requested")
+            packageUpdateMonitor.stopMonitoring()
+        }
+    }
+
+    @WorkerThread
+    private fun unbindAndCleanup(reason: String) {
+        if (DEBUG) {
+            Log.d(TAG, "Unbinding service $intent. Reason: $reason")
+        }
+        wrapper = null
+        try {
+            doUnbind()
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Failed to unbind service", e)
+        }
+    }
+
+    @WorkerThread
+    private fun doUnbind() {
+        if (serviceConnection.connected.compareAndSet(true, false)) {
+            context.unbindService(serviceConnection)
         }
     }
 
@@ -313,7 +354,7 @@ class ControlsProviderLifecycleManager(
         fun run() {
             if (!callWrapper()) {
                 queueServiceMethod(this)
-                binderDied()
+                executor.execute { unbindAndCleanup("couldn't call through binder") }
             }
         }
 
