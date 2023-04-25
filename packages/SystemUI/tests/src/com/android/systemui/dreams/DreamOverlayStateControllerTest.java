@@ -353,6 +353,34 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         }
     }
 
+    @Test
+    public void testHomeControlsDoNotShowIfNotAvailable_featureEnabled() {
+        when(mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)).thenReturn(true);
+
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+        stateController.setShouldShowComplications(true);
+
+        final Complication homeControlsComplication = Mockito.mock(Complication.class);
+        when(homeControlsComplication.getRequiredTypeAvailability())
+                .thenReturn(Complication.COMPLICATION_TYPE_HOME_CONTROLS);
+
+        stateController.addComplication(homeControlsComplication);
+
+        final DreamOverlayStateController.Callback callback =
+                Mockito.mock(DreamOverlayStateController.Callback.class);
+
+        stateController.addCallback(callback);
+        mExecutor.runAllReady();
+
+        // No home controls since it is not available.
+        assertThat(stateController.getComplications()).doesNotContain(homeControlsComplication);
+
+        stateController.setAvailableComplicationTypes(Complication.COMPLICATION_TYPE_HOME_CONTROLS
+                | Complication.COMPLICATION_TYPE_WEATHER);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications()).contains(homeControlsComplication);
+    }
+
     private DreamOverlayStateController getDreamOverlayStateController(boolean overlayEnabled) {
         return new DreamOverlayStateController(mExecutor, overlayEnabled, mFeatureFlags);
     }
