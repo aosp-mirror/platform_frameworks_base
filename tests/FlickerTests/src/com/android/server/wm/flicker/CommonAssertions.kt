@@ -19,9 +19,9 @@
 package com.android.server.wm.flicker
 
 import android.tools.common.PlatformConsts
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.IComponentNameMatcher
 import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.traces.component.IComponentNameMatcher
 import android.tools.common.traces.wm.WindowManagerTrace
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.helpers.WindowUtils
