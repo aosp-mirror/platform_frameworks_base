@@ -68,9 +68,8 @@ struct OverlayableChunk {
 class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, const ResourceTablePackageView& package,
-                   const std::map<size_t, std::string>* shared_libs,
-                   SparseEntriesMode sparse_entries,
-                   bool compact_entries,
+                   const ResourceTable::ReferencedPackages* shared_libs,
+                   SparseEntriesMode sparse_entries, bool compact_entries,
                    bool collapse_key_stringpool,
                    const std::set<ResourceName>& name_collapse_exemptions,
                    bool deduplicate_entry_values)
@@ -548,7 +547,7 @@ class PackageFlattener {
   IAaptContext* context_;
   android::IDiagnostics* diag_;
   const ResourceTablePackageView package_;
-  const std::map<size_t, std::string>* shared_libs_;
+  const ResourceTable::ReferencedPackages* shared_libs_;
   SparseEntriesMode sparse_entries_;
   bool compact_entries_;
   android::StringPool type_pool_;
