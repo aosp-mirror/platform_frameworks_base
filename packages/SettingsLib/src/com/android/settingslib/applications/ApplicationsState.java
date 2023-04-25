@@ -734,7 +734,10 @@ public class ApplicationsState {
 
     private AppEntry getEntryLocked(ApplicationInfo info) {
         int userId = UserHandle.getUserId(info.uid);
-        AppEntry entry = mEntriesMap.get(userId).get(info.packageName);
+        AppEntry entry = null;
+        if (mEntriesMap.contains(userId)) {
+            entry = mEntriesMap.get(userId).get(info.packageName);
+        }
         if (DEBUG) {
             Log.i(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
         }
