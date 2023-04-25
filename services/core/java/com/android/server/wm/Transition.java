@@ -865,6 +865,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (c.getSnapshot() != null) {
                 t.reparent(c.getSnapshot(), null);
             }
+            // The fixed transform hint was set in DisplayContent#applyRotation(). Make sure to
+            // clear the hint in case the start transaction is not applied.
+            if (c.hasFlags(FLAG_IS_DISPLAY) && c.getStartRotation() != c.getEndRotation()
+                    && c.getContainer() != null) {
+                t.unsetFixedTransformHint(WindowContainer.fromBinder(c.getContainer().asBinder())
+                        .asDisplayContent().mSurfaceControl);
+            }
         }
         for (int i = info.getRootCount() - 1; i >= 0; --i) {
             final SurfaceControl leash = info.getRoot(i).getLeash();
