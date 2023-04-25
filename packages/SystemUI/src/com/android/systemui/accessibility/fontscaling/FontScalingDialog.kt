@@ -107,13 +107,13 @@ class FontScalingDialog(
                 var isTrackingTouch = false
 
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                    // Always provide preview configuration for text first when there is a change
+                    // in the seekbar progress.
+                    createTextPreview(progress)
+
                     if (!isTrackingTouch) {
                         // The seekbar progress is changed by icon buttons
                         changeFontSize(progress, CHANGE_BY_BUTTON_DELAY_MS)
-                    } else {
-                        // Provide preview configuration for text instead of changing the system
-                        // font scale before users release their finger from the seekbar.
-                        createTextPreview(progress)
                     }
                 }
 
