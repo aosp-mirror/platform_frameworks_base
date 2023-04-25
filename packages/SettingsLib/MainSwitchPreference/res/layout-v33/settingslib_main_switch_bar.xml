@@ -53,7 +53,7 @@
             android:id="@+id/restricted_icon"
             android:layout_width="@dimen/settingslib_restricted_icon_size"
             android:layout_height="@dimen/settingslib_restricted_icon_size"
-            android:tint="?android:attr/colorAccent"
+            android:tint="@color/settingslib_accent_primary_variant"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
             android:src="@drawable/settingslib_ic_info"
