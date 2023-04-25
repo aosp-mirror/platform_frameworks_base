@@ -33,6 +33,7 @@ import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.os.UserHandle
 import android.os.UserManager
+import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
@@ -45,6 +46,7 @@ import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyA
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.util.kotlin.getOrNull
+import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import com.android.wm.shell.bubbles.Bubbles.BubbleExpandListener
@@ -75,6 +77,7 @@ constructor(
     @NoteTaskEnabledKey private val isEnabled: Boolean,
     private val devicePolicyManager: DevicePolicyManager,
     private val userTracker: UserTracker,
+    private val secureSettings: SecureSettings,
 ) {
 
     @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
@@ -145,7 +148,7 @@ constructor(
             userTracker.userProfiles.firstOrNull { userManager.isManagedProfile(it.id) }?.userHandle
                 ?: userTracker.userHandle
         } else {
-            userTracker.userHandle
+            secureSettings.preferredUser
         }
 
     /**
@@ -311,6 +314,16 @@ constructor(
             context.startServiceAsUser(intent, user)
         }
     }
+
+    private val SecureSettings.preferredUser: UserHandle
+        get() {
+            val userId =
+                secureSettings.getInt(
+                    Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
+                    userTracker.userHandle.identifier,
+                )
+            return UserHandle.of(userId)
+        }
 
     companion object {
         val TAG = NoteTaskController::class.simpleName.orEmpty()

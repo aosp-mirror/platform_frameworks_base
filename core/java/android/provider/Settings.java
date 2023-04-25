@@ -7473,6 +7473,14 @@ public final class Settings {
         public static final String STYLUS_BUTTONS_ENABLED = "stylus_buttons_enabled";
 
         /**
+         * Preferred default user profile to use with the notes task button shortcut.
+         *
+         * @hide
+         */
+        @SuppressLint("NoSettingsProvider")
+        public static final String DEFAULT_NOTE_TASK_PROFILE = "default_note_task_profile";
+
+        /**
          * Host name and port for global http proxy. Uses ':' seperator for
          * between host and port.
          *

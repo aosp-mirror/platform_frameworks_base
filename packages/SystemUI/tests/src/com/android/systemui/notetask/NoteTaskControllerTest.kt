@@ -39,6 +39,7 @@ import android.content.pm.UserInfo
 import android.graphics.drawable.Icon
 import android.os.UserHandle
 import android.os.UserManager
+import android.provider.Settings
 import androidx.test.ext.truth.content.IntentSubject.assertThat
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
@@ -58,6 +59,7 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import com.google.common.truth.Truth.assertThat
@@ -92,6 +94,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Mock private lateinit var shortcutManager: ShortcutManager
     @Mock private lateinit var activityManager: ActivityManager
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var secureSettings: SecureSettings
     private val userTracker = FakeUserTracker()
 
     @Before
@@ -115,6 +118,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         whenever(activityManager.getRunningTasks(anyInt())).thenReturn(emptyList())
         whenever(userManager.isManagedProfile(workUserInfo.id)).thenReturn(true)
         whenever(context.resources).thenReturn(getContext().resources)
+        whenever(secureSettings.userTracker).thenReturn(userTracker)
     }
 
     private fun createNoteTaskController(
@@ -134,6 +138,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             roleManager = roleManager,
             shortcutManager = shortcutManager,
             activityManager = activityManager,
+            secureSettings = secureSettings,
         )
 
     // region onBubbleExpandChanged
@@ -248,6 +253,44 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
         assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
+        verify(eventLogger).logNoteTaskOpened(expectedInfo)
+        verifyZeroInteractions(bubbles)
+    }
+
+    @Test
+    fun showNoteTask_defaultUserSet_shouldStartActivityWithExpectedUserAndLogUiEvent() {
+        whenever(secureSettings.getInt(eq(Settings.Secure.DEFAULT_NOTE_TASK_PROFILE), any()))
+            .thenReturn(10)
+        val user10 = UserHandle.of(/* userId= */ 10)
+
+        val expectedInfo =
+            NOTE_TASK_INFO.copy(
+                entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
+                isKeyguardLocked = true,
+                user = user10,
+            )
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
+        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
+
+        createNoteTaskController()
+            .showNoteTask(
+                entryPoint = expectedInfo.entryPoint!!,
+            )
+
+        val intentCaptor = argumentCaptor<Intent>()
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
+        intentCaptor.value.let { intent ->
+            assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
+            assertThat(intent.`package`).isEqualTo(NOTE_TASK_PACKAGE_NAME)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
+                .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
+                .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
+        }
+        assertThat(userCaptor.value).isEqualTo(user10)
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
         verifyZeroInteractions(bubbles)
     }

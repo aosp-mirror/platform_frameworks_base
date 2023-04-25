@@ -723,6 +723,7 @@ public class SettingsBackupTest {
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.CONTENT_CAPTURE_ENABLED,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
+                 Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
