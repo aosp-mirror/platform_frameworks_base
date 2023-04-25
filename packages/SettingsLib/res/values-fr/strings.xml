@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Moins longtemps."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuler"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Suivant"</string>
+    <string name="back" msgid="5554327870352703710">"Retour"</string>
+    <string name="save" msgid="3745809743277153149">"Enregistrer"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes et rappels"</string>
@@ -543,7 +540,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"le <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Durée"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Toujours demander"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Jusqu\'à la désactivation"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Jusqu\'à ce que vous le désactiviez"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"À l\'instant"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ce téléphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Cette tablette"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Ajouter un utilisateur ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Vous pouvez partager cet appareil avec d\'autres personnes en ajoutant des utilisateurs. Chaque utilisateur dispose de son propre espace où il peut personnaliser ses applications et son fond d\'écran, entre autres. Chaque utilisateur peut également modifier les paramètres de l\'appareil qui s\'appliquent à tous, tels que le Wi-Fi.\n\nLorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nN\'importe quel utilisateur peut mettre à jour les applications pour tous les autres. Toutefois, il est possible que les services et les paramètres d\'accessibilité ne soient pas transférés vers le nouvel utilisateur."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Lorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nN\'importe quel utilisateur peut mettre à jour les applications pour tous les autres utilisateurs."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Définir cet utilisateur comme administrateur ?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Les administrateurs ont des droits spéciaux que les autres utilisateurs n\'ont pas. Un administrateur peut gérer tous les utilisateurs, mettre à jour ou réinitialiser cet appareil, modifier les paramètres, voir toutes les applis installées et accorder ou révoquer des droits d\'administrateur pour d\'autres."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Définir comme administrateur"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurer l\'utilisateur ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assurez-vous que la personne est prête à utiliser l\'appareil et à configurer son espace."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurer le profil maintenant ?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Cette action lancera une nouvelle session Invité et supprimera toutes les applis et données de la session actuelle"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Quitter le mode Invité ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Cette action supprimera les applis et données de la session Invité actuelle."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Oui, le définir comme administrateur"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Non, ne pas le définir comme administrateur"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Quitter"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Enregistrer l\'activité ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Enregistrez l\'activité de la session actuelle ou supprimez les applis et données"</string>

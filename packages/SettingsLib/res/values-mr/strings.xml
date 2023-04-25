@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"जास्त वेळ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कमी वेळ."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"पुढील"</string>
+    <string name="back" msgid="5554327870352703710">"मागे जा"</string>
+    <string name="save" msgid="3745809743277153149">"सेव्ह करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
     <string name="done" msgid="381184316122520313">"पूर्ण झाले"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"नवीन वापरकर्ता जोडायचा?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"अतिरिक्त वापरकर्ते तयार करून तुम्ही इतर लोकांसोबत हे डिव्हाइस शेअर करू शकता. प्रत्येक वापरकर्त्यास त्यांची स्वतःची स्पेस असते, जी ते अ‍ॅप्स, वॉलपेपर आणि यासारख्या गोष्टींनी कस्टमाइझ करू शकतात. वापरकर्ते प्रत्येकाला प्रभावित करणाऱ्या वाय-फाय सारख्या डिव्हाइस सेटिंग्ज अ‍ॅडजस्ट देखील करू शकतात.\n\nतुम्ही एक नवीन वापरकर्ता जोडता, तेव्हा त्या व्यक्तीला त्याची स्पेस सेट अप करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप अपडेट करू शकतो. अ‍ॅक्सेसिबिलिटी सेटिंग्ज आणि सेवा नवीन वापरकर्त्याला कदाचित ट्रान्सफर होणार नाहीत."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीस त्यांचे स्थान सेट करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"या वापरकर्त्याला ॲडमिन करायचे का?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ॲडमिनकडे खास विशेषाधिकार आहेत जे इतर वापरकर्त्यांकडे नसतात. ॲडमिन सर्व वापरकर्ते व्यवस्थापित करू शकतो, हे डिव्हाइस अपडेट करू शकतो किंवा रीसेट करू शकतो, सेटिंग्जमध्ये सुधारणा करू शकतो, सर्व इंस्टॉल केलेली अ‍ॅप्स पाहू शकतो आणि इतरांसाठी ॲडमिनचे विशेषाधिकार मंजूर करू शकतो किंवा रद्द करू शकतो."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ॲडमिन करा"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"आता वापरकर्ता सेट करायचा?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"तो वापरकर्ता डिव्हाइसजवळ आहे आणि त्याचे स्थान सेट करण्यासाठी उपलब्ध आहे याची खात्री करा"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"आता प्रोफाईल सेट करायचा?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"हे नवीन अतिथी सत्र सुरू करेल आणि सध्याच्या सत्रातील सर्व अ‍ॅप्स व डेटा हटवेल"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथी मोडमधून बाहेर पडायचे का?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"हे सध्याच्या अतिथी सत्रातील अ‍ॅप्स आणि डेटा हटवेल"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"होय, त्यांना ॲडमिन करा"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"नाही, त्यांना ॲडमिन करू नका"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहेर पडा"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथी अ‍ॅक्टिव्हिटी सेव्ह करायची का?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"सध्याच्या सत्रातील अ‍ॅक्टिव्हिटी सेव्ह करू किंवा सर्व अ‍ॅप्स व डेटा हटवू शकता"</string>
