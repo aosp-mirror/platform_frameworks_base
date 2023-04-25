@@ -1186,6 +1186,7 @@ public class ApnSetting implements Parcelable {
         ApnSetting other = (ApnSetting) o;
 
         return mEntryName.equals(other.mEntryName)
+                && Objects.equals(mId, other.mId)
                 && Objects.equals(mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(mApnName, other.mApnName)
                 && Objects.equals(mProxyAddress, other.mProxyAddress)
