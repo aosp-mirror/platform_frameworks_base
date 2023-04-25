@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"เวลามากขึ้น"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"เวลาน้อยลง"</string>
     <string name="cancel" msgid="5665114069455378395">"ยกเลิก"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ถัดไป"</string>
+    <string name="back" msgid="5554327870352703710">"กลับ"</string>
+    <string name="save" msgid="3745809743277153149">"บันทึก"</string>
     <string name="okay" msgid="949938843324579502">"ตกลง"</string>
     <string name="done" msgid="381184316122520313">"เสร็จสิ้น"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"การปลุกและการช่วยเตือน"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ต้องการเพิ่มผู้ใช้ใหม่ใช่ไหม"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"คุณมีสิทธิ์แชร์อุปกรณ์นี้กับผู้อื่นได้โดยการเพิ่มผู้ใช้ แต่ละคนจะมีพื้นที่ของตนเองซึ่งปรับใช้กับแอป วอลเปเปอร์ และรายการอื่นๆ ได้ อีกทั้งยังปรับการตั้งค่าอุปกรณ์ได้ด้วย เช่น Wi‑Fi ซึ่งจะมีผลกับทุกคน\n\nเมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตน\n\nผู้ใช้ทุกคนมีสิทธิ์อัปเดตแอปให้ผู้ใช้รายอื่น การตั้งค่าและบริการสำหรับการช่วยเหลือพิเศษอาจโอนไปยังผู้ใช้ใหม่ไม่ได้"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"เมื่อคุณเพิ่มผู้ใช้ใหม่ ผู้ใช้ดังกล่าวจะต้องตั้งค่าพื้นที่ของตนเอง\n\nผู้ใช้ทุกคนสามารถอัปเดตแอปสำหรับผู้ใช้รายอื่นได้"</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"กำหนดให้ผู้ใช้รายนี้เป็นผู้ดูแลระบบไหม"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ผู้ดูแลระบบจะได้รับสิทธิ์พิเศษที่ผู้ใช้รายอื่นๆ ไม่มี ผู้ดูแลระบบสามารถจัดการผู้ใช้ทั้งหมด อัปเดตหรือรีเซ็ตอุปกรณ์นี้ แก้ไขการตั้งค่า ดูแอปที่ติดตั้งทั้งหมด ตลอดจนให้หรือเพิกถอนสิทธิ์ของผู้ดูแลระบบสำหรับคนอื่นๆ ได้"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"กำหนดให้เป็นผู้ดูแลระบบ"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ตั้งค่าผู้ใช้เลยไหม"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ตรวจสอบว่าบุคคลดังกล่าวสามารถนำอุปกรณ์ไปตั้งค่าพื้นที่ของตนได้"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"หากต้องการตั้งค่าโปรไฟล์ทันที"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"การดำเนินการนี้จะเริ่มเซสชันผู้ใช้ชั่วคราวใหม่ และจะลบแอปและข้อมูลทั้งหมดจากเซสชันปัจจุบัน"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ออกจากโหมดผู้ใช้ชั่วคราวไหม"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"การดำเนินการนี้จะลบแอปและข้อมูลออกจากเซสชันผู้ใช้ชั่วคราวในปัจจุบัน"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"ใช่ กำหนดให้เป็นผู้ดูแลระบบ"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"ไม่ อย่ากำหนดให้เป็นผู้ดูแลระบบ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ออก"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"บันทึกกิจกรรมของผู้ใช้ชั่วคราวไหม"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"คุณสามารถบันทึกกิจกรรมจากเซสชันปัจจุบันหรือจะลบแอปและข้อมูลทั้งหมดก็ได้"</string>

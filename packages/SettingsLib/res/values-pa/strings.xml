@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ਹੋਰ ਸਮਾਂ।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ਘੱਟ ਸਮਾਂ।"</string>
     <string name="cancel" msgid="5665114069455378395">"ਰੱਦ ਕਰੋ"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ਅੱਗੇ"</string>
+    <string name="back" msgid="5554327870352703710">"ਪਿੱਛੇ ਜਾਓ"</string>
+    <string name="save" msgid="3745809743277153149">"ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="okay" msgid="949938843324579502">"ਠੀਕ ਹੈ"</string>
     <string name="done" msgid="381184316122520313">"ਹੋ ਗਿਆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ਕੀ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ਤੁਸੀਂ ਵਾਧੂ ਵਰਤੋਂਕਾਰ ਬਣਾ ਕੇ ਹੋਰਾਂ ਲੋਕਾਂ ਨਾਲ ਇਹ ਡੀਵਾਈਸ ਸਾਂਝਾ ਕਰ ਸਕਦੇ ਹੋ। ਹਰੇਕ ਵਰਤੋਂਕਾਰ ਦੀ ਆਪਣੀ ਖੁਦ ਦੀ ਜਗ੍ਹਾ ਹੁੰਦੀ ਹੈ, ਜਿਸਨੂੰ ਉਹ ਐਪਾਂ ਅਤੇ ਵਾਲਪੇਪਰ ਆਦਿ ਨਾਲ ਵਿਉਂਤਬੱਧ ਕਰ ਸਕਦੇ ਹਨ। ਵਰਤੋਂਕਾਰ ਵਾਈ-ਫਾਈ ਵਰਗੀਆਂ ਡੀਵਾਈਸ ਸੈਟਿੰਗਾਂ ਨੂੰ ਵੀ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦੇ ਹਨ, ਜਿਸ ਨਾਲ ਹਰੇਕ ਵਰਤੋਂਕਾਰ \'ਤੇ ਅਸਰ ਪੈਂਦਾ ਹੈ।\n\nਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸੈੱਟ ਅੱਪ ਕਰਨੀ ਪੈਂਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਬਾਕੀ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ। ਸ਼ਾਇਦ ਪਹੁੰਚਯੋਗਤਾ ਸੈਟਿੰਗਾਂ ਅਤੇ ਸੇਵਾਵਾਂ ਨੂੰ ਕਿਸੇ ਨਵੇਂ ਵਰਤੋਂਕਾਰ ਨੂੰ ਟ੍ਰਾਂਸਫਰ ਨਾ ਕੀਤਾ ਜਾ ਸਕੇ।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸੈੱਟਅੱਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਹੋਰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ਕੀ ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਪ੍ਰਸ਼ਾਸਕ ਬਣਾਉਣਾ ਹੈ?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ਪ੍ਰਸ਼ਾਸਕਾਂ ਕੋਲ ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰ ਹੁੰਦੇ ਹਨ ਜੋ ਹੋਰ ਵਰਤੋਂਕਾਰਾਂ ਕੋਲ ਨਹੀਂ ਹੁੰਦੇ। ਇੱਕ ਪ੍ਰਸ਼ਾਸਕ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦਾ ਹੈ, ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਅੱਪਡੇਟ ਜਾਂ ਰੀਸੈੱਟ ਕਰ ਸਕਦਾ ਹੈ, ਸੈਟਿੰਗਾਂ ਨੂੰ ਸੋਧ ਸਕਦਾ ਹੈ, ਸਾਰੀਆਂ ਸਥਾਪਤ ਐਪਾਂ ਨੂੰ ਦੇਖ ਸਕਦਾ ਹੈ, ਅਤੇ ਦੂਜਿਆਂ ਲਈ ਪ੍ਰਸ਼ਾਸਕ ਦੇ ਅਧਿਕਾਰਾਂ ਨੂੰ ਮਨਜ਼ੂਰ ਜਾਂ ਰੱਦ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ਪ੍ਰਸ਼ਾਸਕ ਬਣਾਓ"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ਕੀ ਹੁਣ ਵਰਤੋਂਕਾਰ ਸੈੱਟ ਅੱਪ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ਇਹ ਪੱਕਾ ਕਰੋ ਕਿ ਵਿਅਕਤੀ ਡੀਵਾਈਸ ਵਰਤਣ ਅਤੇ ਆਪਣੀ ਜਗ੍ਹਾ ਦੇ ਸੈੱਟ ਅੱਪ ਲਈ ਉਪਲਬਧ ਹੈ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ਕੀ ਹੁਣ ਪ੍ਰੋਫਾਈਲ ਸੈੱਟ ਅੱਪ ਕਰਨੀ ਹੈ?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ਇਸ ਨਾਲ ਨਵਾਂ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ਕੀ ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਣਾ ਹੈ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ਇਸ ਨਾਲ ਮੌਜੂਦਾ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"ਹਾਂ, ਉਨ੍ਹਾਂ ਨੂੰ ਪ੍ਰਸ਼ਾਸਕ ਬਣਾਓ"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"ਨਹੀਂ, ਉਨ੍ਹਾਂ ਨੂੰ ਪ੍ਰਸ਼ਾਸਕ ਨਾ ਬਣਾਓ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ਬਾਹਰ ਜਾਓ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ਕੀ ਮਹਿਮਾਨ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰਨੀ ਹੈ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ਤੁਸੀਂ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਸਕਦੇ ਹੋ ਜਾਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>

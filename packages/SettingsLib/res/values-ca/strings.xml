@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Més temps"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menys temps"</string>
     <string name="cancel" msgid="5665114069455378395">"Cancel·la"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Següent"</string>
+    <string name="back" msgid="5554327870352703710">"Enrere"</string>
+    <string name="save" msgid="3745809743277153149">"Desa"</string>
     <string name="okay" msgid="949938843324579502">"D\'acord"</string>
     <string name="done" msgid="381184316122520313">"Fet"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Pots compartir aquest dispositiu amb altres persones creant usuaris addicionals. Cada usuari té el seu propi espai, que pot personalitzar amb aplicacions i fons de pantalla, entre d\'altres. Els usuaris també poden ajustar opcions de configuració del dispositiu, com ara la Wi-Fi, que afecten els altres usuaris.\n\nQuan afegeixis un usuari nou, haurà de configurar el seu espai.\n\nTots els usuaris poden actualitzar les aplicacions de la resta. És possible que la configuració i els serveis d\'accessibilitat no es transfereixin a l\'usuari nou."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Quan s\'afegeix un usuari nou, aquesta persona ha de configurar el seu espai.\n\nQualsevol usuari pot actualitzar les aplicacions dels altres usuaris."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vols convertir aquest usuari en administrador?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Els administradors tenen privilegis especials que altres usuaris no tenen. Un administrador pot gestionar tots els usuaris, actualitzar o restablir aquest dispositiu, modificar la configuració, veure totes les aplicacions instal·lades i concedir o revocar privilegis d\'administrador a altres usuaris."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Converteix en administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vols configurar l\'usuari ara?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assegura\'t que la persona estigui disponible per accedir al dispositiu i configurar el seu espai."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vols configurar el perfil ara?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Aquesta acció iniciarà una nova sessió de convidat i suprimirà totes les aplicacions i dades de la sessió actual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sortir del mode de convidat?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Aquesta acció suprimirà les aplicacions i dades de la sessió de convidat actual"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Sí, converteix en administrador"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, no converteixis en administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Surt"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Desar l\'activitat de convidat?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pots desar l\'activitat de la sessió actual o suprimir totes les apps i dades"</string>
