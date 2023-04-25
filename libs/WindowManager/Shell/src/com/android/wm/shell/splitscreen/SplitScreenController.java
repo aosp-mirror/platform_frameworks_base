@@ -460,7 +460,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 }
             }
             @Override
-            public void onAnimationCancelled(boolean isKeyguardOccluded) {
+            public void onAnimationCancelled() {
                 final WindowContainerTransaction evictWct = new WindowContainerTransaction();
                 mStageCoordinator.prepareEvictInvisibleChildTasks(evictWct);
                 mSyncQueue.queue(evictWct);

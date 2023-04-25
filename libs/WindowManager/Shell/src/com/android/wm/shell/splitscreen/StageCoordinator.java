@@ -483,7 +483,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
             @Override
-            public void onAnimationCancelled(boolean isKeyguardOccluded) {
+            public void onAnimationCancelled() {
                 if (isEnteringSplit) {
                     mMainExecutor.execute(() -> exitSplitScreen(
                             mSideStage.getChildCount() == 0 ? mMainStage : mSideStage,
@@ -869,7 +869,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         onRemoteAnimationFinished(apps);
                         t.apply();
                         try {
-                            adapter.getRunner().onAnimationCancelled(mKeyguardShowing);
+                            adapter.getRunner().onAnimationCancelled();
                         } catch (RemoteException e) {
                             Slog.e(TAG, "Error starting remote animation", e);
                         }
@@ -1013,11 +1013,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
 
             @Override
-            public void onAnimationCancelled(boolean isKeyguardOccluded) {
+            public void onAnimationCancelled() {
                 onRemoteAnimationFinishedOrCancelled(evictWct);
                 setDividerVisibility(true, null);
                 try {
-                    adapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
+                    adapter.getRunner().onAnimationCancelled();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error starting remote animation", e);
                 }
@@ -1038,7 +1038,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         onRemoteAnimationFinished(apps);
                         t.apply();
                         try {
-                            adapter.getRunner().onAnimationCancelled(mKeyguardShowing);
+                            adapter.getRunner().onAnimationCancelled();
                         } catch (RemoteException e) {
                             Slog.e(TAG, "Error starting remote animation", e);
                         }

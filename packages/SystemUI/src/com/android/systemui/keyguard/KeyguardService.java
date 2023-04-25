@@ -243,7 +243,7 @@ public class KeyguardService extends Service {
                         Slog.e(TAG, "Called mergeAnimation, but finish callback is missing");
                         return;
                     }
-                    runner.onAnimationCancelled(false /* isKeyguardOccluded */);
+                    runner.onAnimationCancelled();
                     currentFinishCB.onTransitionFinished(null /* wct */, null /* t */);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
@@ -418,7 +418,7 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onAnimationCancelled(boolean isKeyguardOccluded) {
+        public void onAnimationCancelled() {
             mKeyguardViewMediator.cancelKeyguardExitAnimation();
         }
     };
