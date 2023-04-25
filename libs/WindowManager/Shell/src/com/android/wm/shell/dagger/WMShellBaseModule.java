@@ -186,15 +186,15 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static DragAndDropController provideDragAndDropController(Context context,
+    static Optional<DragAndDropController> provideDragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new DragAndDropController(context, shellInit, shellController, displayController,
-                uiEventLogger, iconProvider, mainExecutor);
+        return Optional.ofNullable(DragAndDropController.create(context, shellInit, shellController,
+                displayController, uiEventLogger, iconProvider, mainExecutor));
     }
 
     @WMSingleton
@@ -796,7 +796,7 @@ public abstract class WMShellBaseModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropControllerOptional,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,

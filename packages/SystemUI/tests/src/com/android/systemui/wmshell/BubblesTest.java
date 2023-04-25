@@ -380,7 +380,7 @@ public class BubblesTest extends SysuiTestCase {
                 mPositioner,
                 mock(DisplayController.class),
                 mOneHandedOptional,
-                mock(DragAndDropController.class),
+                Optional.of(mock(DragAndDropController.class)),
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
