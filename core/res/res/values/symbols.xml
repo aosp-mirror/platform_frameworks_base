@@ -1068,7 +1068,9 @@
   <java-symbol type="string" name="action_bar_home_subtitle_description_format" />
   <java-symbol type="string" name="wireless_display_route_description" />
   <java-symbol type="string" name="user_owner_label" />
+  <java-symbol type="string" name="user_owner_app_label" />
   <java-symbol type="string" name="managed_profile_label" />
+  <java-symbol type="string" name="managed_profile_app_label" />
   <java-symbol type="string" name="managed_profile_label_badge" />
   <java-symbol type="string" name="managed_profile_label_badge_2" />
   <java-symbol type="string" name="managed_profile_label_badge_3" />
