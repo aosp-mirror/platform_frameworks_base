@@ -359,6 +359,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (task == null) {
             throw new IllegalArgumentException("Unknown taskId" + taskId);
         }
+        if (isTaskInSplitScreen(taskId)) {
+            throw new IllegalArgumentException("taskId is in split" + taskId);
+        }
         return mStageCoordinator.moveToStage(task, stagePosition, wct);
     }
 
