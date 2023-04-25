@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import static com.android.wm.shell.MockSurfaceControlHelper.createMockSurfaceControlBuilder;
 import static com.android.wm.shell.MockSurfaceControlHelper.createMockSurfaceControlTransaction;
 
@@ -86,6 +88,7 @@ import java.util.function.Supplier;
 public class WindowDecorationTests extends ShellTestCase {
     private static final Rect TASK_BOUNDS = new Rect(100, 300, 400, 400);
     private static final Point TASK_POSITION_IN_PARENT = new Point(40, 60);
+    private static final int CORNER_RADIUS = 20;
 
     private final WindowDecoration.RelayoutResult<TestView> mRelayoutResult =
             new WindowDecoration.RelayoutResult<>();
@@ -130,6 +133,7 @@ public class WindowDecorationTests extends ShellTestCase {
         mCaptionMenuShadowRadiusId = R.dimen.test_caption_menu_shadow_radius;
         mCaptionMenuCornerRadiusId = R.dimen.test_caption_menu_corner_radius;
         mRelayoutParams.mShadowRadiusId = R.dimen.test_window_decor_shadow_radius;
+        mRelayoutParams.mCornerRadius = CORNER_RADIUS;
 
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory)
                 .create(any(), any(), any());
@@ -209,6 +213,7 @@ public class WindowDecorationTests extends ShellTestCase {
                 .setBounds(TASK_BOUNDS)
                 .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
                 .setVisible(true)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
                 .build();
         taskInfo.isFocused = true;
         // Density is 2. Shadow radius is 10px. Caption height is 64px.
@@ -249,6 +254,8 @@ public class WindowDecorationTests extends ShellTestCase {
                 .setPosition(taskSurface, TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y);
         verify(mMockSurfaceControlFinishT)
                 .setWindowCrop(taskSurface, 300, 100);
+        verify(mMockSurfaceControlStartT).setCornerRadius(taskSurface, CORNER_RADIUS);
+        verify(mMockSurfaceControlFinishT).setCornerRadius(taskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlStartT)
                 .show(taskSurface);
         verify(mMockSurfaceControlStartT)
