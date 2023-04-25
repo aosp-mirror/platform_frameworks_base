@@ -150,7 +150,7 @@ public class ScreenshotController {
                 }
 
                 @Override
-                public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                public void onAnimationCancelled() {
                 }
             };
 
