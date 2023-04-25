@@ -191,7 +191,7 @@ final class ColorFade {
         }
 
         if (!(createEglContext(isProtected) && createEglSurface(isProtected, isWideColor)
-                && setScreenshotTextureAndSetViewport(hardwareBuffer))) {
+                && setScreenshotTextureAndSetViewport(hardwareBuffer, displayInfo.rotation))) {
             dismiss();
             return false;
         }
@@ -500,7 +500,8 @@ final class ColorFade {
     }
 
     private boolean setScreenshotTextureAndSetViewport(
-            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer) {
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer,
+            @Surface.Rotation int rotation) {
         if (!attachEglContext()) {
             return false;
         }
@@ -525,14 +526,22 @@ final class ColorFade {
                 s.release();
                 st.release();
             }
+            // if screen is rotated, map texture starting different corner
+            int indexDelta = (rotation == Surface.ROTATION_90) ? 2
+                            : (rotation == Surface.ROTATION_180) ? 4
+                            : (rotation == Surface.ROTATION_270) ? 6 : 0;
 
             // Set up texture coordinates for a quad.
             // We might need to change this if the texture ends up being
             // a different size from the display for some reason.
-            mTexCoordBuffer.put(0, 0f); mTexCoordBuffer.put(1, 0f);
-            mTexCoordBuffer.put(2, 0f); mTexCoordBuffer.put(3, 1f);
-            mTexCoordBuffer.put(4, 1f); mTexCoordBuffer.put(5, 1f);
-            mTexCoordBuffer.put(6, 1f); mTexCoordBuffer.put(7, 0f);
+            mTexCoordBuffer.put(indexDelta, 0f);
+            mTexCoordBuffer.put(indexDelta + 1, 0f);
+            mTexCoordBuffer.put((indexDelta + 2) % 8, 0f);
+            mTexCoordBuffer.put((indexDelta + 3) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 4) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 5) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 6) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 7) % 8, 0f);
 
             // Set up our viewport.
             GLES20.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
