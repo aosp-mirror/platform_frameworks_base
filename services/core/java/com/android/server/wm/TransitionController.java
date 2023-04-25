@@ -823,6 +823,7 @@ class TransitionController {
             // Can reset track-count now that everything is idle.
             mTrackCount = 0;
             validateStates();
+            mAtm.mWindowManager.onAnimationFinished();
         }
     }
 
