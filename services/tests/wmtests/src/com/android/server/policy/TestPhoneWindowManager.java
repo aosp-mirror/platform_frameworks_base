@@ -353,6 +353,10 @@ class TestPhoneWindowManager {
                 () -> LocalServices.getService(eq(StatusBarManagerInternal.class)));
     }
 
+    void overrideLaunchHome() {
+        doNothing().when(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
+    }
+
     /**
      * Below functions will check the policy behavior could be invoked.
      */
@@ -479,5 +483,10 @@ class TestPhoneWindowManager {
                 transitionCaptor.capture());
         transitionCaptor.getValue().onAppTransitionFinishedLocked(any());
         verify(mPhoneWindowManager).lockNow(null);
+    }
+
+    void assertGoToHomescreen() {
+        waitForIdle();
+        verify(mPhoneWindowManager).launchHomeFromHotKey(anyInt());
     }
 }
