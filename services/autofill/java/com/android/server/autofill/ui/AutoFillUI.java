@@ -325,11 +325,12 @@ public final class AutoFillUI {
     public void showSaveUi(@NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
             @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
-            @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi,
-            boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
+            @NonNull AutoFillUiCallback callback, @UserIdInt int userId,
+            @NonNull PendingUi pendingSaveUi, boolean isUpdate, boolean compatMode,
+            boolean showServiceIcon) {
         if (sVerbose) {
             Slog.v(TAG, "showSaveUi(update=" + isUpdate + ") for " + componentName.toShortString()
-                    + ": " + info);
+                    + " and user " + userId + ": " + info);
         }
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
@@ -349,7 +350,7 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mSaveUiCallback = callback;
-            mSaveUi = new SaveUi(mContext, pendingSaveUi, serviceLabel, serviceIcon,
+            mSaveUi = new SaveUi(mContext, userId, pendingSaveUi, serviceLabel, serviceIcon,
                     servicePackageName, componentName, info, valueFinder, mOverlayControl,
                     new SaveUi.OnSaveListener() {
                 @Override
