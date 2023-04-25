@@ -116,6 +116,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaItems.add(new MediaItem(mMediaDevice2));
 
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
         mSpyMediaOutputSeekbar = spy(mViewHolder.mSeekBar);
@@ -202,9 +203,11 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     public void advanced_onBindViewHolder_bindPairNew_verifyView() {
         when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
         mMediaItems.add(new MediaItem());
+        mMediaOutputAdapter.updateItems();
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
 
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
@@ -223,6 +226,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
                         Collectors.toList()));
         when(mMediaOutputController.getSessionName()).thenReturn(TEST_SESSION_NAME);
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
         mMediaOutputAdapter.getItemCount();
@@ -243,6 +247,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
                         Collectors.toList()));
         when(mMediaOutputController.getSessionName()).thenReturn(null);
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
         mMediaOutputAdapter.getItemCount();
@@ -602,9 +607,11 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     public void advanced_onItemClick_clickPairNew_verifyLaunchBluetoothPairing() {
         when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
         mMediaItems.add(new MediaItem());
+        mMediaOutputAdapter.updateItems();
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
         mViewHolder.mContainerLayout.performClick();
 
@@ -700,6 +707,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
                 mMediaItems.stream().map((item) -> item.getMediaDevice().get()).collect(
                         Collectors.toList()));
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
         List<MediaDevice> selectableDevices = new ArrayList<>();
@@ -733,5 +741,19 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.updateColorScheme(wallpaperColors, true);
 
         verify(mMediaOutputController).setCurrentColorScheme(wallpaperColors, true);
+    }
+
+    @Test
+    public void updateItems_controllerItemsUpdated_notUpdatesInAdapterUntilUpdateItems() {
+        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+        mMediaOutputAdapter.updateItems();
+        List<MediaItem> updatedList = new ArrayList<>();
+        updatedList.add(new MediaItem());
+        when(mMediaOutputController.getMediaItemList()).thenReturn(updatedList);
+        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaItems.size());
+
+        mMediaOutputAdapter.updateItems();
+
+        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(updatedList.size());
     }
 }
