@@ -28,6 +28,7 @@ import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.os.UserHandle.getCallingUserId;
 import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.util.TimeUtils.isTimeBetween;
 
@@ -199,8 +200,8 @@ final class UiModeManagerService extends SystemService {
     private PowerManagerInternal mLocalPowerManager;
 
     @GuardedBy("mLock")
-    private final RemoteCallbackList<IUiModeManagerCallback> mUiModeManagerCallbacks =
-            new RemoteCallbackList<IUiModeManagerCallback>();
+    private final SparseArray<RemoteCallbackList<IUiModeManagerCallback>> mUiModeManagerCallbacks =
+            new SparseArray<>();
 
     @GuardedBy("mLock")
     @Nullable
@@ -371,8 +372,9 @@ final class UiModeManagerService extends SystemService {
             synchronized (mLock) {
                 if (updateContrastLocked()) {
                     float contrast = getContrastLocked();
-                    mUiModeManagerCallbacks.broadcast(ignoreRemoteException(callback ->
-                            callback.notifyContrastChanged(contrast)));
+                    mUiModeManagerCallbacks.get(mCurrentUser, new RemoteCallbackList<>())
+                            .broadcast(ignoreRemoteException(
+                                    callback -> callback.notifyContrastChanged(contrast)));
                 }
             }
         }
@@ -664,8 +666,12 @@ final class UiModeManagerService extends SystemService {
     private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
         @Override
         public void addCallback(IUiModeManagerCallback callback) {
+            int userId = getCallingUserId();
             synchronized (mLock) {
-                mUiModeManagerCallbacks.register(callback);
+                if (!mUiModeManagerCallbacks.contains(userId)) {
+                    mUiModeManagerCallbacks.put(userId, new RemoteCallbackList<>());
+                }
+                mUiModeManagerCallbacks.get(userId).register(callback);
             }
         }
 
