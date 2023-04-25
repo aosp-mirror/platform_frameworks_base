@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -54,6 +55,13 @@ public class RemoteInputController {
     private final RemoteInputUriController mRemoteInputUriController;
 
     private final RemoteInputControllerLogger mLogger;
+
+    /**
+     * RemoteInput Active's last emitted value. It's added for debugging purpose to directly see
+     * its last emitted value. As RemoteInputController holds weak reference, isRemoteInputActive
+     * in dump may not reflect the last emitted value of  Active.
+     */
+    @Nullable private Boolean mLastAppliedRemoteInputActive = null;
 
     public RemoteInputController(Delegate delegate,
             RemoteInputUriController remoteInputUriController,
@@ -217,6 +225,7 @@ public class RemoteInputController {
         for (int i = 0; i < N; i++) {
             mCallbacks.get(i).onRemoteInputActive(remoteInputActive);
         }
+        mLastAppliedRemoteInputActive = remoteInputActive;
     }
 
     /**
@@ -323,6 +332,8 @@ public class RemoteInputController {
 
     /** dump debug info; called by {@link NotificationRemoteInputManager} */
     public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.print("mLastAppliedRemoteInputActive: ");
+        pw.println((Object) mLastAppliedRemoteInputActive);
         pw.print("isRemoteInputActive: ");
         pw.println(isRemoteInputActive()); // Note that this prunes the mOpen list, printed later.
         pw.println("mOpen: " + mOpen.size());
