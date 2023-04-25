@@ -16,10 +16,11 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
+import static com.android.systemui.shade.ShadeModule.SHADE_HEADER;
+
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.ViewStub;
 
 import androidx.constraintlayout.motion.widget.MotionLayout;
 
@@ -90,7 +91,6 @@ import javax.inject.Provider;
         })
 public abstract class StatusBarViewModule {
 
-    public static final String SHADE_HEADER = "large_screen_shade_header";
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
 
     /** */
@@ -135,19 +135,6 @@ public abstract class StatusBarViewModule {
     @CentralSurfacesComponent.CentralSurfacesScope
     abstract ShadeViewController bindsShadeViewController(
             NotificationPanelViewController notificationPanelViewController);
-
-    @Provides
-    @Named(SHADE_HEADER)
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static MotionLayout getLargeScreenShadeHeaderBarView(
-            NotificationShadeWindowView notificationShadeWindowView,
-            FeatureFlags featureFlags) {
-        ViewStub stub = notificationShadeWindowView.findViewById(R.id.qs_header_stub);
-        int layoutId = R.layout.combined_qs_header;
-        stub.setLayoutResource(layoutId);
-        MotionLayout v = (MotionLayout) stub.inflate();
-        return v;
-    }
 
     /** */
     @Provides

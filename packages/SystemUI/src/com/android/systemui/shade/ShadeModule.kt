@@ -17,6 +17,8 @@
 package com.android.systemui.shade
 
 import android.view.LayoutInflater
+import android.view.ViewStub
+import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.keyguard.LockIconView
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
@@ -31,6 +33,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import javax.inject.Named
 
 /** Module for classes related to the notification shade. */
 @Module
@@ -42,6 +45,8 @@ abstract class ShadeModule {
     abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
 
     companion object {
+        const val SHADE_HEADER = "large_screen_shade_header"
+
         @Provides
         @SysUISingleton
         // TODO(b/277762009): Do something similar to
@@ -108,6 +113,19 @@ abstract class ShadeModule {
             notificationPanelView: NotificationPanelView,
         ): TapAgainView {
             return notificationPanelView.findViewById(R.id.shade_falsing_tap_again)
+        }
+
+        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
+        @Provides
+        @SysUISingleton
+        @Named(SHADE_HEADER)
+        fun providesShadeHeaderView(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): MotionLayout {
+            val stub = notificationShadeWindowView.findViewById<ViewStub>(R.id.qs_header_stub)
+            val layoutId = R.layout.combined_qs_header
+            stub.layoutResource = layoutId
+            return stub.inflate() as MotionLayout
         }
     }
 }
