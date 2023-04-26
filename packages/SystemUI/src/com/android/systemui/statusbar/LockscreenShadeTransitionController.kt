@@ -18,7 +18,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.biometrics.UdfpsKeyguardViewController
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector

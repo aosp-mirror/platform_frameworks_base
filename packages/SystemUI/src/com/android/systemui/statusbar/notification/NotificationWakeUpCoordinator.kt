@@ -21,8 +21,8 @@ import android.view.animation.Interpolator
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.ObjectAnimator
 import com.android.systemui.Dumpable
-import com.android.systemui.animation.Interpolators
-import com.android.systemui.animation.InterpolatorsAndroidX
+import com.android.app.animation.Interpolators
+import com.android.app.animation.InterpolatorsAndroidX
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController

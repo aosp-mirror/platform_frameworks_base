@@ -34,10 +34,10 @@ import android.widget.TextView
 import androidx.annotation.DimenRes
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import com.android.app.animation.Interpolators
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text.Companion.loadText

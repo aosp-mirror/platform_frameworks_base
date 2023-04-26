@@ -30,9 +30,9 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.keyguard.KeyguardIndication;
 
 /**

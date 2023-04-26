@@ -43,8 +43,8 @@ import android.view.accessibility.AccessibilityEvent;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.dynamicanimation.animation.SpringForce;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;

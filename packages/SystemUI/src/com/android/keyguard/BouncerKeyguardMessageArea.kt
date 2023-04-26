@@ -26,8 +26,8 @@ import android.content.res.TypedArray
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
+import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.TITLE
 
 /** Displays security messages for the keyguard bouncer. */

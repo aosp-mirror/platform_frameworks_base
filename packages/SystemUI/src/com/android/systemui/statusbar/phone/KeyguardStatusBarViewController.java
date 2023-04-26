@@ -37,12 +37,12 @@ import androidx.core.animation.Animator;
 import androidx.core.animation.AnimatorListenerAdapter;
 import androidx.core.animation.ValueAnimator;
 
+import com.android.app.animation.InterpolatorsAndroidX;
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
-import com.android.systemui.animation.InterpolatorsAndroidX;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.LogLevel;

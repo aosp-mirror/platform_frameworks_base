@@ -39,9 +39,9 @@ import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
-import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityLaunchAnimator"

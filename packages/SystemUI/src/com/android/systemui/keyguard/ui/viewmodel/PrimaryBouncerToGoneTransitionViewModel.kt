@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
+import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor

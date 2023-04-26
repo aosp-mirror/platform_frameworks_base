@@ -31,9 +31,9 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 
 import java.lang.annotation.Retention;

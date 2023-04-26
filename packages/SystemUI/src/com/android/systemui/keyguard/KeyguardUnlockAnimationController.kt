@@ -36,7 +36,7 @@ import androidx.core.math.MathUtils
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
