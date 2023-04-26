@@ -12214,17 +12214,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin;
-            if (isPermissionCheckFlagEnabled()) {
-                admin = enforcePermissionAndGetEnforcingAdmin(
-                        who, MANAGE_DEVICE_POLICY_INPUT_METHODS,
-                        caller.getPackageName(), userId).getActiveAdmin();
+            if (isPolicyEngineForFinanceFlagEnabled()) {
+                EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackageName);
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.PERMITTED_INPUT_METHODS,
+                        admin,
+                        packageList == null
+                                ? null
+                                : new StringSetPolicyValue(new HashSet<>(packageList)),
+                        userId);
             } else {
-                admin = getParentOfAdminIfRequired(
-                        getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()), calledOnParentInstance);
+                ActiveAdmin admin = getParentOfAdminIfRequired(
+                        getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()),
+                        calledOnParentInstance);
+                admin.permittedInputMethods = packageList;
+                saveSettingsLocked(caller.getUserId());
             }
-            admin.permittedInputMethods = packageList;
-            saveSettingsLocked(caller.getUserId());
         }
 
         DevicePolicyEventLogger
@@ -12272,19 +12277,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin;
-            if (isPermissionCheckFlagEnabled()) {
+            if (isPolicyEngineForFinanceFlagEnabled()) {
                 int affectedUser = calledOnParentInstance ? getProfileParentId(
                         caller.getUserId()) : caller.getUserId();
-                admin = enforcePermissionAndGetEnforcingAdmin(
-                        who, MANAGE_DEVICE_POLICY_INPUT_METHODS, caller.getPackageName(),
-                        affectedUser).getActiveAdmin();
+                Set<String> policy = mDevicePolicyEngine.getResolvedPolicy(
+                        PolicyDefinition.PERMITTED_INPUT_METHODS, affectedUser);
+                return policy == null ? null : new ArrayList<>(policy);
             } else {
-                admin = getParentOfAdminIfRequired(
+                ActiveAdmin admin = getParentOfAdminIfRequired(
                         getProfileOwnerOrDeviceOwnerLocked(
                                 caller.getUserId()), calledOnParentInstance);
+                return admin.permittedInputMethods;
             }
-            return admin.permittedInputMethods;
         }
     }
 
@@ -12302,37 +12306,45 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private @Nullable List<String> getPermittedInputMethodsUnchecked(@UserIdInt int userId) {
-        synchronized (getLockObject()) {
-            List<String> result = null;
-            // Only device or profile owners can have permitted lists set.
-            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserInclPermissionBasedAdminLocked(userId);
-            for (ActiveAdmin admin: admins) {
-                List<String> fromAdmin = admin.permittedInputMethods;
-                if (fromAdmin != null) {
-                    if (result == null) {
-                        result = new ArrayList<String>(fromAdmin);
-                    } else {
-                        result.retainAll(fromAdmin);
-                    }
-                }
-            }
-
-            // If we have a permitted list add all system input methods.
-            if (result != null) {
-                List<InputMethodInfo> imes = InputMethodManagerInternal
-                        .get().getInputMethodListAsUser(userId);
-                if (imes != null) {
-                    for (InputMethodInfo ime : imes) {
-                        ServiceInfo serviceInfo = ime.getServiceInfo();
-                        ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
-                        if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                            result.add(serviceInfo.packageName);
+        List<String> result = null;
+        if (isPolicyEngineForFinanceFlagEnabled()) {
+            Set<String> policy = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.PERMITTED_INPUT_METHODS, userId);
+            result = policy == null ? null : new ArrayList<>(policy);
+        } else {
+            synchronized (getLockObject()) {
+                // Only device or profile owners can have permitted lists set.
+                List<ActiveAdmin> admins =
+                        getActiveAdminsForAffectedUserInclPermissionBasedAdminLocked(
+                                userId);
+                for (ActiveAdmin admin : admins) {
+                    List<String> fromAdmin = admin.permittedInputMethods;
+                    if (fromAdmin != null) {
+                        if (result == null) {
+                            result = new ArrayList<String>(fromAdmin);
+                        } else {
+                            result.retainAll(fromAdmin);
                         }
                     }
                 }
             }
-            return result;
         }
+
+        // If we have a permitted list add all system input methods.
+        if (result != null) {
+            List<InputMethodInfo> imes = InputMethodManagerInternal
+                    .get().getInputMethodListAsUser(userId);
+            if (imes != null) {
+                for (InputMethodInfo ime : imes) {
+                    ServiceInfo serviceInfo = ime.getServiceInfo();
+                    ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
+                    if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        result.add(serviceInfo.packageName);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -12347,17 +12359,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 String.format(NOT_SYSTEM_CALLER_MSG,
                         "query if an input method is disabled by admin"));
 
-        synchronized (getLockObject()) {
-            ActiveAdmin admin = getParentOfAdminIfRequired(
-                    getActiveAdminUncheckedLocked(who, userHandle), calledOnParentInstance);
-            if (admin == null) {
-                return false;
+        if (isPolicyEngineForFinanceFlagEnabled()) {
+            int affectedUser = calledOnParentInstance ? getProfileParentId(userHandle) : userHandle;
+            Map<EnforcingAdmin, PolicyValue<Set<String>>> policies =
+                    mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
+                            PolicyDefinition.PERMITTED_INPUT_METHODS, affectedUser);
+            EnforcingAdmin admin = null;
+            for (EnforcingAdmin a : policies.keySet()) {
+                if (a.getPackageName().equals(who.getPackageName())) {
+                    if (policies.get(a).getValue() == null) {
+                        return true;
+                    } else {
+                        return checkPackagesInPermittedListOrSystem(
+                                Collections.singletonList(packageName),
+                                new ArrayList<>(policies.get(a).getValue()), affectedUser);
+                    }
+                }
             }
-            if (admin.permittedInputMethods == null) {
-                return true;
+            // Admin didn't set a policy
+            return false;
+        } else {
+            synchronized (getLockObject()) {
+                ActiveAdmin admin = getParentOfAdminIfRequired(
+                        getActiveAdminUncheckedLocked(who, userHandle), calledOnParentInstance);
+                if (admin == null) {
+                    return false;
+                }
+                if (admin.permittedInputMethods == null) {
+                    return true;
+                }
+                return checkPackagesInPermittedListOrSystem(Collections.singletonList(packageName),
+                        admin.permittedInputMethods, userHandle);
             }
-            return checkPackagesInPermittedListOrSystem(Collections.singletonList(packageName),
-                    admin.permittedInputMethods, userHandle);
         }
     }
 
@@ -23790,6 +23823,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public DevicePolicyState getDevicePolicyState() {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
         return mInjector.binderWithCleanCallingIdentity(mDevicePolicyEngine::getDevicePolicyState);
     }
 
