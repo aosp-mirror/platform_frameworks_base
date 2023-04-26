@@ -21,7 +21,6 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -71,6 +70,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -173,14 +173,15 @@ final class SaveUi {
 
     private boolean mDestroyed;
 
-    SaveUi(@NonNull Context systemContext, @UserIdInt int userId, @NonNull PendingUi pendingUi,
+    SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
            @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
            boolean nightMode, boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
-        Context context = DisplayHelper.getDisplayContext(systemContext, userId);
-        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        if (sVerbose) {
+            Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
+        }
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi = pendingUi;
         mListener = new OneActionThenDestroyListener(listener);
