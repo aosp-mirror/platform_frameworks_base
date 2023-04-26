@@ -189,8 +189,9 @@ class DefaultClockController(
             view.setLayoutParams(lp)
         }
 
-        fun moveForSplitShade(fromRect: Rect, toRect: Rect, fraction: Float) {
-            view.moveForSplitShade(fromRect, toRect, fraction)
+        /** See documentation at [AnimatableClockView.offsetGlyphsForStepClockAnimation]. */
+        fun offsetGlyphsForStepClockAnimation(fromLeft: Int, direction: Int, fraction: Float) {
+            view.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
         }
     }
 
@@ -277,8 +278,8 @@ class DefaultClockController(
         dozeFraction: Float,
         foldFraction: Float,
     ) : DefaultClockAnimations(view, dozeFraction, foldFraction) {
-        override fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {
-            largeClock.moveForSplitShade(fromRect, toRect, fraction)
+        override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {
+            largeClock.offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
         }
     }
 
