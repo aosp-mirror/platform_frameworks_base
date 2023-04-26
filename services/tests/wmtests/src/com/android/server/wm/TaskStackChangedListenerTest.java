@@ -52,7 +52,6 @@ import android.view.Display;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import org.junit.After;
@@ -319,7 +318,6 @@ public class TaskStackChangedListenerTest {
     };
 
     @Presubmit
-    @FlakyTest(bugId = 150409355)
     @Test
     public void testNotifyTaskRequestedOrientationChanged() throws Exception {
         final ArrayBlockingQueue<int[]> taskIdAndOrientationQueue = new ArrayBlockingQueue<>(10);

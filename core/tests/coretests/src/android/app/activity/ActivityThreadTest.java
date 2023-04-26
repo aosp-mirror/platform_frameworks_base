@@ -62,7 +62,6 @@ import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -616,7 +615,6 @@ public class ActivityThreadTest {
     }
 
     @Test
-    @FlakyTest(bugId = 176134235)
     public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
 
