@@ -157,8 +157,8 @@ public class MediaProjectionPermissionActivity extends Activity
         CharSequence dialogTitle = null;
         String appName = null;
         if (Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName)) {
-            dialogText = getString(R.string.media_projection_dialog_service_text);
-            dialogTitle = getString(R.string.media_projection_dialog_service_title);
+            dialogText = getString(R.string.media_projection_sys_service_dialog_warning);
+            dialogTitle = getString(R.string.media_projection_sys_service_dialog_title);
         } else {
             String label = aInfo.loadLabel(packageManager).toString();
 
@@ -188,7 +188,7 @@ public class MediaProjectionPermissionActivity extends Activity
                     paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
             appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
 
-            String actionText = getString(R.string.media_projection_dialog_text, appName);
+            String actionText = getString(R.string.media_projection_dialog_warning, appName);
             SpannableString message = new SpannableString(actionText);
 
             int appNameIndex = actionText.indexOf(appName);
