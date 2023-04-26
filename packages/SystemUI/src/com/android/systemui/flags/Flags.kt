@@ -68,8 +68,6 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
         unreleasedFlag(119, "notification_memory_logging_enabled")
 
-    @JvmField val USE_ROUNDNESS_SOURCETYPES = releasedFlag(116, "use_roundness_sourcetype")
-
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
         releasedFlag(259395680, "simplified_appear_fraction")
@@ -81,7 +79,8 @@ object Flags {
     // TODO(b/278873737): Tracking Bug
     @JvmField
     val LOAD_NOTIFICATIONS_BEFORE_THE_USER_SWITCH_IS_COMPLETE =
-            unreleasedFlag(278873737, "load_notifications_before_the_user_switch_is_complete")
+            unreleasedFlag(278873737, "load_notifications_before_the_user_switch_is_complete",
+                    teamfood = true)
 
     // TODO(b/277338665): Tracking Bug
     @JvmField
@@ -116,7 +115,7 @@ object Flags {
 
     // TODO(b/275694445): Tracking Bug
     @JvmField
-    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = releasedFlag(208,
+    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = unreleasedFlag(208,
         "lockscreen_without_secure_lock_when_dreaming")
 
     /**
@@ -222,6 +221,12 @@ object Flags {
     @JvmField
     val LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP =
         unreleasedFlag(232, "lock_screen_long_press_directly_opens_wallpaper_picker")
+
+    /** Provide new auth messages on the bouncer. */
+    // TODO(b/277961132): Tracking bug.
+    @JvmField
+    val REVAMPED_BOUNCER_MESSAGES =
+        unreleasedFlag(234, "revamped_bouncer_messages")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -679,8 +684,8 @@ object Flags {
 
     // TODO(b/272805037): Tracking Bug
     @JvmField
-    val ADVANCED_VPN_ENABLED = unreleasedFlag(2800, name = "AdvancedVpn__enable_feature",
-            namespace = "vpn", teamfood = true)
+    val ADVANCED_VPN_ENABLED = releasedFlag(2800, name = "AdvancedVpn__enable_feature",
+            namespace = "vpn")
 
     // TODO(b/278761837): Tracking Bug
     @JvmField

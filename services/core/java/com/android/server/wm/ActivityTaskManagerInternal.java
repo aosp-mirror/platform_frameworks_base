@@ -755,4 +755,10 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Unregister a task stack listener so that it stops receiving callbacks. */;
     public abstract void unregisterTaskStackListener(ITaskStackListener listener);
+
+    /**
+     * Gets the id of the display the activity was launched on.
+     * @param token The activity token.
+     */
+    public abstract int getDisplayId(IBinder token);
 }

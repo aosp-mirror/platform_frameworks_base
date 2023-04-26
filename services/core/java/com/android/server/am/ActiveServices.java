@@ -3866,7 +3866,7 @@ public final class ActiveServices {
         if (UserHandle.isCore(callingUid)) {
             return;
         }
-        final int callingUserId = UserHandle.getCallingUserId();
+        final int callingUserId = UserHandle.getUserId(callingUid);
         if (callingUserId == userId
                 || !mAm.mUserController.isSameProfileGroup(callingUserId, userId)) {
             return;

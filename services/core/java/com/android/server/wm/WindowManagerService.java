@@ -1831,7 +1831,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean needToSendNewConfiguration =
                     win.isVisibleRequestedOrAdding() && displayContent.updateOrientation();
-            if (win.providesNonDecorInsets()) {
+            if (win.providesDisplayDecorInsets()) {
                 needToSendNewConfiguration |= displayPolicy.updateDecorInsetsInfo();
             }
             if (needToSendNewConfiguration) {
@@ -2274,7 +2274,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         & WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED) != 0) {
                     win.mLayoutNeeded = true;
                 }
-                if (layoutChanged && win.providesNonDecorInsets()) {
+                if (layoutChanged && win.providesDisplayDecorInsets()) {
                     configChanged = displayPolicy.updateDecorInsetsInfo();
                 }
                 if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
@@ -2290,14 +2290,24 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.setColorSpaceAgnosticLocked((win.mAttrs.privateFlags
                             & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
                 }
-                if (win.mActivityRecord != null
-                        && !displayContent.mDwpcHelper.keepActivityOnWindowFlagsChanged(
-                                win.mActivityRecord.info, flagChanges, privateFlagChanges)) {
-                    mH.sendMessage(mH.obtainMessage(H.REPARENT_TASK_TO_DEFAULT_DISPLAY,
-                            win.mActivityRecord.getTask()));
-                    Slog.w(TAG_WM, "Activity " + win.mActivityRecord + " window flag changed,"
-                            + " can't remain on display " + displayContent.getDisplayId());
-                    return 0;
+                // See if the DisplayWindowPolicyController wants to keep the activity on the window
+                if (displayContent.mDwpcHelper.hasController()
+                        && win.mActivityRecord != null && (!win.mRelayoutCalled || flagChanges != 0
+                        || privateFlagChanges != 0)) {
+                    int newOrChangedFlags = !win.mRelayoutCalled ? win.mAttrs.flags : flagChanges;
+                    int newOrChangedPrivateFlags =
+                            !win.mRelayoutCalled ? win.mAttrs.privateFlags : privateFlagChanges;
+
+                    if (!displayContent.mDwpcHelper.keepActivityOnWindowFlagsChanged(
+                            win.mActivityRecord.info, newOrChangedFlags, newOrChangedPrivateFlags,
+                            win.mAttrs.flags,
+                            win.mAttrs.privateFlags)) {
+                        mH.sendMessage(mH.obtainMessage(H.REPARENT_TASK_TO_DEFAULT_DISPLAY,
+                                win.mActivityRecord.getTask()));
+                        Slog.w(TAG_WM, "Activity " + win.mActivityRecord + " window flag changed,"
+                                + " can't remain on display " + displayContent.getDisplayId());
+                        return 0;
+                    }
                 }
             }
 

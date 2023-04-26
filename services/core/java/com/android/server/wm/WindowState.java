@@ -1834,13 +1834,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mPolicyVisibility & POLICY_VISIBILITY_ALL) == POLICY_VISIBILITY_ALL;
     }
 
-    boolean providesNonDecorInsets() {
+    boolean providesDisplayDecorInsets() {
         if (mInsetsSourceProviders == null) {
             return false;
         }
         for (int i = mInsetsSourceProviders.size() - 1; i >= 0; i--) {
             final InsetsSource source = mInsetsSourceProviders.valueAt(i).getSource();
-            if (source.getType() == WindowInsets.Type.navigationBars()) {
+            if ((source.getType() & DisplayPolicy.DecorInsets.CONFIG_TYPES) != 0) {
                 return true;
             }
         }
@@ -2507,13 +2507,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             // Check if window provides non decor insets before clearing its provided insets.
-            final boolean windowProvidesNonDecorInsets = providesNonDecorInsets();
+            final boolean windowProvidesDisplayDecorInsets = providesDisplayDecorInsets();
 
             removeImmediately();
             // Removing a visible window may affect the display orientation so just update it if
             // needed. Also recompute configuration if it provides screen decor insets.
             boolean needToSendNewConfiguration = wasVisible && displayContent.updateOrientation();
-            if (windowProvidesNonDecorInsets) {
+            if (windowProvidesDisplayDecorInsets) {
                 needToSendNewConfiguration |=
                         displayContent.getDisplayPolicy().updateDecorInsetsInfo();
             }

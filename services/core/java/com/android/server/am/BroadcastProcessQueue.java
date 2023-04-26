@@ -242,8 +242,7 @@ class BroadcastProcessQueue {
      */
     @Nullable
     public BroadcastRecord enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record,
-            int recordIndex, boolean wouldBeSkipped,
-            @NonNull BroadcastConsumer deferredStatesApplyConsumer) {
+            int recordIndex, @NonNull BroadcastConsumer deferredStatesApplyConsumer) {
         // When updateDeferredStates() has already applied a deferred state to
         // all pending items, apply to this new broadcast too
         if (mLastDeferredStates && record.deferUntilActive
@@ -252,8 +251,7 @@ class BroadcastProcessQueue {
         }
 
         if (record.isReplacePending()) {
-            final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex,
-                    wouldBeSkipped);
+            final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex);
             if (replacedBroadcastRecord != null) {
                 return replacedBroadcastRecord;
             }
@@ -264,14 +262,13 @@ class BroadcastProcessQueue {
         SomeArgs newBroadcastArgs = SomeArgs.obtain();
         newBroadcastArgs.arg1 = record;
         newBroadcastArgs.argi1 = recordIndex;
-        newBroadcastArgs.argi2 = (wouldBeSkipped ? 1 : 0);
 
         // Cross-broadcast prioritization policy:  some broadcasts might warrant being
         // issued ahead of others that are already pending, for example if this new
         // broadcast is in a different delivery class or is tied to a direct user interaction
         // with implicit responsiveness expectations.
         getQueueForBroadcast(record).addLast(newBroadcastArgs);
-        onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
+        onBroadcastEnqueued(record, recordIndex);
         return null;
     }
 
@@ -285,10 +282,9 @@ class BroadcastProcessQueue {
      *         wasn't any broadcast that was replaced.
      */
     @Nullable
-    private BroadcastRecord replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+    private BroadcastRecord replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex) {
         final ArrayDeque<SomeArgs> queue = getQueueForBroadcast(record);
-        return replaceBroadcastInQueue(queue, record, recordIndex, wouldBeSkipped);
+        return replaceBroadcastInQueue(queue, record, recordIndex);
     }
 
     /**
@@ -302,15 +298,13 @@ class BroadcastProcessQueue {
      */
     @Nullable
     private BroadcastRecord replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
-            @NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+            @NonNull BroadcastRecord record, int recordIndex) {
         final Iterator<SomeArgs> it = queue.descendingIterator();
         final Object receiver = record.receivers.get(recordIndex);
         while (it.hasNext()) {
             final SomeArgs args = it.next();
             final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
             final int testRecordIndex = args.argi1;
-            final boolean testWouldBeSkipped = (args.argi2 == 1);
             final Object testReceiver = testRecord.receivers.get(testRecordIndex);
             if ((record.callingUid == testRecord.callingUid)
                     && (record.userId == testRecord.userId)
@@ -320,10 +314,9 @@ class BroadcastProcessQueue {
                 // Exact match found; perform in-place swap
                 args.arg1 = record;
                 args.argi1 = recordIndex;
-                args.argi2 = (wouldBeSkipped ? 1 : 0);
                 record.copyEnqueueTimeFrom(testRecord);
-                onBroadcastDequeued(testRecord, testRecordIndex, testWouldBeSkipped);
-                onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
+                onBroadcastDequeued(testRecord, testRecordIndex);
+                onBroadcastEnqueued(record, recordIndex);
                 return testRecord;
             }
         }
@@ -383,13 +376,12 @@ class BroadcastProcessQueue {
             final SomeArgs args = it.next();
             final BroadcastRecord record = (BroadcastRecord) args.arg1;
             final int recordIndex = args.argi1;
-            final boolean recordWouldBeSkipped = (args.argi2 == 1);
             if (predicate.test(record, recordIndex)) {
                 consumer.accept(record, recordIndex);
                 if (andRemove) {
                     args.recycle();
                     it.remove();
-                    onBroadcastDequeued(record, recordIndex, recordWouldBeSkipped);
+                    onBroadcastDequeued(record, recordIndex);
                 } else {
                     // Even if we're leaving broadcast in queue, it may have
                     // been mutated in such a way to change our runnable time
@@ -539,12 +531,11 @@ class BroadcastProcessQueue {
         final SomeArgs next = removeNextBroadcast();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
-        final boolean wouldBeSkipped = (next.argi2 == 1);
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
         mActiveWasStopped = false;
         next.recycle();
-        onBroadcastDequeued(mActive, mActiveIndex, wouldBeSkipped);
+        onBroadcastDequeued(mActive, mActiveIndex);
     }
 
     /**
@@ -561,8 +552,7 @@ class BroadcastProcessQueue {
     /**
      * Update summary statistics when the given record has been enqueued.
      */
-    private void onBroadcastEnqueued(@NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+    private void onBroadcastEnqueued(@NonNull BroadcastRecord record, int recordIndex) {
         mCountEnqueued++;
         if (record.deferUntilActive) {
             mCountDeferred++;
@@ -594,8 +584,7 @@ class BroadcastProcessQueue {
         if (record.callerInstrumented) {
             mCountInstrumented++;
         }
-        if (!wouldBeSkipped
-                && (record.receivers.get(recordIndex) instanceof ResolveInfo)) {
+        if (record.receivers.get(recordIndex) instanceof ResolveInfo) {
             mCountManifest++;
         }
         invalidateRunnableAt();
@@ -604,8 +593,7 @@ class BroadcastProcessQueue {
     /**
      * Update summary statistics when the given record has been dequeued.
      */
-    private void onBroadcastDequeued(@NonNull BroadcastRecord record, int recordIndex,
-            boolean wouldBeSkipped) {
+    private void onBroadcastDequeued(@NonNull BroadcastRecord record, int recordIndex) {
         mCountEnqueued--;
         if (record.deferUntilActive) {
             mCountDeferred--;
@@ -637,8 +625,7 @@ class BroadcastProcessQueue {
         if (record.callerInstrumented) {
             mCountInstrumented--;
         }
-        if (!wouldBeSkipped
-                && (record.receivers.get(recordIndex) instanceof ResolveInfo)) {
+        if (record.receivers.get(recordIndex) instanceof ResolveInfo) {
             mCountManifest--;
         }
         invalidateRunnableAt();

@@ -1882,6 +1882,12 @@ public class DisplayPolicy {
 
         static final int DECOR_TYPES = Type.displayCutout() | Type.navigationBars();
 
+        /**
+         * The types that may affect display configuration. This excludes cutout because it is
+         * known from display info.
+         */
+        static final int CONFIG_TYPES = Type.statusBars() | Type.navigationBars();
+
         private final DisplayContent mDisplayContent;
         private final Info[] mInfoForRotation = new Info[4];
         final Info mTmpInfo = new Info();
@@ -1921,7 +1927,7 @@ public class DisplayPolicy {
         final DecorInsets.Info newInfo = mDecorInsets.mTmpInfo;
         newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
-        if (newInfo.mNonDecorFrame.equals(currentInfo.mNonDecorFrame)) {
+        if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)) {
             return false;
         }
         mDecorInsets.invalidate();

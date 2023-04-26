@@ -52,7 +52,7 @@ public class LegacyNotificationShelfControllerImpl implements NotificationShelfC
         mActivatableNotificationViewController = activatableNotificationViewController;
         mKeyguardBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
-        mView.useRoundnessSourceTypes(featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES));
+        mView.useRoundnessSourceTypes(true);
         mView.setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
         mOnAttachStateChangeListener = new View.OnAttachStateChangeListener() {
             @Override

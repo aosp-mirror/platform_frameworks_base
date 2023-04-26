@@ -114,7 +114,7 @@ class DisplayWindowPolicyControllerHelper {
      * @see DisplayWindowPolicyController#keepActivityOnWindowFlagsChanged(ActivityInfo, int, int)
      */
     boolean keepActivityOnWindowFlagsChanged(ActivityInfo aInfo, int flagChanges,
-            int privateFlagChanges) {
+            int privateFlagChanges, int flagValues, int privateFlagValues) {
         if (mDisplayWindowPolicyController == null) {
             return true;
         }
@@ -125,7 +125,7 @@ class DisplayWindowPolicyControllerHelper {
         }
 
         return mDisplayWindowPolicyController.keepActivityOnWindowFlagsChanged(
-                aInfo, flagChanges, privateFlagChanges);
+                aInfo, flagValues, privateFlagValues);
     }
 
     /** Update the top activity and the uids of non-finishing activity */

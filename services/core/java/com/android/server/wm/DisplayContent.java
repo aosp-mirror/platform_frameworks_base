@@ -6045,7 +6045,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     static boolean alwaysCreateRootTask(int windowingMode, int activityType) {
         // Always create a root task for fullscreen, freeform, and multi windowing
         // modes so that we can manage visual ordering and return types correctly.
-        return activityType == ACTIVITY_TYPE_STANDARD
+        return (activityType == ACTIVITY_TYPE_STANDARD || activityType == ACTIVITY_TYPE_RECENTS)
                 && (windowingMode == WINDOWING_MODE_FULLSCREEN
                 || windowingMode == WINDOWING_MODE_FREEFORM
                 || windowingMode == WINDOWING_MODE_PINNED

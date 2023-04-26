@@ -36,6 +36,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ScreenshotHelper;
@@ -302,8 +303,10 @@ public class SystemActionPerformer {
                 case AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT:
                     return takeScreenshot();
                 case AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK:
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK,
-                            InputDevice.SOURCE_KEYBOARD);
+                    if (!AccessibilityUtils.interceptHeadsetHookForActiveCall(mContext)) {
+                        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK,
+                                InputDevice.SOURCE_KEYBOARD);
+                    }
                     return true;
                 case AccessibilityService.GLOBAL_ACTION_DPAD_UP:
                     sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP,

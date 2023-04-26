@@ -803,6 +803,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     protected WallpaperData mLastLockWallpaper;
     private IWallpaperManagerCallback mKeyguardListener;
     private boolean mWaitingForUnlock;
+
+    /**
+     * Flag set to true after reboot if the home wallpaper is waiting for the device to be unlocked.
+     * This happens for wallpapers that are not direct-boot aware; they can only be rendered after
+     * the user unlocks the device for the first time after a reboot. In the meantime, the default
+     * wallpaper is shown instead.
+     */
+    private boolean mHomeWallpaperWaitingForUnlock;
+
+    /**
+     * Flag set to true after reboot if the lock wallpaper is waiting for the device to be unlocked.
+     */
+    private boolean mLockWallpaperWaitingForUnlock;
+
     private boolean mShuttingDown;
 
     /**
@@ -1790,7 +1804,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public void onUnlockUser(final int userId) {
         synchronized (mLock) {
             if (mCurrentUserId == userId) {
-                if (mWaitingForUnlock) {
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    if (mHomeWallpaperWaitingForUnlock) {
+                        final WallpaperData systemWallpaper =
+                                getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                        switchWallpaper(systemWallpaper, null);
+                        // TODO(b/278261563): call notifyCallbacksLocked inside switchWallpaper
+                        notifyCallbacksLocked(systemWallpaper);
+                    }
+                    if (mLockWallpaperWaitingForUnlock) {
+                        final WallpaperData lockWallpaper =
+                                getWallpaperSafeLocked(userId, FLAG_LOCK);
+                        switchWallpaper(lockWallpaper, null);
+                        notifyCallbacksLocked(lockWallpaper);
+                    }
+                }
+
+                if (mWaitingForUnlock && !mIsLockscreenLiveWallpaperEnabled) {
                     // the desired wallpaper is not direct-boot aware, load it now
                     final WallpaperData systemWallpaper =
                             getWallpaperSafeLocked(userId, FLAG_SYSTEM);
@@ -1845,12 +1875,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 mCurrentUserId = userId;
                 systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-                final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
-                lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
+
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    lockWallpaper = systemWallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)
+                            ? systemWallpaper : getWallpaperSafeLocked(userId, FLAG_LOCK);
+                } else {
+                    final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
+                    lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
+                }
+
                 // Not started watching yet, in case wallpaper data was loaded for other reasons.
                 if (systemWallpaper.wallpaperObserver == null) {
                     systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
                     systemWallpaper.wallpaperObserver.startWatching();
+                }
+                if (mIsLockscreenLiveWallpaperEnabled && lockWallpaper != systemWallpaper)  {
+                    switchWallpaper(lockWallpaper, null);
                 }
                 switchWallpaper(systemWallpaper, reply);
             }
@@ -1870,6 +1910,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     void switchWallpaper(WallpaperData wallpaper, IRemoteCallback reply) {
         synchronized (mLock) {
             mWaitingForUnlock = false;
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                if ((wallpaper.mWhich & FLAG_SYSTEM) != 0) mHomeWallpaperWaitingForUnlock = false;
+                if ((wallpaper.mWhich & FLAG_LOCK) != 0) mLockWallpaperWaitingForUnlock = false;
+            }
+
             final ComponentName cname = wallpaper.wallpaperComponent != null ?
                     wallpaper.wallpaperComponent : wallpaper.nextWallpaperComponent;
             if (!bindWallpaperComponentLocked(cname, true, false, wallpaper, reply)) {
@@ -1880,6 +1925,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     si = mIPackageManager.getServiceInfo(cname,
                             PackageManager.MATCH_DIRECT_BOOT_UNAWARE, wallpaper.userId);
                 } catch (RemoteException ignored) {
+                }
+
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    onSwitchWallpaperFailLocked(wallpaper, reply, si);
+                    return;
                 }
 
                 if (si == null) {
@@ -1897,6 +1947,43 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
         }
+    }
+
+    /**
+     * Fallback method if a wallpaper fails to load on boot or after a user switch.
+     * Only called if mIsLockscreenLiveWallpaperEnabled is true.
+     */
+    private void onSwitchWallpaperFailLocked(
+            WallpaperData wallpaper, IRemoteCallback reply, ServiceInfo serviceInfo) {
+
+        if (serviceInfo == null) {
+            Slog.w(TAG, "Failure starting previous wallpaper; clearing");
+
+            if (wallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)) {
+                clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
+                clearWallpaperLocked(false, FLAG_LOCK, wallpaper.userId, reply);
+            } else {
+                clearWallpaperLocked(false, wallpaper.mWhich, wallpaper.userId, reply);
+            }
+            return;
+        }
+        Slog.w(TAG, "Wallpaper isn't direct boot aware; using fallback until unlocked");
+        // We might end up persisting the current wallpaper data
+        // while locked, so pretend like the component was actually
+        // bound into place
+        wallpaper.wallpaperComponent = wallpaper.nextWallpaperComponent;
+        final WallpaperData fallback = new WallpaperData(wallpaper.userId, wallpaper.mWhich);
+
+        // files from the previous static wallpaper may still be stored in memory.
+        // delete them in order to show the default wallpaper.
+        if (wallpaper.wallpaperFile.exists()) {
+            wallpaper.wallpaperFile.delete();
+            wallpaper.cropFile.delete();
+        }
+
+        bindWallpaperComponentLocked(mImageWallpaper, true, false, fallback, reply);
+        if ((wallpaper.mWhich & FLAG_SYSTEM) != 0) mHomeWallpaperWaitingForUnlock = true;
+        if ((wallpaper.mWhich & FLAG_LOCK) != 0) mLockWallpaperWaitingForUnlock = true;
     }
 
     @Override

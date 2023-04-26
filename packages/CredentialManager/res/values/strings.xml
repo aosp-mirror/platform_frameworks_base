@@ -114,13 +114,13 @@
   <!-- Strings for the get flow. -->
   <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_use_passkey_for">Use your saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
-  <!-- This appears as the title of the dialog asking for user confirmation to use the single previously saved credential to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_use_sign_in_for">Use your saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
-  <!-- This appears as the title of the dialog asking for user to make a choice from various previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_choose_sign_in_for">Choose a saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
-  <!-- This appears as the title of the dialog asking for user to make a choice from various previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
+  <!-- This appears as the title of the dialog asking for user confirmation to use the single user credential (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_sign_in_for">Use your sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from various available user credentials (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_sign_in_for">Choose a sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from options of available user information (e.g. driver's license, vaccination status) to pass to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_choose_option_for">Choose an option for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
-  <!-- This appears as the title of the dialog asking user to use a previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
+  <!-- This appears as the title of the dialog asking user to send a piece of user information (e.g. driver's license, vaccination status) to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_use_info_on">Use this info on <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
   <!-- This is a label for a button that links the user to different sign-in methods . [CHAR LIMIT=80] -->
   <string name="get_dialog_use_saved_passkey_for">Sign in another way</string>

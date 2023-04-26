@@ -151,6 +151,7 @@ open class ClockRegistry(
                             { str1 = id },
                             { "Clock Id conflict on load: $str1 is double registered" }
                         )
+                        manager.unloadPlugin()
                         continue
                     }
 

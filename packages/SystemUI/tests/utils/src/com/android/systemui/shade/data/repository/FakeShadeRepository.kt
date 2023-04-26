@@ -21,13 +21,27 @@ import com.android.systemui.shade.domain.model.ShadeModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/** Fake implementation of [KeyguardRepository] */
+/** Fake implementation of [ShadeRepository] */
 class FakeShadeRepository : ShadeRepository {
 
     private val _shadeModel = MutableStateFlow(ShadeModel())
     override val shadeModel: Flow<ShadeModel> = _shadeModel
 
+    private val _qsExpansion = MutableStateFlow(0f)
+    override val qsExpansion = _qsExpansion
+
+    private val _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
+    override val udfpsTransitionToFullShadeProgress = _udfpsTransitionToFullShadeProgress
+
     fun setShadeModel(model: ShadeModel) {
         _shadeModel.value = model
+    }
+
+    override fun setQsExpansion(qsExpansion: Float) {
+        _qsExpansion.value = qsExpansion
+    }
+
+    override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {
+        _udfpsTransitionToFullShadeProgress.value = progress
     }
 }

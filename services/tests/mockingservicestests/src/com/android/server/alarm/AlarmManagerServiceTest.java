@@ -54,6 +54,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_ALLOW_LIST;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_COMPAT;
+import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_LISTENER;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_NOT_APPLICABLE;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_PERMISSION;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_POLICY_PERMISSION;
@@ -2725,6 +2726,66 @@ public final class AlarmManagerServiceTest {
             // Expected.
         }
         verify(mDeviceIdleInternal, times(2)).isAppOnWhitelist(anyInt());
+    }
+
+    @Test
+    public void exactListenerBinderCallWithoutPermissionWithoutAllowlist() throws RemoteException {
+        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, true);
+        mockChangeEnabled(AlarmManager.ENABLE_USE_EXACT_ALARM, true);
+
+        mockScheduleExactAlarmState(false);
+        mockUseExactAlarmState(false);
+        when(mDeviceIdleInternal.isAppOnWhitelist(anyInt())).thenReturn(false);
+
+        final IAlarmListener listener = getNewListener(() -> {});
+        mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_EXACT, 0,
+                0, null, listener, "test-tag", null, null);
+
+        verify(mService, never()).hasUseExactAlarmInternal(TEST_CALLING_PACKAGE, TEST_CALLING_UID);
+        verify(mService, never()).hasScheduleExactAlarmInternal(TEST_CALLING_PACKAGE,
+                TEST_CALLING_UID);
+        verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
+
+        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
+                isNull(), eq(listener), eq("test-tag"), eq(FLAG_STANDALONE), isNull(), isNull(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture(),
+                eq(EXACT_ALLOW_REASON_LISTENER));
+
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
+        assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
+    }
+
+    @Test
+    public void exactAllowWhileIdleListenerBinderCallWithoutPermissionWithoutAllowlist()
+            throws RemoteException {
+        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, true);
+        mockChangeEnabled(AlarmManager.ENABLE_USE_EXACT_ALARM, true);
+
+        mockScheduleExactAlarmState(false);
+        mockUseExactAlarmState(false);
+        when(mDeviceIdleInternal.isAppOnWhitelist(anyInt())).thenReturn(false);
+
+        final IAlarmListener listener = getNewListener(() -> {});
+        mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_EXACT, 0,
+                FLAG_ALLOW_WHILE_IDLE, null, listener, "test-tag", null, null);
+
+        verify(mService, never()).hasUseExactAlarmInternal(TEST_CALLING_PACKAGE, TEST_CALLING_UID);
+        verify(mService, never()).hasScheduleExactAlarmInternal(TEST_CALLING_PACKAGE,
+                TEST_CALLING_UID);
+        verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
+
+        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
+                isNull(), eq(listener), eq("test-tag"),
+                eq(FLAG_STANDALONE | FLAG_ALLOW_WHILE_IDLE_COMPAT), isNull(), isNull(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture(),
+                eq(EXACT_ALLOW_REASON_LISTENER));
+
+        final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
+        final int type = idleOptions.getTemporaryAppAllowlistType();
+        assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, type);
     }
 
     @Test

@@ -86,9 +86,12 @@ public final class ImeFocusController {
     void onPreWindowFocus(boolean hasWindowFocus, WindowManager.LayoutParams windowAttribute) {
         mHasImeFocus = WindowManager.LayoutParams.mayUseInputMethod(windowAttribute.flags);
         if (!hasWindowFocus || !mHasImeFocus || isInLocalFocusMode(windowAttribute)) {
-            return;
+            if (!hasWindowFocus) {
+                getImmDelegate().onWindowLostFocus(mViewRootImpl);
+            }
+        } else {
+            getImmDelegate().onPreWindowGainedFocus(mViewRootImpl);
         }
-        getImmDelegate().onPreWindowGainedFocus(mViewRootImpl);
     }
 
     @UiThread
@@ -163,6 +166,7 @@ public final class ImeFocusController {
         void onPreWindowGainedFocus(ViewRootImpl viewRootImpl);
         void onPostWindowGainedFocus(View viewForWindowFocus,
                 @NonNull WindowManager.LayoutParams windowAttribute);
+        void onWindowLostFocus(@NonNull ViewRootImpl viewRootImpl);
         void onViewFocusChanged(@NonNull View view, boolean hasFocus);
         void onScheduledCheckFocus(@NonNull ViewRootImpl viewRootImpl);
         void onViewDetachedFromWindow(View view, ViewRootImpl viewRootImpl);
