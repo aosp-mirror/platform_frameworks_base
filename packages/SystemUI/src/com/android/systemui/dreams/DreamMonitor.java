@@ -16,11 +16,10 @@
 
 package com.android.systemui.dreams;
 
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
-
 import android.util.Log;
 
 import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.callbacks.DreamStatusBarStateCallback;
 import com.android.systemui.dreams.conditions.DreamCondition;
 import com.android.systemui.flags.RestartDozeListener;
@@ -28,7 +27,6 @@ import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * A {@link CoreStartable} to retain a monitor for tracking dreaming.
@@ -42,13 +40,11 @@ public class DreamMonitor extends ConditionalCoreStartable {
     private final DreamStatusBarStateCallback mCallback;
     private RestartDozeListener mRestartDozeListener;
 
-
     @Inject
-    public DreamMonitor(Monitor monitor, DreamCondition dreamCondition,
-            @Named(DREAM_PRETEXT_MONITOR) Monitor pretextMonitor,
+    public DreamMonitor(@SystemUser Monitor monitor, DreamCondition dreamCondition,
             DreamStatusBarStateCallback callback,
             RestartDozeListener restartDozeListener) {
-        super(pretextMonitor);
+        super(monitor);
         mConditionMonitor = monitor;
         mDreamCondition = dreamCondition;
         mCallback = callback;

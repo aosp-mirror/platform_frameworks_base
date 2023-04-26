@@ -19,6 +19,7 @@ package com.android.systemui.dreams;
 import android.util.Log;
 
 import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.callbacks.AssistantAttentionCallback;
 import com.android.systemui.dreams.conditions.AssistantAttentionCondition;
 import com.android.systemui.shared.condition.Monitor;
@@ -38,7 +39,7 @@ public class AssistantAttentionMonitor implements CoreStartable {
 
     @Inject
     public AssistantAttentionMonitor(
-            Monitor monitor,
+            @SystemUser Monitor monitor,
             AssistantAttentionCondition assistantAttentionCondition,
             AssistantAttentionCallback callback) {
         mConditionMonitor = monitor;

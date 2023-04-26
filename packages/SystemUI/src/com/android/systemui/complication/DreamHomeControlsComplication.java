@@ -21,7 +21,6 @@ import static com.android.systemui.complication.dagger.RegisteredComplicationsMo
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.UNAVAILABLE;
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
 
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +39,7 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsActivity;
 import com.android.systemui.controls.ui.ControlsUiController;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shared.condition.Monitor;
@@ -108,7 +108,7 @@ public class DreamHomeControlsComplication implements Complication {
         public Registrant(DreamHomeControlsComplication complication,
                 DreamOverlayStateController dreamOverlayStateController,
                 ControlsComponent controlsComponent,
-                @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
+                @SystemUser Monitor monitor) {
             super(monitor);
             mComplication = complication;
             mControlsComponent = controlsComponent;
