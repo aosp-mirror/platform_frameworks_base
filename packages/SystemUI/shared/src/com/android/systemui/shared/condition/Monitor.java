@@ -32,8 +32,10 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /**
- * {@link Monitor} takes in a set of conditions, monitors whether all of them have
- * been fulfilled, and informs any registered listeners.
+ * {@link Monitor} allows {@link Subscription}s to a set of conditions and monitors whether all of
+ * them have been fulfilled.
+ * <p>
+ * This class should be used as a singleton, to prevent duplicate monitoring of the same conditions.
  */
 public class Monitor {
     private final String mTag = getClass().getSimpleName();
