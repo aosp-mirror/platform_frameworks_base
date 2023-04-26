@@ -11317,7 +11317,7 @@ public final class ViewRootImpl implements ViewParent,
                         // to sync the same frame in the same BBQ. That shouldn't be possible, but
                         // if it did happen, invoke markSyncReady so the active SSG doesn't get
                         // stuck.
-                        Log.e(mTag, "Unable to syncNextTransaction. Possibly something else is"
+                        Log.w(mTag, "Unable to syncNextTransaction. Possibly something else is"
                                 + " trying to sync?");
                         surfaceSyncGroup.markSyncReady();
                     }
