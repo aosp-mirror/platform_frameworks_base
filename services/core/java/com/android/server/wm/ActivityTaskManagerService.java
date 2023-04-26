@@ -5816,6 +5816,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public int getDisplayId(IBinder token) {
+            synchronized (mGlobalLock) {
+                ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r == null) {
+                    throw new IllegalArgumentException(
+                            "setFocusedActivity: No activity record matching token=" + token);
+                }
+                return r.getDisplayId();
+            }
+        }
+
+        @Override
         public void registerScreenObserver(ScreenObserver observer) {
             mScreenObservers.add(observer);
         }
