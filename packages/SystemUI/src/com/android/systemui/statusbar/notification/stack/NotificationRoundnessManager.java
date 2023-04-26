@@ -25,8 +25,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.Roundable;
@@ -73,8 +71,7 @@ public class NotificationRoundnessManager implements Dumpable {
     NotificationRoundnessManager(
             NotificationSectionsFeatureManager sectionsFeatureManager,
             NotificationRoundnessLogger notifLogger,
-            DumpManager dumpManager,
-            FeatureFlags featureFlags) {
+            DumpManager dumpManager) {
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ExpandableView[numberOfSections];
         mLastInSectionViews = new ExpandableView[numberOfSections];
@@ -82,7 +79,7 @@ public class NotificationRoundnessManager implements Dumpable {
         mTmpLastInSectionViews = new ExpandableView[numberOfSections];
         mNotifLogger = notifLogger;
         mDumpManager = dumpManager;
-        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
+        mUseRoundnessSourceTypes = true;
 
         mDumpManager.registerDumpable(TAG, this);
     }
