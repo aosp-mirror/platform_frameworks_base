@@ -146,7 +146,7 @@ public class AccessibilitySecurityPolicyTest {
     @Mock
     private PolicyWarningUIController mPolicyWarningUIController;
     @Mock
-    private PackageManagerInternal mMockPackageManagerInternal;
+    private PackageManagerInternal mPackageManagerInternal;
 
     @Before
     public void setUp() {
@@ -158,8 +158,7 @@ public class AccessibilitySecurityPolicyTest {
                 R.dimen.accessibility_focus_highlight_stroke_width, 1);
 
         mA11ySecurityPolicy = new AccessibilitySecurityPolicy(
-                mPolicyWarningUIController, mContext, mMockA11yUserManager,
-                mMockPackageManagerInternal);
+                mPolicyWarningUIController, mContext, mMockA11yUserManager);
         mA11ySecurityPolicy.setSendingNonA11yToolNotificationLocked(true);
         mA11ySecurityPolicy.setAccessibilityWindowManager(mMockA11yWindowManager);
         mA11ySecurityPolicy.setAppWidgetManager(mMockAppWidgetManager);
@@ -238,8 +237,8 @@ public class AccessibilitySecurityPolicyTest {
     @Test
     public void resolveValidReportedPackage_uidAndPkgNameMatched_returnPkgName()
             throws PackageManager.NameNotFoundException {
-        when(mMockPackageManagerInternal.isSameApp(PACKAGE_NAME, APP_UID, TEST_USER_ID))
-                .thenReturn(true);
+        when(mMockPackageManager.getPackageUidAsUser(PACKAGE_NAME,
+                PackageManager.MATCH_ANY_USER, TEST_USER_ID)).thenReturn(APP_UID);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
                 PACKAGE_NAME, APP_UID, TEST_USER_ID, APP_PID),
@@ -258,8 +257,8 @@ public class AccessibilitySecurityPolicyTest {
 
         when(mMockAppWidgetManager.getHostedWidgetPackages(widgetHostUid))
                 .thenReturn(widgetPackages);
-        when(mMockPackageManagerInternal.isSameApp(hostPackageName, widgetHostUid, TEST_USER_ID))
-                .thenReturn(true);
+        when(mMockPackageManager.getPackageUidAsUser(hostPackageName, TEST_USER_ID))
+                .thenReturn(widgetHostUid);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
                 widgetPackageName, widgetHostUid, TEST_USER_ID, widgetHostPid),
@@ -273,8 +272,8 @@ public class AccessibilitySecurityPolicyTest {
         final String[] uidPackages = {PACKAGE_NAME, PACKAGE_NAME2};
         when(mMockPackageManager.getPackagesForUid(APP_UID))
                 .thenReturn(uidPackages);
-        when(mMockPackageManagerInternal.isSameApp(invalidPackageName, APP_UID, TEST_USER_ID))
-                .thenReturn(false);
+        when(mMockPackageManager.getPackageUidAsUser(invalidPackageName, TEST_USER_ID))
+                .thenThrow(PackageManager.NameNotFoundException.class);
         when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
                 .thenReturn(new ArraySet<>());
         mContext.getTestablePermissions().setPermission(
@@ -293,8 +292,8 @@ public class AccessibilitySecurityPolicyTest {
         final String[] uidPackages = {PACKAGE_NAME};
         when(mMockPackageManager.getPackagesForUid(APP_UID))
                 .thenReturn(uidPackages);
-        when(mMockPackageManagerInternal.isSameApp(wantedPackageName, wantedUid, TEST_USER_ID))
-                .thenReturn(true);
+        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, TEST_USER_ID))
+                .thenReturn(wantedUid);
         when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
                 .thenReturn(new ArraySet<>());
         mContext.getTestablePermissions().setPermission(
@@ -313,8 +312,8 @@ public class AccessibilitySecurityPolicyTest {
         final String[] uidPackages = {PACKAGE_NAME};
         when(mMockPackageManager.getPackagesForUid(APP_UID))
                 .thenReturn(uidPackages);
-        when(mMockPackageManagerInternal.isSameApp(wantedPackageName, wantedUid, TEST_USER_ID))
-                .thenReturn(true);
+        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, TEST_USER_ID))
+                .thenReturn(wantedUid);
         when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
                 .thenReturn(new ArraySet<>());
         mContext.getTestablePermissions().setPermission(
