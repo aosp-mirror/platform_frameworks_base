@@ -67,9 +67,8 @@ final class PolicyState<V> {
     /**
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
-    boolean addPolicy(@NonNull EnforcingAdmin admin, @NonNull PolicyValue<V> policy) {
+    boolean addPolicy(@NonNull EnforcingAdmin admin, @Nullable PolicyValue<V> policy) {
         Objects.requireNonNull(admin);
-        Objects.requireNonNull(policy);
 
         //LinkedHashMap doesn't update the insertion order of existing keys, removing the existing
         // key will cause it to update.
@@ -89,9 +88,9 @@ final class PolicyState<V> {
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
     boolean addPolicy(
-            @NonNull EnforcingAdmin admin, @NonNull PolicyValue<V> policy,
+            @NonNull EnforcingAdmin admin, @Nullable PolicyValue<V> policy,
             LinkedHashMap<EnforcingAdmin, PolicyValue<V>> globalPoliciesSetByAdmins) {
-        mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), Objects.requireNonNull(policy));
+        mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), policy);
 
         return resolvePolicy(globalPoliciesSetByAdmins);
     }
@@ -210,10 +209,12 @@ final class PolicyState<V> {
         for (EnforcingAdmin admin : mPoliciesSetByAdmins.keySet()) {
             serializer.startTag(/* namespace= */ null, TAG_ADMIN_POLICY_ENTRY);
 
-            serializer.startTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
-            mPolicyDefinition.savePolicyValueToXml(
-                    serializer, mPoliciesSetByAdmins.get(admin).getValue());
-            serializer.endTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
+            if (mPoliciesSetByAdmins.get(admin) != null) {
+                serializer.startTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
+                mPolicyDefinition.savePolicyValueToXml(
+                        serializer, mPoliciesSetByAdmins.get(admin).getValue());
+                serializer.endTag(/* namespace= */ null, TAG_POLICY_VALUE_ENTRY);
+            }
 
             serializer.startTag(/* namespace= */ null, TAG_ENFORCING_ADMIN_ENTRY);
             admin.saveToXml(serializer);
@@ -250,7 +251,7 @@ final class PolicyState<V> {
                                 break;
                         }
                     }
-                    if (admin != null && value != null) {
+                    if (admin != null) {
                         policiesSetByAdmins.put(admin, value);
                     } else {
                         Log.e(TAG, "Error Parsing TAG_ADMIN_POLICY_ENTRY");
