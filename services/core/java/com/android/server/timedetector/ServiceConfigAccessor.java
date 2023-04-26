@@ -64,7 +64,7 @@ public interface ServiceConfigAccessor {
             boolean bypassUserPolicyChecks);
 
     /**
-     * Returns a snapshot of the configuration that controls time zone detector behavior for the
+     * Returns a snapshot of the configuration that controls time detector behavior for the
      * specified user.
      */
     @NonNull

@@ -378,7 +378,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             @Origin int origin = ORIGIN_MANUAL;
             UnixEpochTime unixEpochTime = timeState.getUnixEpochTime();
             setSystemClockAndConfidenceUnderWakeLock(
-                    origin, unixEpochTime, confidence, "setTimeZoneState()");
+                    origin, unixEpochTime, confidence, "setTimeState()");
         } finally {
             mEnvironment.releaseWakeLock();
         }
@@ -535,7 +535,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             // can. Conversely, when automatic time detection is disabled we leave the clock as it
             // is.
             if (autoDetectionEnabled) {
-                String reason = "Auto time zone detection config changed.";
+                String reason = "Auto time detection config changed.";
                 doAutoTimeDetection(reason);
             } else {
                 // CLOCK_PARANOIA: We are losing "control" of the system clock so we cannot predict
