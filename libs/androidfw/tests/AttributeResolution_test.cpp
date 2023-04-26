@@ -36,11 +36,11 @@ class AttributeResolutionTest : public ::testing::Test {
   virtual void SetUp() override {
     styles_assets_ = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
     ASSERT_NE(nullptr, styles_assets_);
-    assetmanager_.SetApkAssets({styles_assets_});
+    assetmanager_.SetApkAssets({styles_assets_.get()});
   }
 
  protected:
-  AssetManager2::ApkAssetsPtr styles_assets_;
+  std::unique_ptr<const ApkAssets> styles_assets_;
   AssetManager2 assetmanager_;
 };
 
@@ -69,7 +69,7 @@ TEST(AttributeResolutionLibraryTest, ApplyStyleWithDefaultStyleResId) {
   AssetManager2 assetmanager;
   auto apk_assets = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk", PROPERTY_DYNAMIC);
   ASSERT_NE(nullptr, apk_assets);
-  assetmanager.SetApkAssets({apk_assets});
+  assetmanager.SetApkAssets({apk_assets.get()});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
 

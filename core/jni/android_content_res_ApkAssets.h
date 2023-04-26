@@ -18,13 +18,13 @@
 #define ANDROID_CONTENT_RES_APKASSETS_H
 
 #include "androidfw/ApkAssets.h"
-#include "androidfw/AssetManager2.h"
 #include "androidfw/MutexGuard.h"
+
 #include "jni.h"
 
 namespace android {
 
-Guarded<AssetManager2::ApkAssetsPtr>& ApkAssetsFromLong(jlong ptr);
+Guarded<std::unique_ptr<const ApkAssets>>& ApkAssetsFromLong(jlong ptr);
 
 } // namespace android
 
