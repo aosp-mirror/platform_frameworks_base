@@ -971,19 +971,30 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         switch (type) {
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
+                final Bundle launchOpts = hop.getLaunchOptions();
+                ActivityOptions activityOptions = launchOpts != null
+                        ? new ActivityOptions(launchOpts) : null;
+                if (activityOptions != null && activityOptions.getTransientLaunch()
+                        && mService.isCallerRecents(hop.getPendingIntent().getCreatorUid())) {
+                    if (mService.getActivityStartController().startExistingRecentsIfPossible(
+                            hop.getActivityIntent(), activityOptions)) {
+                        // Start recents successfully.
+                        break;
+                    }
+                }
+
                 String resolvedType = hop.getActivityIntent() != null
                         ? hop.getActivityIntent().resolveTypeIfNeeded(
                         mService.mContext.getContentResolver())
                         : null;
 
-                ActivityOptions activityOptions = null;
                 if (hop.getPendingIntent().isActivity()) {
                     // Set the context display id as preferred for this activity launches, so that
                     // it can land on caller's display. Or just brought the task to front at the
                     // display where it was on since it has higher preference.
-                    activityOptions = hop.getLaunchOptions() != null
-                            ? new ActivityOptions(hop.getLaunchOptions())
-                            : ActivityOptions.makeBasic();
+                    if (activityOptions == null) {
+                        activityOptions = ActivityOptions.makeBasic();
+                    }
                     activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
                 }
                 final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
