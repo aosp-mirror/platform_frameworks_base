@@ -1831,7 +1831,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean needToSendNewConfiguration =
                     win.isVisibleRequestedOrAdding() && displayContent.updateOrientation();
-            if (win.providesNonDecorInsets()) {
+            if (win.providesDisplayDecorInsets()) {
                 needToSendNewConfiguration |= displayPolicy.updateDecorInsetsInfo();
             }
             if (needToSendNewConfiguration) {
@@ -2274,7 +2274,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         & WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED) != 0) {
                     win.mLayoutNeeded = true;
                 }
-                if (layoutChanged && win.providesNonDecorInsets()) {
+                if (layoutChanged && win.providesDisplayDecorInsets()) {
                     configChanged = displayPolicy.updateDecorInsetsInfo();
                 }
                 if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
