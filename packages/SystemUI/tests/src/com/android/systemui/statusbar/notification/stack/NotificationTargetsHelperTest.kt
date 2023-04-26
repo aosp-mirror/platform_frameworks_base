@@ -6,7 +6,6 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
@@ -30,14 +29,7 @@ class NotificationTargetsHelperTest : SysuiTestCase() {
             NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
     }
 
-    private fun notificationTargetsHelper(
-        notificationGroupCorner: Boolean = true,
-    ) =
-        NotificationTargetsHelper(
-            FakeFeatureFlags().apply {
-                set(Flags.USE_ROUNDNESS_SOURCETYPES, notificationGroupCorner)
-            }
-        )
+    private fun notificationTargetsHelper() = NotificationTargetsHelper(FakeFeatureFlags())
 
     @Test
     fun targetsForFirstNotificationInGroup() {

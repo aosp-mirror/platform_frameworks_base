@@ -20,7 +20,7 @@ class NotificationTargetsHelper
 constructor(
     featureFlags: FeatureFlags,
 ) {
-    private val useRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)
+    private val useRoundnessSourceTypes = true
 
     /**
      * This method looks for views that can be rounded (and implement [Roundable]) during a

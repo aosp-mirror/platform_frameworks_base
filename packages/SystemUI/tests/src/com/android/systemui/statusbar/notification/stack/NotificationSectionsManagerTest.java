@@ -96,8 +96,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                         mIncomingHeaderController,
                         mPeopleHeaderController,
                         mAlertingHeaderController,
-                        mSilentHeaderController,
-                        mFeatureFlag
+                        mSilentHeaderController
                 );
         // Required in order for the header inflation to work properly
         when(mNssl.generateLayoutParams(any(AttributeSet.class)))
