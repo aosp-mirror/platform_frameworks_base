@@ -549,6 +549,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 // are in mOpening.
                 for (int i = 0; i < closingTasks.size(); ++i) {
                     final TransitionInfo.Change change = closingTasks.get(i);
+                    final int pausingIdx = TaskState.indexOf(mPausingTasks, change);
+                    if (pausingIdx >= 0) {
+                        mPausingTasks.remove(pausingIdx);
+                        didMergeThings = true;
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "  closing pausing taskId=%d", change.getTaskInfo().taskId);
+                        continue;
+                    }
                     int openingIdx = TaskState.indexOf(mOpeningTasks, change);
                     if (openingIdx < 0) {
                         Slog.w(TAG, "Closing a task that wasn't opening, this may be split or"
@@ -600,6 +608,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
                 didMergeThings = true;
                 mState = STATE_NEW_TASK;
+            }
+            if (mPausingTasks.isEmpty()) {
+                // The pausing tasks may be removed by the incoming closing tasks.
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.merge: empty pausing tasks", mInstanceId);
             }
             if (!hasTaskChange) {
                 // Activity only transition, so consume the merge as it doesn't affect the rest of
