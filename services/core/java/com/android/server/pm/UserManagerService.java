@@ -1603,14 +1603,14 @@ public class UserManagerService extends IUserManager.Stub {
                 return;
             } else if (info.isAdmin()) {
                 // Exit if the user is already an Admin.
-                mUserJourneyLogger.logUserJourneyFinishWithError(userId, info,
+                mUserJourneyLogger.logUserJourneyFinishWithError(getCurrentUserId(), info,
                         USER_JOURNEY_GRANT_ADMIN, ERROR_CODE_USER_ALREADY_AN_ADMIN);
                 return;
             }
             info.flags ^= UserInfo.FLAG_ADMIN;
             writeUserLP(getUserDataLU(info.id));
         }
-        mUserJourneyLogger.logUserJourneyFinishWithError(userId, info,
+        mUserJourneyLogger.logUserJourneyFinishWithError(getCurrentUserId(), info,
                 USER_JOURNEY_GRANT_ADMIN, ERROR_CODE_UNSPECIFIED);
     }
 
@@ -1638,7 +1638,7 @@ public class UserManagerService extends IUserManager.Stub {
                 writeUserLP(user);
             }
         }
-        mUserJourneyLogger.logUserJourneyFinishWithError(userId, user.info,
+        mUserJourneyLogger.logUserJourneyFinishWithError(getCurrentUserId(), user.info,
                 USER_JOURNEY_REVOKE_ADMIN, ERROR_CODE_UNSPECIFIED);
     }
 
@@ -5554,13 +5554,15 @@ public class UserManagerService extends IUserManager.Stub {
                             @Override
                             public void userStopped(int userIdParam) {
                                 finishRemoveUser(userIdParam);
-                                mUserJourneyLogger.logUserJourneyFinishWithError(userIdParam,
+                                int originUserId = UserManagerService.this.getCurrentUserId();
+                                mUserJourneyLogger.logUserJourneyFinishWithError(originUserId,
                                         userData.info, USER_JOURNEY_USER_REMOVE,
                                         ERROR_CODE_UNSPECIFIED);
                             }
                             @Override
                             public void userStopAborted(int userIdParam) {
-                                mUserJourneyLogger.logUserJourneyFinishWithError(userIdParam,
+                                int originUserId = UserManagerService.this.getCurrentUserId();
+                                mUserJourneyLogger.logUserJourneyFinishWithError(originUserId,
                                         userData.info, USER_JOURNEY_USER_REMOVE,
                                         ERROR_CODE_ABORTED);
                             }
