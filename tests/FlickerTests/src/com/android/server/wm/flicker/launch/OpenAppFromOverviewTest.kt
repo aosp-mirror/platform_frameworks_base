@@ -44,6 +44,7 @@ import org.junit.runners.Parameterized
  *     Relaunch an app [testApp] by selecting it in the overview screen, and wait animation to
  *     complete (only this action is traced)
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

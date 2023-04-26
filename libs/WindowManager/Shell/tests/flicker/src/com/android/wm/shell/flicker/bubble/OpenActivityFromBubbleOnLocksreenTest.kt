@@ -18,7 +18,7 @@ package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -149,9 +149,7 @@ class OpenActivityFromBubbleOnLocksreenTest(flicker: FlickerTest) : BaseBubbleSc
     @Ignore("Not applicable to this CUJ. Taskbar is not shown on lock screen")
     override fun taskBarWindowIsAlwaysVisible() {}
 
-    /**
-     * Checks that the [ComponentNameMatcher.TASK_BAR] is visible at the end of the transition
-     */
+    /** Checks that the [ComponentNameMatcher.TASK_BAR] is visible at the end of the transition */
     @Postsubmit
     @Test
     fun taskBarLayerIsVisibleAtEnd() {
